@@ -176,7 +176,7 @@
                         <configuration>
                             <cmdLine>server dropwizard.yml</cmdLine>
                             <headerType>gui</headerType>
-                            <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
+                            <outfile>${project.build.directory}/windows/karamel.exe</outfile>
                             <!--<dontWrapJar>true</dontWrapJar>-->
                             <!--<jar>${project.build.finalName}-jar-with-dependencies.jar</jar>-->
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
@@ -245,12 +245,12 @@
                 <executions>
                     <execution>
                         <id>copy-dropwizard-conf</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/conf</outputDirectory>
+                            <outputDirectory>${basedir}/target/windows/conf</outputDirectory>
                             <resources>          
                                 <resource>
                                     <directory>src/main/config/</directory>
@@ -261,12 +261,12 @@
                     </execution>
                     <execution>
                         <id>copy-examples-windows</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/examples</outputDirectory>
+                            <outputDirectory>${basedir}/target/windows/examples</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>examples/</directory>
