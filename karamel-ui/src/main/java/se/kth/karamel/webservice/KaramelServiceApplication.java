@@ -28,6 +28,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
 import javax.swing.ImageIcon;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -44,6 +49,26 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static TrayUI trayUi;
 
     private TemplateHealthCheck healthCheck;
+    
+    private static final Options options = new Options();
+    private static final CommandLineParser parser = new GnuParser();
+    
+    static {
+        options.addOption("y", false, "Do not prompt for user-supplied parameters. Accept default param values.");
+        options.addOption("help", false, "Print help message.");
+        options.addOption("server", false, "Run in server mode, without launching the Browser.");
+        options.addOption("port", false, "Set the port. Can also be set using env variable PORT. This switch overrides env variable.");
+        options.addOption(OptionBuilder.withArgName("file")
+                .hasArg()
+                .withDescription("YAML file containing Karamel cluster definition")
+                .create("yaml"));
+    }
+
+    public static void usage(int exitValue) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("karamel", options);
+        System.exit(exitValue);
+    }
 
     public static void main(String[] args) throws Exception {
         karamelRestHandler = new KaramelApiImpl();

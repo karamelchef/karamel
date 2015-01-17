@@ -90,6 +90,26 @@
     <downloadUrl>http://kompics.i.sics.se/maven/repository</downloadUrl>
   </distributionManagement>
 
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>versions-maven-plugin</artifactId>
+            <version>2.1</version>
+        </plugin>
+        <plugin>
+            <artifactId>maven-scm-plugin</artifactId>
+            <version>1.8.1</version>
+            <configuration>
+                <tag>${project.artifactId}-${project.version}</tag>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+<scm>
+    <connection>scm:git:git@github.com:karamelchef/karamel.git</connection>
+</scm>
 
   <repositories>
     <repository>
