@@ -12,6 +12,7 @@ import java.awt.SystemTray;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -27,12 +28,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
+import java.util.List;
 import javax.swing.ImageIcon;
+import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -49,16 +53,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static TrayUI trayUi;
 
     private TemplateHealthCheck healthCheck;
-    
+
     private static final Options options = new Options();
     private static final CommandLineParser parser = new GnuParser();
-    
+
     static {
         options.addOption("y", false, "Do not prompt for user-supplied parameters. Accept default param values.");
         options.addOption("help", false, "Print help message.");
-        options.addOption("server", false, "Run in server mode, without launching the Browser.");
-        options.addOption("port", false, "Set the port. Can also be set using env variable PORT. This switch overrides env variable.");
-        options.addOption(OptionBuilder.withArgName("file")
+        options.addOption("nogui", false, "Run in a headless mode, without launching the Browser or SwingUI.");
+        options.addOption(OptionBuilder.withArgName("launch")
                 .hasArg()
                 .withDescription("YAML file containing Karamel cluster definition")
                 .create("yaml"));
@@ -71,25 +74,63 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
 
     public static void main(String[] args) throws Exception {
+
+        String webPort = System.getenv("PORT");
+        if (webPort == null || webPort.isEmpty()) {
+            webPort = "9191";
+        }
+        boolean cli = false;
+        boolean launch = false;
+        String yamlFile;
+
+        List<String> csArgs = Arrays.asList(args);
+
+        try {
+            CommandLine line = parser.parse(options, args);
+            if (line.getOptions().length > 0) {
+                if (line.hasOption("help")) {
+                    usage(0);
+                } else if (line.hasOption("nogui")) {
+                    launchBrowswer = false;
+                    csArgs.remove("nogui");
+                } else if (line.hasOption("launch")) {
+                    cli = true;
+                    int pos = csArgs.indexOf("launch");
+                    csArgs.remove(pos + 1);
+                    csArgs.remove("launch");
+                }
+            }
+            if (cli) {
+                yamlFile = line.getOptionValue("launch");
+                // Try to open and compile the file. Print error msg if invalid file or invalid YAML.
+            }
+        } catch (ParseException e) {
+            usage(-1);
+        }
+
         karamelRestHandler = new KaramelApiImpl();
         if (args.length > 0 && args[0].compareToIgnoreCase("nolaunch") == 0) {
             launchBrowswer = false;
             args[0] = args[1];
             args[1] = args[2];
         }
-        new KaramelServiceApplication().run(args);
+        if (cli) {
+            KaramelApi k = new KaramelApiImpl();
+            // TODO - KaramelApi needs to support taking a File a a parameter
+        } else {
+            new KaramelServiceApplication().run(args);
+        }
+}
 
-    }
-
-    // Name of the application displayed when application boots up.
-    @Override
-    public String getName() {
+// Name of the application displayed when application boots up.
+@Override
+        public String getName() {
         return "caramel-core";
     }
 
     // Pre start of the dropwizard to plugin with separate bundles.
     @Override
-    public void initialize(Bootstrap<KaramelServiceConfiguration> bootstrap) {
+        public void initialize(Bootstrap<KaramelServiceConfiguration> bootstrap) {
 
         System.out.println("Executing any initialization tasks.");
 //        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/dashboard/"));
@@ -98,7 +139,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
 
     @Override
-    public void run(KaramelServiceConfiguration configuration, Environment environment) throws Exception {
+        public void run(KaramelServiceConfiguration configuration, Environment environment) throws Exception {
 
         healthCheck = new TemplateHealthCheck("%s");
 //        http://stackoverflow.com/questions/26610502/serve-static-content-from-a-base-url-in-dropwizard-0-7-1
@@ -107,28 +148,64 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         /*
          * To allow cross orign resource request from angular js client
          */
-        FilterRegistration.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class);
+        FilterRegistration
+
+.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class  
+
+    );
 
         // Allow cross origin requests.
-        filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, "/*");
-        filter.setInitParameter("allowedOrigins", "*"); // allowed origins comma separated
-        filter.setInitParameter("allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-        filter.setInitParameter("allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
-        filter.setInitParameter("preflightMaxAge", "5184000"); // 2 months
-        filter.setInitParameter("allowCredentials", "true");
+    filter.addMappingForUrlPatterns (EnumSet.allOf
 
-        environment.jersey().setUrlPattern("/api/*");
+    (DispatcherType.class  
 
-        environment.healthChecks().register("template", healthCheck);
+        ), true, "/*");
+        filter.setInitParameter (
 
-        environment.jersey().register(new ConvertYamlToJSON());
-        environment.jersey().register(new ConvertJSONToYaml());
-        environment.jersey().register(new Cookbook());
-        environment.jersey().register(new ProviderValidation());
-        environment.jersey().register(new Cluster.StartCluster());
-        environment.jersey().register(new Cluster.ViewCluster());
+        "allowedOrigins", "*"); // allowed origins comma separated
+        filter.setInitParameter (
 
-        if (launchBrowswer) {
+        "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+        filter.setInitParameter (
+
+        "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
+        filter.setInitParameter (
+
+        "preflightMaxAge", "5184000"); // 2 months
+        filter.setInitParameter (
+
+        "allowCredentials", "true");
+
+        environment.jersey ()
+
+        .setUrlPattern("/api/*");
+
+        environment.healthChecks ()
+
+        .register("template", healthCheck);
+
+        environment.jersey ()
+
+        .register(new ConvertYamlToJSON());
+        environment.jersey ()
+
+        .register(new ConvertJSONToYaml());
+        environment.jersey ()
+
+        .register(new Cookbook());
+        environment.jersey ()
+
+        .register(new ProviderValidation());
+        environment.jersey ()
+
+        .register(new Cluster.StartCluster());
+        environment.jersey ()
+        .register(new Cluster.ViewCluster());
+
+        if (launchBrowswer
+
+        
+            ) {
             openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
 
             if (SystemTray.isSupported()) {

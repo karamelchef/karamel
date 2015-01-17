@@ -15,8 +15,8 @@ logging:
       target: stdout
     - type: file
       threshold: ALL
-      currentLogFilename: ./log/xdropwizard.log
-      archivedLogFilenamePattern: ./log/xdropwizard-%d.log.gz,
+      currentLogFilename: ./log/karamel.log
+      archivedLogFilenamePattern: ./log/karamel-%d.log.gz,
       archivedFileCount: 5
       timeZone: UTC
 
