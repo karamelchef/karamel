@@ -1,0 +1,30 @@
+name: hiway
+ec2:
+    type: m3.medium
+    image: ami-0307ce74
+    region: eu-west-1
+    username: ubuntu
+
+cookbooks:
+  hadoop:
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  hiway:
+    github: "kahak/hiway-chef"
+    branch: "master"
+
+groups:
+  master:
+    size: 1
+    recipes:
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs
+        - hiway::wordcount_cf
+        - hiway::montage_synthetic_dax_cf
+  slaves:
+    size: 2
+    recipes:
+    - hadoop::dn
+    - hadoop::nm
+    - hiway::hadoop

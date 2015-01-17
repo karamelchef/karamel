@@ -1,0 +1,23 @@
+<!-- Item template -->
+
+<!--<div as-sortable-item-handle>-->
+<div>
+    <div class="row">
+        <div class="col-sm-10">
+            <span class="recipe-title">{{recipe.title}}</span>
+        </div>
+        <div class="col-sm-2">
+            <a data-no-drag class=" removeRecipe pull-right btn btn-xs" ng-click="removeRecipe(column,cookbook, recipe)"><span
+                    class="glyphicon glyphicon-remove"></span></a>
+        </div>
+<!--        TODO: This is an attempt to draw a dot for every node in this NodeGroup.
+                  Red=stropped; Orange = starting; Green = started;
+
+<div class="col-sm-12">
+                <ul ng-model="column.recipes">
+                    <li><i class="recipe" ng-repeat="recipe in column.recipes" recipe-dot-stopped>blah</i></li>
+                </ul>            
+        </div>-->
+    </div>
+</div>
+

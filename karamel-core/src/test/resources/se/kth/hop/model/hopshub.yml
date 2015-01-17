@@ -1,0 +1,36 @@
+name: HopsHub
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"   
+  hopshub:                                                                     
+    github: "hopshadoop/hopshub-chef"
+    branch: "master"  
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
+groups: 
+  hopshub:
+    size: 1 
+    recipes:                                                                    
+        - kagent
+        - ndb::mysqld                                                       
+        - ndb::mgmd
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs                                                            
+        - hopshub
+  ndb:
+    size: 2 
+    recipes: 
+        - ndb::ndbd
+  datanodes:
+    size: 1 
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm

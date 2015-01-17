@@ -1,0 +1,67 @@
+{
+    "karamel": {
+        "name": "Hops Cluster",
+        "numberOfColumns": 4,
+        "columns": [
+            {
+                "name": "Nodes: MetaData",
+                "recipes": [
+                    {
+                        "title": "hadoop::nn (4: red)"
+                    },
+                    {
+                        "title": "hadoop::rm (4: red)"
+                    },
+                    {
+                        "title": "ndb::mgmd (1: red)"
+                    },
+                    {
+                        "title": "ndb::mysqld (3: red)"
+                    }
+                ]
+            },
+            {
+                "name": "Nodes: Dashboard",
+                "recipes": [
+                    {
+                        "title": "hopsdashboard (4: red)",
+                        "details": "Testing Card Details"
+                    },
+                    {
+                        "title": "ndb::mysqld ndb::mysqld (3: red)",
+                        "details": "Testing Card Details"
+                    },
+                    {
+                        "title": "hadoop::jhs (5: red)"
+                    },
+                    {
+                        "title": "collectd::server (1: black)",
+                        "details": "Testing Card Details"
+                    }
+                ]
+            },
+            {
+                "name": "Nodes: DB",
+                "recipes": [
+                    {
+                        "title": "ndb::ndbd (2: red)",
+                        "details": "Testing Card Details"
+                    }
+                ]
+            },
+            {
+                "name": "Nodes: Data",
+                "recipes": [
+                    {
+                        "title": "hadoop::dn (1: blue)",
+                        "details": "Testing Card Details"
+                    },
+                    {
+                        "title": "hadoop::nm (1: black)",
+                        "details": "Testing Card Details"
+                    }
+                ]
+            }
+        ]
+    }
+}

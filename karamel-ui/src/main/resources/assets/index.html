@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Karamel</title>
+        <!--styles -->
+        <!--<link href='http://fonts.googleapis.com/css?family=Lobster|Open+Sans' rel='stylesheet' type='text/css'>-->
+        <link href='http://fonts.googleapis.com/css?family=Quicksand|Josefin+Sans|Lobster|Yanone+Kaffeesatz' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="dist/ng-sortable.min.css">
+        <link rel="stylesheet" type="text/css" href="styles/board.css">
+        <link rel="stylesheet" type="text/css" href="styles/sweet-alert.css">
+        <link rel="stylesheet" type="text/css" href="styles/angular-block-ui.css">
+        <link rel="stylesheet" type="text/css" href="styles/angular-block-ui.css.map">
+        <link rel="stylesheet" href="bower_components/angular-xeditable/dist/css/xeditable.css" rel="stylesheet">
+    </head>
+    <body ng-app="demoApp">
+
+        <div class="notifications" ng-controller="MainCtrl">
+            <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+        </div>
+
+        <div ng-include='"templates/header.html"'></div>
+
+        <div ng-view></div>
+
+        <!--scripts-->
+        <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
+        <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-sweetalert/SweetAlert.js"  ></script>
+        <script type="text/javascript" src="bower_components/angular-route/angular-route.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-cookies/angular-cookies.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-bootstrap/ui-bootstrap.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+        <script type="text/javascript" src="bower_components/angular-block-ui/dist/angular-block-ui.min.js"></script>
+        <script type="text/javascript" src="dist/FileSaver.js"></script>
+        <script type="text/javascript" src="dist/yaml.js"></script>
+        <script type="text/javascript" src="dist/underscore-min.js"></script>
+        <script type="text/javascript" src='bower_components/angular-upload/angular-upload.min.js'></script>        
+        <script type="text/javascript" src="dist/ng-sortable.js"></script>
+        <script type="text/javascript" src="karamel.js"></script>
+        <script type="text/javascript" src="karamel-rest.js"></script>
+        <script type="text/javascript" src="scripts/yaml/yamlApp.js"></script>              <!-- yaml application dependency.-->
+        <script type="text/javascript" src="scripts/caramel-core/coreApp.js"></script>
+        <script type="text/javascript" src="app.js"></script>
+        <script type="text/javascript" src="scripts/services/BoardManipulator.js"></script>
+        <script type="text/javascript" src="scripts/services/BoardDataFactory.js"></script>
+        <script type="text/javascript" src="scripts/services/BoardService.js"></script>
+        <script type="text/javascript" src="scripts/controllers/KaramelController.js"></script>
+        <script type="text/javascript" src="scripts/controllers/NewRecipeController.js"></script>
+        <script type="text/javascript" src="scripts/controllers/BoardHeaderControllers.js"></script>
+        <script type="text/javascript" src="scripts/controllers/ProviderController.js"></script>
+        <script type="text/javascript" src="scripts/controllers/ConfigureChefController.js"></script>
+        <script type="text/javascript" src="scripts/controllers/CookbookParamsController.js"></script>
+        <script type="text/javascript" src="scripts/controllers/ViewClusterController.js"></script>
+        <script type="text/javascript" src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+        <!--<script type="text/javascript" src="scripts/services/ClusterFactory.js"></script>-->        
+    </body>
+</html>

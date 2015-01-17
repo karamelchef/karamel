@@ -1,0 +1,22 @@
+<!-- New Card template -->
+
+<form ng-submit="updateChef()" class="noMargin" name="updateChefForm">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="close()">&times;</button>
+        <h4 class="modal-title" ng-model="board">Configure Global Chef Attributes for '{{board}}'</h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <label class="control-label" for="attribute1">Attribute 1</label>
+
+            <div>
+                <input type="text" id="attribute1" placeholder="Attribute value" ng-model="chefAttr" required
+                       focus-me class="recipeInputs form-control"/>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="close()">Close</button>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+</form>

@@ -1,0 +1,23 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9090
+
+logging:
+  level: INFO
+  appenders:
+    - type: console
+      threshold: ALL
+      timeZone: UTC
+      target: stdout
+    - type: file
+      threshold: ALL
+      currentLogFilename: ./log/xdropwizard.log
+      archivedLogFilenamePattern: ./log/xdropwizard-%d.log.gz,
+      archivedFileCount: 5
+      timeZone: UTC
+
+name: Caramel-Webservice

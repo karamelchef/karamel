@@ -1,0 +1,22 @@
+name: HopsHadoop
+
+ec2:
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+    
+groups: 
+  nns:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs                                                            
+  dns:
+    size: 100
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm

@@ -1,0 +1,71 @@
+<div>
+    <form ng-submit="addOrUpdateProvider()" name="ec2ProviderForm" novalidate class="form-horizontal">
+
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="close()">&times;</button>
+            <h4>EC2 Provider</h4>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="form-group">
+                <label for="accountId" class="control-label col-xs-3" style="text-align: left">Account-ID</label>
+                <div class="col-xs-9">
+                    <input type="text" class="form-control" name="accountId" id="accountId" required ng-model="account.accountId" placeholder="Account ID" tabindex="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="accountKey" class="control-label col-xs-3" style="text-align: left">Account-Key</label>
+                <div class="col-xs-9">
+                    <input type="password" class="form-control" name="accountKey" id="accountKey" required ng-model="account.accountKey" placeholder="Account Key" tabindex="2">
+                </div>
+            </div>
+
+            <div class="form-group">
+
+                <div class="col-xs-3">
+                    <!--Adding type="button" to prevent default submit behaviour.-->
+                    <button type="button" class="btn btn-default" ng-click="testConnection()" tabindex="3">Validate</button>
+                </div>
+
+                <div class="col-xs-9">
+                    <span ng-show ="connectionState == states.valid"><span class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>Valid Credentials</span>
+                    <span ng-show="connectionState == states.invalid"><span class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>Invalid Credentials</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pubKey" class="control-label col-xs-12" style="text-align: left; margin-bottom: 5px">Public-Key</label>
+                <div class="col-xs-12">
+                    <textarea name="pubKey" id="pubKey" placeholder="Public Key" class="form-control" style="resize: none" rows="10" ng-model="account.pubKey" tabindex="4"></textarea>
+                </div>
+            </div>
+
+
+
+        </div>
+
+        <div class="modal-footer">
+            <div class="form-group">
+
+                <div class="pull-left col-xs-8">
+
+                    <div class="" style="color:tomato; text-align: left" ng-show="ec2ProviderForm.accountId.$dirty && ec2ProviderForm.accountId.$error.required || ec2ProviderForm.accountId.$error.required && ec2ProviderForm.$submitted">
+                        <span>Account Id cannot be blank.</span>
+                    </div>
+
+                    <div class="" style="color:tomato; text-align: left" ng-show="ec2ProviderForm.accountKey.$dirty && ec2ProviderForm.accountKey.$error.required || ec2ProviderForm.accountKey.$error.required && ec2ProviderForm.$submitted">
+                        <span>Account Key cannot be blank.</span>
+                    </div>
+
+                </div>
+                <div class="pull-right col-xs-4">
+                    <button type="button" class="btn btn-default" ng-click="close()" tabindex="5">Close</button>
+                    <button type="submit" class="btn btn-primary" tabindex="6">Submit</button>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>

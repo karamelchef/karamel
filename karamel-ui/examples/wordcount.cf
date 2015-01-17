@@ -1,0 +1,29 @@
+deftask wc( csv( File ) : txt( File ) )in bash *{
+    awk '{
+        for( i = 1; i <= NF; i++ )
+            freq[ $i ]++
+    }
+    END {
+        for( word in freq )
+            printf "%s\t%d\n", word, freq[ word ]
+    }' $txt > $csv
+}*
+
+deftask groupby( result( File ) : <csv( File )> )in bash *{
+    cat ${csv[@]} | awk '{
+        freq[ $1 ] += $2
+    }
+    END {
+        for( word in freq )
+            printf "%s\t%d\n", word, freq[ word ]
+    }' > $result
+}*
+
+txt( File ) = 'gronemeyer.txt' 'benzko.txt';
+
+csv = wc( txt: txt );
+
+result = groupby( csv: csv );
+
+result;
+

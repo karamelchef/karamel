@@ -1,0 +1,53 @@
+<form novalidate name="nodeGroupForm" class="form-horizontal nodeGroupForm" ng-submit="pushNodeGroup()">
+
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="close()">&times;</button>
+        <h4 class="modal-title" ng-model="columnName">Add/Update Node Group.</h4>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="form-group">
+            <label class="control-label col-xs-2" for="nodeGroupName">Name:</label>
+            <div class="col-xs-8">
+                <input type="text" class="form-control" id="nodeGroupName" placeholder="Name" required ng-model="name" name="nodeGroupName">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-xs-2" for="instances">Instances:</label>
+            <div class="col-xs-8">
+                <input type="number" min="0" class=" form-control" id="instances" required ng-model="instances" name="instances">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+        <div class="pull-left">
+            <span ng-show="nodeGroupForm.nodeGroupName.$dirty && nodeGroupForm.nodeGroupName.$invalid" class="pull-left">
+                <span class="text-danger" ng-show="nodeGroupForm.nodeGroupName.$error.required">Group Name should not be empty.</span>
+            </span>
+            <br>
+            <span ng-show="nodeGroupForm.instances.$dirty && nodeGroupForm.instances.$invalid" class="pull-left">
+
+                <span class="text-danger" ng-show="nodeGroupForm.instances.$error.required">
+                    Instances should not be empty.
+                </span>
+
+                <span class="text-danger" ng-show="nodeGroupForm.instances.$error.min">
+                    Instances should be greater than 0
+                </span>
+                <span class="text-danger" ng-show="nodeGroupForm.instances.$error.number">
+                    No letters allowed in instances, buddy :)
+                </span>
+            </span>
+        </div>
+
+        <div class="form-group">
+            <button type="close" class="btn btn-default" ng-click="close()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </div>
+    
+</form>

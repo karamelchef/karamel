@@ -1,0 +1,21 @@
+name: MySqlCluster                                                             
+
+cookbooks:                                                                      
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    version: "v0.1"
+    
+groups: 
+  datanodes:
+    size: 4 
+    recipes: 
+        - ndb::ndbd
+  server:
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+
+
+

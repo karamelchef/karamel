@@ -1,0 +1,338 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>se.kth.karamel</groupId>
+    <artifactId>karamel-parent</artifactId>
+    <version>0.1</version>
+  </parent>
+
+  <groupId>se.kth.karamel</groupId>
+  <artifactId>karamel-ui</artifactId>
+  <version>0.1</version>
+  <packaging>jar</packaging>
+  <name>karamel-ui</name>
+
+  <properties>
+    <dropwizard.version>0.7.0</dropwizard.version>
+    <karamel-core-version>${project.version}</karamel-core-version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.bazaarvoice.dropwizard</groupId>
+      <artifactId>dropwizard-configurable-assets-bundle</artifactId>
+      <version>0.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>se.kth</groupId>
+      <artifactId>karamel-core</artifactId>
+      <version>${karamel-core-version}</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-core</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-configuration</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-assets</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-servlets</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-views</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-views-freemarker</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.dropwizard</groupId>
+      <artifactId>dropwizard-jetty</artifactId>
+      <version>${dropwizard.version}</version>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.3</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached> 
+              <shadedClassifierName>shaded</shadedClassifierName> 
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+                </transformer>
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>                        
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin</artifactId>
+        <version>1.9</version>
+        <executions>
+          <execution>
+            <id>assemble-karamel</id>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>                
+            <configuration>
+              <configurationDirectory>conf</configurationDirectory>
+              <copyConfigurationDirectory>true</copyConfigurationDirectory>
+              <extraJvmArguments>-Xms128m</extraJvmArguments>
+              <platforms>
+                <platform>unix</platform>
+              </platforms>
+              <programs>
+                <program>
+                  <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+                  <id>karamel</id>
+                  <commandLineArguments>
+                    <commandLineArgument>server</commandLineArgument>
+                    <commandLineArgument>conf/dropwizard.yml</commandLineArgument>
+                  </commandLineArguments>
+                </program>
+              </programs>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.bluestemsoftware.open.maven.plugin</groupId>
+        <artifactId>launch4j-plugin</artifactId>
+        <version>1.5.0.0</version>
+        <executions>
+          <execution>
+            <id>l4j-clui</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <cmdLine>server dropwizard.yml</cmdLine>
+              <headerType>gui</headerType>
+              <outfile>${project.build.directory}/${project.build.finalName}.exe</outfile>
+              <!--<dontWrapJar>true</dontWrapJar>-->
+              <!--<jar>${project.build.finalName}-jar-with-dependencies.jar</jar>-->
+              <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
+              <classPath>
+                <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+              </classPath>
+              <icon>src/main/resources/icons/karamel.ico</icon>
+              <errTitle>Karamel</errTitle>
+              <!--              <singleInstance>
+                   <mutexName>Karamel</mutexName>
+                   <windowTitle>Karamel</windowTitle>
+                   </singleInstance>-->
+              <jre>
+                <minVersion>1.7.0</minVersion>
+                <initialHeapSize>128</initialHeapSize>
+                <maxHeapSize>1024</maxHeapSize>
+              </jre>
+              <!--              <versionInfo>
+                   <fileVersion>1.2.3.4</fileVersion>
+                   <txtFileVersion>txt file version</txtFileVersion>
+                   <fileDescription>a description</fileDescription>
+                   <copyright>Karamel copyright</copyright>
+                   <productVersion>1.2.3.4</productVersion>
+                   <txtProductVersion>txt product version</txtProductVersion>
+                   <productName>product name</productName>
+                   <internalName>internal name</internalName>
+                   <originalFilename>${project.build.directory}/${project.build.finalName}.exe</originalFilename>
+                   </versionInfo>-->
+              <!--              <messages>
+                   <startupErr>Problem starting Karamel</startupErr>
+                   <jreVersionErr>Problem with jre version for Karamel</jreVersionErr>
+                   <launcherErr>Karamel error</launcherErr>
+                   </messages>-->
+            </configuration>
+          </execution>
+          
+          <!-- Command-line exe -->
+          <execution>
+            <id>l4j-cli</id>
+            <phase>package</phase>
+            <goals>
+              <goal>launch4j</goal>
+            </goals>
+            <configuration>
+              <cmdLine>server dropwizard.yml</cmdLine>
+              <headerType>console</headerType>
+              <outfile>target/karamel-client.exe</outfile>
+              <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar> <!-- 'shaded' is the value set on shadedClassifierName above -->
+              <errTitle>App Err</errTitle>
+              <classPath>
+                <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+              </classPath>
+              <icon>src/main/resources/icons/karamel.ico</icon>
+              <jre>
+                <minVersion>1.7.0</minVersion>
+                <initialHeapSize>128</initialHeapSize>
+                <maxHeapSize>1024</maxHeapSize>
+              </jre>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>2.7</version>
+        <executions>
+          <execution>
+            <id>copy-dropwizard-conf</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/conf</outputDirectory>
+              <resources>          
+                <resource>
+                  <directory>src/main/config/</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+          <execution>
+            <id>copy-examples-windows</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/examples</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>examples/</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>
+          <execution>
+            <id>copy-examples-linux</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${basedir}/target/appassembler/examples</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>examples/</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>              
+            </configuration>            
+          </execution>                    
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>com.pyx4me</groupId>
+        <artifactId>proguard-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase></phase>
+            <goals>
+              <goal>proguard</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <obfuscate>false</obfuscate>
+          <injar>${project.artifactId}-${project.version}-shaded.jar</injar>
+          <outjar>${project.build.finalName}-small.jar</outjar>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+          <proguardInclude>${basedir}/proguard.conf</proguardInclude>
+          <options>
+            <option>-allowaccessmodification</option>
+          </options>
+          <libs>
+            <lib>${java.home}/lib/rt.jar</lib>
+          </libs>
+          <addMavenDescriptor>false</addMavenDescriptor>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <repositories>
+    <repository>
+      <id>sics-release</id>
+      <name>SICS Release Repository</name>
+      <url>http://kompics.sics.se/maven/repository</url>
+      <releases>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sics-snapshot</id>
+      <name>SICS Snapshot Repository</name>
+      <url>http://kompics.sics.se/maven/snapshotrepository</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+      </snapshots>
+    </repository>
+  </repositories>
+
+</project>

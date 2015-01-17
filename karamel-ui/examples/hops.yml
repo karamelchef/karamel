@@ -1,0 +1,32 @@
+name: HopsYaml                                                             
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+    
+groups: 
+  namenodes:
+    size: 2
+    recipes: 
+        - hops::nn
+  datanodes:
+    size: 2 
+    recipes: 
+        - ndb::ndbd
+        - hops::dn
+        - hops::nm
+  main:
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+        - hops::jhs                                                            
+        - hops::rm
+
+
+

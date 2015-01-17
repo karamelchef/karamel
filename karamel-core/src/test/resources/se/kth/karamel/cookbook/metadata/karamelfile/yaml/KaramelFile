@@ -1,0 +1,27 @@
+dependencies: 
+  - recipe: hop::install,
+    global:  
+      - ndb::install
+  - recipe: hadoop::nn,
+    local:  
+      - hadoop::install
+  - recipe: hadoop::rm,
+    local:  
+      - hadoop::install
+    global:  
+      - hadoop::nn
+  - recipe: hadoop::dn
+    local: 
+      - hadoop::install
+    global:  
+      - hadoop::rm
+  - recipe: hadoop::nm
+    local:   
+      - hadoop::install
+    global: 
+      - hadoop::dn
+  - recipe: hadoop::jhs
+    local:
+      - hadoop::install
+    global:  
+      - hadoop::dn
