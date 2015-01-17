@@ -1,4 +1,7 @@
 name: MySqlCluster                                                             
+ec2:
+    type: m3.medium
+    region: eu-west-1
 
 cookbooks:                                                                      
   ndb:
@@ -7,7 +10,7 @@ cookbooks:
     
 groups: 
   datanodes:
-    size: 4 
+    size: 2
     recipes: 
         - ndb::ndbd
   server:

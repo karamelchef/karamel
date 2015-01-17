@@ -269,7 +269,7 @@
                             <outputDirectory>${basedir}/target/windows/examples</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>examples/</directory>
+                                    <directory>../clusters/</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>              
@@ -285,7 +285,7 @@
                             <outputDirectory>${basedir}/target/appassembler/examples</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>examples/</directory>
+                                    <directory>../clusters/</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>              
