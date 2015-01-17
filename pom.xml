@@ -69,6 +69,17 @@
       </roles>
       <timezone>+1</timezone>
     </developer>
+    <developer>
+      <id>abhi</id>
+      <name>Abhimanyu Babbar</name>
+      <email>babbar&gt;kth.se</email>
+      <organization>KTH</organization>
+      <organizationUrl>http://www.kth.se/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
   </developers>
 
 
