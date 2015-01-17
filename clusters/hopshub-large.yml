@@ -4,8 +4,8 @@ ec2:
     region: eu-west-1
 
 cookbooks:                                                                      
-  hadoop: 
-    github: "hopshadoop/apache-hadoop-chef"
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
   hopshub:                                                                     
     github: "hopshadoop/hopshub-chef"
@@ -32,24 +32,26 @@ groups:
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - hadoop::client
+        - hops::client
+        - hadoop::jhs                                                            
         - hopshub
   namenodes:
-    size: 1 
+    size: 2 
     recipes:                                                                    
-        - hadoop::nn
-        - hadoop::rm
-        - hadoop::jhs                                                            
-        - hiway::hadoop
-        - hiway::wordcount_cf
+        - hops::nn
+        - ndb::mysqld                                                       
+        - ndb::memcached
+  resourcemanagers:
+    size: 2 
+    recipes:                                                                    
+        - hops::nn
   ndb:
-    size: 1 
+    size: 2
     recipes: 
         - ndb::ndbd
   datanodes:
-    size: 1 
+    size: 6 
     recipes: 
-        - hadoop::dn
-        - hadoop::nm
-        - hiway::hadoop
+        - hops::dn
+        - hops::nm
 

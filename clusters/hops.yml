@@ -1,4 +1,7 @@
 name: HopsYaml                                                             
+ec2:
+    type: m3.medium
+    region: eu-west-1
 
 cookbooks:                                                                      
   hops: 
