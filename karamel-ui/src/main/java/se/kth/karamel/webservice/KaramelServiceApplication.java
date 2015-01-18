@@ -9,10 +9,13 @@ import io.dropwizard.setup.Environment;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.SystemTray;
+import java.io.Console;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -28,7 +31,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
-import java.util.List;
+import java.util.Scanner;
 import javax.swing.ImageIcon;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -40,15 +43,15 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import se.kth.karamel.client.model.yaml.YamlCluster;
+import se.kth.karamel.client.model.yaml.YamlUtil;
 
 /**
  * Created by babbarshaer on 2014-11-20.
  */
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
-    private static KaramelApi karamelRestHandler;
-
-    public static boolean launchBrowswer = true;
+    private static KaramelApi karamelApiHandler;
 
     public static TrayUI trayUi;
 
@@ -58,19 +61,28 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     private static final CommandLineParser parser = new GnuParser();
 
     static {
-        options.addOption("y", false, "Do not prompt for user-supplied parameters. Accept default param values.");
+//        options.addOption("y", false, "Do not prompt for user-supplied parameters. Accept default param values.");
         options.addOption("help", false, "Print help message.");
-        options.addOption("nogui", false, "Run in a headless mode, without launching the Browser or SwingUI.");
-        options.addOption(OptionBuilder.withArgName("launch")
+        options.addOption(OptionBuilder.withArgName("yamlFile")
                 .hasArg()
-                .withDescription("YAML file containing Karamel cluster definition")
-                .create("yaml"));
+                .withDescription("Dropwizard configuration in a YAML file")
+                .create("server"));
+        options.addOption(OptionBuilder.withArgName("yamlFile")
+                .hasArg()
+                .withDescription("Karamel cluster definition in a YAML file")
+                .create("launch"));
     }
 
     public static void usage(int exitValue) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("karamel", options);
         System.exit(exitValue);
+    }
+
+    static String readFile(String path)
+            throws IOException {
+        byte[] encoded = Files.readAllBytes(Paths.get(path));
+        return new String(encoded);
     }
 
     public static void main(String[] args) throws Exception {
@@ -81,56 +93,97 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         }
         boolean cli = false;
         boolean launch = false;
-        String yamlFile;
+        String yamlTxt;
 
-        List<String> csArgs = Arrays.asList(args);
+        // These args are sent to the Dropwizard app (thread)
+        String[] modifiedArgs = new String[2];
+        modifiedArgs[0] = "server";
+
+        karamelApiHandler = new KaramelApiImpl();
 
         try {
             CommandLine line = parser.parse(options, args);
-            if (line.getOptions().length > 0) {
-                if (line.hasOption("help")) {
-                    usage(0);
-                } else if (line.hasOption("nogui")) {
-                    launchBrowswer = false;
-                    csArgs.remove("nogui");
-                } else if (line.hasOption("launch")) {
-                    cli = true;
-                    int pos = csArgs.indexOf("launch");
-                    csArgs.remove(pos + 1);
-                    csArgs.remove("launch");
-                }
+            if (line.getOptions().length == 0) {
+                usage(0);
             }
+            if (line.hasOption("help")) {
+                usage(0);
+            }
+            if (line.hasOption("server")) {
+                modifiedArgs[1] = line.getOptionValue("server");
+            }
+            if (line.hasOption("launch")) {
+                cli = true;
+            }
+
             if (cli) {
-                yamlFile = line.getOptionValue("launch");
-                // Try to open and compile the file. Print error msg if invalid file or invalid YAML.
+                // Try to open and read the yaml file. 
+                // Print error msg if invalid file or invalid YAML.
+                try {
+                    yamlTxt = readFile(line.getOptionValue("launch"));
+                    YamlCluster cluster = YamlUtil.loadCluster(yamlTxt);
+                    String jsonTxt = karamelApiHandler.yamlToJson(yamlTxt);
+                    boolean valid = false;
+                    String ec2Key = System.getenv("AWS_ACCESS_KEY");
+                    String ec2SecretKey = System.getenv("AWS_SECRET_KEY");
+
+                    Console c = null;
+                    if (ec2Key == null || ec2Key.isEmpty() || ec2SecretKey == null || ec2SecretKey.isEmpty()) {
+                        c = System.console();
+                        if (c == null) {
+                            System.err.println("No console available.");
+                            System.exit(1);
+                        }
+                    }
+                    while (!valid) {
+                        if (ec2Key == null || ec2Key.isEmpty()) {
+                            ec2Key = c.readLine("Enter your AWS_ACCESS_KEY:");
+                        }
+                        if (ec2SecretKey == null || ec2SecretKey.isEmpty()) {
+                            char[] secretKeyChars = c.readPassword("Enter your AWS_SECRET_KEY:");
+                            ec2SecretKey = new String(secretKeyChars);
+                        }
+                        valid = karamelApiHandler.updateEc2CredentialsIfValid(ec2Key, ec2SecretKey);
+                        if (!valid) {
+                            System.out.println("Invalid Ec2 Credentials. Try again.");
+                            ec2Key = null;
+                            ec2SecretKey = null;
+                        }
+                    }
+                    karamelApiHandler.startCluster(jsonTxt);
+
+                    long ms1 = System.currentTimeMillis();
+                    while (ms1 + 6000000 > System.currentTimeMillis()) {
+                        String clusterStatus = karamelApiHandler.getClusterStatus(cluster.getName());
+                        System.out.println(clusterStatus);
+                        Thread.currentThread().sleep(30000);
+                    }
+                } catch (KaramelException e) {
+                    System.err.println("Inalid yaml file; " + e.getMessage());
+                    System.exit(-1);
+                } catch (IOException e) {
+                    System.err.println("Could not find or parse yaml file.");
+                    System.exit(-1);
+                }
             }
         } catch (ParseException e) {
             usage(-1);
         }
 
-        karamelRestHandler = new KaramelApiImpl();
-        if (args.length > 0 && args[0].compareToIgnoreCase("nolaunch") == 0) {
-            launchBrowswer = false;
-            args[0] = args[1];
-            args[1] = args[2];
+        if (!cli) {
+            new KaramelServiceApplication().run(modifiedArgs);
         }
-        if (cli) {
-            KaramelApi k = new KaramelApiImpl();
-            // TODO - KaramelApi needs to support taking a File a a parameter
-        } else {
-            new KaramelServiceApplication().run(args);
-        }
-}
+    }
 
 // Name of the application displayed when application boots up.
-@Override
-        public String getName() {
+    @Override
+    public String getName() {
         return "caramel-core";
     }
 
     // Pre start of the dropwizard to plugin with separate bundles.
     @Override
-        public void initialize(Bootstrap<KaramelServiceConfiguration> bootstrap) {
+    public void initialize(Bootstrap<KaramelServiceConfiguration> bootstrap) {
 
         System.out.println("Executing any initialization tasks.");
 //        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/dashboard/"));
@@ -139,7 +192,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
 
     @Override
-        public void run(KaramelServiceConfiguration configuration, Environment environment) throws Exception {
+    public void run(KaramelServiceConfiguration configuration, Environment environment) throws Exception {
 
         healthCheck = new TemplateHealthCheck("%s");
 //        http://stackoverflow.com/questions/26610502/serve-static-content-from-a-base-url-in-dropwizard-0-7-1
@@ -148,71 +201,48 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         /*
          * To allow cross orign resource request from angular js client
          */
-        FilterRegistration
-
-.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class  
-
-    );
+        FilterRegistration.Dynamic filter = environment.servlets().addFilter("CORS", CrossOriginFilter.class
+        );
 
         // Allow cross origin requests.
-    filter.addMappingForUrlPatterns (EnumSet.allOf
-
-    (DispatcherType.class  
-
+        filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class
         ), true, "/*");
-        filter.setInitParameter (
+        filter.setInitParameter(
+                "allowedOrigins", "*"); // allowed origins comma separated
+        filter.setInitParameter(
+                "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+        filter.setInitParameter(
+                "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
+        filter.setInitParameter(
+                "preflightMaxAge", "5184000"); // 2 months
+        filter.setInitParameter(
+                "allowCredentials", "true");
 
-        "allowedOrigins", "*"); // allowed origins comma separated
-        filter.setInitParameter (
+        environment.jersey()
+                .setUrlPattern("/api/*");
 
-        "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
-        filter.setInitParameter (
+        environment.healthChecks()
+                .register("template", healthCheck);
 
-        "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
-        filter.setInitParameter (
+        environment.jersey()
+                .register(new ConvertYamlToJSON());
+        environment.jersey()
+                .register(new ConvertJSONToYaml());
+        environment.jersey()
+                .register(new Cookbook());
+        environment.jersey()
+                .register(new ProviderValidation());
+        environment.jersey()
+                .register(new Cluster.StartCluster());
+        environment.jersey()
+                .register(new Cluster.ViewCluster());
 
-        "preflightMaxAge", "5184000"); // 2 months
-        filter.setInitParameter (
+        openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
 
-        "allowCredentials", "true");
-
-        environment.jersey ()
-
-        .setUrlPattern("/api/*");
-
-        environment.healthChecks ()
-
-        .register("template", healthCheck);
-
-        environment.jersey ()
-
-        .register(new ConvertYamlToJSON());
-        environment.jersey ()
-
-        .register(new ConvertJSONToYaml());
-        environment.jersey ()
-
-        .register(new Cookbook());
-        environment.jersey ()
-
-        .register(new ProviderValidation());
-        environment.jersey ()
-
-        .register(new Cluster.StartCluster());
-        environment.jersey ()
-        .register(new Cluster.ViewCluster());
-
-        if (launchBrowswer
-
-        
-            ) {
-            openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
-
-            if (SystemTray.isSupported()) {
-                trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
-            }
-
+        if (SystemTray.isSupported()) {
+            trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
         }
+
     }
 
     protected static Image createImage(String path, String description) {
@@ -279,7 +309,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
             Response response = null;
             try {
-                String jsonClusterString = karamelRestHandler.yamlToJson(cluster.getYml());
+                String jsonClusterString = karamelApiHandler.yamlToJson(cluster.getYml());
                 response = Response.status(Response.Status.OK).entity(jsonClusterString).build();
             } catch (KaramelException e) {
                 e.printStackTrace();
@@ -300,7 +330,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             System.out.println("Fetch Yaml Called ... ");
 
             try {
-                String yml = karamelRestHandler.jsonToYaml(karamelBoardJSON.getJson());
+                String yml = karamelApiHandler.jsonToYaml(karamelBoardJSON.getJson());
                 KaramelBoardYaml karamelBoardYaml = new KaramelBoardYaml(yml);
                 response = Response.status(Response.Status.OK).entity(karamelBoardYaml).build();
 
@@ -324,7 +354,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             System.out.println("Received Call For the cookbook.");
             System.out.println(cookbookJSON.getUrl());
             try {
-                String cookbookDetails = karamelRestHandler.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
+                String cookbookDetails = karamelApiHandler.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
                 response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
 
             } catch (KaramelException e) {
@@ -354,7 +384,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             System.out.println(" Received request to validate the ec2 account.");
 
             try {
-                if (karamelRestHandler.updateEc2CredentialsIfValid(providerJSON.getAccountId(), providerJSON.getAccountKey())) {
+                if (karamelApiHandler.updateEc2CredentialsIfValid(providerJSON.getAccountId(), providerJSON.getAccountKey())) {
                     response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
                 } else {
                     response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
@@ -385,7 +415,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                 System.out.println(" Received request to start the cluster. ");
 
                 try {
-                    karamelRestHandler.startCluster(boardJSON.getJson());
+                    karamelApiHandler.startCluster(boardJSON.getJson());
                     response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
 
                 } catch (KaramelException e) {
@@ -410,7 +440,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
                 try {
 
-                    String clusterInfo = karamelRestHandler.getClusterStatus(clusterJSON.getClusterName());
+                    String clusterInfo = karamelApiHandler.getClusterStatus(clusterJSON.getClusterName());
                     response = Response.status(Response.Status.OK).entity(clusterInfo).build();
 
                 } catch (KaramelException e) {

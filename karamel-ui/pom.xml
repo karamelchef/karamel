@@ -37,6 +37,12 @@
             <groupId>com.bazaarvoice.dropwizard</groupId>
             <artifactId>dropwizard-configurable-assets-bundle</artifactId>
             <version>0.2.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>se.kth</groupId>
@@ -59,6 +65,12 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-core</artifactId>
             <version>${dropwizard.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.dropwizard</groupId>
@@ -128,7 +140,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+            
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>                    
+                    <archive>
+                        <manifest>
+                            <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id> 
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -152,7 +188,7 @@
                                     <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
                                     <id>karamel</id>
                                     <commandLineArguments>
-                                        <commandLineArgument>server</commandLineArgument>
+                                        <commandLineArgument>-server</commandLineArgument>
                                         <commandLineArgument>conf/dropwizard.yml</commandLineArgument>
                                     </commandLineArguments>
                                 </program>
@@ -174,7 +210,7 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <cmdLine>server dropwizard.yml</cmdLine>
+                            <cmdLine>-server dropwizard.yml</cmdLine>
                             <headerType>gui</headerType>
                             <outfile>${project.build.directory}/windows/karamel.exe</outfile>
                             <!--<dontWrapJar>true</dontWrapJar>-->
@@ -221,7 +257,7 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <cmdLine>server dropwizard.yml</cmdLine>
+                            <cmdLine>-server dropwizard.yml</cmdLine>
                             <headerType>console</headerType>
                             <outfile>target/karamel-client.exe</outfile>
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar> <!-- 'shaded' is the value set on shadedClassifierName above -->
