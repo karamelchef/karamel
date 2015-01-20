@@ -1,4 +1,4 @@
-name: HopsHub
+name: HopsHubbie
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -27,7 +27,7 @@ attrs:
         user: glassfish
 
 groups: 
-  hopshub:
+  hopshub1:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
@@ -39,11 +39,11 @@ groups:
         - hiway::hadoop
         - hiway::wordcount_cf
         - hopshub
-  ndb:
+  ndb1:
     size: 1 
     recipes: 
         - ndb::ndbd
-  datanodes:
+  datanodes1:
     size: 1 
     recipes: 
         - hadoop::dn
