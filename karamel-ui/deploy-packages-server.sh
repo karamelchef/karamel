@@ -2,12 +2,10 @@
 
 set -e
 
-if [ $# -ne 1 ] ; then
-echo "Usage: <prog> release-number"
-exit 1
-fi
+# This reads the pom.xml file in the current directory, and extracts the first version element in the xml version element.
+version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/version//g" | sed "s/>//" | sed "s/<\///g"`
 
-dist=karamel-$1
+dist=karamel-$version
 
 mvn clean package
 cd target
@@ -23,7 +21,7 @@ zip -r ${dist}.zip $dist
 
 #create jar archive
 mkdir ${dist}-jar
-mv karamel-ui-$1-shaded.jar ${dist}-jar
+mv karamel-ui-${version}-shaded.jar ${dist}-jar
 cp ${dist}/conf/* ${dist}-jar/ 
 zip -r ${dist}-jar.zip $dist-jar
 
