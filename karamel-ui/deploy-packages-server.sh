@@ -12,7 +12,7 @@ cd target
 
 #create linux archive
 mv appassembler $dist
-tar zcf ${dist}.tgz $dist
+tar zcf ${dist}.tgz ${dist}/
 mv $dist ${dist}-linux
 
 #create windows archive
