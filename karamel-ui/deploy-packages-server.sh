@@ -22,6 +22,8 @@ zip -r ${dist}.zip $dist
 #create jar archive
 mkdir ${dist}-jar
 mv karamel-ui-${version}-shaded.jar ${dist}-jar
+cp -r appassembler/examples ${dist}-jar/
+cp ../README.txt ${dist}-jar/ 
 cp ${dist}/conf/* ${dist}-jar/ 
 zip -r ${dist}-jar.zip $dist-jar
 
