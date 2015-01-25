@@ -210,11 +210,11 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <cmdLine>-server dropwizard.yml</cmdLine>
+                            <cmdLine>-server conf/dropwizard.yml</cmdLine>
                             <headerType>gui</headerType>
-                            <outfile>${project.build.directory}/windows/karamel.exe</outfile>
-                            <!--<dontWrapJar>true</dontWrapJar>-->
-                            <!--<jar>${project.build.finalName}-jar-with-dependencies.jar</jar>-->
+                            <outfile>${project.build.directory}/karamel-${project.version}/karamel.exe</outfile>
+                            <dontWrapJar>false</dontWrapJar>
+                            <!--<jar>${project.artifactId}-${project.version}-jar-with-dependencies.jar</jar>-->
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
                             <classPath>
                                 <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
@@ -228,7 +228,7 @@
                             <jre>
                                 <minVersion>1.7.0</minVersion>
                                 <initialHeapSize>128</initialHeapSize>
-                                <maxHeapSize>1024</maxHeapSize>
+                                <maxHeapSize>4096</maxHeapSize>
                             </jre>
                             <!--              <versionInfo>
                             <fileVersion>1.2.3.4</fileVersion>
@@ -257,10 +257,10 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <cmdLine>-server dropwizard.yml</cmdLine>
+                            <cmdLine>-server conf/dropwizard.yml</cmdLine>
                             <headerType>console</headerType>
                             <outfile>target/karamel-client.exe</outfile>
-                            <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar> <!-- 'shaded' is the value set on shadedClassifierName above -->
+                            <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar> 
                             <errTitle>App Err</errTitle>
                             <classPath>
                                 <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
@@ -286,7 +286,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/windows/conf</outputDirectory>
+                            <outputDirectory>${basedir}/target/karamel-${project.version}/conf</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>src/main/config/</directory>
@@ -302,7 +302,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${basedir}/target/windows/examples</outputDirectory>
+                            <outputDirectory>${basedir}/target/karamel-${project.version}/examples</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../clusters/</directory>
