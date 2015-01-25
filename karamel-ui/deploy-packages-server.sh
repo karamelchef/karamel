@@ -10,21 +10,24 @@ dist=karamel-$version
 mvn clean package
 cd target
 
+#create windows archive
+cp ../README.windows $dist/README.txt
+zip -r ${dist}.zip $dist
+mv ${dist} ${dist}-windows
+
 #create linux archive
-mv appassembler $dist
+cp -r appassembler $dist
+cp ../README.linux $dist/README.txt
 tar zcf ${dist}.tgz $dist
 mv $dist ${dist}-linux
 
-#create windows archive
-mv windows $dist
-zip -r ${dist}.zip $dist
 
 #create jar archive
 mkdir ${dist}-jar
-mv karamel-ui-${version}-shaded.jar ${dist}-jar
+cp karamel-ui-${version}-shaded.jar ${dist}-jar/karamel-ui-${version}.jar
 cp -r appassembler/examples ${dist}-jar/
-cp ../README.txt ${dist}-jar/ 
-cp ${dist}/conf/* ${dist}-jar/ 
+cp -r appassembler/conf/* ${dist}-jar/ 
+cp ../README.jar ${dist}-jar/README.txt 
 zip -r ${dist}-jar.zip $dist-jar
 
 scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
