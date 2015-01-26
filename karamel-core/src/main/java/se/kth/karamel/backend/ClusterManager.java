@@ -195,6 +195,7 @@ public class ClusterManager implements Runnable {
             machinesMonitor.addMachines(mcs);
             group.setPhase(GroupEntity.GroupPhase.MACHINES_FORKED);
           } catch (Exception ex) {
+            logger.error("", ex);
             group.setFailed(true);
             runtime.setFailed(true);
           }

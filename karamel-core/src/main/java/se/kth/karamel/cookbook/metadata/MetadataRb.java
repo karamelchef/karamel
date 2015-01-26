@@ -15,11 +15,20 @@ import java.util.List;
  */
 public class MetadataRb {
 
+  String url;
   String name;
   String description;
   String version;
   List<Recipe> recipes = new ArrayList<>();
   List<Attribute> attributes = new ArrayList<>();
+
+  public String getUrl() {
+    return url;
+  }
+
+  public void setUrl(String url) {
+    this.url = url;
+  }
 
   public void setAttributes(List<Attribute> attributes) {
     this.attributes = attributes;
