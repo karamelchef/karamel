@@ -21,7 +21,7 @@ import se.kth.karamel.common.Settings;
  *
  * @author kamal
  */
-//@Ignore
+@Ignore
 public class KaramelApiTest {
 
   KaramelApi api = new KaramelApiImpl();
