@@ -21,15 +21,17 @@ public class GithubCookbook {
   private final DefaultRb defaultRb;
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
+  private final Berksfile berksfile;
   private String json;
 
   public GithubCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
     GithubUrls.Builder builder = new GithubUrls.Builder();
     urls = builder.url(homeUrl).build();
     defaultRb = new DefaultRb(urls.attrFile);
-    metadataRb = MetadataParser.parse(urls.metadataFile);
+    metadataRb = MetadataParser.parse(urls.home, urls.metadataFile);
     metadataRb.setDefaults(defaultRb);
     karamelFile = new KaramelFile(urls.karamelFile);
+    berksfile = new Berksfile(urls.berksfile);
   }
 
   public String getMetadataJson() {

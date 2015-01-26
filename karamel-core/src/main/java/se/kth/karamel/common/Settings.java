@@ -5,6 +5,8 @@
  */
 package se.kth.karamel.common;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import org.jclouds.aws.domain.Region;
@@ -38,6 +40,7 @@ public class Settings {
   public static final String REPO_NO_BRANCH_PATTERN = "[^\\/]*/[^\\/]*";
   public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
   public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
+  public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
   public static final int SSH_CONNECT_RETRIES = 5;
@@ -58,7 +61,7 @@ public class Settings {
   //Providers 
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
-    //  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
+  //  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
@@ -76,7 +79,7 @@ public class Settings {
   public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
   public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
   public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";
-  public static final String EC2_KEYPAIR_NAME = "karamel_" + USER_NAME + "_" + OS_NAME;
+  public static final String EC2_KEYPAIR_NAME = loadEc2KeypairName();
   public static final String EC2_CONF_PATH = USER_HOME + "/hop/ec2.properties";
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
@@ -90,9 +93,18 @@ public class Settings {
   public static final String COOKBOOK_DEFAULTRB_REL_PATH = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_PATH = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = "/Karamelfile";
-
+  public static final String COOKBOOK_BERKSFILE_REL_PATH = "/Berksfile";
   //settings on vm machines
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";
+
+  public static String loadEc2KeypairName() {
+    String address = "NoAddress";
+    try {
+      address = InetAddress.getLocalHost().getHostAddress();
+    } catch (UnknownHostException ex) {
+    }
+    return "karamel_" + USER_NAME + "_" + OS_NAME + "_" + address;
+  }
 
 }

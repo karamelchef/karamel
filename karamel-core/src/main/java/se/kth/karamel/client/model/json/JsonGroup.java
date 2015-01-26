@@ -11,11 +11,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
+import se.kth.karamel.common.exception.ClusterDefinitionException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -31,7 +34,7 @@ public class JsonGroup extends JsonScope {
 
   public JsonGroup(YamlCluster cluster, YamlGroup group, String name) throws KaramelException {
     super(cluster);
-    this.name = name;
+    setName(name);
     this.size = group.getSize();
     List<String> recipes = group.getRecipes();
     for (String rec : recipes) {
@@ -88,7 +91,9 @@ public class JsonGroup extends JsonScope {
     return name;
   }
 
-  public void setName(String name) {
+  public final void setName(String name) throws ValidationException {
+    if (!name.matches(Settings.EC2_GEOUPNAME_PATTERN))
+      throw new ValidationException("Group name '%s' must start with letter/number and just lowercase ASCII letters, numbers and dashes are accepted in the name.");
     this.name = name;
   }
 
