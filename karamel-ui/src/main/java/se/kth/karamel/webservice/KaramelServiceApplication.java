@@ -237,6 +237,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         environment.jersey()
                 .register(new Cluster.ViewCluster());
 
+        // Wait to make sure jersey/angularJS is running before launching the browser
+        Thread.sleep(300);
         openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
 
         if (SystemTray.isSupported()) {
