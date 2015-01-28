@@ -1,8 +1,8 @@
 # Karamel - the orchestrator for Chef
 
 Website: http://www.karamel.io
-IRC: #serfdom on Freenode
-Mailing list: <a href="https://groups.google.com/karamel-chef">Google Groups</a>
+
+Mailing list: <a href="https://groups.google.com/forum/#!forum/karamel-chef">Google Groups</a>
 
 Karamel is an orchestration engine for Chef Solo that enables the deployment of large distributed systems on both virtualized platforms (AWS, Vagrant) and bare-metal hosts. 
 
