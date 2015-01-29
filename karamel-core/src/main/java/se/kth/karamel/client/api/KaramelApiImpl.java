@@ -12,14 +12,18 @@ import java.util.HashSet;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
-import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterEntity;
-import se.kth.karamel.backend.running.model.serializers.MakeSoloRbSerializer;
-import se.kth.karamel.backend.running.model.serializers.RunRecipeTaskSerializer;
+import se.kth.karamel.backend.running.model.GroupEntity;
+import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.ShellCommandSerializer;
-import se.kth.karamel.backend.running.model.serializers.VendorCookbookSerializer;
+import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
+import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
+import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
 import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
@@ -99,10 +103,15 @@ public class KaramelApiImpl implements KaramelApi {
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterEntity clusterManager = clusterService.clusterStatus(clusterName);
     Gson gson = new GsonBuilder().
+            registerTypeAdapter(ClusterEntity.class, new ClusterEntitySerializer()).
+            registerTypeAdapter(MachineEntity.class, new MachineEntitySerializer()).
+            registerTypeAdapter(GroupEntity.class, new GroupEntitySerializer()).
             registerTypeAdapter(ShellCommand.class, new ShellCommandSerializer()).
-            registerTypeAdapter(RunRecipeTask.class, new RunRecipeTaskSerializer()).
-            registerTypeAdapter(MakeSoloRbTask.class, new MakeSoloRbSerializer()).
-            registerTypeAdapter(VendorCookbookTask.class, new VendorCookbookSerializer()).
+            registerTypeAdapter(RunRecipeTask.class, new DefaultTaskSerializer()).
+            registerTypeAdapter(MakeSoloRbTask.class, new DefaultTaskSerializer()).
+            registerTypeAdapter(VendorCookbookTask.class, new DefaultTaskSerializer()).
+            registerTypeAdapter(AptGetEssentialsTask.class, new DefaultTaskSerializer()).
+            registerTypeAdapter(InstallBerkshelfTask.class, new DefaultTaskSerializer()).
             setPrettyPrinting().
             create();
     String json = gson.toJson(clusterManager);
@@ -111,12 +120,12 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void pauseCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    clusterService.pauseCluster(clusterName);
   }
 
   @Override
   public void resumeCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    clusterService.resumeCluster(clusterName);
   }
 
   @Override

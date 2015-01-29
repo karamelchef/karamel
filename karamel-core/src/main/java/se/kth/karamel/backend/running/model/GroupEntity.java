@@ -14,20 +14,24 @@ import se.kth.karamel.client.model.json.JsonGroup;
  * @author kamal
  */
 public class GroupEntity {
-  
+
   public static enum GroupPhase {
-    NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING ;
+
+    NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING;
   }
-  
+
+  private final ClusterEntity cluster;
   private GroupPhase phase = GroupPhase.NONE;
   private boolean failed = false;
   private String name;
   private List<MachineEntity> machines = new ArrayList<>();
 
-  public GroupEntity() {
+  public GroupEntity(ClusterEntity cluster) {
+    this.cluster = cluster;
   }
 
-  public GroupEntity(JsonGroup definition) {
+  public GroupEntity(ClusterEntity cluster, JsonGroup definition) {
+    this.cluster = cluster;
     this.name = definition.getName();
   }
 
@@ -50,13 +54,16 @@ public class GroupEntity {
   public void setPhase(GroupPhase phase) {
     this.phase = phase;
   }
-  
+
   public boolean isFailed() {
     return failed;
   }
 
   public void setFailed(boolean failed) {
     this.failed = failed;
+    if (failed) {
+      cluster.setFailed(failed);
+    }
   }
-  
+
 }

@@ -7,6 +7,7 @@ package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
 import java.util.List;
+import se.kth.karamel.backend.running.model.MachineEntity;
 
 /**
  *
@@ -22,14 +23,19 @@ public abstract class Task {
   private final String name;
   private final String machineId;
   protected List<ShellCommand> commands;
+  private final MachineEntity machine;
 
-  public Task(String name, String machineId) {
+  public Task(String name, MachineEntity machine) {
     this.name = name;
-    this.machineId = machineId;
+    this.machineId = machine.getId();
+    this.machine = machine;
   }
 
   public void setStatus(Status status) {
     this.status = status;
+    if (status == Status.FAILED) {
+      machine.setTasksStatus(MachineEntity.TasksStatus.FAILED);
+    }
   }
 
   public Status getStatus() {
