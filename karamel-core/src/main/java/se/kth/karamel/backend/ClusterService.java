@@ -42,8 +42,7 @@ public class ClusterService {
     }
     ClusterManager cluster = new ClusterManager(jsonCluster);
     repository.put(clusterName, cluster);
-    Thread t = new Thread(cluster);
-    t.start();
+    cluster.start();
     cluster.enqueue(ClusterManager.Command.LAUNCH);
   }
 
