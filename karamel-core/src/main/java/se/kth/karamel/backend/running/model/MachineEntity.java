@@ -22,9 +22,10 @@ public class MachineEntity {
 
   public static enum TasksStatus {
 
-    ONGOING, FAILED
+    ONGOING, FAILED, PAUSING, PAUSED
   }
 
+  private final GroupEntity group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.ONGOING;
   private String privateIp;
@@ -32,8 +33,13 @@ public class MachineEntity {
   private int sshPort;
   private String sshUser;
 
-  private List<Task> tasks = new ArrayList<>();
+  private final List<Task> tasks = new ArrayList<>();
 
+  public MachineEntity(GroupEntity group) {
+    this.group = group;
+  }
+
+  
   public String getPublicIp() {
     return publicIp;
   }
@@ -78,7 +84,7 @@ public class MachineEntity {
     return lifeStatus;
   }
 
-  public void setLifeStatus(LifeStatus lifeStatus) {
+  public synchronized void setLifeStatus(LifeStatus lifeStatus) {
     this.lifeStatus = lifeStatus;
   }
 
@@ -86,8 +92,10 @@ public class MachineEntity {
     return tasksStatus;
   }
 
-  public void setTasksStatus(TasksStatus tasksStatus) {
+  public synchronized  void setTasksStatus(TasksStatus tasksStatus) {
     this.tasksStatus = tasksStatus;
+    if (tasksStatus == TasksStatus.FAILED)
+      group.setFailed(true);
   }
 
   public String getId() {

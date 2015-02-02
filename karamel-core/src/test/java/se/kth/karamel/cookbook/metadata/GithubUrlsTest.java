@@ -23,6 +23,7 @@ public class GithubUrlsTest {
     String metadataFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/master/metadata.rb";
     String attFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/master/attributes/default.rb";
     String karamelFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/master/Karamelfile";
+    String berksFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/master/Berksfile";
     String repo = "hadoop-chef";
     String branch = "master";
 
@@ -34,6 +35,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls1.metadataFile);
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
+    assertEquals(berksFile, urls1.berksfile);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
 
@@ -45,6 +47,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls2.metadataFile);
     assertEquals(attFile, urls2.attrFile);
     assertEquals(karamelFile, urls2.karamelFile);
+    assertEquals(berksFile, urls2.berksfile);
     assertEquals(repo, urls2.repoName);
     assertEquals(branch, urls2.branch);
 
@@ -56,6 +59,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls3.metadataFile);
     assertEquals(attFile, urls3.attrFile);
     assertEquals(karamelFile, urls3.karamelFile);
+    assertEquals(berksFile, urls3.berksfile);
     assertEquals(repo, urls3.repoName);
     assertEquals(branch, urls3.branch);
 
@@ -67,6 +71,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls4.metadataFile);
     assertEquals(attFile, urls4.attrFile);
     assertEquals(karamelFile, urls4.karamelFile);
+    assertEquals(berksFile, urls3.berksfile);
     assertEquals(repo, urls4.repoName);
     assertEquals(branch, urls4.branch);
 
@@ -78,6 +83,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls5.metadataFile);
     assertEquals(attFile, urls5.attrFile);
     assertEquals(karamelFile, urls5.karamelFile);
+    assertEquals(berksFile, urls5.berksfile);
     assertEquals(repo, urls5.repoName);
     assertEquals(branch, urls5.branch);
 
@@ -89,6 +95,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls6.metadataFile);
     assertEquals(attFile, urls6.attrFile);
     assertEquals(karamelFile, urls6.karamelFile);
+    assertEquals(berksFile, urls6.berksfile);
     assertEquals(repo, urls6.repoName);
     assertEquals(branch, urls6.branch);
   }
@@ -101,6 +108,7 @@ public class GithubUrlsTest {
     String metadataFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/v0.1/metadata.rb";
     String attFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/v0.1/attributes/default.rb";
     String karamelFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/v0.1/Karamelfile";
+    String berksFile = "https://raw.githubusercontent.com/hopstart/hadoop-chef/v0.1/Berksfile";
     String repo = "hadoop-chef";
     String branch = "v0.1";
 
@@ -112,6 +120,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls1.metadataFile);
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
+    assertEquals(berksFile, urls1.berksfile);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
 
@@ -123,6 +132,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls2.metadataFile);
     assertEquals(attFile, urls2.attrFile);
     assertEquals(karamelFile, urls2.karamelFile);
+    assertEquals(berksFile, urls2.berksfile);
     assertEquals(repo, urls2.repoName);
     assertEquals(branch, urls2.branch);
 
@@ -134,6 +144,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls3.metadataFile);
     assertEquals(attFile, urls3.attrFile);
     assertEquals(karamelFile, urls3.karamelFile);
+    assertEquals(berksFile, urls3.berksfile);
     assertEquals(repo, urls3.repoName);
     assertEquals(branch, urls3.branch);
 
@@ -145,6 +156,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls4.metadataFile);
     assertEquals(attFile, urls4.attrFile);
     assertEquals(karamelFile, urls4.karamelFile);
+    assertEquals(berksFile, urls4.berksfile);
     assertEquals(repo, urls4.repoName);
     assertEquals(branch, urls4.branch);
 
@@ -156,6 +168,7 @@ public class GithubUrlsTest {
     assertEquals(metadataFile, urls5.metadataFile);
     assertEquals(attFile, urls5.attrFile);
     assertEquals(karamelFile, urls5.karamelFile);
+    assertEquals(berksFile, urls5.berksfile);
     assertEquals(repo, urls5.repoName);
     assertEquals(branch, urls5.branch);
 
@@ -165,6 +178,7 @@ public class GithubUrlsTest {
     assertEquals(home, urls6.home);
     assertEquals(rawHome, urls6.rawHome);
     assertEquals(metadataFile, urls6.metadataFile);
+    assertEquals(berksFile, urls6.berksfile);
     assertEquals(attFile, urls6.attrFile);
     assertEquals(karamelFile, urls6.karamelFile);
   }

@@ -27,13 +27,11 @@ public class MachinesMonitor implements Runnable {
   private static final Logger logger = Logger.getLogger(MachinesMonitor.class);
   private final String clusterName;
   private final Map<String, SshMachine> machines = new HashMap<>();
-  private boolean running = true;
-  private final int numMachines;
+  private boolean paused = false;
   ExecutorService executor;
 
   public MachinesMonitor(String clusterName, int numMachines) {
     this.clusterName = clusterName;
-    this.numMachines = numMachines;
     executor = Executors.newFixedThreadPool(numMachines);
   }
 
@@ -46,19 +44,31 @@ public class MachinesMonitor implements Runnable {
     }
   }
 
-  public synchronized void play() {
-    running = true;
+  public synchronized void resume() {
+    if (paused) {
+      for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+        SshMachine sshMachine = entry.getValue();
+        sshMachine.resume();
+      }
+      paused = false;
+    }
   }
 
   public synchronized void pause() {
-    running = false;
+    if (!paused) {
+      for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+        SshMachine sshMachine = entry.getValue();
+        sshMachine.pause();
+      }
+      paused = true;
+    }
   }
 
   @Override
   public void run() {
     logger.info(String.format("Machines-Monitor started for '%s' d'-'", clusterName));
     while (true) {
-      if (running) {
+      if (!paused) {
         Set<Map.Entry<String, SshMachine>> entrySet = machines.entrySet();
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
@@ -69,7 +79,7 @@ public class MachinesMonitor implements Runnable {
           }
         }
       } else {
-        logger.info(String.format("Cluster %s is on pause", clusterName));
+        logger.info(String.format("Cluster %s is on pause, a failure might have happened.", clusterName));
       }
 
       try {

@@ -194,10 +194,10 @@ public class UserClusterDataExtractor {
         for (JsonCookbook jc : jg.getCookbooks()) {
           String installRecipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
           JsonObject json = chefJsons.get(me.getId() + installRecipeName);
-          makeRecipeTask(installRecipeName, me.getId(), map, json);
+          makeRecipeTask(installRecipeName, me, map, json);
           for (JsonRecipe rec : jc.getRecipes()) {
             JsonObject json1 = chefJsons.get(me.getId() + rec.getName());
-            makeRecipeTask(rec.getName(), me.getId(), map, json1);
+            makeRecipeTask(rec.getName(), me, map, json1);
           }
         }
       }
@@ -205,8 +205,8 @@ public class UserClusterDataExtractor {
     return map;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, String machineId, Map<String, Map<String, Task>> map, JsonObject chefJson) {
-    RunRecipeTask t1 = makeRecipeTask(recipeName, machineId, chefJson);
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, Map<String, Map<String, Task>> map, JsonObject chefJson) {
+    RunRecipeTask t1 = makeRecipeTask(recipeName, machine, chefJson);
     Map<String, Task> map1 = map.get(recipeName);
     if (map1 == null) {
       map1 = new HashMap<>();
@@ -216,11 +216,11 @@ public class UserClusterDataExtractor {
     return t1;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, String machineId, JsonObject chefJson) {
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, JsonObject chefJson) {
     ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
     Gson gson = new GsonBuilder().setPrettyPrinting().create();
     String jsonString = gson.toJson(chefJson);
-    return new RunRecipeTask(machineId, recipeName, jsonString);
+    return new RunRecipeTask(machine, recipeName, jsonString);
   }
 
   /**
@@ -239,11 +239,11 @@ public class UserClusterDataExtractor {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
           GithubUrls urls = jc.getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me.getId(), urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH, urls.repoName, urls.home, urls.branch);
+          VendorCookbookTask t1 = new VendorCookbookTask(me, urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH, urls.repoName, urls.home, urls.branch);
           map1.put(t1.uniqueId(), t1);
           String recipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
           JsonObject json = chefJsons.get(me.getId() + recipeName);
-          RunRecipeTask t2 = makeRecipeTask(recipeName, me.getId(), json);
+          RunRecipeTask t2 = makeRecipeTask(recipeName, me, json);
           map1.put(t2.uniqueId(), t2);
         }
         map.put(me.getId(), map1);
@@ -263,11 +263,11 @@ public class UserClusterDataExtractor {
     String vendorPath = makeVendorPath(cluster);
     for (GroupEntity ge : clusterEntity.getGroups()) {
       for (MachineEntity me : ge.getMachines()) {
-        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me.getId());
+        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me);
         map.put(t1.uniqueId(), t1);
-        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me.getId());
+        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me);
         map.put(t2.uniqueId(), t2);
-        MakeSoloRbTask t3 = new MakeSoloRbTask(me.getId(), vendorPath);
+        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath);
         map.put(t3.uniqueId(), t3);
       }
     }

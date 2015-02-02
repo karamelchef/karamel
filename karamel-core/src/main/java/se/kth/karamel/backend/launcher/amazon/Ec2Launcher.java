@@ -21,6 +21,7 @@ import org.jclouds.ec2.domain.SecurityGroup;
 import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.running.model.GroupEntity;
 import se.kth.karamel.backend.running.model.MachineEntity;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
@@ -86,8 +87,8 @@ public final class Ec2Launcher {
     }
   }
 
-  public static List<MachineEntity> forkMachines(String mainGroupName, Set<String> securityGroupNames, int size, Ec2 ec2) throws KaramelException {
-    logger.info(String.format("Forking %d machines for '%s' ...", size, mainGroupName));
+  public static List<MachineEntity> forkMachines(GroupEntity mainGroup, Set<String> securityGroupNames, int size, Ec2 ec2) throws KaramelException {
+    logger.info(String.format("Forking %d machines for '%s' ...", size, mainGroup.getName()));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -118,10 +119,10 @@ public final class Ec2Launcher {
       tries++;
       try {
         forkedNodes = context.getComputeService().createNodesInGroup(
-                mainGroupName, size, template.build());
-        logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, mainGroupName));
+                mainGroup.getName(), size, template.build());
+        logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, mainGroup.getName()));
       } catch (IllegalStateException | RunNodesException ex) {
-        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, mainGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, mainGroup.getName(), Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       if (forkedNodes == null) {
@@ -137,7 +138,7 @@ public final class Ec2Launcher {
     if (forkedNodes != null) {
       List<MachineEntity> machines = new ArrayList<>();
       for (NodeMetadata node : forkedNodes) {
-        MachineEntity machine = new MachineEntity();
+        MachineEntity machine = new MachineEntity(mainGroup);
         if (node != null) {
           ArrayList<String> privateIps = new ArrayList();
           ArrayList<String> publicIps = new ArrayList();
@@ -152,7 +153,7 @@ public final class Ec2Launcher {
       }
       return machines;
     }
-    throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroupName));
+    throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
   public static void cleanup(String groupName, String region) throws KaramelException {

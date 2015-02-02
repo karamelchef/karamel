@@ -10,7 +10,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -40,7 +39,7 @@ public class KaramelApiTest {
     System.out.println(json);
   }
 
-//  @Test
+  @Test
   public void testJsonToYaml() throws KaramelException, IOException {
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/reference.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
