@@ -20,6 +20,8 @@ public class ClusterEntity {
     NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING ;
   }
   
+  private final String name;
+  
   private ClusterPhases phase = ClusterPhases.NONE;
   
   private boolean failed = false;
@@ -28,15 +30,21 @@ public class ClusterEntity {
 
   private List<GroupEntity> groups = new ArrayList<>();
 
-  public ClusterEntity() {
+  public ClusterEntity(String name) {
+    this.name = name;
   }
 
   public ClusterEntity(JsonCluster definition) {
+    this.name = definition.getName();
     List<JsonGroup> definedGroups = definition.getGroups();
     for (JsonGroup jg : definedGroups) {
-      GroupEntity group = new GroupEntity(jg);
+      GroupEntity group = new GroupEntity(this, jg);
       groups.add(group);
     }
+  }
+
+  public String getName() {
+    return name;
   }
   
   public void setGroups(List<GroupEntity> groups) {

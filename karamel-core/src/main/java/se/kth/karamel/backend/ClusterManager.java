@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.dag.DependencyDoesNotExistException;
 import se.kth.karamel.backend.dag.MultiThreadedDagExecutor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
@@ -46,14 +47,17 @@ public class ClusterManager implements Runnable {
   private final JsonCluster definition;
   private final ClusterEntity runtime;
   private final MachinesMonitor machinesMonitor;
+  private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
+  ExecutorService tpool;
 
   public ClusterManager(JsonCluster definition) {
     this.definition = definition;
     this.runtime = new ClusterEntity(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines);
+    clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
   }
 
   public JsonCluster getDefinition() {
@@ -72,6 +76,12 @@ public class ClusterManager implements Runnable {
     }
   }
 
+  public void start() {
+    tpool = Executors.newFixedThreadPool(3);
+    tpool.execute(this);
+    tpool.execute(machinesMonitor);
+    tpool.execute(clusterStatusMonitor);
+  }
   private synchronized void preClean() {
     logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
     runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANING);
@@ -140,17 +150,26 @@ public class ClusterManager implements Runnable {
     for (GroupEntity group : groups) {
       group.setPhase(GroupEntity.GroupPhase.INSTALLING);
     }
+    MultiThreadedDagExecutor executor = null;
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
       installationDag = UserClusterDataExtractor.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
 
-      MultiThreadedDagExecutor executor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
+      executor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
       executor.submit(installationDag);
-      executor.shutdown();
-      executor.awaitTermination(1, TimeUnit.HOURS);
+
     } catch (Exception ex) {
       logger.error("Installing failed )-:", ex);
       runtime.setFailed(true);
+    } finally {
+      if (executor != null && !executor.isShutdown()) {
+        executor.shutdown();
+        try {
+          executor.awaitTermination(1, TimeUnit.HOURS);
+        } catch (InterruptedException ex) {
+          logger.warn("Couldn't shutdown the thread-pool of installation DAG", ex);
+        }
+      }
     }
 
     if (!runtime.isFailed()) {
@@ -163,11 +182,11 @@ public class ClusterManager implements Runnable {
   }
 
   private synchronized void pause() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    machinesMonitor.pause();
   }
 
   private synchronized void resume() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    machinesMonitor.resume();
   }
 
   private synchronized void purge() {
@@ -190,11 +209,12 @@ public class ClusterManager implements Runnable {
             Ec2 ec2 = (Ec2) provider;
             HashSet<String> gns = new HashSet<>();
             gns.add(group.getName());
-            List<MachineEntity> mcs = Ec2Launcher.forkMachines(group.getName(), gns, Integer.valueOf(definedGroup.getSize()), ec2);
+            List<MachineEntity> mcs = Ec2Launcher.forkMachines(group, gns, Integer.valueOf(definedGroup.getSize()), ec2);
             group.setMachines(mcs);
             machinesMonitor.addMachines(mcs);
             group.setPhase(GroupEntity.GroupPhase.MACHINES_FORKED);
           } catch (Exception ex) {
+            logger.error("", ex);
             group.setFailed(true);
             runtime.setFailed(true);
           }
@@ -211,8 +231,6 @@ public class ClusterManager implements Runnable {
   @Override
   public void run() {
     logger.info(String.format("Cluster-Manager started for '%s' d'-'", definition.getName()));
-    Thread t = new Thread(machinesMonitor);
-    t.start();
     while (true) {
       try {
         Command cmd = cmdQueue.take();

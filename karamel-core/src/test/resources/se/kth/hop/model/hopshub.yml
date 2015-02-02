@@ -6,7 +6,7 @@ ec2:
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-    branch: "master"   
+    version: "v0.1"   
   hopshub:                                                                     
     github: "hopshadoop/hopshub-chef"
     branch: "master"  
@@ -18,7 +18,6 @@ groups:
   hopshub:
     size: 1 
     recipes:                                                                    
-        - kagent
         - ndb::mysqld                                                       
         - ndb::mgmd
         - hadoop::nn

@@ -15,8 +15,6 @@
  */
 package se.kth.karamel.backend.dag;
 
-import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.backend.dag.Dag;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

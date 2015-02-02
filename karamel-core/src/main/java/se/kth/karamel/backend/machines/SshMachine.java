@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.ConnectionException;
@@ -45,6 +44,16 @@ public class SshMachine implements Runnable {
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
   }
+  
+  public void pause() {
+    if (machineEntity.getTasksStatus().ordinal() < MachineEntity.TasksStatus.PAUSING.ordinal())
+      machineEntity.setTasksStatus(MachineEntity.TasksStatus.PAUSING);
+  }
+  
+  public void resume() {
+    if (machineEntity.getTasksStatus() != MachineEntity.TasksStatus.FAILED)
+      machineEntity.setTasksStatus(MachineEntity.TasksStatus.ONGOING);
+  }
 
   @Override
   public void run() {
@@ -65,6 +74,8 @@ public class SshMachine implements Runnable {
           logger.error("", ex);
         }
       } else {
+        if (machineEntity.getTasksStatus() == MachineEntity.TasksStatus.PAUSING)
+          machineEntity.setTasksStatus(MachineEntity.TasksStatus.PAUSED);
         try {
 //          logger.debug(String.format("'%s' sleeps shorty till state becomes ready for running taks Zzz..", machineEntity.getId()));
           Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
@@ -105,9 +116,8 @@ public class SshMachine implements Runnable {
       }
     } catch (Exception ex) {
       task.setStatus(Status.FAILED);
-      machineEntity.setTasksStatus(MachineEntity.TasksStatus.FAILED);
       throw new KaramelException(ex);
-    }
+    } 
   }
 
   private synchronized void runSshCmd(ShellCommand shellCommand) {

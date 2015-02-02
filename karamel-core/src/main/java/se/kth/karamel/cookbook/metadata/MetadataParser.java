@@ -37,34 +37,36 @@ public class MetadataParser {
 
   /**
    *
-   * @param path
+   * @param cookbookPath
+   * @param metedataPath
    * @return
-   * @throws se.kth.karamel.exception.CookbookUrlException
-   * @throws se.kth.karamel.exception.MetadataParseException
+   * @throws se.kth.karamel.common.exception.CookbookUrlException
+   * @throws se.kth.karamel.common.exception.MetadataParseException
    */
-  public static MetadataRb parse(String path) throws CookbookUrlException, MetadataParseException {
+  public static MetadataRb parse(String cookbookPath, String metedataPath) throws CookbookUrlException, MetadataParseException {
     URL url;
     try {
-      url = new URL(path);
-      return parse(url);
+      url = new URL(metedataPath);
+      return parse(cookbookPath, url);
     } catch (MalformedURLException ex) {
-      throw new CookbookUrlException("metadata.rb url is malford " + path, ex);
+      throw new CookbookUrlException("metadata.rb url is malford " + metedataPath, ex);
     }
 
   }
 
   /**
-   *
+   * @param cookbookPath
    * @param url
+   *
    * @return
-   * @throws se.kth.karamel.exception.MetadataParseException
+   * @throws se.kth.karamel.common.exception.MetadataParseException
    */
-  public static MetadataRb parse(URL url) throws MetadataParseException {
+  public static MetadataRb parse(String cookbookPath, URL url) throws MetadataParseException {
     InputStream in;
     try {
       in = url.openStream();
       Reader reader = new InputStreamReader(in, "UTF-8");
-      return parse(reader);
+      return parse(cookbookPath, reader);
     } catch (IOException ex) {
       throw new MetadataParseException("Exception occured during parsing metadata.rb", ex);
     }
@@ -73,12 +75,14 @@ public class MetadataParser {
 
   /**
    *
+   * @param cookbookPath
    * @param reader
    * @return
-   * @throws se.kth.karamel.exception.MetadataParseException
+   * @throws se.kth.karamel.common.exception.MetadataParseException
    */
-  public static MetadataRb parse(Reader reader) throws MetadataParseException {
+  public static MetadataRb parse(String cookbookPath, Reader reader) throws MetadataParseException {
     MetadataRb metadata = new MetadataRb();
+    metadata.setUrl(cookbookPath);
     Scanner scanner = new Scanner(reader);
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();

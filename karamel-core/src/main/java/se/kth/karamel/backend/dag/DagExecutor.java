@@ -16,7 +16,6 @@
 
 package se.kth.karamel.backend.dag;
 
-import se.kth.karamel.backend.dag.Dag;
 import java.util.concurrent.TimeUnit;
 
 public interface DagExecutor {
