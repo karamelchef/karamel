@@ -16,6 +16,7 @@ import se.kth.karamel.backend.running.model.MachineEntity;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -29,16 +30,17 @@ public class MachinesMonitor implements Runnable {
   private final Map<String, SshMachine> machines = new HashMap<>();
   private boolean paused = false;
   ExecutorService executor;
+  private final SshKeyPair keyPair;
 
-  public MachinesMonitor(String clusterName, int numMachines) {
+  public MachinesMonitor(String clusterName, int numMachines, SshKeyPair keyPair) {
+    this.keyPair = keyPair;
     this.clusterName = clusterName;
     executor = Executors.newFixedThreadPool(numMachines);
   }
 
   public synchronized void addMachines(List<MachineEntity> machineEntities) {
-    Confs confs = Confs.loadConfs();
     for (MachineEntity machineEntity : machineEntities) {
-      SshMachine sshMachine = new SshMachine(machineEntity, confs.getProperty(Settings.SSH_PUBKEY_KEY), confs.getProperty(Settings.SSH_PRIKEY_KEY));
+      SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey());
       machines.put(machineEntity.getId(), sshMachine);
       executor.execute(sshMachine);
     }
