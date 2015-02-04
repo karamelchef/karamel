@@ -59,7 +59,7 @@ public class ClusterManager implements Runnable {
     this.definition = definition;
     this.runtime = new ClusterEntity(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
-    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines);
+    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
   }
 

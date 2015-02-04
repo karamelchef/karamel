@@ -51,19 +51,20 @@ public class KaramelApiTest {
 
   @Test
   public void testEndToEnd() throws KaramelException, IOException, InterruptedException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hopshub.yml"), Charsets.UTF_8);
+    String clusterName = "SparkOnHadoop";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
 //    System.out.println(json);
 //    System.out.println("===================================================");
     Confs confs = Confs.loadKaramelConfs();
     api.updateEc2CredentialsIfValid(confs.getProperty(Settings.EC2_ACCOUNT_ID_KEY), confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
-    SshKeyPair keypair = api.generateSshKeys("HopsHub");
-    api.registerSshKeys("HopsHub", keypair);
+    SshKeyPair keypair = api.generateSshKeys(clusterName);
+    api.registerSshKeys(clusterName, keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
     long ms1 = System.currentTimeMillis();
     while (ms1 + 6000000 > System.currentTimeMillis()) {
-      String clusterStatus = api.getClusterStatus("HopsHub");
+      String clusterStatus = api.getClusterStatus(clusterName);
 
       System.out.println(clusterStatus);
       Thread.currentThread().sleep(60000);
