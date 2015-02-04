@@ -15,6 +15,7 @@ import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.SshKeyPair;
 
 /**
  *
@@ -39,7 +40,7 @@ public class KaramelApiTest {
     System.out.println(json);
   }
 
-  @Test
+//  @Test
   public void testJsonToYaml() throws KaramelException, IOException {
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/reference.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
@@ -54,8 +55,10 @@ public class KaramelApiTest {
     String json = api.yamlToJson(ymlString);
 //    System.out.println(json);
 //    System.out.println("===================================================");
-    Confs confs = Confs.loadEc2Confs();
+    Confs confs = Confs.loadKaramelConfs();
     api.updateEc2CredentialsIfValid(confs.getProperty(Settings.EC2_ACCOUNT_ID_KEY), confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
+    SshKeyPair keypair = api.generateSshKeys("HopsHub");
+    api.registerSshKeys("HopsHub", keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
     long ms1 = System.currentTimeMillis();

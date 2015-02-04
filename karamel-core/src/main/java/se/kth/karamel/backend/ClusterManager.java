@@ -51,8 +51,11 @@ public class ClusterManager implements Runnable {
   private Dag installationDag;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
+  private final ClusterContext clusterContext;
+  private Ec2Launcher ec2Launcher;
 
-  public ClusterManager(JsonCluster definition) {
+  public ClusterManager(JsonCluster definition, ClusterContext clusterContext) {
+    this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterEntity(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
@@ -82,6 +85,7 @@ public class ClusterManager implements Runnable {
     tpool.execute(machinesMonitor);
     tpool.execute(clusterStatusMonitor);
   }
+
   private synchronized void preClean() {
     logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
     runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANING);
@@ -95,7 +99,10 @@ public class ClusterManager implements Runnable {
         if (provider instanceof Ec2) {
           try {
             Ec2 ec2 = (Ec2) provider;
-            Ec2Launcher.cleanup(group.getName(), ec2.getRegion());
+            if (ec2Launcher == null) {
+              ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
+            }
+            ec2Launcher.cleanup(group.getName(), ec2.getRegion());
             group.setPhase(GroupEntity.GroupPhase.PRECLEANED);
           } catch (Exception ex) {
             group.setFailed(true);
@@ -126,7 +133,10 @@ public class ClusterManager implements Runnable {
             Ec2 ec2 = (Ec2) provider;
             Set<String> ports = new HashSet<>();
             ports.addAll(Settings.EC2_DEFAULT_PORTS);
-            Ec2Launcher.createSecurityGroup(definition.getName(), group.getName(), ec2.getRegion(), ports);
+            if (ec2Launcher == null) {
+              ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
+            }
+            ec2Launcher.createSecurityGroup(definition.getName(), group.getName(), ec2.getRegion(), ports);
             group.setPhase(GroupEntity.GroupPhase.GROUPS_FORKED);
           } catch (Exception ex) {
             group.setFailed(true);
@@ -209,7 +219,11 @@ public class ClusterManager implements Runnable {
             Ec2 ec2 = (Ec2) provider;
             HashSet<String> gns = new HashSet<>();
             gns.add(group.getName());
-            List<MachineEntity> mcs = Ec2Launcher.forkMachines(group, gns, Integer.valueOf(definedGroup.getSize()), ec2);
+            if (ec2Launcher == null) {
+              ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
+            }
+            String keypairname = Settings.EC2_KEYPAIR_NAME(runtime.getName());
+            List<MachineEntity> mcs = ec2Launcher.forkMachines(keypairname, group, gns, Integer.valueOf(definedGroup.getSize()), ec2);
             group.setMachines(mcs);
             machinesMonitor.addMachines(mcs);
             group.setPhase(GroupEntity.GroupPhase.MACHINES_FORKED);

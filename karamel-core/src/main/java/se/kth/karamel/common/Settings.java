@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.common;
 
+import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -70,8 +71,10 @@ public class Settings {
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");
   public static final String OS_NAME = System.getProperty("os.name");
-  public static final String DEFAULT_PUBKEY_PATH = USER_HOME + "/.ssh/id_rsa.pub";
-  public static final String DEFAULT_PRIKEY_PATH = USER_HOME + "/.ssh/id_rsa";
+  public static final String IP_Address = loadIpAddress();
+  public static final boolean UNIX_OS = OS_NAME.toLowerCase().contains("mac") || OS_NAME.toLowerCase().contains("linux");
+  public static final String DEFAULT_PUBKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa.pub" : null;
+  public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
   public static final String SSH_PUBKEY_PATH_KEY = "local.publickey.path";
   public static final String SSH_PRIKEY_PATH_KEY = "local.privatekey.path";
   public static final String SSH_PUBKEY_KEY = "local.publickey";
@@ -80,13 +83,26 @@ public class Settings {
   public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
   public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
   public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";
-  public static final String EC2_KEYPAIR_NAME = loadEc2KeypairName();
-  public static final String EC2_CONF_PATH = USER_HOME + "/hop/ec2.properties";
+
+  public static final String EC2_KEYPAIR_NAME(String clusterName) {
+    return "karamel_" + USER_NAME + "_" + clusterName.toLowerCase() + "_" + OS_NAME + "_" + IP_Address;
+  }
+  public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + "karamel";
+  public static final String KARAMEL_CONF_NAME = "confs";
+  public static final String CLUSTER_PUBKEY_FILENAME = "ida_rsa.pub";
+  public static final String CLUSTER_PRIKEY_FILENAME = "ida_rsa";
+
+  public static String CLUSTER_CLUSTER_FOLDER(String clusterName) {
+    return KARAMEL_ROOT_PATH + File.separator + clusterName.toLowerCase();
+  }
+
+  public static String CLUSTER_SSH_FOLDER(String clusterName) {
+    return CLUSTER_CLUSTER_FOLDER(clusterName) + File.separator + ".ssh";
+  }
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
-  public static final String VAGRANT_CONF_PATH = USER_HOME + "/hop/vagrant.properties";
 
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
@@ -99,13 +115,13 @@ public class Settings {
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";
 
-  public static String loadEc2KeypairName() {
-    String address = "NoAddress";
+  public static String loadIpAddress() {
+    String address = "UnknownHost";
     try {
       address = InetAddress.getLocalHost().getHostAddress();
     } catch (UnknownHostException ex) {
     }
-    return "karamel_" + USER_NAME + "_" + OS_NAME + "_" + address;
+    return address;
   }
 
 }
