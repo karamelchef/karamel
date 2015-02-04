@@ -23,10 +23,11 @@ import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.running.model.GroupEntity;
 import se.kth.karamel.backend.running.model.MachineEntity;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 
 /**
  * @author kamal
@@ -35,25 +36,33 @@ public final class Ec2Launcher {
 
   private static final Logger logger = Logger.getLogger(Ec2Launcher.class);
   public static boolean TESTING = true;
-  public static Ec2Context context;
+  public final Ec2Context context;
+  public final SshKeyPair sshKeyPair;
 
-  public static boolean validateAndUpdateCredentials(String account, String accessKey) {
+  public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
+    this.context = context;
+    this.sshKeyPair = sshKeyPair;
+  }
+
+  public static Ec2Context validateCredentials(String account, String accessKey) throws InvalidEc2CredentialsException {
     try {
       Ec2Context cxt = new Ec2Context(account, accessKey);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
-      context = cxt;
-      return true;
+      return cxt;
     } catch (AuthorizationException e) {
-      context = null;
-      return false;
+      throw new InvalidEc2CredentialsException(e);
     }
   }
 
-  public static void createSecurityGroup(String clusterName, String groupName, String region, Set<String> ports) throws KaramelException {
+  public void createSecurityGroup(String clusterName, String groupName, String region, Set<String> ports) throws KaramelException {
     logger.info(String.format("Creating security group '%s' ...", groupName));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
+    }
+
+    if (sshKeyPair == null) {
+      throw new KaramelException("Choose your ssh keypair first :-| ");
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
@@ -87,24 +96,29 @@ public final class Ec2Launcher {
     }
   }
 
-  public static List<MachineEntity> forkMachines(GroupEntity mainGroup, Set<String> securityGroupNames, int size, Ec2 ec2) throws KaramelException {
+  public List<MachineEntity> forkMachines(String keyPairName, GroupEntity mainGroup,
+          Set<String> securityGroupNames, int size, Ec2 ec2) throws KaramelException {
     logger.info(String.format("Forking %d machines for '%s' ...", size, mainGroup.getName()));
+
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
+    }
+
+    if (sshKeyPair == null) {
+      throw new KaramelException("Choose your ssh keypair first :-| ");
     }
 
     EC2TemplateOptions options = context.getComputeService().templateOptions().as(EC2TemplateOptions.class);
     HashSet<String> regions = new HashSet();
     if (!regions.contains(ec2.getRegion())) {
-      Confs confs = Confs.loadConfs();
-      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{Settings.EC2_KEYPAIR_NAME});
+      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
       if (keypairs.isEmpty()) {
-        context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), Settings.EC2_KEYPAIR_NAME, confs.getProperty(Settings.SSH_PUBKEY_KEY));
+        context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
       }
       regions.add(ec2.getRegion());
     }
     TemplateBuilder template = context.getComputeService().templateBuilder();
-    options.keyPair(Settings.EC2_KEYPAIR_NAME);
+    options.keyPair(keyPairName);
     options.as(EC2TemplateOptions.class).securityGroups(securityGroupNames);
     template.options(options);
     template.os64Bit(true);
@@ -156,10 +170,14 @@ public final class Ec2Launcher {
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
-  public static void cleanup(String groupName, String region) throws KaramelException {
+  public void cleanup(String groupName, String region) throws KaramelException {
     logger.info(String.format("Destroying security group '%s' and all its machines...", groupName));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
+    }
+
+    if (sshKeyPair == null) {
+      throw new KaramelException("Choose your ssh keypair first :-| ");
     }
     for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(region)) {
       if (secgroup.getName().startsWith("jclouds#" + groupName) || secgroup.getName().equals(groupName)) {

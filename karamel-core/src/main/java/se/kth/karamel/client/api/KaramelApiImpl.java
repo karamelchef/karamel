@@ -13,6 +13,7 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterEntity;
 import se.kth.karamel.backend.running.model.GroupEntity;
@@ -37,6 +38,8 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
 import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
 import se.kth.karamel.client.model.yaml.YamlUtil;
+import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.SshKeyPair;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -96,7 +99,9 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public boolean updateEc2CredentialsIfValid(String account, String accessKey) throws KaramelException {
-    return Ec2Launcher.validateAndUpdateCredentials(account, accessKey);
+    Ec2Context context = Ec2Launcher.validateCredentials(account, accessKey);
+    clusterService.registerEc2Context(context);
+    return true;
   }
 
   @Override
@@ -141,6 +146,23 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public String getInstallationDag(String clusterName) throws KaramelException {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException {
+    Confs confs = Confs.loadAllConfsForCluster(clusterName);
+    SshKeyPair sshKeys = confs.getSshKeys();
+    return sshKeys;
+  }
+
+  @Override
+  public SshKeyPair generateSshKeys(String clusterName) throws KaramelException {
+    return Confs.generateAndStoreSshKeys(clusterName);
+  }
+
+  @Override
+  public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException {
+    clusterService.registerSshKeyPair(clusterName, keypair);
   }
 
 }
