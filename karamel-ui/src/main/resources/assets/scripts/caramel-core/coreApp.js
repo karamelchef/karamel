@@ -11,7 +11,7 @@
 
 angular.module('coreApp', [])
 
-    .service('CaramelCoreServices', ['$log', '$http', function($log, $http) {
+    .service('CaramelCoreServices', ['$log', '$http', '$location', function($log, $http, $location) {
 
         // Return the promise object to the users.
         var _getPromiseObject = function(method, url, contentType, data) {
@@ -26,7 +26,9 @@ angular.module('coreApp', [])
           return promiseObject;
         };
 
-        var _defaultHost = 'http://localhost:9090/api';
+        /* window.location.hostname for the webserver  */
+
+        var _defaultHost = 'http://' + $location.host() + ':9090/api';
         var _defaultContentType = 'application/json';
 
 
