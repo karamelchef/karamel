@@ -26,6 +26,8 @@ import se.kth.karamel.backend.running.model.MachineEntity;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 
@@ -42,17 +44,33 @@ public final class Ec2Launcher {
   public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
     this.context = context;
     this.sshKeyPair = sshKeyPair;
+    logger.info(String.format("Account-id='%s'", context.getCredentials().getAccountId()));
+    logger.info(String.format("Public-key='%s'", sshKeyPair.getPublicKeyPath()));
+    logger.info(String.format("Private-key='%s'", sshKeyPair.getPrivateKeyPath()));
   }
 
-  public static Ec2Context validateCredentials(String account, String accessKey) throws InvalidEc2CredentialsException {
+  public static Ec2Context validateCredentials(Ec2Credentials credentials) throws InvalidEc2CredentialsException {
     try {
-      Ec2Context cxt = new Ec2Context(account, accessKey);
+      Ec2Context cxt = new Ec2Context(credentials);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
       return cxt;
     } catch (AuthorizationException e) {
       throw new InvalidEc2CredentialsException(e);
     }
+  }
+
+  public static Ec2Credentials readCredentials(Confs confs) {
+    String accountId = confs.getProperty(Settings.EC2_ACCOUNT_ID_KEY);
+    String accessKey = confs.getProperty(Settings.EC2_ACCESSKEY_KEY);
+    Ec2Credentials credentials = null;
+    if (accountId != null && !accountId.isEmpty() && accessKey != null && !accessKey.isEmpty()) {
+      credentials = new Ec2Credentials();
+      credentials.setAccountId(accountId);
+      credentials.setAccessKey(accessKey);
+
+    }
+    return credentials;
   }
 
   public void createSecurityGroup(String clusterName, String groupName, String region, Set<String> ports) throws KaramelException {
@@ -113,7 +131,10 @@ public final class Ec2Launcher {
     if (!regions.contains(ec2.getRegion())) {
       Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
       if (keypairs.isEmpty()) {
+        logger.info(String.format("New keypair '%s' is being uploaded to EC2", keyPairName));
         context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
+      } else {
+        logger.info(String.format("An old keypair '%s' found on EC2", keyPairName));
       }
       regions.add(ec2.getRegion());
     }

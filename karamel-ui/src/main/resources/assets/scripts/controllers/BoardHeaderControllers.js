@@ -69,7 +69,10 @@ angular.module('demoApp')
             BoardService.editAmazonProvider($rootScope.karamelBoard,null);
         };
 
-
+        $scope.editSshKeys = function(){
+            BoardService.editSshKeys();
+        };
+        
         $scope.launchCluster = function(){
             $log.info("Launching Cluster");
 //            AlertService.addAlert({type: 'info', msg: 'Under development.'});

@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.client.api;
 
+import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -57,7 +58,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException 
    */
-  public SshKeyPair generateSshKeys(String clusterName) throws KaramelException;
+  public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
    * 
@@ -68,14 +69,20 @@ public interface KaramelApi {
   public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
+   * Reads it from default karamel conf file
+   * @return
+   * @throws KaramelException 
+   */
+  public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
+  
+  /**
    * Validates user's credentials before starting the cluster
    *
-   * @param account
-   * @param accessKey
+   * @param credentials
    * @return
    * @throws KaramelException
    */
-  public boolean updateEc2CredentialsIfValid(String account, String accessKey) throws KaramelException;
+  public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
 
   /**
    * Starts running the cluster by launching machines and installing softwares It expect to receive a complete

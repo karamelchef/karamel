@@ -188,7 +188,20 @@ function Cluster() {
     };
 
 }
-
+// ============================================  SSH KEYS ============================================ //
+function SshKeyPair() {
+    this.pubKey = null;
+    this.priKey = null;
+    this.pubKeyPath = null;
+    this.priKeyPath = null;
+    
+    this.load = function (other) {
+        this.priKey = other.priKey;
+        this.pubKey = other.pubKey;
+        this.priKeyPath = other.priKeyPath;
+        this.pubKeyPath = other.pubKeyPath;
+    }
+}
 
 // ============================================  PROVIDERS ============================================ //
 function Provider(name) {
@@ -196,15 +209,12 @@ function Provider(name) {
 }
 
 function EC2Provider() {
-
     this.accountId = null;
     this.accountKey = null;
-    this.pubKey = null;
 
     this.load = function (other) {
         this.accountId = other.accountId;
         this.accountKey = other.accountKey;
-        this.pubKey = other.pubKey;
     }
 }
 

@@ -10,6 +10,7 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
+import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -31,7 +32,10 @@ public class Driver {
     String json = api.yamlToJson(ymlString);
 
     //pass in your ec2 credentials here, 
-    if (!api.updateEc2CredentialsIfValid("<ec2-accoun-id>", "<ec2-access-key>"))
+    Ec2Credentials credentials = new Ec2Credentials();
+    credentials.setAccountId("<ec2-accoun-id>");
+    credentials.setAccessKey("<ec2-access-key>");
+    if (!api.updateEc2CredentialsIfValid(credentials))
       throw new IllegalThreadStateException("Ec2 credentials is not valid");
     
     //this is an async call, you will need to pull status of your cluster periodically with the forthcoming call

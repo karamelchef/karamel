@@ -23,6 +23,7 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
+import se.kth.karamel.common.Ec2Credentials;
 
 /**
  *
@@ -30,16 +31,14 @@ import org.jclouds.sshj.config.SshjSshClientModule;
  */
 public class Ec2Context {
 
-  private final String accountId;
-  private final String accessKey;
+  private final Ec2Credentials credentials;
   private final ComputeService computeService;
   private final EC2Api ec2api;
   private final SecurityGroupApi securityGroupApi;
   private final AWSKeyPairApi keypairApi;
 
-  public Ec2Context(String accountId, String accessKey) {
-    this.accountId = accountId;
-    this.accessKey = accessKey;
+  public Ec2Context(Ec2Credentials credentials) {
+    this.credentials = credentials;
     Properties properties = new Properties();
     long scriptTimeout = TimeUnit.MILLISECONDS.convert(50, TimeUnit.MINUTES);
     properties.setProperty(TIMEOUT_SCRIPT_COMPLETE, scriptTimeout + "");
@@ -53,7 +52,7 @@ public class Ec2Context {
             new EnterpriseConfigurationModule());
 
     ContextBuilder build = ContextBuilder.newBuilder("aws-ec2")
-            .credentials(accountId, accessKey)
+            .credentials(credentials.getAccountId(), credentials.getAccessKey())
             .modules(modules)
             .overrides(properties);
     ComputeServiceContext context = build.buildView(ComputeServiceContext.class);
@@ -63,12 +62,8 @@ public class Ec2Context {
     this.keypairApi = (AWSKeyPairApi) ec2api.getKeyPairApi().get();
   }
 
-  public String getAccessKey() {
-    return accessKey;
-  }
-
-  public String getAccountId() {
-    return accountId;
+  public Ec2Credentials getCredentials() {
+    return credentials;
   }
 
   public ComputeService getComputeService() {
