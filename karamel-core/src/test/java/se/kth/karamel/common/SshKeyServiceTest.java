@@ -11,7 +11,7 @@ import org.junit.Test;
  *
  * @author kamal
  */
-public class ConfsTest {
+public class SshKeyServiceTest {
 
 //  @Test
   public void testNonexistenceConfs() {
@@ -21,6 +21,6 @@ public class ConfsTest {
 
 //  @Test
   public void testGenerateKeys() {
-    Confs.generateAndStoreSshKeys("HopsHup");
+    SshKeyService.generateAndStoreSshKeys("HopsHup");
   }
 }

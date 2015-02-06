@@ -39,7 +39,10 @@ import se.kth.karamel.client.model.yaml.YamlGroup;
 import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.SshKeyService;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -98,8 +101,14 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public boolean updateEc2CredentialsIfValid(String account, String accessKey) throws KaramelException {
-    Ec2Context context = Ec2Launcher.validateCredentials(account, accessKey);
+  public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    return Ec2Launcher.readCredentials(confs);
+  }
+  
+  @Override
+  public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException {
+    Ec2Context context = Ec2Launcher.validateCredentials(credentials);
     clusterService.registerEc2Context(context);
     return true;
   }
@@ -151,13 +160,18 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException {
     Confs confs = Confs.loadAllConfsForCluster(clusterName);
-    SshKeyPair sshKeys = confs.getSshKeys();
+    SshKeyPair sshKeys = SshKeyService.loadSshKeys(confs);
     return sshKeys;
   }
 
   @Override
-  public SshKeyPair generateSshKeys(String clusterName) throws KaramelException {
-    return Confs.generateAndStoreSshKeys(clusterName);
+  public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException {
+    SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys(clusterName);
+    Confs confs = Confs.loadJustClusterConfs(clusterName);
+    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
+    confs.writeClusterConfs(clusterName);
+    return sshkeys;
   }
 
   @Override

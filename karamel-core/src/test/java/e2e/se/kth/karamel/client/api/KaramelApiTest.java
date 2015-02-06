@@ -14,6 +14,7 @@ import org.junit.Test;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 
@@ -57,8 +58,9 @@ public class KaramelApiTest {
 //    System.out.println(json);
 //    System.out.println("===================================================");
     Confs confs = Confs.loadKaramelConfs();
-    api.updateEc2CredentialsIfValid(confs.getProperty(Settings.EC2_ACCOUNT_ID_KEY), confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
-    SshKeyPair keypair = api.generateSshKeys(clusterName);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    SshKeyPair keypair = api.generateSshKeysAndUpdateConf(clusterName);
     api.registerSshKeys(clusterName, keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);

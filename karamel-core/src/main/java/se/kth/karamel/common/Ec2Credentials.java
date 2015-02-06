@@ -3,16 +3,25 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.karamel.webservicemodel;
+
+package se.kth.karamel.common;
 
 /**
  *
- * @author jdowling
+ * @author kamal
  */
-public class ProviderJSON {
+public class Ec2Credentials {
+  
+  private String accountId;
+  private String accessKey;
 
-  public String accountId;
-  public String accountKey;
+  public String getAccessKey() {
+    return accessKey;
+  }
+
+  public void setAccessKey(String accessKey) {
+    this.accessKey = accessKey;
+  }
 
   public String getAccountId() {
     return accountId;
@@ -21,13 +30,5 @@ public class ProviderJSON {
   public void setAccountId(String accountId) {
     this.accountId = accountId;
   }
-
-  public String getAccountKey() {
-    return accountKey;
-  }
-
-  public void setAccountKey(String accountKey) {
-    this.accountKey = accountKey;
-  }
-
+  
 }

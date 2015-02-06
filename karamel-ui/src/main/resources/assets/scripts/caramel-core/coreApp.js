@@ -11,19 +11,19 @@
 
 angular.module('coreApp', [])
 
-    .service('CaramelCoreServices', ['$log', '$http', function ($log, $http) {
+    .service('CaramelCoreServices', ['$log', '$http', function($log, $http) {
 
         // Return the promise object to the users.
-        var _getPromiseObject = function (method, url, contentType, data) {
+        var _getPromiseObject = function(method, url, contentType, data) {
 
-            var promiseObject = $http({
-                method: method,
-                url: url,
-                headers: {'Content-Type': contentType},
-                data: data
-            });
+          var promiseObject = $http({
+            method: method,
+            url: url,
+            headers: {'Content-Type': contentType},
+            data: data
+          });
 
-            return promiseObject;
+          return promiseObject;
         };
 
         var _defaultHost = 'http://localhost:9090/api';
@@ -32,74 +32,75 @@ angular.module('coreApp', [])
 
         // Services interacting with the caramel core.
         return{
+          // Based on the object passed get the complete url.
+          getCompleteYaml: function(json) {
 
-            // Based on the object passed get the complete url.
-            getCompleteYaml: function (json) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/fetchYaml");
 
-                var method = 'PUT';
-                var url = _defaultHost.concat("/fetchYaml");
+            return _getPromiseObject(method, url, _defaultContentType, json);
 
-                return _getPromiseObject(method, url, _defaultContentType, json);
+          },
+          getCleanYaml: function(json) {
 
-            },
+            var method = 'PUT';
+            var url = _defaultHost.concat("/cleanYaml");
 
-            getCleanYaml: function (json) {
+            return  _getPromiseObject(method, url, _defaultContentType, json);
 
-                var method = 'PUT';
-                var url = _defaultHost.concat("/cleanYaml");
+          },
+          getJsonFromYaml: function(ymlString) {
 
-                return  _getPromiseObject(method, url, _defaultContentType, json);
+            var method = 'PUT';
+            var url = _defaultHost.concat("/fetchJson");
 
-            },
-
-            getJsonFromYaml: function (ymlString) {
-
-                var method = 'PUT';
-                var url = _defaultHost.concat("/fetchJson");
-
-                return _getPromiseObject(method, url, _defaultContentType, ymlString);
+            return _getPromiseObject(method, url, _defaultContentType, ymlString);
 
 
-            },
+          },
+          getCookBookInfo: function(requestData) {
 
-            getCookBookInfo: function (requestData) {
-
-                var method = 'PUT';
-                var url = _defaultHost.concat("/fetchCookbook");
-                return _getPromiseObject(method, url, _defaultContentType, requestData);
-            },
-
-            validateAccount : function(providerInfo){
-                var method = 'PUT';
-                var url = _defaultHost.concat("/validateProvider");
-                return _getPromiseObject(method,url,_defaultContentType,providerInfo);
-            },
-
-            startCluster : function(clusterJson){
-                var method = 'PUT';
-                var url = _defaultHost.concat("/startCluster");
-                return _getPromiseObject(method,url,_defaultContentType,clusterJson);
-            },
-
-            viewCluster : function(clusterNameJson){
-                var method = 'PUT';
-                var url = _defaultHost.concat("/viewCluster");
-                return _getPromiseObject(method,url,_defaultContentType, clusterNameJson);
-            },
-
-            pauseCluster : function(clusterName){
-                var method ='PUT';
-                var url = _defaultHost.concat("/pauseCluster");
-                return _getPromiseObject(method,url,_defaultContentType,clusterName);
-            },
-
-            stopCluster : function(clusterName){
-                var method = 'PUT';
-                var url = _defaultHost.concat("/stopCluster");
-                return _getPromiseObject(method,url,_defaultContentType,clusterName);
-            }
+            var method = 'PUT';
+            var url = _defaultHost.concat("/fetchCookbook");
+            return _getPromiseObject(method, url, _defaultContentType, requestData);
+          },
+          loadSshKeys: function() {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/loadSshKeys");
+            return _getPromiseObject(method, url, _defaultContentType);
+          },
+          loadCredentials: function() {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/loadCredentials");
+            return _getPromiseObject(method, url, _defaultContentType);
+          },
+          validateCredentials: function(providerInfo) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/validateCredentials");
+            return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+          },
+          startCluster: function(clusterJson) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/startCluster");
+            return _getPromiseObject(method, url, _defaultContentType, clusterJson);
+          },
+          viewCluster: function(clusterNameJson) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/viewCluster");
+            return _getPromiseObject(method, url, _defaultContentType, clusterNameJson);
+          },
+          pauseCluster: function(clusterName) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/pauseCluster");
+            return _getPromiseObject(method, url, _defaultContentType, clusterName);
+          },
+          stopCluster: function(clusterName) {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/stopCluster");
+            return _getPromiseObject(method, url, _defaultContentType, clusterName);
+          }
         }
 
-    }]);
+      }]);
 
 
