@@ -20,6 +20,7 @@ angular.module('demoApp', [
 ])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/', {templateUrl: 'karamel.html', controller: 'KaramelController'});
+        $routeProvider.when('/commandPage',{templateUrl: 'partials/command-page/commandPage.html', controller: 'CommandCenterController'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 
