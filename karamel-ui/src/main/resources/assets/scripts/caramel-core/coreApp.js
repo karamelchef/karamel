@@ -71,6 +71,11 @@ angular.module('coreApp', [])
             var url = _defaultHost.concat("/loadSshKeys");
             return _getPromiseObject(method, url, _defaultContentType);
           },
+          generateSshKeys: function() {
+            var method = 'PUT';
+            var url = _defaultHost.concat("/generateSshKeys");
+            return _getPromiseObject(method, url, _defaultContentType);
+          },
           loadCredentials: function() {
             var method = 'PUT';
             var url = _defaultHost.concat("/loadCredentials");

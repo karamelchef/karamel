@@ -49,6 +49,7 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.exception.SshKeysNotfoundException;
 
 /**
  * Created by babbarshaer on 2014-11-20.
@@ -232,22 +233,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.healthChecks()
             .register("template", healthCheck);
 
-    environment.jersey()
-            .register(new ConvertYamlToJSON());
-    environment.jersey()
-            .register(new ConvertJSONToYaml());
-    environment.jersey()
-            .register(new Cookbook());
-    environment.jersey()
-            .register(new Ssh.Load());
-    environment.jersey()
-            .register(new Ec2.Load());
-    environment.jersey()
-            .register(new Ec2.Validate());
-    environment.jersey()
-            .register(new Cluster.StartCluster());
-    environment.jersey()
-            .register(new Cluster.ViewCluster());
+    environment.jersey().register(new ConvertYamlToJSON());
+    environment.jersey().register(new ConvertJSONToYaml());
+    environment.jersey().register(new Cookbook());
+    environment.jersey().register(new Ssh.Load());
+    environment.jersey().register(new Ssh.Generate());
+    environment.jersey().register(new Ec2.Load());
+    environment.jersey().register(new Ec2.Validate());
+    environment.jersey().register(new Cluster.StartCluster());
+    environment.jersey().register(new Cluster.ViewCluster());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     Thread.sleep(300);
@@ -390,12 +384,40 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response loadSshKeys() {
         Response response = null;
         System.out.println(" Received request to load ssh keys.");
+        SshKeyPair sshKeypair = null;
         try {
-          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist("test");
+          sshKeypair = karamelApiHandler.loadSshKeysIfExist();
+          if (sshKeypair == null) {
+            sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
+          }
+          karamelApiHandler.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        } catch (KaramelException ex) {
+          ex.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
+        }
+
+        return response;
+      }
+
+    }
+
+    @Path("/generateSshKeys")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Generate {
+
+      @PUT
+      public Response generateSshKeys() {
+        Response response = null;
+        System.out.println(" Received request to generate ssh keys.");
+        try {
+          SshKeyPair sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
+          karamelApiHandler.registerSshKeys(sshKeypair);
+          response = Response.status(Response.Status.OK).entity(sshKeypair).build();
+        } catch (KaramelException ex) {
+          ex.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
         }
         return response;
       }
@@ -417,8 +439,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           ProviderJSON provider = new ProviderJSON();
-          provider.setAccountId(credentials.getAccountId());
-          provider.setAccountKey(credentials.getAccessKey());
+          provider.setAccountId((credentials == null) ? "": credentials.getAccountId());
+          provider.setAccountKey((credentials == null) ? "": credentials.getAccessKey());
           response = Response.status(Response.Status.OK).entity(provider).build();
         } catch (KaramelException e) {
           e.printStackTrace();

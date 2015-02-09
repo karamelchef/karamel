@@ -26,15 +26,25 @@ public class SshKeyService {
 
   private static final Logger logger = Logger.getLogger(SshKeyService.class);
 
+  public static SshKeyPair generateAndStoreSshKeys() {
+    File folder = new File(Settings.KARAMEL_SSH_PATH);
+    return generateAndStoreSshKeys(folder);
+  }
+
   public static SshKeyPair generateAndStoreSshKeys(String clusterName) {
-    Map<String, String> keys = SshKeys.generate();
-    String pub = keys.get("public");
-    String pri = keys.get("private");
-    File folder = new File(Settings.CLUSTER_SSH_FOLDER(clusterName));
+    File folder = new File(Settings.CLUSTER_SSH_PATH(clusterName));
+    return generateAndStoreSshKeys(folder);
+  }
+
+  public static SshKeyPair generateAndStoreSshKeys(File folder) {
     if (!folder.exists()) {
       folder.mkdirs();
     }
-    File pubFile = new File(folder, Settings.CLUSTER_PUBKEY_FILENAME);
+    File pubFile = new File(folder, Settings.SSH_PUBKEY_FILENAME);
+    File priFile = new File(folder, Settings.SSH_PRIKEY_FILENAME);
+    Map<String, String> keys = SshKeys.generate();
+    String pub = keys.get("public");
+    String pri = keys.get("private");
 
     try {
       FileOutputStream pubOut = new FileOutputStream(pubFile);
@@ -44,8 +54,6 @@ public class SshKeyService {
     } catch (IOException ex) {
       logger.error("", ex);
     }
-
-    File priFile = new File(folder, Settings.CLUSTER_PRIKEY_FILENAME);
 
     try {
       FileOutputStream priOut = new FileOutputStream(priFile);
@@ -59,8 +67,8 @@ public class SshKeyService {
     SshKeyPair keyPair = new SshKeyPair();
     keyPair.setPrivateKey(pri);
     keyPair.setPublicKey(pub);
-    keyPair.setPrivateKeyPath(folder + File.separator + Settings.CLUSTER_PRIKEY_FILENAME);
-    keyPair.setPublicKeyPath(folder + File.separator + Settings.CLUSTER_PUBKEY_FILENAME);
+    keyPair.setPrivateKeyPath(folder + File.separator + Settings.SSH_PRIKEY_FILENAME);
+    keyPair.setPublicKeyPath(folder + File.separator + Settings.SSH_PUBKEY_FILENAME);
     return keyPair;
   }
 

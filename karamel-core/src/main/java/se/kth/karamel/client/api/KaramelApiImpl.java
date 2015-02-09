@@ -52,7 +52,7 @@ import se.kth.karamel.common.SshKeyService;
 public class KaramelApiImpl implements KaramelApi {
 
   private static final ClusterService clusterService = new ClusterService();
-  
+
   @Override
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
     if (refresh) {
@@ -105,10 +105,14 @@ public class KaramelApiImpl implements KaramelApi {
     Confs confs = Confs.loadKaramelConfs();
     return Ec2Launcher.readCredentials(confs);
   }
-  
+
   @Override
   public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException {
     Ec2Context context = Ec2Launcher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.EC2_ACCOUNT_ID_KEY, credentials.getAccountId());
+    confs.put(Settings.EC2_ACCESSKEY_KEY, credentials.getAccessKey());
+    confs.writeKaramelConfs();
     clusterService.registerEc2Context(context);
     return true;
   }
@@ -158,10 +162,27 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
+  public SshKeyPair loadSshKeysIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    SshKeyPair sshKeys = SshKeyService.loadSshKeys(confs);
+    return sshKeys;
+  }
+
+  @Override
   public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException {
     Confs confs = Confs.loadAllConfsForCluster(clusterName);
     SshKeyPair sshKeys = SshKeyService.loadSshKeys(confs);
     return sshKeys;
+  }
+
+  @Override
+  public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException {
+    SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys();
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
+    confs.writeKaramelConfs();
+    return sshkeys;
   }
 
   @Override
@@ -175,8 +196,21 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
+  public void registerSshKeys(SshKeyPair keypair) throws KaramelException {
+    clusterService.registerSshKeyPair(keypair);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
+    confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
+    confs.writeKaramelConfs();
+  }
+
+  @Override
   public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException {
     clusterService.registerSshKeyPair(clusterName, keypair);
+    Confs confs = Confs.loadJustClusterConfs(clusterName);
+    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
+    confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
+    confs.writeClusterConfs(clusterName);
   }
 
 }
