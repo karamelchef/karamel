@@ -3,7 +3,7 @@
 'use strict';
 
 angular.module('demoApp')
-    .controller('HeaderController', ['$log', 'BoardService' , '$rootScope', '$scope','$window' ,'AlertService', function ($log, BoardService, $rootScope, $scope,$window,AlertService) {
+    .controller('HeaderController', ['$log', 'BoardService' , '$rootScope', '$scope','$window' , '$location','AlertService', function ($log, BoardService, $rootScope, $scope,$window,$location,AlertService) {
 
         function initScope(scope){
 
@@ -97,6 +97,12 @@ angular.module('demoApp')
             BoardService.viewCluster($rootScope.karamelBoard);
 
         };
+        
+        $scope.switchCommandPage = function(){
+            $log.info('Switching to Command Page.');
+            $location.path('/commandPage');
+        };
+        
 
         initScope($scope);
 

@@ -455,12 +455,14 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static class Process {
 
       @PUT
-      public Response processCommand(String command) {
+      public Response processCommand(CommandJSON command) {
         Response response = null;
-        System.out.println(" Received request to process a command");
+        System.out.println(" Received request to process a command with info: " + command.getCommand());
         try {
-          String cheatSheet = karamelApiHandler.processCommand(command);
-          response = Response.status(Response.Status.OK).entity(cheatSheet).build();
+          String cheatSheet = karamelApiHandler.processCommand(command.getCommand());
+          System.out.println(" Cheat Sheet Information: " + cheatSheet);
+            
+          response = Response.status(Response.Status.OK).entity(command).build();
         } catch (KaramelException e) {
           e.printStackTrace();
           response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
