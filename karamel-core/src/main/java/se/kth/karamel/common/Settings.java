@@ -87,8 +87,8 @@ public class Settings {
   public static final String EC2_KEYPAIR_NAME(String clusterName) {
     return "karamel_" + USER_NAME + "_" + clusterName.toLowerCase() + "_" + OS_NAME + "_" + IP_Address;
   }
-  public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + "karamel";
-  public static final String KARAMEL_CONF_NAME = "confs";
+  public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
+  public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";  
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
