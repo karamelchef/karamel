@@ -242,7 +242,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Cluster.StartCluster());
     environment.jersey().register(new Cluster.ViewCluster());
-
+    environment.jersey().register(new Command.CheatSheet());
+    environment.jersey().register(new Command.Process());
+    
     // Wait to make sure jersey/angularJS is running before launching the browser
     Thread.sleep(300);
     openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
@@ -425,6 +427,49 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
+  public static class Command {
+
+    @Path("/getCommandCheetSheet")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class CheatSheet {
+
+      @PUT
+      public Response getCommandCheetSheet() {
+        Response response = null;
+        System.out.println(" Received request to load the command cheatsheet.");
+        try {
+          String cheatSheet = karamelApiHandler.commandCheatSheet();
+          response = Response.status(Response.Status.OK).entity(cheatSheet).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+
+    @Path("/processCommand")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Process {
+
+      @PUT
+      public Response processCommand(String command) {
+        Response response = null;
+        System.out.println(" Received request to process a command");
+        try {
+          String cheatSheet = karamelApiHandler.processCommand(command);
+          response = Response.status(Response.Status.OK).entity(cheatSheet).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+  }
+
   public static class Ec2 {
 
     @Path("/loadCredentials")
@@ -439,8 +484,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           ProviderJSON provider = new ProviderJSON();
-          provider.setAccountId((credentials == null) ? "": credentials.getAccountId());
-          provider.setAccountKey((credentials == null) ? "": credentials.getAccessKey());
+          provider.setAccountId((credentials == null) ? "" : credentials.getAccountId());
+          provider.setAccountKey((credentials == null) ? "" : credentials.getAccessKey());
           response = Response.status(Response.Status.OK).entity(provider).build();
         } catch (KaramelException e) {
           e.printStackTrace();

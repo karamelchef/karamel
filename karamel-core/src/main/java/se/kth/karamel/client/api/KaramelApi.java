@@ -17,6 +17,23 @@ import se.kth.karamel.common.exception.KaramelException;
 public interface KaramelApi {
 
   /**
+   * Demonstrates available commands and their usage
+   * @return
+   * @throws KaramelException 
+   */
+  public String commandCheatSheet() throws KaramelException;
+  
+  /**
+   * Parses the command, if valid fetches the result in string, result could have different 
+   * formatting depends on the command.
+   * 
+   * @param command
+   * @return
+   * @throws KaramelException 
+   */
+  public String processCommand(String command) throws KaramelException;
+  
+  /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
    *
    * @param cookbookUrl

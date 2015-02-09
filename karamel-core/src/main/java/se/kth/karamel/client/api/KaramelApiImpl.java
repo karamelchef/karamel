@@ -54,6 +54,16 @@ public class KaramelApiImpl implements KaramelApi {
   private static final ClusterService clusterService = new ClusterService();
 
   @Override
+  public String commandCheatSheet() throws KaramelException {
+    return "help";
+  }
+
+  @Override
+  public String processCommand(String command) throws KaramelException {
+    return "command processed";
+  }
+
+  @Override
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
     if (refresh) {
       GithubCookbook cb = CookbookCache.load(cookbookUrl);
