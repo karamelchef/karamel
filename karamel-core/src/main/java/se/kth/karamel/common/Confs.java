@@ -32,16 +32,26 @@ public class Confs<K extends String, V extends String> extends Properties {
     }
   }
 
+  public void writeKaramelConfs() {
+    File folder = new File(Settings.KARAMEL_ROOT_PATH);
+    writeConfs(folder);
+  }
+
   public void writeClusterConfs(String clusterName) {
+    File folder = new File(Settings.CLUSTER_ROOT_PATH(clusterName));
+    writeConfs(folder);
+  }
+
+  public void writeConfs(File folder) {
     FileOutputStream out = null;
     try {
-      File folder = new File(Settings.CLUSTER_CLUSTER_FOLDER(clusterName));
+
       if (!folder.exists()) {
         folder.mkdirs();
       }
       File file = new File(folder, Settings.KARAMEL_CONF_NAME);
       out = new FileOutputStream(file);
-      store(out, clusterName);
+      store(out, "Karamel configurations");
     } catch (IOException ex) {
       logger.error("", ex);
     } finally {
@@ -54,13 +64,13 @@ public class Confs<K extends String, V extends String> extends Properties {
   }
 
   public static Confs loadJustClusterConfs(String clusterName) {
-    Confs clusterConf = loadConfs(Settings.CLUSTER_CLUSTER_FOLDER(clusterName));
+    Confs clusterConf = loadConfs(Settings.CLUSTER_ROOT_PATH(clusterName));
     return clusterConf;
   }
 
   public static Confs loadAllConfsForCluster(String clusterName) {
     Confs karamelConf = loadKaramelConfs();
-    Confs clusterConf = loadConfs(Settings.CLUSTER_CLUSTER_FOLDER(clusterName));
+    Confs clusterConf = loadConfs(Settings.CLUSTER_ROOT_PATH(clusterName));
     for (String prop : clusterConf.stringPropertyNames()) {
       karamelConf.put(prop, clusterConf.getProperty(prop));
     }

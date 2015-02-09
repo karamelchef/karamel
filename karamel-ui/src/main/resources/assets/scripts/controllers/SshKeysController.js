@@ -13,6 +13,7 @@ angular.module("demoApp")
           };
           CaramelCoreServices.loadSshKeys()
               .success(function(data) {
+                $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                 scope.sshKeyPair.priKeyPath = data.privateKeyPath;
               })
@@ -39,17 +40,18 @@ angular.module("demoApp")
           }
         };
 
-//        $scope.generateKeys = function() {
-//          CaramelCoreServices.generateSshKeys()
-//              .success(function(data) {
-//                scope.sshKeyPair.pubKeyPath = data.pubKeyPath;
-//                scope.sshKeyPair.priKeyPath = data.priKeyPath;
-//              })
-//              .error(function(data) {
-//                $log.warn("No SSh keys is available");
-//              });
-//        };
-//
+        $scope.generateKeys = function() {
+          CaramelCoreServices.generateSshKeys()
+              .success(function(data) {
+                $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
+                $scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
+                $scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+              })
+              .error(function(data) {
+                $log.warn("Couldn't generate ssh-keys");
+              });
+        };
+
 
         initKeys($scope);
       }]);

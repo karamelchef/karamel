@@ -75,8 +75,8 @@ public class Settings {
   public static final boolean UNIX_OS = OS_NAME.toLowerCase().contains("mac") || OS_NAME.toLowerCase().contains("linux");
   public static final String DEFAULT_PUBKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa.pub" : null;
   public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
-  public static final String SSH_PUBKEY_PATH_KEY = "local.publickey.path";
-  public static final String SSH_PRIKEY_PATH_KEY = "local.privatekey.path";
+  public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
+  public static final String SSH_PRIKEY_PATH_KEY = "ssh.privatekey.path";
 //  public static final String SSH_PUBKEY_KEY = "local.publickey";
 //  public static final String SSH_PRIKEY_KEY = "local.privatekey";
 //  public static final String USR_SSH_PUBKEY = "user.publickey";
@@ -89,15 +89,17 @@ public class Settings {
   }
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + "karamel";
   public static final String KARAMEL_CONF_NAME = "confs";
-  public static final String CLUSTER_PUBKEY_FILENAME = "ida_rsa.pub";
-  public static final String CLUSTER_PRIKEY_FILENAME = "ida_rsa";
+  public static final String SSH_FOLDER_NAME = ".ssh";  
+  public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
+  public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
+  public static final String SSH_PRIKEY_FILENAME = "ida_rsa";
 
-  public static String CLUSTER_CLUSTER_FOLDER(String clusterName) {
+  public static String CLUSTER_ROOT_PATH(String clusterName) {
     return KARAMEL_ROOT_PATH + File.separator + clusterName.toLowerCase();
   }
 
-  public static String CLUSTER_SSH_FOLDER(String clusterName) {
-    return CLUSTER_CLUSTER_FOLDER(clusterName) + File.separator + ".ssh";
+  public static String CLUSTER_SSH_PATH(String clusterName) {
+    return CLUSTER_ROOT_PATH(clusterName) + File.separator + SSH_FOLDER_NAME;
   }
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;

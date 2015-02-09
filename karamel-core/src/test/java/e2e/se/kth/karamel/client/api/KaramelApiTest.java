@@ -57,11 +57,14 @@ public class KaramelApiTest {
     String json = api.yamlToJson(ymlString);
 //    System.out.println(json);
 //    System.out.println("===================================================");
-    Confs confs = Confs.loadKaramelConfs();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    if (sshKeys == null)
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    api.registerSshKeys(sshKeys);
     Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
     api.updateEc2CredentialsIfValid(credentials);
-    SshKeyPair keypair = api.generateSshKeysAndUpdateConf(clusterName);
-    api.registerSshKeys(clusterName, keypair);
+    
+//    api.registerSshKeys(clusterName, keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
     long ms1 = System.currentTimeMillis();

@@ -43,9 +43,16 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String yamlToJson(String yaml) throws KaramelException;
-
+  
   /**
-   * 
+   * Loads Karamel common keys
+   * @return
+   * @throws KaramelException
+   */
+  public SshKeyPair loadSshKeysIfExist() throws KaramelException;
+  
+  /**
+   * Loads cluster specific keys
    * @param clusterName
    * @return
    * @throws KaramelException
@@ -53,7 +60,14 @@ public interface KaramelApi {
   public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
 
   /**
-   * 
+   * Generates a common ssh keys in the karamel folder
+   * @return
+   * @throws KaramelException 
+   */
+  public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
+  
+  /**
+   * Generates cluster specific ssh keys
    * @param clusterName
    * @return
    * @throws KaramelException 
@@ -61,7 +75,14 @@ public interface KaramelApi {
   public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
-   * 
+   * Register ssh keys for the current runtime of karamel
+   * @param keypair
+   * @throws KaramelException 
+   */
+  public void registerSshKeys(SshKeyPair keypair) throws KaramelException;
+  
+  /**
+   * Register ssh keys for the specified cluster
    * @param clusterName
    * @param keypair
    * @throws KaramelException 
