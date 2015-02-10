@@ -329,3 +329,15 @@ textarea[name="pubkey"]{
 .glyphicon-lg{
     font-size: 1.5em;
 }
+
+/* Command Page CSS*/
+
+#commandControllerWrapper{
+    margin: 0 auto;
+    width: 600px;
+    padding-top: 50px;
+}
+
+.commandControllerForm{
+    padding: 10px;
+}
