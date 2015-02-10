@@ -5,7 +5,12 @@
  */
 package se.kth.karamel.backend.command;
 
+import dnl.utils.text.table.TextTable;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -17,8 +22,6 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterEntity;
 import se.kth.karamel.backend.running.model.GroupEntity;
 import se.kth.karamel.backend.running.model.MachineEntity;
-import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.ClasspathResourceUtil;
 import se.kth.karamel.common.SshKeyPair;
@@ -85,30 +88,44 @@ public class CommandService {
       }
     } else if (cmd.equals("groups")) {
       if (chosenCluster != null) {
-        StringBuilder builder = new StringBuilder();
         ClusterManager cluster = cluster(chosenCluster);
         ClusterEntity clusterEntity = cluster.getRuntime();
-        builder.append("\t").append("Name").append("\t|\t").append("Phase").append("\t|\t").append("Failed").append("\n");
-        for (GroupEntity group : clusterEntity.getGroups()) {
-          builder.append("\t").append(group.getName()).append("\t|\t").append(group.getPhase()).append("\t|\t").append(group.isFailed()).append("\n");
+        String[] columnNames = {"Name", "Phase", "Failed"};
+        String[][] data = new String[clusterEntity.getGroups().size()][3];
+        for (int i = 0; i < clusterEntity.getGroups().size(); i++) {
+          GroupEntity group = clusterEntity.getGroups().get(i);
+          data[i][0] = group.getName();
+          data[i][1] = String.valueOf(group.getPhase());
+          data[i][2] = String.valueOf(group.isFailed());
         }
-        result = builder.toString();
+        result = makeTable(columnNames, data);
       } else {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("machines")) {
       if (chosenCluster != null) {
         if (chosenCluster != null) {
-          StringBuilder builder = new StringBuilder();
           ClusterManager cluster = cluster(chosenCluster);
           ClusterEntity clusterEntity = cluster.getRuntime();
-          builder.append("\t").append("Group").append("\t|\t").append("Public IP").append("\t|\t").append("Private IP").append("\t|\t").append("SSH Port").append("\t|\t").append("SSH User").append("\t|\t").append("Life Status").append("\t|\t").append("Task Status").append("\n");
+          ArrayList<MachineEntity> machines = new ArrayList<>();
           for (GroupEntity group : clusterEntity.getGroups()) {
             for (MachineEntity machine : group.getMachines()) {
-              builder.append("\t").append(group.getName()).append("\t|\t").append(machine.getPublicIp()).append("\t|\t").append(machine.getPrivateIp()).append("\t|\t").append(machine.getSshPort()).append("\t|\t").append(machine.getSshUser()).append("\t|\t").append(machine.getLifeStatus()).append("\t|\t").append(machine.getTasksStatus()).append("\n");
+              machines.add(machine);
             }
           }
-          result = builder.toString();
+          String[] columnNames = {"Group", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
+          Object[][] data = new Object[machines.size()][columnNames.length];
+          for (int i = 0; i < machines.size(); i++) {
+            MachineEntity machine = machines.get(i);
+            data[i][0] = machine.getGroup().getName();
+            data[i][1] = machine.getPublicIp();
+            data[i][2] = machine.getPrivateIp();
+            data[i][3] = machine.getSshPort();
+            data[i][4] = machine.getSshUser();
+            data[i][5] = machine.getLifeStatus();
+            data[i][6] = machine.getTasksStatus();
+          }
+          result = makeTable(columnNames, data);
         } else {
           result = "no cluster has been chosen yet!!";
         }
@@ -186,5 +203,18 @@ public class CommandService {
       result = "No cluster is registered yet..";
     }
     return result;
+  }
+
+  private static String makeTable(String[] columnNames, Object[][] data) {
+    TextTable tt = new TextTable(columnNames, data);
+// this adds the numbering on the left      
+    tt.setAddRowNumbering(true);
+// sort by the first column                              
+    tt.setSort(0);
+    ByteArrayOutputStream os = new ByteArrayOutputStream();
+    PrintStream ps = new PrintStream(os);
+    tt.printTable(ps, 0);
+    ps.flush();
+    return new String(os.toByteArray(), Charset.forName("utf8"));
   }
 }

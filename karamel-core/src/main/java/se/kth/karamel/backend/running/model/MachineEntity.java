@@ -39,6 +39,9 @@ public class MachineEntity {
     this.group = group;
   }
 
+  public GroupEntity getGroup() {
+    return group;
+  }
   
   public String getPublicIp() {
     return publicIp;
