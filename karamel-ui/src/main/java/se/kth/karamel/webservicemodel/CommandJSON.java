@@ -5,14 +5,23 @@ package se.kth.karamel.webservicemodel;
  */
 public class CommandJSON {
 
-    String command;
-    
-    public String getCommand() {
-        return command;
-    }
+  String command;
+  String result;
 
-    public void setCommand(String command) {
-        this.command = command;
-    }
+  public String getCommand() {
+    return command;
+  }
+
+  public void setCommand(String command) {
+    this.command = command;
+  }
+
+  public String getResult() {
+    return result;
+  }
+
+  public void setResult(String result) {
+    this.result = result;
+  }
 
 }
