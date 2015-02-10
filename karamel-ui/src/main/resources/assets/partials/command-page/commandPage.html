@@ -2,30 +2,49 @@
 <!--Main Wrapper Class-->
 <div class="container">
     
-    <div id="commandControllerWrapper">
-        <form class="commandControllerForm well" ng-submit= "processCommand(commandObj.commandName)">
-            
-            <div class="form-group text-center">
-                <h2> Command Center </h2>
-            </div>
-            
-            <hr/>
-            
-            <div class="form-group">
-                <label class="control-label">Command</label>
-                <input type="text" class="form-control" placeholder="Command Name ..." ng-model="commandObj.commandName" />
-            </div>
-            
-            <div class="form-group">
-                
-                <label class="control-label">Command Result</label>
-                <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj.commandResult">
+    <div class="row" style="padding-top: 50px">
+        
+        <div class="col-sm-6">
+            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj.commandName)">
 
-                </textarea>
-                
+                <div class="form-group text-center">
+                    <h2> Command Center </h2>
+                </div>
+
+                <hr/>
+
+                <div class="form-group">
+                    <label class="control-label">Command</label>
+                    <input type="text" class="form-control" placeholder="Command Name ..." ng-model="commandObj.commandName" />
+                </div>
+
+                <div class="form-group">
+
+                    <label class="control-label">Command Result</label>
+                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj.commandResult">
+
+                    </textarea>
+
+                </div>
+
+            </form>
+        </div>
+        
+        <div class="col-sm-offset-1 col-sm-4">
+            <div class="panel panel-success">
+                <div class="panel-heading text-center">Cheat Sheet</div>
+                <div class="panel-body">
+                    <ul class="list-unstyled">
+                        <li>help : Help commands</li>
+                        <hr/>
+                        <li>status : Cluster Status</li>
+                        <hr/>
+                        <li>machine : Machine Health</li>
+                    </ul>
+                </div>
             </div>
-            
-        </form>
+        </div>
+        
     </div>
     
 </div>
