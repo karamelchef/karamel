@@ -13,6 +13,9 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
+  hiway:
+    github: "biobankcloud/hiway-chef"
+    branch: "master"
 
 attrs:
   hdfs:
@@ -33,6 +36,8 @@ groups:
         - hadoop::rm
         - hadoop::jhs                                                            
         - hadoop::nm
+        - hiway::hadoop
+        - hiway::wordcount_cf
         - hopshub
   ndb1:
     size: 1 
@@ -43,4 +48,5 @@ groups:
     recipes: 
         - hadoop::dn
         - hadoop::nm
+        - hiway::hadoop
 
