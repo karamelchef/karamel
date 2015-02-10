@@ -12,7 +12,9 @@ import java.util.HashSet;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterEntity;
@@ -51,16 +53,16 @@ import se.kth.karamel.common.SshKeyService;
  */
 public class KaramelApiImpl implements KaramelApi {
 
-  private static final ClusterService clusterService = new ClusterService();
+  private static final ClusterService clusterService = ClusterService.getInstance();
 
   @Override
   public String commandCheatSheet() throws KaramelException {
-    return "help";
+    return CommandService.processCommand("help");
   }
 
   @Override
   public String processCommand(String command) throws KaramelException {
-    return "command processed";
+    return CommandService.processCommand(command);
   }
 
   @Override
@@ -76,38 +78,12 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String jsonToYaml(String json) throws KaramelException {
-    Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
-    YamlCluster yamlCluster = new YamlCluster(jsonCluster);
-    DumperOptions options = new DumperOptions();
-    options.setIndent(2);
-    options.setWidth(120);
-    options.setExplicitEnd(false);
-    options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-    options.setPrettyFlow(true);
-    options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
-    YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
-    yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
-    Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
-    String content = yaml.dump(yamlCluster);
-    return content;
+    return ClusterDefinitionService.jsonToYaml(json);
   }
 
   @Override
   public String yamlToJson(String yaml) throws KaramelException {
-    try {
-      YamlCluster cluster = YamlUtil.loadCluster(yaml);
-      JsonCluster jsonCluster = new JsonCluster(cluster);
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      String json = gson.toJson(jsonCluster);
-      return json;
-    } catch (IOException ex) {
-      throw new KaramelException("Could not convert yaml to java ", ex);
-    }
+    return ClusterDefinitionService.yamlToJson(yaml);
   }
 
   @Override

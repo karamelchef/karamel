@@ -23,10 +23,28 @@ public class ClusterService {
 
   private static final Logger logger = Logger.getLogger(ClusterService.class);
 
-  private static final ClusterContext commonContext = new ClusterContext();
-  private static final Map<String, ClusterManager> repository = new HashMap<>();
-  private static final Map<String, ClusterContext> clusterContexts = new HashMap<>();
+  private static final ClusterService instance = new ClusterService();
+  
+  private final ClusterContext commonContext = new ClusterContext();
+  private final Map<String, ClusterManager> repository = new HashMap<>();
+  private final Map<String, ClusterContext> clusterContexts = new HashMap<>();
 
+  public static ClusterService getInstance() {
+    return instance;
+  }
+
+  public ClusterContext getCommonContext() {
+    return commonContext;
+  }
+
+  public Map<String, ClusterManager> getRepository() {
+    return repository;
+  }
+
+  public Map<String, ClusterContext> getClusterContexts() {
+    return clusterContexts;
+  }
+  
   public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
     commonContext.setEc2Context(ec2Context);
   }
