@@ -32,7 +32,8 @@ angular.module('coreApp', [])
             CaramelCoreServices.processCommand(obj)
 
                 .success(function(data){
-                    $scope.commandObj.commandResult = data.command;
+                    $scope.commandObj.commandName = null;
+                    $scope.commandObj.commandResult = data.result;
                 })
                 .error(function(data){
                     $log.info(data);

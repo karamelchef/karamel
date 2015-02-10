@@ -459,9 +459,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         System.out.println(" Received request to process a command with info: " + command.getCommand());
         try {
-          String cheatSheet = karamelApiHandler.processCommand(command.getCommand());
-          System.out.println(" Cheat Sheet Information: " + cheatSheet);
-            
+          String result = karamelApiHandler.processCommand(command.getCommand());
+          command.setResult(result);
           response = Response.status(Response.Status.OK).entity(command).build();
         } catch (KaramelException e) {
           e.printStackTrace();
