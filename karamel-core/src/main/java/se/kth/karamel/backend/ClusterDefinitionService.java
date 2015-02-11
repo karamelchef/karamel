@@ -57,11 +57,15 @@ public class ClusterDefinitionService {
     try {
       YamlCluster cluster = YamlUtil.loadCluster(yaml);
       JsonCluster jsonCluster = new JsonCluster(cluster);
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      String json = gson.toJson(jsonCluster);
-      return json;
+      return serializeJson(jsonCluster);
     } catch (IOException ex) {
       throw new KaramelException("Could not convert yaml to java ", ex);
     }
   }
+  
+    public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      String json = gson.toJson(jsonCluster);
+      return json;
+    }
 }
