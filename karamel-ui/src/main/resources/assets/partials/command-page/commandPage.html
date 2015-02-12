@@ -1,48 +1,44 @@
 
 <!--Main Wrapper Class-->
 <div class="container">
-    
-    <div id="commandControllerWrapper">
-        <form class="commandControllerForm well" ng-submit= "processCommand(commandObj.commandName)">
-            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj.commandName)">
+    <div >
 
-                <div class="form-group text-center">
-                    <h2> Command Center </h2>
-                </div>
-
-                <hr/>
-
-                <div class="form-group">
-                    <label class="control-label">Command</label>
-                    <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj.commandName" />
-                </div>
-
-                <div class="form-group">
-
-                    <label class="control-label">Command Result</label>
-                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;">
-
-                    </textarea>
-
-                </div>
-
+        <div id="commandControllerWrapper1" class="col-xs-6">
+            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj1.commandName, 1)">
+                    <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj1.commandName" />
+                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj1.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
             </form>
         </div>
-        
-<!--        <div class="col-sm-offset-1 col-sm-4">
-            <div class="panel panel-success">
-                <div class="panel-heading text-center">Cheat Sheet</div>
-                <div class="panel-body">
-                    <ul class="list-unstyled">
-                        <li>help : Help commands</li>
-                        <hr/>
-                        <li>status : Cluster Status</li>
-                        <hr/>
-                        <li>machine : Machine Health</li>
-                    </ul>
+        <div id="commandControllerWrapper2" class="col-xs-6">
+            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj2.commandName, 2)">
+                    <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj2.commandName" />
+
+                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj2.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
+            </form>
+        </div>
+    </div>
+
+    <div id="commandControllerWrapper3">
+        <form class="commandControllerForm well" ng-submit= "processCommand(commandObj3.commandName, 3)">
+                <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj3.commandName" />
+                <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj3.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
+        </form>
+    </div>
+
+    <!--        <div class="col-sm-offset-1 col-sm-4">
+                <div class="panel panel-success">
+                    <div class="panel-heading text-center">Cheat Sheet</div>
+                    <div class="panel-body">
+                        <ul class="list-unstyled">
+                            <li>help : Help commands</li>
+                            <hr/>
+                            <li>status : Cluster Status</li>
+                            <hr/>
+                            <li>machine : Machine Health</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </div>-->
-        
-    
+            </div>-->
+
+
 </div>
