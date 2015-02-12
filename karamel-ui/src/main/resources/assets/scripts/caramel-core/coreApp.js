@@ -10,39 +10,61 @@
 'use strict';
 
 angular.module('coreApp', [])
-    
-    .controller('CommandCenterController',['$log','$scope','CaramelCoreServices', function($log, $scope, CaramelCoreServices){
-        
-        function initScope(scope){
-            
-            scope.commandObj = {
-                commandName: null,
-                commandResult: null
-            }
-        }
-        
-        
-        $scope.processCommand = function(commandName){
-            
-            var obj = {
-                command : commandName
-            };
-            
-            $log.info("Process Command Called with: " + angular.toJson(obj));
-            CaramelCoreServices.processCommand(obj)
 
-                .success(function(data){
-                    $scope.commandObj.commandName = null;
-                    $scope.commandObj.commandResult = data.result;
-                })
-                .error(function(data){
-                    $log.info(data);
-                    $log.info('Core -> Unable to process command: ' + commandName);
-                })
+    .controller('CommandCenterController', ['$log', '$scope', 'CaramelCoreServices', function($log, $scope, CaramelCoreServices) {
+
+        function initScope(scope) {
+
+          scope.commandObj1 = {
+            commandName: null,
+            commandResult: null
+          };
+
+          scope.commandObj2 = {
+            commandName: null,
+            commandResult: null
+          };
+
+          scope.commandObj3 = {
+            commandName: null,
+            commandResult: null
+          };
+
+        }
+
+
+        $scope.processCommand = function(commandName, terminlanNo) {
+
+          var obj = {
+            command: commandName
+          };
+
+          $log.info("Process Command Called with: " + angular.toJson(obj));
+          CaramelCoreServices.processCommand(obj)
+
+              .success(function(data) {
+                if (terminlanNo === 1) {
+                  $scope.commandObj1.commandName = null;
+                  $scope.commandObj1.commandResult = data.result;
+                } else if (terminlanNo === 2)
+                {
+                  $scope.commandObj2.commandName = null;
+                  $scope.commandObj2.commandResult = data.result;
+                } else if (terminlanNo === 3)
+                {
+                  $scope.commandObj3.commandName = null;
+                  $scope.commandObj3.commandResult = data.result;
+                }
+
+              })
+              .error(function(data) {
+                $log.info(data);
+                $log.info('Core -> Unable to process command: ' + commandName);
+              })
         };
 
         initScope($scope);
-    }])
+      }])
 
     .service('CaramelCoreServices', ['$log', '$http', '$location', function($log, $http, $location) {
 
@@ -139,19 +161,17 @@ angular.module('coreApp', [])
             var url = _defaultHost.concat("/stopCluster");
             return _getPromiseObject(method, url, _defaultContentType, clusterName);
           },
-          
-          commandSheet: function(){
+          commandSheet: function() {
             var method = 'GET';
             var url = _defaultHost.concat("/getCommandSheet");
             return _getPromiseObject(method, url, _defaultContentType);
           },
-
-          processCommand: function(commandName){
+          processCommand: function(commandName) {
             var method = 'PUT';
             var url = _defaultHost.concat("/processCommand");
             return _getPromiseObject(method, url, _defaultContentType, commandName);
-          }  
-            
+          }
+
         }
 
       }]);

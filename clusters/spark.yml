@@ -1,4 +1,4 @@
-name: ApacheHadoop
+name: SparkOnHadoop
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -8,7 +8,7 @@ cookbooks:
     github: "hopshadoop/apache-hadoop-chef"
     version: "v0.1"
   spark: 
-    github: "karamelchef/spark-standalone"
+    github: "hopshadoop/spark-chef"
     branch: "master"
     
 groups: 
