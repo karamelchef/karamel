@@ -23,10 +23,17 @@ angular.module('coreApp', [])
             });
             scope.intervalInstance.push(undefined);
           }
+          
+          // Register a destroy event.
+          scope.$on('$destroy', function(){
+            _destroyIntervalInstances();
+          })
+            
         }
 
         $scope.processCommand = function(index) {
-          destroyIntervalInstance(index);
+          _destroyIntervalInstance(index);
+          
           var commandName = $scope.commandObj[index].commandName;
           $scope.commandObj[index].commandName = null;
           var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
@@ -65,23 +72,26 @@ angular.module('coreApp', [])
           };
 
         }
-        ;
 
-        // Call before window close order to prevent memory leaks.
-        function destroyIntervalInstance(index) {
-          if (angular.isDefined($scope.intervalInstance[index])) {
-            $interval.cancel($scope.intervalInstance[index]);
-            $scope.intervalInstance[index] = undefined;
-          }
+
+        /**
+         * If any interval instances are present, destroy them.
+         * Helps to prevent any memory leaks in the system.
+         * @private
+         */
+        function _destroyIntervalInstances(){
+            
+            for(var i= 0, len = $scope.intervalInstance.length ; i < len ; i++){
+                _destroyIntervalInstance(i);
+            }
         }
-
-        $scope.destroy = function() {
-
-          // Destroy Interval Instance.
-          destroyIntervalInstance(0);
-          destroyIntervalInstance(1);
-
-        };
+        
+        function _destroyIntervalInstance(index){
+            
+            if(angular.isDefined($scope.intervalInstance[index])){
+                $interval.cancel($scope.intervalInstance[index]);
+            }  
+        }
 
         initScope($scope);
       }])
