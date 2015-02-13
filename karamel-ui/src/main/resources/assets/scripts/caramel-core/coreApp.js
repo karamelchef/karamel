@@ -11,56 +11,57 @@
 
 angular.module('coreApp', [])
 
-    .controller('CommandCenterController', ['$log', '$scope', 'CaramelCoreServices', function($log, $scope, CaramelCoreServices) {
+    .controller('CommandCenterController', ['$log', '$scope', '$interval', 'CaramelCoreServices', function($log, $scope, $interval, CaramelCoreServices) {
 
         function initScope(scope) {
-
-          scope.commandObj1 = {
-            commandName: null,
-            commandResult: null
-          };
-
-          scope.commandObj2 = {
-            commandName: null,
-            commandResult: null
-          };
-
-          scope.commandObj3 = {
-            commandName: null,
-            commandResult: null
-          };
-
+          scope.commandObj = [];
+          scope.intervalInstance = [];
+          for (var i = 0; i < 3; i++) {
+            scope.commandObj.push({
+              commandName: null,
+              commandResult: null
+            });
+            scope.intervalInstance.push(null);
+          }
         }
 
+        $scope.processCommand = function(index) {
+          if (angular.isDefined($scope.intervalInstance[index])) {
+            $interval.cancel($scope.intervalInstance[index]);
+            $scope.intervalInstance[index] = undefined;
+          }
+          var cmdObj = $scope.commandObj[index];
+          var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
+          var match = regex.exec(cmdObj.commandName);
+          if (match !== null) {
+            var interval = match[1];
+            var intervalCmd = match[2];
+            $log.info("On " + interval + " seconds will call-> " + intervalCmd);
+            $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, index), interval);
+          } else {
+            $log.info("Will call-> " + intervalCmd + " just once");
+            coreProcessCommand(cmdObj.commandName, index);
+          }
 
-        $scope.processCommand = function(commandName, terminlanNo) {
+        };
 
+        function coreProcessCommand(cmdString, index) {
           var obj = {
-            command: commandName
+            command: cmdString
           };
 
           $log.info("Process Command Called with: " + angular.toJson(obj));
           CaramelCoreServices.processCommand(obj)
 
               .success(function(data) {
-                if (terminlanNo === 1) {
-                  $scope.commandObj1.commandName = null;
-                  $scope.commandObj1.commandResult = data.result;
-                } else if (terminlanNo === 2)
-                {
-                  $scope.commandObj2.commandName = null;
-                  $scope.commandObj2.commandResult = data.result;
-                } else if (terminlanNo === 3)
-                {
-                  $scope.commandObj3.commandName = null;
-                  $scope.commandObj3.commandResult = data.result;
-                }
+                $scope.commandObj[index].commandName = null;
+                $scope.commandObj[index].commandResult = data.result;
 
               })
               .error(function(data) {
                 $log.info(data);
-                $log.info('Core -> Unable to process command: ' + commandName);
-              })
+                $log.info('Core -> Unable to process command: ' + cmdString);
+              });
         };
 
         initScope($scope);

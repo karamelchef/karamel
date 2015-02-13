@@ -1,29 +1,29 @@
 
 <!--Main Wrapper Class-->
 <div class="container">
-    <div >
+    <!--<div >-->
 
-        <div id="commandControllerWrapper1" class="col-xs-6">
-            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj1.commandName, 1)">
-                    <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj1.commandName" />
-                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj1.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
+        <div id="commandControllerWrapper0" class="col-xs-12">
+            <form class="commandControllerForm well" ng-submit= "processCommand(0)">
+                    <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
+                    <textarea id="response0" class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj[0].commandResult" ng-readonly="true" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
             </form>
         </div>
-        <div id="commandControllerWrapper2" class="col-xs-6">
-            <form class="commandControllerForm well" ng-submit= "processCommand(commandObj2.commandName, 2)">
-                    <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj2.commandName" />
+        <div id="commandControllerWrapper1" class="col-xs-12">
+            <form class="commandControllerForm well" ng-submit= "processCommand(1)">
+                    <input type="text" id="command1" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[1].commandName" />
 
-                    <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj2.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
+                    <textarea id="response1" class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj[1].commandResult" ng-readonly="true" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
             </form>
         </div>
-    </div>
+<!--    </div>
 
-    <div id="commandControllerWrapper3">
-        <form class="commandControllerForm well" ng-submit= "processCommand(commandObj3.commandName, 3)">
-                <input type="text" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj3.commandName" />
-                <textarea class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj3.commandResult" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
+    <div id="commandControllerWrapper2">
+        <form class="commandControllerForm well" ng-submit= "processCommand(2)">
+                <input type="text" id="command2" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[2].commandName" />
+                <textarea id="response2" class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj[2].commandResult" ng-readonly="true" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
         </form>
-    </div>
+    </div>-->
 
     <!--        <div class="col-sm-offset-1 col-sm-4">
                 <div class="panel panel-success">
