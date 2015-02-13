@@ -21,47 +21,66 @@ angular.module('coreApp', [])
               commandName: null,
               commandResult: null
             });
-            scope.intervalInstance.push(null);
+            scope.intervalInstance.push(undefined);
           }
         }
 
         $scope.processCommand = function(index) {
-          if (angular.isDefined($scope.intervalInstance[index])) {
-            $interval.cancel($scope.intervalInstance[index]);
-            $scope.intervalInstance[index] = undefined;
-          }
-          var cmdObj = $scope.commandObj[index];
+          destroyIntervalInstance(index);
+          var commandName = $scope.commandObj[index].commandName;
+          $scope.commandObj[index].commandName = null;
           var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
-          var match = regex.exec(cmdObj.commandName);
+          var match = regex.exec(commandName);
           if (match !== null) {
             var interval = match[1];
             var intervalCmd = match[2];
             $log.info("On " + interval + " seconds will call-> " + intervalCmd);
-            $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, index), interval);
+            $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, index), interval * 1000);
           } else {
-            $log.info("Will call-> " + intervalCmd + " just once");
-            coreProcessCommand(cmdObj.commandName, index);
+            $log.info("Will call-> " + commandName + " just once");
+            coreProcessCommand(commandName, index)();
           }
 
         };
 
         function coreProcessCommand(cmdString, index) {
-          var obj = {
-            command: cmdString
+
+          return function() {
+
+            var obj = {
+              command: cmdString
+            };
+
+            $log.info("Process Command Called with: " + angular.toJson(obj));
+            CaramelCoreServices.processCommand(obj)
+
+                .success(function(data) {
+                  $scope.commandObj[index].commandResult = data.result;
+
+                })
+                .error(function(data) {
+                  $log.info(data);
+                  $log.info('Core -> Unable to process command: ' + cmdString);
+                });
           };
 
-          $log.info("Process Command Called with: " + angular.toJson(obj));
-          CaramelCoreServices.processCommand(obj)
+        }
+        ;
 
-              .success(function(data) {
-                $scope.commandObj[index].commandName = null;
-                $scope.commandObj[index].commandResult = data.result;
+        // Call before window close order to prevent memory leaks.
+        function destroyIntervalInstance(index) {
+          if (angular.isDefined($scope.intervalInstance[index])) {
+            $interval.cancel($scope.intervalInstance[index]);
+            $scope.intervalInstance[index] = undefined;
+          }
+        }
 
-              })
-              .error(function(data) {
-                $log.info(data);
-                $log.info('Core -> Unable to process command: ' + cmdString);
-              });
+        $scope.destroy = function() {
+
+          // Destroy Interval Instance.
+          destroyIntervalInstance(0);
+          destroyIntervalInstance(1);
+
         };
 
         initScope($scope);

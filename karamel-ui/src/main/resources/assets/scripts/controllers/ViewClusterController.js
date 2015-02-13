@@ -19,8 +19,6 @@ angular.module('demoApp')
 
         }
 
-
-
         // Invoke the Cluster Function.
         function getClusterStatus(){
 
@@ -50,7 +48,7 @@ angular.module('demoApp')
             }
         }
 
-        $scope.close = function () {
+        $scope.destroy = function () {
 
             // Destroy Interval Instance.
             destroyIntervalInstance();
