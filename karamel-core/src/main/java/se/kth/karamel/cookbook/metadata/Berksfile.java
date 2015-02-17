@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 import se.kth.karamel.common.exception.CookbookUrlException;
 
 /**
@@ -22,7 +23,7 @@ import se.kth.karamel.common.exception.CookbookUrlException;
  * @author kamal
  */
 public class Berksfile {
-
+  private static final Logger logger = Logger.getLogger(Berksfile.class);
   private final String url;
   private final Map<String, String> deps = new HashMap<>();
   public static Pattern LINE_PATTERN = Pattern.compile("cookbook\\s*'(.*)'\\s*,\\s*github\\s*:\\s*'(.*)'");
@@ -61,6 +62,7 @@ public class Berksfile {
       String homeUrl = urls.home;
       String errorMsg = String.format("Cookbook-dependency '%s' doesn't refer to a valid url in Berksfile '%s'", name, url);
       try {
+        logger.debug(String.format("Validating url '%s'", homeUrl));
         URL u = new URL(homeUrl);
         HttpURLConnection huc = (HttpURLConnection) u.openConnection();
         huc.setRequestMethod("GET");
@@ -69,7 +71,7 @@ public class Berksfile {
         if (code != 200)
           throw new CookbookUrlException(errorMsg);
       } catch (IOException ex) {
-        throw new CookbookUrlException(errorMsg);
+        throw new CookbookUrlException(errorMsg, ex);
       }
 
     }

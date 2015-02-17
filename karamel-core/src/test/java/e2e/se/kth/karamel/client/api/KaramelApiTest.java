@@ -35,7 +35,7 @@ public class KaramelApiTest {
 
 //  @Test
   public void testYamlToJson() throws IOException, KaramelException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/reference.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     assertFalse(json.isEmpty());
     System.out.println(json);
@@ -43,7 +43,7 @@ public class KaramelApiTest {
 
 //  @Test
   public void testJsonToYaml() throws KaramelException, IOException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/reference.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     String convertedYaml = api.jsonToYaml(json);
     assertFalse(convertedYaml.isEmpty());
@@ -67,9 +67,10 @@ public class KaramelApiTest {
 //    api.registerSshKeys(clusterName, keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
+    api.processCommand("use sparkonhadoop");
     long ms1 = System.currentTimeMillis();
     while (ms1 + 6000000 > System.currentTimeMillis()) {
-      String clusterStatus = api.getClusterStatus(clusterName);
+      String clusterStatus = api.processCommand("status");
 
       System.out.println(clusterStatus);
       Thread.currentThread().sleep(60000);

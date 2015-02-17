@@ -4,6 +4,7 @@ ec2:                                                                            
     image: ami-0307ce74
     region: eu-west-1
     username: ubuntu 
+    price: 0.1
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
   hopagent:                                                                     #'name' is an alias used in the yaml
@@ -28,30 +29,30 @@ attrs:
 #    version: 2.2.0 #used in hop-chef
   mysql:
     user: admin  #used in hop-chef
-#  ndb:
-#    ndbapi:
-#        private_ips: $ndb.private_ips
-#        public_ips: $ndb.public_ips
-#    nn: 
-#        jmxport: 8077
-#        http_port: 50070
-#    mgmd:
-#        port: 1186        
-#    ndbd:
-#        port: 10000 
-#  hop:
-#    dn:
-#      http_port: 50075
-#    yarn:
-#      ps_port: 20888
-#    rm:
-#      http_port: 8088
-#      jmxport: 8042
-#    nm:
-#      jmxport: 8083
-#      http_port: 8042
-#    jhs:
-#      http_port: 19888
+  ndb:
+    ndbapi:
+        private_ips: $ndb.private_ips
+        public_ips: $ndb.public_ips
+    nn: 
+        jmxport: 8077
+        http_port: 50070
+    mgmd:
+        port: 1186        
+    ndbd:
+        port: 10000 
+  hop:
+    dn:
+      http_port: 50075
+    yarn:
+      ps_port: 20888
+    rm:
+      http_port: 8088
+      jmxport: 8042
+    nm:
+      jmxport: 8083
+      http_port: 8042
+    jhs:
+      http_port: 19888
 
 groups: 
   dashboard:
@@ -62,9 +63,9 @@ groups:
         - hopagent
         - hopdashboard
         - ndb::mysqld
-#    attrs:                                                                      #Group-scoped attributes could be defined, it will override global-scoped attributes
-#        ndb:
-#            mysqld: 3306                                                            
+    attrs:                                                                      #Group-scoped attributes could be defined, it will override global-scoped attributes
+        ndb:
+            mysqld: 3306                                                            
   namenodes:
     size: 2
     ec2: 

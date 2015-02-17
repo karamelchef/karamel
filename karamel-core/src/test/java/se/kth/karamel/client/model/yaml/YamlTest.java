@@ -18,7 +18,7 @@ import se.kth.karamel.client.model.Cookbook;
  *
  * @author kamal
  */
-@Ignore
+//@Ignore
 public class YamlTest {
 
   private YamlCluster cluster;
@@ -38,19 +38,20 @@ public class YamlTest {
     assertEquals("ami-0307ce74", provider.getImage());
     assertEquals("eu-west-1", provider.getRegion());
     assertEquals("ubuntu", provider.getUsername());
+    assertEquals(0.1f, provider.getPrice());
 
-//    assertEquals(cluster.getAttr("ndb:ndbapi:private_ips"), "$ndb.private_ips");
-//    assertEquals(cluster.getAttr("ndb:ndbapi:public_ips"), "$ndb.public_ips");
-    assertEquals(cluster.getAttr("hop:dn:http_port"), "50075");
-    assertEquals(cluster.getAttr("hop:yarn:ps_port"), "20888");
-    assertEquals(cluster.getAttr("hop:rm:http_port"), "8088");
-    assertEquals(cluster.getAttr("hop:nm:jmxport"), "8083");
-    assertEquals(cluster.getAttr("hop:nm:http_port"), "8042");
-    assertEquals(cluster.getAttr("hop:rm:jmxport"), "8042");
-    assertEquals(cluster.getAttr("hop:nm:jmxport"), "8083");
-    assertEquals(cluster.getAttr("hop:jhs:http_port"), "19888");
-    assertEquals(cluster.getAttr("ndb:mgmd:port"), "1186");
-    assertEquals(cluster.getAttr("ndb:ndbd:port"), "10000");
+    assertEquals(cluster.getAttr("mysql/user"), "admin");
+    assertEquals(cluster.getAttr("ndb/ndbapi/public_ips"), "$ndb.public_ips");
+    assertEquals(cluster.getAttr("hop/dn/http_port"), "50075");
+    assertEquals(cluster.getAttr("hop/yarn/ps_port"), "20888");
+    assertEquals(cluster.getAttr("hop/rm/http_port"), "8088");
+    assertEquals(cluster.getAttr("hop/nm/jmxport"), "8083");
+    assertEquals(cluster.getAttr("hop/nm/http_port"), "8042");
+    assertEquals(cluster.getAttr("hop/rm/jmxport"), "8042");
+    assertEquals(cluster.getAttr("hop/nm/jmxport"), "8083");
+    assertEquals(cluster.getAttr("hop/jhs/http_port"), "19888");
+    assertEquals(cluster.getAttr("ndb/mgmd/port"), "1186");
+    assertEquals(cluster.getAttr("ndb/ndbd/port"), "10000");
 
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
     assertTrue(cookbooks.containsKey("hopagent"));
@@ -58,18 +59,18 @@ public class YamlTest {
     assertEquals("master", cookbooks.get("hopagent").getBranch());
     assertTrue(cookbooks.containsKey("hop"));
     assertEquals("hopstart/hop-chef", cookbooks.get("hop").getGithub());
-    assertEquals("v0.1", cookbooks.get("hop").getVersion());
-    assertTrue(cookbooks.containsKey("highway"));
-    assertEquals("biobankcloud/highway-chef", cookbooks.get("highway").getGithub());
+    assertEquals("master", cookbooks.get("hop").getBranch());
+    assertTrue(cookbooks.containsKey("cuneiform"));
+    assertEquals("biobankcloud/cuneiform-chef", cookbooks.get("cuneiform").getGithub());
     Map<String, YamlGroup> groups = cluster.getGroups();
     assertTrue(groups.containsKey("dashboard"));
-    assertEquals("1", groups.get("dashboard").getSize());
-    assertEquals("3306", groups.get("dashboard").getAttr("ndb:mysqld"));
+    assertEquals(1, groups.get("dashboard").getSize());
+    assertEquals("3306", groups.get("dashboard").getAttr("ndb/mysqld"));
     assertTrue(groups.get("dashboard").getRecipes().contains("hopagent"));
     assertTrue(groups.get("dashboard").getRecipes().contains("hopdashboard"));
     assertTrue(groups.get("dashboard").getRecipes().contains("ndb::mysqld"));
     assertTrue(groups.containsKey("namenodes"));
-    assertEquals("2", groups.get("namenodes").getSize());
+    assertEquals(2, groups.get("namenodes").getSize());
     assertTrue(groups.get("namenodes").getRecipes().contains("hopagent"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::memcached"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::mysqld"));
@@ -81,14 +82,14 @@ public class YamlTest {
     Ec2 provider2 = (Ec2) groups.get("namenodes").getProvider();
     assertEquals("m3.medium", provider2.getType());
     assertTrue(groups.containsKey("ndb"));
-    assertEquals("2", groups.get("ndb").getSize());
+    assertEquals(2, groups.get("ndb").getSize());
     assertTrue(groups.get("ndb").getRecipes().contains("hopagent"));
     assertTrue(groups.get("ndb").getRecipes().contains("ndb::ndbd"));
     assertTrue(groups.get("ndb").getProvider() instanceof Ec2);
     Ec2 provider3 = (Ec2) groups.get("ndb").getProvider();
     assertEquals("m3.medium", provider3.getType());
     assertTrue(groups.containsKey("datanodes"));
-    assertEquals("4", groups.get("datanodes").getSize());
+    assertEquals(4, groups.get("datanodes").getSize());
     assertTrue(groups.get("datanodes").getRecipes().contains("hopagent"));
     assertTrue(groups.get("datanodes").getRecipes().contains("hop::dn"));
     assertTrue(groups.get("datanodes").getRecipes().contains("hop::nm"));

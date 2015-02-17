@@ -2,24 +2,25 @@ name: SparkOnHadoop
 ec2:
     type: m3.medium
     region: eu-west-1
+    price: 0.1
 
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     version: "v0.1"
   spark: 
-    github: "karamelchef/spark-standalone"
+    github: "hopshadoop/spark-chef"
     branch: "master"
     
 groups: 
-  spark-namenodes:
+  namenodes:
     size: 1
     recipes: 
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
         - spark::master
-  spark-datanodes:
+  datanodes:
     size: 2
     recipes: 
         - hadoop::dn
