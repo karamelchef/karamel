@@ -17,7 +17,7 @@
     <url>http://maven.apache.org</url>
 
     <properties>
-        <jclouds.version>1.7.2</jclouds.version>
+        <jclouds.version>1.8.0</jclouds.version>
     </properties>
     <repositories>
         <repository>
@@ -41,6 +41,11 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.11</version>
         </dependency>
+<!--        <dependency>
+            <groupId>org.jclouds.provider</groupId>
+            <artifactId>aws-ec2</artifactId>
+            <version>1.1.0</version>
+        </dependency>-->
         <dependency>
             <groupId>org.apache.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>

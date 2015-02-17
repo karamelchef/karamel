@@ -16,6 +16,7 @@ public class Ec2 extends Provider {
   private String type;
   private String region;
   private String image;
+  private Float price;
 
   public String getType() {
     return type;
@@ -41,6 +42,14 @@ public class Ec2 extends Provider {
     this.image = image;
   }
 
+  public Float getPrice() {
+    return price;
+  }
+
+  public void setPrice(Float price) {
+    this.price = price;
+  }
+  
   public static Ec2 makeDefault() {
     Ec2 ec2 = new Ec2();
     return ec2.applyDefaults();
@@ -71,6 +80,7 @@ public class Ec2 extends Provider {
     ec2.setImage(image);
     ec2.setRegion(region);
     ec2.setType(type);
+    ec2.setPrice(price);
     return ec2;
   }
 
@@ -91,6 +101,8 @@ public class Ec2 extends Provider {
       if (clone.getType() == null) {
         clone.setType(parentEc2.getType());
       }
+      if (clone.getPrice() == null)
+        clone.setPrice(parentEc2.getPrice());
     }
     return clone;
   }

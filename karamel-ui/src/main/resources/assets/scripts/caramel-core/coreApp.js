@@ -42,6 +42,7 @@ angular.module('coreApp', [])
             var interval = match[1];
             var intervalCmd = match[2];
             $log.info("On " + interval + " seconds will call-> " + intervalCmd);
+            coreProcessCommand(intervalCmd, index)();
             $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, index), interval * 1000);
           } else {
             $log.info("Will call-> " + commandName + " just once");

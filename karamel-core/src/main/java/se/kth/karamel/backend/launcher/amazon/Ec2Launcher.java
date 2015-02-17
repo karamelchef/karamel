@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
+import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.compute.predicates.NodePredicates;
 import org.jclouds.ec2.compute.options.EC2TemplateOptions;
@@ -125,8 +127,10 @@ public final class Ec2Launcher {
     if (sshKeyPair == null) {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     }
-
-    EC2TemplateOptions options = context.getComputeService().templateOptions().as(EC2TemplateOptions.class);
+    AWSEC2TemplateOptions options = context.getComputeService().templateOptions().as(AWSEC2TemplateOptions.class);
+    if (ec2.getPrice() != null) {
+      options.spotPrice(ec2.getPrice());
+    }
     HashSet<String> regions = new HashSet();
     if (!regions.contains(ec2.getRegion())) {
       Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
