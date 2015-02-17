@@ -8,10 +8,10 @@ cookbooks:
     github: "hopshadoop/apache-hadoop-chef"
     version: "v0.1"
   spark: 
-    github: "karamelchef/spark-standalone"
+    github: "hopshadoop/spark-standalone"
     branch: "master"
   zeppelin: 
-    github: "karamelchef/zeppelin-chef"
+    github: "hopshadoop/zeppelin-chef"
     branch: "master"
     
 groups: 
