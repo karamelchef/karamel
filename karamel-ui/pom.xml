@@ -305,7 +305,7 @@
                             <outputDirectory>${basedir}/target/karamel-${project.version}/examples</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../clusters/</directory>
+                                    <directory>../examples/</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>              
@@ -321,7 +321,7 @@
                             <outputDirectory>${basedir}/target/appassembler/examples</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../clusters/</directory>
+                                    <directory>../examples/</directory>
                                     <filtering>true</filtering>
                                 </resource>
                             </resources>              

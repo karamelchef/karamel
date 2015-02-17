@@ -1,0 +1,26 @@
+name: MySqlCluster2 
+ec2:
+
+cookbooks:                                                                      
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
+attrs:
+    ndb:
+       version: "7.3.6"
+    
+groups: 
+  datanodes2:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  server2:
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+
+
+

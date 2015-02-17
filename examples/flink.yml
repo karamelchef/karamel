@@ -1,4 +1,4 @@
-name: ApacheHadoop
+name: SparkOnHadoop
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -7,11 +7,8 @@ cookbooks:
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     version: "v0.1"
-  spark: 
-    github: "karamelchef/spark-standalone"
-    branch: "master"
-  zeppelin: 
-    github: "karamelchef/zeppelin-chef"
+  flink: 
+    github: "hopshadoop/flink-chef"
     branch: "master"
     
 groups: 
@@ -21,11 +18,10 @@ groups:
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
-        - spark::master
-        - zeppelin
+        - flink::master
   datanodes:
     size: 2
     recipes: 
         - hadoop::dn
         - hadoop::nm
-        - spark::slave
+        - flink::slave
