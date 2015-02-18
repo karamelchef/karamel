@@ -1,4 +1,4 @@
-name: HopsHub
+name: BiobankCloudHops
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -44,7 +44,7 @@ groups:
   resourcemanagers:
     size: 2 
     recipes:                                                                    
-        - hops::nn
+        - hops::rm
   ndb:
     size: 2
     recipes: 
