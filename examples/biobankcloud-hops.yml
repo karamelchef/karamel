@@ -27,7 +27,7 @@ attrs:
         user: glassfish
 
 groups: 
-  hopshub:
+  bbclims:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       

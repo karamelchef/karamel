@@ -24,7 +24,7 @@ attrs:
         user: glassfish
 
 groups: 
-  hopshub1:
+  bbclims:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
@@ -34,11 +34,11 @@ groups:
         - hadoop::jhs                                                            
         - hadoop::nm
         - hopshub
-  ndb1:
+  ndb:
     size: 1 
     recipes: 
         - ndb::ndbd
-  datanodes1:
+  datanodes:
     size: 1 
     recipes: 
         - hadoop::dn
