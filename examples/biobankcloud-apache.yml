@@ -1,20 +1,17 @@
-name: HopsHub
+name: BiobankCloudApache
 ec2:
     type: m3.medium
     region: eu-west-1
 
 cookbooks:                                                                      
-  hops: 
-    github: "hopshadoop/hops-hadoop-chef"
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
   hopshub:                                                                     
     github: "hopshadoop/hopshub-chef"
     branch: "master"  
   ndb:
     github: "hopshadoop/ndb-chef"
-    branch: "master"
-  hiway:
-    github: "hopstart/hiway-chef"
     branch: "master"
 
 attrs:
@@ -27,31 +24,23 @@ attrs:
         user: glassfish
 
 groups: 
-  hopshub:
+  bbclims:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - hops::client
+        - hadoop::nn
+        - hadoop::rm
         - hadoop::jhs                                                            
+        - hadoop::nm
         - hopshub
-  namenodes:
-    size: 2 
-    recipes:                                                                    
-        - hops::nn
-        - ndb::mysqld                                                       
-        - ndb::memcached
-  resourcemanagers:
-    size: 2 
-    recipes:                                                                    
-        - hops::nn
   ndb:
-    size: 2
+    size: 1 
     recipes: 
         - ndb::ndbd
   datanodes:
-    size: 6 
+    size: 1 
     recipes: 
-        - hops::dn
-        - hops::nm
+        - hadoop::dn
+        - hadoop::nm
 
