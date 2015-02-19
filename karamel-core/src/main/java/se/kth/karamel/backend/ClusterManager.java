@@ -6,6 +6,7 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.JsonObject;
+import java.util.Collections;
 import java.util.HashSet;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import java.util.List;
@@ -15,7 +16,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
@@ -49,10 +52,15 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
+  MultiThreadedDagExecutor executor;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
   private Ec2Launcher ec2Launcher;
+  private Future<?> clusterManagerFuture = null;
+  private Future<?> machinesMonitorFuture = null;
+  private Future<?> clusterStatusFuture = null;
+  private boolean stoping = false;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) {
     this.clusterContext = clusterContext;
@@ -74,51 +82,100 @@ public class ClusterManager implements Runnable {
   public synchronized void enqueue(Command command) throws KaramelException {
     if (!cmdQueue.offer(command)) {
       String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command, definition.getName());
-      logger.warn(msg);
+      logger.error(msg);
       throw new KaramelException(msg);
     }
+    if (command == Command.PURGE) {
+      stoping = true;
+    }
+    if ((command == Command.PAUSE || command == Command.PURGE) && cmdQueue.remainingCapacity() == 0) {
+      if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
+        logger.info(String.format("Interrupting cluster manager of '%s'", definition.getName()));
+        clusterManagerFuture.cancel(true);
+      }
+    }
+
   }
 
   public void start() {
     tpool = Executors.newFixedThreadPool(3);
-    tpool.execute(this);
-    tpool.execute(machinesMonitor);
-    tpool.execute(clusterStatusMonitor);
+    clusterManagerFuture = tpool.submit(this);
+    machinesMonitorFuture = tpool.submit(machinesMonitor);
+    clusterStatusFuture = tpool.submit(clusterStatusMonitor);
   }
 
-  private synchronized void preClean() {
-    logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
-    runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANING);
+  public void stop() throws InterruptedException {
+    if (executor != null && !executor.isShutdown()) {
+      logger.info(String.format("Terminating the installation DAG of '%s'", definition.getName()));
+      executor.shutdown();
+      executor.awaitTermination(1, TimeUnit.MINUTES);
+    }
+    machinesMonitor.setStoping(true);
+    if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
+      logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
+      machinesMonitorFuture.cancel(true);
+    }
+    clusterStatusMonitor.setStoping(true);
+    if (clusterStatusFuture != null && !clusterStatusFuture.isCancelled()) {
+      logger.info(String.format("Terminating cluster status monitor of '%s'", definition.getName()));
+      clusterStatusFuture.cancel(true);
+    }
+    stoping = true;
+    if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
+      logger.info(String.format("Terminating cluster manager of '%s'", definition.getName()));
+      clusterManagerFuture.cancel(true);
+    }
+  }
+
+  private synchronized void clean(boolean purging) {
+    if (purging) {
+      logger.info(String.format("Purging '%s' ...", definition.getName()));
+      runtime.setPhase(ClusterEntity.ClusterPhases.PURGING);
+    } else {
+      logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
+      runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANING);
+    }
+
     runtime.setFailed(false);
     List<GroupEntity> groups = runtime.getGroups();
     for (GroupEntity group : groups) {
-      if (group.getPhase() == GroupEntity.GroupPhase.NONE || (group.getPhase() == GroupEntity.GroupPhase.PRECLEANING && group.isFailed())) {
+      if (purging) {
+        group.setPhase(GroupEntity.GroupPhase.PURGING);
+      } else {
         group.setPhase(GroupEntity.GroupPhase.PRECLEANING);
-        group.setFailed(false);
-        Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
-        if (provider instanceof Ec2) {
-          try {
-            Ec2 ec2 = (Ec2) provider;
-            if (ec2Launcher == null) {
-              ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
-            }
-            ec2Launcher.cleanup(group.getName(), ec2.getRegion());
-            group.setPhase(GroupEntity.GroupPhase.PRECLEANED);
-          } catch (Exception ex) {
-            group.setFailed(true);
-            runtime.setFailed(true);
+      }
+      group.setFailed(false);
+      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      if (provider instanceof Ec2) {
+        try {
+          Ec2 ec2 = (Ec2) provider;
+          if (ec2Launcher == null) {
+            ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
           }
+          ec2Launcher.cleanup(group.getName(), ec2.getRegion());
+          if (purging) {
+            group.setMachines(Collections.EMPTY_LIST);
+            group.setPhase(GroupEntity.GroupPhase.NONE);
+          } else {
+            group.setPhase(GroupEntity.GroupPhase.PRECLEANED);
+          }
+        } catch (Exception ex) {
+          group.setFailed(true);
+          runtime.setFailed(true);
         }
       }
     }
 
-    if (!runtime.isFailed()) {
+    if (purging) {
+      runtime.setPhase(ClusterEntity.ClusterPhases.NONE);
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+    } else if (!runtime.isFailed()) {
       runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PRECLEANED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
   }
 
-  private synchronized void forkGroups() {
+  private synchronized void forkGroups() throws InterruptedException {
     logger.info(String.format("Froking groups '%s' ...", definition.getName()));
     runtime.setPhase(ClusterEntity.ClusterPhases.FORKING_GROUPS);
     runtime.setFailed(false);
@@ -139,6 +196,12 @@ public class ClusterManager implements Runnable {
             ec2Launcher.createSecurityGroup(definition.getName(), group.getName(), ec2.getRegion(), ports);
             group.setPhase(GroupEntity.GroupPhase.GROUPS_FORKED);
           } catch (Exception ex) {
+            if (ex instanceof InterruptedException) {
+              InterruptedException ex1 = (InterruptedException) ex;
+              throw ex1;
+            } else {
+              logger.error("", ex);
+            }
             group.setFailed(true);
             runtime.setFailed(true);
           }
@@ -152,7 +215,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void install() {
+  private synchronized void install() throws Exception {
     logger.info(String.format("Installing '%s' ...", definition.getName()));
     runtime.setPhase(ClusterEntity.ClusterPhases.INSTALLING);
     runtime.setFailed(false);
@@ -160,7 +223,7 @@ public class ClusterManager implements Runnable {
     for (GroupEntity group : groups) {
       group.setPhase(GroupEntity.GroupPhase.INSTALLING);
     }
-    MultiThreadedDagExecutor executor = null;
+
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
       installationDag = UserClusterDataExtractor.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
@@ -169,8 +232,8 @@ public class ClusterManager implements Runnable {
       executor.submit(installationDag);
 
     } catch (Exception ex) {
-      logger.error("Installing failed )-:", ex);
       runtime.setFailed(true);
+      throw ex;
     } finally {
       if (executor != null && !executor.isShutdown()) {
         executor.shutdown();
@@ -199,11 +262,12 @@ public class ClusterManager implements Runnable {
     machinesMonitor.resume();
   }
 
-  private synchronized void purge() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  private synchronized void purge() throws InterruptedException {
+    clean(true);
+    stop();
   }
 
-  private void forkMachines() {
+  private void forkMachines() throws Exception {
     logger.info(String.format("Launching '%s' ...", definition.getName()));
     runtime.setPhase(ClusterEntity.ClusterPhases.FORKING_MACHINES);
     runtime.setFailed(false);
@@ -228,9 +292,9 @@ public class ClusterManager implements Runnable {
             machinesMonitor.addMachines(mcs);
             group.setPhase(GroupEntity.GroupPhase.MACHINES_FORKED);
           } catch (Exception ex) {
-            logger.error("", ex);
             group.setFailed(true);
             runtime.setFailed(true);
+            throw ex;
           }
         }
       }
@@ -248,11 +312,12 @@ public class ClusterManager implements Runnable {
     while (true) {
       try {
         Command cmd = cmdQueue.take();
+        logger.info(String.format("Going to serve '%s'", cmd.toString()));
         switch (cmd) {
           case LAUNCH:
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.NONE
                     || (runtime.getPhase() == ClusterEntity.ClusterPhases.PRECLEANING && runtime.isFailed())) {
-              preClean();
+              clean(false);
             }
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.PRECLEANED
                     || (runtime.getPhase() == ClusterEntity.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
@@ -277,8 +342,20 @@ public class ClusterManager implements Runnable {
             purge();
             break;
         }
-      } catch (InterruptedException ex) {
-        logger.error(String.format("Cluster Manager thread for cluster '%s' got interrupted.", definition.getName()));
+      } catch (java.lang.InterruptedException ex) {
+        if (stoping) {
+          tpool.shutdown();
+          try {
+            tpool.awaitTermination(1, TimeUnit.MINUTES);
+          } catch (InterruptedException ex1) {
+          }
+          logger.info(String.format("Cluster-Manager stoped for '%s' d'-'", definition.getName()));
+          return;
+        } else {
+          logger.error("", ex);
+        }
+      } catch (Exception ex) {
+        logger.error("", ex);
       }
     }
   }

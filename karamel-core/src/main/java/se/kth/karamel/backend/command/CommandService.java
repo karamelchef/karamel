@@ -89,7 +89,7 @@ public class CommandService {
     } else if (cmd.equals("purge")) {
       if (chosenCluster != null) {
         try {
-          clusterService.pauseCluster(chosenCluster);
+          clusterService.purgeCluster(chosenCluster);
           result = "Purging " + chosenCluster;
         } catch (KaramelException ex) {
           result = ex.getMessage();
