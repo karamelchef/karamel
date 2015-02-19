@@ -23,3 +23,4 @@ detail                  : detail json of the cluster
 groups                  : groups' summary
 machines                : machines' summary
 tasks                   : installation tasks on each machine
+purge                   : kills all vms, security groups

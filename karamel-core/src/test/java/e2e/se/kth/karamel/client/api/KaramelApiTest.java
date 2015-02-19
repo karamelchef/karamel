@@ -13,9 +13,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 
 /**
@@ -69,10 +67,18 @@ public class KaramelApiTest {
     api.startCluster(json);
     api.processCommand("use sparkonhadoop");
     long ms1 = System.currentTimeMillis();
+    int mins = 0;
     while (ms1 + 6000000 > System.currentTimeMillis()) {
+      mins ++;
       String clusterStatus = api.processCommand("status");
 
       System.out.println(clusterStatus);
+//      if (mins == 3)
+//        api.processCommand("purge");
+//      if (mins == 6)
+//        api.processCommand("resume");
+//      if (mins == 8)
+//        api.processCommand("purge");
       Thread.currentThread().sleep(60000);
     }
   }

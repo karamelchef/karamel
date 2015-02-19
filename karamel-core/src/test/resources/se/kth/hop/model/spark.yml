@@ -2,7 +2,6 @@ name: SparkOnHadoop
 ec2:
     type: m3.medium
     region: eu-west-1
-    price: 0.1
 
 cookbooks:                                                                      
   hadoop: 
