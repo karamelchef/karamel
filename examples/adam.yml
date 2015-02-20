@@ -15,13 +15,13 @@ cookbooks:
     branch: "master"
     
 groups: 
-  namenodes:
+  master:
     size: 1
     recipes: 
         - hadoop::nn
         - spark::master
         - adam
-  datanodes:
+  servants:
     size: 2
     recipes: 
         - hadoop::dn
