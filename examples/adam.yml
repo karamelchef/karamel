@@ -19,12 +19,10 @@ groups:
     size: 1
     recipes: 
         - hadoop::nn
-        - hadoop::rm
         - spark::master
         - adam
   datanodes:
     size: 2
     recipes: 
         - hadoop::dn
-        - hadoop::nm
         - spark::slave
