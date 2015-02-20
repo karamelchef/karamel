@@ -48,7 +48,7 @@ angular.module('demoApp')
             }
         }
 
-        $scope.destroy = function () {
+        $scope.close = function () {
 
             // Destroy Interval Instance.
             destroyIntervalInstance();
