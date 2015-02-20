@@ -20,7 +20,6 @@ groups:
     recipes: 
         - hadoop::nn
         - hadoop::rm
-        - hadoop::jhs
         - spark::master
         - adam
   datanodes:
