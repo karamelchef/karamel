@@ -24,12 +24,16 @@ import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.backend.running.model.tasks.Task.Status;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import java.security.Security;
 
 /**
  *
  * @author kamal
  */
 public class SshMachine implements Runnable {
+  
+  static { Security.addProvider(new BouncyCastleProvider()); }
 
   private static final Logger logger = Logger.getLogger(SshMachine.class);
   private final MachineEntity machineEntity;
@@ -39,6 +43,8 @@ public class SshMachine implements Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stoping = false;
+
+
 
   public SshMachine(MachineEntity machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
