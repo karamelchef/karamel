@@ -75,16 +75,15 @@ angular.module('demoApp')
         
         $scope.launchCluster = function(){
             $log.info("Launching Cluster");
+//            var rootScope = $rootScope.karamelBoard;
+//            $log.info(rootScope.getEC2provider());
 
-            var rootScope = $rootScope.karamelBoard;
-            $log.info(rootScope.getEC2provider());
-
-            if(rootScope.getEC2provider() == null){
-                BoardService.editAmazonProvider(rootScope,null, true)
-            }
-            else{
+//            if(rootScope.getEC2provider() == null){
+//                BoardService.editAmazonProvider(rootScope,null, true)
+//            }
+//            else{
                 BoardService.startCluster($rootScope.karamelBoard);
-            }
+//            }
 
         };
 

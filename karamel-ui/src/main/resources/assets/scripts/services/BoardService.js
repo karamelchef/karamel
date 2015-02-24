@@ -341,7 +341,8 @@ angular.module('demoApp')
                 }
               }
             });
-
+            
+            var externalObj = this;
             modalInstance.result.then(function(provider) {
 
               if (provider) {
@@ -364,7 +365,7 @@ angular.module('demoApp')
 
                 if(isLaunch){
                     // If call came as part of start cluster, launch cluster.
-                    this.startCluster(board);
+                    externalObj.startCluster(board);
                 }
                 
               }
