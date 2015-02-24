@@ -9,7 +9,7 @@ angular.module("demoApp")
         function initKeys(scope) {
           scope.sshKeyPair = {
             pubKeyPath: null,
-            priKeyPath: null,
+            priKeyPath: null
           };
           CaramelCoreServices.loadSshKeys()
               .success(function(data) {

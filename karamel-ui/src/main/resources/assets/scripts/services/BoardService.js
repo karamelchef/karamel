@@ -324,7 +324,7 @@ angular.module('demoApp')
                 });
 
           },
-          editAmazonProvider: function(board, group) {
+          editAmazonProvider: function(board, group, isLaunch) {
 
             $log.info("Edit Amazon Provider.");
 
@@ -349,19 +349,32 @@ angular.module('demoApp')
                 var ec2Provider = new EC2Provider();
                 ec2Provider.load(provider.ec2Provider);
 
-                if (_.isNull(group)) {
-                  $log.info("Save the provider details at global level.");
-                  board.setEC2Provider(ec2Provider);
-                }
 
-                else {
-                  $log.info("Save the provider details at group level.");
-                  group.setEC2Provider(ec2Provider);
-                }
+                  if (_.isNull(group)) {
+                      $log.info("Save the provider details at global level.");
+                      board.setEC2Provider(ec2Provider);
+                  }
 
-                _syncBoardWithCache(board);
+                  else {
+                      $log.info("Save the provider details at group level.");
+                      group.setEC2Provider(ec2Provider);
+                  }
+
+                  _syncBoardWithCache(board);
+
+                if(isLaunch){
+                    // If call came as part of start cluster, launch cluster.
+                    this.startCluster(board);
+                }
+                
               }
-
+              else{
+                  // If provider is still not set.
+                  if(board.getEC2provider() == null){
+                      $log.info("Ec2 provider details still not set.");
+                      AlertService.addAlert({type: 'danger', msg: 'Provider details not set.'});
+                  }
+              }
             });
 
           },
@@ -407,7 +420,8 @@ angular.module('demoApp')
                 })
                 .error(function(data, status, headers, config) {
                   $log.info("Error Received.");
-                  AlertService.addAlert({type: 'warning', msg: data.message});
+                  $log.info(data.message);
+                  AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
                 });
           },
           viewCluster: function(board) {

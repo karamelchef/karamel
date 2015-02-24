@@ -66,7 +66,7 @@ angular.module('demoApp')
         };
 
         $scope.editAmazonProvider = function(){
-            BoardService.editAmazonProvider($rootScope.karamelBoard,null);
+           BoardService.editAmazonProvider($rootScope.karamelBoard,null, false);
         };
 
         $scope.editSshKeys = function(){
@@ -75,8 +75,16 @@ angular.module('demoApp')
         
         $scope.launchCluster = function(){
             $log.info("Launching Cluster");
-//            AlertService.addAlert({type: 'info', msg: 'Under development.'});
-            BoardService.startCluster($rootScope.karamelBoard);
+
+            var rootScope = $rootScope.karamelBoard;
+            $log.info(rootScope.getEC2provider());
+
+            if(rootScope.getEC2provider() == null){
+                BoardService.editAmazonProvider(rootScope,null, true)
+            }
+            else{
+                BoardService.startCluster($rootScope.karamelBoard);
+            }
 
         };
 

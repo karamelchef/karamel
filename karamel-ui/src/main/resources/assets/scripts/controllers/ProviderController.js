@@ -11,7 +11,7 @@ angular.module("demoApp")
 
           scope.account = {
             accountId: null,
-            accountKey: null,
+            accountKey: null
           };
 
           CaramelCoreServices.loadCredentials()
