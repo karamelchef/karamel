@@ -28,10 +28,11 @@ public interface KaramelApi {
    * formatting depends on the command.
    * 
    * @param command
+   * @param args
    * @return
    * @throws KaramelException 
    */
-  public String processCommand(String command) throws KaramelException;
+  public String processCommand(String command, String... args) throws KaramelException;
   
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file

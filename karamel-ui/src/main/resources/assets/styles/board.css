@@ -332,10 +332,15 @@ textarea[name="pubkey"]{
 
 /* Command Page CSS*/
 
-#commandControllerWrapper{
-    margin: 0 auto;
-    width: 1000px;
-    padding-top: 50px;
+.commandResponseArea{
+    font-family:Courier;
+    color: #CCCCCC;
+    background: #000000;
+    border: 3px double #CCCCCC;
+    padding: 10px;
+    font-size: 12px;
+    height: 800px;
+    width: 100%;
 }
 
 .commandControllerForm{

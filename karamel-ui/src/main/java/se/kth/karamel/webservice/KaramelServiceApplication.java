@@ -244,7 +244,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Cluster.ViewCluster());
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
-    
+
     // Wait to make sure jersey/angularJS is running before launching the browser
     Thread.sleep(300);
     openWebpage(new URL("http://localhost:" + getPort(environment) + "/index.html"));
@@ -459,12 +459,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         System.out.println(" Received request to process a command with info: " + command.getCommand());
         try {
-          String result = karamelApiHandler.processCommand(command.getCommand());
+          String result = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
           command.setResult(result);
-          response = Response.status(Response.Status.OK).entity(command).build();
+
         } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          command.setResult(e.getMessage());
+        } catch (Exception e) {
+          command.setResult(e.getMessage());
+        } finally {
+          response = Response.status(Response.Status.OK).entity(command).build();
         }
         return response;
       }
