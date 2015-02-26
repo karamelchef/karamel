@@ -35,6 +35,12 @@ function getClusterHelperMethods() {
                 container.addNodeGroup(group);
             }
         },
+        
+        loadEc2Provider : function(container, provider){
+            var ec2Provider = new EC2Provider();
+            ec2Provider.load(provider);
+            container.setEC2Provider(ec2Provider);
+        },
 
         loadCookbooks : function(container, cookbooks){
 
@@ -170,6 +176,7 @@ function Cluster() {
     this.load = function (other) {
 
         this.name = other.name;
+        this.helperObj.loadEc2Provider(this,other["ec2"]);
         this.helperObj.loadGroups(this, other["groups"]);
         this.helperObj.loadCookbooks(this, other["cookbooks"]);
     };
@@ -181,7 +188,7 @@ function Cluster() {
         this.name = other.name;
         if(other.ec2Provider != null){
             this.ec2Provider = new EC2Provider();
-            this.ec2Provider.load(other.ec2Provider);
+            this.ec2Provider.copy(other.ec2Provider);
         }
         this.helperObj.copyGroups(this,other["nodeGroups"]);
         this.helperObj.copyCookbooks(this,other["cookbooks"]);
@@ -209,12 +216,33 @@ function Provider(name) {
 }
 
 function EC2Provider() {
+    
+    this.type = null;
+    this.image = null;
+    this.region = null;
+    this.price = null;
     this.accountId = null;
     this.accountKey = null;
 
     this.load = function (other) {
-        this.accountId = other.accountId;
-        this.accountKey = other.accountKey;
+        this.type = other.type || null;
+        this.image = other.image || null;
+        this.region = other.region || null;
+        this.price = other.price || null;
+    };
+    this.copy = function(other){
+        
+        this.type = other.type || null;
+        this.image = other.image || null;
+        this.region = other.region || null;
+        this.price = other.price || null;
+        this.accountId = other.accountId || null;
+        this.accountKey = other.accountKey || null;
+    };
+    
+    this.addAccountDetails = function(other){
+        this.accountId = other.accountId || null;
+        this.accountKey = other.accountKey || null;
     }
 }
 

@@ -43,19 +43,6 @@ angular.module("demoApp")
             container = info.board;
           }
 
-          // In case we have the credentials
-          if (!(_.isNull(container.getEC2provider()) || _.isUndefined(container.getEC2provider()) || _.isEmpty(container.getEC2provider()))) {
-
-            scope.account = container.getEC2provider();
-
-            validate(scope.account)
-                .success(function(data, status, header, config) {
-                  $scope.connectionState = $scope.states.valid;
-                })
-                .error(function(data, status, header, config) {
-                  $scope.connectionState = $scope.states.invalid;
-                })
-          }
         }
 
         $scope.close = function() {
