@@ -347,8 +347,8 @@ angular.module('demoApp')
 
               if (provider) {
 
-                var ec2Provider = new EC2Provider();
-                ec2Provider.load(provider.ec2Provider);
+                var ec2Provider = board.getEC2provider() != null ? board.getEC2provider() : new EC2Provider();
+                ec2Provider.addAccountDetails(provider.ec2Provider);
 
 
                   if (_.isNull(group)) {
@@ -410,7 +410,7 @@ angular.module('demoApp')
             else {
               restObj = getRestObjBuilder().buildCaramelForRest(board);
             }
-
+            $log.info(restObj);
             var data = {
               json: angular.toJson(restObj)
             };
@@ -444,10 +444,24 @@ angular.module('demoApp')
               }
             });
 
+          },
+            
+          setCredentials: function(board){
+            $log.info("Set Credentials function called.");
+              
+              var modalInstance = $modal.open({
+                  templateUrl: "partials/credentials.html",
+                  controller: "CredentialsController",
+                  backdrop: "static",
+                  resolve: {
+                      info: function() {
+                          return {
+                              board: board
+                          }
+                      }
+                  }
+              });
           }
-
-        }
-
-
+        }       
 
       }]);
