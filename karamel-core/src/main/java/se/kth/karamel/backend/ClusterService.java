@@ -8,6 +8,7 @@ package se.kth.karamel.backend;
 import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterEntity;
@@ -43,6 +44,10 @@ public class ClusterService {
 
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
+  }
+  
+  public synchronized void saveYaml(String yaml) throws KaramelException {
+    
   }
 
   public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
@@ -95,6 +100,8 @@ public class ClusterService {
   public synchronized void startCluster(String json) throws KaramelException {
     Gson gson = new Gson();
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
+    ClusterDefinitionService.saveYaml(yml);
     logger.info(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
     String clusterName = jsonCluster.getName();
     String name = clusterName.toLowerCase();
@@ -139,8 +146,25 @@ public class ClusterService {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
 
-    ClusterManager cluster = repository.get(name);
-    cluster.enqueue(ClusterManager.Command.PURGE);
+    final ClusterManager cluster = repository.get(name);
+    Thread t = new Thread() {
+      @Override
+      public void run() {
+        try {
+          ClusterEntity runtime = cluster.getRuntime();
+          cluster.enqueue(ClusterManager.Command.PURGE);
+          while (runtime.getPhase() != ClusterEntity.ClusterPhases.NONE) {
+            Thread.sleep(100);
+          }
+          String name = runtime.getName().toLowerCase();
+          repository.remove(name);
+        } catch (InterruptedException ex) {
+        } catch (KaramelException ex) {
+          logger.error("", ex);
+        }
+      }
+    };
+    t.start();
   }
 
   private ClusterContext checkContext(String clusterName) throws KaramelException {

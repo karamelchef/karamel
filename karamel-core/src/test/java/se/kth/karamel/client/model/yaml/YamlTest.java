@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import se.kth.karamel.client.model.Cookbook;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -24,7 +25,7 @@ public class YamlTest {
   private YamlCluster cluster;
 
   @Before
-  public void init() throws IOException {
+  public void init() throws KaramelException {
     this.cluster = YamlUtil.loadYamlFileInClassPath("se/kth/hop/model/reference.yml");
   }
 

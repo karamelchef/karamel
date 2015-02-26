@@ -41,8 +41,8 @@ public class CommandService {
   private static final ClusterService clusterService = ClusterService.getInstance();
 //  private static final KaramelApi api = new KaramelApiImpl();
 
-  public static String processCommand(String command) {
-    String cmd = command.toLowerCase();
+  public static String processCommand(String command, String... args) throws KaramelException {
+    String cmd = command.toLowerCase().trim();
     String result = "command not found";
     if (cmd.equals("help")) {
       try {
@@ -52,6 +52,22 @@ public class CommandService {
       }
     } else if (cmd.equals("clusters")) {
       result = clusters();
+    } else if (cmd.equals("list")) {
+      List<String> defs = ClusterDefinitionService.listClusters();
+      StringBuilder builder = new StringBuilder();
+      builder.append("Yaml Definitions:").append("\n").append("---------------------").append("\n");
+      for (String def : defs) {
+        builder.append(def).append("\n");
+      }
+      builder.append("\n").append("Running Clusters:").append("\n").append("----------------------").append("\n");
+      builder.append(clusters());
+      result = builder.toString();
+    } else if (cmd.equals("save")) {
+      if (args.length == 0) {
+        throw new KaramelException("Provide the yaml definition");
+      }
+      ClusterDefinitionService.saveYaml(args[0]);
+      result = "Yaml updated";
     } else if (cmd.equals("yaml")) {
       if (chosenCluster != null) {
         ClusterManager cluster = cluster(chosenCluster);
@@ -178,6 +194,42 @@ public class CommandService {
           result = String.format("switched to %s now", clusterName);
         } else {
           result = String.format("cluster %s is not registered yet!!", clusterName);
+        }
+      }
+
+      p = Pattern.compile("remove\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        if (cluster(clusterName) != null) {
+          result = String.format("%s is running now, terminate it first!!", clusterName);
+        } else {
+          ClusterDefinitionService.removeDefinition(clusterName);
+          result = String.format("cluster definition %s removed successfully..", clusterName);
+        }
+      }
+
+      p = Pattern.compile("yaml\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        result = ClusterDefinitionService.loadYaml(clusterName);
+      }
+
+      p = Pattern.compile("launch\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        if (cluster(clusterName) != null) {
+          result = String.format("%s is already running, purge it first!!", clusterName);
+        } else {
+          String yaml = ClusterDefinitionService.loadYaml(clusterName);
+          String json = ClusterDefinitionService.yamlToJson(yaml);
+          clusterService.startCluster(json);
+          result = String.format("cluster %s launched successfully..", clusterName);
         }
       }
 

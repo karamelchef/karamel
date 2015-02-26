@@ -7,24 +7,29 @@ ec2:
 
 cookbooks:
   hadoop:
-    github: "hopshadoop/apache-hadoop-chef"
+    github: "marcbux/apache-hadoop-chef"
     branch: "master"
   hiway:
-    github: "kahak/hiway-chef"
+    github: "marcbux/hiway-chef"
     branch: "master"
-
+    
 groups:
-  master:
+  hiwaymaster:
     size: 1
     recipes:
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
-        - hiway::wordcount_cf
-        - hiway::montage_synthetic_dax_cf
-  slaves:
+
+  hiwayslaves:
     size: 2
     recipes:
-    - hadoop::dn
-    - hadoop::nm
-    - hiway::hadoop
+        - hadoop::dn
+        - hadoop::nm
+        - hiway::hadoop
+        - hiway::cuneiform
+        - hiway::cuneiform_helloworld_cf_prepare
+        - hiway::cuneiform_variantcall_hg38_cf_prepare
+        - hiway::hiway_wordcount_cf_prepare
+        - hiway::hiway_montage_synthetic_dax_prepare
+        - hiway::hiway_galaxy101_ga_prepare

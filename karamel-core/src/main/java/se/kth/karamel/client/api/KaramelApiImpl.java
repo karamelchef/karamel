@@ -49,8 +49,8 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public String processCommand(String command) throws KaramelException {
-    return CommandService.processCommand(command);
+  public String processCommand(String command, String... args) throws KaramelException {
+    return CommandService.processCommand(command, args);
   }
 
   @Override

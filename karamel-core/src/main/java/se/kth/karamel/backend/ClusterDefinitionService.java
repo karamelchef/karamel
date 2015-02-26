@@ -5,10 +5,21 @@
  */
 package se.kth.karamel.backend;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.Tag;
@@ -19,7 +30,9 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
 import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
 import se.kth.karamel.client.model.yaml.YamlUtil;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
+import java.nio.file.*;
 
 /**
  *
@@ -47,6 +60,90 @@ public class ClusterDefinitionService {
     return content;
   }
 
+  public static void saveYaml(String yaml) throws KaramelException {
+    try {
+      YamlCluster cluster = YamlUtil.loadCluster(yaml);
+      String name = cluster.getName().toLowerCase();
+      File folder = new File(Settings.CLUSTER_ROOT_PATH(name));
+      if (!folder.exists()) {
+        folder.mkdirs();
+      }
+      File file = new File(Settings.CLUSTER_YAML_PATH(name));
+      Files.write(yaml, file, Charset.forName("UTF-8"));
+    } catch (IOException ex) {
+      throw new KaramelException("Could not convert yaml to java ", ex);
+    }
+  }
+
+  public static String loadYaml(String clusterName) throws KaramelException {
+    try {
+      String name = clusterName.toLowerCase();
+      File folder = new File(Settings.CLUSTER_ROOT_PATH(name));
+      if (!folder.exists()) {
+        throw new KaramelException(String.format("cluster '%s' is not available", name));
+      }
+      String yamlPath = Settings.CLUSTER_YAML_PATH(name);
+      File file = new File(yamlPath);
+      if (!file.exists()) {
+        throw new KaramelException(String.format("yaml '%s' is not available", yamlPath));
+      }
+      String yaml = Files.toString(file, Charsets.UTF_8);
+      return yaml;
+    } catch (IOException ex) {
+      throw new KaramelException("Could not save the yaml ", ex);
+    }
+  }
+
+  public static void removeDefinition(String clusterName) throws KaramelException {
+    String name = clusterName.toLowerCase();
+    File folder = new File(Settings.CLUSTER_ROOT_PATH(name));
+    try {
+      deleteRecursive(folder);
+    } catch (FileNotFoundException ex) {
+      throw new KaramelException(ex);
+    }
+  }
+
+  /**
+   * By default File#delete fails for non-empty directories, it works like "rm". We need something a little more brutual
+   * - this does the equivalent of "rm -r"
+   *
+   * @param path Root File Path
+   * @return true iff the file and all sub files/directories have been removed
+   * @throws FileNotFoundException
+   */
+  public static boolean deleteRecursive(File path) throws FileNotFoundException {
+    if (!path.exists()) {
+      throw new FileNotFoundException(path.getAbsolutePath());
+    }
+    boolean ret = true;
+    if (path.isDirectory()) {
+      for (File f : path.listFiles()) {
+        ret = ret && deleteRecursive(f);
+      }
+    }
+    return ret && path.delete();
+  }
+
+  public static List<String> listClusters() throws KaramelException {
+    List<String> clusters = new ArrayList();
+    File folder = new File(Settings.KARAMEL_ROOT_PATH);
+    if (folder.exists()) {
+      File[] files = folder.listFiles();
+      for (File file : files) {
+        if (file.isDirectory()) {
+          File[] files2 = file.listFiles();
+          for (File file2 : files2) {
+            if (file2.isFile() && file2.getName().equals(Settings.YAML_FILE_NAME)) {
+              clusters.add(file.getName());
+            }
+          }
+        }
+      }
+    }
+    return clusters;
+  }
+
   public static String jsonToYaml(String json) throws KaramelException {
     Gson gson = new Gson();
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
@@ -54,18 +151,14 @@ public class ClusterDefinitionService {
   }
 
   public static String yamlToJson(String yaml) throws KaramelException {
-    try {
-      YamlCluster cluster = YamlUtil.loadCluster(yaml);
-      JsonCluster jsonCluster = new JsonCluster(cluster);
-      return serializeJson(jsonCluster);
-    } catch (IOException ex) {
-      throw new KaramelException("Could not convert yaml to java ", ex);
-    }
+    YamlCluster cluster = YamlUtil.loadCluster(yaml);
+    JsonCluster jsonCluster = new JsonCluster(cluster);
+    return serializeJson(jsonCluster);
   }
-  
-    public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      String json = gson.toJson(jsonCluster);
-      return json;
-    }
+
+  public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    String json = gson.toJson(jsonCluster);
+    return json;
+  }
 }

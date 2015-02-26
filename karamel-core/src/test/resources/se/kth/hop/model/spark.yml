@@ -12,14 +12,14 @@ cookbooks:
     branch: "master"
     
 groups: 
-  namenodes:
+  namenodes1:
     size: 1
     recipes: 
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
         - spark::master
-  datanodes:
+  datanodes1:
     size: 2
     recipes: 
         - hadoop::dn

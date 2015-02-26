@@ -35,6 +35,7 @@ angular.module('coreApp', [])
           _destroyIntervalInstance(index);
           
           var commandName = $scope.commandObj[index].commandName;
+          var commandArg = $scope.commandObj[index].commandResult;
           $scope.commandObj[index].commandName = null;
           var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
           var match = regex.exec(commandName);
@@ -42,21 +43,22 @@ angular.module('coreApp', [])
             var interval = match[1];
             var intervalCmd = match[2];
             $log.info("On " + interval + " seconds will call-> " + intervalCmd);
-            coreProcessCommand(intervalCmd, index)();
-            $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, index), interval * 1000);
+            coreProcessCommand(intervalCmd, commandArg, index)();
+            $scope.intervalInstance[index] = $interval(coreProcessCommand(intervalCmd, commandArg, index), interval * 1000);
           } else {
             $log.info("Will call-> " + commandName + " just once");
-            coreProcessCommand(commandName, index)();
+            coreProcessCommand(commandName, commandArg, index)();
           }
 
         };
 
-        function coreProcessCommand(cmdString, index) {
+        function coreProcessCommand(cmdName, cmdArg, index) {
 
           return function() {
 
             var obj = {
-              command: cmdString
+              command: cmdName,
+              result: cmdArg
             };
 
             $log.info("Process Command Called with: " + angular.toJson(obj));
@@ -68,7 +70,7 @@ angular.module('coreApp', [])
                 })
                 .error(function(data) {
                   $log.info(data);
-                  $log.info('Core -> Unable to process command: ' + cmdString);
+                  $log.info('Core -> Unable to process command: ' + cmdName);
                 });
           };
 

@@ -10,6 +10,8 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.scanner.ScannerException;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -21,22 +23,33 @@ public class YamlUtil {
    *
    * @param yamlPath fully qualified path in the classpath
    * @return
-   * @throws IOException
+   * @throws se.kth.karamel.common.exception.KaramelException
    */
-  public static YamlCluster loadYamlFileInClassPath(String yamlPath) throws IOException {
-    String ymlString = Resources.toString(Resources.getResource(yamlPath), Charsets.UTF_8);
-    return loadCluster(ymlString);
+  public static YamlCluster loadYamlFileInClassPath(String yamlPath) throws KaramelException {
+    String ymlString;
+    try {
+      ymlString = Resources.toString(Resources.getResource(yamlPath), Charsets.UTF_8);
+      return loadCluster(ymlString);
+    } catch (IOException ex) {
+      throw new KaramelException("couldn't load the yaml", ex);
+    }
+
   }
 
   /**
    * loads java cluster from yaml string
+   *
    * @param ymlString
    * @return
-   * @throws IOException 
+   * @throws se.kth.karamel.common.exception.KaramelException
    */
-  public static YamlCluster loadCluster(String ymlString) throws IOException {
-    Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
-    Object document = yaml.load(ymlString);
-    return ((YamlCluster) document);
+  public static YamlCluster loadCluster(String ymlString) throws KaramelException {
+    try {
+      Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
+      Object document = yaml.load(ymlString);
+      return ((YamlCluster) document);
+    } catch (ScannerException ex) {
+      throw new KaramelException("Syntax error in the yaml!!", ex);
+    }
   }
 }

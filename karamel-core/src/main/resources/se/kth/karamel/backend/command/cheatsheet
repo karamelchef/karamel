@@ -8,11 +8,16 @@
                                                                                                                           
 ##########################################################################################################################
 help                    : shows available commands
-watch -n <sec> <command>: executes the command on the intervals specified 
+list                    : available cluster definitions in the cache
+save                    : updates cluster definition in the cache
+remove <cluster_name>   : deletes cluster definition if it is not running
+yaml   <cluster_name>   : returns cluster definition from the cache
+launch <cluster_name>   : launches denoted cluster if it is not already running
 which ec2               : ec2 account-id 
 which ssh               : ssh keys' path
 clusters                : lists available running clusters
 use <cluster_name>      : switches the active cluster in terminal
+watch -n <sec> <command>: executes the command on the intervals specified 
 --------------------------------------------------------------------------------
                     ACTIVE CLUSTER COMMANDS
 --------------------------------------------------------------------------------
