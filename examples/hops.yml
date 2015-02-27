@@ -1,4 +1,4 @@
-name: HopsYaml                                                             
+name: Hops                                                  
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -12,17 +12,13 @@ cookbooks:
     branch: "master"
     
 groups: 
-  namenodes:
-    size: 2
-    recipes: 
-        - hops::nn
   datanodes:
     size: 2 
     recipes: 
         - ndb::ndbd
         - hops::dn
         - hops::nm
-  main:
+  metanodes:
     size: 1 
     recipes: 
         - ndb::mysqld
@@ -30,6 +26,4 @@ groups:
         - ndb::mgmd
         - hops::jhs                                                            
         - hops::rm
-
-
-
+        - hops::nn

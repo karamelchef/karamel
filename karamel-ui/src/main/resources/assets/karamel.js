@@ -37,8 +37,13 @@ function getClusterHelperMethods() {
         },
         
         loadEc2Provider : function(container, provider){
+            
             var ec2Provider = new EC2Provider();
-            ec2Provider.load(provider);
+            
+            if( !(_.isUndefined(provider) || _.isNull(provider)) ){
+                ec2Provider.load(provider);
+            }
+
             container.setEC2Provider(ec2Provider);
         },
 
