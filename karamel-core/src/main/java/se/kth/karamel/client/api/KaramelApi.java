@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.client.api;
 
+import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -32,7 +33,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException 
    */
-  public String processCommand(String command, String... args) throws KaramelException;
+  public CommandResponse processCommand(String command, String... args) throws KaramelException;
   
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file

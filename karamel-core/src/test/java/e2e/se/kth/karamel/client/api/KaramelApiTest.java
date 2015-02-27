@@ -11,6 +11,7 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
@@ -70,9 +71,9 @@ public class KaramelApiTest {
     int mins = 0;
     while (ms1 + 6000000 > System.currentTimeMillis()) {
       mins ++;
-      String clusterStatus = api.processCommand("status");
+      CommandResponse response = api.processCommand("status");
 
-      System.out.println(clusterStatus);
+      System.out.println(response.getResult());
 //      if (mins == 3)
 //        api.processCommand("purge");
 //      if (mins == 6)

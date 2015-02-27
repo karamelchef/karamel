@@ -33,10 +33,13 @@ angular.module('coreApp', [])
 
         $scope.processCommand = function(index) {
           _destroyIntervalInstance(index);
-          
           var commandName = $scope.commandObj[index].commandName;
           var commandArg = $scope.commandObj[index].commandResult;
           $scope.commandObj[index].commandName = null;
+          processCommand(index, commandName, commandArg);
+        };
+        
+        function processCommand(index, commandName, commandArg){
           var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
           var match = regex.exec(commandName);
           if (match !== null) {
@@ -49,9 +52,8 @@ angular.module('coreApp', [])
             $log.info("Will call-> " + commandName + " just once");
             coreProcessCommand(commandName, commandArg, index)();
           }
-
-        };
-
+        }
+        
         function coreProcessCommand(cmdName, cmdArg, index) {
 
           return function() {
@@ -66,7 +68,9 @@ angular.module('coreApp', [])
 
                 .success(function(data) {
                   $scope.commandObj[index].commandResult = data.result;
-
+                  if (data.nextCmd !== null) {
+                    processCommand(index, data.nextCmd, null)
+                  }
                 })
                 .error(function(data) {
                   $log.info(data);
