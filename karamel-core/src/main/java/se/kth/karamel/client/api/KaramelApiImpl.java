@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
@@ -45,11 +46,11 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String commandCheatSheet() throws KaramelException {
-    return CommandService.processCommand("help");
+    return CommandService.processCommand("help").getResult();
   }
 
   @Override
-  public String processCommand(String command, String... args) throws KaramelException {
+  public CommandResponse processCommand(String command, String... args) throws KaramelException {
     return CommandService.processCommand(command, args);
   }
 

@@ -45,6 +45,7 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
@@ -459,8 +460,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         System.out.println(" Received request to process a command with info: " + command.getCommand());
         try {
-          String result = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
-          command.setResult(result);
+          CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
+          command.setResult(cmdRes.getResult());
+          command.setNextCmd(cmdRes.getNextCmd());
 
         } catch (KaramelException e) {
           command.setResult(e.getMessage());

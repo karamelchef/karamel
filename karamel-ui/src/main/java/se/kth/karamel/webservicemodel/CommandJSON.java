@@ -7,6 +7,7 @@ public class CommandJSON {
 
   String command;
   String result;
+  String nextCmd;
 
   public String getCommand() {
     return command;
@@ -22,6 +23,14 @@ public class CommandJSON {
 
   public void setResult(String result) {
     this.result = result;
+  }
+
+  public String getNextCmd() {
+    return nextCmd;
+  }
+
+  public void setNextCmd(String nextCmd) {
+    this.nextCmd = nextCmd;
   }
 
 }

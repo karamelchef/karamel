@@ -38,11 +38,14 @@ import se.kth.karamel.common.exception.KaramelException;
 public class CommandService {
 
   private static String chosenCluster = null;
+  private static String autoselectedCluster = null;
   private static final ClusterService clusterService = ClusterService.getInstance();
 //  private static final KaramelApi api = new KaramelApiImpl();
 
-  public static String processCommand(String command, String... args) throws KaramelException {
+  public static CommandResponse processCommand(String command, String... args) throws KaramelException {
     String cmd = command.toLowerCase().trim();
+    String nextCmd = null;
+    selectCluster();
     String result = "command not found";
     if (cmd.equals("help")) {
       try {
@@ -69,8 +72,8 @@ public class CommandService {
       ClusterDefinitionService.saveYaml(args[0]);
       result = "Yaml updated";
     } else if (cmd.equals("yaml")) {
-      if (chosenCluster != null) {
-        ClusterManager cluster = cluster(chosenCluster);
+      if (chosenCluster() != null) {
+        ClusterManager cluster = cluster(chosenCluster());
         JsonCluster json = cluster.getDefinition();
         try {
           result = ClusterDefinitionService.jsonToYaml(json);
@@ -81,10 +84,11 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("pause")) {
-      if (chosenCluster != null) {
+      if (chosenCluster() != null) {
         try {
-          clusterService.pauseCluster(chosenCluster);
+          clusterService.pauseCluster(chosenCluster());
           result = "Pausing the installation...";
+          nextCmd = "watch -n 2 status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -92,10 +96,11 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("resume")) {
-      if (chosenCluster != null) {
+      if (chosenCluster() != null) {
         try {
-          clusterService.resumeCluster(chosenCluster);
+          clusterService.resumeCluster(chosenCluster());
           result = "Resuming the installation...";
+          nextCmd = "watch -n 2 status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -103,10 +108,11 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("purge")) {
-      if (chosenCluster != null) {
+      if (chosenCluster() != null) {
         try {
-          clusterService.purgeCluster(chosenCluster);
-          result = "Purging " + chosenCluster;
+          clusterService.purgeCluster(chosenCluster());
+          result = "Purging " + chosenCluster();
+          nextCmd = "watch -n 2 status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -114,9 +120,9 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("status")) {
-      if (chosenCluster != null) {
+      if (chosenCluster() != null) {
         StringBuilder builder = new StringBuilder();
-        ClusterManager cluster = cluster(chosenCluster);
+        ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         builder.append(clusterEntity.getName()).append(" is ").append(clusterEntity.getPhase());
         if (clusterEntity.isPaused()) {
@@ -132,8 +138,8 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("detail")) {
-      if (chosenCluster != null) {
-        ClusterManager cluster = cluster(chosenCluster);
+      if (chosenCluster() != null) {
+        ClusterManager cluster = cluster(chosenCluster());
         JsonCluster json = cluster.getDefinition();
 
         try {
@@ -145,8 +151,8 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("groups")) {
-      if (chosenCluster != null) {
-        ClusterManager cluster = cluster(chosenCluster);
+      if (chosenCluster() != null) {
+        ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         String[] columnNames = {"Name", "Phase", "Failed"};
         String[][] data = new String[clusterEntity.getGroups().size()][3];
@@ -161,8 +167,8 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("machines")) {
-      if (chosenCluster != null) {
-        ClusterManager cluster = cluster(chosenCluster);
+      if (chosenCluster() != null) {
+        ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         ArrayList<MachineEntity> machines = new ArrayList<>();
         for (GroupEntity group : clusterEntity.getGroups()) {
@@ -175,8 +181,8 @@ public class CommandService {
         result = "no cluster has been chosen yet!!";
       }
     } else if (cmd.equals("tasks")) {
-      if (chosenCluster != null) {
-        ClusterManager cluster = cluster(chosenCluster);
+      if (chosenCluster() != null) {
+        ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         result = machinesTasksTable(clusterEntity);
       } else {
@@ -230,6 +236,7 @@ public class CommandService {
           String json = ClusterDefinitionService.yamlToJson(yaml);
           clusterService.startCluster(json);
           result = String.format("cluster %s launched successfully..", clusterName);
+          nextCmd = "watch -n 2 status";
         }
       }
 
@@ -239,8 +246,8 @@ public class CommandService {
         found = true;
         String subcmd = matcher.group(1);
         if (subcmd.equals("cluster")) {
-          if (chosenCluster != null) {
-            result = String.format("%s has been chosen.", chosenCluster);
+          if (chosenCluster() != null) {
+            result = String.format("%s has been chosen.", chosenCluster());
           } else {
             result = "no cluster has been chosen yet!!";
           }
@@ -261,7 +268,34 @@ public class CommandService {
         }
       }
     }
-    return result;
+    CommandResponse response = new CommandResponse();
+    response.setNextCmd(nextCmd);
+    response.setResult(result);
+    return response;
+  }
+
+  private static String chosenCluster() {
+    if (chosenCluster != null) {
+      return chosenCluster;
+    } else if (autoselectedCluster != null) {
+      return autoselectedCluster;
+    } else {
+      return null;
+    }
+  }
+
+  private static void selectCluster() {
+    Map<String, ClusterManager> repository = clusterService.getRepository();
+    if (autoselectedCluster != null && cluster(autoselectedCluster) == null) {
+      autoselectedCluster = null;
+    }
+    if (chosenCluster != null && cluster(chosenCluster) == null) {
+      chosenCluster = null;
+    }
+
+    if (chosenCluster == null && repository.size() == 1) {
+      autoselectedCluster = (String) repository.keySet().toArray()[0];
+    }
   }
 
   private static ClusterManager cluster(String name) {
