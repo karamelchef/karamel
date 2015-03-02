@@ -125,7 +125,7 @@ public class Dag {
    * @param task
    */
   public synchronized void insert(Runnable task) {
-    logger.debug(String.format("Task[%s] no dependency.", task));
+    logger.info(String.format("Task[%s] no dependency.", task));
     tasks.add(task);
   }
 
@@ -137,8 +137,8 @@ public class Dag {
    * @param dependency
    */
   public synchronized void insert(Runnable task, Runnable dependency) {
-    logger.debug(String.format("Task[%s] depends on:", task));
-    logger.debug(String.format("    [%s]", dependency));
+    logger.info(String.format("Task[%s] depends on:", task));
+    logger.info(String.format("    [%s]", dependency));
     tasks.add(task);
     editableDeps.put(task, dependency);
 //    nonEditableDeps.put(task, dependency);
@@ -152,9 +152,9 @@ public class Dag {
    * @param deps
    */
   public synchronized void insert(Runnable task, Set<? extends Runnable> deps) {
-    logger.debug(String.format("Task[%s] depends on:", task));
+    logger.info(String.format("Task[%s] depends on:", task));
     for (Runnable dep : deps) {
-      logger.debug(String.format("    [%s]", dep));
+      logger.info(String.format("    [%s]", dep));
     }
     tasks.add(task);
     editableDeps.putAll(task, deps);
@@ -203,16 +203,16 @@ public class Dag {
     JsonObject root = new JsonObject();
     Set<Runnable> keys = nonEditableDeps.keySet();
     for (Runnable key : keys) {
-      RunRecipeTask r = (RunRecipeTask) key;
+      TaskRunner r = (TaskRunner) key;
       Set<? extends Runnable> deps = nonEditableDeps.get(key);
       String depsString = Joiner.on(",").join(deps);
       JsonObject child = new JsonObject();
       //TODO: uncomment
-//      child.addProperty("recipe", r.getRecipeName());
-//      child.addProperty("machine", r.getMachine().getPublicIps().get(0));
-//      child.addProperty("status", r.getStatus().toString());
-//      child.addProperty("input", depsString);
-//      root.add(r.hash(), child);
+      child.addProperty("task", r.getTask().getName());
+      child.addProperty("machine", r.getTask().getMachineId());
+      child.addProperty("status", r.getTask().getStatus().toString());
+      child.addProperty("input", depsString);
+      root.add(r.getTask().getName(), child);
     }
     return root.toString();
   }
