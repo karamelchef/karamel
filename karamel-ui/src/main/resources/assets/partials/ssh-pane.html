@@ -16,8 +16,14 @@
 
     <div class="form-group">
 
-        <div class="col-xs-12">
+        <div class="col-xs-3">
             <button type="button" class="btn btn-default" ng-click="generateKeys()" tabindex="3">Generate Keys</button>
+        </div>
+        
+        <div class="col-xs-9">
+             <span ng-show="currentState == availableStates.success"><span class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>Valid Ssh Key</span>
+             <span ng-show="currentState == availableStates.failure"><span class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>Unable to Generate Ssh Key</span>
+             <span ng-show="currentState == availableStates.warn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>Unable to load default Ssh Key</span>
         </div>
 
     </div>

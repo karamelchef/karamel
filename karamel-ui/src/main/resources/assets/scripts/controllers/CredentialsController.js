@@ -9,7 +9,12 @@ angular.module('demoApp')
                 provider: 'provider',
                 summary : 'summary'
             };
-
+            _setUpHolderMap(scope.credentialsHolderMap);
+        }
+        
+        function _setUpHolderMap(map){
+            map[$scope.mapKeys.provider] = info.board.getEC2provider();
+            map[$scope.mapKeys.ssh] = info.board.getSshKeyPair();
         }
 
         $scope.close = function () {
@@ -80,7 +85,13 @@ angular.module('demoApp')
                         valid: 'valid',
                         invalid: 'invalid'
                     };
+                    
                     scp.currentState = scp.states.initial;
+                    scp.provider = scp.credentialsHolderMap[scp.mapKey];
+                    
+                    if(scp.provider.getIsValid()){
+                        scp.currentState = scp.states.valid;
+                    }
                 }
 
                 scope.$watch('selected', function(){
@@ -171,6 +182,35 @@ angular.module('demoApp')
                         pubKeyPath: null,
                         priKeyPath: null
                     };
+
+                    scp.availableStates = {
+                        success: 'success',
+                        failure: 'failure',
+                        warn: 'warn'
+                    };
+                    
+                    scp.currentState = scp.availableStates.warn;
+                    scp.sshKeyObj = scp.credentialsHolderMap[scp.mapKey];
+                }
+                
+                
+                function _updateState(result){
+                    
+                    if (result === 'success'){
+                        scope.sshKeyObj.setIsValid(true);
+                        scope.currentState = scope.availableStates.success;
+                    }
+                    
+                    else if (result === 'failure'){
+                        scope.sshKeyObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.failure;
+                    }
+                    
+                    else if(result === 'warn'){
+                        scope.sshKeyObj.setIsValid(false);    
+                        scope.currentState = scope.availableStates.warn;
+                    }
+                    
                 }
                 
                 scope.$watch('selected', function(){
@@ -178,7 +218,6 @@ angular.module('demoApp')
                     if(scope.selected){
                         
                         $log.info('ssh-key-pane selected');
-                        $log.info('Map-Key:' + scope.mapKey);
                         
                         if(scope.bootUp){
                             
@@ -189,10 +228,12 @@ angular.module('demoApp')
                                     $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                                     scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                                     scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+                                    _updateState('success');
                                 })
                                 
                                 .error(function(data) {
-                                    $log.warn("No SSh keys is available");
+                                    $log.warn("No default ssh key available");
+                                    _updateState('warn');
                                 });
                             
                             scope.bootUp = false;
@@ -204,6 +245,28 @@ angular.module('demoApp')
                     }
                 });
                 
+                
+                scope.generateKeys = function(){
+                    
+                
+                    CaramelCoreServices.generateSshKeys()
+                        .success(function(data) {
+                            
+                            $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
+                            scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
+                            scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+                            _updateState('success');
+                            
+                            
+                    })
+                        .error(function(data) {
+                            
+                            $log.warn("Couldn't generate ssh-keys");
+                            _updateState('failure');
+                            
+                    });
+                    
+                };
                 
                 _initScope(scope);
             },
@@ -219,20 +282,56 @@ angular.module('demoApp')
             scope:{
                 title: '@',
                 mapKey: '@',
+                allKeys: '=',
                 credentialsHolderMap: "="
             },
             link : function(scope, elem, attrs, tabsCtrl){
 
                 function _initScope(scp){
+                    
                     tabsCtrl.addPane(scp);
+                    scp.summary = {
+                        provider : false,
+                        sshKey: false
+                    }
                 }
 
-                scope.$watch('selected', function(){
-                    if(scope.selected){
-                        $log.info('summary pane selected');
-                    }
-                });
+                function _checkAndUpdateSummary(summary, map){
+                    
+                    $log.info("Updating summary.");
+                    
+                    for(var name in scope.allKeys){
 
+                        if(name !== scope.mapKey){
+                            
+                            var obj = map[name];
+                            $log.info(angular.toJson(obj));
+                            
+                            if(obj !== null){
+                                
+                                if(obj instanceof Provider){
+                                    summary.provider = obj.getIsValid() ? true : false;
+                                }
+
+                                else if(obj instanceof SshKeyPair){
+                                    summary.sshKey = obj.getIsValid() ? true : false;
+                                }
+                            }
+
+                        }
+                    }
+                }
+                
+                scope.$watch('selected', function(){
+                    
+                    if(scope.selected){
+                        
+                        $log.info("Scope is selected and recalculating summary.");
+                        _checkAndUpdateSummary(scope.summary, scope.credentialsHolderMap);
+                        
+                    }
+                    
+                });
 
                 _initScope(scope);
             },
