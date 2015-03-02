@@ -150,10 +150,14 @@ public class ClusterDefinitionService {
     return jsonToYaml(jsonCluster);
   }
 
-  public static String yamlToJson(String yaml) throws KaramelException {
+  public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = YamlUtil.loadCluster(yaml);
-    JsonCluster jsonCluster = new JsonCluster(cluster);
-    return serializeJson(jsonCluster);
+    return new JsonCluster(cluster);
+  }
+  
+  public static String yamlToJson(String yaml) throws KaramelException {
+    JsonCluster jsonObj = yamlToJsonObject(yaml);
+    return serializeJson(jsonObj);
   }
 
   public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
