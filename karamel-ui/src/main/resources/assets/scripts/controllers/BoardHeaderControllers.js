@@ -86,6 +86,12 @@ angular.module('demoApp')
 //            }
 
         };
+        
+        $scope.setCredentials = function(){
+            $log.info(" Launching Set Credentials");
+            BoardService.setCredentials($rootScope.karamelBoard);
+        };
+        
 
         $scope.stopCluster = function(){
             $log.info("stop cluster invoked.");
