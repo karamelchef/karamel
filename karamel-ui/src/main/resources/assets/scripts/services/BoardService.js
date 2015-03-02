@@ -410,7 +410,7 @@ angular.module('demoApp')
             else {
               restObj = getRestObjBuilder().buildCaramelForRest(board);
             }
-            $log.info(restObj);
+            $log.info(angular.toJson(restObj));
             var data = {
               json: angular.toJson(restObj)
             };
