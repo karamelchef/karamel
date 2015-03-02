@@ -264,8 +264,9 @@
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
                             <classPath>
                                 <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
-                                <addDependencies>true</addDependencies>
-                                <jarLocation>./lib/</jarLocation>
+                                <!--<addDependencies>true</addDependencies>-->
+                                <!--<jarLocation>./lib/</jarLocation>-->
+                                <preCp>lib\*.jar</preCp>
                             </classPath>
                             <icon>src/main/resources/icons/karamel.ico</icon>
                             <errTitle>Karamel</errTitle>
