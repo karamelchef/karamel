@@ -8,10 +8,8 @@ package se.kth.karamel.backend.converter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.backend.dag.Dag;
@@ -88,10 +86,10 @@ public class UserClusterDataExtractor {
    * @return
    * @throws KaramelException
    */
-  public static Dag getInstallationDag(JsonCluster cluster, ClusterEntity clusterEntity, MachinesMonitor monitor, Map<String, JsonObject> chefJsons) throws KaramelException {
+  public static Dag getInstallationDag(JsonCluster cluster, ClusterEntity clusterEntity, MachinesMonitor monitor, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
     Map<String, Task> mlts = machineLevelTasks(cluster, clusterEntity);
-    Map<String, Map<String, Task>> clts = cookbookLevelTasks(cluster, clusterEntity, chefJsons);
-    Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, chefJsons);
+    Map<String, Map<String, Task>> clts = cookbookLevelTasks(cluster, clusterEntity, chefJsons, test);
+    Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, chefJsons, test);
     Map<String, MachineEntity> allMachines = new HashMap<>();
     for (GroupEntity ge : clusterEntity.getGroups()) {
       for (MachineEntity me : ge.getMachines()) {
@@ -150,10 +148,12 @@ public class UserClusterDataExtractor {
 
               for (String globRec : depenency.getGlobal()) {
                 Map<String, Task> rlt2 = rlts.get(globRec);
-                for (Map.Entry<String, Task> entry : rlt2.entrySet()) {
-                  Task t7 = entry.getValue();
-                  TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
-                  deps.add(r7);
+                if (rlt2 != null) {
+                  for (Map.Entry<String, Task> entry : rlt2.entrySet()) {
+                    Task t7 = entry.getValue();
+                    TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
+                    deps.add(r7);
+                  }
                 }
               }
             }
@@ -186,18 +186,28 @@ public class UserClusterDataExtractor {
    * @param chefJsons
    * @return two level mapping of (recipeName -> taskId -> task)
    */
-  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons) {
+  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons, boolean test) {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupEntity ge : clusterEntity.getGroups()) {
       JsonGroup jg = findGroup(cluster, ge.getName());
       for (MachineEntity me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           String installRecipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
-          JsonObject json = chefJsons.get(me.getId() + installRecipeName);
-          makeRecipeTask(installRecipeName, me, map, json);
+
+          if (!test) {
+            JsonObject json = chefJsons.get(me.getId() + installRecipeName);
+            makeRecipeTask(installRecipeName, me, map, json, test);
+          } else {
+            makeRecipeTask(installRecipeName, me, map, null, test);
+          }
+
           for (JsonRecipe rec : jc.getRecipes()) {
-            JsonObject json1 = chefJsons.get(me.getId() + rec.getName());
-            makeRecipeTask(rec.getName(), me, map, json1);
+            if (!test) {
+              JsonObject json1 = chefJsons.get(me.getId() + rec.getName());
+              makeRecipeTask(rec.getName(), me, map, json1, test);
+            } else {
+              makeRecipeTask(rec.getName(), me, map, null, test);
+            }
           }
         }
       }
@@ -205,8 +215,8 @@ public class UserClusterDataExtractor {
     return map;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, Map<String, Map<String, Task>> map, JsonObject chefJson) {
-    RunRecipeTask t1 = makeRecipeTask(recipeName, machine, chefJson);
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, Map<String, Map<String, Task>> map, JsonObject chefJson, boolean test) {
+    RunRecipeTask t1 = makeRecipeTask(recipeName, machine, chefJson, test);
     Map<String, Task> map1 = map.get(recipeName);
     if (map1 == null) {
       map1 = new HashMap<>();
@@ -216,11 +226,15 @@ public class UserClusterDataExtractor {
     return t1;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, JsonObject chefJson) {
-    ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-    String jsonString = gson.toJson(chefJson);
-    return new RunRecipeTask(machine, recipeName, jsonString);
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, JsonObject chefJson, boolean test) {
+    if (!test) {
+      ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      String jsonString = gson.toJson(chefJson);
+      return new RunRecipeTask(machine, recipeName, jsonString);
+    } else {
+      return new RunRecipeTask(machine, recipeName, "");
+    }
   }
 
   /**
@@ -231,7 +245,7 @@ public class UserClusterDataExtractor {
    * @return two level mapping of (machineId -> taskId -> task)
    * @throws KaramelException
    */
-  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons) throws KaramelException {
+  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupEntity ge : clusterEntity.getGroups()) {
       JsonGroup jg = findGroup(cluster, ge.getName());
@@ -242,9 +256,14 @@ public class UserClusterDataExtractor {
           VendorCookbookTask t1 = new VendorCookbookTask(me, urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH, urls.repoName, urls.home, urls.branch);
           map1.put(t1.uniqueId(), t1);
           String recipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
-          JsonObject json = chefJsons.get(me.getId() + recipeName);
-          RunRecipeTask t2 = makeRecipeTask(recipeName, me, json);
-          map1.put(t2.uniqueId(), t2);
+          if (!test) {
+            JsonObject json = chefJsons.get(me.getId() + recipeName);
+            RunRecipeTask t2 = makeRecipeTask(recipeName, me, json, test);
+            map1.put(t2.uniqueId(), t2);
+          } else {
+            RunRecipeTask t2 = makeRecipeTask(recipeName, me, null, test);
+            map1.put(t2.uniqueId(), t2);
+          }
         }
         map.put(me.getId(), map1);
       }
