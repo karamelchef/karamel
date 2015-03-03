@@ -39,7 +39,8 @@ angular.module('demoApp')
         $scope.credentialsFormSubmit = function () {
             
             if (_checkSummaryValid($scope.credentialsHolderMap)) {
-                $log.info('All checks passed.');
+                $log.info('All checks passed, capturing details.');
+                $modalInstance.close(info.board);
             }
             else{
                 $scope.summaryValid = false;
@@ -122,9 +123,6 @@ angular.module('demoApp')
                     scp.currentState = scp.availableStates.initialWarn;
                     scp.provider = scp.credentialsHolderMap[scp.mapKey];
 
-                    if (scp.provider.getIsValid()) {
-                        scp.currentState = scp.states.valid;
-                    }
                 }
 
 
