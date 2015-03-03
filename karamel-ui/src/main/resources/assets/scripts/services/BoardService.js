@@ -30,7 +30,38 @@ angular.module('demoApp')
           return originalUrl;
         }
 
-        // =============== API Exposed to the users.
+
+        function _launchCluster(board){
+            
+            var restObj = getRestObjBuilder().buildCaramelForRest(board);
+            var data = {
+                json: angular.toJson(restObj)
+            };
+            CaramelCoreServices.startCluster(data)
+                .success(function(data, status, headers, config) {
+                    $log.info("Connection Successful.");
+                    AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
+                })
+                .error(function(data, status, headers, config) {
+                    $log.info("Error Received.");
+                    $log.info(data.message);
+                    AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
+                });    
+        }
+        
+        
+        function _areCredentialsSet(board){
+
+            var result = true;
+            
+            result = result && board.getEC2provider().getIsValid();
+            result = result && board.getSshKeyPair().getIsValid();
+
+            return result;
+        }
+
+ // --------------------------------------------------------------------------------------------------------------------
+
         return {
           addNewRecipe: function(board, nodeGroup) {
 
@@ -324,6 +355,8 @@ angular.module('demoApp')
                 });
 
           },
+            
+            
           editAmazonProvider: function(board, group, isLaunch) {
 
             $log.info("Edit Amazon Provider.");
@@ -379,6 +412,8 @@ angular.module('demoApp')
             });
 
           },
+            
+            
           editSshKeys: function() {
 
             $log.info("Edit SSH Keys.");
@@ -396,35 +431,29 @@ angular.module('demoApp')
             });
 
           },
+            
           startCluster: function(board) {
 
             $log.info("Invoked Function to start cluster.");
             // Populate the rest object that needs to be sent to the REST Service to get back the yaml.
-            var restObj = null;
 
             if (board == null) {
               $log.info("No Board Object Present.");
               AlertService.addAlert({type: 'warning', msg: 'No Karamel Model Found.'});
               return;
             }
-            else {
-              restObj = getRestObjBuilder().buildCaramelForRest(board);
+            
+            if(! (_areCredentialsSet(board))){
+                this.setCredentials(board, true);
             }
-            $log.info(angular.toJson(restObj));
-            var data = {
-              json: angular.toJson(restObj)
-            };
-            CaramelCoreServices.startCluster(data)
-                .success(function(data, status, headers, config) {
-                  $log.info("Connection Successful.");
-                  AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
-                })
-                .error(function(data, status, headers, config) {
-                  $log.info("Error Received.");
-                  $log.info(data.message);
-                  AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
-                });
+            
+            else{
+                _launchCluster(board);
+            }
+              
           },
+            
+            
           viewCluster: function(board) {
 
             $log.info("View cluster function invoked.");
@@ -446,7 +475,7 @@ angular.module('demoApp')
 
           },
             
-          setCredentials: function(board){
+          setCredentials: function(board , isLaunch){
             $log.info("Set Credentials function called.");
               
               var modalInstance = $modal.open({
@@ -469,7 +498,19 @@ angular.module('demoApp')
                       board.setSshKeyPair(updatedBoard.getSshKeyPair());
                       
                       _syncBoardWithCache(updatedBoard);
+                      
+                      if(isLaunch){
+                          _launchCluster(board);
+                      }
                   }
+                  
+                  else{
+                      if(!_areCredentialsSet(board)){
+                          AlertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
+                      }
+                      
+                  }
+                  
               });
           }
         }       

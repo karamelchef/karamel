@@ -111,13 +111,15 @@ angular.module('demoApp')
                         success: 'success',
                         failure: 'failure',
                         initialWarn: 'initialWarn',
-                        userWarn: 'userWarn'
+                        userWarn: 'userWarn',
+                        specialWarn: 'specialWarn'
                     };
                     scp.stateMessage = {
                         success: 'Valid Provider Details',
                         failure: 'Provider Details Invalid.',
-                        initialWarn: 'Unable to Validate Provider Details.',
-                        userWarn: 'Please Re-Validate'
+                        initialWarn: 'No Provider Details Found.',
+                        userWarn: 'Please Re-Validate',
+                        specialWarn: 'Found values but please validate them.'
                     };
 
                     scp.currentState = scp.availableStates.initialWarn;
@@ -147,6 +149,10 @@ angular.module('demoApp')
                         credentialObj.setIsValid(false);
                         scope.currentState = scope.availableStates.userWarn;
                     }
+                    else if(result === 'specialWarn'){
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.specialWarn;
+                    }
 
                 }
 
@@ -168,12 +174,12 @@ angular.module('demoApp')
                                 .success(function (data) {
                                     scope.account.accountId = data.accountId;
                                     scope.account.accountKey = data.accountKey;
-                                    _updateState('success', scope.provider);
+                                    _updateState('specialWarn', scope.provider);
                                 })
 
                                 .error(function (data) {
                                     $log.warn("No Ec2 credentials is available");
-                                    _updateState('warn', scope.provider);
+                                    _updateState('initialWarn', scope.provider);
                                 });
 
                             scope.bootUp = false;
