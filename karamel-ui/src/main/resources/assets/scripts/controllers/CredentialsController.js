@@ -3,16 +3,17 @@ angular.module('demoApp')
 
         function _initScope(scope) {
             scope.credentialsHolderMap = {};
-            
+
             scope.mapKeys = {
-                ssh : 'ssh',
+                ssh: 'ssh',
                 provider: 'provider',
-                summary : 'summary'
+                summary: 'summary'
             };
+            scope.summaryValid = true;
             _setUpHolderMap(scope.credentialsHolderMap);
         }
-        
-        function _setUpHolderMap(map){
+
+        function _setUpHolderMap(map) {
             map[$scope.mapKeys.provider] = info.board.getEC2provider();
             map[$scope.mapKeys.ssh] = info.board.getSshKeyPair();
         }
@@ -21,9 +22,34 @@ angular.module('demoApp')
             $modalInstance.close();
         };
 
+        function _checkSummaryValid(map) {
+            var result = true;
+            for (var name in map) {
+
+                var obj = map[name];
+                if (obj instanceof Credentials) {
+                    $log.info(obj.getIsValid());
+                    result = result && obj.getIsValid();
+                }
+            }
+            return result;
+        }
+
+
+        $scope.credentialsFormSubmit = function () {
+            
+            if (_checkSummaryValid($scope.credentialsHolderMap)) {
+                $log.info('All checks passed.');
+            }
+            else{
+                $scope.summaryValid = false;
+            }
+
+        };
+
         _initScope($scope);
     }])
-    
+
     // Credentials Tab Directive.
     .directive('credentialsTab', ['$log', function ($log) {
 
@@ -53,131 +79,161 @@ angular.module('demoApp')
         }
 
     }])
-    
+
     // Directive for the Providers.
-    .directive('providerPane', ['$log','CaramelCoreServices', function ($log, CaramelCoreServices) {
-            
+    .directive('providerPane', ['$log', 'CaramelCoreServices', function ($log, CaramelCoreServices) {
+
         return{
             restrict: 'E',
             require: "^credentialsTab",
-            scope:{
+            scope: {
                 title: '@',
                 mapKey: '@',
                 credentialsHolderMap: '='
             },
-            link : function(scope,elem,attrs,tabsCtrl){
-                
-                
-                function _initScope(scp){
-                    
+            link: function (scope, elem, attrs, tabsCtrl) {
+
+
+                function _initScope(scp) {
+
                     tabsCtrl.addPane(scp);
                     scp.mapKey = 'provider';
-                    
+
                     scp.bootUp = true;
                     scp.account = {
                         accountId: null,
                         accountKey: null
                     };
-                    
-                    
-                    scp.states = {
-                        initial: 'initial',
-                        valid: 'valid',
-                        invalid: 'invalid'
+
+
+                    scp.availableStates = {
+                        success: 'success',
+                        failure: 'failure',
+                        initialWarn: 'initialWarn',
+                        userWarn: 'userWarn'
                     };
-                    
-                    scp.currentState = scp.states.initial;
+                    scp.stateMessage = {
+                        success: 'Valid Provider Details',
+                        failure: 'Provider Details Invalid.',
+                        initialWarn: 'Unable to Validate Provider Details.',
+                        userWarn: 'Please Re-Validate'
+                    };
+
+                    scp.currentState = scp.availableStates.initialWarn;
                     scp.provider = scp.credentialsHolderMap[scp.mapKey];
-                    
-                    if(scp.provider.getIsValid()){
+
+                    if (scp.provider.getIsValid()) {
                         scp.currentState = scp.states.valid;
                     }
                 }
 
-                scope.$watch('selected', function(){
-                    
-                    if(scope.selected){
-                        
+
+                function _updateState(result, credentialObj) {
+
+                    if (result === 'success') {
+                        credentialObj.setIsValid(true);
+                        scope.currentState = scope.availableStates.success;
+                    }
+
+                    else if (result === 'failure') {
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.failure;
+                    }
+
+                    else if (result === 'initialWarn') {
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.initialWarn;
+                    }
+
+                    else if (result === 'userWarn') {
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.userWarn;
+                    }
+
+                }
+
+                scope.warnUser = function () {
+                    _updateState('userWarn', scope.provider);
+                };
+
+
+                scope.$watch('selected', function () {
+
+                    if (scope.selected) {
+
                         $log.info('provider pane selected.');
-                        
-                        if(scope.bootUp){
-                            
+
+                        if (scope.bootUp) {
+
                             CaramelCoreServices.loadCredentials()
-                                
-                                .success(function(data) {
-                                    
+
+                                .success(function (data) {
                                     scope.account.accountId = data.accountId;
                                     scope.account.accountKey = data.accountKey;
-                                    scope.currentState = scope.states.valid;
-                                    
+                                    _updateState('success', scope.provider);
                                 })
-                                
-                                .error(function(data) {
+
+                                .error(function (data) {
                                     $log.warn("No Ec2 credentials is available");
+                                    _updateState('warn', scope.provider);
                                 });
+
                             scope.bootUp = false;
-                            
                         }
-                        
-                        else{
+
+                        else {
                             $log.info('Won\'t try now');
                         }
                     }
-                    
+
                 });
-                
-                
-                scope.validateCredentials = function() {
+
+
+                scope.validateCredentials = function () {
 
                     if (scope.account.accountId != null && scope.account.accountKey != null) {
-                        _resetParameters(scope);
-                        
+
                         CaramelCoreServices.validateCredentials(scope.account)
-                            
-                            .success(function(data) {
-                                scope.currentState = scope.states.valid;
+                            .success(function (data) {
+                                _updateState('success', scope.provider);
                             })
-                            
-                            .error(function(data) {
-                                $log.warn("No Ec2 credentials is available");
+
+                            .error(function (data) {
+                                _updateState('failure', scope.provider);
                             });
                     }
-                    else{
-                        $log.info("Seems to work provider pane");
+                    else {
+                        _updateState('failure', scope.provider);
                     }
                 };
 
-                function _resetParameters(scp){
-                    scp.currentState = scp.states.initial;
-                }
-                
                 _initScope(scope);
 
             },
             templateUrl: 'partials/provider-pane.html'
-            
+
         }
     }])
-    
+
     // Directive for the ssh key pane.
-    .directive('sshKeyPane', ['$log','CaramelCoreServices',  function ($log, CaramelCoreServices) {
-        
+    .directive('sshKeyPane', ['$log', 'CaramelCoreServices', function ($log, CaramelCoreServices) {
+
         return{
             restrict: 'E',
 //            transclude: true,
             require: "^credentialsTab",
-            scope:{
+            scope: {
                 title: '@',
                 mapKey: '@',
                 credentialsHolderMap: '='
             },
-            link : function(scope, elem, attrs, tabsCtrl){
-                
-                function _initScope(scp){
-                    
+            link: function (scope, elem, attrs, tabsCtrl) {
+
+                function _initScope(scp) {
+
                     tabsCtrl.addPane(scp);
                     scp.bootUp = true;
-                    
+
                     scp.sshKeyPair = {
                         pubKeyPath: null,
                         priKeyPath: null
@@ -186,134 +242,151 @@ angular.module('demoApp')
                     scp.availableStates = {
                         success: 'success',
                         failure: 'failure',
-                        warn: 'warn'
+                        initialWarn: 'initialWarn',
+                        userWarn: 'userWarn'
                     };
-                    
-                    scp.currentState = scp.availableStates.warn;
+
+                    scp.stateMessage = {
+                        success: 'Valid SSH Key Pair',
+                        failure: 'Unable to generate valid SSH Key Pair',
+                        initialWarn: 'No default SSH Key Pair Found.',
+                        userWarn: 'Please generate a new one, instead of manual changing.'
+                    };
+
+                    scp.currentState = scp.availableStates.initialWarn;
                     scp.sshKeyObj = scp.credentialsHolderMap[scp.mapKey];
                 }
-                
-                
-                function _updateState(result){
-                    
-                    if (result === 'success'){
-                        scope.sshKeyObj.setIsValid(true);
+
+
+                function _updateState(result, credentialObj) {
+
+                    if (result === 'success') {
+                        credentialObj.setIsValid(true);
                         scope.currentState = scope.availableStates.success;
                     }
-                    
-                    else if (result === 'failure'){
-                        scope.sshKeyObj.setIsValid(false);
+
+                    else if (result === 'failure') {
+                        credentialObj.setIsValid(false);
                         scope.currentState = scope.availableStates.failure;
                     }
-                    
-                    else if(result === 'warn'){
-                        scope.sshKeyObj.setIsValid(false);    
-                        scope.currentState = scope.availableStates.warn;
+
+                    else if (result === 'initialWarn') {
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.initialWarn;
                     }
-                    
+
+                    else if (result === 'userWarn') {
+                        credentialObj.setIsValid(false);
+                        scope.currentState = scope.availableStates.userWarn;
+                    }
+
                 }
-                
-                scope.$watch('selected', function(){
-                    
-                    if(scope.selected){
-                        
+
+                scope.warnUser = function () {
+                    _updateState('userWarn', scope.sshKeyObj);
+                };
+
+                scope.$watch('selected', function () {
+
+                    if (scope.selected) {
+
                         $log.info('ssh-key-pane selected');
-                        
-                        if(scope.bootUp){
-                            
+
+                        if (scope.bootUp) {
+
                             $log.info("ssh - first time try.");
                             CaramelCoreServices.loadSshKeys()
-                                
-                                .success(function(data) {
+
+                                .success(function (data) {
                                     $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                                     scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                                     scope.sshKeyPair.priKeyPath = data.privateKeyPath;
-                                    _updateState('success');
+                                    _updateState('success', scope.sshKeyObj);
                                 })
-                                
-                                .error(function(data) {
+
+                                .error(function (data) {
                                     $log.warn("No default ssh key available");
-                                    _updateState('warn');
+                                    _updateState('initialWarn', scope.sshKeyObj);
                                 });
-                            
+
                             scope.bootUp = false;
                         }
-                        
-                        else{
+
+                        else {
                             $log.info("Won't try now.");
                         }
                     }
                 });
-                
-                
-                scope.generateKeys = function(){
-                    
-                
+
+
+                scope.generateKeys = function () {
+
+
                     CaramelCoreServices.generateSshKeys()
-                        .success(function(data) {
-                            
+                        .success(function (data) {
+
                             $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                             scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                             scope.sshKeyPair.priKeyPath = data.privateKeyPath;
-                            _updateState('success');
-                            
-                            
-                    })
-                        .error(function(data) {
-                            
+                            _updateState('success', scope.sshKeyObj);
+
+
+                        })
+                        .error(function (data) {
+
                             $log.warn("Couldn't generate ssh-keys");
-                            _updateState('failure');
-                            
-                    });
-                    
+                            _updateState('failure', scope.sshKeyObj);
+
+                        });
+
                 };
-                
+
                 _initScope(scope);
             },
             templateUrl: 'partials/ssh-pane.html'
         }
     }])
 
-    .directive('summaryPane', ['$log', function($log){
+    .directive('summaryPane', ['$log', function ($log) {
 
         return{
             restrict: 'E',
             require: "^credentialsTab",
-            scope:{
+            scope: {
                 title: '@',
                 mapKey: '@',
                 allKeys: '=',
                 credentialsHolderMap: "="
             },
-            link : function(scope, elem, attrs, tabsCtrl){
+            link: function (scope, elem, attrs, tabsCtrl) {
 
-                function _initScope(scp){
-                    
+                function _initScope(scp) {
+
                     tabsCtrl.addPane(scp);
                     scp.summary = {
-                        provider : false,
+                        provider: false,
                         sshKey: false
                     }
                 }
 
-                function _checkAndUpdateSummary(summary, map){
-                    
-                    $log.info("Updating summary.");
-                    
-                    for(var name in scope.allKeys){
+                function _checkAndUpdateSummary(summary, map) {
 
-                        if(name !== scope.mapKey){
-                            
+                    $log.info("Updating summary.");
+
+                    for (var name in scope.allKeys) {
+
+                        if (name !== scope.mapKey) {
+
                             var obj = map[name];
                             $log.info(angular.toJson(obj));
-                            
-                            if(obj !== null){
-                                
-                                if(obj instanceof Provider){
+
+                            if (obj !== null) {
+
+                                if (obj instanceof Provider) {
                                     summary.provider = obj.getIsValid() ? true : false;
                                 }
 
-                                else if(obj instanceof SshKeyPair){
+                                else if (obj instanceof SshKeyPair) {
                                     summary.sshKey = obj.getIsValid() ? true : false;
                                 }
                             }
@@ -321,21 +394,21 @@ angular.module('demoApp')
                         }
                     }
                 }
-                
-                scope.$watch('selected', function(){
-                    
-                    if(scope.selected){
-                        
+
+                scope.$watch('selected', function () {
+
+                    if (scope.selected) {
+
                         $log.info("Scope is selected and recalculating summary.");
                         _checkAndUpdateSummary(scope.summary, scope.credentialsHolderMap);
-                        
+
                     }
-                    
+
                 });
 
                 _initScope(scope);
             },
             templateUrl: 'partials/summary-pane.html'
         }
-        
+
     }]);
