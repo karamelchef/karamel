@@ -34,9 +34,10 @@
                         class="glyphicon glyphicon-plus"></span></a></li>
             </ul>
             <ul class="nav navbar-nav navbar-left">
+<!--
                 <li class="dropdown">
 
-                    <!-- Selects a cloud provider (AWS, Vagrant, Bare-metal) for the Project.-->
+                     Selects a cloud provider (AWS, Vagrant, Bare-metal) for the Project.
                     <a class="dropdown-toggle headerFont" data-toggle="dropdown"><i
                             class="glyphicon glyphicon-cloud specializeProvider"></i>Provider </a>
                     <ul class="dropdown-menu" role="menu">
@@ -51,6 +52,7 @@
                                                    ng-click="setCredentials()">Credentials</a></li>
                     </ul>
                 </li>
+-->
                 <li><span/></li>
                 <!--<li>-->
                 <!--&lt;!&ndash; Add a new NodeGroup (List) to the Board &ndash;&gt;-->
@@ -60,11 +62,20 @@
                 <li><span/></li>
                 <li>
                 </li>
-                <li>
+                <li class="dropdown">
                     <!-- Dropdown list of all Chef Cookbooks on the board.
                          User can select one, model-dialog appears to fill in mandatory/optional attributes -->
-                    <a title="Configure Chef Attributes" ng-click="configureGlobalAttributes()" class="headerFont"><i
+                    <a class="dropdown-toggle headerFont" data-toggle="dropdown"><i
                             class="glyphicon glyphicon-tasks specializeProvider"></i>Configure </a>
+                    
+                    <ul class="dropdown-menu" role="menu">
+
+                        <li class="custom-font"><a title="Set Cookbook Attributes" class="leftTextAlign"
+                                                   ng-click="configureGlobalAttributes()">Cookbook Attributes</a></li>
+                        
+                        <li class="custom-font"><a title="Set Credentials" class="leftTextAlign"
+                                                   ng-click="setCredentials()">Credentials</a></li>
+                    </ul>
                 </li>
                 <li>
                     <!-- Launch a cluster. 
