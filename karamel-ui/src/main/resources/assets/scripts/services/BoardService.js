@@ -456,9 +456,19 @@ angular.module('demoApp')
                   resolve: {
                       info: function() {
                           return {
-                              board: board
+                              board: angular.copy(board)
                           }
                       }
+                  }
+              });
+              
+              modalInstance.result.then(function(updatedBoard){
+                  if(updatedBoard){
+                      
+                      board.setEC2Provider(updatedBoard.getEC2provider());
+                      board.setSshKeyPair(updatedBoard.getSshKeyPair());
+                      
+                      _syncBoardWithCache(updatedBoard);
                   }
               });
           }
