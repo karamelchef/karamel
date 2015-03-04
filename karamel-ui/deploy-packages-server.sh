@@ -12,11 +12,6 @@ dist=karamel-$version
 mvn clean package
 cd target
 
-#create windows archive
-cp ../README.windows $dist/README.txt
-zip -r ${dist}.zip $dist
-mv ${dist} ${dist}-windows
-
 #create linux archive
 cp -r appassembler $dist
 cp ../README.linux $dist/README.txt
@@ -33,9 +28,21 @@ cp ../README.jar ${dist}-jar/README.txt
 zip -r ${dist}-jar.zip $dist-jar
 
 scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
-scp ${dist}.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
+
+echo "Now building windows distribution"
+
+cd ..
+mvn -Dwin clean package
+cd target
+
+#create windows archive
+cp ../README.windows $dist/README.txt
+zip -r ${dist}.zip $dist
+
+mv ${dist} ${dist}-windows
+
+scp ${dist}.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 cd ..
 
-echo "To build windows, run:"
-echo "mvn -Dwin clean package"
+echo "finished releasing karamel"

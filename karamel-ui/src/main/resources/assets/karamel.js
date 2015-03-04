@@ -46,6 +46,10 @@ function getClusterHelperMethods() {
 
             container.setEC2Provider(ec2Provider);
         },
+        
+        loadSshKeyPair : function(container, sshKeyPair){
+            container.setSshKeyPair(new SshKeyPair());
+        },
 
         loadCookbooks : function(container, cookbooks){
 
@@ -106,6 +110,7 @@ function Cluster() {
     this.ec2Provider = null;
     this.vagrantProvider = {};
     this.helperObj = getClusterHelperMethods();
+    this.sshKeyPair = null;
 
 
     this.setEC2Provider = function (ec2Provider) {
@@ -116,7 +121,15 @@ function Cluster() {
         return this.ec2Provider;
     };
 
+    this.setSshKeyPair = function(sshKeyPair){
+        this.sshKeyPair = sshKeyPair;
+    };
+    
+    this.getSshKeyPair = function(){
+        return this.sshKeyPair;
+    };
 
+    
     // Number of Node groups.
     this.numberOfNodeGroups = function () {
         return this.nodeGroups.length;
@@ -182,6 +195,7 @@ function Cluster() {
 
         this.name = other.name;
         this.helperObj.loadEc2Provider(this,other["ec2"]);
+        this.helperObj.loadSshKeyPair(this, null);
         this.helperObj.loadGroups(this, other["groups"]);
         this.helperObj.loadCookbooks(this, other["cookbooks"]);
     };
@@ -195,30 +209,63 @@ function Cluster() {
             this.ec2Provider = new EC2Provider();
             this.ec2Provider.copy(other.ec2Provider);
         }
+        if(other.sshKeyPair != null){
+            this.sshKeyPair = new SshKeyPair();
+            this.sshKeyPair.copy(other.sshKeyPair);
+        }
         this.helperObj.copyGroups(this,other["nodeGroups"]);
         this.helperObj.copyCookbooks(this,other["cookbooks"]);
     };
 
 }
+
+function Credentials(){
+}
+
+Credentials.prototype = {
+    isValid: false,
+    
+    setIsValid : function(isValid){
+        this.isValid = isValid;
+    },
+    getIsValid : function(){
+        return this.isValid;
+    }
+};
+
+
+
 // ============================================  SSH KEYS ============================================ //
+
 function SshKeyPair() {
+    
     this.pubKey = null;
     this.priKey = null;
     this.pubKeyPath = null;
     this.priKeyPath = null;
     
     this.load = function (other) {
-        this.priKey = other.priKey;
-        this.pubKey = other.pubKey;
-        this.priKeyPath = other.priKeyPath;
-        this.pubKeyPath = other.pubKeyPath;
+//        this.priKey = other.priKey;
+//        this.pubKey = other.pubKey;
+//        this.priKeyPath = other.priKeyPath;
+//        this.pubKeyPath = other.pubKeyPath;
+    };
+    
+    this.copy = function(other){
+        this.isValid = other.isValid;
     }
+    
 }
+
+SshKeyPair.prototype = Object.create(Credentials.prototype);
 
 // ============================================  PROVIDERS ============================================ //
 function Provider(name) {
 
 }
+
+Provider.prototype = Object.create(Credentials.prototype);
+Provider.prototype.isActive = false;
 
 function EC2Provider() {
     
@@ -251,11 +298,15 @@ function EC2Provider() {
     }
 }
 
+// Inherit from the Provider.
+EC2Provider.prototype = Object.create(Provider.prototype);
+
 function VagrantProvider(name, ip) {
     this.name = name;
     this.ip = ip;
 }
 
+VagrantProvider.prototype = Object.create(Provider.prototype);
 
 // ===========================================  COOKBOOKS ============================================== //
 function Cookbook() {
