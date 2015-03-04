@@ -134,6 +134,7 @@ public class CommandService {
         builder.append("\n");
         builder.append(machinesTasksTable(clusterEntity));
         result = builder.toString();
+        nextCmd = "watch -n 2 status";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -144,6 +145,7 @@ public class CommandService {
 
         try {
           result = ClusterDefinitionService.serializeJson(json);
+          nextCmd = "watch -n 2 detail";
         } catch (KaramelException ex) {
           result = "sorry couldn't load the yaml";
         }
@@ -163,6 +165,7 @@ public class CommandService {
           data[i][2] = String.valueOf(group.isFailed());
         }
         result = makeTable(columnNames, 2, data, true);
+        nextCmd = "watch -n 2 groups";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -177,6 +180,7 @@ public class CommandService {
           }
         }
         result = machinesTable(machines, true);
+        nextCmd = "watch -n 2 machines";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -185,6 +189,7 @@ public class CommandService {
         ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         result = machinesTasksTable(clusterEntity);
+        nextCmd = "watch -n 2 tasks";
       } else {
         result = "no cluster has been chosen yet!!";
       }
