@@ -37,4 +37,5 @@ scp ${dist}.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/file
 scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 cd ..
 
-
+echo "To build windows, run:"
+echo "mvn -Dwin clean package"

@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
   <jar>C:\Users\Jim\Documents\NetBeansProjects\karamel\karamel-ui\target\karamel-ui-0.1-shaded.jar</jar>
-  <outfile>C:\Users\Jim\Documents\NetBeansProjects\karamel.exe</outfile>
+  <outfile>C:\Users\Jim\Documents\NetBeansProjects\karamel-0.1\karamel.exe</outfile>
   <errTitle></errTitle>
   <cmdLine>-server conf\dropwizard.yml</cmdLine>
   <chdir>.</chdir>
@@ -14,10 +14,6 @@
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
   <icon>C:\Users\Jim\Documents\NetBeansProjects\karamel\karamel-ui\src\main\resources\icons\karamel.ico</icon>
-  <singleInstance>
-    <mutexName>karamelize</mutexName>
-    <windowTitle>Karamel</windowTitle>
-  </singleInstance>
   <classPath>
     <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
     <cp>lib\*.jar</cp>
