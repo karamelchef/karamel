@@ -138,11 +138,13 @@ public class UserClusterDataExtractor {
             if (depenency != null) {
               for (String localRec : depenency.getLocal()) {
                 Map<String, Task> rlt2 = rlts.get(localRec);
-                String id7 = RunRecipeTask.makeUniqueId(mid, localRec);
-                Task t7 = rlt2.get(id7);
-                TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
-                if (t7 != null) {
-                  deps.add(r7);
+                if (rlt2 != null) {
+                  String id7 = RunRecipeTask.makeUniqueId(mid, localRec);
+                  Task t7 = rlt2.get(id7);
+                  TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
+                  if (t7 != null) {
+                    deps.add(r7);
+                  }
                 }
               }
 
