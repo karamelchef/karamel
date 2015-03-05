@@ -49,7 +49,6 @@ public class LaunchLogDialog extends javax.swing.JDialog {
      */
     public LaunchLogDialog(java.awt.Frame parent, int port, Image image) {
         super(parent, "Karamel", false);
-//        super(parent, true);
         this.port = port;
         this.image = image;
         initComponents();
@@ -92,6 +91,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
         jScrollPaneKaramelStdOut = new javax.swing.JScrollPane();
         jTextAreaKaramelStdOut = new javax.swing.JTextArea();
         clearButton = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
 
         setIconImage(this.image);
         setIconImages(null);
@@ -101,20 +101,22 @@ public class LaunchLogDialog extends javax.swing.JDialog {
             }
         });
 
-        launchButton.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        launchButton.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         launchButton.setText("Launch Browser");
         launchButton.setMaximumSize(new java.awt.Dimension(140, 33));
         launchButton.setMinimumSize(new java.awt.Dimension(140, 33));
+        launchButton.setPreferredSize(new java.awt.Dimension(163, 33));
         launchButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 launchButtonActionPerformed(evt);
             }
         });
 
-        closelButton.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        closelButton.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
         closelButton.setText("Close Window");
         closelButton.setMaximumSize(new java.awt.Dimension(140, 33));
         closelButton.setMinimumSize(new java.awt.Dimension(140, 33));
+        closelButton.setPreferredSize(new java.awt.Dimension(163, 33));
         closelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 closelButtonActionPerformed(evt);
@@ -138,11 +140,23 @@ public class LaunchLogDialog extends javax.swing.JDialog {
         jTextAreaKaramelStdOut.setSelectedTextColor(new java.awt.Color(252, 251, 38));
         jScrollPaneKaramelStdOut.setViewportView(jTextAreaKaramelStdOut);
 
-        clearButton.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
-        clearButton.setText("Clear ");
+        clearButton.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        clearButton.setText("Clear Screen");
+        clearButton.setPreferredSize(new java.awt.Dimension(163, 33));
         clearButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clearButtonActionPerformed(evt);
+            }
+        });
+
+        jButton1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
+        jButton1.setText("Exit Karamel");
+        jButton1.setMaximumSize(new java.awt.Dimension(163, 31));
+        jButton1.setMinimumSize(new java.awt.Dimension(163, 31));
+        jButton1.setPreferredSize(new java.awt.Dimension(163, 31));
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
             }
         });
 
@@ -154,12 +168,13 @@ public class LaunchLogDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(91, 91, 91)
-                        .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(64, 64, 64)
-                        .addComponent(closelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 162, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(closelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPaneKaramelStdOut, javax.swing.GroupLayout.DEFAULT_SIZE, 853, Short.MAX_VALUE))
                 .addContainerGap())
         );
@@ -172,7 +187,8 @@ public class LaunchLogDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(closelButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(clearButton))
+                    .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -203,13 +219,20 @@ public class LaunchLogDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_closeDialog
 
     private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
-        
+
         try {
             jTextAreaKaramelStdOut.getDocument().remove(0, jTextAreaKaramelStdOut.getDocument().getLength());
         } catch (BadLocationException ex) {
             Logger.getLogger(LaunchLogDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_clearButtonActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+
+        System.out.println("User Clicked on 'Exit Karamel' Button");
+        System.out.println("Exiting Karamel....");
+        System.exit(0);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     private void doClose(int retStatus) {
         returnStatus = retStatus;
@@ -218,9 +241,11 @@ public class LaunchLogDialog extends javax.swing.JDialog {
     }
 
 
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton clearButton;
     private javax.swing.JButton closelButton;
+    private javax.swing.JButton jButton1;
     private javax.swing.JScrollPane jScrollPaneKaramelStdOut;
     private javax.swing.JTextArea jTextAreaKaramelStdOut;
     private javax.swing.JButton launchButton;
