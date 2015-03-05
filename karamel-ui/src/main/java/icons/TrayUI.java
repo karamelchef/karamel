@@ -63,8 +63,8 @@ public class TrayUI extends TrayIcon implements PropertyChangeListener {
         this.port = port;
         frame = new javax.swing.JFrame("Karamel");
         logDialog = new LaunchLogDialog(frame, port, image);
-        logDialog.setIconImage(new ImageIcon(TrayUI.image).getImage());
-
+        frame.setIconImage(new ImageIcon(TrayUI.image).getImage());
+        logDialog.setResizable(true);
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
