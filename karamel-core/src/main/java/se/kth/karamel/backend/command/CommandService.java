@@ -45,6 +45,7 @@ public class CommandService {
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
     String cmd = command.toLowerCase().trim();
     String nextCmd = null;
+    CommandResponse.Renderer renderer = CommandResponse.Renderer.INFO;
     selectCluster();
     String result = "command not found";
     if (cmd.equals("help")) {
@@ -71,24 +72,29 @@ public class CommandService {
       }
       ClusterDefinitionService.saveYaml(args[0]);
       result = "Yaml updated";
+    } else if (cmd.equals("new")) {
+      result = "";
+      renderer = CommandResponse.Renderer.YAML;
     } else if (cmd.equals("yaml")) {
       if (chosenCluster() != null) {
         ClusterManager cluster = cluster(chosenCluster());
         JsonCluster json = cluster.getDefinition();
         try {
           result = ClusterDefinitionService.jsonToYaml(json);
+          renderer = CommandResponse.Renderer.YAML;
         } catch (KaramelException ex) {
           result = "sorry couldn't load the yaml";
         }
       } else {
         result = "no cluster has been chosen yet!!";
       }
+
     } else if (cmd.equals("pause")) {
       if (chosenCluster() != null) {
         try {
           clusterService.pauseCluster(chosenCluster());
           result = "Pausing the installation...";
-          nextCmd = "watch -n 2 status";
+          nextCmd = "status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -100,7 +106,7 @@ public class CommandService {
         try {
           clusterService.resumeCluster(chosenCluster());
           result = "Resuming the installation...";
-          nextCmd = "watch -n 2 status";
+          nextCmd = "status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -112,7 +118,7 @@ public class CommandService {
         try {
           clusterService.purgeCluster(chosenCluster());
           result = "Purging " + chosenCluster();
-          nextCmd = "watch -n 2 status";
+          nextCmd = "status";
         } catch (KaramelException ex) {
           result = ex.getMessage();
         }
@@ -134,7 +140,7 @@ public class CommandService {
         builder.append("\n");
         builder.append(machinesTasksTable(clusterEntity));
         result = builder.toString();
-        nextCmd = "watch -n 2 status";
+        nextCmd = "status";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -145,7 +151,7 @@ public class CommandService {
 
         try {
           result = ClusterDefinitionService.serializeJson(json);
-          nextCmd = "watch -n 2 detail";
+          nextCmd = "detail";
         } catch (KaramelException ex) {
           result = "sorry couldn't load the yaml";
         }
@@ -165,7 +171,7 @@ public class CommandService {
           data[i][2] = String.valueOf(group.isFailed());
         }
         result = makeTable(columnNames, 2, data, true);
-        nextCmd = "watch -n 2 groups";
+        nextCmd = "groups";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -180,7 +186,7 @@ public class CommandService {
           }
         }
         result = machinesTable(machines, true);
-        nextCmd = "watch -n 2 machines";
+        nextCmd = "machines";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -189,7 +195,7 @@ public class CommandService {
         ClusterManager cluster = cluster(chosenCluster());
         ClusterEntity clusterEntity = cluster.getRuntime();
         result = machinesTasksTable(clusterEntity);
-        nextCmd = "watch -n 2 tasks";
+        nextCmd = "tasks";
       } else {
         result = "no cluster has been chosen yet!!";
       }
@@ -227,6 +233,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         result = ClusterDefinitionService.loadYaml(clusterName);
+        renderer = CommandResponse.Renderer.YAML;
       }
 
       p = Pattern.compile("launch\\s+(\\w+)");
@@ -241,7 +248,7 @@ public class CommandService {
           String json = ClusterDefinitionService.yamlToJson(yaml);
           clusterService.startCluster(json);
           result = String.format("cluster %s launched successfully..", clusterName);
-          nextCmd = "watch -n 2 status";
+          nextCmd = "status";
         }
       }
 
@@ -276,6 +283,7 @@ public class CommandService {
     CommandResponse response = new CommandResponse();
     response.setNextCmd(nextCmd);
     response.setResult(result);
+    response.setRenderer(renderer);
     return response;
   }
 

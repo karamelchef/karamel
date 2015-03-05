@@ -463,6 +463,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
           command.setResult(cmdRes.getResult());
           command.setNextCmd(cmdRes.getNextCmd());
+          command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
 
         } catch (KaramelException e) {
           command.setResult(e.getMessage());
