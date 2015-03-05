@@ -1,44 +1,18 @@
 
 <!--Main Wrapper Class-->
 <div class="container">
-    <!--<div >-->
-
         <div id="commandControllerWrapper0" class="col-xs-12">
             <form class="commandControllerForm well" ng-submit= "processCommand(0)">
                     <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
-                    <textarea id="response0" class="commandResponseArea" placeholder="Command Response ..." rows="20" ng-model="commandObj[0].commandResult"/>
+                    <div  id="response00" ng-show="commandObj[0].renderer === 'info'" class="commandResponseArea" ng-bind-html="htmlsafe(0)" ></div>
+                    <textarea id="response01" ng-show="commandObj[0].renderer === 'yaml'" class="commandResponseArea" placeholder="Command Response ..." rows="20" ng-model="commandObj[0].commandResult"/>
             </form>
         </div>
         <div id="commandControllerWrapper1" class="col-xs-12">
             <form class="commandControllerForm well" ng-submit= "processCommand(1)">
                     <input type="text" id="command1" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[1].commandName" />
 
-                    <textarea id="response1" class="commandResponseArea" placeholder="Command Response ..." rows="20" ng-model="commandObj[1].commandResult"/>
+                    <textarea id="response10" class="commandResponseArea" placeholder="Command Response ..." rows="20" ng-model="commandObj[1].commandResult"/>
             </form>
         </div>
-<!--    </div>
-
-    <div id="commandControllerWrapper2">
-        <form class="commandControllerForm well" ng-submit= "processCommand(2)">
-                <input type="text" id="command2" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[2].commandName" />
-                <textarea id="response2" class="form-control" placeholder="Command Response ..." rows="20" ng-bind="commandObj[2].commandResult" ng-readonly="true" style="font-family:Courier;color: #CCCCCC;background: #000000;border: 3px double #CCCCCC;padding: 10px;font-size: 12px;"/>
-        </form>
-    </div>-->
-
-    <!--        <div class="col-sm-offset-1 col-sm-4">
-                <div class="panel panel-success">
-                    <div class="panel-heading text-center">Cheat Sheet</div>
-                    <div class="panel-body">
-                        <ul class="list-unstyled">
-                            <li>help : Help commands</li>
-                            <hr/>
-                            <li>status : Cluster Status</li>
-                            <hr/>
-                            <li>machine : Machine Health</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>-->
-
-
 </div>

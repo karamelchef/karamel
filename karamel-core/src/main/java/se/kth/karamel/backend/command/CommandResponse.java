@@ -12,8 +12,13 @@ package se.kth.karamel.backend.command;
  */
 public class CommandResponse {
   
+  public static enum Renderer {
+    INFO, YAML
+  };
+  
   private String result;
   private String nextCmd;
+  private Renderer renderer = Renderer.INFO;
 
   public String getNextCmd() {
     return nextCmd;
@@ -29,6 +34,14 @@ public class CommandResponse {
 
   public void setResult(String result) {
     this.result = result;
+  }
+
+  public Renderer getRenderer() {
+    return renderer;
+  }
+
+  public void setRenderer(Renderer renderer) {
+    this.renderer = renderer;
   }
   
 }
