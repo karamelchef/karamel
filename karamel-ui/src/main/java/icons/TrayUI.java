@@ -24,6 +24,7 @@ public class TrayUI extends TrayIcon implements PropertyChangeListener {
     private JPopupMenu menu;
     private LaunchLogDialog logDialog;
 
+    private static javax.swing.JFrame frame;
     private static final JDialog dialog;
     private static Image image;
     int x;
@@ -60,7 +61,9 @@ public class TrayUI extends TrayIcon implements PropertyChangeListener {
         super(image);
         TrayUI.image = image;
         this.port = port;
-        logDialog = new LaunchLogDialog(new javax.swing.JFrame("Karamel"), port, image);
+        frame = new javax.swing.JFrame("Karamel");
+        logDialog = new LaunchLogDialog(frame, port, image);
+        logDialog.setIconImage(new ImageIcon(TrayUI.image).getImage());
 
         EventQueue.invokeLater(new Runnable() {
             @Override
@@ -81,13 +84,15 @@ public class TrayUI extends TrayIcon implements PropertyChangeListener {
                         dialog.setVisible(false);
                     }
                 } else {
-//                    TODO Show swing dialog with
-
                     logDialog.setLocation(x + 200, y + 200);
-                    logDialog.setIconImage(new ImageIcon(TrayUI.image).getImage());
                     logDialog.pack();
-
                     logDialog.setVisible(true);
+                    int state = frame.getExtendedState();
+                    state &= ~JFrame.ICONIFIED;
+                    frame.setExtendedState(state);
+                    logDialog.setAlwaysOnTop(false);
+                    logDialog.toFront();
+                    logDialog.requestFocus();
 
                 }
 
