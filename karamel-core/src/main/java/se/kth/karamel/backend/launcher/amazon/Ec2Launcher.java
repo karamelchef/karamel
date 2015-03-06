@@ -89,7 +89,7 @@ public final class Ec2Launcher {
             = context.getEc2api().getSecurityGroupApiForRegion(region);
     if (securityGroupExt.isPresent()) {
       SecurityGroupApi client = securityGroupExt.get();
-      client.createSecurityGroupInRegion(region, groupName, "A region for cluster '" + clusterName + "'");
+      client.createSecurityGroupInRegion(region, groupName, groupName);
 
       if (!TESTING) {
         for (String port : ports) {
