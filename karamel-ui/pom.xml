@@ -188,30 +188,6 @@
                 </executions>
             </plugin>
             
-            <!-- <plugin> -->
-            <!--     <artifactId>maven-assembly-plugin</artifactId> -->
-            <!--     <version>2.5.3</version> -->
-            <!--     <configuration> -->
-            <!--         <descriptorRefs> -->
-            <!--             <descriptorRef>jar-with-dependencies</descriptorRef> -->
-            <!--         </descriptorRefs>                     -->
-            <!--         <archive> -->
-            <!--             <manifest> -->
-            <!--                 <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass> -->
-            <!--             </manifest> -->
-            <!--         </archive> -->
-            <!--     </configuration> -->
-            <!--     <executions> -->
-            <!--         <execution> -->
-            <!--             <id>make-assembly</id>  -->
-            <!--             <phase>package</phase> -->
-            <!--             <goals> -->
-            <!--                 <goal>single</goal> -->
-            <!--             </goals> -->
-            <!--         </execution> -->
-            <!--     </executions> -->
-            <!-- </plugin> -->
-            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
@@ -264,16 +240,14 @@
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
                             <classPath>
                                 <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
-                                <!--<addDependencies>true</addDependencies>-->
-                                <!--<jarLocation>./lib/</jarLocation>-->
                                 <preCp>lib\*.jar</preCp>
                             </classPath>
                             <icon>src/main/resources/icons/karamel.ico</icon>
                             <errTitle>Karamel</errTitle>
-                            <!--              <singleInstance>
+                            <singleInstance>
                             <mutexName>Karamel</mutexName>
                             <windowTitle>Karamel</windowTitle>
-                            </singleInstance>-->
+                            </singleInstance>
                             <jre>
                                 <minVersion>1.7.0</minVersion>
                                 <initialHeapSize>128</initialHeapSize>
@@ -298,30 +272,6 @@
                         </configuration>
                     </execution>
           
-                    <!-- Command-line exe -->
-                    <execution>
-                        <id>l4j-cli</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <cmdLine>-server conf/dropwizard.yml</cmdLine>
-                            <headerType>console</headerType>
-                            <outfile>target/karamel-client.exe</outfile>
-                            <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar> 
-                            <errTitle>App Err</errTitle>
-                            <classPath>
-                                <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
-                            </classPath>
-                            <icon>src/main/resources/icons/karamel.ico</icon>
-                            <jre>
-                                <minVersion>1.7.0</minVersion>
-                                <initialHeapSize>128</initialHeapSize>
-                                <maxHeapSize>1024</maxHeapSize>
-                            </jre>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
