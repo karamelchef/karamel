@@ -37,9 +37,9 @@
                   <Group type="102" attributes="0">
                       <Component id="jButton1" min="-2" pref="156" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Component id="launchButton" min="-2" pref="167" max="-2" attributes="0"/>
+                      <Component id="launchButton" min="-2" pref="202" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="clearButton" min="-2" pref="157" max="-2" attributes="0"/>
+                      <Component id="clearButton" min="-2" pref="180" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="closelButton" min="-2" pref="155" max="-2" attributes="0"/>
                   </Group>
@@ -95,7 +95,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="18" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Close Window"/>
+        <Property name="text" type="java.lang.String" value="Close"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[140, 33]"/>
         </Property>
@@ -173,7 +173,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Arial" size="18" style="0"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Exit Karamel"/>
+        <Property name="text" type="java.lang.String" value="Shutdown"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[163, 31]"/>
         </Property>
