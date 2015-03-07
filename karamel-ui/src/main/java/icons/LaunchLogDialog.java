@@ -113,7 +113,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
         });
 
         closelButton.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        closelButton.setText("Close Window");
+        closelButton.setText("Close");
         closelButton.setMaximumSize(new java.awt.Dimension(140, 33));
         closelButton.setMinimumSize(new java.awt.Dimension(140, 33));
         closelButton.setPreferredSize(new java.awt.Dimension(163, 33));
@@ -150,7 +150,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
         });
 
         jButton1.setFont(new java.awt.Font("Arial", 0, 18)); // NOI18N
-        jButton1.setText("Exit Karamel");
+        jButton1.setText("Shutdown");
         jButton1.setMaximumSize(new java.awt.Dimension(163, 31));
         jButton1.setMinimumSize(new java.awt.Dimension(163, 31));
         jButton1.setPreferredSize(new java.awt.Dimension(163, 31));
@@ -170,9 +170,9 @@ public class LaunchLogDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 167, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(launchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(clearButton, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(closelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jScrollPaneKaramelStdOut, javax.swing.GroupLayout.DEFAULT_SIZE, 853, Short.MAX_VALUE))

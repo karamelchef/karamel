@@ -31,9 +31,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -50,7 +47,6 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.common.exception.SshKeysNotfoundException;
 
 /**
  * Created by babbarshaer on 2014-11-20.
@@ -67,7 +63,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static final CommandLineParser parser = new GnuParser();
 
   static {
-//        options.addOption("y", false, "Do not prompt for user-supplied parameters. Accept default param values.");
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
             .hasArg()
@@ -92,13 +87,13 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   public static void main(String[] args) throws Exception {
+    System.out.println("");
 
     String webPort = System.getenv("PORT");
     if (webPort == null || webPort.isEmpty()) {
       webPort = "9191";
     }
     boolean cli = false;
-    boolean launch = false;
     String yamlTxt;
 
     // These args are sent to the Dropwizard app (thread)
