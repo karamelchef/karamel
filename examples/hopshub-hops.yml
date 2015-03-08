@@ -1,4 +1,4 @@
-name: BiobankCloudHops
+name: HopsWorks
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -32,20 +32,13 @@ groups:
         - hops::client
         - hops::jhs                                                            
         - hopshub
-  namenodes:
-    size: 1 
-    recipes:                                                                    
         - hops::ndb
         - hops::rm
         - hops::nn
-        - ndb::mysqld                                                       
         - ndb::memcached
-  ndb:
-    size: 2
-    recipes: 
-        - ndb::ndbd
   datanodes:
     size: 2
     recipes: 
+        - ndb::ndbd
         - hops::dn
         - hops::nm
