@@ -1,0 +1,51 @@
+name: BiobankCloudHops
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  hopshub:                                                                     
+    github: "hopshadoop/hopshub-chef"
+    branch: "master"  
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
+attrs:
+  hdfs:
+    user: glassfish
+  hadoop:
+    yarn: 
+        user: glassfish
+    mr: 
+        user: glassfish
+
+groups: 
+  hopsworks:
+    size: 1 
+    recipes:                                                                    
+        - ndb::mysqld                                                       
+        - ndb::mgmd
+        - hops::client
+        - hops::jhs                                                            
+        - hopshub
+  namenodes:
+    size: 1 
+    recipes:                                                                    
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - ndb::mysqld                                                       
+        - ndb::memcached
+  ndb:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  datanodes:
+    size: 2
+    recipes: 
+        - hops::dn
+        - hops::nm
