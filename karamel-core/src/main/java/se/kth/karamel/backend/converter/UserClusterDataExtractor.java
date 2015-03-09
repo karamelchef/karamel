@@ -10,6 +10,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.backend.dag.Dag;
@@ -35,6 +36,8 @@ import se.kth.karamel.client.model.json.JsonRecipe;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.cookbook.metadata.GithubCookbook;
 import se.kth.karamel.cookbook.metadata.GithubUrls;
+import se.kth.karamel.cookbook.metadata.MetadataRb;
+import se.kth.karamel.cookbook.metadata.Recipe;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 
 /**
@@ -42,6 +45,46 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
  * @author kamal
  */
 public class UserClusterDataExtractor {
+
+  public static String clusterLinks(JsonCluster cluster, ClusterEntity clusterEntity) throws KaramelException {
+    StringBuilder builder = new StringBuilder();
+    for (JsonGroup jg : cluster.getGroups()) {
+      for (JsonCookbook jc : jg.getCookbooks()) {
+        for (JsonRecipe rec : jc.getRecipes()) {
+          String cbid = jc.getUrls().id;
+          GithubCookbook cb = CookbookCache.get(cbid);
+          MetadataRb metadataRb = cb.getMetadataRb();
+          List<Recipe> recipes = metadataRb.getRecipes();
+          for (Recipe recipe : recipes) {
+            if (recipe.getName().equalsIgnoreCase(rec.getName())) {
+              Set<String> links = recipe.getLinks();
+              for (String link : links) {
+                if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
+                  if (clusterEntity != null) {
+                    GroupEntity ge = findGroup(clusterEntity, jg.getName());
+                    if (ge != null) {
+                      List<MachineEntity> machines = ge.getMachines();
+                      if (machines != null) {
+                        for (MachineEntity me : ge.getMachines()) {
+                          String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
+                          builder.append(l).append("\n");
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  builder.append(link).append("\n");
+                }
+
+              }
+
+            }
+          }
+        }
+      }
+    }
+    return builder.toString();
+  }
 
   public static int totalMachines(JsonCluster cluster) {
     int total = 0;
@@ -53,6 +96,15 @@ public class UserClusterDataExtractor {
 
   public static JsonGroup findGroup(JsonCluster cluster, String groupName) {
     for (JsonGroup g : cluster.getGroups()) {
+      if (g.getName().equals(groupName)) {
+        return g;
+      }
+    }
+    return null;
+  }
+
+  public static GroupEntity findGroup(ClusterEntity clusterEntity, String groupName) {
+    for (GroupEntity g : clusterEntity.getGroups()) {
       if (g.getName().equals(groupName)) {
         return g;
       }
