@@ -29,13 +29,12 @@ groups:
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - hops::client
-        - hops::jhs                                                            
-        - hopshub
+        - ndb::memcached
         - hops::ndb
         - hops::rm
         - hops::nn
-        - ndb::memcached
+        - hops::jhs                                                            
+        - hopshub
   datanodes:
     size: 2
     recipes: 
