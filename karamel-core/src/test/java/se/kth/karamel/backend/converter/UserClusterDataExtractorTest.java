@@ -27,12 +27,20 @@ import se.kth.karamel.common.exception.KaramelException;
 public class UserClusterDataExtractorTest {
 
 //  @Test
+  public void clusterLinksTest() throws IOException, KaramelException {
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hopshub.yml"), Charsets.UTF_8);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    String links = UserClusterDataExtractor.clusterLinks(json, null);
+    System.out.println(links);
+  }
+//  @Test
+
   public void dagTest() throws IOException, KaramelException {
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     JsonCluster json = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterEntity entity = new ClusterEntity(json);
     int gn = 0;
-    for (JsonGroup g: json.getGroups()) {
+    for (JsonGroup g : json.getGroups()) {
       GroupEntity gent = entity.getGroups().get(gn);
       List<MachineEntity> mes = new ArrayList<>();
       for (int i = 0; i < g.getSize(); i++) {

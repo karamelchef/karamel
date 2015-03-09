@@ -85,7 +85,7 @@ public class Settings {
     return "karamel_" + USER_NAME + "_" + clusterName.toLowerCase() + "_" + OS_NAME + "_" + IP_Address;
   }
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
-    public static final String YAML_FILE_NAME = "definition.yaml";
+  public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
@@ -115,6 +115,7 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_PATH = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = "/Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = "/Berksfile";
+  public static final String METADATA_INCOMMENT_HOST_KEY = "%host%";
   //settings on vm machines
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";

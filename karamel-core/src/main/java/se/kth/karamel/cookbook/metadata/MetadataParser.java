@@ -11,6 +11,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,66 +86,72 @@ public class MetadataParser {
     MetadataRb metadata = new MetadataRb();
     metadata.setUrl(cookbookPath);
     Scanner scanner = new Scanner(reader);
+    List<String> comments = new ArrayList<>();
     while (scanner.hasNextLine()) {
       String line = scanner.nextLine();
-      Matcher m1 = NAME.matcher(line);
-      if (m1.matches()) {
-        metadata.setName(m1.group(1));
+      if (line.startsWith("#")) {
+        comments.add(line);
       } else {
-        Matcher m2 = DESC.matcher(line);
-        if (m2.matches()) {
-          metadata.setDescription(m2.group(1));
+        Matcher m1 = NAME.matcher(line);
+        if (m1.matches()) {
+          metadata.setName(m1.group(1));
         } else {
-          Matcher m3 = VERSION.matcher(line);
-          if (m3.matches()) {
-            metadata.setVersion(m3.group(1));
+          Matcher m2 = DESC.matcher(line);
+          if (m2.matches()) {
+            metadata.setDescription(m2.group(1));
           } else {
-            Matcher m4 = RECIPE.matcher(line);
-            if (m4.matches()) {
-              Recipe r = new Recipe();
-              r.setName(m4.group(1));
-              r.setDescription(m4.group(3));
-              metadata.getRecipes().add(r);
+            Matcher m3 = VERSION.matcher(line);
+            if (m3.matches()) {
+              metadata.setVersion(m3.group(1));
             } else {
-              Matcher m5 = ATTR.matcher(line);
-              if (m5.matches()) {
-                Attribute attr = new Attribute();
-                attr.setName(m5.group(1));
-                while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
-                  line = scanner.nextLine();
-                  Matcher m6 = ATTR_DISP_NAME.matcher(line);
-                  if (m6.matches()) {
-                    attr.setDisplayName(m6.group(1));
-                  } else {
-                    Matcher m7 = ATTR_TYPE.matcher(line);
-                    if (m7.matches()) {
-                      attr.setType(m7.group(1));
+              Matcher m4 = RECIPE.matcher(line);
+              if (m4.matches()) {
+                Recipe r = new Recipe();
+                r.setName(m4.group(1));
+                r.setDescription(m4.group(3));
+                r.parseComments(comments);
+                metadata.getRecipes().add(r);
+              } else {
+                Matcher m5 = ATTR.matcher(line);
+                if (m5.matches()) {
+                  Attribute attr = new Attribute();
+                  attr.setName(m5.group(1));
+                  while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
+                    line = scanner.nextLine();
+                    Matcher m6 = ATTR_DISP_NAME.matcher(line);
+                    if (m6.matches()) {
+                      attr.setDisplayName(m6.group(1));
                     } else {
-                      Matcher m8 = ATTR_DESC.matcher(line);
-                      if (m8.matches()) {
-                        attr.setDescription(m8.group(1));
+                      Matcher m7 = ATTR_TYPE.matcher(line);
+                      if (m7.matches()) {
+                        attr.setType(m7.group(1));
                       } else {
-                        Matcher m9 = ATTR_DEFAULT.matcher(line);
-                        if (m9.matches()) {
-                          attr.setDefault(m9.group(1));
+                        Matcher m8 = ATTR_DESC.matcher(line);
+                        if (m8.matches()) {
+                          attr.setDescription(m8.group(1));
                         } else {
-                          Matcher m10 = ATTR_REQUIRED.matcher(line);
-                          if (m10.matches()) {
-                            attr.setRequired(m10.group(1));
+                          Matcher m9 = ATTR_DEFAULT.matcher(line);
+                          if (m9.matches()) {
+                            attr.setDefault(m9.group(1));
+                          } else {
+                            Matcher m10 = ATTR_REQUIRED.matcher(line);
+                            if (m10.matches()) {
+                              attr.setRequired(m10.group(1));
+                            }
                           }
                         }
                       }
-                    }
 
+                    }
                   }
+                  metadata.getAttributes().add(attr);
                 }
-                metadata.getAttributes().add(attr);
               }
             }
           }
         }
+        comments.clear();
       }
-
     }
     return metadata;
   }

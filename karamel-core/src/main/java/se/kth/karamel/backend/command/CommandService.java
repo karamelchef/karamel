@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterEntity;
 import se.kth.karamel.backend.running.model.GroupEntity;
@@ -234,6 +235,23 @@ public class CommandService {
         String clusterName = matcher.group(1);
         result = ClusterDefinitionService.loadYaml(clusterName);
         renderer = CommandResponse.Renderer.YAML;
+      }
+
+      p = Pattern.compile("links\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        ClusterManager cluster = cluster(clusterName);
+        if (cluster != null) {
+          result = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+        } else {
+          String yml = ClusterDefinitionService.loadYaml(clusterName);
+          JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+          result = UserClusterDataExtractor.clusterLinks(json, null);
+        }
+        
+        renderer = CommandResponse.Renderer.INFO;
       }
 
       p = Pattern.compile("launch\\s+(\\w+)");
