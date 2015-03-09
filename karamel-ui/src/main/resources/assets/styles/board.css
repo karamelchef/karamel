@@ -331,17 +331,26 @@ textarea[name="pubkey"]{
 }
 
 /* Command Page CSS*/
-.commandResponseArea{
+.editorResponseArea{
     font-family:Courier;
-/*    color: #CCCCCC;
-    background: #000000;*/
-    border: 3px double #CCCCCC;
     padding: 10px;
     font-size: 12px;
     height: 800px;
     width: 100%;
 }
 
+/* Command Page CSS*/
+.infoResponseArea{
+    font-family:Courier;
+    color: #CCCCCC;
+    background: #000000;
+    border: 3px double #CCCCCC;
+    padding: 10px;
+    font-size: 12px;
+    height: 800px;
+    width: 100%;
+    overflow:scroll;
+}
 
 .commandControllerForm{
     padding: 10px;
