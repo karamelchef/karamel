@@ -335,7 +335,7 @@ textarea[name="pubkey"]{
     font-family:Courier;
     padding: 10px;
     font-size: 12px;
-    height: 800px;
+    height: 1600px;
     width: 100%;
 }
 
@@ -347,7 +347,7 @@ textarea[name="pubkey"]{
     border: 3px double #CCCCCC;
     padding: 10px;
     font-size: 12px;
-    height: 800px;
+    height: 1600px;
     width: 100%;
     overflow:scroll;
 }
