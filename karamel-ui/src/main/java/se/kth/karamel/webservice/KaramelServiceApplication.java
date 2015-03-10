@@ -294,15 +294,14 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   public synchronized static void openWebpage(URI uri) {
-    Desktop desktop = Desktop.getDesktop();
-    Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
     if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
       try {
         desktop.browse(uri);
       } catch (Exception e) {
         e.printStackTrace();
       }
-    else {
+    } else {
       System.err.println("Brower UI could not be launched. Are you running a window manager?");
     }
   }
