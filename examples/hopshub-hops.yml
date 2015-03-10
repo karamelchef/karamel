@@ -35,7 +35,7 @@ groups:
         - hops::nn
         - hops::jhs                                                            
         - hopshub
-  datanodes:
+  hopsminions:
     size: 2
     recipes: 
         - ndb::ndbd
