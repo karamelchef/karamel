@@ -83,7 +83,7 @@ angular.module('coreApp', [])
           newStr = newStr + match[0];
         }
 
-        if (lastInx < text.length) {
+        if (text !== null && lastInx < text.length) {
           newStr = newStr + htmlize(text.substring(lastInx, text.length));
         }
 
@@ -98,6 +98,11 @@ angular.module('coreApp', [])
         coreProcessCommand(index, commandName, commandArg)();
       };
 
+      $scope.processCommand = function(index, cmdName) {
+        _destroyIntervalInstance(index);
+        coreProcessCommand(index, cmdName, null)();
+      };
+      
 //      function processCommand(index, commandName, commandArg) {
 //        var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
 //        var match = regex.exec(commandName);
