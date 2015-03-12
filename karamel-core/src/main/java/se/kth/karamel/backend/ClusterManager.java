@@ -131,6 +131,7 @@ public class ClusterManager implements Runnable {
       logger.info(String.format("Purging '%s' ...", definition.getName()));
       runtime.setPhase(ClusterEntity.ClusterPhases.PURGING);
     } else {
+      LogService.cleanup(definition.getName());
       logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
       runtime.setPhase(ClusterEntity.ClusterPhases.PRECLEANING);
     }

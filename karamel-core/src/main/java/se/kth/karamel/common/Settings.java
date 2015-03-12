@@ -91,7 +91,23 @@ public class Settings {
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
   public static final String SSH_PRIKEY_FILENAME = "ida_rsa";
+  
+  public static String CLUSTER_LOG_FOLDER(String clusterName) {
+    return CLUSTER_ROOT_PATH(clusterName) + File.separator + "logs";
+  }
+  
+  public static String MACHINE_LOG_FOLDER(String clusterName, String machineIp) {
+    return CLUSTER_LOG_FOLDER(clusterName) + File .separator + machineIp;
+  }
+  
+  public static String TASK_ERROR_FILE_PATH(String clusterName, String machinIp, String taskName) {
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File .separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".err";
+  }
 
+  public static String TASK_OUTPUT_FILE_PATH(String clusterName, String machinIp, String taskName) {
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File .separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".out";
+  }
+  
   public static String CLUSTER_ROOT_PATH(String clusterName) {
     return KARAMEL_ROOT_PATH + File.separator + clusterName.toLowerCase();
   }

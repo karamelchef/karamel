@@ -66,7 +66,7 @@ angular.module('coreApp', [])
                 newStr = newStr + str.substring(lastInx, match.index);
               }
               lastInx = pattern.lastIndex;
-              newStr = newStr + "href='processCommand(0, \'" + match[1] + "\')";
+              newStr = newStr + "ng-click=\"processCommand(0, \'" + match[1] + "\')\"";
             }
 
             if (str !== null && lastInx < str.length) {

@@ -7,6 +7,7 @@ package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import se.kth.karamel.backend.running.model.MachineEntity;
 
 /**
@@ -24,11 +25,13 @@ public abstract class Task {
   private final String machineId;
   protected List<ShellCommand> commands;
   private final MachineEntity machine;
+  private final String uuid;
 
   public Task(String name, MachineEntity machine) {
     this.name = name;
     this.machineId = machine.getId();
     this.machine = machine;
+    this.uuid = UUID.randomUUID().toString();
   }
 
   public void setStatus(Status status) {
@@ -63,4 +66,12 @@ public abstract class Task {
 
   public abstract String uniqueId();
 
+  public MachineEntity getMachine() {
+    return machine;
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+  
 }
