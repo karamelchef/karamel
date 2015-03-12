@@ -301,6 +301,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       } catch (Exception e) {
         e.printStackTrace();
       }
+    } else {
+      System.err.println("Brower UI could not be launched. Are you running a window manager?");
     }
   }
 
