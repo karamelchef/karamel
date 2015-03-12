@@ -66,4 +66,8 @@ public class GroupEntity {
     }
   }
 
+  public ClusterEntity getCluster() {
+    return cluster;
+  }
+
 }

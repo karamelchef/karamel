@@ -26,14 +26,17 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import se.kth.karamel.backend.LogService;
 
 /**
  *
  * @author kamal
  */
 public class SshMachine implements Runnable {
-  
-  static { Security.addProvider(new BouncyCastleProvider()); }
+
+  static {
+    Security.addProvider(new BouncyCastleProvider());
+  }
 
   private static final Logger logger = Logger.getLogger(SshMachine.class);
   private final MachineEntity machineEntity;
@@ -43,8 +46,6 @@ public class SshMachine implements Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stoping = false;
-
-
 
   public SshMachine(MachineEntity machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
@@ -75,7 +76,7 @@ public class SshMachine implements Runnable {
       while (true && !stoping) {
 
         if (machineEntity.getLifeStatus() == MachineEntity.LifeStatus.CONNECTED
-                && machineEntity.getTasksStatus() == MachineEntity.TasksStatus.ONGOING) {
+            && machineEntity.getTasksStatus() == MachineEntity.TasksStatus.ONGOING) {
           try {
             logger.debug("Going to take a task from the queue");
             Task task = taskQueue.take();
@@ -126,7 +127,7 @@ public class SshMachine implements Runnable {
 
       for (ShellCommand cmd : commands) {
         if (cmd.getStatus() != ShellCommand.Status.DONE) {
-          runSshCmd(cmd);
+          runSshCmd(cmd, task);
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
             task.setStatus(Status.FAILED);
             break;
@@ -142,7 +143,7 @@ public class SshMachine implements Runnable {
     }
   }
 
-  private synchronized void runSshCmd(ShellCommand shellCommand) {
+  private synchronized void runSshCmd(ShellCommand shellCommand, Task task) {
     shellCommand.setStatus(ShellCommand.Status.ONGOING);
     Session session = null;
     try {
@@ -157,11 +158,7 @@ public class SshMachine implements Runnable {
       } else {
         shellCommand.setStatus(ShellCommand.Status.DONE);
       }
-      try {
-        shellCommand.appendLog(IOUtils.readFully(cmd.getErrorStream()).toString());
-      } catch (IOException ex) {
-        logger.error("", ex);
-      }
+      LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
 
     } catch (ConnectionException | TransportException ex) {
       logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
