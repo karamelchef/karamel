@@ -33,6 +33,7 @@ import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import java.nio.file.*;
+import se.kth.karamel.common.FilesystemUtil;
 
 /**
  *
@@ -96,33 +97,11 @@ public class ClusterDefinitionService {
 
   public static void removeDefinition(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
-    File folder = new File(Settings.CLUSTER_ROOT_PATH(name));
     try {
-      deleteRecursive(folder);
+      FilesystemUtil.deleteRecursive(Settings.CLUSTER_ROOT_PATH(name));
     } catch (FileNotFoundException ex) {
       throw new KaramelException(ex);
     }
-  }
-
-  /**
-   * By default File#delete fails for non-empty directories, it works like "rm". We need something a little more brutual
-   * - this does the equivalent of "rm -r"
-   *
-   * @param path Root File Path
-   * @return true iff the file and all sub files/directories have been removed
-   * @throws FileNotFoundException
-   */
-  public static boolean deleteRecursive(File path) throws FileNotFoundException {
-    if (!path.exists()) {
-      throw new FileNotFoundException(path.getAbsolutePath());
-    }
-    boolean ret = true;
-    if (path.isDirectory()) {
-      for (File f : path.listFiles()) {
-        ret = ret && deleteRecursive(f);
-      }
-    }
-    return ret && path.delete();
   }
 
   public static List<String> listClusters() throws KaramelException {
@@ -154,7 +133,7 @@ public class ClusterDefinitionService {
     YamlCluster cluster = YamlUtil.loadCluster(yaml);
     return new JsonCluster(cluster);
   }
-  
+
   public static String yamlToJson(String yaml) throws KaramelException {
     JsonCluster jsonObj = yamlToJsonObject(yaml);
     return serializeJson(jsonObj);
