@@ -32,14 +32,13 @@ angular.module('coreApp', [])
           _destroyIntervalInstances();
         });
 
+        scope.htmlSafeData = undefined;
       }
 
       $scope.htmlsafe = function(index) {
 
-
-
-//        str = str + "<br/>" + "<a href ng-click=\"processCommand(0)\">Test Command!</a>"
-//        str = str + "<br/>" + "<a ng-show=\"false\">Test Command!</a>"
+        $log.info('Called html safe');
+        var text = $scope.commandObj[index].commandResult;
 
         var htmlize = function(str) {
           if (str !== null) {
@@ -55,26 +54,36 @@ angular.module('coreApp', [])
             return "";
         };
 
-        var text = $scope.commandObj[index].commandResult,
-          pattern = new RegExp(/<a[^>]*>[^<>]*<\/a>/g),
-          match,
-          newStr = "",
-          lastInx = -1;
-        
-        var htmlize = function(str) {
+        var convertLinks = function(str) {
           if (str !== null) {
-            return str
-              .replace(/&/g, '&amp;')
-              .replace(/ /g, '&nbsp;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#39;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(new RegExp('\r?\n', 'g'), '<br/>');
+            var pattern = new RegExp(/kref='((\w|[-]|\s)*)'/g);
+            var match;
+            var lastInx = -1;
+            var newStr = "";
+            while (match = pattern.exec(str)) {
+
+              if (lastInx < match.index) {
+                newStr = newStr + str.substring(lastInx, match.index);
+              }
+              lastInx = pattern.lastIndex;
+              newStr = newStr + "href='processCommand(0, \'" + match[1] + "\')";
+            }
+
+            if (str !== null && lastInx < str.length) {
+              newStr = newStr + str.substring(lastInx, str.length);
+            }
+
+            return newStr;
           } else
             return "";
         };
 
+        text = convertLinks(text);
+
+        var pattern = new RegExp(/<a[^>]*>[^<>]*<\/a>/g);
+        var match;
+        var lastInx = -1;
+        var newStr = "";
         while (match = pattern.exec(text)) {
           if (lastInx < match.index) {
             newStr = newStr + htmlize(text.substring(lastInx, match.index));
@@ -87,10 +96,11 @@ angular.module('coreApp', [])
           newStr = newStr + htmlize(text.substring(lastInx, text.length));
         }
 
-        return $sce.trustAsHtml(newStr);
+        newStr = "<div>" + newStr + "</div>";
+        $scope.htmlSafeData = newStr;
       };
 
-      $scope.processCommand = function(index) {
+      $scope.processTerminal = function(index) {
         _destroyIntervalInstance(index);
         var commandName = $scope.commandObj[index].commandName;
         var commandArg = $scope.commandObj[index].commandResult;
@@ -99,29 +109,16 @@ angular.module('coreApp', [])
       };
 
       $scope.processCommand = function(index, cmdName) {
+        $log.info("Process Command Called");
         _destroyIntervalInstance(index);
         coreProcessCommand(index, cmdName, null)();
       };
-      
-//      function processCommand(index, commandName, commandArg) {
-//        var regex = /watch\s+-n\s+(\d+)\s+(.*)/;
-//        var match = regex.exec(commandName);
-//        if (match !== null) {
-//          var interval = match[1];
-//          var intervalCmd = match[2];
-//          $log.info("On " + interval + " seconds will call-> " + intervalCmd);
-//          coreProcessCommand(intervalCmd, commandArg, index)();
-//          $scope.intervalInstance[index] = $interval(coreProcessCommand(index, intervalCmd, commandArg), interval * 1000);
-//        } else {
-//          $log.info("Will call-> " + commandName + " just once");
-//          coreProcessCommand(index, commandName, commandArg)();
-//        }
-//      }
 
       function coreProcessCommand(index, cmdName, cmdArg) {
 
         return function() {
           $log.info("Running " + cmdName);
+
           var obj = {
             command: cmdName,
             result: cmdArg
@@ -134,8 +131,12 @@ angular.module('coreApp', [])
 
               if (data.renderer !== null) {
                 $scope.commandObj[index].renderer = data.renderer;
-              } else
+              } else {
                 $scope.commandObj[index].renderer = 'info';
+              }
+              if (data.renderer === 'info') {
+                $scope.htmlsafe(index);
+              }
 
               if (data.nextCmd !== null) {
                 _destroyIntervalInstance(index);
@@ -143,7 +144,6 @@ angular.module('coreApp', [])
               }
             })
             .error(function(data) {
-              $log.info(data);
               $log.info('Core -> Unable to process command: ' + cmdName);
             });
         };
@@ -172,6 +172,21 @@ angular.module('coreApp', [])
       }
 
       initScope($scope);
+    }])
+
+  .directive('compileData', ['$log', '$sce', '$compile', function($log, $sce, $compile) {
+      return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+          scope.$watch('htmlSafeData', function(data) {
+            if (data !== undefined) {
+              element.html('');
+              data = $compile(data)(scope);
+              element.append(data);
+            }
+          });
+        }
+      }
     }])
 
   .service('CaramelCoreServices', ['$log', '$http', '$location', function($log, $http, $location) {
