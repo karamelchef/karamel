@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterEntity;
@@ -250,7 +251,7 @@ public class CommandService {
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           result = UserClusterDataExtractor.clusterLinks(json, null);
         }
-        
+
         renderer = CommandResponse.Renderer.INFO;
       }
 
@@ -267,6 +268,60 @@ public class CommandService {
           clusterService.startCluster(json);
           result = String.format("cluster %s launched successfully..", clusterName);
           nextCmd = "status";
+        }
+      }
+
+      p = Pattern.compile("out\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterEntity clusterEntity = cluster.getRuntime();
+          for (GroupEntity group : clusterEntity.getGroups()) {
+            for (MachineEntity machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  result = LogService.loadOutLog(clusterEntity.getName(), machine.getPublicIp(), task.getName());
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            result = "Opps, task was not found, make sure cluster is chosen first";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
+        }
+      }
+
+      p = Pattern.compile("err\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterEntity clusterEntity = cluster.getRuntime();
+          for (GroupEntity group : clusterEntity.getGroups()) {
+            for (MachineEntity machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  result = LogService.loadErrLog(clusterEntity.getName(), machine.getPublicIp(), task.getName());
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            result = "Opps, task was not found, make sure cluster is chosen first";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
         }
       }
 
@@ -357,13 +412,15 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Machine"};
+    String[] columnNames = {"Task", "Status", "Machine", "Logs"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
       data[i][0] = task.getName();
       data[i][1] = task.getStatus();
       data[i][2] = task.getMachineId();
+      String uuid = task.getUuid();
+      data[i][3] = "<a kref='out " + uuid + "'>output</a> <a kref='err " + uuid + "'>error</a>";
     }
     return makeTable(columnNames, 1, data, rowNumbering);
   }

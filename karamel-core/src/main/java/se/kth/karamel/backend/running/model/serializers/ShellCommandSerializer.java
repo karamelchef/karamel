@@ -23,9 +23,6 @@ public class ShellCommandSerializer implements JsonSerializer<ShellCommand> {
     final JsonObject jsonObj = new JsonObject();
     jsonObj.add("status", context.serialize(cmd.getStatus().toString()));
     jsonObj.add("cmdStr", context.serialize(cmd.getCmdStr()));
-    if (cmd.getStatus() == ShellCommand.Status.FAILED) {
-      jsonObj.add("err", context.serialize(cmd.getErrorStream()));
-    }
     return jsonObj;
   }
 

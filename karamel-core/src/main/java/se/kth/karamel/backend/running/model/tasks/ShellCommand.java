@@ -16,15 +16,11 @@ public class ShellCommand {
     WAITING, QUEUED, ONGOING, DONE, FAILED;
   }
   Status status = Status.WAITING;
+  Task task;
   String cmdStr;
-  StringBuffer errorStream = new StringBuffer();
 
   public ShellCommand(String cmdStr) {
     this.cmdStr = cmdStr;
-  }
-
-  public void appendLog(String error) {
-    errorStream.append(error);
   }
 
   public Status getStatus() {
@@ -37,10 +33,6 @@ public class ShellCommand {
 
   public String getCmdStr() {
     return cmdStr;
-  }
-
-  public String getErrorStream() {
-    return errorStream.toString();
   }
 
 }
