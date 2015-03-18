@@ -10,7 +10,7 @@ if [ -f chefdk_0.1.0-1_amd64-ubuntu12.deb ] ; then
       wget $BINARIES
       sudo dpkg -i $CHEFDK
   fi
-else 
+else
   wget $BINARIES
   sudo dpkg -i $CHEFDK
 fi
