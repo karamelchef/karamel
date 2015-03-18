@@ -235,7 +235,7 @@
                         <configuration>
                             <cmdLine>-server conf/dropwizard.yml</cmdLine>
                             <headerType>gui</headerType>
-                            <outfile>${project.build.directory}/karamel-${project.version}/karamel.exe</outfile>
+                            <outfile>${project.build.directory}/karamel.exe</outfile>
                             <dontWrapJar>false</dontWrapJar>
                             <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
                             <classPath>
