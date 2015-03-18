@@ -1,6 +1,6 @@
-name: HopsHub
+name: HopsWorks
 ec2:
-    type: m3.medium
+    type: c3.2xlarge
     region: eu-west-1
 
 cookbooks:                                                                      

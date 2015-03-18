@@ -13,7 +13,7 @@ mvn clean package
 cd target
 
 #create linux archive
-cp -r appassembler $dist
+cp -r appassembler/* $dist/
 cp ../README.linux $dist/README.txt
 tar zcf ${dist}.tgz $dist
 mv $dist ${dist}-linux
@@ -31,11 +31,10 @@ scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/file
 scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 
 echo "Now building windows distribution"
-
 cd ..
 mvn -Dwin clean package
 cd target
-
+mv karamel.exe $dist
 #create windows archive
 cp ../README.windows $dist/README.txt
 zip -r ${dist}.zip $dist
