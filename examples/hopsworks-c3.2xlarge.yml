@@ -1,4 +1,4 @@
-name: HopsWorks
+name: HopsWorksC32x
 ec2:
     type: c3.2xlarge
     region: eu-west-1
