@@ -53,6 +53,7 @@ public class CookbookScaffolder {
             // write contents to file as text, not binary data
             PrintWriter out = new PrintWriter(path);
             out.println(script);
+            out.flush();
     }
 
     public static void create() {
@@ -60,13 +61,13 @@ public class CookbookScaffolder {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-            System.out.print("Enter cookbook name:");
+            System.out.print("Enter cookbook name: ");
             name = br.readLine();
             File cb = new File("cookbooks" + File.separator + name);
             if (cb.exists()) {
                 boolean wiped = false;
                 while (!wiped) {
-                    System.out.print("Do you want to over-write the existing cookbook " + name + "? (y/n)");
+                    System.out.print("Do you want to over-write the existing cookbook " + name + "? (y/n) ");
                     String overwrite = br.readLine();
                     if (overwrite.compareToIgnoreCase("n") == 0 || overwrite.compareToIgnoreCase("no") == 0) {
                         System.out.println("Not over-writing. Exiting.");
@@ -78,30 +79,29 @@ public class CookbookScaffolder {
                     }
                 }
             }
-            mkdirs("cookbooks" + File.separator + name + File.separator + "recipes");
-            mkdirs("cookbooks" + File.separator + name + File.separator + "attributes");
-            mkdirs("cookbooks" + File.separator + name + File.separator + "templates" + File.separator + "default");
+            
+            String cbName = "cookbooks" + File.separator + name + File.separator;
+            
+            // Create all the directories for the coookbook 
+            mkdirs(cbName + "recipes");
+            mkdirs(cbName + "attributes");
+            mkdirs(cbName + "templates" + File.separator + "default");
 
 //            String uid = System.getProperty("user.name"); 
 
-            String defaultAttrs = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_DEFAULTRB_REL_PATH;
-            createFile(defaultAttrs, Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT, name);
-            String berks = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_BERKSFILE_REL_PATH;
-            createFile(berks, Settings.CB_TEMPLATE_BERKSFILE, name);
-            String metadata = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_METADATARB_REL_PATH;
-            createFile(metadata, Settings.CB_TEMPLATE_METADATA, name);
-            String karamel = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_KARAMELFILE_REL_PATH;
-            createFile(karamel, Settings.CB_TEMPLATE_KARAMELFILE, name);
-            String installRecipe = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_RECIPE_INSTALL_PATH;
-            createFile(installRecipe, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
-            String defaultRecipe = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_RECIPE_DEFAULT_PATH;
-            createFile(defaultRecipe, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);            
-            String masterRecipe = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_RECIPE_MASTER_PATH;
-            createFile(masterRecipe, Settings.CB_TEMPLATE_RECIPE_MASTER, name);
-            String slaveRecipe = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_RECIPE_SLAVE_PATH;
-            createFile(slaveRecipe, Settings.CB_TEMPLATE_RECIPE_SLAVE, name);            
-            String kitchen = "cookbooks" + File.separator + name + File.separator + Settings.COOKBOOK_KITCHEN_YML_PATH;
-            createFile(kitchen, Settings.CB_TEMPLATE_KITCHEN_YML, name);            
+            // Create all the files for the coookbook using the file-templates in the resources
+            createFile(cbName + Settings.COOKBOOK_DEFAULTRB_REL_PATH, Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT, name);
+            createFile(cbName + Settings.COOKBOOK_BERKSFILE_REL_PATH, Settings.CB_TEMPLATE_BERKSFILE, name);
+            createFile(cbName + Settings.COOKBOOK_METADATARB_REL_PATH, Settings.CB_TEMPLATE_METADATA, name);
+            createFile(cbName + Settings.COOKBOOK_KARAMELFILE_REL_PATH, Settings.CB_TEMPLATE_KARAMELFILE, name);
+            createFile(cbName + Settings.COOKBOOK_RECIPE_INSTALL_PATH, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
+            createFile(cbName + Settings.COOKBOOK_RECIPE_DEFAULT_PATH, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);            
+            createFile(cbName + Settings.COOKBOOK_RECIPE_MASTER_PATH, Settings.CB_TEMPLATE_RECIPE_MASTER, name);
+            createFile(cbName + Settings.COOKBOOK_RECIPE_SLAVE_PATH, Settings.CB_TEMPLATE_RECIPE_SLAVE, name);            
+            createFile(cbName + Settings.COOKBOOK_KITCHEN_YML_PATH, cbName + Settings.CB_TEMPLATE_KITCHEN_YML, name);            
+            createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, cbName + Settings.CB_TEMPLATE_CONFIG_PROPS, name);            
+            createFile(cbName + Settings.COOKBOOK_MASTER_SH_PATH, cbName + Settings.CB_TEMPLATE_MASTER_SH, name);            
+            createFile(cbName + Settings.COOKBOOK_SLAVE_SH_PATH, cbName + Settings.CB_TEMPLATE_SLAVE_SH, name);            
             System.out.println("Cookbook scaffolding for " + name);
             System.out.println("Cookbook now in folder: ./cookbooks/" + name);
                         
