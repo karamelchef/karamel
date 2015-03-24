@@ -1,0 +1,2 @@
+
+master_private_ip = private_recipe_ip("%%NAME%%","master")

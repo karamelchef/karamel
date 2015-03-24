@@ -1,0 +1,21 @@
+libpath = File.expand_path '../../../kagent/libraries', __FILE__
+
+master_ip = private_recipe_ip("%%NAME%%","master")
+
+
+#service "%%NAME%%-slave" do
+#  supports :restart => true, :stop => true, :start => true, :status => true
+#  action :nothing
+#end
+
+template "#{node[:%%NAME%%][:version_dir]}/bin/slave.sh" do
+  source "slave.sh.erb"
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode 0754
+  variables({
+              :master_ip => master_ip
+            })
+#  notifies :enable, "service[%%NAME%%]"
+#  notifies :restart,"service[%%NAME%%]", :immediately
+end

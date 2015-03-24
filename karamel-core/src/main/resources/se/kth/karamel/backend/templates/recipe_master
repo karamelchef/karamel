@@ -1,0 +1,27 @@
+
+master_ip = my_private_ip()
+
+bash "%%NAME%%_install_bash" do
+    user "root"
+    code <<-EOF
+
+# Do something here...
+
+touch #{node[:%%NAME%%][:version_dir]}/.installed
+EOF
+  not_if { ::File.exists?( "#{node[:%%NAME%%][:version_dir]}/.installed" ) }
+end
+
+#service "%%NAME%%-master" do
+#  supports :restart => true, :stop => true, :start => true, :status => true
+#  action :nothing
+#end
+
+template "#{node[:%%NAME%%][:version_dir]}/bin/master.sh" do
+  source "master.sh.erb"
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode 0754
+#  notifies :enable, "service[%%NAME%%]"
+#  notifies :restart,"service[%%NAME%%]", :immediately
+end

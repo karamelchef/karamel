@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -47,6 +45,7 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.utils.CookbookScaffolder;
 
 /**
  * Created by babbarshaer on 2014-11-20.
@@ -72,6 +71,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                 .hasArg()
                 .withDescription("Karamel cluster definition in a YAML file")
                 .create("launch"));
+        options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     }
 
     public static void usage(int exitValue) {
@@ -80,11 +80,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         System.exit(exitValue);
     }
 
-    static String readFile(String path)
-            throws IOException {
-        byte[] encoded = Files.readAllBytes(Paths.get(path));
-        return new String(encoded);
-    }
 
     public static void main(String[] args) throws Exception {
         System.out.println("");
@@ -106,6 +101,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             if (line.hasOption("help")) {
                 usage(0);
             }
+            if (line.hasOption("scaffold")) {
+                CookbookScaffolder.create();
+            }
             if (line.hasOption("server")) {
                 modifiedArgs[1] = line.getOptionValue("server");
             }
@@ -114,10 +112,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             }
 
             if (cli) {
-        // Try to open and read the yaml file. 
+                // Try to open and read the yaml file. 
                 // Print error msg if invalid file or invalid YAML.
                 try {
-                    yamlTxt = readFile(line.getOptionValue("launch"));
+                    yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
                     YamlCluster cluster = YamlUtil.loadCluster(yamlTxt);
                     String jsonTxt = karamelApiHandler.yamlToJson(yamlTxt);
                     boolean valid = false;

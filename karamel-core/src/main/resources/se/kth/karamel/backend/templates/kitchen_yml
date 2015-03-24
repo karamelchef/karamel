@@ -1,0 +1,31 @@
+  name: chef_solo
+
+platforms:
+  - name: centos-6.5
+  - name: ubuntu-14.04
+
+suites: 
+  - name: default
+    run_list:
+      - recipe[kagent::install]
+      - recipe[%%NAME%%::install]
+      - recipe[%%NAME%%::default]
+
+    attributes:
+         %%NAME%%:
+            user: %%USER%%
+            %%SERVICE1%%:
+               private_ips: ["10.0.2.15"]
+               public_ips: ["10.0.2.15"]
+            %%SERVICE2%%:
+               private_ips: ["10.0.2.15"]
+               public_ips: ["10.0.2.15"]
+            %%SERVICE3%%:
+               private_ips: ["10.0.2.15"]
+               public_ips: ["10.0.2.15"]
+         kagent:
+            private_ips: ["10.0.2.15"]
+            public_ips: ["10.0.2.15"]
+         private_ips: ["10.0.2.15"]
+         public_ips: ["10.0.2.15"]
+         vagrant: "enabled"

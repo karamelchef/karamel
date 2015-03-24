@@ -1,0 +1,12 @@
+dependencies:
+  - recipe: %%NAME%%::install
+    local:
+      - XXXX::install
+    global:
+      - XXXX::nn
+  - recipe: %%NAME%%::default
+    local:
+      - XXXX::install
+    global:
+      - XXXX::nn
+      - XXXX::rm

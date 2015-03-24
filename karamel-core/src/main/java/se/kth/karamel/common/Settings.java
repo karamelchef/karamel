@@ -131,11 +131,40 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_PATH = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = "/Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = "/Berksfile";
+
+  // Template files for generating scaffolding for a cookbook
+  public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
+  public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
+  public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
+  public static final String CB_TEMPLATE_RECIPE_MASTER = CB_TEMPLATE_PATH_ROOT + "recipe_master";
+  public static final String CB_TEMPLATE_RECIPE_SLAVE = CB_TEMPLATE_PATH_ROOT + "recipe_slave";
+  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + "config.props";
+  public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";
+  public static final String CB_TEMPLATE_MASTER = CB_TEMPLATE_PATH_ROOT + "master_sh";
+  public static final String CB_TEMPLATE_SLAVE = CB_TEMPLATE_PATH_ROOT + "slave_sh";
+  public static final String CB_TEMPLATE_METADATA = CB_TEMPLATE_PATH_ROOT + "metadata";
+  public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "KaramelFile";
+  public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
+  public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
+  
+  
+  public static final String COOKBOOK_RECIPE_INSTALL_PATH = "/recipes/install.rb";
+  public static final String COOKBOOK_RECIPE_DEFAULT_PATH = "/recipes/default.rb";
+  public static final String COOKBOOK_RECIPE_MASTER_PATH = "/recipes/master.rb";
+  public static final String COOKBOOK_RECIPE_SLAVE_PATH = "/recipes/slave.rb";
+  public static final String COOKBOOK_CONFIG_FILE_PATH = "/templates/default/config.props.erb";
+  public static final String COOKBOOK_MASTER_SH_PATH = "/templates/default/master.sh.erb";
+  public static final String COOKBOOK_SLAVE_SH_PATH = "/templates/default/slave.sh.erb";
+  public static final String COOKBOOK_KITCHEN_YML_PATH = "/.kitchen.yml";
+  
+  
   public static final String METADATA_INCOMMENT_HOST_KEY = "%host%";
   //settings on vm machines
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";
 
+  
+  
   public static String loadIpAddress() {
     String address = "UnknownHost";
     try {
