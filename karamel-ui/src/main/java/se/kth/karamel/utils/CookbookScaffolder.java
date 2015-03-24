@@ -98,11 +98,11 @@ public class CookbookScaffolder {
             createFile(cbName + Settings.COOKBOOK_RECIPE_DEFAULT_PATH, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);            
             createFile(cbName + Settings.COOKBOOK_RECIPE_MASTER_PATH, Settings.CB_TEMPLATE_RECIPE_MASTER, name);
             createFile(cbName + Settings.COOKBOOK_RECIPE_SLAVE_PATH, Settings.CB_TEMPLATE_RECIPE_SLAVE, name);            
-            createFile(cbName + Settings.COOKBOOK_KITCHEN_YML_PATH, cbName + Settings.CB_TEMPLATE_KITCHEN_YML, name);            
-            createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, cbName + Settings.CB_TEMPLATE_CONFIG_PROPS, name);            
-            createFile(cbName + Settings.COOKBOOK_MASTER_SH_PATH, cbName + Settings.CB_TEMPLATE_MASTER_SH, name);            
-            createFile(cbName + Settings.COOKBOOK_SLAVE_SH_PATH, cbName + Settings.CB_TEMPLATE_SLAVE_SH, name);            
-            System.out.println("Cookbook scaffolding for " + name);
+            createFile(cbName + Settings.COOKBOOK_KITCHEN_YML_PATH, Settings.CB_TEMPLATE_KITCHEN_YML, name);            
+            createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, Settings.CB_TEMPLATE_CONFIG_PROPS, name);            
+            createFile(cbName + Settings.COOKBOOK_MASTER_SH_PATH, Settings.CB_TEMPLATE_MASTER_SH, name);            
+            createFile(cbName + Settings.COOKBOOK_SLAVE_SH_PATH, Settings.CB_TEMPLATE_SLAVE_SH, name);            
+            System.out.println("Cookbook scaffolding created.");
             System.out.println("Cookbook now in folder: ./cookbooks/" + name);
                         
         } catch (IOException ex) {
