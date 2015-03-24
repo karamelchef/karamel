@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Start the master using this script
+
+nohup java -jar myjar.jar master -config <%= node[:%%NAME%%][:HOME_DIR] %>/config/config.props 2>&1 %%NAME%%.log &

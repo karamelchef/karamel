@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Start the slave using this script
+
+nohup java -jar myjar.jar slave -config <%= node[:%%NAME%%][:HOME_DIR] %>/config/config.props -master=<%= @master_ip %> 2>&1 %%NAME%%.log &

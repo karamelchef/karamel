@@ -1,0 +1,32 @@
+name             '%%NAME%%'
+maintainer       "%%USER%%"
+maintainer_email "%%USER%%@company.com"
+license          "Apache v2.0"
+description      'Installs/Configures %%NAME%%'
+version          "0.1"
+
+recipe            "%%NAME%%::default", "Installs and starts %%NAME%%"
+
+depends 'kagent'
+depends 'java'
+depends 'ark'
+
+%w{ ubuntu debian rhel centos }.each do |os|
+  supports os
+end
+
+attribute "%%NAME%%/version",
+:description => "Version of %%NAME%%",
+:type => 'string',
+:default => "0.1"
+
+
+attribute "%%NAME%%/url",
+:description => "Url to download binaries for %%NAME%%",
+:type => 'string',
+:default => ""
+
+attribute "%%NAME%%/user",
+:description => "Run %%NAME%% as this user",
+:type => 'string',
+:default => "%%NAME%%"

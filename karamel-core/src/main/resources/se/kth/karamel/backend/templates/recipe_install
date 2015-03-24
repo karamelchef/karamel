@@ -1,0 +1,94 @@
+libpath = File.expand_path '../../../kagent/libraries', __FILE__
+
+node.default['java']['jdk_version'] = 7
+include_recipe "java"
+
+group node[:%%NAME%%][:group] do
+  action :create
+end
+
+user node[:%%NAME%%][:user] do
+#  supports :manage_home => true
+#  home "/home/#{node[:%%NAME%%][:user]}"
+  action :create
+  system true
+  shell "/bin/bash"
+  not_if "getent passwd #{node[:%%NAME%%]['user']}"
+end
+
+directory node[:%%NAME%%][:version_dir] do
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode "755"
+  action :create
+  recursive true
+end
+
+directory "#{node[:%%NAME%%][:version_dir]}/bin" do
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode "755"
+  action :create
+  recursive true
+end
+
+directory "#{node[:%%NAME%%][:version_dir]}/config" do
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode "755"
+  action :create
+  recursive true
+end
+
+
+link node[:%%NAME%%][:base_dir] do
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  to node[:%%NAME%%][:version_dir]
+end
+
+
+# See ark resource here: https://github.com/burtlo/ark
+# It will: fetch it to to /var/cache/chef/
+# unpack it to the default path (/usr/local/XXX-1.2.3)
+# create a symlink for :home_dir (/usr/local/XXX) 
+# add /user/local/XXX/bin to the enviroment PATH variable
+ ark '%%NAME%%' do
+   url node[:%%NAME%%][:url]
+   version node[:%%NAME%%][:version]
+   path node[:%%NAME%%][:version_dir]
+   home_dir node[:%%NAME%%][:home_dir]
+#   checksum  '89ba5fde0c596db388c3bbd265b63007a9cc3df3a8e6d79a46780c1a39408cb5'
+   append_env_path true
+   owner node[:%%NAME%%][:user]
+ end
+
+private_ip = my_private_ip()
+public_ip = my_public_ip()
+
+
+bash "%%NAME%%_install_bash" do
+    user "root"
+    code <<-EOF
+
+# Do something here...
+
+touch #{node[:%%NAME%%][:version_dir]}/.installed
+EOF
+  not_if { ::File.exists?( "#{node[:%%NAME%%][:version_dir]}/.installed" ) }
+end
+
+# returns the first %%NAME%%::master private_ip in the list
+master_private_ip = private_recipe_ip("%%NAME%%","master")
+
+
+template "#{node[:%%NAME%%][:version_dir]}/config/config.props" do
+  source "config.props.erb"
+  owner node[:%%NAME%%][:user]
+  group node[:%%NAME%%][:group]
+  mode "755"
+  variables({
+              :master_ip => master_private_ip
+            })
+  action :create_if_missing
+end
