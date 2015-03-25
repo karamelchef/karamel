@@ -474,6 +474,41 @@ angular.module('demoApp')
             });
 
           },
+
+            scaffoldCookbook: function(board) {
+
+            $log.info("Scaffold Cookbook function invoked.");
+            var modalInstance = $modal.open({
+              templateUrl: "partials/scaffold.html",
+              controller: "ScaffoldController",
+              backdrop: "static",
+              resolve: {
+                info: function() {
+                  return {
+                    cluster: {
+                      clusterName: board.name
+                    }
+                  }
+                }
+              }
+            });
+            var restObj = getRestObjBuilder().buildCaramelForRest(board);
+            var data = {
+                json: angular.toJson(restObj)
+            };
+            CaramelCoreServices.scaffoldCookbook(data)
+                .success(function(data, status, headers, config) {
+                    $log.info("Connection Successful.");
+                    AlertService.addAlert({type: 'success', msg: 'Cookbook created successfully.'});
+                })
+                .error(function(data, status, headers, config) {
+                    $log.info("Error Received.");
+                    $log.info(data.message);
+                    AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to create cookbook'});
+                });    
+
+
+          },
             
           setCredentials: function(board , isLaunch){
             $log.info("Set Credentials function called.");
