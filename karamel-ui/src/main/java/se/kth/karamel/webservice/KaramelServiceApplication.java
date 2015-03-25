@@ -9,8 +9,11 @@ import io.dropwizard.setup.Environment;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.SystemTray;
+import java.io.BufferedReader;
 import java.io.Console;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -29,6 +32,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -45,7 +50,9 @@ import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.utils.CookbookScaffolder;
+import se.kth.karamel.common.CookbookScaffolder;
+import static se.kth.karamel.common.CookbookScaffolder.create;
+import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
 /**
  * Created by babbarshaer on 2014-11-20.
@@ -74,12 +81,43 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     }
 
+    public static void create() {
+        String name = "";
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+            System.out.print("Enter cookbook name: ");
+            name = br.readLine();
+            File cb = new File("cookbooks" + File.separator + name);
+            if (cb.exists()) {
+                boolean wiped = false;
+                while (!wiped) {
+                    System.out.print("Do you want to over-write the existing cookbook " + name + "? (y/n) ");
+                    String overwrite = br.readLine();
+                    if (overwrite.compareToIgnoreCase("n") == 0 || overwrite.compareToIgnoreCase("no") == 0) {
+                        System.out.println("Not over-writing. Exiting.");
+                        System.exit(0);
+                    }
+                    if (overwrite.compareToIgnoreCase("y") == 0 || overwrite.compareToIgnoreCase("yes") == 0) {
+                        deleteRecursive(cb);
+                        wiped = true;
+                    }
+                }
+            }
+            String pathToCb = CookbookScaffolder.create(name);
+            System.out.println("New Cookbook is now located at: " + pathToCb);
+            System.exit(0);
+        } catch (IOException ex) {
+            Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(-1);
+        }
+    }
+
     public static void usage(int exitValue) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("karamel", options);
         System.exit(exitValue);
     }
-
 
     public static void main(String[] args) throws Exception {
         System.out.println("");
@@ -102,7 +140,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                 usage(0);
             }
             if (line.hasOption("scaffold")) {
-                CookbookScaffolder.create();
+                create();
             }
             if (line.hasOption("server")) {
                 modifiedArgs[1] = line.getOptionValue("server");
@@ -232,6 +270,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         environment.jersey().register(new Ec2.Validate());
         environment.jersey().register(new Cluster.StartCluster());
         environment.jersey().register(new Cluster.ViewCluster());
+        environment.jersey().register(new Scaffolder.ScaffoldCluster());
         environment.jersey().register(new Command.CheatSheet());
         environment.jersey().register(new Command.Process());
 
@@ -595,6 +634,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             }
         }
 
+    }
+
+    /**
+     * Place holder class dealing with separate cluster state handling.
+     */
+    public static class Scaffolder {
+
+        @Path("/scaffold")
+        @Consumes(MediaType.APPLICATION_JSON)
+        public static class ScaffoldCluster {
+            @PUT
+            public Response scaffold(ScaffoldJSON cbName) {
+                Response response = null;
+                System.out.println(" Received request to scaffold a new cookbook.... ");
+                try {
+                    CookbookScaffolder.create(cbName.getName());
+                    response = Response.status(Response.Status.OK).build();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+                }
+                return response;
+            }
+        }
     }
 
 }

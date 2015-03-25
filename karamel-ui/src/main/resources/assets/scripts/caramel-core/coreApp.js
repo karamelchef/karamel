@@ -284,6 +284,11 @@ angular.module('coreApp', [])
           var url = _defaultHost.concat("/stopCluster");
           return _getPromiseObject(method, url, _defaultContentType, clusterName);
         },
+        scaffoldCookbook: function(cookbookName) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/scaffold");
+          return _getPromiseObject(method, url, _defaultContentType, cookbookName);
+        },
         commandSheet: function() {
           var method = 'GET';
           var url = _defaultHost.concat("/getCommandSheet");
