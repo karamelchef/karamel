@@ -49,6 +49,15 @@ public class MachinesMonitor implements Runnable {
     this.stoping = stoping;
   }
 
+  public SshMachine getMachine(String publicIp) {
+    for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+      SshMachine sshMachine = entry.getValue();
+      if (sshMachine.getMachineEntity().getPublicIp().equals(publicIp))
+        return sshMachine;
+    }
+    return null;
+  }
+
   public synchronized void addMachines(List<MachineEntity> machineEntities) {
     for (MachineEntity machineEntity : machineEntities) {
       SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey());

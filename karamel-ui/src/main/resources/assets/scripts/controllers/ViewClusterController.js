@@ -2,7 +2,7 @@
 
 angular.module('demoApp')
 
-    .controller('ViewClusterController',['$log','$scope','$interval','$modalInstance','CaramelCoreServices','info', function($log,$scope,$interval,$modalInstance,CaramelCoreServices, info){
+    .controller('ViewClusterController',['$log','$scope','$interval','$modalInstance','KaramelCoreRestServices','info', function($log,$scope,$interval,$modalInstance,KaramelCoreRestServices, info){
 
         function initScope(scope) {
 
@@ -27,7 +27,7 @@ angular.module('demoApp')
                 clusterName : info.cluster.clusterName
             };
 
-            CaramelCoreServices.viewCluster(_obj)
+            KaramelCoreRestServices.viewCluster(_obj)
 
                 .success(function (data, status, headers, config) {
                     $scope.cluster = angular.toJson(data);

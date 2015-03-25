@@ -13,7 +13,7 @@ package se.kth.karamel.backend.command;
 public class CommandResponse {
   
   public static enum Renderer {
-    INFO, YAML
+    INFO, YAML, SSH
   };
   
   private String result;

@@ -3,7 +3,7 @@
 'use strict';
 
 angular.module('yamlApp', [])
-    .controller('yamlEditorController', ['$log', '$rootScope', '$modalInstance', '$scope', 'CaramelCoreServices', function ($log, $rootScope, $modalInstance, $scope, CaramelCoreServices) {
+    .controller('yamlEditorController', ['$log', '$rootScope', '$modalInstance', '$scope', 'KaramelCoreRestServices', function ($log, $rootScope, $modalInstance, $scope, KaramelCoreRestServices) {
 
         $scope.updateBoardDataObject = function () {
             // Check if the form is valid, which in turn depends upon the validity of its elements.
@@ -13,7 +13,7 @@ angular.module('yamlApp', [])
 //                    yml: $scope.cluster.yaml
 //                };
 //
-//                CaramelCoreServices.getJsonFromYaml(ymlJson)
+//                KaramelCoreRestServices.getJsonFromYaml(ymlJson)
 //                    .success(function (data, status, headers, config) {
 //                        $log.info("Success");
 //                        // Set the root scope and update the window local storage also.
@@ -38,7 +38,7 @@ angular.module('yamlApp', [])
 
             var _rest = getRestObjBuilder().buildCaramelForRest($rootScope.karamelBoard);
 
-            CaramelCoreServices.getCompleteYaml({
+            KaramelCoreRestServices.getCompleteYaml({
                 json: angular.toJson(_rest)
             })
                 .success(function (data, status, headers, config) {

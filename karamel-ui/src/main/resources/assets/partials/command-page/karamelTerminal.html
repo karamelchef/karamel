@@ -22,13 +22,19 @@
       <li><a ng-click="processCommand(0, 'machines')">machines</a></li>
       <li><a ng-click="processCommand(0, 'tasks')">tasks</a></li>
       <li><a ng-click="processCommand(0, 'purge')">purge</a></li>
+      <li><a ng-click="processCommand(0, 'shelldisconnect')">shell disconnect</a></li>
     </ul>
   </div>
   <div id="commandControllerWrapper0" class="col-xs-10">
-    <form class="commandControllerForm well" ng-submit= "processTerminal(0)">
+    <form class="commandControllerForm well" ng-submit= "processTerminal(0)" style="margin-bottom: 0px;">
       <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
       <div  id="response00" ng-show="commandObj[0].renderer === 'info'" class="infoResponseArea" compile-data ></div>
       <textarea id="response01" ng-show="commandObj[0].renderer === 'yaml'" class="editorResponseArea" placeholder="Write or copy/paste your yaml here ..." rows="20" ng-model="commandObj[0].commandResult"/>
     </form>
+    <div ng-show="commandObj[0].renderer === 'ssh'" class="sshResponseArea">
+      <terminal >
+      </terminal>
+    </div>
   </div>
+
 </div>

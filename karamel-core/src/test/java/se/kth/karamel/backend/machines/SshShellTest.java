@@ -3,23 +3,24 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package se.kth.karamel.backend.machines;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.connection.channel.direct.Session;
-import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
+import java.io.OutputStream;
+import org.junit.Test;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
  * @author kamal
  */
-public class SshMachineTest {
-
+public class SshShellTest {
 //  @Test
-  public void testReadLogfile() throws IOException {
+  public void testSshService() throws InterruptedException, KaramelException, FileNotFoundException, IOException {
     String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"
         + "MIIEogIBAAKCAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzI\n"
         + "w+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoP\n"
@@ -49,22 +50,34 @@ public class SshMachineTest {
         + "-----END RSA PRIVATE KEY-----";
 
     String publicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key";
-    SSHClient client = new SSHClient();
-    client.addHostKeyVerifier(new PromiscuousVerifier());
-    KeyProvider keys = client.loadKeys(privateKey, publicKey, null);
-    client.connect("192.168.33.10", 22);
-    client.authPublickey("vagrant", keys);
+    SshShell shell = new SshShell(privateKey, publicKey, "192.168.33.10", "vagrant", 22);
+    FileOutputStream fos = new FileOutputStream(new File("/home/kamal/output1"));
 
-    Session session = client.startSession();
-    final Session.Command cmd = session.exec("ls");
-    cmd.join();
-    final byte[] buffer = new byte[65536];
-    InputStream is = cmd.getInputStream();
-    int r;
-    while ((r = is.read(buffer)) > 0) {
-      String decoded = new String(buffer, "UTF-8");
-      System.out.println(decoded);
-    }
+    shell.connect();
 
+    waitNPrint(shell, fos);
+
+    shell.exec("ls\r");
+    waitNPrint(shell, fos);
+
+    waitNPrint(shell, fos);
+
+    shell.exec("pwd\r");
+    waitNPrint(shell, fos);
+//    waitNPrint();
+//
+//    SshService.shellExec("bbb\r");
+//    waitNPrint();
+
+    Thread.sleep(1000);
+    shell.disconnect();
+    fos.close();
+  }
+
+  public static void waitNPrint(SshShell shell, OutputStream os) throws InterruptedException, KaramelException, IOException {
+    Thread.sleep(1000);
+    String ss = shell.readStreams();
+    os.write(ss.getBytes());
+    os.flush();
   }
 }

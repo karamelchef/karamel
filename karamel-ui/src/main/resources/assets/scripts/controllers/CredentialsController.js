@@ -82,7 +82,7 @@ angular.module('demoApp')
     }])
 
     // Directive for the Providers.
-    .directive('providerPane', ['$log', 'CaramelCoreServices', function ($log, CaramelCoreServices) {
+    .directive('providerPane', ['$log', 'KaramelCoreRestServices', function ($log, KaramelCoreRestServices) {
 
         return{
             restrict: 'E',
@@ -169,7 +169,7 @@ angular.module('demoApp')
 
                         if (scope.bootUp) {
 
-                            CaramelCoreServices.loadCredentials()
+                            KaramelCoreRestServices.loadCredentials()
 
                                 .success(function (data) {
                                     scope.account.accountId = data.accountId;
@@ -197,7 +197,7 @@ angular.module('demoApp')
 
                     if (scope.account.accountId != null && scope.account.accountKey != null) {
 
-                        CaramelCoreServices.validateCredentials(scope.account)
+                        KaramelCoreRestServices.validateCredentials(scope.account)
                             .success(function (data) {
                                 _updateState('success', scope.provider);
                             })
@@ -220,7 +220,7 @@ angular.module('demoApp')
     }])
 
     // Directive for the ssh key pane.
-    .directive('sshKeyPane', ['$log', 'CaramelCoreServices', function ($log, CaramelCoreServices) {
+    .directive('sshKeyPane', ['$log', 'KaramelCoreRestServices', function ($log, KaramelCoreRestServices) {
 
         return{
             restrict: 'E',
@@ -299,7 +299,7 @@ angular.module('demoApp')
                         if (scope.bootUp) {
 
                             $log.info("ssh - first time try.");
-                            CaramelCoreServices.loadSshKeys()
+                            KaramelCoreRestServices.loadSshKeys()
 
                                 .success(function (data) {
                                     $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
@@ -326,7 +326,7 @@ angular.module('demoApp')
                 scope.generateKeys = function () {
 
 
-                    CaramelCoreServices.generateSshKeys()
+                    KaramelCoreRestServices.generateSshKeys()
                         .success(function (data) {
 
                             $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);

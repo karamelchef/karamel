@@ -30,3 +30,10 @@ groups                  : groups' summary
 machines                : machines' summary
 tasks                   : installation tasks on each machine
 purge                   : kills all vms, security groups
+--------------------------------------------------------------------------------
+                    ACTIVE SHELL COMMANDS
+--------------------------------------------------------------------------------
+shellconnect <ip>       : opens an interactive shell to specified machine, 
+shelldisconnect         : drops the connection to the active shell
+shellexec               : flushes the command into the output stream of active shell
+shellread               : reads unread data from input stream of active shell

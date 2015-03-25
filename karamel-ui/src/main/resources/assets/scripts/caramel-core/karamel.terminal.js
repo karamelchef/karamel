@@ -9,9 +9,9 @@
 
 'use strict';
 
-angular.module('coreApp', [])
+angular.module('karamel.terminal', [])
 
-  .controller('CommandCenterController', ['$log', '$scope', '$sce', '$interval', '$timeout', 'CaramelCoreServices', function($log, $scope, $sce, $interval, $timeout, CaramelCoreServices) {
+  .controller('karamelTerminalController', ['$log', '$scope', '$sce', '$interval', '$timeout', 'KaramelCoreRestServices', function($log, $scope, $sce, $interval, $timeout, KaramelCoreRestServices) {
 
       function initScope(scope) {
         scope.commandObj = [];
@@ -56,7 +56,7 @@ angular.module('coreApp', [])
 
         var convertLinks = function(str) {
           if (str !== null) {
-            var pattern = new RegExp(/kref='((\w|[-]|\s)*)'/g);
+            var pattern = new RegExp(/kref='((\w|[-]|\.|\s)*)'/g);
             var match;
             var lastInx = -1;
             var newStr = "";
@@ -105,50 +105,56 @@ angular.module('coreApp', [])
         var commandName = $scope.commandObj[index].commandName;
         var commandArg = $scope.commandObj[index].commandResult;
         $scope.commandObj[index].commandName = null;
-        coreProcessCommand(index, commandName, commandArg)();
+        $scope.$emit('ask-core', {index: index, cmdName: commandName, cmdArg: commandArg});
       };
 
       $scope.processCommand = function(index, cmdName) {
         $log.info("Process Command Called");
         _destroyIntervalInstance(index);
-        coreProcessCommand(index, cmdName, null)();
+        $scope.$emit('ask-core', {index: index, cmdName: cmdName, cmdArg: null});
       };
 
-      function coreProcessCommand(index, cmdName, cmdArg) {
+      $scope.$on('ask-core', function(e, input) {
+        var index = input.index;
+        var cmdName = input.cmdName;
+        var cmdArg = input.cmdArg;
+        $log.info("Running " + cmdName);
 
-        return function() {
-          $log.info("Running " + cmdName);
-
-          var obj = {
-            command: cmdName,
-            result: cmdArg
-          };
-
-          CaramelCoreServices.processCommand(obj)
-
-            .success(function(data) {
-              $scope.commandObj[index].commandResult = data.result;
-
-              if (data.renderer !== null) {
-                $scope.commandObj[index].renderer = data.renderer;
-              } else {
-                $scope.commandObj[index].renderer = 'info';
-              }
-              if (data.renderer === 'info') {
-                $scope.htmlsafe(index);
-              }
-
-              if (data.nextCmd !== null) {
-                _destroyIntervalInstance(index);
-                $scope.timeoutInstance[index] = $timeout(coreProcessCommand(index, data.nextCmd, null), 2000);
-              }
-            })
-            .error(function(data) {
-              $log.info('Core -> Unable to process command: ' + cmdName);
-            });
+        var obj = {
+          command: cmdName,
+          result: cmdArg
         };
 
-      }
+        KaramelCoreRestServices.processCommand(obj)
+
+          .success(function(data) {
+            $scope.commandObj[index].commandResult = data.result;
+
+            if (data.renderer !== null) {
+              $scope.commandObj[index].renderer = data.renderer;
+            } else {
+              $scope.commandObj[index].renderer = 'info';
+            }
+            if (data.renderer === 'info') {
+              if (data.nextCmd !== null) {
+                _destroyIntervalInstance(index);
+                $scope.timeoutInstance[index] = $timeout(function() {
+                  $scope.$emit('ask-core', {index: index, cmdName: data.nextCmd, cmdArg: null})
+                }, 2000);
+              }
+              $scope.htmlsafe(index);
+            } else if (data.renderer === 'ssh') {
+              _destroyIntervalInstance(index);
+              $scope.$emit('core-result-ssh', [data.result]);
+            }
+
+
+
+          })
+          .error(function(data) {
+            $log.info('Core -> Unable to process command: ' + cmdName);
+          });
+      });
 
 
       /**
@@ -189,7 +195,7 @@ angular.module('coreApp', [])
       }
     }])
 
-  .service('CaramelCoreServices', ['$log', '$http', '$location', function($log, $http, $location) {
+  .service('KaramelCoreRestServices', ['$log', '$http', '$location', function($log, $http, $location) {
 
       // Return the promise object to the users.
       var _getPromiseObject = function(method, url, contentType, data) {
@@ -301,6 +307,13 @@ angular.module('coreApp', [])
         }
 
       }
+
+    }])
+
+  .service('sshIps', ['$log', function() {
+      var _ipAddress = '192.168.33.10';
+
+      this.ipAddress = _ipAddress;
 
     }]);
 

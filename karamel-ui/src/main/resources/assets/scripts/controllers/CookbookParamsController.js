@@ -98,7 +98,7 @@ angular.module('demoApp')
         }
 
     }])
-    .controller('LocalCookbookAttributeController', ['$log', '$scope', '$modalInstance', 'cookbooks', 'CaramelCoreServices', 'BoardDataService', 'CookbookManipulationService', function ($log, $scope, $modalInstance, cookbooks, CaramelCoreServices, BoardDataService, CookbookManipulationService) {
+    .controller('LocalCookbookAttributeController', ['$log', '$scope', '$modalInstance', 'cookbooks', 'KaramelCoreRestServices', 'BoardDataService', 'CookbookManipulationService', function ($log, $scope, $modalInstance, cookbooks, KaramelCoreRestServices, BoardDataService, CookbookManipulationService) {
 
         function initScope(scope, cookbooksMetaData) {
 
@@ -113,7 +113,7 @@ angular.module('demoApp')
 
         function _fetchCookbookMetaData() {
 
-            CaramelCoreServices.getCookBookInfo(null)
+            KaramelCoreRestServices.getCookBookInfo(null)
                 .success(function (data, status, headers, config) {
                     // set the init scope here.
                 })
@@ -207,7 +207,7 @@ angular.module('demoApp')
         }
     }])
 
-    .directive('myPane', ['$log', 'CaramelCoreServices', 'CookbookManipulationService', function ($log, CaramelCoreServices, CookbookManipulationService) {
+    .directive('myPane', ['$log', 'KaramelCoreRestServices', 'CookbookManipulationService', function ($log, KaramelCoreRestServices, CookbookManipulationService) {
 
         return{
 
@@ -243,7 +243,7 @@ angular.module('demoApp')
                                     "refresh": false
                                 };
 
-                                CaramelCoreServices.getCookBookInfo(data)
+                                KaramelCoreRestServices.getCookBookInfo(data)
 
                                     .success(function (data, status, headers, config) {
 

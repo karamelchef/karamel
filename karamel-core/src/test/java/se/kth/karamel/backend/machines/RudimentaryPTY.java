@@ -5,21 +5,27 @@
  */
 package se.kth.karamel.backend.machines;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.BufferedReader;
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.common.StreamCopier;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Session.Shell;
+import net.schmizz.sshj.transport.verification.ConsoleKnownHostsVerifier;
+import net.schmizz.sshj.transport.verification.OpenSSHKnownHosts;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 
 /**
- *
- * @author kamal
+ * A very rudimentary psuedo-terminal based on console I/O.
  */
-public class SshMachineTest {
+class RudimentaryPTY {
 
-//  @Test
-  public void testReadLogfile() throws IOException {
+  public static void main(String... args)
+      throws IOException {
     String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"
         + "MIIEogIBAAKCAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzI\n"
         + "w+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoP\n"
@@ -54,17 +60,36 @@ public class SshMachineTest {
     KeyProvider keys = client.loadKeys(privateKey, publicKey, null);
     client.connect("192.168.33.10", 22);
     client.authPublickey("vagrant", keys);
+    try {
 
-    Session session = client.startSession();
-    final Session.Command cmd = session.exec("ls");
-    cmd.join();
-    final byte[] buffer = new byte[65536];
-    InputStream is = cmd.getInputStream();
-    int r;
-    while ((r = is.read(buffer)) > 0) {
-      String decoded = new String(buffer, "UTF-8");
-      System.out.println(decoded);
+      final Session session = client.startSession();
+      try {
+
+        session.allocateDefaultPTY();
+
+        final Shell shell = session.startShell();
+
+        new StreamCopier(shell.getInputStream(), System.out)
+            .bufSize(shell.getLocalMaxPacketSize())
+            .spawn("stdout");
+
+        new StreamCopier(shell.getErrorStream(), System.err)
+            .bufSize(shell.getLocalMaxPacketSize())
+            .spawn("stderr");
+
+        // Now make System.in act as stdin. To exit, hit Ctrl+D (since that results in an EOF on System.in)
+        // This is kinda messy because java only allows console input after you hit return
+        // But this is just an example... a GUI app could implement a proper PTY
+        new StreamCopier(System.in, shell.getOutputStream())
+            .bufSize(shell.getRemoteMaxPacketSize())
+            .copy();
+
+      } finally {
+        session.close();
+      }
+
+    } finally {
+      client.disconnect();
     }
-
   }
 }
