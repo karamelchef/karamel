@@ -15,12 +15,13 @@ angular.module('demoApp', [
     , "xeditable"// edit project name
     , "oitozero.ngSweetAlert"
     ,'yamlApp'
-    ,'coreApp'
+    ,'karamel.terminal'
     ,'blockUI'
+    , 'ssh.terminal'
 ])
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/', {templateUrl: 'karamel.html', controller: 'KaramelController'});
-        $routeProvider.when('/commandPage',{templateUrl: 'partials/command-page/commandPage.html', controller: 'CommandCenterController'});
+        $routeProvider.when('/terminal',{templateUrl: 'partials/command-page/karamelTerminal.html', controller: 'karamelTerminalController'});
         $routeProvider.otherwise({redirectTo: '/'});
     }])
 

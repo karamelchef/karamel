@@ -4,7 +4,7 @@
 // Controller for different providers.
 
 angular.module("demoApp")
-    .controller('AmazonProviderController', ['$log', '$scope', '$modalInstance', 'info', 'CaramelCoreServices', function($log, $scope, $modalInstance, info, CaramelCoreServices) {
+    .controller('AmazonProviderController', ['$log', '$scope', '$modalInstance', 'info', 'KaramelCoreRestServices', function($log, $scope, $modalInstance, info, KaramelCoreRestServices) {
 
         function initScope(scope) {
 
@@ -14,7 +14,7 @@ angular.module("demoApp")
             accountKey: null
           };
 
-          CaramelCoreServices.loadCredentials()
+          KaramelCoreRestServices.loadCredentials()
               .success(function(data) {
                 scope.account.accountId = data.accountId;
                 scope.account.accountKey = data.accountKey;
@@ -77,13 +77,13 @@ angular.module("demoApp")
 
 
         function validate(account) {
-          return CaramelCoreServices.validateCredentials(account);
+          return KaramelCoreRestServices.validateCredentials(account);
         }
 
 
         initScope($scope);
       }])
-    .directive('accountCredentialsValidator', ['$log', '$scope', 'CaramelCoreServices', function($log, $scope, CaramelCoreServices) {
+    .directive('accountCredentialsValidator', ['$log', '$scope', 'KaramelCoreRestServices', function($log, $scope, KaramelCoreRestServices) {
 
         // ===== WIP.
         return {

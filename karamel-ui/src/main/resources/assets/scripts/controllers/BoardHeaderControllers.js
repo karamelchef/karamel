@@ -111,16 +111,16 @@ angular.module('demoApp')
 
         };
         
-        $scope.switchCommandPage = function(){
+        $scope.switchTerminal = function(){
             $log.info('Switching to Command Page.');
-            $location.path('/commandPage');
+            $location.path('/terminal');
         };
         
 
         initScope($scope);
 
     }])
-    .directive('fileUploader', ['$log', '$rootScope', 'BoardService', 'BoardDataService', 'CaramelCoreServices','$window','AlertService', function ($log, $rootScope, BoardService, BoardDataService, CaramelCoreServices,$window,AlertService) {
+    .directive('fileUploader', ['$log', '$rootScope', 'BoardService', 'BoardDataService', 'KaramelCoreRestServices','$window','AlertService', function ($log, $rootScope, BoardService, BoardDataService, KaramelCoreRestServices,$window,AlertService) {
 
         // Reset the cache.
         function _cleanKaramelBoard(){
@@ -151,7 +151,7 @@ angular.module('demoApp')
                         _cleanKaramelBoard();
 
                         // Now issue the call to core.
-                        CaramelCoreServices.getJsonFromYaml(ymlJson)
+                        KaramelCoreRestServices.getJsonFromYaml(ymlJson)
                             .success(function (data, status, headers, config) {
                                 $log.info("Success");
 

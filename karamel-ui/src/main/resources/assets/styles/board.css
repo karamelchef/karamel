@@ -352,6 +352,14 @@ textarea[name="pubkey"]{
     overflow:scroll;
 }
 
+/* Command Page CSS*/
+.sshResponseArea{
+    border: 3px double #CCCCCC;
+    padding: 10px;
+    height: 1600px;
+    width: 100%;
+}
+
 .commandControllerForm{
     padding: 5px;
 }

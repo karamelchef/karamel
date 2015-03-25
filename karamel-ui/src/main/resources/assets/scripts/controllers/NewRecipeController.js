@@ -5,7 +5,7 @@
 'use strict';
 
 angular.module('demoApp')
-    .controller('NewRecipeController',['$scope','$log','$modalInstance','nodeGroup','CaramelCoreServices', function($scope,$log,$modalInstance,nodeGroup,CaramelCoreServices){
+    .controller('NewRecipeController',['$scope','$log','$modalInstance','nodeGroup','KaramelCoreRestServices', function($scope,$log,$modalInstance,nodeGroup,KaramelCoreRestServices){
 
         function initScope(scope){
             scope.groupName = nodeGroup.name;
@@ -27,7 +27,7 @@ angular.module('demoApp')
                     "refresh": true                             // ======= OPTION OF explicit refreshing needs to be allowed.
                 };
 
-                CaramelCoreServices.getCookBookInfo(data)
+                KaramelCoreRestServices.getCookBookInfo(data)
 
                     .success(function(data,status,headers,config){
                         $scope.cookbook = data;

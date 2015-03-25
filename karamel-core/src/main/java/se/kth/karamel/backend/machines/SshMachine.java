@@ -46,13 +46,23 @@ public class SshMachine implements Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stoping = false;
+  private SshShell shell;
 
   public SshMachine(MachineEntity machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
+    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
   }
 
+  public MachineEntity getMachineEntity() {
+    return machineEntity;
+  }
+
+  public SshShell getShell() {
+    return shell;
+  }
+  
   public void setStoping(boolean stoping) {
     this.stoping = stoping;
   }

@@ -70,6 +70,10 @@ public class ClusterManager implements Runnable {
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
   }
 
+  public MachinesMonitor getMachinesMonitor() {
+    return machinesMonitor;
+  }
+
   public JsonCluster getDefinition() {
     return definition;
   }

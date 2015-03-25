@@ -24,6 +24,9 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
+import se.kth.karamel.backend.machines.MachinesMonitor;
+import se.kth.karamel.backend.machines.SshMachine;
+import se.kth.karamel.backend.machines.SshShell;
 import se.kth.karamel.backend.running.model.ClusterEntity;
 import se.kth.karamel.backend.running.model.GroupEntity;
 import se.kth.karamel.backend.running.model.MachineEntity;
@@ -41,7 +44,9 @@ public class CommandService {
 
   private static String chosenCluster = null;
   private static String autoselectedCluster = null;
+  private static String chosenMachine = "";
   private static final ClusterService clusterService = ClusterService.getInstance();
+  private static SshShell shell = null;
 //  private static final KaramelApi api = new KaramelApiImpl();
 
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
@@ -238,6 +243,109 @@ public class CommandService {
         renderer = CommandResponse.Renderer.YAML;
       }
 
+      p = Pattern.compile("shellconnect\\s+((\\d|.)+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String ip = matcher.group(1);
+        if (chosenCluster() != null) {
+          String clusterName = chosenCluster();
+          ClusterManager clusterMgr = cluster(clusterName);
+          MachinesMonitor mm = clusterMgr.getMachinesMonitor();
+          SshMachine machine = mm.getMachine(ip);
+          if (machine != null) {
+            shell = machine.getShell();
+            if (shell.isConnected()) {
+              result = "shell is already connected!!";
+              renderer = CommandResponse.Renderer.INFO;
+            } else {
+              shell.connect();
+              if (!shell.isConnected()) {
+                result = "shell is not connected.";
+                renderer = CommandResponse.Renderer.INFO;
+              } else {
+                try {
+                  Thread.sleep(200);
+                } catch (InterruptedException ex) {
+                  Logger.getLogger(CommandService.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                result = shell.readStreams();
+                renderer = CommandResponse.Renderer.SSH;
+              }
+            }
+          } else {
+            result = "Opps, machine was not found, make sure cluster is chosen first";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
+        }
+      }
+      p = Pattern.compile("shelldisconnect");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        if (chosenCluster() != null) {
+          if (shell != null) {
+            shell.disconnect();
+            renderer = CommandResponse.Renderer.INFO;
+          } else {
+            result = "Opps, there is not connected shell..";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
+        }
+      }
+
+      p = Pattern.compile("shellexec(.+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String cmdStr = matcher.group(1);
+        if (chosenCluster() != null) {
+          if (shell != null) {
+            if (!shell.isConnected()) {
+              result = "shell is not connected.";
+              renderer = CommandResponse.Renderer.INFO;
+            } else {
+              shell.exec(cmdStr + "\r");
+              try {
+                Thread.sleep(100);
+              } catch (InterruptedException ex) {
+                Logger.getLogger(CommandService.class.getName()).log(Level.SEVERE, null, ex);
+              }
+              result = shell.readStreams();
+              renderer = CommandResponse.Renderer.SSH;
+            }
+          } else {
+            result = "Opps, there is not connected shell..";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
+        }
+      }
+
+      p = Pattern.compile("shellread");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        if (chosenCluster() != null) {
+          if (shell != null) {
+            if (!shell.isConnected()) {
+              result = "shell is not connected.";
+              renderer = CommandResponse.Renderer.INFO;
+            } else {
+              result = shell.readStreams();
+              renderer = CommandResponse.Renderer.SSH;
+            }
+          } else {
+            result = "Opps, there is not connected shell..";
+          }
+        } else {
+          result = "no cluster has been chosen yet!!";
+        }
+
+      }
+
       p = Pattern.compile("links\\s+(\\w+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
@@ -431,7 +539,7 @@ public class CommandService {
     for (int i = 0; i < machines.size(); i++) {
       MachineEntity machine = machines.get(i);
       data[i][0] = machine.getGroup().getName();
-      data[i][1] = machine.getPublicIp();
+      data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>"+ machine.getPublicIp() +"</a>";
       data[i][2] = machine.getPrivateIp();
       data[i][3] = machine.getSshPort();
       data[i][4] = machine.getSshUser();

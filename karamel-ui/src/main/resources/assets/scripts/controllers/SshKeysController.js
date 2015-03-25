@@ -4,14 +4,14 @@
 // Controller for different providers.
 
 angular.module("demoApp")
-    .controller('SshKeysController', ['$log', '$scope', '$modalInstance', 'CaramelCoreServices', function($log, $scope, $modalInstance, CaramelCoreServices) {
+    .controller('SshKeysController', ['$log', '$scope', '$modalInstance', 'KaramelCoreRestServices', function($log, $scope, $modalInstance, KaramelCoreRestServices) {
 
         function initKeys(scope) {
           scope.sshKeyPair = {
             pubKeyPath: null,
             priKeyPath: null
           };
-          CaramelCoreServices.loadSshKeys()
+          KaramelCoreRestServices.loadSshKeys()
               .success(function(data) {
                 $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
@@ -41,7 +41,7 @@ angular.module("demoApp")
         };
 
         $scope.generateKeys = function() {
-          CaramelCoreServices.generateSshKeys()
+          KaramelCoreRestServices.generateSshKeys()
               .success(function(data) {
                 $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 $scope.sshKeyPair.pubKeyPath = data.publicKeyPath;

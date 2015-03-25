@@ -5,7 +5,7 @@
 
 angular.module('demoApp')
 
-    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', 'BoardManipulator', '$rootScope', 'CaramelCoreServices', 'KaramelSyncService', 'AlertService', function(BoardDataService, SweetAlert, $log, $modal, BoardManipulator, $rootScope, CaramelCoreServices, KaramelSyncService, AlertService) {
+    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', 'BoardManipulator', '$rootScope', 'KaramelCoreRestServices', 'KaramelSyncService', 'AlertService', function(BoardDataService, SweetAlert, $log, $modal, BoardManipulator, $rootScope, KaramelCoreRestServices, KaramelSyncService, AlertService) {
 
         // ============  Private Functions
         var _createAndPopulateBoard = function(boardJSON) {
@@ -37,7 +37,7 @@ angular.module('demoApp')
             var data = {
                 json: angular.toJson(restObj)
             };
-            CaramelCoreServices.startCluster(data)
+            KaramelCoreRestServices.startCluster(data)
                 .success(function(data, status, headers, config) {
                     $log.info("Connection Successful.");
                     AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
@@ -345,7 +345,7 @@ angular.module('demoApp')
             var data = {
               json: angular.toJson(restObj)
             };
-            CaramelCoreServices.getCompleteYaml(data)
+            KaramelCoreRestServices.getCompleteYaml(data)
                 .success(function(data, status, headers, config) {
                   var blob = new Blob([data.yml], {type: "text/plain;charset=utf-8"});
                   saveAs(blob, board["name"].concat(".yml"));
