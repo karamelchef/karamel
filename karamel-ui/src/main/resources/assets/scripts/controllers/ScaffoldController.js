@@ -2,62 +2,35 @@
 
 angular.module('demoApp')
 
-    .controller('ScaffoldController',['$log','$scope','$interval','$modalInstance','CaramelCoreServices','info', function($log,$scope,$interval,$modalInstance,CaramelCoreServices, info){
+    .controller('ScaffoldController',['$log','$scope','$modalInstance','KaramelCoreRestServices', function($log, $scope, $modalInstance, KaramelCoreRestServices){
 
-        function initScope(scope) {
-
-            // Initialize the instance of cluster.
-            scope.cluster = "Fetching the data ..... ";
-
-            //STEP 1: Set the interval value.
-            scope.interval = 5000;
-
-            $log.info(info);
-
-            //STEP 2: Create an instance of timeout function.
-            scope.intervalInstance = $interval(getClusterStatus, scope.interval);
+        function initCb(scope) {
+          scope.cbName = "";
+          scope.states = {
+            valid: "valid",
+            invalid: "invalid",
+            initial: "initial"
+          };
 
         }
 
-        // Invoke the Cluster Function.
-        function getClusterStatus(){
-
-            // Create internal object.
-            var _obj = {
-                clusterName : info.cluster.clusterName
-            };
-
-            CaramelCoreServices.viewCluster(_obj)
-
-                .success(function (data, status, headers, config) {
-                    $scope.cluster = angular.toJson(data);
-                })
-
-                .error(function(data,status,headers,config){
-                    $log.info("Received cluster error.");
-                })
-        }
-
-
-        // Call before window close order to prevent memory leaks.
-        function destroyIntervalInstance (){
-
-            if (angular.isDefined($scope.intervalInstance)) {
-                $interval.cancel($scope.intervalInstance);
-                $scope.intervalInstance = undefined;
-            }
-        }
-
-        $scope.close = function () {
-
-            // Destroy Interval Instance.
-            destroyIntervalInstance();
-
-            // Close the instance.
-            $modalInstance.close();
+        $scope.close = function() {
+          $modalInstance.close();
         };
 
-        // Initialize the scope.
-        initScope($scope);
+        $scope.scaffoldFormSubmit = function() {
+//          if (this.sshKeyForm.$valid) {
+//            $modalInstance.close();
+//          }
+            KaramelCoreRestServices.scaffoldCookbook($scope.cbName)
+              .success(function(data) {
+//                scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+              })
+              .error(function(data) {
+                $log.warn("Scaffolding a cookbook failed.");
+              });
 
+        };
+
+        initCb($scope);
     }]);

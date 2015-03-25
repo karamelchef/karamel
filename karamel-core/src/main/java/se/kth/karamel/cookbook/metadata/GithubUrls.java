@@ -6,9 +6,6 @@
 package se.kth.karamel.cookbook.metadata;
 
 import se.kth.karamel.common.Settings;
-import static se.kth.karamel.common.Settings.COOKBOOK_DEFAULTRB_REL_PATH;
-import static se.kth.karamel.common.Settings.COOKBOOK_KARAMELFILE_REL_PATH;
-import static se.kth.karamel.common.Settings.COOKBOOK_METADATARB_REL_PATH;
 import static se.kth.karamel.common.Settings.GITHUB_BASE_URL;
 import static se.kth.karamel.common.Settings.GITHUB_DEFAULT_BRANCH;
 import static se.kth.karamel.common.Settings.GITHUB_RAW_URL;
@@ -91,10 +88,10 @@ public class GithubUrls {
       String home = GITHUB_BASE_URL + SLASH + user + SLASH + repo;
       String rawHome = GITHUB_RAW_URL + SLASH + user + SLASH + repo + SLASH + branch;
 
-      String attrFile = rawHome + COOKBOOK_DEFAULTRB_REL_PATH;
-      String metadataFile = rawHome + COOKBOOK_METADATARB_REL_PATH;
-      String karamelFile = rawHome + COOKBOOK_KARAMELFILE_REL_PATH;
-      String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_PATH;
+      String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
+      String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
+      String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
+      String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
       GithubUrls urls = new GithubUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, berksFile);
       return urls;
     }
