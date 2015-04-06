@@ -1,26 +1,26 @@
-name: MySqlCluster2 
+name: MySqlCluster
 ec2:
+    type: m3.medium
+    region: eu-west-1
 
 cookbooks:                                                                      
   ndb:
     github: "hopshadoop/ndb-chef"
-    branch: "master"
-
+    version: "v0.1"
 attrs:
     ndb:
-       version: "7.3.6"
+       version: "7.4.5"
     
 groups: 
-  datanodes2:
+  datanodes:
     size: 2
     recipes: 
         - ndb::ndbd
-  server2:
+  mgmnodes:
     size: 1 
     recipes: 
         - ndb::mysqld
         - ndb::memcached
         - ndb::mgmd
-
 
 
