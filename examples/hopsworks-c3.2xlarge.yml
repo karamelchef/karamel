@@ -24,7 +24,7 @@ attrs:
         user: glassfish
 
 groups: 
-  hwctwob:
+  hopsworksmetabig:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
@@ -35,7 +35,7 @@ groups:
         - hops::nn
         - hops::jhs                                                            
         - hopshub
-  hwctwoa:
+  hopsworksdatabig:
     size: 2
     recipes: 
         - ndb::ndbd
