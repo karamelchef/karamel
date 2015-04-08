@@ -24,6 +24,7 @@ groups:
         - ndb::mysqld
         - ndb::memcached
         - ndb::mgmd
-        - hops::jhs                                                            
+        - hops::ndb                                                          
         - hops::rm
         - hops::nn
+        - hops::jhs                                                            
