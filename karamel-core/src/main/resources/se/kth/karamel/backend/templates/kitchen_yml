@@ -14,15 +14,14 @@ suites:
     attributes:
          %%NAME%%:
             user: %%USER%%
-            %%SERVICE1%%:
+            master:
                private_ips: ["10.0.2.15"]
                public_ips: ["10.0.2.15"]
-            %%SERVICE2%%:
+            slave:
                private_ips: ["10.0.2.15"]
                public_ips: ["10.0.2.15"]
-            %%SERVICE3%%:
-               private_ips: ["10.0.2.15"]
-               public_ips: ["10.0.2.15"]
+            private_ips: ["10.0.2.15"]
+            public_ips: ["10.0.2.15"]
          kagent:
             private_ips: ["10.0.2.15"]
             public_ips: ["10.0.2.15"]

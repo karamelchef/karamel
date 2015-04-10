@@ -6,6 +6,8 @@ description      'Installs/Configures %%NAME%%'
 version          "0.1"
 
 recipe            "%%NAME%%::default", "Installs and starts %%NAME%%"
+recipe            "%%NAME%%::master", "Installs and starts %%NAME%% master"
+recipe            "%%NAME%%::slave", "Installs and starts %%NAME%% slave"
 
 depends 'kagent'
 depends 'java'
