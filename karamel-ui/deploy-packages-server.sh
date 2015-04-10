@@ -35,6 +35,11 @@ echo "Now building windows distribution"
 cd ..
 mvn -Dwin clean package
 cd target
+
+#
+# Instructions for signing the .exe were taken from here:
+# http://development.adaptris.net/users/lchan/blog/2013/06/07/signing-windows-installers-on-linux/
+#
 osslsigncode -spc ${certs_dir}/authenticode.spc -key ${certs_dir}/authenticode.key -t http://timestamp.verisign.com/scripts/timstamp.dll -in karamel.exe -out karamel-signed.exe
 mv karamel-signed.exe $dist/karamel.exe
 #create windows archive

@@ -15,3 +15,5 @@ At the cluster level, the set of Karamelfiles defines a directed acyclic graph (
 Karamel system definitions are very compact. We leverage Berkshelf to transparently download and install transitive cookbook dependencies, so large systems can be defined in a few lines of code. Finally, the Karamel runtime builds and manages the execution of the DAG of Chef recipes, by first launching the virtual machines or configuring the bare-metal boxes and then executing recipes with Chef Solo. 
 
 Karamel provides a web-ui, built on AngularJS.
+
+
