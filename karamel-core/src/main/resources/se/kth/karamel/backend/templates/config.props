@@ -1,4 +1,4 @@
 
 data_size=<%= node[:%%NAME%%][:data_memory_mbs] %>
-timeout=<%= node[:%%NAME%%][:xx_timeout_ms] %>
+timeout=<%= node[:%%NAME%%][:timeout_ms] %>
 master_ip=<%= @master_ip %>

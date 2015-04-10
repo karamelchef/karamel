@@ -9,4 +9,4 @@ default[:%%NAME%%][:version_dir] = "/usr/local/%%NAME%%-#{node[:%%NAME%%][:versi
 default[:%%NAME%%][:home_dir] = "/usr/local/%%NAME%%"
 
 default[:%%NAME%%][:data_memory_mbs] = 500
-default[:%%NAME%%][:timeout_xx_ms] = 10000
+default[:%%NAME%%][:timeout_ms] = 10000
