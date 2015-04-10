@@ -1,3 +1,12 @@
+---
+driver:
+  name: vagrant
+  customize:
+    memory: 3000
+    natdnshostresolver1: "on"
+    natdnsproxy1: "on"
+
+provisioner:
   name: chef_solo
 
 platforms:
@@ -10,6 +19,8 @@ suites:
       - recipe[kagent::install]
       - recipe[%%NAME%%::install]
       - recipe[%%NAME%%::default]
+      - recipe[%%NAME%%::master]
+      - recipe[%%NAME%%::slave]
 
     attributes:
          %%NAME%%:

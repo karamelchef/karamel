@@ -44,10 +44,8 @@ public class CookbookScaffolder {
     public static void createFile(String path, String template, String name) throws IOException {
         String script = ClasspathResourceUtil.readContent(template);
         script = script.replaceAll("%%NAME%%", name);
-        if (template.compareTo(Settings.CB_TEMPLATE_METADATA) == 0) {
-            String uid = System.getProperty("user.name");
-            script = script.replaceAll("%%USER%%", uid);
-        }
+        String uid = System.getProperty("user.name");
+        script = script.replaceAll("%%USER%%", uid);
         // write contents to file as text, not binary data
         PrintWriter out = new PrintWriter(path);
         out.println(script);
