@@ -8,6 +8,7 @@ version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/
 echo "version is: $version"
 
 dist=karamel-$version
+certs_dir=/home/jdowling/Dropbox/karamel/certs
 
 mvn clean package
 cd target
@@ -34,7 +35,8 @@ echo "Now building windows distribution"
 cd ..
 mvn -Dwin clean package
 cd target
-mv karamel.exe $dist
+osslsigncode -spc ${certs_dir}/authenticode.spc -key ${certs_dir}/authenticode.key -t http://timestamp.verisign.com/scripts/timstamp.dll -in karamel.exe -out karamel-signed.exe
+mv karamel-signed.exe $dist/karamel.exe
 #create windows archive
 cp ../README.windows $dist/README.txt
 zip -r ${dist}.zip $dist
