@@ -85,7 +85,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         String name = "";
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
             System.out.print("Enter cookbook name: ");
             name = br.readLine();
             File cb = new File("cookbooks" + File.separator + name);
@@ -106,6 +105,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             }
             String pathToCb = CookbookScaffolder.create(name);
             System.out.println("New Cookbook is now located at: " + pathToCb);
+            System.out.println();
             System.exit(0);
         } catch (IOException ex) {
             Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
