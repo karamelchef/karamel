@@ -44,6 +44,7 @@ osslsigncode -spc ${certs_dir}/authenticode.spc -key ${certs_dir}/authenticode.k
 mv karamel-signed.exe $dist/karamel.exe
 #create windows archive
 cp ../README.windows $dist/README.txt
+cp -r ../src/main/resources/icons $dist/
 zip -r ${dist}.zip $dist
 
 mv ${dist} ${dist}-windows
