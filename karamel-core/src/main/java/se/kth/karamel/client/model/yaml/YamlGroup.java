@@ -8,6 +8,7 @@ package se.kth.karamel.client.model.yaml;
 import java.util.ArrayList;
 import java.util.List;
 import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -46,6 +47,11 @@ public class YamlGroup extends YamlScope {
 
   public void setRecipe(String recipe) {
     this.recipes.add(recipe);
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

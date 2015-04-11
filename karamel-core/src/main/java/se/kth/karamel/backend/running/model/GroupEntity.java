@@ -24,6 +24,7 @@ public class GroupEntity {
   private GroupPhase phase = GroupPhase.NONE;
   private boolean failed = false;
   private String name;
+  private String id;
   private List<MachineEntity> machines = new ArrayList<>();
 
   public GroupEntity(ClusterEntity cluster) {
@@ -41,6 +42,14 @@ public class GroupEntity {
 
   public List<MachineEntity> getMachines() {
     return machines;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getName() {

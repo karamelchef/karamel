@@ -100,6 +100,7 @@ public class ClusterService {
   public synchronized void startCluster(String json) throws KaramelException {
     Gson gson = new Gson();
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    jsonCluster.validate();
     String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
     ClusterDefinitionService.saveYaml(yml);
     logger.info(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));

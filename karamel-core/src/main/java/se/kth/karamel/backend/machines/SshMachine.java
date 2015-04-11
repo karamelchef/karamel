@@ -62,7 +62,7 @@ public class SshMachine implements Runnable {
   public SshShell getShell() {
     return shell;
   }
-  
+
   public void setStoping(boolean stoping) {
     this.stoping = stoping;
   }
@@ -86,7 +86,7 @@ public class SshMachine implements Runnable {
       while (true && !stoping) {
 
         if (machineEntity.getLifeStatus() == MachineEntity.LifeStatus.CONNECTED
-            && machineEntity.getTasksStatus() == MachineEntity.TasksStatus.ONGOING) {
+                && machineEntity.getTasksStatus() == MachineEntity.TasksStatus.ONGOING) {
           try {
             logger.debug("Going to take a task from the queue");
             Task task = taskQueue.take();
@@ -188,6 +188,8 @@ public class SshMachine implements Runnable {
       KeyProvider keys = null;
       client = new SSHClient();
       client.addHostKeyVerifier(new PromiscuousVerifier());
+      client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
+      client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
       keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
       logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
       try {
