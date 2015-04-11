@@ -13,6 +13,7 @@ import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -64,6 +65,11 @@ public class YamlCluster extends YamlScope {
 
   public void setCookbooks(Map<String, Cookbook> cookbooks) {
     this.cookbooks.putAll(cookbooks);
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

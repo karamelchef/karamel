@@ -6,6 +6,7 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
@@ -142,6 +143,8 @@ public class ClusterManager implements Runnable {
 
     runtime.setFailed(false);
     List<GroupEntity> groups = runtime.getGroups();
+    List<GroupEntity> ec2GroupEntities = new ArrayList<>();
+    List<JsonGroup> ec2JsonGroups = new ArrayList<>();
     for (GroupEntity group : groups) {
       if (purging) {
         group.setPhase(GroupEntity.GroupPhase.PURGING);
@@ -151,23 +154,27 @@ public class ClusterManager implements Runnable {
       group.setFailed(false);
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2) {
-        try {
-          Ec2 ec2 = (Ec2) provider;
-          if (ec2Launcher == null) {
-            ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
-          }
-          ec2Launcher.cleanup(group.getName(), ec2.getRegion());
-          if (purging) {
-            group.setMachines(Collections.EMPTY_LIST);
-            group.setPhase(GroupEntity.GroupPhase.NONE);
-          } else {
-            group.setPhase(GroupEntity.GroupPhase.PRECLEANED);
-          }
-        } catch (Exception ex) {
-          group.setFailed(true);
-          runtime.setFailed(true);
+        if (ec2Launcher == null) {
+          ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
+        }
+        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
+        ec2GroupEntities.add(group);
+        ec2JsonGroups.add(jg);
+      }
+    }
+    try {
+      ec2Launcher.cleanup(definition.getName(), ec2JsonGroups, ec2GroupEntities);
+      for (GroupEntity group : ec2GroupEntities) {
+        if (purging) {
+          group.setMachines(Collections.EMPTY_LIST);
+          group.setPhase(GroupEntity.GroupPhase.NONE);
+        } else {
+          group.setPhase(GroupEntity.GroupPhase.PRECLEANED);
         }
       }
+    } catch (Exception ex) {
+      logger.error("", ex);
+      runtime.setFailed(true);
     }
 
     if (purging) {
@@ -189,6 +196,7 @@ public class ClusterManager implements Runnable {
         group.setPhase(GroupEntity.GroupPhase.FORKING_GROUPS);
         group.setFailed(false);
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
         if (provider instanceof Ec2) {
           try {
             Ec2 ec2 = (Ec2) provider;
@@ -197,7 +205,8 @@ public class ClusterManager implements Runnable {
             if (ec2Launcher == null) {
               ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
             }
-            ec2Launcher.createSecurityGroup(definition.getName(), group.getName(), ec2.getRegion(), ports);
+            String groupId = ec2Launcher.createSecurityGroup(definition.getName(), jg, ports);
+            group.setId(groupId);
             group.setPhase(GroupEntity.GroupPhase.GROUPS_FORKED);
           } catch (Exception ex) {
             if (ex instanceof InterruptedException) {
@@ -285,13 +294,13 @@ public class ClusterManager implements Runnable {
         if (provider instanceof Ec2) {
           try {
             Ec2 ec2 = (Ec2) provider;
-            HashSet<String> gns = new HashSet<>();
-            gns.add(group.getName());
+            HashSet<String> gids = new HashSet<>();
+            gids.add(group.getId());
             if (ec2Launcher == null) {
               ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
             }
             String keypairname = Settings.EC2_KEYPAIR_NAME(runtime.getName());
-            List<MachineEntity> mcs = ec2Launcher.forkMachines(keypairname, group, gns, Integer.valueOf(definedGroup.getSize()), ec2);
+            List<MachineEntity> mcs = ec2Launcher.forkMachines(keypairname, group, gids, Integer.valueOf(definedGroup.getSize()), ec2);
             group.setMachines(mcs);
             machinesMonitor.addMachines(mcs);
             group.setPhase(GroupEntity.GroupPhase.MACHINES_FORKED);
@@ -320,19 +329,19 @@ public class ClusterManager implements Runnable {
         switch (cmd) {
           case LAUNCH:
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.NONE
-                    || (runtime.getPhase() == ClusterEntity.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterEntity.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               clean(false);
             }
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.PRECLEANED
-                    || (runtime.getPhase() == ClusterEntity.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterEntity.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
               forkGroups();
             }
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.GROUPS_FORKED
-                    || (runtime.getPhase() == ClusterEntity.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterEntity.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               forkMachines();
             }
             if (runtime.getPhase() == ClusterEntity.ClusterPhases.MACHINES_FORKED
-                    || (runtime.getPhase() == ClusterEntity.ClusterPhases.INSTALLING && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterEntity.ClusterPhases.INSTALLING && runtime.isFailed())) {
               install();
             }
             break;

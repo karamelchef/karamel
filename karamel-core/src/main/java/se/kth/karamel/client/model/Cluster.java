@@ -7,6 +7,8 @@ package se.kth.karamel.client.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -45,6 +47,14 @@ public class Cluster extends Scope {
   @Override
   public String getAttr(String key) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    super.validate();
+    for (Group jg : groups.values()) {
+      jg.validate();
+    }
   }
 
 }
