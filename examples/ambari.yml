@@ -1,11 +1,11 @@
 name: ApacheHadoop
 ec2:
-    ami: 
+    image: ami-029f9476
     type: m3.medium
     region: eu-west-1
 
 cookbooks:                                                                      
-  hadoop: 
+  ambari: 
     github: "jimdowling/ambari"
     branch: "master"
     
