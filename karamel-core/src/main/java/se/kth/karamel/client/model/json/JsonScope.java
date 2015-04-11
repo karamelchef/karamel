@@ -17,6 +17,7 @@ import se.kth.karamel.client.model.Scope;
 import se.kth.karamel.cookbook.metadata.Attribute;
 import se.kth.karamel.cookbook.metadata.GithubCookbook;
 import se.kth.karamel.client.model.yaml.YamlCluster;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -78,6 +79,11 @@ public class JsonScope extends Scope {
   @Override
   public String getAttr(String key) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    super.validate();
   }
 
 }

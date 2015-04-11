@@ -8,6 +8,7 @@ package se.kth.karamel.common;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.jclouds.aws.domain.Region;
@@ -50,6 +51,8 @@ public class Settings {
   public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
   public static final int TASK_BUSYWAITING_INTERVALS = 100;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
+  public static final int SSH_CONNECTION_TIMEOUT = 24*3600*1000;
+  public static final int SSH_SESSION_TIMEOUT = 24*3600*1000;
 
   //Shell scripts
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
@@ -64,7 +67,7 @@ public class Settings {
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
   //  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
-  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
+  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
 
@@ -84,6 +87,19 @@ public class Settings {
   public static final String EC2_KEYPAIR_NAME(String clusterName) {
     return "karamel_" + USER_NAME + "_" + clusterName.toLowerCase() + "_" + OS_NAME + "_" + IP_Address;
   }
+
+  public static final String EC2_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
+    return USER_NAME + "-" + clusterName + "-" + groupName;
+  }
+
+  public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int size) {
+    List<String> names = new ArrayList<>();
+    for (int i = 1; i <= size; i++) {
+      names.add(EC2_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
+    }
+    return names;
+  }
+
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
@@ -91,23 +107,23 @@ public class Settings {
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
   public static final String SSH_PRIKEY_FILENAME = "ida_rsa";
-  
+
   public static String CLUSTER_LOG_FOLDER(String clusterName) {
     return CLUSTER_ROOT_PATH(clusterName) + File.separator + "logs";
   }
-  
+
   public static String MACHINE_LOG_FOLDER(String clusterName, String machineIp) {
-    return CLUSTER_LOG_FOLDER(clusterName) + File .separator + machineIp;
+    return CLUSTER_LOG_FOLDER(clusterName) + File.separator + machineIp;
   }
-  
+
   public static String TASK_ERROR_FILE_PATH(String clusterName, String machinIp, String taskName) {
-    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File .separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".err";
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".err";
   }
 
   public static String TASK_OUTPUT_FILE_PATH(String clusterName, String machinIp, String taskName) {
-    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File .separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".out";
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".out";
   }
-  
+
   public static String CLUSTER_ROOT_PATH(String clusterName) {
     return KARAMEL_ROOT_PATH + File.separator + clusterName.toLowerCase();
   }
@@ -130,9 +146,8 @@ public class Settings {
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
-  public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";  
-  
-  
+  public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
+
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
   public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
@@ -147,8 +162,7 @@ public class Settings {
   public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
-  
-  
+
   // Relative file locations of files in cookbook scaffolding
   public static final String COOKBOOK_DEFAULTRB_REL_PATH = File.separator + "attributes" + File.separator + "default.rb";
   public static final String COOKBOOK_METADATARB_REL_PATH = File.separator + "metadata.rb";
@@ -162,15 +176,12 @@ public class Settings {
   public static final String COOKBOOK_MASTER_SH_PATH = File.separator + "templates" + File.separator + "default" + File.separator + "master.sh.erb";
   public static final String COOKBOOK_SLAVE_SH_PATH = File.separator + "templates" + File.separator + "default" + File.separator + "slave.sh.erb";
   public static final String COOKBOOK_KITCHEN_YML_PATH = File.separator + ".kitchen.yml";
-  
-  
+
   public static final String METADATA_INCOMMENT_HOST_KEY = "%host%";
   //settings on vm machines
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";
 
-  
-  
   public static String loadIpAddress() {
     String address = "UnknownHost";
     try {

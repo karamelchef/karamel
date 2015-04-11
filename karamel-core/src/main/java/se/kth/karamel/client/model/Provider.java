@@ -5,6 +5,8 @@
  */
 package se.kth.karamel.client.model;
 
+import se.kth.karamel.common.exception.ValidationException;
+
 /**
  *
  * @author kamal
@@ -26,4 +28,6 @@ public abstract class Provider {
   public abstract Provider applyParentScope(Provider parentScopeProvider);
   
   public abstract Provider applyDefaults();
+  
+  public abstract void validate() throws ValidationException;
 }

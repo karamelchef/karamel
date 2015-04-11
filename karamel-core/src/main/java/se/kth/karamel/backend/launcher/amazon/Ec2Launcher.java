@@ -5,14 +5,21 @@
 package se.kth.karamel.backend.launcher.amazon;
 
 import com.google.common.base.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Predicate;
+import static com.google.common.base.Strings.emptyToNull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
+import org.jclouds.aws.ec2.features.AWSSecurityGroupApi;
+import org.jclouds.aws.ec2.options.CreateSecurityGroupOptions;
 import org.jclouds.compute.RunNodesException;
+import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.domain.TemplateBuilder;
@@ -21,13 +28,17 @@ import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.ec2.domain.KeyPair;
 import org.jclouds.ec2.domain.SecurityGroup;
 import org.jclouds.ec2.features.SecurityGroupApi;
+import org.jclouds.ec2.util.IpPermissions;
+import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.running.model.GroupEntity;
 import se.kth.karamel.backend.running.model.MachineEntity;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -75,8 +86,9 @@ public final class Ec2Launcher {
     return credentials;
   }
 
-  public void createSecurityGroup(String clusterName, String groupName, String region, Set<String> ports) throws KaramelException {
-    logger.info(String.format("Creating security group '%s' ...", groupName));
+  public String createSecurityGroup(String clusterName, JsonGroup group, Set<String> ports) throws KaramelException {
+    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, group.getName());
+    logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -86,10 +98,16 @@ public final class Ec2Launcher {
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
-            = context.getEc2api().getSecurityGroupApiForRegion(region);
+        = context.getEc2api().getSecurityGroupApiForRegion(group.getEc2().getRegion());
     if (securityGroupExt.isPresent()) {
-      SecurityGroupApi client = securityGroupExt.get();
-      client.createSecurityGroupInRegion(region, groupName, groupName);
+      AWSSecurityGroupApi client = (AWSSecurityGroupApi) securityGroupExt.get();
+      String groupId = null;
+      if (group.getEc2().getVpc() != null) {
+        CreateSecurityGroupOptions csgos = CreateSecurityGroupOptions.Builder.vpcId(group.getEc2().getVpc());
+        groupId = client.createSecurityGroupInRegionAndReturnId(group.getEc2().getRegion(), uniqeGroupName, uniqeGroupName, csgos);
+      } else {
+        groupId = client.createSecurityGroupInRegionAndReturnId(group.getEc2().getRegion(), uniqeGroupName, uniqeGroupName);
+      }
 
       if (!TESTING) {
         for (String port : ports) {
@@ -103,22 +121,26 @@ public final class Ec2Launcher {
             p = Integer.valueOf(port);
             pr = IpProtocol.TCP;
           }
-          client.authorizeSecurityGroupIngressInRegion(region,
-                  groupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
-          logger.info(String.format("Ports became open for '%s'", groupName));
+          client.authorizeSecurityGroupIngressInRegion(group.getEc2().getRegion(),
+              uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
+          logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
-        client.authorizeSecurityGroupIngressInRegion(region,
-                groupName, IpProtocol.TCP, 0, 65535, "0.0.0.0/0");
-        logger.info(String.format("Ports became open for '%s'", groupName));
+        IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        client.authorizeSecurityGroupIngressInRegion(group.getEc2().getRegion(), groupId, ippermission);
+        logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
       }
-      logger.info(String.format("Security group '%s' was created :)", groupName));
+      logger.info(String.format("Security group '%s' was created :)", uniqeGroupName));
+      return groupId;
     }
+    return null;
   }
 
   public List<MachineEntity> forkMachines(String keyPairName, GroupEntity mainGroup,
-          Set<String> securityGroupNames, int size, Ec2 ec2) throws KaramelException {
-    logger.info(String.format("Forking %d machines for '%s' ...", size, mainGroup.getName()));
+      Set<String> securityGroupIds, int size, Ec2 ec2) throws KaramelException {
+    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
+    List<String> uniqeVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), size);
+    logger.info(String.format("Forking %d machines for '%s' ...", size, uniqeGroupName));
 
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -144,7 +166,12 @@ public final class Ec2Launcher {
     }
     TemplateBuilder template = context.getComputeService().templateBuilder();
     options.keyPair(keyPairName);
-    options.as(EC2TemplateOptions.class).securityGroups(securityGroupNames);
+    options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
+
+    options.nodeNames(uniqeVmNames);
+    if (ec2.getSubnet() != null) {
+      options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
+    }
     template.options(options);
     template.os64Bit(true);
     template.hardwareId(ec2.getType());
@@ -158,10 +185,10 @@ public final class Ec2Launcher {
       tries++;
       try {
         forkedNodes = context.getComputeService().createNodesInGroup(
-                mainGroup.getName(), size, template.build());
-        logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, mainGroup.getName()));
+            uniqeGroupName, size, template.build());
+        logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, uniqeGroupName));
       } catch (IllegalStateException | RunNodesException ex) {
-        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, mainGroup.getName(), Settings.EC2_RETRY_INTERVAL), ex);
+        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       if (forkedNodes == null) {
@@ -177,8 +204,8 @@ public final class Ec2Launcher {
     if (forkedNodes != null) {
       List<MachineEntity> machines = new ArrayList<>();
       for (NodeMetadata node : forkedNodes) {
-        MachineEntity machine = new MachineEntity(mainGroup);
         if (node != null) {
+          MachineEntity machine = new MachineEntity(mainGroup);
           ArrayList<String> privateIps = new ArrayList();
           ArrayList<String> publicIps = new ArrayList();
           privateIps.addAll(node.getPrivateAddresses());
@@ -195,8 +222,7 @@ public final class Ec2Launcher {
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
-  public void cleanup(String groupName, String region) throws KaramelException {
-    logger.info(String.format("Destroying security group '%s' and all its machines...", groupName));
+  public void cleanup(String clusterName, List<JsonGroup> jgroups, List<GroupEntity> groups) throws KaramelException {
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -204,42 +230,76 @@ public final class Ec2Launcher {
     if (sshKeyPair == null) {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     }
-    for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(region)) {
-      if (secgroup.getName().startsWith("jclouds#" + groupName) || secgroup.getName().equals(groupName)) {
-        context.getComputeService().destroyNodesMatching(NodePredicates.inGroup(groupName));
-        logger.info(String.format("Machines destroyed in the security group '%s'.", secgroup.getName()));
+    List<String> allVmNames = new ArrayList<>();
+    for (GroupEntity groupEntity : groups) {
+      for (JsonGroup jg : jgroups) {
+        if (jg.getName().equals(groupEntity.getName())) {
+          List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(groupEntity.getCluster().getName(), groupEntity.getName(), jg.getSize());
+          allVmNames.addAll(vmNames);
+        }
       }
     }
-    for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(region)) {
-      if (secgroup.getName().startsWith("jclouds#" + groupName) || secgroup.getName().equals(groupName)) {
-        boolean retry = false;
-        int count = 0;
-        do {
-          count++;
-          try {
-            logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
-            context.getSecurityGroupApi().deleteSecurityGroupInRegion(region, secgroup.getName());
-          } catch (IllegalStateException ex) {
-            Throwable cause = ex.getCause();
-            if (cause instanceof AWSResponseException) {
-              AWSResponseException e = (AWSResponseException) cause;
-              if (e.getError().getCode().equals("InvalidGroup.InUse")) {
-                logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@", groupName, Settings.EC2_RETRY_INTERVAL));
-                retry = true;
-                try {
-                  Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
-                } catch (InterruptedException ex1) {
-                  logger.error("", ex1);
+    logger.info(String.format("Killing all machines in the cluster if exist.."));
+    context.getComputeService().destroyNodesMatching(withNamePrefix(allVmNames));
+    logger.info(String.format("All machines destroyed in all the security groups. :) "));
+
+    for (JsonGroup group : jgroups) {
+      String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, group.getName());
+      for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(group.getEc2().getRegion())) {
+        if (secgroup.getName().startsWith("jclouds#" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
+          logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
+          boolean retry = false;
+          int count = 0;
+          do {
+            count++;
+            try {
+              logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
+              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(group.getEc2().getRegion(), secgroup.getId());
+            } catch (IllegalStateException ex) {
+              Throwable cause = ex.getCause();
+              if (cause instanceof AWSResponseException) {
+                AWSResponseException e = (AWSResponseException) cause;
+                if (e.getError().getCode().equals("InvalidGroup.InUse") || e.getError().getCode().equals("DependencyViolation")) {
+                  logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@", uniqueGroupName, Settings.EC2_RETRY_INTERVAL));
+                  retry = true;
+                  try {
+                    Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
+                  } catch (InterruptedException ex1) {
+                    logger.error("", ex1);
+                  }
+                } else {
+                  throw ex;
                 }
-              } else {
-                throw ex;
               }
             }
-          }
-        } while (retry);
-        logger.info(String.format("The security group '%s' destroyed ^-^", secgroup.getName()));
+          } while (retry);
+          logger.info(String.format("The security group '%s' destroyed ^-^", secgroup.getName()));
+        }
       }
     }
   }
 
+  public static Predicate<NodeMetadata> withNamePrefix(final List<String> namePrefixs) {
+    return new Predicate<NodeMetadata>() {
+      @Override
+      public boolean apply(NodeMetadata nodeMetadata) {
+        String name = nodeMetadata.getName();
+        if (name == null) {
+          return false;
+        } else {
+          for (String pref : namePrefixs) {
+            if (name.equals(pref)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      @Override
+      public String toString() {
+        return "nameStartsWith(" + namePrefixs.toArray().toString() + ")";
+      }
+    };
+  }
 }

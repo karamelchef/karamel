@@ -6,6 +6,7 @@
 package se.kth.karamel.client.model;
 
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -17,6 +18,8 @@ public class Ec2 extends Provider {
   private String region;
   private String image;
   private Float price;
+  private String vpc;
+  private String subnet;
 
   public String getType() {
     return type;
@@ -49,7 +52,23 @@ public class Ec2 extends Provider {
   public void setPrice(Float price) {
     this.price = price;
   }
-  
+
+  public String getSubnet() {
+    return subnet;
+  }
+
+  public void setSubnet(String subnet) {
+    this.subnet = subnet;
+  }
+
+  public String getVpc() {
+    return vpc;
+  }
+
+  public void setVpc(String vpc) {
+    this.vpc = vpc;
+  }
+
   public static Ec2 makeDefault() {
     Ec2 ec2 = new Ec2();
     return ec2.applyDefaults();
@@ -81,6 +100,8 @@ public class Ec2 extends Provider {
     ec2.setRegion(region);
     ec2.setType(type);
     ec2.setPrice(price);
+    ec2.setSubnet(subnet);
+    ec2.setVpc(vpc);
     return ec2;
   }
 
@@ -101,10 +122,23 @@ public class Ec2 extends Provider {
       if (clone.getType() == null) {
         clone.setType(parentEc2.getType());
       }
-      if (clone.getPrice() == null)
+      if (clone.getPrice() == null) {
         clone.setPrice(parentEc2.getPrice());
+      }
+      if (clone.getSubnet() == null) {
+        clone.setSubnet(parentEc2.getSubnet());
+      }
+      if (clone.getVpc() == null) {
+        clone.setVpc(parentEc2.getVpc());
+      }
     }
     return clone;
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    if ((subnet != null && vpc == null) || (subnet == null && vpc != null))
+      throw new ValidationException("Both subnet and vpc ids are required for vpc settings on ec2");
   }
 
 }

@@ -1,7 +1,10 @@
 name: spark
 ec2:
-    type: m3.medium
+    type: c4.large
     region: eu-west-1
+    image: ami-47a23a30
+    vpc: vpc-f70ea392
+    subnet: subnet-e7830290
 
 cookbooks:                                                                      
   hadoop: 
