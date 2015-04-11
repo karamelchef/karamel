@@ -1,4 +1,4 @@
-name: ApacheHadoop
+name: Ambari
 ec2:
     image: ami-029f9476
     type: m3.medium
