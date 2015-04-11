@@ -1,0 +1,23 @@
+name: ApacheHadoop
+ec2:
+    ami: 
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "jimdowling/ambari"
+    branch: "master"
+    
+groups: 
+  server:
+    size: 1
+    recipes: 
+        - ambari::server
+  agents:
+    size: 4
+    recipes: 
+        - ambari::agent
+
+
+
