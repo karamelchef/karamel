@@ -51,6 +51,8 @@ public class Settings {
   public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
   public static final int TASK_BUSYWAITING_INTERVALS = 100;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
+  public static final int SSH_CONNECTION_TIMEOUT = 24*3600*1000;
+  public static final int SSH_SESSION_TIMEOUT = 24*3600*1000;
 
   //Shell scripts
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
