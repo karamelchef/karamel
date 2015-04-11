@@ -254,14 +254,31 @@
                       <maxHeapSize>4096</maxHeapSize>
                       <runtimeBits>64/32</runtimeBits>
                     </jre>
-<!--
-                    <splash>
-                      <file>icons/karamel-logo.bmp</file>
-		      <waitForWindow>false</waitForWindow>
-		      <timeout>2</timeout>
-		      <timeoutErr>false</timeoutErr>
-		    </splash>
--->
+		    <!--
+			<splash>
+			<file>icons/karamel-logo.bmp</file>
+			<waitForWindow>false</waitForWindow>
+			<timeout>2</timeout>
+			<timeoutErr>false</timeoutErr>
+			</splash>
+		    -->
+		    <versionInfo>
+		      <fileVersion>0.0.0.1</fileVersion>
+		      <txtFileVersion>Karamel</txtFileVersion>
+		      <fileDescription>Karamel</fileDescription>
+		      <copyright>Karamel</copyright>
+		      <productVersion>0.0.0.1</productVersion>
+		      <txtProductVersion>Karamel</txtProductVersion>
+		      <productName>Karamel</productName>
+		      <companyName>Karamel</companyName>
+		      <internalName>karamel</internalName>
+		      <originalFilename>karamel.exe</originalFilename>
+		    </versionInfo>
+		    <messages>
+		      <startupErr>Karamel startup error</startupErr>
+		      <jreVersionErr>Karamel requires 64-bit java version 7 or higher.</jreVersionErr>
+		      <launcherErr>Karamel launcher error. Karamel requires 64-bit java, version 7 or higher.</launcherErr>
+		    </messages>
                   </configuration>
                 </execution>
               </executions>
