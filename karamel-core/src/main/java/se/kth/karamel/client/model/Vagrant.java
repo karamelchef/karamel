@@ -6,6 +6,8 @@
 
 package se.kth.karamel.client.model;
 
+import se.kth.karamel.common.exception.ValidationException;
+
 /**
  *
  * @author kamal
@@ -24,6 +26,11 @@ public class Vagrant extends Provider {
 
   @Override
   public Provider applyDefaults() {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void validate() throws ValidationException {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
   

@@ -11,6 +11,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import static org.jclouds.Constants.PROPERTY_CONNECTION_TIMEOUT;
 import org.jclouds.ContextBuilder;
+import org.jclouds.aws.ec2.compute.AWSEC2ComputeService;
 import org.jclouds.aws.ec2.features.AWSKeyPairApi;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
 import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
@@ -32,7 +33,7 @@ import se.kth.karamel.common.Ec2Credentials;
 public class Ec2Context {
 
   private final Ec2Credentials credentials;
-  private final ComputeService computeService;
+  private final AWSEC2ComputeService computeService;
   private final EC2Api ec2api;
   private final SecurityGroupApi securityGroupApi;
   private final AWSKeyPairApi keypairApi;
@@ -56,7 +57,7 @@ public class Ec2Context {
             .modules(modules)
             .overrides(properties);
     ComputeServiceContext context = build.buildView(ComputeServiceContext.class);
-    this.computeService = context.getComputeService();
+    this.computeService = (AWSEC2ComputeService) context.getComputeService();
     this.ec2api = computeService.getContext().unwrapApi(EC2Api.class);
     this.securityGroupApi = ec2api.getSecurityGroupApi().get();
     this.keypairApi = (AWSKeyPairApi) ec2api.getKeyPairApi().get();
@@ -66,7 +67,7 @@ public class Ec2Context {
     return credentials;
   }
 
-  public ComputeService getComputeService() {
+  public AWSEC2ComputeService getComputeService() {
     return computeService;
   }
 

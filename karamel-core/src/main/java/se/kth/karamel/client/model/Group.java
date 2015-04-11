@@ -7,6 +7,7 @@ package se.kth.karamel.client.model;
 
 import java.util.HashSet;
 import java.util.Set;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -51,6 +52,11 @@ public class Group extends Scope {
   @Override
   public String getAttr(String key) {
     throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    super.validate();
   }
 
 }

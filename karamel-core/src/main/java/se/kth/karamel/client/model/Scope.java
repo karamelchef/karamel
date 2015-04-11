@@ -5,6 +5,8 @@
  */
 package se.kth.karamel.client.model;
 
+import se.kth.karamel.common.exception.ValidationException;
+
 /**
  *
  * @author kamal
@@ -24,7 +26,6 @@ public abstract class Scope {
     this.baremetal = scope.getBaremetal();
   }
 
-  
   public abstract String getAttr(String key);
 
   public Provider getProvider() {
@@ -61,4 +62,12 @@ public abstract class Scope {
     this.vagrant = vagrant;
   }
 
+  public void validate() throws ValidationException {
+    if (ec2 != null)
+      ec2.validate();
+    if (baremetal != null)
+      baremetal.validate();
+    if(vagrant != null)
+      vagrant.validate();
+  };
 }
