@@ -16,4 +16,22 @@ Karamel system definitions are very compact. We leverage Berkshelf to transparen
 
 Karamel provides a web-ui, built on AngularJS.
 
+####Using Virtual Private Cloud on AWS-EC2
+------
 
+User must take the steps below to be able to use vpc: 
+
+0. Make a VPC and a subnet assigned to it under your ec2.
+1. Check the "Auto-assign Public IP" item for your subnet. 
+2. Make an internet gateway and attach it to the VPC.
+3. Make a routing table for your VPC and add a row for your gateway into it, on this row open all ips '0.0.0.0/0'.
+4. Add your vpc-id and subnet-id into the ec2 section of your yaml like the following example. Also make sure you are using the right image and type of instance for your vpc. 
+
+```yaml
+ec2:
+    type: c4.large
+    region: eu-west-1
+    image: ami-47a23a30
+    vpc: vpc-f70ea392
+    subnet: subnet-e7830290
+```
