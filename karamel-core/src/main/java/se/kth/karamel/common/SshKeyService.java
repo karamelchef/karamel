@@ -12,11 +12,16 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.Files;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.ssh.SshKeys;
 import se.kth.karamel.common.exception.SshKeysNotfoundException;
+
 
 /**
  *
@@ -42,6 +47,14 @@ public class SshKeyService {
     }
     File pubFile = new File(folder, Settings.SSH_PUBKEY_FILENAME);
     File priFile = new File(folder, Settings.SSH_PRIKEY_FILENAME);
+    Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+    perms.add(PosixFilePermission.OWNER_READ);
+    perms.add(PosixFilePermission.OWNER_WRITE);
+    try {
+       Files.setPosixFilePermissions(priFile.toPath(), perms);
+    } catch (IOException ex) {
+	logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on generated private ssh-key. ", ex);
+    }
     Map<String, String> keys = SshKeys.generate();
     String pub = keys.get("public");
     String pri = keys.get("private");
