@@ -51,8 +51,8 @@ public class KaramelApiTest {
 
   @Test
   public void testEndToEnd() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "spark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/sparkonvpc.yml"), Charsets.UTF_8);
+    String clusterName = "hiway";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
 //    System.out.println(json);
 //    System.out.println("===================================================");
