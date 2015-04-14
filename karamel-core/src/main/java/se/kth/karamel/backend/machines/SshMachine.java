@@ -161,7 +161,7 @@ public class SshMachine implements Runnable {
 
       session = client.startSession();
       Session.Command cmd = session.exec(shellCommand.getCmdStr());
-      cmd.join(30, TimeUnit.MINUTES);
+      cmd.join(1, TimeUnit.DAYS);
       updateHeartbeat();
       if (cmd.getExitStatus() != 0) {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
