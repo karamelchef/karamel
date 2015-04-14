@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
@@ -58,8 +58,8 @@ public class MachinesMonitor implements Runnable {
     return null;
   }
 
-  public synchronized void addMachines(List<MachineEntity> machineEntities) {
-    for (MachineEntity machineEntity : machineEntities) {
+  public synchronized void addMachines(List<MachineRuntime> machineEntities) {
+    for (MachineRuntime machineEntity : machineEntities) {
       SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey());
       machines.put(machineEntity.getId(), sshMachine);
       executor.execute(sshMachine);

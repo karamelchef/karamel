@@ -16,6 +16,7 @@ import net.schmizz.sshj.connection.channel.direct.PTYMode;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.connection.channel.direct.SessionChannel;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
+import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -88,6 +89,9 @@ public class SshShell {
 
       };
       streamReader.start();
+    } catch (UserAuthException ex) {
+      logger.error("", ex);
+      throw new KaramelException("Issue for using ssh keys, make sure you keypair is not password protected..", ex);
     } catch (Exception ex) {
       logger.error("", ex);
       throw new KaramelException("Exception Occured", ex);

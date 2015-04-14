@@ -8,7 +8,7 @@ package se.kth.karamel.backend.running.model.tasks;
 import java.io.IOException;
 import java.util.List;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
 /**
@@ -17,7 +17,7 @@ import se.kth.karamel.common.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineEntity machine) {
+  public AptGetEssentialsTask(MachineRuntime machine) {
     super("apt-get essentials", machine);
   }
 

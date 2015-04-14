@@ -8,7 +8,7 @@ package se.kth.karamel.backend.running.model.tasks;
 import java.io.IOException;
 import java.util.List;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
 /**
@@ -23,7 +23,7 @@ public class VendorCookbookTask extends Task {
   private final String cookbookUrl;
   private final String branch;
 
-  public VendorCookbookTask(MachineEntity machine, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
+  public VendorCookbookTask(MachineRuntime machine, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
     super("clone and vendor " + cookbookUrl, machine);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;

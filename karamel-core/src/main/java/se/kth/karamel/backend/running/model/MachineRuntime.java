@@ -13,7 +13,7 @@ import se.kth.karamel.backend.running.model.tasks.Task;
  *
  * @author kamal
  */
-public class MachineEntity {
+public class MachineRuntime {
 
   public static enum LifeStatus {
 
@@ -25,7 +25,7 @@ public class MachineEntity {
     ONGOING, FAILED, PAUSING, PAUSED
   }
 
-  private final GroupEntity group;
+  private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.ONGOING;
   private String privateIp;
@@ -35,11 +35,11 @@ public class MachineEntity {
 
   private final List<Task> tasks = new ArrayList<>();
 
-  public MachineEntity(GroupEntity group) {
+  public MachineRuntime(GroupRuntime group) {
     this.group = group;
   }
 
-  public GroupEntity getGroup() {
+  public GroupRuntime getGroup() {
     return group;
   }
   
@@ -95,10 +95,10 @@ public class MachineEntity {
     return tasksStatus;
   }
 
-  public synchronized  void setTasksStatus(TasksStatus tasksStatus) {
+  public synchronized  void setTasksStatus(TasksStatus tasksStatus, String taskId, String failureMessage) {
     this.tasksStatus = tasksStatus;
     if (tasksStatus == TasksStatus.FAILED)
-      group.setFailed(true);
+      group.getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, taskId, failureMessage));
   }
 
   public String getId() {

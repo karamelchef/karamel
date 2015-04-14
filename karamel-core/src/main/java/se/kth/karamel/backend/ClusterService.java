@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
-import se.kth.karamel.backend.running.model.ClusterEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.SshKeyPair;
@@ -88,7 +88,7 @@ public class ClusterService {
     clusterContexts.put(name, clusterContext);
   }
 
-  public synchronized ClusterEntity clusterStatus(String clusterName) throws KaramelException {
+  public synchronized ClusterRuntime clusterStatus(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
@@ -152,9 +152,9 @@ public class ClusterService {
       @Override
       public void run() {
         try {
-          ClusterEntity runtime = cluster.getRuntime();
+          ClusterRuntime runtime = cluster.getRuntime();
           cluster.enqueue(ClusterManager.Command.PURGE);
-          while (runtime.getPhase() != ClusterEntity.ClusterPhases.NONE) {
+          while (runtime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED) {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
