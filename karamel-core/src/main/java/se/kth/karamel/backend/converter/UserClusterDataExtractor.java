@@ -16,9 +16,9 @@ import java.util.Set;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.dag.TaskRunner;
 import se.kth.karamel.backend.machines.MachinesMonitor;
-import se.kth.karamel.backend.running.model.ClusterEntity;
-import se.kth.karamel.backend.running.model.GroupEntity;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
 import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
 import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
@@ -46,7 +46,7 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
  */
 public class UserClusterDataExtractor {
 
-  public static String clusterLinks(JsonCluster cluster, ClusterEntity clusterEntity) throws KaramelException {
+  public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
@@ -61,11 +61,11 @@ public class UserClusterDataExtractor {
               for (String link : links) {
                 if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
                   if (clusterEntity != null) {
-                    GroupEntity ge = findGroup(clusterEntity, jg.getName());
+                    GroupRuntime ge = findGroup(clusterEntity, jg.getName());
                     if (ge != null) {
-                      List<MachineEntity> machines = ge.getMachines();
+                      List<MachineRuntime> machines = ge.getMachines();
                       if (machines != null) {
-                        for (MachineEntity me : ge.getMachines()) {
+                        for (MachineRuntime me : ge.getMachines()) {
                           String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
                           builder.append(l).append("\n");
                         }
@@ -103,8 +103,8 @@ public class UserClusterDataExtractor {
     return null;
   }
 
-  public static GroupEntity findGroup(ClusterEntity clusterEntity, String groupName) {
-    for (GroupEntity g : clusterEntity.getGroups()) {
+  public static GroupRuntime findGroup(ClusterRuntime clusterEntity, String groupName) {
+    for (GroupRuntime g : clusterEntity.getGroups()) {
       if (g.getName().equals(groupName)) {
         return g;
       }
@@ -138,21 +138,21 @@ public class UserClusterDataExtractor {
    * @return
    * @throws KaramelException
    */
-  public static Dag getInstallationDag(JsonCluster cluster, ClusterEntity clusterEntity, MachinesMonitor monitor, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
+  public static Dag getInstallationDag(JsonCluster cluster, ClusterRuntime clusterEntity, MachinesMonitor monitor, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
     Map<String, Task> mlts = machineLevelTasks(cluster, clusterEntity);
     Map<String, Map<String, Task>> clts = cookbookLevelTasks(cluster, clusterEntity, chefJsons, test);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, chefJsons, test);
-    Map<String, MachineEntity> allMachines = new HashMap<>();
-    for (GroupEntity ge : clusterEntity.getGroups()) {
-      for (MachineEntity me : ge.getMachines()) {
+    Map<String, MachineRuntime> allMachines = new HashMap<>();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      for (MachineRuntime me : ge.getMachines()) {
         allMachines.put(me.getId(), me);
       }
     }
     Map<String, TaskRunner> allTasks = new HashMap<>();
     Dag dag = new Dag();
-    for (GroupEntity ge : clusterEntity.getGroups()) {
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineEntity me : ge.getMachines()) {
+      for (MachineRuntime me : ge.getMachines()) {
         String mid = me.getId();
         String id1 = AptGetEssentialsTask.makeUniqueId(mid);
         Task t1 = mlts.get(id1);
@@ -220,10 +220,10 @@ public class UserClusterDataExtractor {
     return dag;
   }
 
-  private static TaskRunner getTaskRunner(Task t, MachinesMonitor monitor, Map<String, TaskRunner> allTasks, Map<String, MachineEntity> allMachines) {
+  private static TaskRunner getTaskRunner(Task t, MachinesMonitor monitor, Map<String, TaskRunner> allTasks, Map<String, MachineRuntime> allMachines) {
     TaskRunner r1 = allTasks.get(t.uniqueId());
     if (r1 == null) {
-      MachineEntity me = allMachines.get(t.getMachineId());
+      MachineRuntime me = allMachines.get(t.getMachineId());
       me.addTask(t);
       r1 = new TaskRunner(t, monitor);
       allTasks.put(t.uniqueId(), r1);
@@ -240,11 +240,11 @@ public class UserClusterDataExtractor {
    * @param chefJsons
    * @return two level mapping of (recipeName -> taskId -> task)
    */
-  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons, boolean test) {
+  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, Map<String, JsonObject> chefJsons, boolean test) {
     Map<String, Map<String, Task>> map = new HashMap<>();
-    for (GroupEntity ge : clusterEntity.getGroups()) {
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineEntity me : ge.getMachines()) {
+      for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           String installRecipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
 
@@ -269,7 +269,7 @@ public class UserClusterDataExtractor {
     return map;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, Map<String, Map<String, Task>> map, JsonObject chefJson, boolean test) {
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineRuntime machine, Map<String, Map<String, Task>> map, JsonObject chefJson, boolean test) {
     RunRecipeTask t1 = makeRecipeTask(recipeName, machine, chefJson, test);
     Map<String, Task> map1 = map.get(recipeName);
     if (map1 == null) {
@@ -280,7 +280,7 @@ public class UserClusterDataExtractor {
     return t1;
   }
 
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineEntity machine, JsonObject chefJson, boolean test) {
+  private static RunRecipeTask makeRecipeTask(String recipeName, MachineRuntime machine, JsonObject chefJson, boolean test) {
     if (!test) {
       ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -299,11 +299,11 @@ public class UserClusterDataExtractor {
    * @return two level mapping of (machineId -> taskId -> task)
    * @throws KaramelException
    */
-  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
+  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
-    for (GroupEntity ge : clusterEntity.getGroups()) {
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineEntity me : ge.getMachines()) {
+      for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
           GithubUrls urls = jc.getUrls();
@@ -331,11 +331,11 @@ public class UserClusterDataExtractor {
    * @param clusterEntity
    * @return map of taskId -> task
    */
-  public static Map<String, Task> machineLevelTasks(JsonCluster cluster, ClusterEntity clusterEntity) throws KaramelException {
+  public static Map<String, Task> machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     Map<String, Task> map = new HashMap<>();
     String vendorPath = makeVendorPath(cluster);
-    for (GroupEntity ge : clusterEntity.getGroups()) {
-      for (MachineEntity me : ge.getMachines()) {
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      for (MachineRuntime me : ge.getMachines()) {
         AptGetEssentialsTask t1 = new AptGetEssentialsTask(me);
         map.put(t1.uniqueId(), t1);
         InstallBerkshelfTask t2 = new InstallBerkshelfTask(me);

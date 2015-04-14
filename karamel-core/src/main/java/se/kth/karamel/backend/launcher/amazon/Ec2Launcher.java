@@ -33,8 +33,8 @@ import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import se.kth.karamel.backend.running.model.GroupEntity;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
@@ -69,7 +69,7 @@ public final class Ec2Launcher {
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
       return cxt;
     } catch (AuthorizationException e) {
-      throw new InvalidEc2CredentialsException(e);
+      throw new InvalidEc2CredentialsException("accountid:" + credentials.getAccountId(), e);
     }
   }
 
@@ -98,7 +98,7 @@ public final class Ec2Launcher {
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
-        = context.getEc2api().getSecurityGroupApiForRegion(group.getEc2().getRegion());
+            = context.getEc2api().getSecurityGroupApiForRegion(group.getEc2().getRegion());
     if (securityGroupExt.isPresent()) {
       AWSSecurityGroupApi client = (AWSSecurityGroupApi) securityGroupExt.get();
       String groupId = null;
@@ -122,7 +122,7 @@ public final class Ec2Launcher {
             pr = IpProtocol.TCP;
           }
           client.authorizeSecurityGroupIngressInRegion(group.getEc2().getRegion(),
-              uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
+                  uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
@@ -136,8 +136,34 @@ public final class Ec2Launcher {
     return null;
   }
 
-  public List<MachineEntity> forkMachines(String keyPairName, GroupEntity mainGroup,
-      Set<String> securityGroupIds, int size, Ec2 ec2) throws KaramelException {
+  public void uploadSshPublicKey(String keyPairName, Ec2 ec2, boolean removeOld) throws KaramelException {
+    if (context == null) {
+      throw new KaramelException("Register your valid credentials first :-| ");
+    }
+
+    if (sshKeyPair == null) {
+      throw new KaramelException("Choose your ssh keypair first :-| ");
+    }
+
+    HashSet<String> regions = new HashSet();
+    if (!regions.contains(ec2.getRegion())) {
+      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
+      if (keypairs.isEmpty()) {
+        logger.info(String.format("New keypair '%s' is being uploaded to EC2", keyPairName));
+        context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
+      } else {
+        if (removeOld) {
+          logger.info(String.format("Removing the old keypair '%s' and uploading the new one ...", keyPairName));
+          context.getKeypairApi().deleteKeyPairInRegion(ec2.getRegion(), keyPairName);
+          context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
+        } 
+      }
+      regions.add(ec2.getRegion());
+    }
+  }
+
+  public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
+          Set<String> securityGroupIds, int size, Ec2 ec2) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
     List<String> uniqeVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), size);
     logger.info(String.format("Forking %d machines for '%s' ...", size, uniqeGroupName));
@@ -153,17 +179,7 @@ public final class Ec2Launcher {
     if (ec2.getPrice() != null) {
       options.spotPrice(ec2.getPrice());
     }
-    HashSet<String> regions = new HashSet();
-    if (!regions.contains(ec2.getRegion())) {
-      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
-      if (keypairs.isEmpty()) {
-        logger.info(String.format("New keypair '%s' is being uploaded to EC2", keyPairName));
-        context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
-      } else {
-        logger.info(String.format("An old keypair '%s' found on EC2", keyPairName));
-      }
-      regions.add(ec2.getRegion());
-    }
+
     TemplateBuilder template = context.getComputeService().templateBuilder();
     options.keyPair(keyPairName);
     options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
@@ -185,7 +201,7 @@ public final class Ec2Launcher {
       tries++;
       try {
         forkedNodes = context.getComputeService().createNodesInGroup(
-            uniqeGroupName, size, template.build());
+                uniqeGroupName, size, template.build());
         logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, uniqeGroupName));
       } catch (IllegalStateException | RunNodesException ex) {
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
@@ -202,10 +218,10 @@ public final class Ec2Launcher {
     }
 
     if (forkedNodes != null) {
-      List<MachineEntity> machines = new ArrayList<>();
+      List<MachineRuntime> machines = new ArrayList<>();
       for (NodeMetadata node : forkedNodes) {
         if (node != null) {
-          MachineEntity machine = new MachineEntity(mainGroup);
+          MachineRuntime machine = new MachineRuntime(mainGroup);
           ArrayList<String> privateIps = new ArrayList();
           ArrayList<String> publicIps = new ArrayList();
           privateIps.addAll(node.getPrivateAddresses());
@@ -222,7 +238,7 @@ public final class Ec2Launcher {
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
-  public void cleanup(String clusterName, List<JsonGroup> jgroups, List<GroupEntity> groups) throws KaramelException {
+  public void cleanup(String clusterName, List<String> vmNames, Map<String, String> groupRegion) throws KaramelException {
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -230,22 +246,13 @@ public final class Ec2Launcher {
     if (sshKeyPair == null) {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     }
-    List<String> allVmNames = new ArrayList<>();
-    for (GroupEntity groupEntity : groups) {
-      for (JsonGroup jg : jgroups) {
-        if (jg.getName().equals(groupEntity.getName())) {
-          List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(groupEntity.getCluster().getName(), groupEntity.getName(), jg.getSize());
-          allVmNames.addAll(vmNames);
-        }
-      }
-    }
-    logger.info(String.format("Killing all machines in the cluster if exist.."));
-    context.getComputeService().destroyNodesMatching(withNamePrefix(allVmNames));
-    logger.info(String.format("All machines destroyed in all the security groups. :) "));
 
-    for (JsonGroup group : jgroups) {
-      String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, group.getName());
-      for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(group.getEc2().getRegion())) {
+    logger.info(String.format("Killing following machines in the cluster if exist..\n %s", vmNames.toString()));
+    context.getComputeService().destroyNodesMatching(withNamePrefix(vmNames));
+    logger.info(String.format("All machines destroyed in all the security groups. :) "));
+    for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
+      String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
+      for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(gp.getValue())) {
         if (secgroup.getName().startsWith("jclouds#" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
           logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
           boolean retry = false;
@@ -254,7 +261,7 @@ public final class Ec2Launcher {
             count++;
             try {
               logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
-              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(group.getEc2().getRegion(), secgroup.getId());
+              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(gp.getValue(), secgroup.getId());
             } catch (IllegalStateException ex) {
               Throwable cause = ex.getCause();
               if (cause instanceof AWSResponseException) {

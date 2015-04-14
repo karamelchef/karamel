@@ -8,7 +8,7 @@ package se.kth.karamel.backend.running.model.tasks;
 import java.io.IOException;
 import java.util.List;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
 /**
@@ -20,7 +20,7 @@ public class RunRecipeTask extends Task {
   private final String recipe;
   private String json;
 
-  public RunRecipeTask(MachineEntity machine, String recipe, String json) {
+  public RunRecipeTask(MachineRuntime machine, String recipe, String json) {
     super("recipe " + recipe, machine);
     this.recipe = recipe;
     this.json = json;

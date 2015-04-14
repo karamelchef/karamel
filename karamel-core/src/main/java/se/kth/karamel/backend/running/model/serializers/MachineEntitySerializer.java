@@ -10,16 +10,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 
 /**
  *
  * @author kamal
  */
-public class MachineEntitySerializer implements JsonSerializer<MachineEntity> {
+public class MachineEntitySerializer implements JsonSerializer<MachineRuntime> {
 
   @Override
-  public JsonElement serialize(MachineEntity machineEntity, Type type, JsonSerializationContext context) {
+  public JsonElement serialize(MachineRuntime machineEntity, Type type, JsonSerializationContext context) {
     final JsonObject jsonObj = new JsonObject();
     jsonObj.add("machine", context.serialize(machineEntity.getPublicIp()));
     jsonObj.add("life", context.serialize(machineEntity.getLifeStatus().toString()));

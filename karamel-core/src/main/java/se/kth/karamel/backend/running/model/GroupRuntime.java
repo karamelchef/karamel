@@ -13,34 +13,33 @@ import se.kth.karamel.client.model.json.JsonGroup;
  *
  * @author kamal
  */
-public class GroupEntity {
+public class GroupRuntime {
 
   public static enum GroupPhase {
 
     NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING;
   }
 
-  private final ClusterEntity cluster;
+  private final ClusterRuntime cluster;
   private GroupPhase phase = GroupPhase.NONE;
-  private boolean failed = false;
   private String name;
   private String id;
-  private List<MachineEntity> machines = new ArrayList<>();
+  private List<MachineRuntime> machines = new ArrayList<>();
 
-  public GroupEntity(ClusterEntity cluster) {
+  public GroupRuntime(ClusterRuntime cluster) {
     this.cluster = cluster;
   }
 
-  public GroupEntity(ClusterEntity cluster, JsonGroup definition) {
+  public GroupRuntime(ClusterRuntime cluster, JsonGroup definition) {
     this.cluster = cluster;
     this.name = definition.getName();
   }
 
-  public void setMachines(List<MachineEntity> machines) {
+  public void setMachines(List<MachineRuntime> machines) {
     this.machines = machines;
   }
 
-  public List<MachineEntity> getMachines() {
+  public List<MachineRuntime> getMachines() {
     return machines;
   }
 
@@ -63,19 +62,8 @@ public class GroupEntity {
   public void setPhase(GroupPhase phase) {
     this.phase = phase;
   }
-
-  public boolean isFailed() {
-    return failed;
-  }
-
-  public void setFailed(boolean failed) {
-    this.failed = failed;
-    if (failed) {
-      cluster.setFailed(failed);
-    }
-  }
-
-  public ClusterEntity getCluster() {
+  
+  public ClusterRuntime getCluster() {
     return cluster;
   }
 

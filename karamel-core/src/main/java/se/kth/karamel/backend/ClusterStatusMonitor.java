@@ -7,7 +7,7 @@ package se.kth.karamel.backend;
 
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.machines.MachinesMonitor;
-import se.kth.karamel.backend.running.model.ClusterEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.Settings;
 
@@ -20,10 +20,10 @@ public class ClusterStatusMonitor implements Runnable {
   private static final Logger logger = Logger.getLogger(ClusterStatusMonitor.class);
   private final JsonCluster definition;
   private final MachinesMonitor machinesMonitor;
-  private final ClusterEntity clusterEntity;
+  private final ClusterRuntime clusterEntity;
   private boolean stoping = false;
 
-  public ClusterStatusMonitor(MachinesMonitor machinesMonitor, JsonCluster definition, ClusterEntity runtime) {
+  public ClusterStatusMonitor(MachinesMonitor machinesMonitor, JsonCluster definition, ClusterRuntime runtime) {
     this.definition = definition;
     this.machinesMonitor = machinesMonitor;
     this.clusterEntity = runtime;

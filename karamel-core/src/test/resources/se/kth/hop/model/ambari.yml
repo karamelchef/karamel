@@ -1,0 +1,23 @@
+name: ambari
+ec2:
+    image: ami-029f9476
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  ambari: 
+    github: "jimdowling/ambari"
+    branch: "master"
+    
+groups: 
+  server:
+    size: 1
+    recipes: 
+        - ambari::server
+  agents:
+    size: 2
+    recipes: 
+        - ambari::agent
+
+
+

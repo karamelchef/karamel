@@ -10,22 +10,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import se.kth.karamel.backend.running.model.GroupEntity;
+import se.kth.karamel.backend.running.model.GroupRuntime;
 
 /**
  *
  * @author kamal
  */
-public class GroupEntitySerializer implements JsonSerializer<GroupEntity> {
+public class GroupEntitySerializer implements JsonSerializer<GroupRuntime> {
 
   @Override
-  public JsonElement serialize(GroupEntity groupEntity, Type type, JsonSerializationContext context) {
+  public JsonElement serialize(GroupRuntime groupEntity, Type type, JsonSerializationContext context) {
     final JsonObject jsonObj = new JsonObject();
     jsonObj.add("group", context.serialize(groupEntity.getName()));
     jsonObj.add("phase", context.serialize(groupEntity.getPhase().toString()));
-    if (groupEntity.isFailed()) {
-      jsonObj.add("failed", context.serialize(groupEntity.isFailed()));
-    }
     jsonObj.add("machines", context.serialize(groupEntity.getMachines()));
     return jsonObj;
   }

@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import se.kth.karamel.backend.running.model.ClusterEntity;
-import se.kth.karamel.backend.running.model.GroupEntity;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -37,11 +37,11 @@ public class ChefJsonGenerator {
    * @param clusterEntity
    * @return map of machineId-recipeName->json
    */
-  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, ClusterEntity clusterEntity) {
+  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, ClusterRuntime clusterEntity) {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
-    for (GroupEntity groupEntity : clusterEntity.getGroups()) {
+    for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
       for (JsonCookbook cb : jsonGroup.getCookbooks()) {
@@ -52,10 +52,10 @@ public class ChefJsonGenerator {
     return chefJsons;
   }
 
-  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, GroupEntity groupEntity) {
+  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, GroupRuntime groupEntity) {
     Map<String, JsonObject> groupJsons = new HashMap<>();
     addCookbookAttributes(cb, json);
-    for (MachineEntity me : groupEntity.getMachines()) {
+    for (MachineRuntime me : groupEntity.getMachines()) {
       for (JsonRecipe recipe : cb.getRecipes()) {
         JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getName());
         groupJsons.put(me.getId() + recipe.getName(), clone);
@@ -67,7 +67,7 @@ public class ChefJsonGenerator {
     return groupJsons;
   }
 
-  public static JsonObject addMachineNRecipeToJson(JsonObject json, MachineEntity me, String recipeName) {
+  public static JsonObject addMachineNRecipeToJson(JsonObject json, MachineRuntime me, String recipeName) {
     JsonObject clone = cloneJsonObject(json);
     addMachineIps(clone, me);
     addRunListForRecipe(clone, recipeName);
@@ -80,7 +80,7 @@ public class ChefJsonGenerator {
     chefJson.add(Settings.CHEF_JSON_RUNLIST_TAG, jarr);
   }
 
-  public static void addMachineIps(JsonObject json, MachineEntity machineEntity) {
+  public static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
     JsonArray ips = new JsonArray();
     ips.add(new JsonPrimitive(machineEntity.getPrivateIp()));
     json.add("private_ips", ips);
@@ -130,12 +130,12 @@ public class ChefJsonGenerator {
     }
   }
 
-  public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterEntity clusterEntity) {
+  public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
     Map<String, Set<String>> privateIps = new HashMap<>();
     Map<String, Set<String>> publicIps = new HashMap<>();
-    for (GroupEntity ge : clusterEntity.getGroups()) {
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
-      for (MachineEntity me : ge.getMachines()) {
+      for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
             if (!recipe.getName().endsWith(Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {

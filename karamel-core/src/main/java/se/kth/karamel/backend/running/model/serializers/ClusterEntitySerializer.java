@@ -10,16 +10,16 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
-import se.kth.karamel.backend.running.model.ClusterEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 
 /**
  *
  * @author kamal
  */
-public class ClusterEntitySerializer implements JsonSerializer<ClusterEntity> {
+public class ClusterEntitySerializer implements JsonSerializer<ClusterRuntime> {
 
   @Override
-  public JsonElement serialize(ClusterEntity clusterEntity, Type type, JsonSerializationContext context) {
+  public JsonElement serialize(ClusterRuntime clusterEntity, Type type, JsonSerializationContext context) {
     final JsonObject jsonObj = new JsonObject();
     jsonObj.add("cluster", context.serialize(clusterEntity.getName()));
     jsonObj.add("phase", context.serialize(clusterEntity.getPhase().toString()));

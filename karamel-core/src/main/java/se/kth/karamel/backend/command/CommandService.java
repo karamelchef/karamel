@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +28,10 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.machines.SshMachine;
 import se.kth.karamel.backend.machines.SshShell;
-import se.kth.karamel.backend.running.model.ClusterEntity;
-import se.kth.karamel.backend.running.model.GroupEntity;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.ClasspathResourceUtil;
@@ -136,13 +138,14 @@ public class CommandService {
       if (chosenCluster() != null) {
         StringBuilder builder = new StringBuilder();
         ClusterManager cluster = cluster(chosenCluster());
-        ClusterEntity clusterEntity = cluster.getRuntime();
+        ClusterRuntime clusterEntity = cluster.getRuntime();
         builder.append(clusterEntity.getName()).append(" is ").append(clusterEntity.getPhase());
         if (clusterEntity.isPaused()) {
-          builder.append(" but it is paused.");
+          builder.append(" but it is on pause.").append("\n");
         }
-        if (clusterEntity.isFailed()) {
-          builder.append(" Some failures have happened.");
+        if (clusterEntity.isFailed() && !clusterEntity.getFailures().isEmpty()) {
+          builder.append(" List of failures: ").append("\n");
+          builder.append(failureTable(clusterEntity.getFailures().values(), true));
         }
         builder.append("\n");
         builder.append(machinesTasksTable(clusterEntity));
@@ -168,14 +171,13 @@ public class CommandService {
     } else if (cmd.equals("groups")) {
       if (chosenCluster() != null) {
         ClusterManager cluster = cluster(chosenCluster());
-        ClusterEntity clusterEntity = cluster.getRuntime();
-        String[] columnNames = {"Name", "Phase", "Failed"};
+        ClusterRuntime clusterEntity = cluster.getRuntime();
+        String[] columnNames = {"Name", "Phase"};
         String[][] data = new String[clusterEntity.getGroups().size()][3];
         for (int i = 0; i < clusterEntity.getGroups().size(); i++) {
-          GroupEntity group = clusterEntity.getGroups().get(i);
+          GroupRuntime group = clusterEntity.getGroups().get(i);
           data[i][0] = group.getName();
           data[i][1] = String.valueOf(group.getPhase());
-          data[i][2] = String.valueOf(group.isFailed());
         }
         result = makeTable(columnNames, 2, data, true);
         nextCmd = "groups";
@@ -185,10 +187,10 @@ public class CommandService {
     } else if (cmd.equals("machines")) {
       if (chosenCluster() != null) {
         ClusterManager cluster = cluster(chosenCluster());
-        ClusterEntity clusterEntity = cluster.getRuntime();
-        ArrayList<MachineEntity> machines = new ArrayList<>();
-        for (GroupEntity group : clusterEntity.getGroups()) {
-          for (MachineEntity machine : group.getMachines()) {
+        ClusterRuntime clusterEntity = cluster.getRuntime();
+        ArrayList<MachineRuntime> machines = new ArrayList<>();
+        for (GroupRuntime group : clusterEntity.getGroups()) {
+          for (MachineRuntime machine : group.getMachines()) {
             machines.add(machine);
           }
         }
@@ -200,7 +202,7 @@ public class CommandService {
     } else if (cmd.equals("tasks")) {
       if (chosenCluster() != null) {
         ClusterManager cluster = cluster(chosenCluster());
-        ClusterEntity clusterEntity = cluster.getRuntime();
+        ClusterRuntime clusterEntity = cluster.getRuntime();
         result = machinesTasksTable(clusterEntity);
         nextCmd = "tasks";
       } else {
@@ -387,9 +389,9 @@ public class CommandService {
         if (chosenCluster() != null) {
           boolean taskFound = false;
           ClusterManager cluster = cluster(chosenCluster());
-          ClusterEntity clusterEntity = cluster.getRuntime();
-          for (GroupEntity group : clusterEntity.getGroups()) {
-            for (MachineEntity machine : group.getMachines()) {
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -414,9 +416,9 @@ public class CommandService {
         if (chosenCluster() != null) {
           boolean taskFound = false;
           ClusterManager cluster = cluster(chosenCluster());
-          ClusterEntity clusterEntity = cluster.getRuntime();
-          for (GroupEntity group : clusterEntity.getGroups()) {
-            for (MachineEntity machine : group.getMachines()) {
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -519,6 +521,19 @@ public class CommandService {
     return result;
   }
 
+  private static String failureTable(Collection<Failure> failures, boolean rowNumbering) {
+    String[] columnNames = {"Failure", "Id", "Message"};
+    Object[][] data = new Object[failures.size()][columnNames.length];
+    int i = 0;
+    for (Failure failure : failures) {
+      data[i][0] = failure.getType().name();
+      data[i][1] = (failure.getId() == null)? "" : failure.getId();
+      data[i][2] = failure.getMessage();
+    }
+
+    return makeTable(columnNames, 1, data, rowNumbering);
+  }
+
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
     String[] columnNames = {"Task", "Status", "Machine", "Logs"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
@@ -533,13 +548,13 @@ public class CommandService {
     return makeTable(columnNames, 1, data, rowNumbering);
   }
 
-  private static String machinesTable(ArrayList<MachineEntity> machines, boolean rowNumbering) {
+  private static String machinesTable(ArrayList<MachineRuntime> machines, boolean rowNumbering) {
     String[] columnNames = {"Group", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
     Object[][] data = new Object[machines.size()][columnNames.length];
     for (int i = 0; i < machines.size(); i++) {
-      MachineEntity machine = machines.get(i);
+      MachineRuntime machine = machines.get(i);
       data[i][0] = machine.getGroup().getName();
-      data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>"+ machine.getPublicIp() +"</a>";
+      data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>" + machine.getPublicIp() + "</a>";
       data[i][2] = machine.getPrivateIp();
       data[i][3] = machine.getSshPort();
       data[i][4] = machine.getSshUser();
@@ -562,11 +577,11 @@ public class CommandService {
     return new String(os.toByteArray(), Charset.forName("utf8"));
   }
 
-  private static String machinesTasksTable(ClusterEntity clusterEntity) {
+  private static String machinesTasksTable(ClusterRuntime clusterEntity) {
     StringBuilder builder = new StringBuilder();
-    for (GroupEntity group : clusterEntity.getGroups()) {
-      for (MachineEntity machine : group.getMachines()) {
-        ArrayList<MachineEntity> machines = new ArrayList<>();
+    for (GroupRuntime group : clusterEntity.getGroups()) {
+      for (MachineRuntime machine : group.getMachines()) {
+        ArrayList<MachineRuntime> machines = new ArrayList<>();
         machines.add(machine);
         builder.append(machinesTable(machines, false));
         builder.append("\n");

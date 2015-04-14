@@ -51,26 +51,27 @@ public class KaramelApiTest {
 
   @Test
   public void testEndToEnd() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "hiway";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
+    String clusterName = "ambari";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/ambari.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
 //    System.out.println(json);
 //    System.out.println("===================================================");
     SshKeyPair sshKeys = api.loadSshKeysIfExist();
-    if (sshKeys == null)
+    if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
     api.registerSshKeys(sshKeys);
     Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
     api.updateEc2CredentialsIfValid(credentials);
-    
+
 //    api.registerSshKeys(clusterName, keypair);
 //    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
 //    api.processCommand("use hiway");
     long ms1 = System.currentTimeMillis();
     int mins = 0;
-    while (ms1 + 6000000 > System.currentTimeMillis()) {
-      mins ++;
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      mins++;
       CommandResponse response = api.processCommand("status");
 
       System.out.println(response.getResult());

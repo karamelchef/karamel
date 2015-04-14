@@ -18,7 +18,7 @@ import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.backend.running.model.tasks.Task.Status;
@@ -26,7 +26,9 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import net.schmizz.sshj.userauth.UserAuthException;
 import se.kth.karamel.backend.LogService;
+import se.kth.karamel.backend.running.model.Failure;
 
 /**
  *
@@ -39,7 +41,7 @@ public class SshMachine implements Runnable {
   }
 
   private static final Logger logger = Logger.getLogger(SshMachine.class);
-  private final MachineEntity machineEntity;
+  private final MachineRuntime machineEntity;
   private final String serverPubKey;
   private final String serverPrivateKey;
   private SSHClient client;
@@ -48,14 +50,14 @@ public class SshMachine implements Runnable {
   private boolean stoping = false;
   private SshShell shell;
 
-  public SshMachine(MachineEntity machineEntity, String serverPubKey, String serverPrivateKey) {
+  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
     this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
   }
 
-  public MachineEntity getMachineEntity() {
+  public MachineRuntime getMachineEntity() {
     return machineEntity;
   }
 
@@ -68,14 +70,14 @@ public class SshMachine implements Runnable {
   }
 
   public void pause() {
-    if (machineEntity.getTasksStatus().ordinal() < MachineEntity.TasksStatus.PAUSING.ordinal()) {
-      machineEntity.setTasksStatus(MachineEntity.TasksStatus.PAUSING);
+    if (machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
+      machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSING, null, null);
     }
   }
 
   public void resume() {
-    if (machineEntity.getTasksStatus() != MachineEntity.TasksStatus.FAILED) {
-      machineEntity.setTasksStatus(MachineEntity.TasksStatus.ONGOING);
+    if (machineEntity.getTasksStatus() != MachineRuntime.TasksStatus.FAILED) {
+      machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
     }
   }
 
@@ -85,11 +87,12 @@ public class SshMachine implements Runnable {
     try {
       while (true && !stoping) {
 
-        if (machineEntity.getLifeStatus() == MachineEntity.LifeStatus.CONNECTED
-                && machineEntity.getTasksStatus() == MachineEntity.TasksStatus.ONGOING) {
+        if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
+                && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
+          Task task = null;
           try {
             logger.debug("Going to take a task from the queue");
-            Task task = taskQueue.take();
+            task = taskQueue.take();
             logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
             runTask(task);
           } catch (InterruptedException ex) {
@@ -100,12 +103,12 @@ public class SshMachine implements Runnable {
               logger.error("", ex);
             }
           } catch (KaramelException ex) {
-            machineEntity.setTasksStatus(MachineEntity.TasksStatus.FAILED);
+            machineEntity.setTasksStatus(MachineRuntime.TasksStatus.FAILED, (task != null) ? task.getUuid() : null, ex.getMessage());
             logger.error("", ex);
           }
         } else {
-          if (machineEntity.getTasksStatus() == MachineEntity.TasksStatus.PAUSING) {
-            machineEntity.setTasksStatus(MachineEntity.TasksStatus.PAUSED);
+          if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
+            machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
           }
           try {
             Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
@@ -122,33 +125,34 @@ public class SshMachine implements Runnable {
   public void enqueue(Task task) throws KaramelException {
     logger.debug(String.format("Queuing '%s'", task.toString()));
     try {
-      task.setStatus(Status.READY);
+      task.setStatus(Status.READY, null);
       taskQueue.put(task);
     } catch (InterruptedException ex) {
-      task.setStatus(Status.FAILED);
-      throw new KaramelException(String.format("Couldn't queue task '%s' on machine '%s'", task.getName(), machineEntity.getId()), ex);
+      String message = String.format("Couldn't queue task '%s' on machine '%s'", task.getName(), machineEntity.getId());
+      task.setStatus(Status.FAILED, message);
+      throw new KaramelException(message, ex);
     }
   }
 
   private synchronized void runTask(Task task) throws KaramelException {
     try {
-      task.setStatus(Status.ONGOING);
+      task.setStatus(Status.ONGOING, null);
       List<ShellCommand> commands = task.getCommands();
 
       for (ShellCommand cmd : commands) {
         if (cmd.getStatus() != ShellCommand.Status.DONE) {
           runSshCmd(cmd, task);
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-            task.setStatus(Status.FAILED);
+            task.setStatus(Status.FAILED, String.format("Incompleted command '%s", cmd.getCmdStr()));
             break;
           }
         }
       }
       if (task.getStatus() == Status.ONGOING) {
-        task.setStatus(Status.DONE);
+        task.setStatus(Status.DONE, null);
       }
     } catch (Exception ex) {
-      task.setStatus(Status.FAILED);
+      task.setStatus(Status.FAILED, ex.getMessage());
       throw new KaramelException(ex);
     }
   }
@@ -161,7 +165,7 @@ public class SshMachine implements Runnable {
 
       session = client.startSession();
       Session.Command cmd = session.exec(shellCommand.getCmdStr());
-      cmd.join(1, TimeUnit.DAYS);
+      cmd.join(60 * 24, TimeUnit.MINUTES);
       updateHeartbeat();
       if (cmd.getExitStatus() != 0) {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
@@ -200,14 +204,20 @@ public class SshMachine implements Runnable {
       }
       if (client.isConnected()) {
         logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
+        machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp()));
         client.authPublickey(machineEntity.getSshUser(), keys);
-        machineEntity.setLifeStatus(MachineEntity.LifeStatus.CONNECTED);
+        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
         return true;
       } else {
         logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
-        machineEntity.setLifeStatus(MachineEntity.LifeStatus.UNREACHABLE);
+        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
         return false;
       }
+    } catch (UserAuthException ex) {
+      String message = "Issue for using ssh keys, make sure you keypair is not password protected..";
+      KaramelException exp = new KaramelException(message, ex);
+      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
+      throw exp;
     } catch (IOException e) {
       throw new KaramelException(e);
     }

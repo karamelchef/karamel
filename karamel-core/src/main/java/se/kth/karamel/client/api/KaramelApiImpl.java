@@ -13,9 +13,9 @@ import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
-import se.kth.karamel.backend.running.model.ClusterEntity;
-import se.kth.karamel.backend.running.model.GroupEntity;
-import se.kth.karamel.backend.running.model.MachineEntity;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
@@ -94,11 +94,11 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
-    ClusterEntity clusterManager = clusterService.clusterStatus(clusterName);
+    ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
     Gson gson = new GsonBuilder().
-            registerTypeAdapter(ClusterEntity.class, new ClusterEntitySerializer()).
-            registerTypeAdapter(MachineEntity.class, new MachineEntitySerializer()).
-            registerTypeAdapter(GroupEntity.class, new GroupEntitySerializer()).
+            registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
+            registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
+            registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
             registerTypeAdapter(ShellCommand.class, new ShellCommandSerializer()).
             registerTypeAdapter(RunRecipeTask.class, new DefaultTaskSerializer()).
             registerTypeAdapter(MakeSoloRbTask.class, new DefaultTaskSerializer()).

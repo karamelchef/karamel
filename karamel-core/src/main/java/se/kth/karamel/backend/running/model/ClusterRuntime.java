@@ -6,7 +6,9 @@
 package se.kth.karamel.backend.running.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonGroup;
 
@@ -14,31 +16,33 @@ import se.kth.karamel.client.model.json.JsonGroup;
  *
  * @author kamal
  */
-public class ClusterEntity {
+public class ClusterRuntime {
 
   public static enum ClusterPhases {
-    NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING ;
+    NOT_STARTED, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING ;
   }
   
   private final String name;
   
-  private ClusterPhases phase = ClusterPhases.NONE;
+  private ClusterPhases phase = ClusterPhases.NOT_STARTED;
   
   private boolean failed = false;
   
   private boolean paused = false;
 
-  private List<GroupEntity> groups = new ArrayList<>();
-
-  public ClusterEntity(String name) {
+  private List<GroupRuntime> groups = new ArrayList<>();
+  
+  private Map<String, Failure> failures = new HashMap<>();
+  
+  public ClusterRuntime(String name) {
     this.name = name;
   }
 
-  public ClusterEntity(JsonCluster definition) {
+  public ClusterRuntime(JsonCluster definition) {
     this.name = definition.getName();
     List<JsonGroup> definedGroups = definition.getGroups();
     for (JsonGroup jg : definedGroups) {
-      GroupEntity group = new GroupEntity(this, jg);
+      GroupRuntime group = new GroupRuntime(this, jg);
       groups.add(group);
     }
   }
@@ -47,11 +51,11 @@ public class ClusterEntity {
     return name;
   }
   
-  public void setGroups(List<GroupEntity> groups) {
+  public void setGroups(List<GroupRuntime> groups) {
     this.groups = groups;
   }
 
-  public List<GroupEntity> getGroups() {
+  public List<GroupRuntime> getGroups() {
     return groups;
   }
 
@@ -67,8 +71,23 @@ public class ClusterEntity {
     return failed;
   }
 
-  public void setFailed(boolean failed) {
-    this.failed = failed;
+  public void issueFailure(Failure failure) {
+    this.failed = true;
+    failures.put(failure.hash(), failure);
+  }
+  
+  public void resolveFailure(String hash) {
+    failures.remove(hash);
+    failed = !failures.isEmpty();
+  }
+  
+  public void resolveFailures() {
+    failures.clear();
+    failed = false;
+  }
+
+  public Map<String, Failure> getFailures() {
+    return failures;
   }
 
   public boolean isPaused() {
