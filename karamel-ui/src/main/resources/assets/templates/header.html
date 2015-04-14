@@ -20,12 +20,12 @@
                     <a class="dropdown-toggle headerFont" data-toggle="dropdown"> File <b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         <!--<li><a href="#/yaml/template">New from template</a></li>-->
-                        <li class="custom-font"><a href="#/yaml/open" click-directive>Load Yaml</a></li>
+                        <li class="custom-font"><a href="#/yaml/open" click-directive>Load Cluster</a></li>
                         <li class="custom-font"><input type="file" id="fileUploader" style="display: none"
                                                        file-uploader></li>
-                        <li class="custom-font"><a ng-click="editYaml()">View Yaml</a></li>
+                        <li class="custom-font"><a ng-click="editYaml()">View Cluster</a></li>
                         <li class="divider"></li>
-                        <li class="custom-font"><a ng-click="saveYamlToDisk()">Save</a></li>
+                        <li class="custom-font"><a ng-click="saveYamlToDisk()">Save Cluster</a></li>
                         <li class="divider"></li>
                         <li class="custom-font"><a ng-click="switchTerminal()">Command Page</a> </li>
                     </ul>
@@ -71,10 +71,7 @@
                     <ul class="dropdown-menu" role="menu">
 
                         <li class="custom-font"><a title="Set Cookbook Attributes" class="leftTextAlign"
-                                                   ng-click="configureGlobalAttributes()">Cookbook Attributes</a></li>
-                        
-                        <li class="custom-font"><a title="Set Credentials" class="leftTextAlign"
-                                                   ng-click="setCredentials()">Credentials</a></li>
+                                                   ng-click="configureGlobalAttributes()">Configure Cluster</a></li>
                     </ul>
                 </li>
                 <li>
