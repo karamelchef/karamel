@@ -86,8 +86,8 @@ public final class Ec2Launcher {
     return credentials;
   }
 
-  public String createSecurityGroup(String clusterName, JsonGroup group, Set<String> ports) throws KaramelException {
-    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, group.getName());
+  public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports) throws KaramelException {
+    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -98,15 +98,15 @@ public final class Ec2Launcher {
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
-            = context.getEc2api().getSecurityGroupApiForRegion(group.getEc2().getRegion());
+            = context.getEc2api().getSecurityGroupApiForRegion(ec2.getRegion());
     if (securityGroupExt.isPresent()) {
       AWSSecurityGroupApi client = (AWSSecurityGroupApi) securityGroupExt.get();
       String groupId = null;
-      if (group.getEc2().getVpc() != null) {
-        CreateSecurityGroupOptions csgos = CreateSecurityGroupOptions.Builder.vpcId(group.getEc2().getVpc());
-        groupId = client.createSecurityGroupInRegionAndReturnId(group.getEc2().getRegion(), uniqeGroupName, uniqeGroupName, csgos);
+      if (ec2.getVpc() != null) {
+        CreateSecurityGroupOptions csgos = CreateSecurityGroupOptions.Builder.vpcId(ec2.getVpc());
+        groupId = client.createSecurityGroupInRegionAndReturnId(ec2.getRegion(), uniqeGroupName, uniqeGroupName, csgos);
       } else {
-        groupId = client.createSecurityGroupInRegionAndReturnId(group.getEc2().getRegion(), uniqeGroupName, uniqeGroupName);
+        groupId = client.createSecurityGroupInRegionAndReturnId(ec2.getRegion(), uniqeGroupName, uniqeGroupName);
       }
 
       if (!TESTING) {
@@ -121,13 +121,13 @@ public final class Ec2Launcher {
             p = Integer.valueOf(port);
             pr = IpProtocol.TCP;
           }
-          client.authorizeSecurityGroupIngressInRegion(group.getEc2().getRegion(),
+          client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(),
                   uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
         IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
-        client.authorizeSecurityGroupIngressInRegion(group.getEc2().getRegion(), groupId, ippermission);
+        client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, ippermission);
         logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
       }
       logger.info(String.format("Security group '%s' was created :)", uniqeGroupName));
