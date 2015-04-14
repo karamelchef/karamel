@@ -1,9 +1,10 @@
 name: hiway
 ec2:
-    type: m3.medium
-    image: ami-0307ce74
+    type: m3.large
+    image: ami-234ecc54
     region: eu-west-1
-    username: ubuntu
+    username: hiway
+    price: 0.1
 
 cookbooks:
   hadoop:
@@ -12,24 +13,44 @@ cookbooks:
   hiway:
     github: "marcbux/hiway-chef"
     branch: "master"
+
+attrs:
+  hadoop:
+    yarn:
+      nm:
+        memory_mbs: '6656'
+      vcores: '7'
+    mr:
+      tmp_dir: '/mnt/tmp/hadoop'
+    data_dir: '/mnt/data/hadoop'
+    num_replicas: '1'
+    container_cleanup_delay_sec: '86400'
+  hiway:
+    data: '/mnt/data'
+    release: 'false'
+    hiway:
+      am:
+        memory_mb: '512'
+        vcores: '1'
+      worker:
+        memory_mb: '6144'
+        vcores: '6'
     
 groups:
-  hiwaymaster:
+  clientmaster:
     size: 1
     recipes:
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
+        - hiway::hiway_client
+        - hiway::RNAseq_client
 
-  hiwayslaves:
-    size: 2
+  workers:
+    size: 3
     recipes:
         - hadoop::dn
         - hadoop::nm
-        - hiway::hadoop
-        - hiway::cuneiform
-        - hiway::cuneiform_helloworld_cf_prepare
-        - hiway::cuneiform_variantcall_hg38_cf_prepare
-        - hiway::hiway_wordcount_cf_prepare
-        - hiway::hiway_montage_synthetic_dax_prepare
-        - hiway::hiway_galaxy101_ga_prepare
+        - hiway::hiway_worker
+        - hiway::galaxy_worker
+        - hiway::RNAseq_worker
