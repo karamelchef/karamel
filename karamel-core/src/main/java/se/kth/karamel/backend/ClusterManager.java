@@ -212,7 +212,7 @@ public class ClusterManager implements Runnable {
             if (ec2Launcher == null) {
               ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
             }
-            String groupId = ec2Launcher.createSecurityGroup(definition.getName(), jg, ports);
+            String groupId = ec2Launcher.createSecurityGroup(definition.getName(), jg.getName(), ec2, ports);
             group.setId(groupId);
             group.setPhase(GroupRuntime.GroupPhase.GROUPS_FORKED);
           } catch (Exception ex) {
