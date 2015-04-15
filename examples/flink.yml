@@ -1,0 +1,24 @@
+name: StandaloneFlinkWithHDFS
+ec2:
+    type: m3.medium
+    region: eu-west-1
+    
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink: 
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+    
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - flink::jobmanager
+  datanodes:
+    size: 2
+    recipes: 
+        - hadoop::dn
+        - flink::taskmanager
