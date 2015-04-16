@@ -1,0 +1,25 @@
+name: ApacheHadoop
+ec2:
+    type: c3.2xlarge
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "version_26"
+    
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs                                                            
+  datanodes:
+    size: 2
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm
+
+
+
