@@ -6,7 +6,11 @@ ec2:
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-    branch: "version_26"
+    branch: "master"
+
+attrs:
+  hadoop:
+    version: 2.6.0
     
 groups: 
   namenodes:
