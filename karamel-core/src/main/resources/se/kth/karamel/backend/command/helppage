@@ -1,0 +1,38 @@
+########################################################################################################################
+   _____                              _           _    _____                                          _     
+  / ____|                            | |         | |  / ____|                                        | |    
+ | (___  _   _ _ __  _ __   ___  _ __| |_ ___  __| | | |     ___  _ __ ___  _ __ ___   __ _ _ __   __| |___ 
+  \___ \| | | | '_ \| '_ \ / _ \| '__| __/ _ \/ _` | | |    / _ \| '_ ` _ \| '_ ` _ \ / _` | '_ \ / _` / __|
+  ____) | |_| | |_) | |_) | (_) | |  | ||  __/ (_| | | |___| (_) | | | | | | | | | | | (_| | | | | (_| \__ \
+ |_____/ \__,_| .__/| .__/ \___/|_|   \__\___|\__,_|  \_____\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_|___/
+              | |   | |                                                                                     
+              |_|   |_|                                                                                     
+########################################################################################################################
+home                    : terminal home-page
+help                    : shows available commands
+list                    : available cluster definitions in the cache
+new                     : yaml editor to define a new cluster yaml
+save                    : creates/updates cluster definition in the cache
+remove   <cluster_name> : deletes cluster definition if it is not running
+yaml     <cluster_name> : returns cluster definition from the cache
+launch   <cluster_name> : launches denoted cluster if it is not already running
+links    <cluster_name> : useful links of the cluster's services
+which ec2               : ec2 account-id 
+which ssh               : ssh keys' path
+clusters                : lists available running clusters
+use      <cluster_name> : switches the active cluster in terminal
+which cluster           : active cluster in the command center
+yaml     <cluster_name> : yaml definition of the cluster
+status   <cluster_name> : summary of the cluster
+detail   <cluster_name> : detail json of the cluster
+groups   <cluster_name> : groups' summary
+machines <cluster_name> : machines' summary
+tasks    <cluster_name> : installation tasks on each machine
+purge    <cluster_name> : kills all vms, security groups
+--------------------------------------------------------------------------------
+                    ACTIVE SHELL COMMANDS
+--------------------------------------------------------------------------------
+shellconnect <ip>       : opens an interactive shell to specified machine, 
+shelldisconnect         : drops the connection to the active shell
+shellexec               : flushes the command into the output stream of active shell
+shellread               : reads unread data from input stream of active shell

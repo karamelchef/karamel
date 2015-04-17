@@ -21,7 +21,8 @@ angular.module('karamel.terminal', [])
           scope.commandObj.push({
             commandName: null,
             commandResult: null,
-            renderer: 'info'
+            renderer: 'info',
+            menuitems: [{command: "home", label: 'Home'}, {command: "new", label: 'New Cluster'}, {command: "help", label: 'Help'}]
           });
           scope.intervalInstance.push(undefined);
           scope.timeoutInstance.push(undefined);
@@ -33,6 +34,7 @@ angular.module('karamel.terminal', [])
         });
 
         scope.htmlSafeData = undefined;
+        scope.processCommand(0, "home");
       }
 
       $scope.htmlsafe = function(index) {
@@ -110,8 +112,11 @@ angular.module('karamel.terminal', [])
 
       $scope.processCommand = function(index, cmdName) {
         $log.info("Process Command Called");
+        var commandArg = null;
+        if ($scope.commandObj[index].renderer === 'yaml')
+          commandArg = $scope.commandObj[index].commandResult;
         _destroyIntervalInstance(index);
-        $scope.$emit('ask-core', {index: index, cmdName: cmdName, cmdArg: null});
+        $scope.$emit('ask-core', {index: index, cmdName: cmdName, cmdArg: commandArg});
       };
 
       $scope.$on('ask-core', function(e, input) {
@@ -128,27 +133,34 @@ angular.module('karamel.terminal', [])
         KaramelCoreRestServices.processCommand(obj)
 
           .success(function(data) {
-            $scope.commandObj[index].commandResult = data.result;
+            $scope.commandObj[index].errormsg = data.errormsg;
 
-            if (data.renderer !== null) {
-              $scope.commandObj[index].renderer = data.renderer;
-            } else {
-              $scope.commandObj[index].renderer = 'info';
-            }
-            if (data.renderer === 'info') {
-              if (data.nextCmd !== null) {
-                _destroyIntervalInstance(index);
-                $scope.timeoutInstance[index] = $timeout(function() {
-                  $scope.$emit('ask-core', {index: index, cmdName: data.nextCmd, cmdArg: null})
-                }, 2000);
+            if (data.errormsg === null) {
+              $scope.commandObj[index].successmsg = data.successmsg;
+              if (data.successmsg === null) {
+                $scope.commandObj[index].commandResult = data.result;
+
+                if (data.renderer !== null) {
+                  $scope.commandObj[index].renderer = data.renderer;
+                } else {
+                  $scope.commandObj[index].renderer = 'info';
+                }
+                if (data.renderer === 'info') {
+                  if (data.nextCmd !== null) {
+                    _destroyIntervalInstance(index);
+                    $scope.timeoutInstance[index] = $timeout(function() {
+                      $scope.$emit('ask-core', {index: index, cmdName: data.nextCmd, cmdArg: null})
+                    }, 2000);
+                  }
+                  $scope.htmlsafe(index);
+                } else if (data.renderer === 'ssh') {
+                  _destroyIntervalInstance(index);
+                  $scope.$emit('core-result-ssh', [data.result]);
+                }
+
+                $scope.commandObj[index].menuitems = data.menuItems;
               }
-              $scope.htmlsafe(index);
-            } else if (data.renderer === 'ssh') {
-              _destroyIntervalInstance(index);
-              $scope.$emit('core-result-ssh', [data.result]);
             }
-
-
 
           })
           .error(function(data) {
