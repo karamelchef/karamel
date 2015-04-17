@@ -506,11 +506,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                     command.setResult(cmdRes.getResult());
                     command.setNextCmd(cmdRes.getNextCmd());
                     command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
-
+                    command.getMenuItems().addAll(cmdRes.getMenuItems());
+                    command.setSuccessmsg(cmdRes.getSuccessMessage());
                 } catch (KaramelException e) {
-                    command.setResult(e.getMessage());
+                    command.setErrormsg(e.getMessage());
                 } catch (Exception e) {
-                    command.setResult(e.getMessage());
+                    command.setErrormsg(e.getMessage());
                 } finally {
                     response = Response.status(Response.Status.OK).entity(command).build();
                 }
