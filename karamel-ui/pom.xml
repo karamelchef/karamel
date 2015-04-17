@@ -245,13 +245,13 @@
                     <errTitle>Karamel Error</errTitle>
                     <singleInstance>
                       <mutexName>Karamel</mutexName>
-                      <windowTitle>Karamel</windowTitle>
+                      <windowTitle>Another Instance of Karamel is already Running.</windowTitle>
                     </singleInstance>
                     <jre>
                       <minVersion>1.7.0</minVersion>
                       <maxVersion>1.9.0</maxVersion>
                       <initialHeapSize>128</initialHeapSize>
-                      <maxHeapSize>4096</maxHeapSize>
+                      <maxHeapSize>1024</maxHeapSize>
                       <runtimeBits>64/32</runtimeBits>
                     </jre>
 		    <!--
@@ -265,12 +265,12 @@
 		    <versionInfo>
 		      <fileVersion>0.0.0.1</fileVersion>
 		      <txtFileVersion>Karamel</txtFileVersion>
-		      <fileDescription>Karamel</fileDescription>
+		      <fileDescription>Karamel - orchestration for Chef Solo</fileDescription>
 		      <copyright>Karamel</copyright>
 		      <productVersion>0.0.0.1</productVersion>
 		      <txtProductVersion>Karamel</txtProductVersion>
 		      <productName>Karamel</productName>
-		      <companyName>Karamel</companyName>
+		      <companyName>karamel.io</companyName>
 		      <internalName>karamel</internalName>
 		      <originalFilename>karamel.exe</originalFilename>
 		    </versionInfo>
