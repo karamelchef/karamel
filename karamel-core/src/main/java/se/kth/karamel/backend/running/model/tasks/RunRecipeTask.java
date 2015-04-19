@@ -56,4 +56,21 @@ public class RunRecipeTask extends Task {
         return recipe.substring(idx+Settings.COOOKBOOK_DELIMITER.length(), recipe.length()-1);
     }
 
+    @Override
+    public int hashCode() {
+        return recipe.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof RunRecipeTask)) {
+            return false;
+        }
+        RunRecipeTask rrt = (RunRecipeTask) obj;
+        if (uniqueId().compareTo(rrt.uniqueId()) != 0) {
+            return false;
+        }
+        return true;
+    }
+    
 }
