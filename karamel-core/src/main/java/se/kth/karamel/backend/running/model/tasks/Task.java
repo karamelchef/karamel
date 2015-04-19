@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.running.model.tasks;
 
+import com.google.gson.JsonArray;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,8 @@ public abstract class Task {
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
-
+  private JsonArray results;
+    
   public Task(String name, MachineRuntime machine) {
     this.name = name;
     this.machineId = machine.getId();
@@ -73,5 +75,12 @@ public abstract class Task {
   public String getUuid() {
     return uuid;
   }
-  
+
+  public JsonArray getResults() {
+    return results;
+  }
+
+  public void setResults(JsonArray results) {
+    this.results = results;
+  }
 }

@@ -5,13 +5,18 @@
  */
 package se.kth.karamel.backend.machines;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.TransportException;
@@ -26,9 +31,12 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 
 /**
  *
@@ -49,7 +57,8 @@ public class SshMachine implements Runnable {
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stoping = false;
   private SshShell shell;
-
+  private final ConcurrentLinkedQueue<JsonArray> resultsQueue = new ConcurrentLinkedQueue<>();
+    
   public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
@@ -122,6 +131,40 @@ public class SshMachine implements Runnable {
     }
   }
 
+
+    /**
+     *
+     * @return null if the Queue is empty, otherwise a JsonArray
+     */
+    public JsonArray getNextResult() {
+        return resultsQueue.poll();
+    }
+
+    /**
+     * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
+     *
+     * @param session
+     * @param cookbook
+     * @param recipe
+     */
+    private synchronized JsonArray downloadResultsScp(String cookbook, String recipe) throws IOException {
+        String remoteFile = "~/" + cookbook + "__" + recipe + ".out";
+        SCPFileTransfer scp = client.newSCPFileTransfer();
+        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + "__" + recipe + ".out";
+        File f = new File(localResultsFile);
+        // TODO - should move this to some initialization method
+        f.mkdirs();
+        if (f.exists()) {
+            f.delete();
+        }
+        // TODO: error checking here...
+        scp.download(remoteFile, localResultsFile);
+        JsonReader reader = new JsonReader(new FileReader(localResultsFile));
+        JsonParser jsonParser = new JsonParser();
+        return jsonParser.parse(reader).getAsJsonArray();
+    }
+    
+    
   public void enqueue(Task task) throws KaramelException {
     logger.debug(String.format("Queuing '%s'", task.toString()));
     try {
@@ -170,7 +213,20 @@ public class SshMachine implements Runnable {
       if (cmd.getExitStatus() != 0) {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
       } else {
-        shellCommand.setStatus(ShellCommand.Status.DONE);
+	  shellCommand.setStatus(ShellCommand.Status.DONE);
+	  if (task instanceof RunRecipeTask) {
+	      RunRecipeTask rrt = (RunRecipeTask) task;
+	      try {
+		  JsonArray results = downloadResultsScp(rrt.getCookbook(), rrt.getRecipe());
+		  rrt.setResults(results);
+	      } catch (JsonParseException p) {
+		  logger.error("Bug in Chef Cookbook - Results were not a valid json document: " + rrt.getCookbook() + "::" + rrt.getRecipe());
+		  rrt.setResults(null);		  
+	      } catch (IOException e) {
+		  logger.error("Possible network problem. No results were able to be downloaded for: " + rrt.getCookbook() + "::" + rrt.getRecipe());
+		  rrt.setResults(null);
+	      }
+	  }
       }
       LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
 

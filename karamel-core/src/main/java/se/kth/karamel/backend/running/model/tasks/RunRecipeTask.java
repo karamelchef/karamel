@@ -17,33 +17,43 @@ import se.kth.karamel.common.Settings;
  */
 public class RunRecipeTask extends Task {
 
-  private final String recipe;
-  private String json;
+    private final String recipe;
+    private String json;
 
-  public RunRecipeTask(MachineRuntime machine, String recipe, String json) {
-    super("recipe " + recipe, machine);
-    this.recipe = recipe;
-    this.json = json;
-  }
-
-  @Override
-  public List<ShellCommand> getCommands() throws IOException {
-    if (commands == null) {
-      String jsonFileName = recipe.replaceAll(Settings.COOOKBOOK_DELIMITER, "__");
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE, 
-              "chef_json", json,
-              "json_file_name", jsonFileName,
-              "log_file_name", jsonFileName);
+    public RunRecipeTask(MachineRuntime machine, String recipe, String json) {
+        super("recipe " + recipe, machine);
+        this.recipe = recipe;
+        this.json = json;
     }
-    return commands;
-  }
 
-  public static String makeUniqueId(String machineId, String recipe) {
-    return RunRecipeTask.class.getSimpleName() + recipe +  machineId;
-  }
+    @Override
+    public List<ShellCommand> getCommands() throws IOException {
+        if (commands == null) {
+            String jsonFileName = recipe.replaceAll(Settings.COOOKBOOK_DELIMITER, "__");
+            commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE,
+                    "chef_json", json,
+                    "json_file_name", jsonFileName,
+                    "log_file_name", jsonFileName);
+        }
+        return commands;
+    }
 
-  @Override
-  public String uniqueId() {
-    return makeUniqueId(super.getMachineId(), recipe);
-  }
+    public static String makeUniqueId(String machineId, String recipe) {
+        return RunRecipeTask.class.getSimpleName() + recipe + machineId;
+    }
+
+    @Override
+    public String uniqueId() {
+        return makeUniqueId(super.getMachineId(), recipe);
+    }
+
+    public String getRecipe() {
+        return recipe.substring(0, recipe.indexOf(Settings.COOOKBOOK_DELIMITER)-1);
+    }
+
+    public String getCookbook() {
+        int idx = recipe.lastIndexOf(Settings.COOOKBOOK_DELIMITER);
+        return recipe.substring(idx+Settings.COOOKBOOK_DELIMITER.length(), recipe.length()-1);
+    }
+
 }
