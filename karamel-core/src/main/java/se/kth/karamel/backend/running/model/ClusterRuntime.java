@@ -27,8 +27,6 @@ public class ClusterRuntime implements Serializable {
   
   private ClusterPhases phase = ClusterPhases.NOT_STARTED;
   
-  private boolean failed = false;
-  
   private boolean paused = false;
 
   private List<GroupRuntime> groups = new ArrayList<>();
@@ -69,22 +67,19 @@ public class ClusterRuntime implements Serializable {
   }
 
   public boolean isFailed() {
-    return failed;
+    return !failures.isEmpty();
   }
 
   public void issueFailure(Failure failure) {
-    this.failed = true;
     failures.put(failure.hash(), failure);
   }
   
   public void resolveFailure(String hash) {
     failures.remove(hash);
-    failed = !failures.isEmpty();
   }
   
   public void resolveFailures() {
     failures.clear();
-    failed = false;
   }
 
   public Map<String, Failure> getFailures() {

@@ -52,8 +52,9 @@ public class MachinesMonitor implements Runnable {
   public SshMachine getMachine(String publicIp) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
-      if (sshMachine.getMachineEntity().getPublicIp().equals(publicIp))
+      if (sshMachine.getMachineEntity().getPublicIp().equals(publicIp)) {
         return sshMachine;
+      }
     }
     return null;
   }
@@ -66,8 +67,9 @@ public class MachinesMonitor implements Runnable {
     }
   }
 
-  public synchronized void resume() {
+  public void resume() {
     if (paused) {
+      logger.info("Sending resume signal to all machines");
       for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
         SshMachine sshMachine = entry.getValue();
         sshMachine.resume();
@@ -76,8 +78,9 @@ public class MachinesMonitor implements Runnable {
     }
   }
 
-  public synchronized void pause() {
+  public void pause() {
     if (!paused) {
+      logger.info("Sending pause signal to all machines");
       for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
         SshMachine sshMachine = entry.getValue();
         sshMachine.pause();
@@ -100,8 +103,6 @@ public class MachinesMonitor implements Runnable {
             logger.error("", ex);
           }
         }
-      } else {
-        logger.info(String.format("Cluster %s is on pause, a failure might have happened.", clusterName));
       }
 
       try {
@@ -118,7 +119,7 @@ public class MachinesMonitor implements Runnable {
           } catch (InterruptedException ex1) {
           }
         } else {
-          logger.error("Someone knocked on my door (-_-)zzz", ex);
+          logger.error("Got interupted without having recived the stopping signal..", ex);
         }
       }
     }
