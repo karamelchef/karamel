@@ -28,6 +28,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 import net.schmizz.sshj.userauth.UserAuthException;
 import se.kth.karamel.backend.LogService;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 
 /**
@@ -88,7 +89,7 @@ public class SshMachine implements Runnable {
       while (true && !stoping) {
 
         if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
-                && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
+            && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
           Task task = null;
           try {
             logger.debug("Going to take a task from the queue");
@@ -100,7 +101,7 @@ public class SshMachine implements Runnable {
               logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
               return;
             } else {
-              logger.error("", ex);
+              logger.error("Got interrupted without having recieved stopping signal");
             }
           } catch (KaramelException ex) {
             machineEntity.setTasksStatus(MachineRuntime.TasksStatus.FAILED, (task != null) ? task.getUuid() : null, ex.getMessage());
@@ -113,7 +114,9 @@ public class SshMachine implements Runnable {
           try {
             Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
           } catch (InterruptedException ex) {
-            logger.error("", ex);
+            if (!stoping) {
+              logger.error("Got interrupted without having recieved stopping signal");
+            }
           }
         }
       }
@@ -161,7 +164,8 @@ public class SshMachine implements Runnable {
     shellCommand.setStatus(ShellCommand.Status.ONGOING);
     Session session = null;
     try {
-      logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
+      //SesshionChannle logs the same thing
+//     logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
       session = client.startSession();
       Session.Command cmd = session.exec(shellCommand.getCmdStr());
@@ -175,7 +179,9 @@ public class SshMachine implements Runnable {
       LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
 
     } catch (ConnectionException | TransportException ex) {
-      logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
+      if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+        logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
+      }
     } finally {
       if (session != null) {
         try {
@@ -226,7 +232,9 @@ public class SshMachine implements Runnable {
   public synchronized void disconnect() {
     logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
     try {
-      client.close();
+      if (client != null && client.isConnected()) {
+        client.close();
+      }
     } catch (IOException ex) {
     }
   }

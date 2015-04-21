@@ -47,7 +47,8 @@ public class ClusterStatusMonitor implements Runnable {
           logger.info(String.format("Cluster-StatusMonitor stoped for '%s' d'-'", definition.getName()));
           return;
         } else {
-          logger.error("Someone knocked on my door (-_-)zzz", ex);
+          String message = String.format("ClusterMonitor for '%s' interrupted while it hasn't received stopping signale yet", definition.getName());
+          logger.error(message, ex);
         }
 
       }

@@ -55,7 +55,7 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
-  MultiThreadedDagExecutor executor;
+  MultiThreadedDagExecutor dagExecutor;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
@@ -86,20 +86,24 @@ public class ClusterManager implements Runnable {
     return runtime;
   }
 
-  public synchronized void enqueue(Command command) throws KaramelException {
-    if (!cmdQueue.offer(command)) {
-      String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command, definition.getName());
-      logger.error(msg);
-      throw new KaramelException(msg);
+  public void enqueue(Command command) throws KaramelException {
+    if (command != Command.PAUSE && command != Command.RESUME) {
+      if (!cmdQueue.offer(command)) {
+        String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command, definition.getName());
+        logger.error(msg);
+        throw new KaramelException(msg);
+      }
     }
+
     if (command == Command.PURGE) {
-      stoping = true;
-    }
-    if ((command == Command.PAUSE || command == Command.PURGE) && cmdQueue.remainingCapacity() == 0) {
       if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
-        logger.info(String.format("Interrupting cluster manager of '%s'", definition.getName()));
+        logger.info(String.format("Forcing to stop ClusterManager of '%s'", definition.getName()));
         clusterManagerFuture.cancel(true);
       }
+    } else if (command == Command.PAUSE) {
+      pause();
+    } else if (command == Command.RESUME) {
+      resume();
     }
 
   }
@@ -112,10 +116,10 @@ public class ClusterManager implements Runnable {
   }
 
   public void stop() throws InterruptedException {
-    if (executor != null && !executor.isShutdown()) {
+    if (dagExecutor != null && !dagExecutor.isShutdown()) {
       logger.info(String.format("Terminating the installation DAG of '%s'", definition.getName()));
-      executor.shutdown();
-      executor.awaitTermination(1, TimeUnit.MINUTES);
+      dagExecutor.shutdownNow();
+      dagExecutor.awaitTermination(1, TimeUnit.MINUTES);
     }
     machinesMonitor.setStoping(true);
     if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
@@ -127,7 +131,6 @@ public class ClusterManager implements Runnable {
       logger.info(String.format("Terminating cluster status monitor of '%s'", definition.getName()));
       clusterStatusFuture.cancel(true);
     }
-    stoping = true;
     if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
       logger.info(String.format("Terminating cluster manager of '%s'", definition.getName()));
       clusterManagerFuture.cancel(true);
@@ -135,10 +138,7 @@ public class ClusterManager implements Runnable {
   }
 
   private synchronized void clean(boolean purging) {
-    if (purging) {
-      logger.info(String.format("Purging '%s' ...", definition.getName()));
-      runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
-    } else {
+    if (!purging) {
       LogService.cleanup(definition.getName());
       logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
       runtime.setPhase(ClusterRuntime.ClusterPhases.PRECLEANING);
@@ -164,7 +164,7 @@ public class ClusterManager implements Runnable {
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
         List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(), jg.getSize());
         allEc2Vms.addAll(vmNames);
-        groupRegion.put(group.getName(), ((Ec2)provider).getRegion());
+        groupRegion.put(group.getName(), ((Ec2) provider).getRegion());
         ec2GroupEntities.add(group);
       }
     }
@@ -180,14 +180,13 @@ public class ClusterManager implements Runnable {
         }
       }
     } catch (Exception ex) {
-      logger.error("", ex);
-      runtime.issueFailure(new Failure(Failure.Type.CLEANUP_FAILE, ex.getMessage()));
+      if (!(ex.getCause() instanceof InterruptedException && stoping)) {
+        logger.error("", ex);
+        runtime.issueFailure(new Failure(Failure.Type.CLEANUP_FAILE, ex.getMessage()));
+      }
     }
 
-    if (purging) {
-      runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
-    } else if (!runtime.isFailed()) {
+    if (!purging && !runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.PRECLEANED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PRECLEANED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
@@ -247,21 +246,12 @@ public class ClusterManager implements Runnable {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
       installationDag = UserClusterDataExtractor.getInstallationDag(definition, runtime, machinesMonitor, chefJsons, false);
 
-      executor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
-      executor.submit(installationDag);
-
+      dagExecutor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
+      dagExecutor.submit(installationDag);
+      dagExecutor.awaitTermination(24 * 60, TimeUnit.MINUTES);
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
       throw ex;
-    } finally {
-      if (executor != null && !executor.isShutdown()) {
-        executor.shutdown();
-        try {
-          executor.awaitTermination(1, TimeUnit.HOURS);
-        } catch (InterruptedException ex) {
-          logger.warn("Couldn't shutdown the thread-pool of installation DAG", ex);
-        }
-      }
     }
 
     if (!runtime.isFailed()) {
@@ -273,17 +263,28 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void pause() {
+  private void pause() {
+    logger.info(String.format("Pausing '%s'", definition.getName()));
     machinesMonitor.pause();
+    runtime.setPaused(true);
+    logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PAUSED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private synchronized void resume() {
+  private void resume() {
+    logger.info(String.format("Resuming '%s'", definition.getName()));
     machinesMonitor.resume();
+    runtime.setPaused(false);
+    logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
   private synchronized void purge() throws InterruptedException {
+    logger.info(String.format("Purging '%s' ...", definition.getName()));
+    runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
+    stoping = true;
     clean(true);
     stop();
+    runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
+    logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
   private void forkMachines() throws Exception {
@@ -340,27 +341,21 @@ public class ClusterManager implements Runnable {
         switch (cmd) {
           case LAUNCH:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
-                    || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               clean(false);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
-                    || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
               forkGroups();
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
-                    || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               forkMachines();
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
-                    || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
+                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
               install();
             }
-            break;
-          case PAUSE:
-            pause();
-            break;
-          case RESUME:
-            resume();
             break;
           case PURGE:
             purge();
@@ -368,7 +363,7 @@ public class ClusterManager implements Runnable {
         }
       } catch (java.lang.InterruptedException ex) {
         if (stoping) {
-          tpool.shutdown();
+          tpool.shutdownNow();
           try {
             tpool.awaitTermination(1, TimeUnit.MINUTES);
           } catch (InterruptedException ex1) {
@@ -376,7 +371,7 @@ public class ClusterManager implements Runnable {
           logger.info(String.format("Cluster-Manager stoped for '%s' d'-'", definition.getName()));
           return;
         } else {
-          logger.error("", ex);
+          logger.warn("Got interrupted, perhaps a higher priority command is comming on..");
         }
       } catch (Exception ex) {
         logger.error("", ex);

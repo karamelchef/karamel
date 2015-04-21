@@ -137,31 +137,37 @@ angular.module('karamel.terminal', [])
 
             if (data.errormsg === null) {
               $scope.commandObj[index].successmsg = data.successmsg;
+              var timeinterval = 2000;
+
               if (data.successmsg === null) {
                 $scope.commandObj[index].commandResult = data.result;
-
                 if (data.renderer !== null) {
                   $scope.commandObj[index].renderer = data.renderer;
                 } else {
                   $scope.commandObj[index].renderer = 'info';
                 }
                 if (data.renderer === 'info') {
-                  if (data.nextCmd !== null) {
-                    _destroyIntervalInstance(index);
-                    $scope.timeoutInstance[index] = $timeout(function() {
-                      $scope.$emit('ask-core', {index: index, cmdName: data.nextCmd, cmdArg: null})
-                    }, 2000);
-                  }
                   $scope.htmlsafe(index);
                 } else if (data.renderer === 'ssh') {
                   _destroyIntervalInstance(index);
                   $scope.$emit('core-result-ssh', [data.result]);
                 }
-
-                $scope.commandObj[index].menuitems = data.menuItems;
+              } else {
+                timeinterval = 5000;
               }
+
+              if (data.nextCmd !== null) {
+                _destroyIntervalInstance(index);
+                $scope.timeoutInstance[index] = $timeout(function() {
+                  $scope.$emit('ask-core', {index: index, cmdName: data.nextCmd, cmdArg: null});
+                }, timeinterval);
+              }
+
             }
 
+            if (data.menuItems.length > 0) {
+              $scope.commandObj[index].menuitems = data.menuItems;
+            }
           })
           .error(function(data) {
             $log.info('Core -> Unable to process command: ' + cmdName);
