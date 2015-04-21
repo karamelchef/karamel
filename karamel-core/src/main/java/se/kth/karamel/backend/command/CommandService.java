@@ -515,8 +515,8 @@ public class CommandService {
       String name = cluster.getDefinition().getName();
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
-      data[i][1] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][2] = "<a kref='status " + name + "'>status</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -637,7 +637,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("no cluster has been chosen yet!!");
+          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the context.");
         }
       } else {
         clusterName = matcher.group(2);
