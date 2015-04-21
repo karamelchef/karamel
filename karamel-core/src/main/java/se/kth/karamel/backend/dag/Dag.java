@@ -15,7 +15,6 @@
  */
 package se.kth.karamel.backend.dag;
 
-import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import com.google.common.base.Joiner;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +23,7 @@ import java.util.Set;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.gson.JsonObject;
+import java.io.Serializable;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
 
@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
  * A class that can represent a directed-acyclic-graph (DAG) consisting of tasks (Runnable objects) and their
  * dependencies (on other Runnable objects in the graph).
  */
-public class Dag {
+public class Dag implements Serializable {
 
   private static final Logger logger = Logger.getLogger(Dag.class);
   private final HashSet<Runnable> tasks = new HashSet<>();

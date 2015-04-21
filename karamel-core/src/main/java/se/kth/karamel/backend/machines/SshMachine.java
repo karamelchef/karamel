@@ -55,7 +55,7 @@ public class SshMachine implements Runnable {
     private SSHClient client;
     private long lastHeartbeat = 0;
     private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
-    private boolean stoping = false;
+    private boolean stopping = false;
     private SshShell shell;
     private final ConcurrentHashMap<RunRecipeTask, JsonArray> resultsMap = new ConcurrentHashMap<>();
 
@@ -75,7 +75,7 @@ public class SshMachine implements Runnable {
     }
 
     public void setStoping(boolean stoping) {
-        this.stoping = stoping;
+        this.stopping = stoping;
     }
 
     public void pause() {
@@ -94,22 +94,25 @@ public class SshMachine implements Runnable {
     public void run() {
         logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
         try {
-            while (true && !stoping) {
+            while (true && !stopping) {
 
                 if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
                         && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
                     Task task = null;
                     try {
                         logger.debug("Going to take a task from the queue");
+                        // TOODO: Jim - need to change this behaviour if we want a command-line version of Karamel for testing.
+                        // poll(, 30 seconds) - if 30 seconds passes, System.exit(0);
                         task = taskQueue.take();
                         logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
                               JsonArray res = runTask(task);
                               if (res != null) {
                                   RunRecipeTask rrt = (RunRecipeTask) task;
                                   // TODO - how to pass on return values to update the dag....
+                                  resultsMap.put(rrt, res);
                               }
                     } catch (InterruptedException ex) {
-                        if (stoping) {
+                        if (stopping) {
                             logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
                             return;
                         } else {

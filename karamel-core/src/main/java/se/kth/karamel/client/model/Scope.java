@@ -5,13 +5,14 @@
  */
 package se.kth.karamel.client.model;
 
+import java.io.Serializable;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
  * @author kamal
  */
-public abstract class Scope {
+public abstract class Scope implements Serializable{
 
   private Ec2 ec2;
   private Vagrant vagrant;
