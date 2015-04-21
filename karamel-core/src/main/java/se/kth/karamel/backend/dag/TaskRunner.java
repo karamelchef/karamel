@@ -7,6 +7,8 @@ package se.kth.karamel.backend.dag;
 
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.machines.MachinesMonitor;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
@@ -32,13 +34,16 @@ public class TaskRunner implements Runnable {
     try {
       machinesMonitor.runTask(task);
     } catch (KaramelException ex) {
+      task.getMachine().getGroup().getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, task.getUuid(), ex.getMessage()));
       logger.error("", ex);
     }
     while (task.getStatus().ordinal() <= Task.Status.ONGOING.ordinal()) {
       try {
         Thread.sleep(Settings.TASK_BUSYWAITING_INTERVALS);
       } catch (InterruptedException ex) {
-        logger.error("Someone knocked on my door (-_-)zzz", ex);
+        if (task.getMachine().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+          logger.error(String.format("Taskrunner for the task '%s' in the DAG got interrupted without having recieved the stop signal, I will disregard this and continue.", task.getUuid()));
+        }
       }
     }
   }
@@ -51,7 +56,5 @@ public class TaskRunner implements Runnable {
   public String toString() {
     return task.toString();
   }
-  
-  
 
 }

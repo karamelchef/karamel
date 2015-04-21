@@ -50,12 +50,10 @@ public class KaramelApiTest {
   }
 
   @Test
-  public void testEndToEnd() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "hiway";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
+  public void testPauseResumePurge() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "spark";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-//    System.out.println(json);
-//    System.out.println("===================================================");
     SshKeyPair sshKeys = api.loadSshKeysIfExist();
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
@@ -63,24 +61,24 @@ public class KaramelApiTest {
     api.registerSshKeys(sshKeys);
     Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
     api.updateEc2CredentialsIfValid(credentials);
-
-//    api.registerSshKeys(clusterName, keypair);
-//    api.updateEc2CredentialsIfValid("aaa", confs.getProperty(Settings.EC2_ACCESSKEY_KEY));
     api.startCluster(json);
-//    api.processCommand("use hiway");
     long ms1 = System.currentTimeMillis();
     int mins = 0;
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
-      CommandResponse response = api.processCommand("status");
-
-      System.out.println(response.getResult());
-//      if (mins == 3)
-//        api.processCommand("purge");
-//      if (mins == 6)
-//        api.processCommand("resume");
-//      if (mins == 8)
-//        api.processCommand("purge");
+      System.out.println(api.processCommand("status").getResult());
+      if (mins == 3){
+        api.processCommand("pause");
+        System.out.println(api.processCommand("status").getResult());
+      }
+      if (mins == 5) {
+        api.processCommand("resume");
+        System.out.println(api.processCommand("status").getResult());
+      }
+      if (mins == 7) {
+        api.processCommand("purge");
+        System.out.println(api.processCommand("status").getResult());
+      }
       Thread.currentThread().sleep(60000);
     }
   }

@@ -45,9 +45,9 @@ public class ClusterService {
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
   }
-  
+
   public synchronized void saveYaml(String yaml) throws KaramelException {
-    
+
   }
 
   public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
@@ -158,6 +158,7 @@ public class ClusterService {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
+          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {
         } catch (KaramelException ex) {
