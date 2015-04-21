@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.running.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -13,7 +14,7 @@ import se.kth.karamel.client.model.json.JsonGroup;
  *
  * @author kamal
  */
-public class GroupRuntime {
+public class GroupRuntime implements Serializable {
 
   public static enum GroupPhase {
 

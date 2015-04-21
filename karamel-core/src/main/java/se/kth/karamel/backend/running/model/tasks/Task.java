@@ -7,6 +7,7 @@ package se.kth.karamel.backend.running.model.tasks;
 
 import com.google.gson.JsonArray;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.List;
 import java.util.UUID;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -15,7 +16,7 @@ import se.kth.karamel.backend.running.model.MachineRuntime;
  *
  * @author kamal
  */
-public abstract class Task {
+public abstract class Task implements Serializable {
 
   public static enum Status {
 
