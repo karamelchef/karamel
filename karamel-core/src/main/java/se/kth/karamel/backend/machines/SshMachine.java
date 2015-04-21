@@ -152,23 +152,22 @@ public class SshMachine implements Runnable {
         }
     }
 
-
-  private synchronized JsonArray runSshCmd(ShellCommand shellCommand, Task task) {
-    shellCommand.setStatus(ShellCommand.Status.ONGOING);
-    Session session = null;
-    JsonArray res = null;
-    try {
-      //SesshionChannle logs the same thing
+    private synchronized JsonArray runSshCmd(ShellCommand shellCommand, Task task) {
+        shellCommand.setStatus(ShellCommand.Status.ONGOING);
+        Session session = null;
+        JsonArray res = null;
+        try {
+            //SesshionChannle logs the same thing
 //     logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
-      session = client.startSession();
-      Session.Command cmd = session.exec(shellCommand.getCmdStr());
-      cmd.join(60 * 24, TimeUnit.MINUTES);
-      updateHeartbeat();
-      if (cmd.getExitStatus() != 0) {
-        shellCommand.setStatus(ShellCommand.Status.FAILED);
-      } else {
-        shellCommand.setStatus(ShellCommand.Status.DONE);
+            session = client.startSession();
+            Session.Command cmd = session.exec(shellCommand.getCmdStr());
+            cmd.join(60 * 24, TimeUnit.MINUTES);
+            updateHeartbeat();
+            if (cmd.getExitStatus() != 0) {
+                shellCommand.setStatus(ShellCommand.Status.FAILED);
+            } else {
+                shellCommand.setStatus(ShellCommand.Status.DONE);
                 if (task instanceof RunRecipeTask) {
                     RunRecipeTask rrt = (RunRecipeTask) task;
                     try {
@@ -183,94 +182,93 @@ public class SshMachine implements Runnable {
                         rrt.setResults(null);
                     }
                 }
-	
-      }
-      LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
 
-    } catch (ConnectionException | TransportException ex) {
-      if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
-        logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
-      }
-    } finally {
-      if (session != null) {
+            }
+            LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
+
+        } catch (ConnectionException | TransportException ex) {
+            if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+                logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
+            }
+        } finally {
+            if (session != null) {
+                try {
+                    client.close();
+                } catch (IOException ex) {
+                }
+            }
+        }
+        return res;
+    }
+
+    private synchronized boolean connect() throws KaramelException {
         try {
-            client.close();
+            KeyProvider keys = null;
+            client = new SSHClient();
+            client.addHostKeyVerifier(new PromiscuousVerifier());
+            client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
+            client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
+            keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
+            logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
+            try {
+                client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
+            } catch (IOException ex) {
+                logger.warn(String.format("Opps!! coudln't connect to '%s' :@", machineEntity.getId()));
+                logger.debug(ex);
+            }
+            if (client.isConnected()) {
+                logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
+                machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp()));
+                client.authPublickey(machineEntity.getSshUser(), keys);
+                machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
+                return true;
+            } else {
+                logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
+                machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
+                return false;
+            }
+        } catch (UserAuthException ex) {
+            String message = "Issue for using ssh keys, make sure you keypair is not password protected..";
+            KaramelException exp = new KaramelException(message, ex);
+            machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
+            throw exp;
+        } catch (IOException e) {
+            throw new KaramelException(e);
+        }
+    }
+
+    public synchronized void disconnect() {
+        logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
+        try {
+            if (client != null && client.isConnected()) {
+                client.close();
+            }
         } catch (IOException ex) {
         }
-      }
     }
-    return res;
-  }
 
-  private synchronized boolean connect() throws KaramelException {
-    try {
-      KeyProvider keys = null;
-      client = new SSHClient();
-      client.addHostKeyVerifier(new PromiscuousVerifier());
-      client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
-      client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
-      logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
-      try {
-        client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
-      } catch (IOException ex) {
-        logger.warn(String.format("Opps!! coudln't connect to '%s' :@", machineEntity.getId()));
-        logger.debug(ex);
-      }
-      if (client.isConnected()) {
-        logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
-        machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp()));
-        client.authPublickey(machineEntity.getSshUser(), keys);
-        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
-        return true;
-      } else {
-        logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
-        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
-        return false;
-      }
-    } catch (UserAuthException ex) {
-      String message = "Issue for using ssh keys, make sure you keypair is not password protected..";
-      KaramelException exp = new KaramelException(message, ex);
-      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
-      throw exp;
-    } catch (IOException e) {
-      throw new KaramelException(e);
+    public synchronized boolean ping() throws KaramelException {
+        if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
+            if (client != null && client.isConnected()) {
+                updateHeartbeat();
+                return true;
+            } else {
+                return connect();
+            }
+        } else {
+            return true;
+        }
     }
-  }
 
-  public synchronized void disconnect() {
-    logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
-    try {
-      if (client != null && client.isConnected()) {
-        client.close();
-      }
-    } catch (IOException ex) {
+    private void updateHeartbeat() {
+        lastHeartbeat = System.currentTimeMillis();
     }
-  }
-
-  public synchronized boolean ping() throws KaramelException {
-    if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
-      if (client != null && client.isConnected()) {
-        updateHeartbeat();
-        return true;
-      } else {
-        return connect();
-      }
-    } else {
-      return true;
-    }
-  }
-
-  private void updateHeartbeat() {
-    lastHeartbeat = System.currentTimeMillis();
-  }
-
-
 
     /**
      *
      * @param rrt
-     * @return null if the Map doesn't contain a result for this RunRecipeTask, otherwise a JsonArray
+     * @return null if the Map doesn't contain a result for this RunRecipeTask,
+     * otherwise a JsonArray
      */
     public JsonArray getRecipeResult(RunRecipeTask rrt) {
         JsonArray res = resultsMap.get(rrt);
@@ -304,7 +302,6 @@ public class SshMachine implements Runnable {
         JsonParser jsonParser = new JsonParser();
         return jsonParser.parse(reader).getAsJsonArray();
     }
-
 
     private synchronized JsonArray runTask(Task task) throws KaramelException {
         JsonArray res = null;
