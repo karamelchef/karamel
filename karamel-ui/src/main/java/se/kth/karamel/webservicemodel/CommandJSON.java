@@ -1,14 +1,40 @@
 package se.kth.karamel.webservicemodel;
 
+import java.util.ArrayList;
+import java.util.List;
+import se.kth.karamel.backend.command.CommandResponse;
+
 /**
  * Created by babbarshaer on 2015-02-09.
  */
 public class CommandJSON {
 
+  public class MenuItem {
+
+    private String label;
+    private String command;
+
+    public MenuItem(String label, String command) {
+      this.label = label;
+      this.command = command;
+    }
+
+    public String getCommand() {
+      return command;
+    }
+
+    public String getLabel() {
+      return label;
+    }
+
+  }
   String command;
   String result;
   String nextCmd;
   String renderer;
+  String errormsg;
+  String successmsg;
+  List<CommandResponse.MenuItem> menuItems = new ArrayList();
 
   public String getCommand() {
     return command;
@@ -40,6 +66,30 @@ public class CommandJSON {
 
   public void setRenderer(String renderer) {
     this.renderer = renderer;
+  }
+
+  public String getErrormsg() {
+    return errormsg;
+  }
+
+  public void setErrormsg(String errormsg) {
+    this.errormsg = errormsg;
+  }
+
+  public String getSuccessmsg() {
+    return successmsg;
+  }
+
+  public void setSuccessmsg(String successmsg) {
+    this.successmsg = successmsg;
+  }
+  
+  public List<CommandResponse.MenuItem> getMenuItems() {
+    return menuItems;
+  }
+
+  public void setMenuItems(List<CommandResponse.MenuItem> menuItems) {
+    this.menuItems = menuItems;
   }
 
 }

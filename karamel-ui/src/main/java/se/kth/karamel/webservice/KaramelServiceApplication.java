@@ -335,7 +335,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                 e.printStackTrace();
             }
         } else {
-            System.err.println("Brower UI could not be launched. Are you running a window manager?");
+           System.err.println("Brower UI could not be launched using Java's Desktop library. Are you running a window manager?");
+           System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
+           System.err.println("Retrying to launch the browser now using a different method.");
+           BareBonesBrowserLaunch.openURL(uri.toASCIIString());
         }
     }
 
@@ -506,11 +509,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                     command.setResult(cmdRes.getResult());
                     command.setNextCmd(cmdRes.getNextCmd());
                     command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
-
+                    command.getMenuItems().addAll(cmdRes.getMenuItems());
+                    command.setSuccessmsg(cmdRes.getSuccessMessage());
                 } catch (KaramelException e) {
-                    command.setResult(e.getMessage());
+                    command.setErrormsg(e.getMessage());
                 } catch (Exception e) {
-                    command.setResult(e.getMessage());
+                    command.setErrormsg(e.getMessage());
                 } finally {
                     response = Response.status(Response.Status.OK).entity(command).build();
                 }

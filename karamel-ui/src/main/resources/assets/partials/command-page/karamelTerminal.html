@@ -1,32 +1,15 @@
 
 <!--Main Wrapper Class-->
 <div class="container" style="width: 100%;">
-  <div id="availableCommands0" class="col-xs-2 well" style="height: 1600px;">
-    <h3>Quick Commands</h3>
-    <ul>
-      <li><a ng-click="processCommand(0, 'help')">help</a></li>
-      <li><a ng-click="processCommand(0, 'list')">list</a></li>
-      <li><a ng-click="processCommand(0, 'new')">new</a></li>
-      <li><a ng-click="processCommand(0, 'save')">save</a></li>
-      <li><a ng-click="processCommand(0, 'which ec2')">which ec2</a></li>
-      <li><a ng-click="processCommand(0, 'which ssh')">which ssh</a></li>
-      <li><a ng-click="processCommand(0, 'clusters')">clusters</a></li>
-    </ul>
-    <h3>Active Cluster Commands</h3>
-    <ul>
-      <li><a ng-click="processCommand(0, 'which cluster')">which cluster</a></li>
-      <li><a ng-click="processCommand(0, 'yaml')">yaml</a></li>
-      <li><a ng-click="processCommand(0, 'status')">status</a></li>
-      <li><a ng-click="processCommand(0, 'detail')">detail</a></li>
-      <li><a ng-click="processCommand(0, 'groups')">groups</a></li>
-      <li><a ng-click="processCommand(0, 'machines')">machines</a></li>
-      <li><a ng-click="processCommand(0, 'tasks')">tasks</a></li>
-      <li><a ng-click="processCommand(0, 'purge')">purge</a></li>
-      <li><a ng-click="processCommand(0, 'shelldisconnect')">shell disconnect</a></li>
-    </ul>
-  </div>
-  <div id="commandControllerWrapper0" class="col-xs-10">
+  <div id="commandControllerWrapper0" class="col-xs-12">
     <form class="commandControllerForm well" ng-submit= "processTerminal(0)" style="margin-bottom: 0px;">
+      <p>
+        <span ng-repeat="item in commandObj[0].menuitems">
+          <button type="button" class="btn btn-info btn-sm" ng-click="processCommand(0, item.command)">{{item.label}}</button>
+        </span>
+      </p>
+      <p style="color:red;" ng-show="commandObj[0].errormsg !== null">{{commandObj[0].errormsg}}</p>
+      <p style="color:green;" ng-show="commandObj[0].successmsg !== null">{{commandObj[0].successmsg}}</p>
       <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
       <div  id="response00" ng-show="commandObj[0].renderer === 'info'" class="infoResponseArea" compile-data ></div>
       <textarea id="response01" ng-show="commandObj[0].renderer === 'yaml'" class="editorResponseArea" placeholder="Write or copy/paste your yaml here ..." rows="20" ng-model="commandObj[0].commandResult"/>
