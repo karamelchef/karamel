@@ -28,6 +28,8 @@ public class MachineRuntime {
   private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.ONGOING;
+  private String name;
+  private String ec2Id;
   private String privateIp;
   private String publicIp;
   private int sshPort;
@@ -41,6 +43,22 @@ public class MachineRuntime {
 
   public GroupRuntime getGroup() {
     return group;
+  }
+
+  public String getEc2Id() {
+    return ec2Id;
+  }
+
+  public void setEc2Id(String ec2Id) {
+    this.ec2Id = ec2Id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
   
   public String getPublicIp() {
