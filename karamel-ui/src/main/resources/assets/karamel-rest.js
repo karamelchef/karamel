@@ -137,12 +137,16 @@ function getRestObjBuilder () {
         this.image = null;
         this.region = null;
         this.price = null;
+        this.vpc = null;
+        this.subnet = null;
         
         this.load = function(other){
             this.type = other.type || null;
             this.image = other.image || null;
             this.region = other.region || null;
             this.price = other.price || null;
+            this.vpc = other.vpc || null;
+            this.subnet = other.subnet || null;
         }
         
     }
