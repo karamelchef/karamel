@@ -566,11 +566,11 @@ public class CommandService {
   }
 
   private static String machinesTable(ArrayList<MachineRuntime> machines, boolean rowNumbering) {
-    String[] columnNames = {"Group", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
+    String[] columnNames = {"Machine", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
     Object[][] data = new Object[machines.size()][columnNames.length];
     for (int i = 0; i < machines.size(); i++) {
       MachineRuntime machine = machines.get(i);
-      data[i][0] = machine.getGroup().getName();
+      data[i][0] = machine.getName();
       data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>" + machine.getPublicIp() + "</a>";
       data[i][2] = machine.getPrivateIp();
       data[i][3] = machine.getSshPort();

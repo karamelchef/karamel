@@ -11,7 +11,8 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import se.kth.karamel.backend.command.CommandResponse;
+import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
@@ -49,7 +50,7 @@ public class KaramelApiTest {
     System.out.println(convertedYaml);
   }
 
-  @Test
+//  @Test
   public void testPauseResumePurge() throws KaramelException, IOException, InterruptedException {
     String clusterName = "spark";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
@@ -67,7 +68,7 @@ public class KaramelApiTest {
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
       System.out.println(api.processCommand("status").getResult());
-      if (mins == 3){
+      if (mins == 3) {
         api.processCommand("pause");
         System.out.println(api.processCommand("status").getResult());
       }
@@ -79,6 +80,31 @@ public class KaramelApiTest {
         api.processCommand("purge");
         System.out.println(api.processCommand("status").getResult());
       }
+      Thread.currentThread().sleep(60000);
+    }
+  }
+
+  @Test
+  public void testForkMachineScale() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "bigspark";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/bigspark.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    int mins = 0;
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      mins++;
+      ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
+      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.FORKING_MACHINES.ordinal())
+        api.processCommand("purge " + clusterName);
+      System.out.println(api.processCommand("machines").getResult());
       Thread.currentThread().sleep(60000);
     }
   }

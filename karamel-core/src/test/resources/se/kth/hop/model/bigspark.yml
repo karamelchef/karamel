@@ -1,10 +1,7 @@
-name: sparkonvpc
+name: bigspark
 ec2:
-    type: c4.large
+    type: m3.medium
     region: eu-west-1
-    image: ami-47a23a30
-    vpc: vpc-f70ea392
-    subnet: subnet-e7830290
 
 cookbooks:                                                                      
   hadoop: 
@@ -22,7 +19,7 @@ groups:
         - hadoop::jhs
         - spark::master
   datanodes:
-    size: 4
+    size: 60
     recipes: 
         - hadoop::dn
         - hadoop::nm

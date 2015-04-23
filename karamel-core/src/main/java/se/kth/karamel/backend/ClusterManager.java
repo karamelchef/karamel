@@ -147,7 +147,8 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailures();
     List<GroupRuntime> groups = runtime.getGroups();
     List<GroupRuntime> ec2GroupEntities = new ArrayList<>();
-    List<String> allEc2Vms = new ArrayList<>();
+    Set<String> allEc2Vms = new HashSet<>();
+    Set<String> allEc2VmsIds = new HashSet<>();
     Map<String, String> groupRegion = new HashMap<>();
     for (GroupRuntime group : groups) {
       if (purging) {
@@ -161,6 +162,11 @@ public class ClusterManager implements Runnable {
         if (ec2Launcher == null) {
           ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
         }
+        for (MachineRuntime machine : group.getMachines()) {
+          if (machine.getEc2Id() != null) {
+            allEc2VmsIds.add(machine.getEc2Id());
+          }
+        }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
         List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(), jg.getSize());
         allEc2Vms.addAll(vmNames);
@@ -170,7 +176,7 @@ public class ClusterManager implements Runnable {
     }
     try {
 
-      ec2Launcher.cleanup(definition.getName(), allEc2Vms, groupRegion);
+      ec2Launcher.cleanup(definition.getName(), allEc2VmsIds, allEc2Vms, groupRegion);
       for (GroupRuntime group : ec2GroupEntities) {
         if (purging) {
           group.setMachines(Collections.EMPTY_LIST);
