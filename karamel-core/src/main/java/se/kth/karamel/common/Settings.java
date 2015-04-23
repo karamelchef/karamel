@@ -10,7 +10,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
 
@@ -53,6 +55,12 @@ public class Settings {
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
   public static final int SSH_CONNECTION_TIMEOUT = 24*3600*1000;
   public static final int SSH_SESSION_TIMEOUT = 24*3600*1000;
+  
+  
+  //Jcloud settings
+  public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
+  public static final int JCLOUDS_PROPERTY_RETRY_DELAY_START = 1000; //ms
+  public static final int EC2_MAX_FORK_VMS_PER_REQUEST = 50;
 
   //Shell scripts
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";

@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import org.jclouds.Constants;
 import static org.jclouds.Constants.PROPERTY_CONNECTION_TIMEOUT;
 import org.jclouds.ContextBuilder;
 import org.jclouds.aws.ec2.compute.AWSEC2ComputeService;
@@ -25,6 +26,7 @@ import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.Settings;
 
 /**
  *
@@ -47,15 +49,18 @@ public class Ec2Context {
     properties.setProperty(PROPERTY_CONNECTION_TIMEOUT, scriptTimeout + "");
     properties.setProperty(PROPERTY_EC2_AMI_QUERY, "owner-id=137112412989;state=available;image-type=machine");
     properties.setProperty(PROPERTY_EC2_CC_AMI_QUERY, "");
+    properties.setProperty(Constants.PROPERTY_MAX_RETRIES, Settings.JCLOUDS_PROPERTY_MAX_RETRIES + ""); 
+    properties.setProperty(Constants.PROPERTY_RETRY_DELAY_START, Settings.JCLOUDS_PROPERTY_RETRY_DELAY_START + ""); 
+
     Iterable<Module> modules = ImmutableSet.<Module>of(
-            new SshjSshClientModule(),
-            new SLF4JLoggingModule(),
-            new EnterpriseConfigurationModule());
+        new SshjSshClientModule(),
+        new SLF4JLoggingModule(),
+        new EnterpriseConfigurationModule());
 
     ContextBuilder build = ContextBuilder.newBuilder("aws-ec2")
-            .credentials(credentials.getAccountId(), credentials.getAccessKey())
-            .modules(modules)
-            .overrides(properties);
+        .credentials(credentials.getAccountId(), credentials.getAccessKey())
+        .modules(modules)
+        .overrides(properties);
     ComputeServiceContext context = build.buildView(ComputeServiceContext.class);
     this.computeService = (AWSEC2ComputeService) context.getComputeService();
     this.ec2api = computeService.getContext().unwrapApi(EC2Api.class);
@@ -82,5 +87,5 @@ public class Ec2Context {
   public SecurityGroupApi getSecurityGroupApi() {
     return securityGroupApi;
   }
-  
+
 }
