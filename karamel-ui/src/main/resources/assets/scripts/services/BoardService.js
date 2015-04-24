@@ -33,7 +33,7 @@ angular.module('demoApp')
 
         function _launchCluster(board){
             
-            var restObj = getRestObjBuilder().buildCaramelForRest(board);
+            var restObj = getRestObjBuilder().buildKaramelForRest(board);
             var data = {
                 json: angular.toJson(restObj)
             };
@@ -339,7 +339,7 @@ angular.module('demoApp')
               return;
             }
             else {
-              restObj = getRestObjBuilder().buildCaramelForRest(board);
+              restObj = getRestObjBuilder().buildKaramelForRest(board);
             }
 
             var data = {
@@ -492,11 +492,11 @@ angular.module('demoApp')
                 }
               }
             });
-            var restObj = getRestObjBuilder().buildCaramelForRest(board);
+            var restObj = getRestObjBuilder().buildKaramelForRest(board);
             var data = {
                 json: angular.toJson(restObj)
             };
-            CaramelCoreServices.scaffoldCookbook(data)
+            KaramelCoreServices.scaffoldCookbook(data)
                 .success(function(data, status, headers, config) {
                     $log.info("Connection Successful.");
                     AlertService.addAlert({type: 'success', msg: 'Cookbook created successfully.'});

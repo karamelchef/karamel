@@ -215,7 +215,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 // Name of the application displayed when application boots up.
     @Override
     public String getName() {
-        return "caramel-core";
+        return "karamel-core";
     }
 
     // Pre start of the dropwizard to plugin with separate bundles.
@@ -598,7 +598,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             public Response startCluster(KaramelBoardJSON boardJSON) {
 
                 Response response = null;
-                System.out.println(" Received request to start the cluster. ");
+                Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, 
+                        "Start cluster: \n" + boardJSON.getJson());
 
                 try {
                     karamelApiHandler.startCluster(boardJSON.getJson());

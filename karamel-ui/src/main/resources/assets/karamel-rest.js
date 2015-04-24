@@ -161,7 +161,7 @@ function getRestObjBuilder () {
 
     return {
 
-        buildCaramelForRest : function (board){
+        buildKaramelForRest : function (board){
 
             var _rest = new _Cluster();
 

@@ -36,7 +36,7 @@ angular.module('yamlApp', [])
 
             scope.cluster = {};
 
-            var _rest = getRestObjBuilder().buildCaramelForRest($rootScope.karamelBoard);
+            var _rest = getRestObjBuilder().buildKaramelForRest($rootScope.karamelBoard);
 
             KaramelCoreRestServices.getCompleteYaml({
                 json: angular.toJson(_rest)

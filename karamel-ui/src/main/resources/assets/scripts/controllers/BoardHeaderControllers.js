@@ -145,7 +145,7 @@ angular.module('demoApp')
                             yml: loadEvent.target.result
                         };
 
-                        $log.info("Requesting Caramel Core Services for JSON. ");
+                        $log.info("Requesting Karamel Core Services for JSON. ");
 
                         // Reset the karamelBoard.
                         _cleanKaramelBoard();
