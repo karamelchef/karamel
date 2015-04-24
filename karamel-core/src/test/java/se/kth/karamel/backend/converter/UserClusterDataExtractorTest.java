@@ -8,17 +8,13 @@ package se.kth.karamel.backend.converter;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.testutils.MockingUtil;
 
 /**
  *
@@ -33,25 +29,13 @@ public class UserClusterDataExtractorTest {
     String links = UserClusterDataExtractor.clusterLinks(json, null);
     System.out.println(links);
   }
-//  @Test
-
+  
+  @Test
   public void dagTest() throws IOException, KaramelException {
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     JsonCluster json = ClusterDefinitionService.yamlToJsonObject(ymlString);
-    ClusterRuntime entity = new ClusterRuntime(json);
-    int gn = 0;
-    for (JsonGroup g : json.getGroups()) {
-      GroupRuntime gent = entity.getGroups().get(gn);
-      List<MachineRuntime> mes = new ArrayList<>();
-      for (int i = 0; i < g.getSize(); i++) {
-        MachineRuntime me = new MachineRuntime(gent);
-        me.setPublicIp(gent.getName());
-        me.setSshUser("" + ++i);
-        mes.add(me);
-      }
-      gent.setMachines(mes);
-    }
-    Dag dag = UserClusterDataExtractor.getInstallationDag(json, entity, null, null, true);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
+    Dag dag = UserClusterDataExtractor.getInstallationDag(json, dummyRuntime, null, null, true);
     System.out.println(dag.d3Json());
   }
 }
