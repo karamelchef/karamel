@@ -16,19 +16,19 @@ import se.kth.karamel.common.Settings;
  * @author kamal
  */
 public class ClusterStatusMonitor implements Runnable {
-
+  
   private static final Logger logger = Logger.getLogger(ClusterStatusMonitor.class);
   private final JsonCluster definition;
   private final MachinesMonitor machinesMonitor;
   private final ClusterRuntime clusterEntity;
   private boolean stoping = false;
-
+  
   public ClusterStatusMonitor(MachinesMonitor machinesMonitor, JsonCluster definition, ClusterRuntime runtime) {
     this.definition = definition;
     this.machinesMonitor = machinesMonitor;
     this.clusterEntity = runtime;
   }
-
+  
   public void setStoping(boolean stoping) {
     this.stoping = stoping;
   }
@@ -37,22 +37,26 @@ public class ClusterStatusMonitor implements Runnable {
   public void run() {
     logger.info(String.format("Cluster-StatusMonitor started for '%s' d'-'", definition.getName()));
     while (true && !stoping) {
-      if (clusterEntity.isFailed()) {
-        machinesMonitor.pause();
-      }
       try {
-        Thread.sleep(Settings.CLUSTER_FAILURE_DETECTION_INTERVAL);
-      } catch (InterruptedException ex) {
-        if (stoping) {
-          logger.info(String.format("Cluster-StatusMonitor stoped for '%s' d'-'", definition.getName()));
-          return;
-        } else {
-          String message = String.format("ClusterMonitor for '%s' interrupted while it hasn't received stopping signale yet", definition.getName());
-          logger.error(message, ex);
+        if (clusterEntity.isFailed()) {
+          machinesMonitor.pause();
         }
-
+        try {
+          Thread.sleep(Settings.CLUSTER_FAILURE_DETECTION_INTERVAL);
+        } catch (InterruptedException ex) {
+          if (stoping) {
+            logger.info(String.format("Cluster-StatusMonitor stoped for '%s' d'-'", definition.getName()));
+            return;
+          } else {
+            String message = String.format("ClusterMonitor for '%s' interrupted while it hasn't received stopping signale yet", definition.getName());
+            logger.error(message, ex);
+          }
+          
+        }
+      } catch (Exception ex) {
+        logger.error("", ex);
       }
     }
   }
-
+  
 }

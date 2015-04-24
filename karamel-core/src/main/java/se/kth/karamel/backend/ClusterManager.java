@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.xml.ws.FaultAction;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
@@ -137,7 +136,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void clean(boolean purging) {
+  private void clean(boolean purging) {
     if (!purging) {
       LogService.cleanup(definition.getName());
       logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
@@ -198,7 +197,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void forkGroups() throws InterruptedException {
+  private void forkGroups() throws InterruptedException {
     logger.info(String.format("Froking groups '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_GROUPS);
     runtime.resolveFailures();
@@ -239,7 +238,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void install() throws Exception {
+  private void install() throws Exception {
     logger.info(String.format("Installing '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLING);
     runtime.resolveFailure(Failure.hash(Failure.Type.INSTALLATION_FAILURE, null));
@@ -283,7 +282,7 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private synchronized void purge() throws InterruptedException {
+  private void purge() throws InterruptedException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
     stoping = true;

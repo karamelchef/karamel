@@ -93,7 +93,7 @@ public final class Ec2Launcher {
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
-        = context.getEc2api().getSecurityGroupApiForRegion(ec2.getRegion());
+            = context.getEc2api().getSecurityGroupApiForRegion(ec2.getRegion());
     if (securityGroupExt.isPresent()) {
       AWSSecurityGroupApi client = (AWSSecurityGroupApi) securityGroupExt.get();
       String groupId = null;
@@ -117,7 +117,7 @@ public final class Ec2Launcher {
             pr = IpProtocol.TCP;
           }
           client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(),
-              uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
+                  uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
@@ -158,7 +158,7 @@ public final class Ec2Launcher {
   }
 
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
-      Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
+          Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
     List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), totalSize);
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
@@ -207,20 +207,23 @@ public final class Ec2Launcher {
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
         succ.addAll(context.getComputeService().createNodesInGroup(
-            uniqeGroupName, requestSize, template.build()));
+                uniqeGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (AWSResponseException e) {
         if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
           throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
-              + "size of your cluster or increase the limitation of your account.", e);
+                  + "size of your cluster or increase the limitation of your account.", e);
+        } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
+          throw new KaramelException(String.format("It seems your ec2 account doesn't have sufficent capacity for %s "
+                  + "instances", ec2.getType()), e);
         } else {
           logger.error("", e);
         }
       } catch (IllegalStateException ex) {
         logger.error("", ex);
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-            uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+                uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
@@ -229,8 +232,8 @@ public final class Ec2Launcher {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-              + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
-              totalSize, uniqeGroupName));
+                  + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
+                  totalSize, uniqeGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
@@ -272,7 +275,7 @@ public final class Ec2Launcher {
       }
       logger.info(String.format("Destroying failed nodes with ids: %s", lostIds.toString()));
       Set<? extends NodeMetadata> destroyedNodes = context.getComputeService().destroyNodesMatching(
-          Predicates.in(failedNodes.keySet()));
+              Predicates.in(failedNodes.keySet()));
       lostIds.clear();
       for (NodeMetadata destroyed : destroyedNodes) {
         lostIds.add(destroyed.getId());

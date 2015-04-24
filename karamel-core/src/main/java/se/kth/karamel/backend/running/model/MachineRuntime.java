@@ -65,7 +65,7 @@ public class MachineRuntime {
     return publicIp;
   }
 
-  public void setPublicIp(String publicIp) {
+  public synchronized void setPublicIp(String publicIp) {
     this.publicIp = publicIp;
   }
 
@@ -73,7 +73,7 @@ public class MachineRuntime {
     return privateIp;
   }
 
-  public void setPrivateIp(String privateIp) {
+  public synchronized void setPrivateIp(String privateIp) {
     this.privateIp = privateIp;
   }
 
@@ -81,7 +81,7 @@ public class MachineRuntime {
     return sshPort;
   }
 
-  public void setSshPort(int sshPort) {
+  public synchronized void setSshPort(int sshPort) {
     this.sshPort = sshPort;
   }
 
@@ -89,7 +89,7 @@ public class MachineRuntime {
     return sshUser;
   }
 
-  public void setSshUser(String sshUser) {
+  public synchronized void setSshUser(String sshUser) {
     this.sshUser = sshUser;
   }
 

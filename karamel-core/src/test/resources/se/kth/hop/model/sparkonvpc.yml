@@ -22,7 +22,7 @@ groups:
         - hadoop::jhs
         - spark::master
   datanodes:
-    size: 4
+    size: 20
     recipes: 
         - hadoop::dn
         - hadoop::nm

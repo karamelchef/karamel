@@ -84,7 +84,7 @@ public class KaramelApiTest {
     }
   }
 
-  @Test
+//  @Test
   public void testForkMachineScale() throws KaramelException, IOException, InterruptedException {
     String clusterName = "bigspark";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/bigspark.yml"), Charsets.UTF_8);
@@ -102,10 +102,37 @@ public class KaramelApiTest {
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
       ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
-      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.FORKING_MACHINES.ordinal())
+      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.FORKING_MACHINES.ordinal()) {
         api.processCommand("purge " + clusterName);
+      }
       System.out.println(api.processCommand("machines").getResult());
       Thread.currentThread().sleep(60000);
+    }
+  }
+
+  @Test
+  public void testVcpMachines() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "sparkonvpc";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/sparkonvpc.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    int mins = 0;
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      mins++;
+      ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
+      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.INSTALLED.ordinal()) {
+        api.processCommand("purge " + clusterName);
+      }
+      System.out.println(api.processCommand("machines").getResult());
+      Thread.currentThread().sleep(30000);
     }
   }
 

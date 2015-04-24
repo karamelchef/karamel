@@ -35,7 +35,7 @@ public class GroupRuntime {
     this.name = definition.getName();
   }
 
-  public void setMachines(List<MachineRuntime> machines) {
+  public synchronized void setMachines(List<MachineRuntime> machines) {
     this.machines = machines;
   }
 
@@ -47,7 +47,7 @@ public class GroupRuntime {
     return id;
   }
 
-  public void setId(String id) {
+  public synchronized void setId(String id) {
     this.id = id;
   }
 
@@ -59,7 +59,7 @@ public class GroupRuntime {
     return phase;
   }
 
-  public void setPhase(GroupPhase phase) {
+  public synchronized void setPhase(GroupPhase phase) {
     this.phase = phase;
   }
   

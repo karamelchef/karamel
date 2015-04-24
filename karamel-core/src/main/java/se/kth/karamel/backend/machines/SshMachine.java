@@ -35,11 +35,11 @@ import se.kth.karamel.backend.running.model.Failure;
  * @author kamal
  */
 public class SshMachine implements Runnable {
-
+  
   static {
     Security.addProvider(new BouncyCastleProvider());
   }
-
+  
   private static final Logger logger = Logger.getLogger(SshMachine.class);
   private final MachineRuntime machineEntity;
   private final String serverPubKey;
@@ -49,81 +49,84 @@ public class SshMachine implements Runnable {
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stoping = false;
   private SshShell shell;
-
+  
   public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
     this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
   }
-
+  
   public MachineRuntime getMachineEntity() {
     return machineEntity;
   }
-
+  
   public SshShell getShell() {
     return shell;
   }
-
+  
   public void setStoping(boolean stoping) {
     this.stoping = stoping;
   }
-
+  
   public void pause() {
     if (machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
       machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSING, null, null);
     }
   }
-
+  
   public void resume() {
     if (machineEntity.getTasksStatus() != MachineRuntime.TasksStatus.FAILED) {
       machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
     }
   }
-
+  
   @Override
   public void run() {
     logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
     try {
       while (true && !stoping) {
-
-        if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
-            && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
-          Task task = null;
-          try {
-            logger.debug("Going to take a task from the queue");
-            task = taskQueue.take();
-            logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
-            runTask(task);
-          } catch (InterruptedException ex) {
-            if (stoping) {
-              logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
-              return;
-            } else {
-              logger.error("Got interrupted without having recieved stopping signal");
+        try {
+          if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
+              && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
+            Task task = null;
+            try {
+              logger.debug("Going to take a task from the queue");
+              task = taskQueue.take();
+              logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
+              runTask(task);
+            } catch (InterruptedException ex) {
+              if (stoping) {
+                logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
+                return;
+              } else {
+                logger.error("Got interrupted without having recieved stopping signal");
+              }
+            } catch (KaramelException ex) {
+              machineEntity.setTasksStatus(MachineRuntime.TasksStatus.FAILED, (task != null) ? task.getUuid() : null, ex.getMessage());
+              logger.error("", ex);
             }
-          } catch (KaramelException ex) {
-            machineEntity.setTasksStatus(MachineRuntime.TasksStatus.FAILED, (task != null) ? task.getUuid() : null, ex.getMessage());
-            logger.error("", ex);
-          }
-        } else {
-          if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
-            machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
-          }
-          try {
-            Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
-          } catch (InterruptedException ex) {
-            if (!stoping) {
-              logger.error("Got interrupted without having recieved stopping signal");
+          } else {
+            if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
+              machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
+            }
+            try {
+              Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
+            } catch (InterruptedException ex) {
+              if (!stoping) {
+                logger.error("Got interrupted without having recieved stopping signal");
+              }
             }
           }
+        } catch (Exception e) {
+          logger.error("", e);
         }
       }
     } finally {
       disconnect();
     }
   }
-
+  
   public void enqueue(Task task) throws KaramelException {
     logger.debug(String.format("Queuing '%s'", task.toString()));
     try {
@@ -135,12 +138,12 @@ public class SshMachine implements Runnable {
       throw new KaramelException(message, ex);
     }
   }
-
-  private synchronized void runTask(Task task) throws KaramelException {
+  
+  private void runTask(Task task) throws KaramelException {
     try {
       task.setStatus(Status.ONGOING, null);
       List<ShellCommand> commands = task.getCommands();
-
+      
       for (ShellCommand cmd : commands) {
         if (cmd.getStatus() != ShellCommand.Status.DONE) {
           runSshCmd(cmd, task);
@@ -158,8 +161,8 @@ public class SshMachine implements Runnable {
       throw new KaramelException(ex);
     }
   }
-
-  private synchronized void runSshCmd(ShellCommand shellCommand, Task task) {
+  
+  private void runSshCmd(ShellCommand shellCommand, Task task) {
     shellCommand.setStatus(ShellCommand.Status.ONGOING);
     Session session = null;
     try {
@@ -176,7 +179,7 @@ public class SshMachine implements Runnable {
         shellCommand.setStatus(ShellCommand.Status.DONE);
       }
       LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
-
+      
     } catch (ConnectionException | TransportException ex) {
       if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
         logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
@@ -191,8 +194,8 @@ public class SshMachine implements Runnable {
       }
     }
   }
-
-  private synchronized boolean connect() throws KaramelException {
+  
+  private boolean connect() throws KaramelException {
     try {
       KeyProvider keys = null;
       client = new SSHClient();
@@ -227,8 +230,8 @@ public class SshMachine implements Runnable {
       throw new KaramelException(e);
     }
   }
-
-  public synchronized void disconnect() {
+  
+  public void disconnect() {
     logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
     try {
       if (client != null && client.isConnected()) {
@@ -237,8 +240,8 @@ public class SshMachine implements Runnable {
     } catch (IOException ex) {
     }
   }
-
-  public synchronized boolean ping() throws KaramelException {
+  
+  public boolean ping() throws KaramelException {
     if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
       if (client != null && client.isConnected()) {
         updateHeartbeat();
@@ -250,7 +253,7 @@ public class SshMachine implements Runnable {
       return true;
     }
   }
-
+  
   private void updateHeartbeat() {
     lastHeartbeat = System.currentTimeMillis();
   }
