@@ -1,6 +1,6 @@
 name: MySqlCluster
 ec2:
-    type: m3.medium
+    type: c3.8xlarge
     region: eu-west-1
 
 cookbooks:                                                                      
