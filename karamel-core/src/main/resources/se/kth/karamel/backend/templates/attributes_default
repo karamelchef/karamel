@@ -1,11 +1,11 @@
-include_attributes "kagent"
+include_attribute  "kagent"
 
 default[:%%NAME%%][:url] = "http://enter.here.url.for.your.binary/binary.tgz"
 default[:%%NAME%%][:version] = "0.1"
 default[:%%NAME%%][:user] = "%%NAME%%"
 default[:%%NAME%%][:group] = "%%NAME%%"
 
-default[:%%NAME%%][:version_dir] = "/usr/local/%%NAME%%-#{node[:%%NAME%%][:version]"
+default[:%%NAME%%][:version_dir] = "/usr/local/%%NAME%%-#{node[:%%NAME%%][:version]}"
 default[:%%NAME%%][:home_dir] = "/usr/local/%%NAME%%"
 
 default[:%%NAME%%][:data_memory_mbs] = 500
