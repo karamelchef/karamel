@@ -25,6 +25,8 @@ attrs:
         user: glassfish
     mr: 
         user: glassfish
+  hiway:
+    user: glassfish
 
 groups: 
   master:
@@ -36,7 +38,7 @@ groups:
         - hops::ndb
         - hops::rm
         - hops::nn
-        - hops::jhs                                                            
+        - hops::jhs                                              
         - hopshub
         - hiway::hiway_client
         - hiway::cuneiform_client
@@ -47,7 +49,6 @@ groups:
         - hiway::galaxy101_client
         - hiway::variantcall_client
 
-	
   minions:
     size: 2
     recipes: 
@@ -62,4 +63,4 @@ groups:
         - hiway::helloworld_run_loc
         - hiway::montage_synth_run_hw
         - hiway::variantcall_run_hw
-        - hiway::galaxy101_run_hw	   
+        - hiway::galaxy101_run_hw
