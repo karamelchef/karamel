@@ -4,7 +4,7 @@ ec2:
     region: eu-west-1
 
 cookbooks:                                                                      
-  hops:
+  volodb:
     github: "hopshadoop/volodb-chef"
     branch: "master"
   ndb:
