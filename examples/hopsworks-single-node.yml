@@ -13,6 +13,9 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
+  spark:
+    github: "hopshadoop/spark-chef"
+    branch: "master"
 
 attrs:
   hdfs:
