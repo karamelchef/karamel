@@ -57,8 +57,8 @@ public class ChefJsonGenerator {
     addCookbookAttributes(cb, json);
     for (MachineRuntime me : groupEntity.getMachines()) {
       for (JsonRecipe recipe : cb.getRecipes()) {
-        JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getName());
-        groupJsons.put(me.getId() + recipe.getName(), clone);
+        JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getCanonicalName());
+        groupJsons.put(me.getId() + recipe.getCanonicalName(), clone);
       }
       String installRecipeName = cb.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
       JsonObject clone = addMachineNRecipeToJson(json, me, installRecipeName);
@@ -138,9 +138,9 @@ public class ChefJsonGenerator {
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
-            if (!recipe.getName().endsWith(Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
-              String privateAttr = recipe.getName() + Settings.ATTR_DELIMITER + Settings.CHEF_PRIVATE_IPS;
-              String publicAttr = recipe.getName() + Settings.ATTR_DELIMITER + Settings.CHEF_PUBLIC_IPS;
+            if (!recipe.getCanonicalName().endsWith(Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
+              String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PRIVATE_IPS;
+              String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PUBLIC_IPS;
               if (!privateIps.containsKey(privateAttr)) {
                 privateIps.put(privateAttr, new HashSet<String>());
                 publicIps.put(publicAttr, new HashSet<String>());

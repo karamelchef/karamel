@@ -15,7 +15,7 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.testutils.MockingUtil;
+import se.kth.karamel.backend.mocking.MockingUtil;
 
 /**
  *
@@ -46,7 +46,8 @@ public class ChefJsonGeneratorTest {
     }
     ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
-    JsonObject jsonObject = chefJsons.get("ubuntu@192.168.0.1ndb::mgmd");
+    System.out.println(chefJsons.keySet());
+    JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));
   }

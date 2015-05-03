@@ -5,12 +5,14 @@
  */
 package se.kth.karamel.common;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  *
  * @author kamal
  */
+@Ignore
 public class SshKeyServiceTest {
 
 //  @Test

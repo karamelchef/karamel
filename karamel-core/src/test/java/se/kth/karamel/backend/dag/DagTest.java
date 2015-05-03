@@ -1,247 +1,211 @@
 /*
-   Copyright 2011 Isaac Dooley
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
-
 package se.kth.karamel.backend.dag;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import junit.framework.TestCase;
+import java.util.Set;
+import org.junit.Assert;
+import org.junit.Test;
+import se.kth.karamel.common.exception.DagConstructionException;
 
+/**
+ *
+ * @author kamal
+ */
+public class DagTest {
 
+  @Test
+  public void testCycle() throws DagConstructionException {
+    Dag dag = new Dag();
+    dag.addNode("11");
+    dag.addDependency("12", "121");
+    dag.addDependency("13", "131");
+    try {
+      dag.detectCycles();
+    } catch (DagConstructionException e) {
+      Assert.fail();
+    }
+    dag.addDependency("131", "132");
+    dag.addDependency("132", "133");
+    dag.addDependency("133", "13");
+    try {
+      dag.detectCycles();
+    } catch (DagConstructionException e) {
+    }
+  }
 
-public class DagTest extends TestCase {
+  @Test
+  public void testPrint() throws DagConstructionException {
+    Dag dag = new Dag();
+    dag.addNode("task1");
+    dag.addDependency("task2", "task21");
+    dag.addDependency("task3", "task31");
+    dag.addDependency("task31", "task32");
+    dag.addDependency("task32", "task33");
+    dag.addDependency("task21", "task31");
+    System.out.println(dag.print());
+  }
 
-	List<String> _result = Collections.synchronizedList(new ArrayList<String>());
-	
-	/** Create a DAG and pretend to schedule some tests  */
-	public void testDagPretendSchedule() throws DependencyDoesNotExistException {
+  @Test
+  public void testCycleOnRealData() throws DagConstructionException {
+    Dag dag = new Dag();
+    dag.addNode("apt-get essentials on hopshub1");
+    dag.addNode("apt-get essentials on ndb1");
+    dag.addNode("apt-get essentials on ndb2");
+    dag.addNode("apt-get essentials on datanodes1");
+    dag.addDependency("apt-get essentials on hopshub1", "install berkshelf on hopshub1");
+    dag.addDependency("install berkshelf on hopshub1", "make solo.rb on hopshub1");
+    dag.addDependency("make solo.rb on hopshub1", "clone and vendor cookbooks/hopshadoop/apache-hadoop-chef on hopshub1");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/apache-hadoop-chef on hopshub1", "hadoop::install on hopshub1");
+    dag.addDependency("hadoop::nn on hopshub1", "hadoop::rm on hopshub1");
+    dag.addDependency("hadoop::install on hopshub1", "hadoop::rm on hopshub1");
+    dag.addDependency("hadoop::install on hopshub1", "hadoop::nn on hopshub1");
+    dag.addDependency("hadoop::nn on hopshub1", "hadoop::jhs on hopshub1");
+    dag.addDependency("hadoop::nn on hopshub1", "hadoop::jhs on hopshub1");
+    dag.addDependency("hadoop::install on hopshub1", "hadoop::jhs on hopshub1");
+    dag.addDependency("hadoop::dn on datanodes1", "hadoop::jhs on hopshub1");
+    dag.addDependency("make solo.rb on hopshub1", "clone and vendor cookbooks/hopshadoop/ndb-chef on hopshub1");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/ndb-chef on hopshub1", "ndb::install on hopshub1");
+    dag.addDependency("ndb::ndbd on ndb1", "ndb::mysqld on hopshub1");
+    dag.addDependency("ndb::install on hopshub1", "ndb::mysqld on hopshub1");
+    dag.addDependency("ndb::mgmd on hopshub1", "ndb::mysqld on hopshub1");
+    dag.addDependency("ndb::ndbd on ndb2", "ndb::mysqld on hopshub1");
+    dag.addDependency("ndb::install on hopshub1", "ndb::mgmd on hopshub1");
+    dag.addDependency("make solo.rb on hopshub1", "clone and vendor cookbooks/hopshadoop/hopshub-chef on hopshub1");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/hopshub-chef on hopshub1", "hopshub::install on hopshub1");
+    dag.addDependency("hadoop::nn on hopshub1", "hopshub::default on hopshub1");
+    dag.addDependency("hopshub::install on hopshub1", "hopshub::default on hopshub1");
+    dag.addDependency("ndb::mysqld on hopshub1", "hopshub::default on hopshub1");
+    dag.addDependency("hadoop::dn on datanodes1", "hopshub::default on hopshub1");
+    dag.addDependency("apt-get essentials on ndb1", "install berkshelf on ndb1");
+    dag.addDependency("install berkshelf on ndb1", "make solo.rb on ndb1");
+    dag.addDependency("make solo.rb on ndb1", "clone and vendor cookbooks/hopshadoop/ndb-chef on ndb1");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/ndb-chef on ndb1", "ndb::install on ndb1");
+    dag.addDependency("ndb::install on ndb1", "ndb::ndbd on ndb1");
+    dag.addDependency("ndb::mgmd on hopshub1", "ndb::ndbd on ndb1");
+    dag.addDependency("apt-get essentials on ndb2", "install berkshelf on ndb2");
+    dag.addDependency("install berkshelf on ndb2", "make solo.rb on ndb2");
+    dag.addDependency("make solo.rb on ndb2", "clone and vendor cookbooks/hopshadoop/ndb-chef on ndb2");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/ndb-chef on ndb2", "ndb::install on ndb2");
+    dag.addDependency("ndb::mgmd on hopshub1", "ndb::ndbd on ndb2");
+    dag.addDependency("ndb::install on ndb2", "ndb::ndbd on ndb2");
+    dag.addDependency("apt-get essentials on datanodes1", "install berkshelf on datanodes1");
+    dag.addDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1");
+    dag.addDependency("make solo.rb on datanodes1", "clone and vendor cookbooks/hopshadoop/apache-hadoop-chef on datanodes1");
+    dag.addDependency("clone and vendor cookbooks/hopshadoop/apache-hadoop-chef on datanodes1", "hadoop::install on datanodes1");
+    dag.addDependency("hadoop::rm on hopshub1", "hadoop::nm on datanodes1");
+    dag.addDependency("hadoop::install on datanodes1", "hadoop::nm on datanodes1");
+    dag.addDependency("hadoop::nn on hopshub1", "hadoop::dn on datanodes1");
+    dag.addDependency("hadoop::install on datanodes1", "hadoop::dn on datanodes1");
+    dag.detectCycles();
+    System.out.println(dag.print());
+  }
 
-		Dag dag = new Dag();
-		assertFalse(dag.hasTasks());
+  @Test(expected = DagConstructionException.class)
+  public void testValidation() throws DagConstructionException {
+    class DummyTask implements DagTask {
 
-		Task t0 = new Task("t0");
-		Task t1 = new Task("t1");
-		Task t2 = new Task("t2");
-		Task t3 = new Task("t3");
+      String id;
 
-		dag.insert(t3);
-		assertTrue(dag.hasTasks());
+      public DummyTask(String id) {
+        this.id = id;
+      }
 
-		dag.insert(t2, t3);
-		dag.insert(t1, t2);
-		dag.insert(t0, t1);
-	
-		assertTrue(dag.getErrors().isEmpty());
-		assertTrue(dag.hasNextRunnableTask());
-		assertEquals(t3,dag.nextRunnableTask());
-		dag.notifyDone(t3);
+      @Override
+      public String dagNodeId() {
+        return id;
+      }
 
-		assertTrue(dag.hasNextRunnableTask());
-		assertEquals(t2,dag.nextRunnableTask());
-		dag.notifyDone(t2);
+      @Override
+      public void submit(DagTaskCallback callback) {
+        callback.succeed();
+      }
 
-		assertTrue(dag.hasNextRunnableTask());
-		assertEquals(t1,dag.nextRunnableTask());
-		dag.notifyDone(t1);
-		
-		assertTrue(dag.hasNextRunnableTask());
-		assertEquals(t0,dag.nextRunnableTask());
-		dag.notifyDone(t0);
-		
-		assertFalse(dag.hasNextRunnableTask());
-		assertTrue(dag.getErrors().isEmpty());
-		assertEquals(Dag.Status.COMPLETED_ALL_TASKS,dag.status());
+      @Override
+      public Set<String> dagDependencies() {
+        return Collections.EMPTY_SET;
+      }
 
-	}
+    }
 
-	public void testSinglethreaded() 
-	throws InterruptedException, DependencyDoesNotExistException {
-		SingleThreadedDagExecutor executor = new SingleThreadedDagExecutor();
-		testExecutor(executor);
-	}
+    Dag dag = new Dag();
+    dag.addNode("task1");
+    dag.addDependency("task2", "task21");
+    dag.addDependency("task3", "task31");
+    dag.addDependency("task31", "task32");
+    dag.addDependency("task32", "task33");
+    dag.addDependency("task21", "task31");
+    dag.addTask(new DummyTask("task1"));
+    dag.addTask(new DummyTask("task2"));
+    dag.addTask(new DummyTask("task3"));
+    dag.addTask(new DummyTask("task21"));
+    dag.addTask(new DummyTask("task31"));
+    dag.addTask(new DummyTask("task32"));
+    //task33 doesnt have any task, expecting exception here
+    dag.start();
+  }
 
-	public void testMultithreaded() 
-	throws InterruptedException, DependencyDoesNotExistException {
-		MultiThreadedDagExecutor executor = new MultiThreadedDagExecutor();
-		testExecutor(executor);
-	}
-	
+  @Test
+  public void testOrder() throws DagConstructionException {
+    final List<String> expectedOrder = new ArrayList<>();
+    expectedOrder.add("task1");
+    expectedOrder.add("task2");
+    expectedOrder.add("task21");
+    expectedOrder.add("task3");
+    expectedOrder.add("task31");
+    expectedOrder.add("task32");
+    expectedOrder.add("task33");
 
-	public void testSinglethreadedCycle() 
-	throws InterruptedException, DependencyDoesNotExistException {
-		SingleThreadedDagExecutor executor = new SingleThreadedDagExecutor();
-		testCycleExecutor(executor);
-	}
+    class DummyTask implements DagTask {
 
-	public void testMultithreadedCycle() 
-	throws InterruptedException, DependencyDoesNotExistException {
-		MultiThreadedDagExecutor executor = new MultiThreadedDagExecutor();
-		testCycleExecutor(executor);
-	}
+      String id;
 
-	/** Create a DAG and pretend to schedule some tests  */
-	public void testVariableLengthTasks() throws InterruptedException, DependencyDoesNotExistException {
-		MultiThreadedDagExecutor executor = new MultiThreadedDagExecutor();
+      public DummyTask(String id) {
+        this.id = id;
+      }
 
-		_result = new ArrayList<String>();
-		Dag dag = new Dag();
-		assertFalse(dag.hasTasks());
+      @Override
+      public String dagNodeId() {
+        return id;
+      }
 
-		Task t0 = new Task("t0", 000);
-		Task t1 = new Task("t1", 100);
-		Task t2 = new Task("t2", 100);
-		Task t3 = new Task("t3", 150);
+      @Override
+      public void submit(DagTaskCallback callback) {
+        synchronized (expectedOrder) {
+          String id = ((DagNode) callback).getId();
+          System.out.println(id + " is ready to go");
+          String expectedId = expectedOrder.get(0);
+          Assert.assertEquals(expectedId, id);
+          expectedOrder.remove(0);
+          callback.succeed();
+        }
+      }
 
-		dag.insert(t0);
-		dag.insert(t1, t0);
-		dag.insert(t2, t1);
-		dag.insert(t3);
-		
-		executor.submit(dag);
-		executor.shutdown();
-		executor.awaitTermination(1, TimeUnit.SECONDS);
-		
-		assertFalse(dag.hasNextRunnableTask());
-		assertTrue(dag.getErrors().isEmpty());
-		assertEquals(Dag.Status.COMPLETED_ALL_TASKS,dag.status());
-		
-		String[] expecteds = {"t0", "t1", "t3", "t2"};
-		assertTrue(Arrays.equals(expecteds, _result.toArray()));
-	}
-	
-	/** Create a DAG and pretend to schedule some tests  */
-	public void testExecutor(DagExecutor executor) throws InterruptedException, DependencyDoesNotExistException {
+      @Override
+      public Set<String> dagDependencies() {
+        return Collections.EMPTY_SET;
+      }
+    }
 
-		_result = new ArrayList<String>();
-		Dag dag = new Dag();
-		assertFalse(dag.hasTasks());
-
-		Task t0 = new Task("t0");
-		Task t1 = new Task("t1");
-		Task t2 = new Task("t2");
-		Task t3 = new Task("t3");
-
-		dag.insert(t3);
-		dag.insert(t2, t3);
-		dag.insert(t1, t2);
-		dag.insert(t0, t1);
-		
-		executor.submit(dag);
-		executor.shutdown();
-		executor.awaitTermination(1, TimeUnit.SECONDS);
-		
-		assertFalse(dag.hasNextRunnableTask());
-		assertTrue(dag.getErrors().isEmpty());
-		assertEquals(Dag.Status.COMPLETED_ALL_TASKS,dag.status());
-		
-		String[] expecteds = {"t3", "t2", "t1", "t0"};
-		assertTrue(Arrays.equals(expecteds, _result.toArray()));
-		
-	}
-	
-
-	/** Create a DAG and pretend to schedule some tests  */
-	public void testCycleExecutor(DagExecutor executor) 
-	throws InterruptedException, DependencyDoesNotExistException {
-
-		_result = new ArrayList<String>();
-		Dag dag = new Dag();
-		assertFalse(dag.hasTasks());
-
-		int numTasks = 10;
-		Task[] tasks = new Task[numTasks];
-		for(int i=0; i< numTasks; i++){
-			tasks[i] = new Task("t" + i);
-		}
-
-		for(int i=0; i< numTasks; i++){
-			dag.insert(tasks[i], tasks[(i+1)%numTasks]);
-		}
-		
-		executor.submit(dag);
-	
-		assertFalse(dag.hasNextRunnableTask());
-		assertTrue(dag.getErrors().isEmpty());
-		assertEquals(Dag.Status.INVALID_DEPENDENCIES,dag.status());
-		
-		String[] expecteds = {};
-		assertTrue(Arrays.equals(expecteds, _result.toArray()));
-		
-	}
-	
-	
-
-	public void testDeadlock() 
-	throws InterruptedException, DependencyDoesNotExistException {
-
-		_result = new ArrayList<String>();
-		
-		// Build DAG that is a cycle
-		Dag dag = new Dag();
-		int numTasks = 10;
-		Task[] tasks = new Task[numTasks];
-		for(int i=0; i< numTasks; i++){
-			tasks[i] = new Task("t" + i);
-		}
-		for(int i=0; i< numTasks; i++){
-			dag.insert(tasks[i], tasks[(i+1)%numTasks]);
-		}
-		
-		MultiThreadedDagExecutor executor = new MultiThreadedDagExecutor();
-		executor.submit(dag);
-		executor.shutdown();
-		assertTrue(executor.awaitTermination(500, TimeUnit.MILLISECONDS));
-		
-		assertEquals(Dag.Status.INVALID_DEPENDENCIES,dag.status());
-		
-		String[] expecteds = {};
-		assertTrue(Arrays.equals(expecteds, _result.toArray()));
-		
-	}
-	
-	public class Task implements Runnable {
-
-		private final String _name;
-		private final long _sleepMillis;
-		
-		public Task(String name){
-			_name = name;
-			_sleepMillis = 0;
-		}
-		
-		public Task(String name, long sleepMillis) { 
-			_name = name;
-			_sleepMillis = sleepMillis;
-		}
-		
-		@Override
-		public void run() {
-			if(_sleepMillis>0){
-				try {
-					Thread.sleep(_sleepMillis);
-				} catch (InterruptedException e) {
-					// do nothing
-				}
-			}
-			_result.add(_name);
-		}
-		
-	}
-
+    Dag dag = new Dag();
+    dag.addNode("task1");
+    dag.addDependency("task2", "task21");
+    dag.addDependency("task3", "task31");
+    dag.addDependency("task31", "task32");
+    dag.addDependency("task32", "task33");
+    dag.addDependency("task21", "task31");
+    dag.addTask(new DummyTask("task1"));
+    dag.addTask(new DummyTask("task2"));
+    dag.addTask(new DummyTask("task3"));
+    dag.addTask(new DummyTask("task21"));
+    dag.addTask(new DummyTask("task31"));
+    dag.addTask(new DummyTask("task32"));
+    dag.addTask(new DummyTask("task33"));
+    dag.start();
+  }
 }

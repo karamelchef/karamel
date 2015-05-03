@@ -10,9 +10,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
 
@@ -22,6 +20,11 @@ import org.jclouds.ec2.domain.InstanceType;
  */
 public class Settings {
 
+  //test
+  public static boolean CB_CLASSPATH_MODE = false;
+  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+
+  //read
   public static final String ATTR_DELIMITER = "/";
   public static final String COOOKBOOK_DELIMITER = "::";
   public static final String INSTALL_RECIPE = "install";
@@ -51,12 +54,11 @@ public class Settings {
   public static final int SSH_CONNECT_INTERVALS = 5 * 1000;
   public static final int SSH_PING_INTERVAL = 10 * 1000;
   public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
-  public static final int TASK_BUSYWAITING_INTERVALS = 100;
+  public static final int CLUSTER_STATUS_CHECKING_INTERVAL = 1000;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
-  public static final int SSH_CONNECTION_TIMEOUT = 24*3600*1000;
-  public static final int SSH_SESSION_TIMEOUT = 24*3600*1000;
-  
-  
+  public static final int SSH_CONNECTION_TIMEOUT = 24 * 3600 * 1000;
+  public static final int SSH_SESSION_TIMEOUT = 24 * 3600 * 1000;
+
   //Jcloud settings
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
   public static final int JCLOUDS_PROPERTY_RETRY_DELAY_START = 1000; //ms
@@ -143,6 +145,15 @@ public class Settings {
   public static String CLUSTER_YAML_PATH(String clusterName) {
     return CLUSTER_ROOT_PATH(clusterName) + File.separator + YAML_FILE_NAME;
   }
+
+  public static String RECIPE_CANONICAL_NAME(String recipeName) {
+    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
+      return recipeName + COOOKBOOK_DELIMITER + "default";
+    } else {
+      return recipeName;
+    }
+  }
+
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});

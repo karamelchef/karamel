@@ -6,8 +6,11 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
@@ -19,8 +22,8 @@ public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath) {
-    super("make solo.rb", machine);
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, TaskSubmitter submitter) {
+    super("make solo.rb", machine, submitter);
     this.vendorPath = vendorPath;
   }
 
@@ -33,11 +36,19 @@ public class MakeSoloRbTask extends Task {
   }
 
   public static String makeUniqueId(String machineId) {
-    return MakeSoloRbTask.class.getSimpleName() + machineId;
+    return "make solo.rb on " + machineId;
   }
 
   @Override
   public String uniqueId() {
     return makeUniqueId(super.getMachineId());
+  }
+
+  @Override
+  public Set<String> dagDependencies() {
+    Set<String> deps = new HashSet<>();
+    String id = InstallBerkshelfTask.makeUniqueId(getMachineId());
+    deps.add(id);
+    return deps;
   }
 }

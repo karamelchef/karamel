@@ -7,6 +7,9 @@ package se.kth.karamel.cookbook.metadata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
+import java.util.List;
+import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 
@@ -15,23 +18,31 @@ import se.kth.karamel.common.exception.MetadataParseException;
  *
  * @author kamal
  */
-public class GithubCookbook {
+public class KaramelizedCookbook {
 
-  private final GithubUrls urls;
+  private final CookbookUrls urls;
   private final DefaultRb defaultRb;
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
   private final Berksfile berksfile;
   private String json;
 
-  public GithubCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
-    GithubUrls.Builder builder = new GithubUrls.Builder();
-    urls = builder.url(homeUrl).build();
-    defaultRb = new DefaultRb(urls.attrFile);
-    metadataRb = MetadataParser.parse(urls.home, urls.metadataFile);
-    metadataRb.setDefaults(defaultRb);
-    karamelFile = new KaramelFile(urls.karamelFile);
-    berksfile = new Berksfile(urls.berksfile);
+  public KaramelizedCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
+    try {
+      CookbookUrls.Builder builder = new CookbookUrls.Builder();
+      urls = builder.url(homeUrl).build();
+      List<String> lines1 = IoUtils.readLines(urls.attrFile);
+      defaultRb = new DefaultRb(lines1);
+      String metadataContent = IoUtils.readContent(urls.metadataFile);
+      metadataRb = MetadataParser.parse(metadataContent);
+      metadataRb.setDefaults(defaultRb);
+      String karamelFileConent = IoUtils.readContent(urls.karamelFile);
+      karamelFile = new KaramelFile(karamelFileConent);
+      List<String> berksfileLines = IoUtils.readLines(urls.berksfile);
+      berksfile = new Berksfile(berksfileLines);
+    } catch (IOException e) {
+      throw new CookbookUrlException("", e);
+    }
   }
 
   public String getMetadataJson() {

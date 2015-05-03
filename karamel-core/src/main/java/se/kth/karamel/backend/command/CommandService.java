@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.command;
 
+import com.google.gson.JsonObject;
 import dnl.utils.text.table.TextTable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,18 +24,23 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
+import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.machines.SshMachine;
 import se.kth.karamel.backend.machines.SshShell;
+import se.kth.karamel.backend.machines.TaskSubmitter;
+import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.ClasspathResourceUtil;
+import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -57,8 +63,8 @@ public class CommandService {
 
   static {
     try {
-      HELP_PAGE_TEMPLATE = ClasspathResourceUtil.readContent("se/kth/karamel/backend/command/helppage");
-      HOME_PAGE_TEMPLATE = ClasspathResourceUtil.readContent("se/kth/karamel/backend/command/homepage");
+      HELP_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/helppage");
+      HOME_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/homepage");
     } catch (IOException e) {
 
     }
@@ -131,7 +137,7 @@ public class CommandService {
         }
       }
 
-      String clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "yaml");
+      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "yaml");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         response.addMenuItem("Save", "save");
@@ -139,7 +145,7 @@ public class CommandService {
         result = ClusterDefinitionService.loadYaml(clusterNameInUserInput);
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "pause");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.pauseCluster(clusterNameInUserInput);
@@ -147,7 +153,7 @@ public class CommandService {
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "resume");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "resume");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.resumeCluster(clusterNameInUserInput);
@@ -155,7 +161,7 @@ public class CommandService {
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "purge");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "purge");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.purgeCluster(clusterNameInUserInput);
@@ -163,7 +169,7 @@ public class CommandService {
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "status");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "status");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         addActiveClusterMenus(response);
@@ -185,7 +191,7 @@ public class CommandService {
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "detail");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "detail");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         addActiveClusterMenus(response);
@@ -195,7 +201,7 @@ public class CommandService {
         nextCmd = "detail " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "groups");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "groups");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         addActiveClusterMenus(response);
@@ -212,7 +218,7 @@ public class CommandService {
         nextCmd = "groups " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "machines");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "machines");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         addActiveClusterMenus(response);
@@ -228,7 +234,7 @@ public class CommandService {
         nextCmd = "machines " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfMatchesForCommand(cmd, "tasks");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "tasks");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         addActiveClusterMenus(response);
@@ -237,7 +243,7 @@ public class CommandService {
         result = machinesTasksTable(clusterEntity);
         nextCmd = "tasks " + clusterNameInUserInput;
       }
-      
+
       p = Pattern.compile("shellconnect\\s+((\\d|.)+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
@@ -262,7 +268,7 @@ public class CommandService {
 
                 } catch (InterruptedException ex) {
                   Logger.getLogger(CommandService.class
-                      .getName()).log(Level.SEVERE, null, ex);
+                          .getName()).log(Level.SEVERE, null, ex);
                 }
                 result = shell.readStreams();
                 renderer = CommandResponse.Renderer.SSH;
@@ -309,7 +315,7 @@ public class CommandService {
 
               } catch (InterruptedException ex) {
                 Logger.getLogger(CommandService.class
-                    .getName()).log(Level.SEVERE, null, ex);
+                        .getName()).log(Level.SEVERE, null, ex);
               }
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
@@ -345,6 +351,37 @@ public class CommandService {
 
       }
 
+      p = Pattern.compile("dag\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        ClusterManager cluster = cluster(clusterName);
+        if (cluster == null || cluster.getInstallationDag() == null) {
+          TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+            @Override
+            public void submitTask(Task task) throws KaramelException {
+              System.out.println(task.uniqueId());
+              task.succeed();
+            }
+          };
+          String yml = ClusterDefinitionService.loadYaml(clusterName);
+          JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+          ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, dummyTaskSubmitter, chefJsons);
+          installationDag.validate();
+          result = installationDag.print();
+        } else {
+          result = cluster.getInstallationDag().print();
+          addActiveClusterMenus(response);
+          nextCmd = cmd;
+        }
+
+        renderer = CommandResponse.Renderer.INFO;
+      }
+
       p = Pattern.compile("links\\s+(\\w+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
@@ -353,6 +390,7 @@ public class CommandService {
         ClusterManager cluster = cluster(clusterName);
         if (cluster != null) {
           result = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+          addActiveClusterMenus(response);
         } else {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -516,7 +554,7 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -530,7 +568,7 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>links</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>links</a>";
       i++;
     }
 
@@ -614,6 +652,7 @@ public class CommandService {
     ClusterRuntime clusterEntity = cluster.getRuntime();
     response.addMenuItem("View Definition", "yaml");
     response.addMenuItem("Status", "status");
+    response.addMenuItem("DAG", "dag");
     response.addMenuItem("Detail", "detail");
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");
@@ -627,7 +666,7 @@ public class CommandService {
 
   }
 
-  private static String getClusterNameIfMatchesForCommand(String userinput, String cmd) throws KaramelException {
+  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) throws KaramelException {
     Pattern p = Pattern.compile(cmd + "(\\s+(\\w+))?");
     Matcher matcher = p.matcher(userinput);
     if (matcher.matches()) {

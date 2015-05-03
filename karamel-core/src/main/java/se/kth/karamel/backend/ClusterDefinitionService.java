@@ -18,17 +18,19 @@ import java.util.HashSet;
 import java.util.List;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.scanner.ScannerException;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
 import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
-import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.FilesystemUtil;
+import se.kth.karamel.common.IoUtils;
 
 /**
  *
@@ -58,7 +60,7 @@ public class ClusterDefinitionService {
 
   public static void saveYaml(String yaml) throws KaramelException {
     try {
-      YamlCluster cluster = YamlUtil.loadCluster(yaml);
+      YamlCluster cluster = yamlToYamlObject(yaml);
       String name = cluster.getName().toLowerCase();
       File folder = new File(Settings.CLUSTER_ROOT_PATH(name));
       if (!folder.exists()) {
@@ -131,10 +133,21 @@ public class ClusterDefinitionService {
   }
 
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
-    YamlCluster cluster = YamlUtil.loadCluster(yaml);
+    YamlCluster cluster = yamlToYamlObject(yaml);
     return new JsonCluster(cluster);
   }
 
+  
+  public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {
+    try {
+      Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
+      Object document = yaml.load(ymlString);
+      return ((YamlCluster) document);
+    } catch (ScannerException ex) {
+      throw new KaramelException("Syntax error in the yaml!!", ex);
+    }
+  }
+  
   public static String yamlToJson(String yaml) throws KaramelException {
     JsonCluster jsonObj = yamlToJsonObject(yaml);
     return serializeJson(jsonObj);

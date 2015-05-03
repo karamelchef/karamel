@@ -8,13 +8,21 @@ package se.kth.karamel.backend.running.model.tasks;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import org.apache.log4j.Logger;
+import se.kth.karamel.backend.dag.DagTask;
+import se.kth.karamel.backend.dag.DagTaskCallback;
+import se.kth.karamel.backend.machines.TaskSubmitter;
+import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
  * @author kamal
  */
-public abstract class Task {
+public abstract class Task implements DagTask, TaskCallback {
+
+  private static final Logger logger = Logger.getLogger(Task.class);
 
   public static enum Status {
 
@@ -26,19 +34,15 @@ public abstract class Task {
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
+  private DagTaskCallback dagCallback;
+  private final TaskSubmitter submitter;
 
-  public Task(String name, MachineRuntime machine) {
+  public Task(String name, MachineRuntime machine, TaskSubmitter submitter) {
     this.name = name;
     this.machineId = machine.getId();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
-  }
-
-  public void setStatus(Status status, String message) {
-    this.status = status;
-    if (status == Status.FAILED) {
-      machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, message);
-    }
+    this.submitter = submitter;
   }
 
   public Status getStatus() {
@@ -73,5 +77,47 @@ public abstract class Task {
   public String getUuid() {
     return uuid;
   }
-  
+
+  @Override
+  public String dagNodeId() {
+    return uniqueId();
+  }
+
+  @Override
+  public void submit(DagTaskCallback callback) {
+    this.dagCallback = callback;
+    try {
+      submitter.submitTask(this);
+    } catch (KaramelException ex) {
+      machine.getGroup().getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, uuid, ex.getMessage()));
+      logger.error("", ex);
+      dagCallback.failed(ex.getMessage());
+    }
+  }
+
+  @Override
+  public void queued() {
+    status = Status.READY;
+    dagCallback.queued();
+  }
+
+  @Override
+  public void started() {
+    status = Status.ONGOING;
+    dagCallback.started();
+  }
+
+  @Override
+  public void succeed() {
+    status = Status.DONE;
+    dagCallback.succeed();
+  }
+
+  @Override
+  public void failed(String reason) {
+    this.status = Status.FAILED;
+    machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, reason);
+    dagCallback.failed(reason);
+  }
+
 }

@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import org.junit.Ignore;
 import org.junit.Test;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -18,6 +19,7 @@ import se.kth.karamel.common.exception.KaramelException;
  *
  * @author kamal
  */
+@Ignore
 public class SshShellTest {
 //  @Test
   public void testSshService() throws InterruptedException, KaramelException, FileNotFoundException, IOException {

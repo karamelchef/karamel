@@ -12,7 +12,7 @@ package se.kth.karamel.client.api;
 import java.util.HashMap;
 import java.util.Map;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.GithubCookbook;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 
 /**
  *
@@ -20,16 +20,16 @@ import se.kth.karamel.cookbook.metadata.GithubCookbook;
  */
 public class CookbookCache {
   
-  public static Map<String, GithubCookbook> cookbooks = new HashMap<>();
+  public static Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
   
-  public static GithubCookbook load(String cookbookUrl) throws KaramelException {
-    GithubCookbook cookbook = new GithubCookbook(cookbookUrl);
+  public static KaramelizedCookbook load(String cookbookUrl) throws KaramelException {
+    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl);
     cookbooks.put(cookbookUrl, cookbook);
     return cookbook;
   }
   
-  public static GithubCookbook get(String cookbookUrl) throws KaramelException {
-    GithubCookbook cb = cookbooks.get(cookbookUrl);
+  public static KaramelizedCookbook get(String cookbookUrl) throws KaramelException {
+    KaramelizedCookbook cb = cookbooks.get(cookbookUrl);
     if (cb == null)
       cb = load(cookbookUrl);
     return cb;

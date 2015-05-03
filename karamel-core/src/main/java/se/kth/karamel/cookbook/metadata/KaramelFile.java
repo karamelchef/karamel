@@ -5,16 +5,9 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
-import com.google.common.io.Resources;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
-import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
@@ -25,29 +18,19 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
  */
 public final class KaramelFile {
 
-  private final String url;
+  private final String fileContent;
 
   private Map<String, YamlDependency> kv;
 
-  public KaramelFile(String rawFileUrl) throws CookbookUrlException {
-    this.url = rawFileUrl;
+  public KaramelFile(String fileContent) {
+    this.fileContent = fileContent;
     loadDependencies();
   }
 
-  public void loadDependencies() throws CookbookUrlException {
-    URL fileUrl;
-    try {
-      fileUrl = new URL(url);
-      String ymlString = Resources.toString(fileUrl, Charset.forName("UTF-8"));
-      Yaml yaml = new Yaml(new Constructor(YamlKaramelFile.class));
-      YamlKaramelFile file = (YamlKaramelFile)yaml.load(ymlString);
-      kv = file.getDependencyMap();
-    } catch (MalformedURLException ex) {
-      throw new CookbookUrlException("Karamelfile url is malford " + url, ex);
-    } catch (IOException ex) {
-      throw new CookbookUrlException("Cannot parse the Karamelfile " + url, ex);
-    }
-
+  public void loadDependencies() {
+    Yaml yaml = new Yaml(new Constructor(YamlKaramelFile.class));
+    YamlKaramelFile file = (YamlKaramelFile) yaml.load(fileContent);
+    kv = file.getDependencyMap();
   }
 
   public YamlDependency getDepenency(String recipeName) {

@@ -120,6 +120,6 @@ public class MachineRuntime {
   }
 
   public String getId() {
-    return sshUser + "@" + publicIp;
+    return publicIp;
   }
 }

@@ -18,7 +18,7 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public class YamlScopeTest {
 
-//  @Test
+  @Test
   public void foldOutAttrTest() throws MetadataParseException {
     YamlScope yamlScope = new YamlScope() {
 

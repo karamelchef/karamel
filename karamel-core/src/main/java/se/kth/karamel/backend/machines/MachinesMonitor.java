@@ -13,11 +13,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -26,7 +24,7 @@ import se.kth.karamel.common.exception.KaramelException;
  *
  * @author kamal
  */
-public class MachinesMonitor implements Runnable {
+public class MachinesMonitor implements TaskSubmitter, Runnable {
   
   private static final Logger logger = Logger.getLogger(MachinesMonitor.class);
   private final String clusterName;
@@ -125,7 +123,8 @@ public class MachinesMonitor implements Runnable {
     }
   }
   
-  public void runTask(Task task) throws KaramelException {
+  @Override
+  public void submitTask(Task task) throws KaramelException {
     logger.debug(String.format("Recieved '%s' from DAG", task.toString()));
     String machineName = task.getMachineId();
     if (!machines.containsKey(machineName)) {

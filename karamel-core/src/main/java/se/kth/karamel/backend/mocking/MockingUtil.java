@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.karamel.testutils;
+package se.kth.karamel.backend.mocking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,8 @@ public class MockingUtil {
     for (GroupRuntime group : clusterRuntime.getGroups()) {
       JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, group.getName());
       List<MachineRuntime> mcs = new ArrayList<>();
-      String ippref = "192.168.0.";
+//      String ippref = "192.168.0.";
+      String ippref = group.getName();
       for (int i = 1; i <= definedGroup.getSize(); i++) {
         String name = group.getName() + "-" + i;
         MachineRuntime ma = new MachineRuntime(group);

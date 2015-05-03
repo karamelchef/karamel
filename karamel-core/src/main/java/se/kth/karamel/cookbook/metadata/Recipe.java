@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import se.kth.karamel.common.Settings;
 
 /**
  *
@@ -36,6 +37,10 @@ public class Recipe {
 
   public String getName() {
     return name;
+  }
+
+  public String getCanonicalName() {
+    return Settings.RECIPE_CANONICAL_NAME(name);
   }
 
   public Set<String> getLinks() {

@@ -79,7 +79,7 @@ public class JsonGroup extends JsonScope {
     for (JsonCookbook cb : getCookbooks()) {
       Set<JsonRecipe> recipes1 = cb.getRecipes();
       for (JsonRecipe jsonRecipe : recipes1) {
-        recipes.add(jsonRecipe.getName());
+        recipes.add(jsonRecipe.getCanonicalName());
       }
     }
     return recipes;

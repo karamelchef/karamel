@@ -31,7 +31,7 @@ public class YamlKaramelFile {
   public Map<String, YamlDependency> getDependencyMap() {
     Map<String, YamlDependency> map = new HashMap<>();
     for (YamlDependency yamlDependency : dependencies) {
-      map.put(yamlDependency.getRecipe(), yamlDependency);
+      map.put(yamlDependency.getRecipeCanonicalName(), yamlDependency);
     }
     return map;
   }

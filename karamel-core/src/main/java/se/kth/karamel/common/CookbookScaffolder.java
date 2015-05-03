@@ -6,8 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import se.kth.karamel.common.exception.KaramelException;
 
 public class CookbookScaffolder {
 
@@ -42,7 +41,7 @@ public class CookbookScaffolder {
      * @throws IOException
      */
     public static void createFile(String path, String template, String name) throws IOException {
-        String script = ClasspathResourceUtil.readContent(template);
+        String script = IoUtils.readContentFromClasspath(template);
         script = script.replaceAll("%%NAME%%", name);
         String uid = System.getProperty("user.name");
         script = script.replaceAll("%%USER%%", uid);

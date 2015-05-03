@@ -6,7 +6,7 @@ ec2:
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-    version: "v0.1"   
+    branch: "master"   
   hopshub:                                                                     
     github: "hopshadoop/hopshub-chef"
     branch: "master"  

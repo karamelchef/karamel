@@ -23,13 +23,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.dag.MultiThreadedDagExecutor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.Provider;
@@ -54,7 +54,6 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
-  MultiThreadedDagExecutor dagExecutor;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
@@ -71,6 +70,10 @@ public class ClusterManager implements Runnable {
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
+  }
+
+  public Dag getInstallationDag() {
+    return installationDag;
   }
 
   public MachinesMonitor getMachinesMonitor() {
@@ -115,11 +118,6 @@ public class ClusterManager implements Runnable {
   }
 
   public void stop() throws InterruptedException {
-    if (dagExecutor != null && !dagExecutor.isShutdown()) {
-      logger.info(String.format("Terminating the installation DAG of '%s'", definition.getName()));
-      dagExecutor.shutdownNow();
-      dagExecutor.awaitTermination(1, TimeUnit.MINUTES);
-    }
     machinesMonitor.setStoping(true);
     if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
       logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
@@ -249,16 +247,18 @@ public class ClusterManager implements Runnable {
 
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
-      installationDag = UserClusterDataExtractor.getInstallationDag(definition, runtime, machinesMonitor, chefJsons, false);
-
-      dagExecutor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
-      dagExecutor.submit(installationDag);
-      dagExecutor.awaitTermination(24 * 60, TimeUnit.MINUTES);
+      installationDag = DagBuilder.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
+      installationDag.validate();
+      installationDag.start();
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
       throw ex;
     }
 
+    while(runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING) {
+      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
+    }
+      
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLED);
       for (GroupRuntime group : groups) {
