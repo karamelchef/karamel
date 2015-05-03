@@ -36,5 +36,6 @@ groups:
         - hops::jhs                                                            
         - hopshub
         - ndb::ndbd
-        - hops::dn
         - hops::nm
+        - hops::nm
+        - spark::yarn
