@@ -420,7 +420,7 @@ public class CommandService {
         }
       }
 
-      p = Pattern.compile("out\\s+(.*)");
+      p = Pattern.compile("log\\s+(.*)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -434,34 +434,7 @@ public class CommandService {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
-                  result = LogService.loadOutLog(clusterEntity.getName(), machine.getPublicIp(), task.getName());
-                }
-              }
-            }
-          }
-          if (!taskFound) {
-            throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
-          }
-        } else {
-          throw new KaramelException("no cluster has been chosen yet!!");
-        }
-      }
-
-      p = Pattern.compile("err\\s+(.*)");
-      matcher = p.matcher(cmd);
-      if (!found && matcher.matches()) {
-        found = true;
-        String taskuuid = matcher.group(1);
-        if (chosenCluster() != null) {
-          boolean taskFound = false;
-          ClusterManager cluster = cluster(chosenCluster());
-          ClusterRuntime clusterEntity = cluster.getRuntime();
-          for (GroupRuntime group : clusterEntity.getGroups()) {
-            for (MachineRuntime machine : group.getMachines()) {
-              for (Task task : machine.getTasks()) {
-                if (task.getUuid().equals(taskuuid)) {
-                  taskFound = true;
-                  result = LogService.loadErrLog(clusterEntity.getName(), machine.getPublicIp(), task.getName());
+                  result = LogService.loadLog(clusterEntity.getName(), machine.getPublicIp(), task.getName());
                 }
               }
             }
@@ -602,7 +575,7 @@ public class CommandService {
       data[i][1] = task.getStatus();
       data[i][2] = task.getMachineId();
       String uuid = task.getUuid();
-      data[i][3] = "<a kref='out " + uuid + "'>output</a> <a kref='err " + uuid + "'>error</a>";
+      data[i][3] = "<a kref='log " + uuid + "'>log</a>";
     }
     return makeTable(columnNames, 1, data, rowNumbering);
   }

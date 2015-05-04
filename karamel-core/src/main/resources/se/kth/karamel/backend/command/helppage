@@ -23,6 +23,7 @@ clusters                : lists available running clusters
 use      <cluster_name> : switches the active cluster in terminal
 which cluster           : active cluster in the command center
 yaml     <cluster_name> : yaml definition of the cluster
+dag      <cluster_name> : installation dag of the yaml/cluster
 status   <cluster_name> : summary of the cluster
 detail   <cluster_name> : detail json of the cluster
 groups   <cluster_name> : groups' summary

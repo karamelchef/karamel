@@ -6,6 +6,7 @@
 package se.kth.karamel.backend.machines;
 
 import java.io.IOException;
+import java.io.SequenceInputStream;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -173,7 +174,8 @@ public class SshMachine implements Runnable {
       } else {
         shellCommand.setStatus(ShellCommand.Status.DONE);
       }
-      LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
+      SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
+      LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
 
     } catch (ConnectionException | TransportException ex) {
       if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {

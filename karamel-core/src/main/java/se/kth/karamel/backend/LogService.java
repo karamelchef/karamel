@@ -38,19 +38,17 @@ public class LogService {
     }
   }
 
-  public static void serializeTaskLogs(Task task, String machineIp, InputStream out, InputStream err) {
+  public static void serializeTaskLog(Task task, String machineIp, InputStream log) {
     String publicIp = task.getMachine().getPublicIp();
     String clusterName = task.getMachine().getGroup().getCluster().getName();
-    String errFilePath = Settings.TASK_ERROR_FILE_PATH(clusterName, publicIp, task.getName());
-    String outFilePath = Settings.TASK_ERROR_FILE_PATH(clusterName, publicIp, task.getName());
+    String logFilePath = Settings.TASK_LOG_FILE_PATH(clusterName, publicIp, task.getName());
 
     File folder = new File(Settings.MACHINE_LOG_FOLDER(clusterName, machineIp));
 
     if (!folder.exists()) {
       folder.mkdirs();
     }
-    appendToFile(errFilePath, err);
-    appendToFile(outFilePath, out);
+    appendToFile(logFilePath, log);
   }
 
   private static void appendToFile(String filePath, InputStream in) {
@@ -73,14 +71,9 @@ public class LogService {
     }
   }
 
-  public static String loadErrLog(String clusterName, String publicIp, String taskName) throws KaramelException {
-    String errFilPath = Settings.TASK_ERROR_FILE_PATH(clusterName, publicIp, taskName);
+  public static String loadLog(String clusterName, String publicIp, String taskName) throws KaramelException {
+    String errFilPath = Settings.TASK_LOG_FILE_PATH(clusterName, publicIp, taskName);
     return loadLogFile(errFilPath);
-  }
-
-  public static String loadOutLog(String clusterName, String publicIp, String taskName) throws KaramelException {
-    String outFilPath = Settings.TASK_OUTPUT_FILE_PATH(clusterName, publicIp, taskName);
-    return loadLogFile(outFilPath);
   }
 
   public static String loadLogFile(String filePath) throws KaramelException {
