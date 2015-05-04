@@ -180,6 +180,5 @@ public interface KaramelApi {
   public String getInstallationDag(String clusterName) throws KaramelException;
   
   
-  public String createGithubRepo(String username, String password, String repoName) throws KaramelException;
 
 }
