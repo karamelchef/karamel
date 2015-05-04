@@ -531,7 +531,7 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -545,7 +545,7 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>links</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -635,6 +635,7 @@ public class CommandService {
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");
     response.addMenuItem("Tasks", "tasks");
+    response.addMenuItem("Services", "links " + clusterName);
     if (clusterEntity.isPaused()) {
       response.addMenuItem("Resume", "resume");
     } else {
