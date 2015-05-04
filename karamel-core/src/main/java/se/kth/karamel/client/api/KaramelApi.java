@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.client.api;
 
+import java.io.IOException;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -177,5 +178,8 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String getInstallationDag(String clusterName) throws KaramelException;
+  
+  
+  public String createGithubRepo(String username, String password, String repoName) throws KaramelException;
 
 }
