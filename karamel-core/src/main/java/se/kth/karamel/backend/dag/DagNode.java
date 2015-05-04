@@ -33,7 +33,7 @@ public class DagNode implements DagTaskCallback {
   private DagTask task;
   private Status status = Status.WAITING;
   private int indention = 1;
-  
+
   public DagNode(String id) {
     this.id = id;
   }
@@ -83,6 +83,18 @@ public class DagNode implements DagTaskCallback {
     }
   }
 
+  public void prepareToStart(String prob) throws DagConstructionException {
+    if (probs.contains(prob)) {
+      return;
+    }
+    probs.add(prob);
+    task.prepareToStart();
+
+    for (DagNode succ : successors) {
+      succ.prepareToStart(prob);
+    }
+  }
+
   public void detectCylcles(String prob, List<DagNode> ancestors) throws DagConstructionException {
     if (ancestors.contains(this)) {
       String message = "Cycle deceted: " + ancestors.toString() + " " + id;
@@ -105,14 +117,15 @@ public class DagNode implements DagTaskCallback {
       succ.detectCylcles(prob, newList);
     }
   }
-  
+
   public void findMaxIndentionLevel(int indention) {
-    if (this.indention < indention)
+    if (this.indention < indention) {
       this.indention = indention;
+    }
     for (DagNode newTask : successors) {
       newTask.findMaxIndentionLevel(indention + 1);
     }
-  } 
+  }
 
   public String printBfs(String prob, String pref, int indention) {
     if (this.indention > indention || probs.contains(prob)) {

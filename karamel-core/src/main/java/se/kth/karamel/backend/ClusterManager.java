@@ -248,7 +248,6 @@ public class ClusterManager implements Runnable {
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
       installationDag = DagBuilder.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
-      installationDag.validate();
       installationDag.start();
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));

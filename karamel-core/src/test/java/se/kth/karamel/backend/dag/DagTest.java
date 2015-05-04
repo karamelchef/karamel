@@ -131,6 +131,10 @@ public class DagTest {
         return Collections.EMPTY_SET;
       }
 
+      @Override
+      public void prepareToStart() {
+      }
+
     }
 
     Dag dag = new Dag();
@@ -189,6 +193,10 @@ public class DagTest {
       @Override
       public Set<String> dagDependencies() {
         return Collections.EMPTY_SET;
+      }
+
+      @Override
+      public void prepareToStart() {
       }
     }
 

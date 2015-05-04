@@ -14,5 +14,7 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public interface TaskSubmitter {
 
+  public void prepareToStart(Task task) throws KaramelException;
+
   public void submitTask(Task task) throws KaramelException;
 }

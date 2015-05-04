@@ -39,6 +39,10 @@ public class DagBuilderTest {
         System.out.println(task.uniqueId());
         task.succeed();
       }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
     };
 
     Settings.CB_CLASSPATH_MODE = true;
@@ -60,6 +64,10 @@ public class DagBuilderTest {
       public void submitTask(Task task) throws KaramelException {
         System.out.println(task.uniqueId());
         task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
       }
     };
 

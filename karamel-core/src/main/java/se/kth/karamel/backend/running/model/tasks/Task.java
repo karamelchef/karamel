@@ -84,6 +84,17 @@ public abstract class Task implements DagTask, TaskCallback {
   }
 
   @Override
+  public void prepareToStart() {
+    try {
+      submitter.prepareToStart(this);
+    } catch (KaramelException ex) {
+      machine.getGroup().getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, uuid, ex.getMessage()));
+      logger.error("", ex);
+      dagCallback.failed(ex.getMessage());
+    }
+  }
+
+  @Override
   public void submit(DagTaskCallback callback) {
     this.dagCallback = callback;
     try {

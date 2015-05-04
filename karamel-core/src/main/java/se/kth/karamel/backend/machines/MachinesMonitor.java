@@ -141,4 +141,10 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
       machine.disconnect();
     }
   }
+
+  @Override
+  public void prepareToStart(Task task) throws KaramelException {
+    MachineRuntime machine = task.getMachine();
+    machine.addTask(task);
+  }
 }

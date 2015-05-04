@@ -23,10 +23,15 @@ import se.kth.karamel.common.SshKeyPair;
  *
  * @author kamal
  */
-@Ignore
+//@Ignore
 public class KaramelApiTest {
 
   KaramelApi api = new KaramelApiImpl();
+  
+  @Test
+  public void dummyTest() {
+    //just that we dont need to ignore this class all the time
+  }
 
 //  @Test
   public void testGetCookbookDetails() throws KaramelException {
@@ -155,6 +160,28 @@ public class KaramelApiTest {
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
       System.out.println(api.processCommand("dag spark").getResult());
+      Thread.currentThread().sleep(60000);
+    }
+  }
+
+  @Test
+  public void testStatus() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "flink";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    int mins = 0;
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      mins++;
+      System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
     }
   }

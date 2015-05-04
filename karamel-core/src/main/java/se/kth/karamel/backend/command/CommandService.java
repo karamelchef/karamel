@@ -365,6 +365,10 @@ public class CommandService {
               System.out.println(task.uniqueId());
               task.succeed();
             }
+
+            @Override
+            public void prepareToStart(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -649,10 +653,11 @@ public class CommandService {
 
   private static void addActiveClusterMenus(CommandResponse response) {
     ClusterManager cluster = cluster(chosenCluster());
+    String clusterName = cluster.getDefinition().getName().toLowerCase();
     ClusterRuntime clusterEntity = cluster.getRuntime();
     response.addMenuItem("View Definition", "yaml");
     response.addMenuItem("Status", "status");
-    response.addMenuItem("DAG", "dag");
+    response.addMenuItem("DAG", "dag " + clusterName);
     response.addMenuItem("Detail", "detail");
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");

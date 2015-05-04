@@ -50,11 +50,13 @@ public class Dag {
   }
 
   public boolean addDependency(String first, String next) throws DagConstructionException {
-    if (first == null || first.isEmpty() || next == null || next.isEmpty())
+    if (first == null || first.isEmpty() || next == null || next.isEmpty()) {
       throw new DagConstructionException(String.format("Dependencies cannot be null or empty: %s -> %s", first, next));
-    
-    if (first.equals(next))
+    }
+
+    if (first.equals(next)) {
       throw new DagConstructionException(String.format("Cyrcular dependency is not allowed: %s -> %s", first, next));
+    }
 
     logger.debug("Adding dependency: " + first + " -> " + next);
     DagNode firstNode;
@@ -77,6 +79,11 @@ public class Dag {
 
   public void start() throws DagConstructionException {
     validate();
+    logger.info("Dag is starting: \n" + print());
+    String prob = UUID.randomUUID().toString();
+    for (DagNode node : findRootNodes()) {
+      node.prepareToStart(prob);
+    }
     for (DagNode node : findRootNodes()) {
       node.start();
     }
@@ -121,7 +128,7 @@ public class Dag {
     }
     return builder.toString();
   }
-  
+
   public boolean isRoot(String nodeId) {
     if (allNodes.containsKey(nodeId)) {
       DagNode node = allNodes.get(nodeId);
@@ -129,7 +136,7 @@ public class Dag {
     }
     return false;
   }
-  
+
   public boolean hasDependency(String first, String next) {
     if (allNodes.containsKey(first) && allNodes.containsKey(next)) {
       DagNode firstNode = allNodes.get(first);
