@@ -164,7 +164,7 @@ public class KaramelApiTest {
     }
   }
 
-  @Test
+//  @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flink";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink.yml"), Charsets.UTF_8);

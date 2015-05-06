@@ -126,12 +126,8 @@ public class Settings {
     return CLUSTER_LOG_FOLDER(clusterName) + File.separator + machineIp;
   }
 
-  public static String TASK_ERROR_FILE_PATH(String clusterName, String machinIp, String taskName) {
-    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".err";
-  }
-
-  public static String TASK_OUTPUT_FILE_PATH(String clusterName, String machinIp, String taskName) {
-    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".out";
+  public static String TASK_LOG_FILE_PATH(String clusterName, String machinIp, String taskName) {
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".log";
   }
 
   public static String CLUSTER_ROOT_PATH(String clusterName) {
