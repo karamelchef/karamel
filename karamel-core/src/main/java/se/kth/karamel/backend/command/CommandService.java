@@ -6,11 +6,7 @@
 package se.kth.karamel.backend.command;
 
 import com.google.gson.JsonObject;
-import dnl.utils.text.table.TextTable;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -42,6 +38,7 @@ import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -214,7 +211,7 @@ public class CommandService {
           data[i][0] = group.getName();
           data[i][1] = String.valueOf(group.getPhase());
         }
-        result = makeTable(columnNames, 0, data, true);
+        result = TextTable.makeTable(columnNames, 0, data, true);
         nextCmd = "groups " + clusterNameInUserInput;
       }
 
@@ -531,11 +528,11 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>links</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
-    return makeTable(columnNames, 1, data, true);
+    return TextTable.makeTable(columnNames, 1, data, true);
   }
 
   private static String yamlsTable() throws KaramelException {
@@ -545,11 +542,11 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>links</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
-    return makeTable(columnNames, 1, data, true);
+    return TextTable.makeTable(columnNames, 1, data, true);
   }
 
   private static String failureTable(Collection<Failure> failures, boolean rowNumbering) {
@@ -563,7 +560,7 @@ public class CommandService {
       i++;
     }
 
-    return makeTable(columnNames, 1, data, rowNumbering);
+    return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
@@ -577,7 +574,7 @@ public class CommandService {
       String uuid = task.getUuid();
       data[i][3] = "<a kref='log " + uuid + "'>log</a>";
     }
-    return makeTable(columnNames, 1, data, rowNumbering);
+    return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
 
   private static String machinesTable(ArrayList<MachineRuntime> machines, boolean rowNumbering) {
@@ -593,20 +590,7 @@ public class CommandService {
       data[i][5] = machine.getLifeStatus();
       data[i][6] = machine.getTasksStatus();
     }
-    return makeTable(columnNames, 6, data, rowNumbering);
-  }
-
-  private static String makeTable(String[] columnNames, int sortIndex, Object[][] data, boolean rowNumbering) {
-    TextTable tt = new TextTable(columnNames, data);
-// this adds the numbering on the left      
-    tt.setAddRowNumbering(rowNumbering);
-// sort by the first column                              
-    tt.setSort(sortIndex);
-    ByteArrayOutputStream os = new ByteArrayOutputStream();
-    PrintStream ps = new PrintStream(os);
-    tt.printTable(ps, 0);
-    ps.flush();
-    return new String(os.toByteArray(), Charset.forName("utf8"));
+    return TextTable.makeTable(columnNames, 6, data, rowNumbering);
   }
 
   private static String machinesTasksTable(ClusterRuntime clusterEntity) {
@@ -635,6 +619,7 @@ public class CommandService {
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");
     response.addMenuItem("Tasks", "tasks");
+    response.addMenuItem("Services", "links " + clusterName);
     if (clusterEntity.isPaused()) {
       response.addMenuItem("Resume", "resume");
     } else {
