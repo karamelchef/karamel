@@ -124,7 +124,7 @@ public class ClusterManager implements Runnable {
       logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
       machinesMonitorFuture.cancel(true);
     }
-    clusterStatusMonitor.setStoping(true);
+    clusterStatusMonitor.setStopping(true);
     if (clusterStatusFuture != null && !clusterStatusFuture.isCancelled()) {
       logger.info(String.format("Terminating cluster status monitor of '%s'", definition.getName()));
       clusterStatusFuture.cancel(true);
