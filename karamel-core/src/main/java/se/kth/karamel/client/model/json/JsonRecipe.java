@@ -12,7 +12,7 @@ import se.kth.karamel.common.Settings;
  *
  * @author kamal
  */
-public class JsonRecipe implements Comparable<JsonRecipe>{
+public class JsonRecipe {
   String name;
 
   public String getName() {
@@ -26,10 +26,4 @@ public class JsonRecipe implements Comparable<JsonRecipe>{
   public String getCanonicalName() {
     return Settings.RECIPE_CANONICAL_NAME(name);
   }
-
-    @Override
-    public int compareTo(JsonRecipe o) {
-        return getCanonicalName().compareTo(o.getCanonicalName());
-    }
-  
 }
