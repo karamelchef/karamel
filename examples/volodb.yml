@@ -1,0 +1,26 @@
+name: VoloDB
+ec2:
+    type: m3.large
+    region: eu-west-1
+
+cookbooks:                                                                      
+  volodb:
+    github: "hopshadoop/volodb-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+    
+groups: 
+  datanodes:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  server:
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+        - volodb::server
+

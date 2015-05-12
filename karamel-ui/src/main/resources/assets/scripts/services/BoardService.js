@@ -5,7 +5,7 @@
 
 angular.module('demoApp')
 
-    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', 'BoardManipulator', '$rootScope', 'KaramelCoreRestServices', 'KaramelSyncService', 'AlertService', function(BoardDataService, SweetAlert, $log, $modal, BoardManipulator, $rootScope, KaramelCoreRestServices, KaramelSyncService, AlertService) {
+    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', '$location', 'BoardManipulator', '$rootScope', 'KaramelCoreRestServices', 'KaramelSyncService', 'AlertService', function(BoardDataService, SweetAlert, $log, $modal, $location, BoardManipulator, $rootScope, KaramelCoreRestServices, KaramelSyncService, AlertService) {
 
         // ============  Private Functions
         var _createAndPopulateBoard = function(boardJSON) {
@@ -31,36 +31,37 @@ angular.module('demoApp')
         }
 
 
-        function _launchCluster(board){
-            
-            var restObj = getRestObjBuilder().buildCaramelForRest(board);
-            var data = {
-                json: angular.toJson(restObj)
-            };
-            KaramelCoreRestServices.startCluster(data)
-                .success(function(data, status, headers, config) {
-                    $log.info("Connection Successful.");
-                    AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
-                })
-                .error(function(data, status, headers, config) {
-                    $log.info("Error Received.");
-                    $log.info(data.message);
-                    AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
-                });    
-        }
-        
-        
-        function _areCredentialsSet(board){
+        function _launchCluster(board) {
 
-            var result = true;
-            
-            result = result && board.getEC2provider().getIsValid();
-            result = result && board.getSshKeyPair().getIsValid();
-
-            return result;
+          var restObj = getRestObjBuilder().buildKaramelForRest(board);
+          var data = {
+            json: angular.toJson(restObj)
+          };
+          KaramelCoreRestServices.startCluster(data)
+              .success(function(data, status, headers, config) {
+                $log.info("Connection Successful.");
+                AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
+                $location.path('/terminal');
+              })
+              .error(function(data, status, headers, config) {
+                $log.info("Error Received.");
+                $log.info(data.message);
+                AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
+              });
         }
 
- // --------------------------------------------------------------------------------------------------------------------
+
+        function _areCredentialsSet(board) {
+
+          var result = true;
+
+          result = result && board.getEC2provider().getIsValid();
+          result = result && board.getSshKeyPair().getIsValid();
+
+          return result;
+        }
+
+        // --------------------------------------------------------------------------------------------------------------------
 
         return {
           addNewRecipe: function(board, nodeGroup) {
@@ -339,7 +340,7 @@ angular.module('demoApp')
               return;
             }
             else {
-              restObj = getRestObjBuilder().buildCaramelForRest(board);
+              restObj = getRestObjBuilder().buildKaramelForRest(board);
             }
 
             var data = {
@@ -355,8 +356,6 @@ angular.module('demoApp')
                 });
 
           },
-            
-            
           editAmazonProvider: function(board, group, isLaunch) {
 
             $log.info("Edit Amazon Provider.");
@@ -374,7 +373,7 @@ angular.module('demoApp')
                 }
               }
             });
-            
+
             var externalObj = this;
             modalInstance.result.then(function(provider) {
 
@@ -384,36 +383,34 @@ angular.module('demoApp')
                 ec2Provider.addAccountDetails(provider.ec2Provider);
 
 
-                  if (_.isNull(group)) {
-                      $log.info("Save the provider details at global level.");
-                      board.setEC2Provider(ec2Provider);
-                  }
-
-                  else {
-                      $log.info("Save the provider details at group level.");
-                      group.setEC2Provider(ec2Provider);
-                  }
-
-                  _syncBoardWithCache(board);
-
-                if(isLaunch){
-                    // If call came as part of start cluster, launch cluster.
-                    externalObj.startCluster(board);
+                if (_.isNull(group)) {
+                  $log.info("Save the provider details at global level.");
+                  board.setEC2Provider(ec2Provider);
                 }
-                
+
+                else {
+                  $log.info("Save the provider details at group level.");
+                  group.setEC2Provider(ec2Provider);
+                }
+
+                _syncBoardWithCache(board);
+
+                if (isLaunch) {
+                  // If call came as part of start cluster, launch cluster.
+                  externalObj.startCluster(board);
+                }
+
               }
-              else{
-                  // If provider is still not set.
-                  if(board.getEC2provider() == null){
-                      $log.info("Ec2 provider details still not set.");
-                      AlertService.addAlert({type: 'danger', msg: 'Provider details not set.'});
-                  }
+              else {
+                // If provider is still not set.
+                if (board.getEC2provider() == null) {
+                  $log.info("Ec2 provider details still not set.");
+                  AlertService.addAlert({type: 'danger', msg: 'Provider details not set.'});
+                }
               }
             });
 
           },
-            
-            
           editSshKeys: function() {
 
             $log.info("Edit SSH Keys.");
@@ -431,7 +428,6 @@ angular.module('demoApp')
             });
 
           },
-            
           startCluster: function(board) {
 
             $log.info("Invoked Function to start cluster.");
@@ -442,18 +438,16 @@ angular.module('demoApp')
               AlertService.addAlert({type: 'warning', msg: 'No Karamel Model Found.'});
               return;
             }
-            
-            if(! (_areCredentialsSet(board))){
-                this.setCredentials(board, true);
+
+            if (!(_areCredentialsSet(board))) {
+              this.setCredentials(board, true);
             }
-            
-            else{
-                _launchCluster(board);
+
+            else {
+              _launchCluster(board);
             }
-              
+
           },
-            
-            
           viewCluster: function(board) {
 
             $log.info("View cluster function invoked.");
@@ -474,8 +468,7 @@ angular.module('demoApp')
             });
 
           },
-
-            scaffoldCookbook: function(board) {
+          scaffoldCookbook: function(board) {
 
             $log.info("Scaffold Cookbook function invoked.");
             var modalInstance = $modal.open({
@@ -492,62 +485,61 @@ angular.module('demoApp')
                 }
               }
             });
-            var restObj = getRestObjBuilder().buildCaramelForRest(board);
+            var restObj = getRestObjBuilder().buildKaramelForRest(board);
             var data = {
-                json: angular.toJson(restObj)
+              json: angular.toJson(restObj)
             };
-            CaramelCoreServices.scaffoldCookbook(data)
+            KaramelCoreServices.scaffoldCookbook(data)
                 .success(function(data, status, headers, config) {
-                    $log.info("Connection Successful.");
-                    AlertService.addAlert({type: 'success', msg: 'Cookbook created successfully.'});
+                  $log.info("Connection Successful.");
+                  AlertService.addAlert({type: 'success', msg: 'Cookbook created successfully.'});
                 })
                 .error(function(data, status, headers, config) {
-                    $log.info("Error Received.");
-                    $log.info(data.message);
-                    AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to create cookbook'});
-                });    
+                  $log.info("Error Received.");
+                  $log.info(data.message);
+                  AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to create cookbook'});
+                });
 
 
           },
-            
-          setCredentials: function(board , isLaunch){
+          setCredentials: function(board, isLaunch) {
             $log.info("Set Credentials function called.");
-              
-              var modalInstance = $modal.open({
-                  templateUrl: "partials/credentials.html",
-                  controller: "CredentialsController",
-                  backdrop: "static",
-                  resolve: {
-                      info: function() {
-                          return {
-                              board: angular.copy(board)
-                          }
-                      }
+
+            var modalInstance = $modal.open({
+              templateUrl: "partials/credentials.html",
+              controller: "CredentialsController",
+              backdrop: "static",
+              resolve: {
+                info: function() {
+                  return {
+                    board: angular.copy(board)
                   }
-              });
-              
-              modalInstance.result.then(function(updatedBoard){
-                  if(updatedBoard){
-                      
-                      board.setEC2Provider(updatedBoard.getEC2provider());
-                      board.setSshKeyPair(updatedBoard.getSshKeyPair());
-                      
-                      _syncBoardWithCache(updatedBoard);
-                      
-                      if(isLaunch){
-                          _launchCluster(board);
-                      }
-                  }
-                  
-                  else{
-                      if(!_areCredentialsSet(board)){
-                          AlertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
-                      }
-                      
-                  }
-                  
-              });
+                }
+              }
+            });
+
+            modalInstance.result.then(function(updatedBoard) {
+              if (updatedBoard) {
+
+                board.setEC2Provider(updatedBoard.getEC2provider());
+                board.setSshKeyPair(updatedBoard.getSshKeyPair());
+
+                _syncBoardWithCache(updatedBoard);
+
+                if (isLaunch) {
+                  _launchCluster(board);
+                }
+              }
+
+              else {
+                if (!_areCredentialsSet(board)) {
+                  AlertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
+                }
+
+              }
+
+            });
           }
-        }       
+        }
 
       }]);

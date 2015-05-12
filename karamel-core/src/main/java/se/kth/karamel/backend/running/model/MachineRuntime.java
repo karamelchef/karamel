@@ -29,6 +29,8 @@ public class MachineRuntime implements Serializable {
   private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.ONGOING;
+  private String name;
+  private String ec2Id;
   private String privateIp;
   private String publicIp;
   private int sshPort;
@@ -43,12 +45,28 @@ public class MachineRuntime implements Serializable {
   public GroupRuntime getGroup() {
     return group;
   }
+
+  public String getEc2Id() {
+    return ec2Id;
+  }
+
+  public void setEc2Id(String ec2Id) {
+    this.ec2Id = ec2Id;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
   
   public String getPublicIp() {
     return publicIp;
   }
 
-  public void setPublicIp(String publicIp) {
+  public synchronized void setPublicIp(String publicIp) {
     this.publicIp = publicIp;
   }
 
@@ -56,7 +74,7 @@ public class MachineRuntime implements Serializable {
     return privateIp;
   }
 
-  public void setPrivateIp(String privateIp) {
+  public synchronized void setPrivateIp(String privateIp) {
     this.privateIp = privateIp;
   }
 
@@ -64,7 +82,7 @@ public class MachineRuntime implements Serializable {
     return sshPort;
   }
 
-  public void setSshPort(int sshPort) {
+  public synchronized void setSshPort(int sshPort) {
     this.sshPort = sshPort;
   }
 
@@ -72,7 +90,7 @@ public class MachineRuntime implements Serializable {
     return sshUser;
   }
 
-  public void setSshUser(String sshUser) {
+  public synchronized void setSshUser(String sshUser) {
     this.sshUser = sshUser;
   }
 
@@ -103,6 +121,6 @@ public class MachineRuntime implements Serializable {
   }
 
   public String getId() {
-    return sshUser + "@" + publicIp;
+    return publicIp;
   }
 }

@@ -1,0 +1,40 @@
+name: HopsWorksOneNode
+ec2:
+    type: m3.large
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
+    branch: "master"  
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
+attrs:
+  hdfs:
+    user: glassfish
+  hadoop:
+    yarn: 
+        user: glassfish
+    mr: 
+        user: glassfish
+
+groups: 
+  hopsworks:
+    size: 1 
+    recipes:                                                                    
+        - ndb::mysqld                                                       
+        - ndb::mgmd
+        - ndb::memcached
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - hops::jhs                                                            
+        - hopsworks
+        - ndb::ndbd
+        - hops::nm
+        - hops::nm

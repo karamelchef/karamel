@@ -20,17 +20,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import javax.xml.ws.FaultAction;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.dag.MultiThreadedDagExecutor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.Provider;
@@ -55,7 +54,6 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
-  MultiThreadedDagExecutor dagExecutor;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
@@ -63,7 +61,7 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterManagerFuture = null;
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
-  private boolean stoping = false;
+  private boolean stopping = false;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) {
     this.clusterContext = clusterContext;
@@ -72,6 +70,10 @@ public class ClusterManager implements Runnable {
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
+  }
+
+  public Dag getInstallationDag() {
+    return installationDag;
   }
 
   public MachinesMonitor getMachinesMonitor() {
@@ -116,12 +118,8 @@ public class ClusterManager implements Runnable {
   }
 
   public void stop() throws InterruptedException {
-    if (dagExecutor != null && !dagExecutor.isShutdown()) {
-      logger.info(String.format("Terminating the installation DAG of '%s'", definition.getName()));
-      dagExecutor.shutdownNow();
-      dagExecutor.awaitTermination(1, TimeUnit.MINUTES);
-    }
     machinesMonitor.setStopping(true);
+
     if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
       logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
       machinesMonitorFuture.cancel(true);
@@ -137,7 +135,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void clean(boolean purging) {
+  private void clean(boolean purging) {
     if (!purging) {
       LogService.cleanup(definition.getName());
       logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
@@ -147,7 +145,8 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailures();
     List<GroupRuntime> groups = runtime.getGroups();
     List<GroupRuntime> ec2GroupEntities = new ArrayList<>();
-    List<String> allEc2Vms = new ArrayList<>();
+    Set<String> allEc2Vms = new HashSet<>();
+    Set<String> allEc2VmsIds = new HashSet<>();
     Map<String, String> groupRegion = new HashMap<>();
     for (GroupRuntime group : groups) {
       if (purging) {
@@ -161,6 +160,11 @@ public class ClusterManager implements Runnable {
         if (ec2Launcher == null) {
           ec2Launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
         }
+        for (MachineRuntime machine : group.getMachines()) {
+          if (machine.getEc2Id() != null) {
+            allEc2VmsIds.add(machine.getEc2Id());
+          }
+        }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
         List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(), jg.getSize());
         allEc2Vms.addAll(vmNames);
@@ -170,7 +174,7 @@ public class ClusterManager implements Runnable {
     }
     try {
 
-      ec2Launcher.cleanup(definition.getName(), allEc2Vms, groupRegion);
+      ec2Launcher.cleanup(definition.getName(), allEc2VmsIds, allEc2Vms, groupRegion);
       for (GroupRuntime group : ec2GroupEntities) {
         if (purging) {
           group.setMachines(Collections.EMPTY_LIST);
@@ -180,7 +184,7 @@ public class ClusterManager implements Runnable {
         }
       }
     } catch (Exception ex) {
-      if (!(ex.getCause() instanceof InterruptedException && stoping)) {
+      if (!(ex.getCause() instanceof InterruptedException && stopping)) {
         logger.error("", ex);
         runtime.issueFailure(new Failure(Failure.Type.CLEANUP_FAILE, ex.getMessage()));
       }
@@ -192,7 +196,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void forkGroups() throws InterruptedException {
+  private void forkGroups() throws InterruptedException {
     logger.info(String.format("Froking groups '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_GROUPS);
     runtime.resolveFailures();
@@ -233,7 +237,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private synchronized void install() throws Exception {
+  private void install() throws Exception {
     logger.info(String.format("Installing '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLING);
     runtime.resolveFailure(Failure.hash(Failure.Type.INSTALLATION_FAILURE, null));
@@ -244,16 +248,17 @@ public class ClusterManager implements Runnable {
 
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
-      installationDag = UserClusterDataExtractor.getInstallationDag(definition, runtime, machinesMonitor, chefJsons, false);
-
-      dagExecutor = new MultiThreadedDagExecutor(Settings.INSTALLATION_DAG_THREADPOOL_SIZE);
-      dagExecutor.submit(installationDag);
-      dagExecutor.awaitTermination(24 * 60, TimeUnit.MINUTES);
+      installationDag = DagBuilder.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
+      installationDag.start();
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
       throw ex;
     }
 
+    while(runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING) {
+      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
+    }
+      
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLED);
       for (GroupRuntime group : groups) {
@@ -277,10 +282,10 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private synchronized void purge() throws InterruptedException {
+  private void purge() throws InterruptedException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
-    stoping = true;
+    stopping = true;
     clean(true);
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
@@ -362,7 +367,7 @@ public class ClusterManager implements Runnable {
             break;
         }
       } catch (java.lang.InterruptedException ex) {
-        if (stoping) {
+        if (stopping) {
           tpool.shutdownNow();
           try {
             tpool.awaitTermination(1, TimeUnit.MINUTES);

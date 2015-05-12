@@ -2,7 +2,7 @@
  * Created by babbarshaer on 2014-10-29.
  */
 
-// This module deals with the core caramel services.
+// This module deals with the core karamel services.
 
 /*jshint undef: false, unused: false, indent: 2*/
 /*global angular: false */
@@ -234,7 +234,7 @@ angular.module('karamel.terminal', [])
       var _defaultContentType = 'application/json';
 
 
-      // Services interacting with the caramel core.
+      // Services interacting with the karamel core.
       return{
         // Based on the object passed get the complete url.
         getCompleteYaml: function(json) {

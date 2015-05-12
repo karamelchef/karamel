@@ -5,26 +5,13 @@
  */
 package se.kth.karamel.backend.converter;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.dag.TaskRunner;
-import se.kth.karamel.backend.machines.MachinesMonitor;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
-import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
-import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
-import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
-import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
 import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.client.model.Ec2;
@@ -34,11 +21,10 @@ import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.client.model.json.JsonRecipe;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.GithubCookbook;
-import se.kth.karamel.cookbook.metadata.GithubUrls;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
+import se.kth.karamel.cookbook.metadata.CookbookUrls;
 import se.kth.karamel.cookbook.metadata.MetadataRb;
 import se.kth.karamel.cookbook.metadata.Recipe;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 
 /**
  *
@@ -46,17 +32,19 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
  */
 public class UserClusterDataExtractor {
 
+  private static final Logger logger = Logger.getLogger(UserClusterDataExtractor.class);
+
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {
           String cbid = jc.getUrls().id;
-          GithubCookbook cb = CookbookCache.get(cbid);
+          KaramelizedCookbook cb = CookbookCache.get(cbid);
           MetadataRb metadataRb = cb.getMetadataRb();
           List<Recipe> recipes = metadataRb.getRecipes();
           for (Recipe recipe : recipes) {
-            if (recipe.getName().equalsIgnoreCase(rec.getName())) {
+            if (recipe.getCanonicalName().equalsIgnoreCase(rec.getCanonicalName())) {
               Set<String> links = recipe.getLinks();
               for (String link : links) {
                 if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
@@ -129,229 +117,11 @@ public class UserClusterDataExtractor {
     return provider;
   }
 
-  /**
-   *
-   * @param cluster
-   * @param clusterEntity
-   * @param monitor
-   * @param chefJsons
-   * @return
-   * @throws KaramelException
-   */
-  public static Dag getInstallationDag(JsonCluster cluster, ClusterRuntime clusterEntity, MachinesMonitor monitor, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
-    Map<String, Task> mlts = machineLevelTasks(cluster, clusterEntity);
-    Map<String, Map<String, Task>> clts = cookbookLevelTasks(cluster, clusterEntity, chefJsons, test);
-    Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, chefJsons, test);
-    Map<String, MachineRuntime> allMachines = new HashMap<>();
-    for (GroupRuntime ge : clusterEntity.getGroups()) {
-      for (MachineRuntime me : ge.getMachines()) {
-        allMachines.put(me.getId(), me);
-      }
-    }
-    Map<String, TaskRunner> allTasks = new HashMap<>();
-    Dag dag = new Dag();
-    for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
-        String mid = me.getId();
-        String id1 = AptGetEssentialsTask.makeUniqueId(mid);
-        Task t1 = mlts.get(id1);
-        TaskRunner r1 = getTaskRunner(t1, monitor, allTasks, allMachines);
-        String id2 = InstallBerkshelfTask.makeUniqueId(mid);
-        Task t2 = mlts.get(id2);
-        TaskRunner r2 = getTaskRunner(t2, monitor, allTasks, allMachines);
-        String id3 = MakeSoloRbTask.makeUniqueId(mid);
-        Task t3 = mlts.get(id3);
-        TaskRunner r3 = getTaskRunner(t3, monitor, allTasks, allMachines);
-        dag.insert(r1);
-        dag.insert(r2, r1);
-        dag.insert(r3, r2);
-        Map<String, Task> cblt = clts.get(mid);
-        for (JsonCookbook cb : jg.getCookbooks()) {
-          GithubUrls urls = cb.getUrls();
-          String id4 = VendorCookbookTask.makeUniqueId(mid, urls.id);
-          Task t4 = cblt.get(id4);
-          TaskRunner r4 = getTaskRunner(t4, monitor, allTasks, allMachines);
-          dag.insert(r4, r3);
-          String id5 = RunRecipeTask.makeUniqueId(mid, cb.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE);
-          Task t5 = cblt.get(id5);
-          TaskRunner r5 = getTaskRunner(t5, monitor, allTasks, allMachines);
-          dag.insert(r5, r4);
-          GithubCookbook ghcb = CookbookCache.get(cb.getUrls().id);
-
-          for (JsonRecipe rec : cb.getRecipes()) {
-            String id6 = RunRecipeTask.makeUniqueId(mid, rec.getName());
-            Map<String, Task> rlt = rlts.get(rec.getName());
-            Task t6 = rlt.get(id6);
-            TaskRunner r6 = getTaskRunner(t6, monitor, allTasks, allMachines);
-            Set<TaskRunner> deps = new HashSet<>();
-            deps.add(r5);
-            YamlDependency depenency = ghcb.getKaramelFile().getDepenency(rec.getName());
-            if (depenency != null) {
-              for (String localRec : depenency.getLocal()) {
-                Map<String, Task> rlt2 = rlts.get(localRec);
-                if (rlt2 != null) {
-                  String id7 = RunRecipeTask.makeUniqueId(mid, localRec);
-                  Task t7 = rlt2.get(id7);
-                  TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
-                  if (t7 != null) {
-                    deps.add(r7);
-                  }
-                }
-              }
-
-              for (String globRec : depenency.getGlobal()) {
-                Map<String, Task> rlt2 = rlts.get(globRec);
-                if (rlt2 != null) {
-                  for (Map.Entry<String, Task> entry : rlt2.entrySet()) {
-                    Task t7 = entry.getValue();
-                    TaskRunner r7 = getTaskRunner(t7, monitor, allTasks, allMachines);
-                    deps.add(r7);
-                  }
-                }
-              }
-            }
-            dag.insert(r6, deps);
-          }
-        }
-      }
-    }
-
-    return dag;
-  }
-
-  private static TaskRunner getTaskRunner(Task t, MachinesMonitor monitor, Map<String, TaskRunner> allTasks, Map<String, MachineRuntime> allMachines) {
-    TaskRunner r1 = allTasks.get(t.uniqueId());
-    if (r1 == null) {
-      MachineRuntime me = allMachines.get(t.getMachineId());
-      me.addTask(t);
-      r1 = new TaskRunner(t, monitor);
-      allTasks.put(t.uniqueId(), r1);
-    }
-
-    return r1;
-  }
-
-  /**
-   *
-   * @param cluster
-   * @param clusterEntity
-   *
-   * @param chefJsons
-   * @return two level mapping of (recipeName -> taskId -> task)
-   */
-  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, Map<String, JsonObject> chefJsons, boolean test) {
-    Map<String, Map<String, Task>> map = new HashMap<>();
-    for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          String installRecipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
-
-          if (!test) {
-            JsonObject json = chefJsons.get(me.getId() + installRecipeName);
-            makeRecipeTask(installRecipeName, me, map, json, test);
-          } else {
-            makeRecipeTask(installRecipeName, me, map, null, test);
-          }
-
-          for (JsonRecipe rec : jc.getRecipes()) {
-            if (!test) {
-              JsonObject json1 = chefJsons.get(me.getId() + rec.getName());
-              makeRecipeTask(rec.getName(), me, map, json1, test);
-            } else {
-              makeRecipeTask(rec.getName(), me, map, null, test);
-            }
-          }
-        }
-      }
-    }
-    return map;
-  }
-
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineRuntime machine, Map<String, Map<String, Task>> map, JsonObject chefJson, boolean test) {
-    RunRecipeTask t1 = makeRecipeTask(recipeName, machine, chefJson, test);
-    Map<String, Task> map1 = map.get(recipeName);
-    if (map1 == null) {
-      map1 = new HashMap<>();
-      map.put(recipeName, map1);
-    }
-    map1.put(t1.uniqueId(), t1);
-    return t1;
-  }
-
-  private static RunRecipeTask makeRecipeTask(String recipeName, MachineRuntime machine, JsonObject chefJson, boolean test) {
-    if (!test) {
-      ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
-      String jsonString = gson.toJson(chefJson);
-      return new RunRecipeTask(machine, recipeName, jsonString);
-    } else {
-      return new RunRecipeTask(machine, recipeName, "");
-    }
-  }
-
-  /**
-   *
-   * @param cluster
-   * @param clusterEntity
-   * @param chefJsons
-   * @return two level mapping of (machineId -> taskId -> task)
-   * @throws KaramelException
-   */
-  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, Map<String, JsonObject> chefJsons, boolean test) throws KaramelException {
-    Map<String, Map<String, Task>> map = new HashMap<>();
-    for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = findGroup(cluster, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
-        Map<String, Task> map1 = new HashMap<>();
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          GithubUrls urls = jc.getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me, urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH, urls.repoName, urls.home, urls.branch);
-          map1.put(t1.uniqueId(), t1);
-          String recipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
-          if (!test) {
-            JsonObject json = chefJsons.get(me.getId() + recipeName);
-            RunRecipeTask t2 = makeRecipeTask(recipeName, me, json, test);
-            map1.put(t2.uniqueId(), t2);
-          } else {
-            RunRecipeTask t2 = makeRecipeTask(recipeName, me, null, test);
-            map1.put(t2.uniqueId(), t2);
-          }
-        }
-        map.put(me.getId(), map1);
-      }
-    }
-    return map;
-  }
-
-  /**
-   *
-   * @param cluster
-   * @param clusterEntity
-   * @return map of taskId -> task
-   */
-  public static Map<String, Task> machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
-    Map<String, Task> map = new HashMap<>();
-    String vendorPath = makeVendorPath(cluster);
-    for (GroupRuntime ge : clusterEntity.getGroups()) {
-      for (MachineRuntime me : ge.getMachines()) {
-        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me);
-        map.put(t1.uniqueId(), t1);
-        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me);
-        map.put(t2.uniqueId(), t2);
-        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath);
-        map.put(t3.uniqueId(), t3);
-      }
-    }
-    return map;
-  }
-
   public static String makeVendorPath(JsonCluster cluster) throws KaramelException {
     Set<String> paths = new HashSet<>();
     for (JsonGroup gr : cluster.getGroups()) {
       for (JsonCookbook cb : gr.getCookbooks()) {
-        GithubUrls urls = cb.getUrls();
+        CookbookUrls urls = cb.getUrls();
         paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + urls.repoName + Settings.SLASH + Settings.COOKBOOKS_VENDOR_SUBFOLDER);
       }
     }

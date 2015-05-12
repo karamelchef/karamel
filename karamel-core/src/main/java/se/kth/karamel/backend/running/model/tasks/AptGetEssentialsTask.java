@@ -6,8 +6,11 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
@@ -17,8 +20,8 @@ import se.kth.karamel.common.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineRuntime machine) {
-    super("apt-get essentials", machine);
+  public AptGetEssentialsTask(MachineRuntime machine, TaskSubmitter submitter) {
+    super("apt-get essentials", machine, submitter);
   }
 
   @Override
@@ -30,12 +33,19 @@ public class AptGetEssentialsTask extends Task {
   }
 
   public static String makeUniqueId(String machineId) {
-    return AptGetEssentialsTask.class.getSimpleName() + machineId;
+    return  "apt-get essentials on "+ machineId;
   }
   
   @Override
   public String uniqueId() {
     return makeUniqueId(super.getMachineId());
   }
+
+  @Override
+  public Set<String> dagDependencies() {
+    return Collections.EMPTY_SET;
+  }
+  
+  
 
 }

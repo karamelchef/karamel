@@ -5,14 +5,15 @@
  */
 package se.kth.karamel.client.model.yaml;
 
-import se.kth.karamel.client.model.Ec2;
 import java.io.IOException;
+import se.kth.karamel.client.model.Ec2;
 import java.util.Map;
 import static junit.framework.TestCase.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.model.Cookbook;
+import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -25,8 +26,9 @@ public class YamlTest {
   private YamlCluster cluster;
 
   @Before
-  public void init() throws KaramelException {
-    this.cluster = YamlUtil.loadYamlFileInClassPath("se/kth/hop/model/reference.yml");
+  public void init() throws KaramelException, IOException {
+    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
+    this.cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
   }
 
   @Test

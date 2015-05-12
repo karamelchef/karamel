@@ -12,6 +12,7 @@ import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.SequenceInputStream;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -75,8 +76,8 @@ public class SshMachine implements Runnable {
         return shell;
     }
 
-    public void setStoping(boolean stoping) {
-        this.stopping = stoping;
+    public void setStopping(boolean stopping) {
+        this.stopping = stopping;
     }
 
     public void pause() {
@@ -96,43 +97,43 @@ public class SshMachine implements Runnable {
         logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
         try {
             while (true && !stopping) {
+                try {
+                    if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
+                            && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
+                        Task task = null;
+                        try {
+                            logger.debug("Going to take a task from the queue");
+                            task = taskQueue.take();
+                            logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
+                            JsonArray res = runTask(task);
+                            if (res != null) {
+                                RunRecipeTask rrt = (RunRecipeTask) task;
+                                // TODO - how to pass on return values to update the dag....
+                                resultsMap.put(rrt, res);
+                            }
 
-                if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
-                        && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
-                    Task task = null;
-                    try {
-                        logger.debug("Going to take a task from the queue");
-                        task = taskQueue.take();
-                        logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
-                        JsonArray res = runTask(task);
-                        if (res != null) {
-                            RunRecipeTask rrt = (RunRecipeTask) task;
-                            // TODO - how to pass on return values to update the dag....
-                            resultsMap.put(rrt, res);
+                        } catch (InterruptedException ex) {
+                            if (stopping) {
+                                logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
+                                return;
+                            } else {
+                                logger.error("Got interrupted without having recieved stopping signal");
+                            }
                         }
-
-                    } catch (InterruptedException ex) {
-                        if (stopping) {
-                            logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
-                            return;
-                        } else {
-                            logger.error("Got interrupted without having recieved stopping signal");
+                    } else {
+                        if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
+                            machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
                         }
-                    } catch (KaramelException ex) {
-                        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.FAILED, (task != null) ? task.getUuid() : null, ex.getMessage());
-                        logger.error("", ex);
-                    }
-                } else {
-                    if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
-                        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
-                    }
-                    try {
-                        Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
-                    } catch (InterruptedException ex) {
-                        if (!stopping) {
-                            logger.error("Got interrupted without having recieved stopping signal");
+                        try {
+                            Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
+                        } catch (InterruptedException ex) {
+                            if (!stopping) {
+                                logger.error("Got interrupted without having recieved stopping signal");
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    logger.error("", e);
                 }
             }
         } finally {
@@ -143,13 +144,37 @@ public class SshMachine implements Runnable {
     public void enqueue(Task task) throws KaramelException {
         logger.debug(String.format("Queuing '%s'", task.toString()));
         try {
-            task.setStatus(Status.READY, null);
             taskQueue.put(task);
+            task.queued();
         } catch (InterruptedException ex) {
             String message = String.format("Couldn't queue task '%s' on machine '%s'", task.getName(), machineEntity.getId());
-            task.setStatus(Status.FAILED, message);
+            task.failed(message);
             throw new KaramelException(message, ex);
         }
+    }
+
+    private synchronized JsonArray runTask(Task task) {
+        JsonArray res = null;
+        try {
+            task.started();
+            List<ShellCommand> commands = task.getCommands();
+
+            for (ShellCommand cmd : commands) {
+                if (cmd.getStatus() != ShellCommand.Status.DONE) {
+                    res = runSshCmd(cmd, task);
+                    if (cmd.getStatus() != ShellCommand.Status.DONE) {
+                        task.failed(String.format("Incompleted command '%s", cmd.getCmdStr()));
+                        break;
+                    }
+                }
+            }
+            if (task.getStatus() == Status.ONGOING) {
+                task.succeed();
+            }
+        } catch (Exception ex) {
+            task.failed(ex.getMessage());
+        }
+        return res;
     }
 
     private synchronized JsonArray runSshCmd(ShellCommand shellCommand, Task task) {
@@ -158,7 +183,7 @@ public class SshMachine implements Runnable {
         JsonArray res = null;
         try {
             //SesshionChannle logs the same thing
-//     logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
+            logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
             session = client.startSession();
             Session.Command cmd = session.exec(shellCommand.getCmdStr());
@@ -171,20 +196,24 @@ public class SshMachine implements Runnable {
                 if (task instanceof RunRecipeTask) {
                     RunRecipeTask rrt = (RunRecipeTask) task;
                     try {
-                        JsonArray results = downloadResultsScp(rrt.getCookbook(), rrt.getRecipe());
+                        JsonArray results = downloadResultsScp(rrt.getCookbookName(), rrt.getRecipeCanonicalName());
                         rrt.setResults(results);
                         res = results;
                     } catch (JsonParseException p) {
-                        logger.error("Bug in Chef Cookbook - Results were not a valid json document: " + rrt.getCookbook() + "::" + rrt.getRecipe());
+                        logger.error("Bug in Chef Cookbook - Results were not a valid json document: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
                         rrt.setResults(null);
                     } catch (IOException e) {
-                        logger.error("Possible network problem. No results were able to be downloaded for: " + rrt.getCookbook() + "::" + rrt.getRecipe());
+                        logger.error("Possible network problem. No results were able to be downloaded for: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
                         rrt.setResults(null);
                     }
                 }
 
             }
-            LogService.serializeTaskLogs(task, machineEntity.getPublicIp(), cmd.getInputStream(), cmd.getErrorStream());
+
+            SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
+            LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
 
         } catch (ConnectionException | TransportException ex) {
             if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
@@ -201,7 +230,7 @@ public class SshMachine implements Runnable {
         return res;
     }
 
-    private synchronized boolean connect() throws KaramelException {
+    private boolean connect() throws KaramelException {
         try {
             KeyProvider keys = null;
             client = new SSHClient();
@@ -237,7 +266,7 @@ public class SshMachine implements Runnable {
         }
     }
 
-    public synchronized void disconnect() {
+    public void disconnect() {
         logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
         try {
             if (client != null && client.isConnected()) {
@@ -245,23 +274,6 @@ public class SshMachine implements Runnable {
             }
         } catch (IOException ex) {
         }
-    }
-
-    public synchronized boolean ping() throws KaramelException {
-        if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
-            if (client != null && client.isConnected()) {
-                updateHeartbeat();
-                return true;
-            } else {
-                return connect();
-            }
-        } else {
-            return true;
-        }
-    }
-
-    private void updateHeartbeat() {
-        lastHeartbeat = System.currentTimeMillis();
     }
 
     /**
@@ -303,29 +315,21 @@ public class SshMachine implements Runnable {
         return jsonParser.parse(reader).getAsJsonArray();
     }
 
-    private synchronized JsonArray runTask(Task task) throws KaramelException {
-        JsonArray res = null;
-        try {
-            task.setStatus(Status.ONGOING, null);
-            List<ShellCommand> commands = task.getCommands();
-
-            for (ShellCommand cmd : commands) {
-                if (cmd.getStatus() != ShellCommand.Status.DONE) {
-                    res = runSshCmd(cmd, task);
-                    if (cmd.getStatus() != ShellCommand.Status.DONE) {
-                        task.setStatus(Status.FAILED, String.format("Incompleted command '%s", cmd.getCmdStr()));
-                        break;
-                    }
-                }
+    public boolean ping() throws KaramelException {
+        if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
+            if (client != null && client.isConnected()) {
+                updateHeartbeat();
+                return true;
+            } else {
+                return connect();
             }
-            if (task.getStatus() == Status.ONGOING) {
-                task.setStatus(Status.DONE, null);
-            }
-        } catch (Exception ex) {
-            task.setStatus(Status.FAILED, ex.getMessage());
-            throw new KaramelException(ex);
+        } else {
+            return true;
         }
-        return res;
+
     }
 
+    private void updateHeartbeat() {
+        lastHeartbeat = System.currentTimeMillis();
+    }
 }

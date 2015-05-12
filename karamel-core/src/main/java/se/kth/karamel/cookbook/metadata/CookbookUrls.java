@@ -20,7 +20,7 @@ import se.kth.karamel.common.exception.CookbookUrlException;
  *
  * @author kamal
  */
-public class GithubUrls {
+public class CookbookUrls {
 
   public String repoName;
   public String branch;
@@ -32,8 +32,8 @@ public class GithubUrls {
   public String karamelFile;
   public String berksfile;
 
-  public GithubUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile, 
-          String metadataFile, String karamelFile, String berksfile) {
+  public CookbookUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile,
+      String metadataFile, String karamelFile, String berksfile) {
     this.repoName = repoName;
     this.branch = branch;
     this.id = id;
@@ -54,7 +54,7 @@ public class GithubUrls {
 
     public Builder url(String url) throws CookbookUrlException {
       if (url.isEmpty()) {
-        throw new CookbookUrlException("Github url is null.");
+        throw new CookbookUrlException("Cookbook url is empty.");
       }
       this.url = url.trim();
       return this;
@@ -64,8 +64,8 @@ public class GithubUrls {
       this.branch = branch;
       return this;
     }
-
-    public GithubUrls build() throws CookbookUrlException {
+    
+    public CookbookUrls build() throws CookbookUrlException {
       if (url.matches(REPO_WITH_BRANCH_PATTERN) || url.matches(GITHUB_REPO_WITH_BRANCH_PATTERN)) {
         String[] comp = url.split(SLASH);
         user = comp[comp.length - 4];
@@ -84,15 +84,18 @@ public class GithubUrls {
         throw new CookbookUrlException(String.format("'%s' is not a valid Github url, it must be one the following formats: \n'http(s)://github.com/<user_name>/<repo>', \n'http(s)://github.com/<user_name>/<repo>/tree/<branch>', \n'<user_name>/<repo>', or \n'<user_name>/<repo>/tree/<branch>'", url));
       }
 
+      String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL; 
+      String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL; 
+      
       String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
-      String home = GITHUB_BASE_URL + SLASH + user + SLASH + repo;
-      String rawHome = GITHUB_RAW_URL + SLASH + user + SLASH + repo + SLASH + branch;
+      String home = base + SLASH + user + SLASH + repo;
+      String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
 
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
-      GithubUrls urls = new GithubUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, berksFile);
+      CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, berksFile);
       return urls;
     }
 

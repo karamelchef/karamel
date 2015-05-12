@@ -1,4 +1,4 @@
-name: spark
+name: sparkonvpc
 ec2:
     type: c4.large
     region: eu-west-1
@@ -22,7 +22,7 @@ groups:
         - hadoop::jhs
         - spark::master
   datanodes:
-    size: 2
+    size: 20
     recipes: 
         - hadoop::dn
         - hadoop::nm

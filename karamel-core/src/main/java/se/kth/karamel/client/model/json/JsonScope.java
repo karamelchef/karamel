@@ -15,7 +15,7 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Scope;
 import se.kth.karamel.cookbook.metadata.Attribute;
-import se.kth.karamel.cookbook.metadata.GithubCookbook;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.exception.ValidationException;
 
@@ -38,7 +38,7 @@ public class JsonScope extends Scope {
       String key = entry.getKey();
       Cookbook cb = entry.getValue();
 
-      GithubCookbook metadata = CookbookCache.get(cb.getUrls().id);
+      KaramelizedCookbook metadata = CookbookCache.get(cb.getUrls().id);
       List<Attribute> allAttrs = metadata.getMetadataRb().getAttributes();
       Map<String, String> filteredAttrs = new HashMap<>();
       for (Attribute att : allAttrs) {

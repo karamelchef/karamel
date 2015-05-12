@@ -27,6 +27,25 @@
     </repositories>
     <dependencies>
         <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>3.7.0.201502260915-r</version>
+        </dependency>
+       
+
+<!--        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.68</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>org.eclipse.mylyn.github</groupId>
+            <artifactId>org.eclipse.egit.github.core</artifactId>
+            <version>2.1.5</version>
+        </dependency>        
+        
+        <dependency>
             <groupId>dnl.utils</groupId>
             <artifactId>j-text-utils</artifactId>
             <version>0.3.3</version>
@@ -41,7 +60,7 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.11</version>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>org.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>
             <version>1.1.0</version>

@@ -45,13 +45,12 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.client.model.yaml.YamlCluster;
-import se.kth.karamel.client.model.yaml.YamlUtil;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
-import static se.kth.karamel.common.CookbookScaffolder.create;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
 /**
@@ -154,7 +153,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
                 // Print error msg if invalid file or invalid YAML.
                 try {
                     yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
-                    YamlCluster cluster = YamlUtil.loadCluster(yamlTxt);
+                    YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
                     String jsonTxt = karamelApiHandler.yamlToJson(yamlTxt);
                     boolean valid = false;
                     Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
@@ -215,7 +214,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 // Name of the application displayed when application boots up.
     @Override
     public String getName() {
-        return "caramel-core";
+        return "karamel-core";
     }
 
     // Pre start of the dropwizard to plugin with separate bundles.
@@ -598,7 +597,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             public Response startCluster(KaramelBoardJSON boardJSON) {
 
                 Response response = null;
-                System.out.println(" Received request to start the cluster. ");
+                Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, 
+                        "Start cluster: \n" + boardJSON.getJson());
 
                 try {
                     karamelApiHandler.startCluster(boardJSON.getJson());

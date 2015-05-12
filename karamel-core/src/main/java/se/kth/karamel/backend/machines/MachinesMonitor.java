@@ -6,17 +6,16 @@
 package se.kth.karamel.backend.machines;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -25,8 +24,8 @@ import se.kth.karamel.common.exception.KaramelException;
  *
  * @author kamal
  */
-public class MachinesMonitor implements Runnable {
-
+public class MachinesMonitor implements TaskSubmitter, Runnable {
+  
   private static final Logger logger = Logger.getLogger(MachinesMonitor.class);
   private final String clusterName;
   private final Map<String, SshMachine> machines = new HashMap<>();
@@ -44,11 +43,11 @@ public class MachinesMonitor implements Runnable {
   public void setStopping(boolean stopping) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
-      sshMachine.setStoping(true);
+      sshMachine.setStopping(true);
     }
     this.stopping = stopping;
   }
-
+  
   public SshMachine getMachine(String publicIp) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
@@ -58,15 +57,15 @@ public class MachinesMonitor implements Runnable {
     }
     return null;
   }
-
-  public synchronized void addMachines(List<MachineRuntime> machineEntities) {
+  
+  public void addMachines(List<MachineRuntime> machineEntities) {
     for (MachineRuntime machineEntity : machineEntities) {
       SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey());
       machines.put(machineEntity.getId(), sshMachine);
       executor.execute(sshMachine);
     }
   }
-
+  
   public void resume() {
     if (paused) {
       logger.info("Sending resume signal to all machines");
@@ -77,7 +76,7 @@ public class MachinesMonitor implements Runnable {
       paused = false;
     }
   }
-
+  
   public void pause() {
     if (!paused) {
       logger.info("Sending pause signal to all machines");
@@ -88,44 +87,44 @@ public class MachinesMonitor implements Runnable {
       paused = true;
     }
   }
-
+  
   @Override
   public void run() {
     logger.info(String.format("Machines-Monitor started for '%s' d'-'", clusterName));
     while (true && !stopping) {
-      if (!paused) {
-        Set<Map.Entry<String, SshMachine>> entrySet = machines.entrySet();
+      try {
+        Set<Map.Entry<String, SshMachine>> entrySet = new HashSet<>();
+        entrySet.addAll(machines.entrySet());
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
-          try {
             machine.ping();
-          } catch (KaramelException ex) {
-            logger.error("", ex);
+        }
+        
+        try {
+          Thread.currentThread().sleep(Settings.SSH_PING_INTERVAL);
+        } catch (InterruptedException ex) {
+          if (stopping) {
+            logger.error("Terminating machines threadpool");
+            executor.shutdownNow();
+            try {
+              executor.awaitTermination(1, TimeUnit.MINUTES);
+              logger.info("Machines threadpool terminated");
+              logger.info(String.format("Machines-Monitor stoped for '%s' d'-'", clusterName));
+              return;
+            } catch (InterruptedException ex1) {
+            }
+          } else {
+            logger.error("Got interupted without having recived the stopping signal..", ex);
           }
         }
-      }
-
-      try {
-        Thread.currentThread().sleep(Settings.SSH_PING_INTERVAL);
-      } catch (InterruptedException ex) {
-        if (stopping) {
-          logger.error("Terminating machines threadpool");
-          executor.shutdownNow();
-          try {
-            executor.awaitTermination(1, TimeUnit.MINUTES);
-            logger.info("Machines threadpool terminated");
-            logger.info(String.format("Machines-Monitor stoped for '%s' d'-'", clusterName));
-            return;
-          } catch (InterruptedException ex1) {
-          }
-        } else {
-          logger.error("Got interupted without having recived the stopping signal..", ex);
-        }
+      } catch (Exception ex) {
+        logger.error("", ex);
       }
     }
   }
-
-  public synchronized void runTask(Task task) throws KaramelException {
+  
+  @Override
+  public void submitTask(Task task) throws KaramelException {
     logger.debug(String.format("Recieved '%s' from DAG", task.toString()));
     String machineName = task.getMachineId();
     if (!machines.containsKey(machineName)) {
@@ -135,12 +134,18 @@ public class MachinesMonitor implements Runnable {
     machine.enqueue(task);
     // TODO - check if there is a return value....
   }
-
-  public synchronized void disconnect() throws KaramelException {
+  
+  public void disconnect() throws KaramelException {
     Set<Map.Entry<String, SshMachine>> entrySet = machines.entrySet();
     for (Map.Entry<String, SshMachine> entry : entrySet) {
       SshMachine machine = entry.getValue();
       machine.disconnect();
     }
+  }
+
+  @Override
+  public void prepareToStart(Task task) throws KaramelException {
+    MachineRuntime machine = task.getMachine();
+    machine.addTask(task);
   }
 }

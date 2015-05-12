@@ -5,9 +5,8 @@
  */
 package se.kth.karamel.client.model;
 
-import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.GithubUrls;
+import se.kth.karamel.cookbook.metadata.CookbookUrls;
 
 /**
  *
@@ -52,14 +51,14 @@ public class Cookbook {
     this.version = version;
   }
 
-  public GithubUrls getUrls() throws KaramelException {
-    GithubUrls.Builder builder = new GithubUrls.Builder();
+  public CookbookUrls getUrls() throws KaramelException {
+    CookbookUrls.Builder builder = new CookbookUrls.Builder();
     builder.url(github);
     if (branch != null)
       builder.branchOrVersion(branch);
     else if (version != null)
       builder.branchOrVersion(version);
-    GithubUrls urls = builder.build();
+    CookbookUrls urls = builder.build();
     return urls;
   }
 }

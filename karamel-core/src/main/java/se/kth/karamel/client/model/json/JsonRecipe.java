@@ -6,6 +6,8 @@
 
 package se.kth.karamel.client.model.json;
 
+import se.kth.karamel.common.Settings;
+
 /**
  *
  * @author kamal
@@ -21,4 +23,7 @@ public class JsonRecipe {
     this.name = name;
   }
   
+  public String getCanonicalName() {
+    return Settings.RECIPE_CANONICAL_NAME(name);
+  }
 }

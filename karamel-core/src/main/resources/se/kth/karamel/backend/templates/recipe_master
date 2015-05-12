@@ -1,5 +1,4 @@
 
-master_ip = my_private_ip()
 
 bash "%%NAME%%_install_bash" do
     user "root"

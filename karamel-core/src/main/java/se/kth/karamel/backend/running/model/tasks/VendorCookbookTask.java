@@ -6,8 +6,11 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 
@@ -23,8 +26,8 @@ public class VendorCookbookTask extends Task {
   private final String cookbookUrl;
   private final String branch;
 
-  public VendorCookbookTask(MachineRuntime machine, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
-    super("clone and vendor " + cookbookUrl, machine);
+  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
+    super("clone and vendor " + cookbookUrl, machine, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;
     this.cookbookName = cookbookName;
@@ -35,22 +38,30 @@ public class VendorCookbookTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK, 
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
               "cookbooks_home", cookbooksHome,
-              "cookbook_name", cookbookName, 
+              "cookbook_name", cookbookName,
               "cookbook_url", cookbookUrl,
-              "branch_name", branch, 
+              "branch_name", branch,
               "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER);
     }
     return commands;
   }
 
   public static String makeUniqueId(String machineId, String cookbookId) {
-    return RunRecipeTask.class.getSimpleName() + cookbookId + machineId;
+    return "clone and vendor " + cookbookId + " on " + machineId;
   }
 
   @Override
   public String uniqueId() {
     return makeUniqueId(super.getMachineId(), cookbookId);
+  }
+
+  @Override
+  public Set<String> dagDependencies() {
+    Set<String> deps = new HashSet<>();
+    String id = MakeSoloRbTask.makeUniqueId(getMachineId());
+    deps.add(id);
+    return deps;
   }
 }

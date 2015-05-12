@@ -28,7 +28,7 @@ import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.GithubCookbook;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
@@ -57,10 +57,10 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
     if (refresh) {
-      GithubCookbook cb = CookbookCache.load(cookbookUrl);
+      KaramelizedCookbook cb = CookbookCache.load(cookbookUrl);
       return cb.getMetadataJson();
     } else {
-      GithubCookbook cb = CookbookCache.get(cookbookUrl);
+      KaramelizedCookbook cb = CookbookCache.get(cookbookUrl);
       return cb.getMetadataJson();
     }
   }

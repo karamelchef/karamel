@@ -5,10 +5,12 @@
 package se.kth.karamel.backend.launcher.amazon;
 
 import com.google.common.base.Optional;
-import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Predicate;
-import static com.google.common.base.Strings.emptyToNull;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -19,26 +21,19 @@ import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
 import org.jclouds.aws.ec2.features.AWSSecurityGroupApi;
 import org.jclouds.aws.ec2.options.CreateSecurityGroupOptions;
 import org.jclouds.compute.RunNodesException;
-import org.jclouds.compute.domain.ComputeMetadata;
 import org.jclouds.compute.domain.NodeMetadata;
-import org.jclouds.compute.domain.Template;
 import org.jclouds.compute.domain.TemplateBuilder;
-import org.jclouds.compute.predicates.NodePredicates;
-import org.jclouds.ec2.compute.options.EC2TemplateOptions;
 import org.jclouds.ec2.domain.KeyPair;
 import org.jclouds.ec2.domain.SecurityGroup;
 import org.jclouds.ec2.features.SecurityGroupApi;
-import org.jclouds.ec2.util.IpPermissions;
 import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -156,17 +151,17 @@ public final class Ec2Launcher {
           logger.info(String.format("Removing the old keypair '%s' and uploading the new one ...", keyPairName));
           context.getKeypairApi().deleteKeyPairInRegion(ec2.getRegion(), keyPairName);
           context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
-        } 
+        }
       }
       regions.add(ec2.getRegion());
     }
   }
 
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
-          Set<String> securityGroupIds, int size, Ec2 ec2) throws KaramelException {
+          Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
-    List<String> uniqeVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), size);
-    logger.info(String.format("Forking %d machines for '%s' ...", size, uniqeGroupName));
+    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), totalSize);
+    logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
 
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -180,65 +175,151 @@ public final class Ec2Launcher {
       options.spotPrice(ec2.getPrice());
     }
 
-    TemplateBuilder template = context.getComputeService().templateBuilder();
-    options.keyPair(keyPairName);
-    options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
-
-    options.nodeNames(uniqeVmNames);
-    if (ec2.getSubnet() != null) {
-      options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
-    }
-    template.options(options);
-    template.os64Bit(true);
-    template.hardwareId(ec2.getType());
-    template.imageId(ec2.getRegion() + "/" + ec2.getImage());
-    template.locationId(ec2.getRegion());
     boolean succeed = false;
     int tries = 0;
-    Set<? extends NodeMetadata> forkedNodes = null;
+    Set<NodeMetadata> successfulNodes = Sets.newLinkedHashSet();
+    List<String> unforkedVmNames = new ArrayList<>();
+    List<String> toBeForkedVmNames;
+    unforkedVmNames.addAll(allVmNames);
+    Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
-      succeed = true;
+      int requestSize = totalSize - successfulNodes.size();
+      if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
+        requestSize = Settings.EC2_MAX_FORK_VMS_PER_REQUEST;
+        toBeForkedVmNames = unforkedVmNames.subList(0, Settings.EC2_MAX_FORK_VMS_PER_REQUEST);
+      } else {
+        toBeForkedVmNames = unforkedVmNames;
+      }
+      TemplateBuilder template = context.getComputeService().templateBuilder();
+      options.keyPair(keyPairName);
+      options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
+      options.nodeNames(toBeForkedVmNames);
+      if (ec2.getSubnet() != null) {
+        options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
+      }
+      template.options(options);
+      template.os64Bit(true);
+      template.hardwareId(ec2.getType());
+      template.imageId(ec2.getRegion() + "/" + ec2.getImage());
+      template.locationId(ec2.getRegion());
       tries++;
+      Set<NodeMetadata> succ = new HashSet<>();
       try {
-        forkedNodes = context.getComputeService().createNodesInGroup(
-                uniqeGroupName, size, template.build());
-        logger.info(String.format("Cool!! we got %d machine(s) for'%s' |;-)", size, uniqeGroupName));
-      } catch (IllegalStateException | RunNodesException ex) {
-        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries, uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
+        succ.addAll(context.getComputeService().createNodesInGroup(
+                uniqeGroupName, requestSize, template.build()));
+      } catch (RunNodesException ex) {
+        addSuccessAndLostNodes(ex, succ, failedNodes);
+      } catch (AWSResponseException e) {
+        if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
+          throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
+                  + "size of your cluster or increase the limitation of your account.", e);
+        } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
+          throw new KaramelException(String.format("It seems your ec2 account doesn't have sufficent capacity for %s "
+                  + "instances", ec2.getType()), e);
+        } else {
+          logger.error("", e);
+        }
+      } catch (IllegalStateException ex) {
+        logger.error("", ex);
+        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
+                uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
-      if (forkedNodes == null) {
+      unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
+      successfulNodes.addAll(succ);
+      if (successfulNodes.size() < totalSize) {
         try {
+          succeed = false;
+          logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
+                  + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
+                  totalSize, uniqeGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
         }
-      }
-
-    }
-
-    if (forkedNodes != null) {
-      List<MachineRuntime> machines = new ArrayList<>();
-      for (NodeMetadata node : forkedNodes) {
-        if (node != null) {
-          MachineRuntime machine = new MachineRuntime(mainGroup);
-          ArrayList<String> privateIps = new ArrayList();
-          ArrayList<String> publicIps = new ArrayList();
-          privateIps.addAll(node.getPrivateAddresses());
-          publicIps.addAll(node.getPublicAddresses());
-          machine.setPrivateIp(privateIps.get(0));
-          machine.setPublicIp(publicIps.get(0));
-          machine.setSshPort(node.getLoginPort());
-          machine.setSshUser(node.getCredentials().getUser());
-          machines.add(machine);
+      } else {
+        succeed = true;
+        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill before we go on..", totalSize, uniqeGroupName, failedNodes.size()));
+        if (failedNodes.size() > 0) {
+          cleanupFailedNodes(failedNodes);
         }
+        List<MachineRuntime> machines = new ArrayList<>();
+        for (NodeMetadata node : successfulNodes) {
+          if (node != null) {
+            MachineRuntime machine = new MachineRuntime(mainGroup);
+            ArrayList<String> privateIps = new ArrayList();
+            ArrayList<String> publicIps = new ArrayList();
+            privateIps.addAll(node.getPrivateAddresses());
+            publicIps.addAll(node.getPublicAddresses());
+            machine.setEc2Id(node.getId());
+            machine.setName(node.getName());
+            machine.setPrivateIp(privateIps.get(0));
+            machine.setPublicIp(publicIps.get(0));
+            machine.setSshPort(node.getLoginPort());
+            machine.setSshUser(node.getCredentials().getUser());
+            machines.add(machine);
+          }
+        }
+        return machines;
       }
-      return machines;
     }
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
-  public void cleanup(String clusterName, List<String> vmNames, Map<String, String> groupRegion) throws KaramelException {
+  private void cleanupFailedNodes(Map<NodeMetadata, Throwable> failedNodes) {
+    if (failedNodes.size() > 0) {
+      Set<String> lostIds = Sets.newLinkedHashSet();
+      for (Map.Entry<NodeMetadata, Throwable> lostNode : failedNodes.entrySet()) {
+        lostIds.add(lostNode.getKey().getId());
+      }
+      logger.info(String.format("Destroying failed nodes with ids: %s", lostIds.toString()));
+      Set<? extends NodeMetadata> destroyedNodes = context.getComputeService().destroyNodesMatching(
+              Predicates.in(failedNodes.keySet()));
+      lostIds.clear();
+      for (NodeMetadata destroyed : destroyedNodes) {
+        lostIds.add(destroyed.getId());
+      }
+      logger.info("Failed nodes destroyed ;)");
+    }
+  }
+
+  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata, Throwable> lostNodes) {
+    // workaround https://code.google.com/p/jclouds/issues/detail?id=923 
+    // by ensuring that any nodes in the "NodeErrors" do not get considered 
+    // successful 
+    Set<? extends NodeMetadata> reportedSuccessfulNodes = rnex.getSuccessfulNodes();
+    Map<? extends NodeMetadata, ? extends Throwable> errorNodesMap = rnex.getNodeErrors();
+    Set<? extends NodeMetadata> errorNodes = errorNodesMap.keySet();
+
+    // "actual" successful nodes are ones that don't appear in the errorNodes  
+    successfulNodes.addAll(Sets.difference(reportedSuccessfulNodes, errorNodes));
+    lostNodes.putAll(errorNodesMap);
+  }
+
+  private List<String> findLeftVmNames(Set<? extends NodeMetadata> successfulNodes, List<String> vmNames) {
+    List<String> leftVmNames = new ArrayList<>();
+    leftVmNames.addAll(vmNames);
+    int unnamedVms = 0;
+    for (NodeMetadata nodeMetadata : successfulNodes) {
+      String nodeName = nodeMetadata.getName();
+      if (leftVmNames.contains(nodeName)) {
+        leftVmNames.remove(nodeName);
+      } else {
+        unnamedVms++;
+      }
+    }
+
+    for (int i = 0; i < unnamedVms; i++) {
+      if (leftVmNames.size() > 0) {
+        logger.debug(String.format("Taking %s as one of the unnamed vms.", leftVmNames.get(0)));
+        leftVmNames.remove(0);
+      }
+    }
+    return leftVmNames;
+  }
+
+  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion) throws KaramelException {
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -246,9 +327,13 @@ public final class Ec2Launcher {
     if (sshKeyPair == null) {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     }
-
-    logger.info(String.format("Killing following machines in the cluster if exist..\n %s", vmNames.toString()));
-    context.getComputeService().destroyNodesMatching(withNamePrefix(vmNames));
+    Set<String> groupNames = new HashSet<>();
+    for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
+      groupNames.add(Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
+    }
+    logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: %s", vmNames.toString(), groupNames, vmIds));
+    logger.info(String.format("Killing all machines in groups: %s", groupNames.toString()));
+    context.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
     logger.info(String.format("All machines destroyed in all the security groups. :) "));
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
       String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
@@ -286,26 +371,19 @@ public final class Ec2Launcher {
     }
   }
 
-  public static Predicate<NodeMetadata> withNamePrefix(final List<String> namePrefixs) {
+  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names, final Set<String> groupNames) {
     return new Predicate<NodeMetadata>() {
       @Override
       public boolean apply(NodeMetadata nodeMetadata) {
+        String id = nodeMetadata.getId();
         String name = nodeMetadata.getName();
-        if (name == null) {
-          return false;
-        } else {
-          for (String pref : namePrefixs) {
-            if (name.equals(pref)) {
-              return true;
-            }
-          }
-        }
-        return false;
+        String group = nodeMetadata.getGroup();
+        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) || (group != null && groupNames.contains(group))));
       }
 
       @Override
       public String toString() {
-        return "nameStartsWith(" + namePrefixs.toArray().toString() + ")";
+        return "machines predicate";
       }
     };
   }

@@ -3,30 +3,41 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.kth.karamel.cookbook.metadata;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 import java.util.Set;
-import static org.junit.Assert.*;
+import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import se.kth.karamel.common.IoUtils;
+import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 
 /**
  *
  * @author kamal
  */
-public class MetadataParserTest {
-  
+public class TestKaramelizedCookbook {
+
+  @Test
+  public void testLoadingClasspathCookbook() {
+    try {
+      Settings.CB_CLASSPATH_MODE = true;
+      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopshub-chef");
+    } catch (CookbookUrlException | MetadataParseException e) {
+      Assert.fail();
+    }
+  }
+
   @Test
   public void testMetadata() throws MetadataParseException, IOException {
     String file = Resources.toString(Resources.getResource("se/kth/karamel/cookbook/metadata/metadata.rb"), Charsets.UTF_8);
-    StringReader reader = new StringReader(file);
-    MetadataRb metadatarb = MetadataParser.parse("testurl", reader);
+    MetadataRb metadatarb = MetadataParser.parse(file);
     List<Recipe> recipes = metadatarb.getRecipes();
     assertEquals(recipes.size(), 2);
     Recipe r1 = recipes.get(0);
@@ -39,5 +50,12 @@ public class MetadataParserTest {
     assertEquals(l2.size(), 2);
     assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopshub in your browser");
     assertEquals(l2.toArray()[1], "Visit Karamel {here,www.karamel.io}");
+  }
+
+  @Test
+  public void testLoadDependencies() throws CookbookUrlException, IOException {
+    Settings.CB_CLASSPATH_MODE = true;
+    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopshub-chef/master/Berksfile");
+    Berksfile berksfile = new Berksfile(list);
   }
 }

@@ -50,7 +50,7 @@ public class ClusterRuntime implements Serializable {
     return name;
   }
   
-  public void setGroups(List<GroupRuntime> groups) {
+  public synchronized void setGroups(List<GroupRuntime> groups) {
     this.groups = groups;
   }
 
@@ -62,7 +62,7 @@ public class ClusterRuntime implements Serializable {
     return phase;
   }
 
-  public void setPhase(ClusterPhases phase) {
+  public synchronized void setPhase(ClusterPhases phase) {
     this.phase = phase;
   }
 
@@ -70,15 +70,15 @@ public class ClusterRuntime implements Serializable {
     return !failures.isEmpty();
   }
 
-  public void issueFailure(Failure failure) {
+  public synchronized void issueFailure(Failure failure) {
     failures.put(failure.hash(), failure);
   }
   
-  public void resolveFailure(String hash) {
+  public synchronized void resolveFailure(String hash) {
     failures.remove(hash);
   }
   
-  public void resolveFailures() {
+  public synchronized void resolveFailures() {
     failures.clear();
   }
 
@@ -90,7 +90,7 @@ public class ClusterRuntime implements Serializable {
     return paused;
   }
 
-  public void setPaused(boolean paused) {
+  public synchronized void setPaused(boolean paused) {
     this.paused = paused;
   }
 
