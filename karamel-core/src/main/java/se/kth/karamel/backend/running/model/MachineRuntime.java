@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.backend.running.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import se.kth.karamel.backend.running.model.tasks.Task;
@@ -14,7 +13,7 @@ import se.kth.karamel.backend.running.model.tasks.Task;
  *
  * @author kamal
  */
-public class MachineRuntime implements Serializable {
+public class MachineRuntime {
 
   public static enum LifeStatus {
 

@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.backend.running.model;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +16,7 @@ import se.kth.karamel.client.model.json.JsonGroup;
  *
  * @author kamal
  */
-public class ClusterRuntime implements Serializable {
+public class ClusterRuntime {
 
   public static enum ClusterPhases {
     NOT_STARTED, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, INSTALLING, INSTALLED, PURGING ;

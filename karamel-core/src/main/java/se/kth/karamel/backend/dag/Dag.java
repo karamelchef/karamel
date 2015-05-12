@@ -24,7 +24,7 @@ import se.kth.karamel.common.exception.DagConstructionException;
  *
  * @author kamal
  */
-public class Dag implements Serializable {
+public class Dag {
 
   private static final Logger logger = Logger.getLogger(Dag.class);
   private Map<String, DagNode> allNodes = new HashMap<>();

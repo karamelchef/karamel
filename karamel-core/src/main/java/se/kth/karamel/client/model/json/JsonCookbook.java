@@ -5,22 +5,21 @@
  */
 package se.kth.karamel.client.model.json;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import se.kth.karamel.client.model.Cookbook;
 
 /**
  *
  * @author kamal
  */
-// TODO - Make this class thread-safe and mutable, so that results can be returned from recipes.
 public class JsonCookbook extends Cookbook {
 
   String name;
-  ConcurrentHashMap<String, String> attrs = new ConcurrentHashMap<>();
-  ConcurrentSkipListSet<JsonRecipe> recipes = new ConcurrentSkipListSet<>();
+  Map<String, String> attrs = new HashMap<>();
+  Set<JsonRecipe> recipes = new HashSet<>();
   
   public JsonCookbook() {
   }
@@ -28,7 +27,7 @@ public class JsonCookbook extends Cookbook {
   public JsonCookbook(Cookbook cb, String name, Map<String, String> attrs) {
     super(cb);
     this.name = name;
-    this.attrs.putAll(attrs);
+    this.attrs = attrs;
   }
 
   public String getName() {
@@ -39,26 +38,20 @@ public class JsonCookbook extends Cookbook {
     this.name = name;
   }
 
-  public ConcurrentHashMap<String, String> getAttrs() {
+  public Map<String, String> getAttrs() {
     return attrs;
   }
 
   public void setAttrs(Map<String, String> attrs) {
-    this.attrs.clear();
-    this.attrs.putAll(attrs);
+    this.attrs = attrs;
   }
 
-  public ConcurrentSkipListSet<JsonRecipe> getRecipes() {
+  public Set<JsonRecipe> getRecipes() {
     return recipes;
   }
 
-  public void setRecipes(ConcurrentSkipListSet<JsonRecipe> recipes) {
-    this.recipes.clear();
-    this.recipes.addAll(recipes);
-  }
-  
-  public void addAttr(String attr, String val) {
-      this.attrs.put(attr, val);
+  public void setRecipes(Set<JsonRecipe> recipes) {
+    this.recipes = recipes;
   }
   
 }
