@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.running.model.tasks;
 
+import com.google.gson.JsonArray;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ public class RunRecipeTask extends Task {
   private String json;
   private final String cookbookId;
   private final String cookbookName;
+  private JsonArray results;
 
   public RunRecipeTask(MachineRuntime machine, String recipe, String json, TaskSubmitter submitter, String cookbookId, String cookbookName) {
     super("recipe " + recipe, machine, submitter);
@@ -32,6 +34,15 @@ public class RunRecipeTask extends Task {
     this.cookbookId = cookbookId;
     this.cookbookName = cookbookName;
   }
+
+    public JsonArray getResults() {
+        return results;
+    }
+
+    public void setResults(JsonArray results) {
+        this.results = results;
+    }
+  
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
@@ -56,7 +67,7 @@ public class RunRecipeTask extends Task {
   public String getCookbookName() {
     return cookbookName;
   }
-
+  
   public static String installRecipeIdFromCookbookName(String machineId, String cookbook) {
     String installName = cookbook + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
     return makeUniqueId(machineId, installName);
