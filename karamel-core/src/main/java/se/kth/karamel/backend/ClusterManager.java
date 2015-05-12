@@ -61,7 +61,7 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterManagerFuture = null;
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
-  private boolean stoping = false;
+  private boolean stopping = false;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) {
     this.clusterContext = clusterContext;
@@ -183,7 +183,7 @@ public class ClusterManager implements Runnable {
         }
       }
     } catch (Exception ex) {
-      if (!(ex.getCause() instanceof InterruptedException && stoping)) {
+      if (!(ex.getCause() instanceof InterruptedException && stopping)) {
         logger.error("", ex);
         runtime.issueFailure(new Failure(Failure.Type.CLEANUP_FAILE, ex.getMessage()));
       }
@@ -284,7 +284,7 @@ public class ClusterManager implements Runnable {
   private void purge() throws InterruptedException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
-    stoping = true;
+    stopping = true;
     clean(true);
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
@@ -366,7 +366,7 @@ public class ClusterManager implements Runnable {
             break;
         }
       } catch (java.lang.InterruptedException ex) {
-        if (stoping) {
+        if (stopping) {
           tpool.shutdownNow();
           try {
             tpool.awaitTermination(1, TimeUnit.MINUTES);

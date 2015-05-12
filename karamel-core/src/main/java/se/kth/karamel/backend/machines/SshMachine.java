@@ -48,7 +48,7 @@ public class SshMachine implements Runnable {
   private SSHClient client;
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
-  private boolean stoping = false;
+  private boolean stopping = false;
   private SshShell shell;
 
   public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
@@ -66,8 +66,8 @@ public class SshMachine implements Runnable {
     return shell;
   }
 
-  public void setStoping(boolean stoping) {
-    this.stoping = stoping;
+  public void setStoping(boolean stopping) {
+    this.stopping = stopping;
   }
 
   public void pause() {
@@ -86,7 +86,7 @@ public class SshMachine implements Runnable {
   public void run() {
     logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
     try {
-      while (true && !stoping) {
+      while (true && !stopping) {
         try {
           if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
               && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
@@ -97,7 +97,7 @@ public class SshMachine implements Runnable {
               logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
               runTask(task);
             } catch (InterruptedException ex) {
-              if (stoping) {
+              if (stopping) {
                 logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
                 return;
               } else {
@@ -111,7 +111,7 @@ public class SshMachine implements Runnable {
             try {
               Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
             } catch (InterruptedException ex) {
-              if (!stoping) {
+              if (!stopping) {
                 logger.error("Got interrupted without having recieved stopping signal");
               }
             }

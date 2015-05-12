@@ -21,7 +21,7 @@ public class ClusterStatusMonitor implements Runnable {
   private final JsonCluster definition;
   private final MachinesMonitor machinesMonitor;
   private final ClusterRuntime clusterEntity;
-  private boolean stoping = false;
+  private boolean stopping = false;
   
   public ClusterStatusMonitor(MachinesMonitor machinesMonitor, JsonCluster definition, ClusterRuntime runtime) {
     this.definition = definition;
@@ -29,14 +29,14 @@ public class ClusterStatusMonitor implements Runnable {
     this.clusterEntity = runtime;
   }
   
-  public void setStoping(boolean stoping) {
-    this.stoping = stoping;
+  public void setStoping(boolean stopping) {
+    this.stopping = stopping;
   }
   
   @Override
   public void run() {
     logger.info(String.format("Cluster-StatusMonitor started for '%s' d'-'", definition.getName()));
-    while (true && !stoping) {
+    while (true && !stopping) {
       try {
         if (clusterEntity.isFailed()) {
           machinesMonitor.pause();
@@ -44,7 +44,7 @@ public class ClusterStatusMonitor implements Runnable {
         try {
           Thread.sleep(Settings.CLUSTER_FAILURE_DETECTION_INTERVAL);
         } catch (InterruptedException ex) {
-          if (stoping) {
+          if (stopping) {
             logger.info(String.format("Cluster-StatusMonitor stoped for '%s' d'-'", definition.getName()));
             return;
           } else {
