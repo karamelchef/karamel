@@ -5,6 +5,12 @@
  */
 package se.kth.karamel.backend.machines;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.List;
@@ -27,9 +33,11 @@ import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 
 /**
  *
@@ -173,6 +181,21 @@ public class SshMachine implements Runnable {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
       } else {
         shellCommand.setStatus(ShellCommand.Status.DONE);
+                if (task instanceof RunRecipeTask) {
+                    RunRecipeTask rrt = (RunRecipeTask) task;
+                    try {
+                        JsonArray results = downloadResultsScp(rrt.getCookbookName(), rrt.getRecipeCanonicalName());
+                    } catch (JsonParseException p) {
+                        logger.error("Bug in Chef Cookbook - Results were not a valid json document: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
+                        rrt.setResults(null);
+                    } catch (IOException e) {
+                        logger.error("Possible network problem. No results were able to be downloaded for: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
+                        rrt.setResults(null);
+                    }
+                }
+	
       }
       SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
       LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
@@ -254,4 +277,28 @@ public class SshMachine implements Runnable {
   private void updateHeartbeat() {
     lastHeartbeat = System.currentTimeMillis();
   }
+
+    /**
+     * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
+     *
+     * @param session
+     * @param cookbook
+     * @param recipe
+     */
+    private synchronized JsonArray downloadResultsScp(String cookbook, String recipe) throws IOException {
+        String remoteFile = "~/" + cookbook + "__" + recipe + ".out";
+        SCPFileTransfer scp = client.newSCPFileTransfer();
+        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + "__" + recipe + ".out";
+        File f = new File(localResultsFile);
+        // TODO - should move this to some initialization method
+        f.mkdirs();
+        if (f.exists()) {
+            f.delete();
+        }
+        // TODO: error checking here...
+        scp.download(remoteFile, localResultsFile);
+        JsonReader reader = new JsonReader(new FileReader(localResultsFile));
+        JsonParser jsonParser = new JsonParser();
+        return jsonParser.parse(reader).getAsJsonArray();
+    }
 }
