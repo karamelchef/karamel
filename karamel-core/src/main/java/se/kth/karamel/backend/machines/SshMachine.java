@@ -286,7 +286,7 @@ public class SshMachine implements Runnable {
      * @param recipe
      */
     private synchronized JsonArray downloadResultsScp(String cookbook, String recipe) throws IOException {
-        String remoteFile = "~/" + cookbook + "__" + recipe + ".out";
+        String remoteFile = "/tmp/" + cookbook + "__" + recipe + ".out";
         SCPFileTransfer scp = client.newSCPFileTransfer();
         String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + "__" + recipe + ".out";
         File f = new File(localResultsFile);
