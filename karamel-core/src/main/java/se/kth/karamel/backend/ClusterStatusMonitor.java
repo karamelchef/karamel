@@ -29,7 +29,7 @@ public class ClusterStatusMonitor implements Runnable {
     this.clusterEntity = runtime;
   }
   
-  public void setStoping(boolean stopping) {
+  public void setStopping(boolean stopping) {
     this.stopping = stopping;
   }
   

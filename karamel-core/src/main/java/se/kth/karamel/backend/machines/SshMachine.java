@@ -66,7 +66,7 @@ public class SshMachine implements Runnable {
     return shell;
   }
 
-  public void setStoping(boolean stopping) {
+  public void setStopping(boolean stopping) {
     this.stopping = stopping;
   }
 

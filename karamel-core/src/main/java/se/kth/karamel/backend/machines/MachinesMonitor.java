@@ -40,10 +40,10 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     executor = Executors.newFixedThreadPool(numMachines);
   }
   
-  public void setStoping(boolean stopping) {
+  public void setStopping(boolean stopping) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
-      sshMachine.setStoping(true);
+      sshMachine.setStopping(true);
     }
     this.stopping = stopping;
   }
