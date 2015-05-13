@@ -502,7 +502,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             @PUT
             public Response processCommand(CommandJSON command) {
                 Response response = null;
-                System.out.println(" Received request to process a command with info: " + command.getCommand());
+                                
+                Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.FINEST, 
+                        " Received request to process a command with info: {0}", command.getCommand());
                 try {
                     CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
                     command.setResult(cmdRes.getResult());

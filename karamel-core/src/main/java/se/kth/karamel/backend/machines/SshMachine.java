@@ -286,16 +286,18 @@ public class SshMachine implements Runnable {
      * @param recipe
      */
     private synchronized JsonArray downloadResultsScp(String cookbook, String recipe) throws IOException {
-        String remoteFile = "/tmp/" + cookbook + "__" + recipe + ".out";
+        String postfix = "__out.json";
+        String recipeSeparator = "__";
+        String remoteFile = "/tmp/" + cookbook + recipeSeparator + recipe + postfix;
         SCPFileTransfer scp = client.newSCPFileTransfer();
-        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + "__" + recipe + ".out";
+        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
         File f = new File(localResultsFile);
-        // TODO - should move this to some initialization method
         f.mkdirs();
+        // Don't collect logs of values, just overwrite
         if (f.exists()) {
             f.delete();
         }
-        // TODO: error checking here...
+        // If the file doesn't exist, it should quickly throw an IOException
         scp.download(remoteFile, localResultsFile);
         JsonReader reader = new JsonReader(new FileReader(localResultsFile));
         JsonParser jsonParser = new JsonParser();

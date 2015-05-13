@@ -17,14 +17,31 @@ angular.module('demoApp', [
     ,'yamlApp'
     ,'karamel.terminal'
     ,'blockUI'
+    ,'ngSanitize'
     , 'ssh.terminal'
 ])
+//
+// We add an interceptor to update the UI board name if the karamel-core application is not available.
+//
     .config(['$routeProvider', function ($routeProvider) {
         $routeProvider.when('/', {templateUrl: 'karamel.html', controller: 'KaramelController'});
         $routeProvider.when('/terminal',{templateUrl: 'partials/command-page/karamelTerminal.html', controller: 'karamelTerminalController'});
         $routeProvider.otherwise({redirectTo: '/'});
-    }])
-
+    }], function($httpProvider, $rootScope, $interpolate){
+            $httpProvider.interceptors.push(function ($q) {
+                return {
+                    responseError: function (rejection) {
+                        if (rejection.status === 0) {
+                            $rootScope.karamelBoard.name = $interpolate("<font color=\"red\">Karamel Application has Crashed!!</font>");
+//                            $rootScope.karamelBoard.name = $interpolate("<div class=\"danger\">Karamel Application has Crashed. Restart it.</div>");
+                            return;
+                        }
+                        return $q.reject(rejection);
+                    }
+                }
+            });
+    }
+            )    
     .controller("MainCtrl",['$log','$scope','$timeout','AlertService', function($log,$scope,$timeout,AlertService){
 
         var _defaultTimeout = 3000;

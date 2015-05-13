@@ -11,7 +11,9 @@
 
 angular.module('karamel.terminal', [])
 
-  .controller('karamelTerminalController', ['$log', '$scope', '$sce', '$interval', '$timeout', 'KaramelCoreRestServices', function($log, $scope, $sce, $interval, $timeout, KaramelCoreRestServices) {
+  .controller('karamelTerminalController', ['$log', '$rootScope', '$scope', '$sce', 
+      '$interval', '$timeout', 'KaramelCoreRestServices', 
+      function($log, $rootScope, $scope, $sce, $interval, $timeout, KaramelCoreRestServices) {
 
       function initScope(scope) {
         scope.commandObj = [];
@@ -111,7 +113,7 @@ angular.module('karamel.terminal', [])
       };
 
       $scope.processCommand = function(index, cmdName) {
-        $log.info("Process Command Called");
+        $log.debug("Process Command Called");
         var commandArg = null;
         if ($scope.commandObj[index].renderer === 'yaml')
           commandArg = $scope.commandObj[index].commandResult;
@@ -171,6 +173,11 @@ angular.module('karamel.terminal', [])
           })
           .error(function(data) {
             $log.info('Core -> Unable to process command: ' + cmdName);
+            // Turn text Red and write error message at the board cluster name
+            // http://stackoverflow.com/questions/27030849/change-font-color-of-text-in-scope-variable-in-angularjs
+//            $rootScope.headerName = "Karamel Application has Crashed. Restart it.";
+            $rootScope.karamelBoard.name = "Karamel Application has Crashed. Restart it.";
+//            $rootScope.karamelBoard.name = $interpolate('<font color="red">{{headerName}}</font>')($rootScope);      
           });
       });
 
