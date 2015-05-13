@@ -13,6 +13,17 @@
       <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
       <div  id="response00" ng-show="commandObj[0].renderer === 'info'" class="infoResponseArea" compile-data ></div>
       <textarea id="response01" ng-show="commandObj[0].renderer === 'yaml'" class="editorResponseArea" placeholder="Write or copy/paste your yaml here ..." rows="20" ng-model="commandObj[0].commandResult"/>
+<!--      <div ng-show="commandObj[0].renderer === 'dag'" class="live map">
+        <svg>
+        <g/>
+        </svg>
+      </div>-->
+
+      <div id="d3dag" ng-show="commandObj[0].renderer === 'dag'" class="live map d3body" ac-dagre>
+        <svg class="dagViewer" >
+        <g />
+        </svg>
+      </div>
     </form>
     <div ng-show="commandObj[0].renderer === 'ssh'" class="sshResponseArea">
       <terminal >

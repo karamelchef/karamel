@@ -1,0 +1,159 @@
+.d3body {
+    margin: 0;
+    padding: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+    background: #333;
+}
+
+
+@-webkit-keyframes blinker {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+
+    25%, 75% {
+        opacity: 0.2;
+    }
+}
+/*                            @-webkit-keyframes blinker {  
+                                from { opacity: 1.0; }
+                                to { opacity: 0.2; }
+                            }*/
+
+@keyframes flash {
+    0%, 50%, 100% {
+        opacity: 1;
+    }
+
+    25%, 75% {
+        opacity: 0.2;
+    }
+}
+
+
+.blinking {
+    -webkit-animation-name: blinker;  
+    -webkit-animation-iteration-count: infinite;  
+    -webkit-animation-timing-function: cubic-bezier(.5, 0, 1, 1);
+    -webkit-animation-duration: 1.7s; 
+} 
+
+.appear {
+    -webkit-animation-duration: 500s;
+    animation-duration: 5s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-iteration-count: 1;
+    animation-iteration-count: 1;
+}
+
+.live.map {
+    width: 100%;
+    height: 100%;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.live.map text {
+    font-weight: 300;
+    font-size: 14px;
+}
+
+.live.map .node rect {
+    stroke-width: 1px;
+    stroke: #bbb;
+    fill: #666;
+}
+
+.live.map .status {
+    height: 100%;
+    width: 5px;
+    display: block;
+    float: left;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin-right: 4px;
+}
+
+.live.map .waiting .status {
+    background-color: #336699;
+}
+
+.live.map .ready .status {
+    background-color: #ffcc00;
+}
+
+.live.map .ongoing .status {
+    background-color: #ff6600;
+}
+
+.live.map .done .status {
+    background-color: #00ff00;
+}
+
+.live.map .failed .status {
+    background-color: #ff0000;
+}
+
+.warn {
+    -webkit-animation-name: flash;
+    animation-name: flash;
+}
+
+.live.map .consumers {
+    margin-right: 2px;
+}
+
+.live.map .consumers,
+.live.map .name {
+    margin-top: 4px;
+    font-size: 10px;
+} 
+
+.live.map .consumers:after {
+    content: "x";
+}
+
+.live.map .queue {
+    display: block;
+    float: left;
+    width: 130px;
+    height: 20px;
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+.live.map .node g div {
+    width: 100px;
+    height: 25px;
+    color: #fff;
+}
+
+.live.map .node g div span.consumers {
+    display: inline-block;
+    width: 20px;
+}
+
+.live.map .edgeLabel rect {
+    fill: none;
+}
+
+.live.map .edgeLabel div {
+    width: 50px;
+    color: #fff;
+}
+
+.live.map .edgePath path {
+    stroke: #999;
+    stroke-width: 1.5px;
+    fill: none;
+}
+
+/* Override path marker color */
+#arrowhead {
+    fill: #999 !important;
+}
