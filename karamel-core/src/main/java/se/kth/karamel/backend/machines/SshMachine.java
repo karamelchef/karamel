@@ -5,9 +5,12 @@
  */
 package se.kth.karamel.backend.machines;
 
-import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonReader;
 import java.io.File;
 import java.io.FileReader;
@@ -32,9 +35,11 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.Iterator;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
+import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
@@ -184,15 +189,13 @@ public class SshMachine implements Runnable {
                 if (task instanceof RunRecipeTask) {
                     RunRecipeTask rrt = (RunRecipeTask) task;
                     try {
-                        JsonArray results = downloadResultsScp(rrt.getCookbookName(), rrt.getRecipeCanonicalName());
+                        processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
                     } catch (JsonParseException p) {
                         logger.error("Bug in Chef Cookbook - Results were not a valid json document: " 
                                 + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
-                        rrt.setResults(null);
                     } catch (IOException e) {
                         logger.error("Possible network problem. No results were able to be downloaded for: " 
                                 + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
-                        rrt.setResults(null);
                     }
                 }
 	
@@ -281,14 +284,16 @@ public class SshMachine implements Runnable {
     /**
      * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
      *
-     * @param session
-     * @param cookbook
-     * @param recipe
+     * This method downloads the return values from a chef recipe as a JSON object.
+     * It then parses the JSON object and updates a central location for Chef Attributes.
+     * 
+     * @param cookbook Chef solo cookbook name
+     * @param recipe Chef solo recipe name
      */
-    private synchronized JsonArray downloadResultsScp(String cookbook, String recipe) throws IOException {
+    private synchronized void processReturnValues(String cookbook, String recipe) throws IOException {
         String postfix = "__out.json";
         String recipeSeparator = "__";
-        String remoteFile = "/tmp/" + cookbook + recipeSeparator + recipe + postfix;
+        String remoteFile = Settings.SYSTEM_TMP_FOLDER_NAME + File.separator + cookbook + recipeSeparator + recipe + postfix;
         SCPFileTransfer scp = client.newSCPFileTransfer();
         String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
         File f = new File(localResultsFile);
@@ -301,6 +306,11 @@ public class SshMachine implements Runnable {
         scp.download(remoteFile, localResultsFile);
         JsonReader reader = new JsonReader(new FileReader(localResultsFile));
         JsonParser jsonParser = new JsonParser();
-        return jsonParser.parse(reader).getAsJsonArray();
+        try {
+            JsonElement el = jsonParser.parse(reader);
+            DagParams.setGlobalParams(el);
+        } catch (JsonIOException | JsonSyntaxException ex) {
+            logger.error(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), reader.toString()));            
+        }
     }
 }
