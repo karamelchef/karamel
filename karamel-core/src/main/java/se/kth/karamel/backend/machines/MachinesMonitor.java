@@ -33,13 +33,13 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   ExecutorService executor;
   private final SshKeyPair keyPair;
   private boolean stopping = false;
-  
+
   public MachinesMonitor(String clusterName, int numMachines, SshKeyPair keyPair) {
     this.keyPair = keyPair;
     this.clusterName = clusterName;
     executor = Executors.newFixedThreadPool(numMachines);
   }
-  
+
   public void setStopping(boolean stopping) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
@@ -132,6 +132,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
     SshMachine machine = machines.get(machineName);
     machine.enqueue(task);
+    // TODO - check if there is a return value....
   }
   
   public void disconnect() throws KaramelException {

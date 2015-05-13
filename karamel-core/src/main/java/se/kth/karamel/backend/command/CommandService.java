@@ -359,6 +359,8 @@ public class CommandService {
 
             @Override
             public void submitTask(Task task) throws KaramelException {
+              Logger.getLogger(CommandService.class.getName()).log(Level.FINEST,
+                  " Received request to process a command with info: {0}", task.uniqueId());
               task.succeed();
             }
 

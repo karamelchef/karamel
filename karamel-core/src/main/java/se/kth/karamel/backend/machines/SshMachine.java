@@ -5,6 +5,15 @@
  */
 package se.kth.karamel.backend.machines;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.List;
@@ -26,10 +35,14 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.Iterator;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
+import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 
 /**
  *
@@ -173,6 +186,19 @@ public class SshMachine implements Runnable {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
       } else {
         shellCommand.setStatus(ShellCommand.Status.DONE);
+                if (task instanceof RunRecipeTask) {
+                    RunRecipeTask rrt = (RunRecipeTask) task;
+                    try {
+                        processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
+                    } catch (JsonParseException p) {
+                        logger.error("Bug in Chef Cookbook - Results were not a valid json document: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
+                    } catch (IOException e) {
+                        logger.error("Possible network problem. No results were able to be downloaded for: " 
+                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
+                    }
+                }
+	
       }
       SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
       LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
@@ -254,4 +280,37 @@ public class SshMachine implements Runnable {
   private void updateHeartbeat() {
     lastHeartbeat = System.currentTimeMillis();
   }
+
+    /**
+     * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
+     *
+     * This method downloads the return values from a chef recipe as a JSON object.
+     * It then parses the JSON object and updates a central location for Chef Attributes.
+     * 
+     * @param cookbook Chef solo cookbook name
+     * @param recipe Chef solo recipe name
+     */
+    private synchronized void processReturnValues(String cookbook, String recipe) throws IOException {
+        String postfix = "__out.json";
+        String recipeSeparator = "__";
+        String remoteFile = Settings.SYSTEM_TMP_FOLDER_NAME + File.separator + cookbook + recipeSeparator + recipe + postfix;
+        SCPFileTransfer scp = client.newSCPFileTransfer();
+        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
+        File f = new File(localResultsFile);
+        f.mkdirs();
+        // Don't collect logs of values, just overwrite
+        if (f.exists()) {
+            f.delete();
+        }
+        // If the file doesn't exist, it should quickly throw an IOException
+        scp.download(remoteFile, localResultsFile);
+        JsonReader reader = new JsonReader(new FileReader(localResultsFile));
+        JsonParser jsonParser = new JsonParser();
+        try {
+            JsonElement el = jsonParser.parse(reader);
+            DagParams.setGlobalParams(el);
+        } catch (JsonIOException | JsonSyntaxException ex) {
+            logger.error(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), reader.toString()));            
+        }
+    }
 }

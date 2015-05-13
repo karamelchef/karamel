@@ -3,7 +3,8 @@
 'use strict';
 
 angular.module('demoApp')
-    .controller('HeaderController', ['$log', 'BoardService', '$rootScope', '$scope', '$window', '$location', 'AlertService', function($log, BoardService, $rootScope, $scope, $window, $location, AlertService) {
+    .controller('HeaderController', ['$log', 'BoardService', '$rootScope', '$scope', '$window', '$location', 'AlertService', 
+function($log, BoardService, $rootScope, $scope, $window, $location, AlertService) {
 
         function initScope(scope) {
 

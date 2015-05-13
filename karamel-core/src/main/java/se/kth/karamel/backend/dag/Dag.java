@@ -5,12 +5,13 @@
  */
 package se.kth.karamel.backend.dag;
 
+
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashMap;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import se.kth.karamel.common.exception.DagConstructionException;
