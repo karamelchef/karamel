@@ -26,7 +26,7 @@ angular.module('demoApp', [
         $routeProvider.when('/', {templateUrl: 'karamel.html', controller: 'KaramelController'});
         $routeProvider.when('/terminal',{templateUrl: 'partials/command-page/karamelTerminal.html', controller: 'karamelTerminalController'});
         $routeProvider.otherwise({redirectTo: '/'});
-    }], function($httpProvider, $rootScope, $interpolate){
+    }], function($httpProvider, $rootScope){
             $httpProvider.interceptors.push(function ($q) {
                 return {
                     responseError: function (rejection) {
