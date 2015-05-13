@@ -17,7 +17,6 @@ angular.module('demoApp', [
     ,'yamlApp'
     ,'karamel.terminal'
     ,'blockUI'
-    ,'ngSanitize'
     , 'ssh.terminal'
 ])
 //
@@ -32,8 +31,7 @@ angular.module('demoApp', [
                 return {
                     responseError: function (rejection) {
                         if (rejection.status === 0) {
-                            $rootScope.karamelBoard.name = $interpolate("<font color=\"red\">Karamel Application has Crashed!!</font>");
-//                            $rootScope.karamelBoard.name = $interpolate("<div class=\"danger\">Karamel Application has Crashed. Restart it.</div>");
+                            $rootScope.karamelBoard.name = "Karamel Application has Crashed!!";
                             return;
                         }
                         return $q.reject(rejection);
