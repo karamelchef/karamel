@@ -119,7 +119,6 @@ public class ClusterManager implements Runnable {
 
   public void stop() throws InterruptedException {
     machinesMonitor.setStopping(true);
-
     if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
       logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
       machinesMonitorFuture.cancel(true);

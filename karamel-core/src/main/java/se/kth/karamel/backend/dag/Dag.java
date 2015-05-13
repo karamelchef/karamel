@@ -6,15 +6,11 @@
 package se.kth.karamel.backend.dag;
 
 
-import com.google.common.base.Joiner;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.gson.JsonObject;
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.UUID;
 import org.apache.log4j.Logger;
@@ -100,7 +96,7 @@ public class Dag {
     for (DagNode node : allNodes.values()) {
       if (node.getTask() == null) {
         throw new DagConstructionException(String.format("No task assigned to '%s' while it appreard in dependencies.. "
-                + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(), node.getSuccessors().toString()));
+            + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(), node.getSuccessors().toString()));
       }
     }
   }
@@ -151,8 +147,23 @@ public class Dag {
         return true;
       }
     }
-
     return false;
+  }
+
+  public String asJson() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("[");
+    Collection<DagNode> values = allNodes.values();
+    int i = 0;
+    for (DagNode dagNode : values) {
+      i++;
+      builder.append(dagNode.toJson());
+      if (i != allNodes.size()) {
+        builder.append(",");
+      }
+    }
+    builder.append("]");
+    return builder.toString();
   }
 
 }

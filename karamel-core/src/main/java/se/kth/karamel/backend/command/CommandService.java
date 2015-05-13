@@ -348,7 +348,7 @@ public class CommandService {
 
       }
 
-      p = Pattern.compile("dag\\s+(\\w+)");
+      p = Pattern.compile("tdag\\s+(\\w+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -382,6 +382,40 @@ public class CommandService {
         }
 
         renderer = CommandResponse.Renderer.INFO;
+      }
+
+      p = Pattern.compile("vdag\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        ClusterManager cluster = cluster(clusterName);
+        if (cluster == null || cluster.getInstallationDag() == null) {
+          TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+            @Override
+            public void submitTask(Task task) throws KaramelException {
+              task.succeed();
+            }
+
+            @Override
+            public void prepareToStart(Task task) throws KaramelException {
+            }
+          };
+          String yml = ClusterDefinitionService.loadYaml(clusterName);
+          JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+          ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, dummyTaskSubmitter, chefJsons);
+          installationDag.validate();
+          result = installationDag.asJson();
+        } else {
+          result = cluster.getInstallationDag().asJson();
+          addActiveClusterMenus(response);
+          nextCmd = cmd;
+        }
+
+        renderer = CommandResponse.Renderer.DAG;
       }
 
       p = Pattern.compile("links\\s+(\\w+)");
@@ -529,7 +563,7 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -543,7 +577,7 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -615,7 +649,8 @@ public class CommandService {
     ClusterRuntime clusterEntity = cluster.getRuntime();
     response.addMenuItem("View Definition", "yaml");
     response.addMenuItem("Status", "status");
-    response.addMenuItem("DAG", "dag " + clusterName);
+    response.addMenuItem("TDAG", "tdag " + clusterName);
+    response.addMenuItem("VDAG", "vdag " + clusterName);
     response.addMenuItem("Detail", "detail");
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");
