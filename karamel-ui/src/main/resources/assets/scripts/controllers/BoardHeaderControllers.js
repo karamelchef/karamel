@@ -117,6 +117,11 @@ function($log, BoardService, $rootScope, $scope, $window, $location, AlertServic
           $location.path('/terminal');
         };
 
+        $scope.exitKaramel = function() {
+          $log.info('Request to exit Karamel.');
+          BoardService.exitKaramel();
+        };
+
 
         initScope($scope);
 
