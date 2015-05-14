@@ -417,6 +417,11 @@ angular.module('karamel.terminal', [])
           var url = _defaultHost.concat("/getCommandSheet");
           return _getPromiseObject(method, url, _defaultContentType);
         },
+        exitKaramel: function() {
+          var method = 'GET';
+          var url = _defaultHost.concat("/exitKaramel");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
         processCommand: function(commandName) {
           var method = 'PUT';
           var url = _defaultHost.concat("/processCommand");

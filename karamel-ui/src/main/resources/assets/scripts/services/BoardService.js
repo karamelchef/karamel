@@ -5,7 +5,11 @@
 
 angular.module('demoApp')
 
-    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', '$location', 'BoardManipulator', '$rootScope', 'KaramelCoreRestServices', 'KaramelSyncService', 'AlertService', function(BoardDataService, SweetAlert, $log, $modal, $location, BoardManipulator, $rootScope, KaramelCoreRestServices, KaramelSyncService, AlertService) {
+    .service('BoardService', ['BoardDataService', 'SweetAlert', '$log', '$modal', '$location', 
+'BoardManipulator', '$rootScope', '$window', 'KaramelCoreRestServices', 'KaramelSyncService', 
+'AlertService', 
+function(BoardDataService, SweetAlert, $log, $modal, $location, BoardManipulator, $rootScope, $window, 
+KaramelCoreRestServices, KaramelSyncService, AlertService) {
 
         // ============  Private Functions
         var _createAndPopulateBoard = function(boardJSON) {
@@ -164,6 +168,35 @@ angular.module('demoApp')
                 SweetAlert.swal("Deleted!", "Node Group Deleted.", "success");
                 BoardManipulator.removeNodeGroup(board, nodeGroup.name);    // FIX ME: Remove the BoardManipulator Functionality as duplicate functionality.
                 _syncBoardWithCache(board);
+              } else {
+                SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
+              }
+            });
+          },
+          exitKaramel: function() {
+
+            SweetAlert.swal({
+              title: "Are you sure?",
+              text: "Karamel will exit and ongoing deployments will be lost.",
+              type: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, exit Karamel!",
+              cancelButtonText: "Cancel",
+              closeOnConfirm: false,
+              closeOnCancel: false},
+            function(isConfirm) {
+              if (isConfirm) {
+                SweetAlert.swal("Exiting!", "Karamel is exiting.", "success");
+                
+            KaramelCoreRestServices.exitKaramel()
+                .success(function(data, status, headers, config) {
+                    $window.close()
+                 })
+                .error(function(data, status, headers, config) {
+                  $log.info("Error Received.");
+                });                
+     
+                
               } else {
                 SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
               }
