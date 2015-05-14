@@ -1,6 +1,7 @@
 package se.kth.karamel.client.model;
 
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.settings.OpenStackSetting;
 
 /**
  * Created by alberto on 2015-05-14.
@@ -73,16 +74,16 @@ public class OpenStack extends Provider{
         OpenStack clone = cloneMe();
         //TODO add default settings for openstack
         if(clone.getUsername() == null){
-
+            clone.setUsername(OpenStackSetting.OPENSTACK_DEFAULT_USERNAME.getParameter());
         }
         if(clone.getImage() == null){
-
+            clone.setImage(OpenStackSetting.OPENSTACK_DEFAULT_IMAGE.getParameter());
         }
         if(clone.getFlavor() == null){
-
+            clone.setFlavor(OpenStackSetting.OPENSTACK_DEFAULT_FLAVOR.getParameter());
         }
         if(clone.getRegion() == null){
-
+            clone.setImage(OpenStackSetting.OPENSTACK_DEFAULT_REGION.getParameter());
         }
         return clone;
     }
