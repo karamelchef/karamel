@@ -66,6 +66,11 @@
             <version>1.1.0</version>
         </dependency>-->
         <dependency>
+            <groupId>org.apache.jclouds.api</groupId>
+            <artifactId>openstack-nova</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>
             <version>${jclouds.version}</version>

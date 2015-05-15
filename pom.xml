@@ -72,6 +72,17 @@
             </roles>
             <timezone>+1</timezone>
         </developer>
+        <developer>
+            <id>alorlea</id>
+            <name>Alberto Lorente Leal</name>
+            <email>a.lorenteleal&gt;gmail.com</email>
+            <organization>Free contributor</organization>
+            <organizationUrl>http://www.kth.se/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
     </developers>
 
 
