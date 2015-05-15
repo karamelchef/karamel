@@ -120,7 +120,7 @@ angular.module('demoApp')
                                 failure: 'Provider Details Invalid.',
                                 initialWarn: 'No Provider Details Found.',
                                 userWarn: 'Please Re-Validate',
-                                specialWarn: 'Found values but please validate them.'
+                                specialWarn: 'Credentials must be validated. Click on the \'Validate\' button.'
                             };
 
                             scp.currentState = scp.availableStates.initialWarn;

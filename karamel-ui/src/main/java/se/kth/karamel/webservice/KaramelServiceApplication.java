@@ -14,9 +14,12 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -68,7 +71,20 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static final Options options = new Options();
   private static final CommandLineParser parser = new GnuParser();
 
+  private static final int PORT = 58931;
+  private static ServerSocket s;
+
   static {
+// Ensure a single instance of the app is running
+    try {
+      s = new ServerSocket(PORT, 10, InetAddress.getLocalHost());
+    } catch (UnknownHostException e) {
+      // shouldn't happen for localhost
+    } catch (IOException e) {
+      // port taken, so app is already running
+      System.exit(10);
+    }
+
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
         .hasArg()
@@ -113,6 +129,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
+  /**
+   * Usage instructions
+   *
+   * @param exitValue
+   */
   public static void usage(int exitValue) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("karamel", options);
@@ -120,6 +141,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   public static void main(String[] args) throws Exception {
+
     System.out.println("");
     System.setProperty("java.net.preferIPv4Stack", "true");
     boolean cli = false;
@@ -210,7 +232,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     if (!cli) {
       new KaramelServiceApplication().run(modifiedArgs);
     }
- 
+
     Runtime.getRuntime().addShutdownHook(new KaramelCleanupBeforeShutdownThread());
   }
 
@@ -283,7 +305,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     new Thread("webpage opening..") {
       public void run() {
         try {
-          Thread.sleep(1000);
+          Thread.sleep(2000);
           openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
         } catch (InterruptedException e) {
 //           swallow the exception
@@ -437,7 +459,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         System.out.println(" Received request to load ssh keys.");
         try {
-          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();          
+          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();
           if (sshKeypair == null) {
             sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           }
@@ -452,7 +474,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
 
     }
-    
+
     @Path("/registerSshKeys")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -703,7 +725,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     @GET
     public Response exitKaramel() {
       Response response = Response.status(Response.Status.OK).build();
-      
+
       new Thread() {
         @Override
         public void run() {
@@ -715,7 +737,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           }
         }
       }.start();
-      
+
       return response;
     }
   }
