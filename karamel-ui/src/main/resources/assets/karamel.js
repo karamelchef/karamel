@@ -43,6 +43,16 @@ function getClusterHelperMethods() {
 
       container.setEC2Provider(ec2Provider);
     },
+    loadBaremetalProvider: function(container, provider) {
+
+      var baremetalProvider = new BaremetalProvider();
+
+      if (!(_.isUndefined(provider) || _.isNull(provider))) {
+        baremetalProvider.load(provider);
+      }
+
+      container.setBaremetalProvider(baremetalProvider);
+    },
     loadSshKeyPair: function(container, sshKeyPair) {
       container.setSshKeyPair(new SshKeyPair());
     },
@@ -101,7 +111,7 @@ function Cluster() {
 
   // Externally add the providers.
   this.ec2Provider = null;
-  this.vagrantProvider = {};
+  this.baremetalProvider = {};
   this.helperObj = getClusterHelperMethods();
   this.sshKeyPair = null;
 
@@ -187,7 +197,12 @@ function Cluster() {
   this.load = function(other) {
 
     this.name = other.name;
-    this.helperObj.loadEc2Provider(this, other["ec2"]);
+    if (other["ec2"]) {    
+        this.helperObj.loadEc2Provider(this, other["ec2"]);
+    }
+    if (other["baremetal"]) {    
+        this.helperObj.loadBaremetalProvider(this, other["baremetal"]);
+    }
     this.helperObj.loadSshKeyPair(this, null);
     this.helperObj.loadGroups(this, other["groups"]);
     this.helperObj.loadCookbooks(this, other["cookbooks"]);
@@ -295,18 +310,27 @@ function EC2Provider() {
   this.addAccountDetails = function(other) {
     this.accountId = other.accountId || null;
     this.accountKey = other.accountKey || null;
-  }
+  };
 }
 
 // Inherit from the Provider.
 EC2Provider.prototype = Object.create(Provider.prototype);
 
-function VagrantProvider(name, ip) {
-  this.name = name;
-  this.ip = ip;
+function BaremetalProvider(username) {
+  this.username = username;
+  this.load = function(other) {
+    this.username= other.username || null;
+  };
+  this.copy = function(other) {
+    this.username= other.username || null;
+  };
+
+  this.addAccountDetails = function(other) {
+    this.username = other.username || null;
+  };
 }
 
-VagrantProvider.prototype = Object.create(Provider.prototype);
+BaremetalProvider.prototype = Object.create(Provider.prototype);
 
 // ===========================================  COOKBOOKS ============================================== //
 function Cookbook() {
@@ -406,7 +430,7 @@ function NodeGroup() {
   this.attrs = [];
   this.instances = 0;
   this.ec2 = {};
-  this.vagrant = {};
+  this.baremetal = {};
   this.cookbooks = [];
 
   this.setEC2Provider = function(ec2Provider) {
@@ -417,12 +441,12 @@ function NodeGroup() {
     return this.ec2;
   };
 
-  this.getVagrantProvider = function() {
-    return this.vagrant;
+  this.getBaremetalProvider = function() {
+    return this.baremetal;
   };
 
-  this.setVagrantProvider = function(vagrantProvider) {
-    this.vagrant = vagrantProvider;
+  this.setBaremetalProvider = function(baremetalProvider) {
+    this.baremetal = baremetalProvider;
   };
 
   this.addCookbook = function(cookbook) {
@@ -442,7 +466,7 @@ function NodeGroup() {
     this.name = group.name;
     this.instances = group.size;
     this.ec2 = group.ec2;
-    this.vagrant = group.vagrant;
+    this.baremetal = group.baremetal;
   };
 
   // Copy the data from a similar instance of node group.
@@ -453,7 +477,7 @@ function NodeGroup() {
     this.attrs = other.attrs;
     this.instances = other.instances;
     this.ec2 = other.ec2;
-    this.vagrant = other.vagrant;
+    this.baremetal = other.baremetal;
 
     // Load cookbooks instead of copying.
   };
