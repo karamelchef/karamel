@@ -18,7 +18,7 @@ public class SshKeyServiceTest {
 //  @Test
   public void testNonexistenceConfs() {
     Confs confs = Confs.loadAllConfsForCluster("HopsHup");
-    System.out.println(confs.getProperty(Settings.SSH_PRIKEY_PATH_KEY));
+    System.out.println(confs.getProperty(Settings.SSH_PRIVKEY_PATH_KEY));
   }
 
 //  @Test

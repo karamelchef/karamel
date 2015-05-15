@@ -66,18 +66,20 @@ public interface KaramelApi {
   
   /**
    * Loads Karamel common keys
+   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist() throws KaramelException;
+  public SshKeyPair loadSshKeysIfExist(String passphrase) throws KaramelException;
   
   /**
    * Loads cluster specific keys
    * @param clusterName
+   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
+  public SshKeyPair loadSshKeysIfExist(String clusterName, String passphrase) throws KaramelException;
 
   /**
    * Generates a common ssh keys in the karamel folder

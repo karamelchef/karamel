@@ -46,7 +46,7 @@ public class SshKeyService {
       folder.mkdirs();
     }
     File pubFile = new File(folder, Settings.SSH_PUBKEY_FILENAME);
-    File priFile = new File(folder, Settings.SSH_PRIKEY_FILENAME);
+    File priFile = new File(folder, Settings.SSH_PRIVKEY_FILENAME);
     Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
     perms.add(PosixFilePermission.OWNER_READ);
     perms.add(PosixFilePermission.OWNER_WRITE);
@@ -80,15 +80,15 @@ public class SshKeyService {
     SshKeyPair keyPair = new SshKeyPair();
     keyPair.setPrivateKey(pri);
     keyPair.setPublicKey(pub);
-    keyPair.setPrivateKeyPath(folder + File.separator + Settings.SSH_PRIKEY_FILENAME);
+    keyPair.setPrivateKeyPath(folder + File.separator + Settings.SSH_PRIVKEY_FILENAME);
     keyPair.setPublicKeyPath(folder + File.separator + Settings.SSH_PUBKEY_FILENAME);
     return keyPair;
   }
 
   public static SshKeyPair loadSshKeys(Confs confs) throws SshKeysNotfoundException {
     String pubkeyPath = confs.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
-    String prikeyPath = confs.getProperty(Settings.SSH_PRIKEY_PATH_KEY);
-    return loadSshKeys(pubkeyPath, prikeyPath);
+    String privKeyPath = confs.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
+    return loadSshKeys(pubkeyPath, privKeyPath);
   }
 
   public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath) throws SshKeysNotfoundException {

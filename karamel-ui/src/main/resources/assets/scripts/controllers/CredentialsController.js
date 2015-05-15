@@ -240,7 +240,8 @@ angular.module('demoApp')
 
                     scp.sshKeyPair = {
                         pubKeyPath: null,
-                        priKeyPath: null
+                        priKeyPath: null,
+                        passphrase: null
                     };
 
                     scp.availableStates = {
@@ -299,12 +300,13 @@ angular.module('demoApp')
                         if (scope.bootUp) {
 
                             $log.info("ssh - first time try.");
-                            KaramelCoreRestServices.loadSshKeys()
+                            KaramelCoreRestServices.loadSshKeys(scope.sshKeyPair.passphrase)
 
                                 .success(function (data) {
                                     $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                                     scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                                     scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+                                    scope.sshKeyPair.passphrase = data.passphrase;
                                     _updateState('success', scope.sshKeyObj);
                                 })
 
@@ -332,6 +334,7 @@ angular.module('demoApp')
                             $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                             scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                             scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+                            scope.sshKeyPair.passphrase = data.passphrase;
                             _updateState('success', scope.sshKeyObj);
 
 

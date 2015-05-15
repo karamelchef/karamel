@@ -444,23 +444,6 @@ KaramelCoreRestServices, KaramelSyncService, AlertService) {
             });
 
           },
-          editSshKeys: function() {
-
-            $log.info("Edit SSH Keys.");
-
-            var modalInstance = $modal.open({
-              templateUrl: "partials/sshKeys.html",
-              controller: "SshKeysController",
-              backdrop: "static",
-              resolve: {
-              }
-            });
-
-            modalInstance.result.then(function() {
-
-            });
-
-          },
           startCluster: function(board) {
 
             $log.info("Invoked Function to start cluster.");

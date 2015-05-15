@@ -137,16 +137,22 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public SshKeyPair loadSshKeysIfExist() throws KaramelException {
+  public SshKeyPair loadSshKeysIfExist(String passphrase) throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
     SshKeyPair sshKeys = SshKeyService.loadSshKeys(confs);
+    if (passphrase != null && passphrase.isEmpty()) {
+          sshKeys.setPassword(passphrase);
+    }
     return sshKeys;
   }
 
   @Override
-  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException {
+  public SshKeyPair loadSshKeysIfExist(String clusterName, String passphrase) throws KaramelException {
     Confs confs = Confs.loadAllConfsForCluster(clusterName);
     SshKeyPair sshKeys = SshKeyService.loadSshKeys(confs);
+    if (passphrase != null && passphrase.isEmpty()) {
+          sshKeys.setPassword(passphrase);
+    }
     return sshKeys;
   }
 
@@ -154,7 +160,7 @@ public class KaramelApiImpl implements KaramelApi {
   public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException {
     SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys();
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
     confs.writeKaramelConfs();
     return sshkeys;
@@ -164,7 +170,7 @@ public class KaramelApiImpl implements KaramelApi {
   public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException {
     SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys(clusterName);
     Confs confs = Confs.loadJustClusterConfs(clusterName);
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
     confs.writeClusterConfs(clusterName);
     return sshkeys;
@@ -174,7 +180,7 @@ public class KaramelApiImpl implements KaramelApi {
   public void registerSshKeys(SshKeyPair keypair) throws KaramelException {
     clusterService.registerSshKeyPair(keypair);
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
     confs.writeKaramelConfs();
   }
@@ -183,7 +189,7 @@ public class KaramelApiImpl implements KaramelApi {
   public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException {
     clusterService.registerSshKeyPair(clusterName, keypair);
     Confs confs = Confs.loadJustClusterConfs(clusterName);
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
     confs.writeClusterConfs(clusterName);
   }

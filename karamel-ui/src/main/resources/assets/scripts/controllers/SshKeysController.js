@@ -9,13 +9,15 @@ angular.module("demoApp")
         function initKeys(scope) {
           scope.sshKeyPair = {
             pubKeyPath: null,
-            priKeyPath: null
+            priKeyPath: null,
+            passphrase: null
           };
           KaramelCoreRestServices.loadSshKeys()
               .success(function(data) {
                 $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                 scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+                scope.sshKeyPair.passphrase = data.passphrase;
               })
               .error(function(data) {
                 $log.warn("No SSh keys is available");

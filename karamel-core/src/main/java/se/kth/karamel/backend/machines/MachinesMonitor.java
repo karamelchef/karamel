@@ -60,7 +60,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   
   public void addMachines(List<MachineRuntime> machineEntities) {
     for (MachineRuntime machineEntity : machineEntities) {
-      SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey());
+      SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey(), keyPair.getPassword());
       machines.put(machineEntity.getId(), sshMachine);
       executor.execute(sshMachine);
     }

@@ -432,12 +432,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static class Load {
 
       @PUT
-      public Response loadSshKeys() {
+      public Response loadSshKeys(SshKeyPassphraseJSON passphraseJSON) {
         Response response = null;
         System.out.println(" Received request to load ssh keys.");
         SshKeyPair sshKeypair = null;
         try {
-          sshKeypair = karamelApiHandler.loadSshKeysIfExist();
+          sshKeypair = karamelApiHandler.loadSshKeysIfExist(passphraseJSON.getPassphrase());          
           if (sshKeypair == null) {
             sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           }

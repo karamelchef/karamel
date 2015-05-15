@@ -235,12 +235,14 @@ function SshKeyPair() {
   this.priKey = null;
   this.pubKeyPath = null;
   this.priKeyPath = null;
+  this.passphrase = null;
 
   this.load = function(other) {
 //        this.priKey = other.priKey;
 //        this.pubKey = other.pubKey;
 //        this.priKeyPath = other.priKeyPath;
 //        this.pubKeyPath = other.pubKeyPath;
+//        this.passphrase = other.passphrase;
   };
 
   this.copy = function(other) {
