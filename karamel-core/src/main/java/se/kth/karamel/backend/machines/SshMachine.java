@@ -202,10 +202,10 @@ public class SshMachine implements Runnable {
           try {
             processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
           } catch (JsonParseException p) {
-            logger.error("Bug in Chef Cookbook - Results were not a valid json document: "
+            logger.error("Bug in Chef Cookbook - Return JSON was not a valid json document from: "
                 + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
           } catch (IOException e) {
-            logger.error("Possible network problem. No results were able to be downloaded for: "
+            logger.error("No return values for: "
                 + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
           }
         }
