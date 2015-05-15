@@ -20,4 +20,6 @@ public interface DagTask {
   public void submit(DagTaskCallback callback);
 
   public Set<String> dagDependencies();
+  
+  public String asJson();
 }

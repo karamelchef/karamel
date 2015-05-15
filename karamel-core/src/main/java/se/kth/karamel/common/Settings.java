@@ -114,7 +114,10 @@ public class Settings {
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
+  public static final String TMP_FOLDER_NAME = "tmp";
+  public static final String SYSTEM_TMP_FOLDER_NAME = "/tmp";
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
+  public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;    
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
   public static final String SSH_PRIKEY_FILENAME = "ida_rsa";
 

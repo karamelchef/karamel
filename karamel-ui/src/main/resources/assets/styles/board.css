@@ -362,6 +362,13 @@ textarea[name="pubkey"]{
   width: 100%;
 }
 
+/* Command Page CSS*/
+.dagViewer{
+  border: 3px double #CCCCCC;
+  height: 1600px;
+  width: 100%;
+}
+
 .commandControllerForm{
   padding: 5px;
 }

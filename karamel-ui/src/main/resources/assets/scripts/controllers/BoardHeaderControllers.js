@@ -3,7 +3,8 @@
 'use strict';
 
 angular.module('demoApp')
-    .controller('HeaderController', ['$log', 'BoardService', '$rootScope', '$scope', '$window', '$location', 'AlertService', function($log, BoardService, $rootScope, $scope, $window, $location, AlertService) {
+    .controller('HeaderController', ['$log', 'BoardService', '$rootScope', '$scope', '$window', '$location', 'AlertService', 
+function($log, BoardService, $rootScope, $scope, $window, $location, AlertService) {
 
         function initScope(scope) {
 
@@ -114,6 +115,11 @@ angular.module('demoApp')
         $scope.switchTerminal = function() {
           $log.info('Switching to Command Page.');
           $location.path('/terminal');
+        };
+
+        $scope.exitKaramel = function() {
+          $log.info('Request to exit Karamel.');
+          BoardService.exitKaramel();
         };
 
 

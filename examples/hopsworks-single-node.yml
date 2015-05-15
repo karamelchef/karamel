@@ -7,8 +7,8 @@ cookbooks:
   hops: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
-  hopshub:                                                                     
-    github: "hopshadoop/hopshub-chef"
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
     branch: "master"  
   ndb:
     github: "hopshadoop/ndb-chef"
@@ -34,7 +34,7 @@ groups:
         - hops::rm
         - hops::nn
         - hops::jhs                                                            
-        - hopshub
+        - hopsworks
         - ndb::ndbd
         - hops::nm
         - hops::nm

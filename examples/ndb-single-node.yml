@@ -9,15 +9,12 @@ cookbooks:
     branch: "master"
     
 groups: 
-  datanodes:
-    size: 2
-    recipes: 
-        - ndb::ndbd
-  mgmnodes:
+  nodes:
     size: 1 
     recipes: 
+        - ndb::mgmd
+        - ndb::ndbd
         - ndb::mysqld
         - ndb::memcached
-        - ndb::mgmd
 
 

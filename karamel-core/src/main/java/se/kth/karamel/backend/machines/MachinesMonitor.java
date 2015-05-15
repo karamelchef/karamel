@@ -32,20 +32,20 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   private boolean paused = false;
   ExecutorService executor;
   private final SshKeyPair keyPair;
-  private boolean stoping = false;
-  
+  private boolean stopping = false;
+
   public MachinesMonitor(String clusterName, int numMachines, SshKeyPair keyPair) {
     this.keyPair = keyPair;
     this.clusterName = clusterName;
     executor = Executors.newFixedThreadPool(numMachines);
   }
-  
-  public void setStoping(boolean stoping) {
+
+  public void setStopping(boolean stopping) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
-      sshMachine.setStoping(true);
+      sshMachine.setStopping(true);
     }
-    this.stoping = stoping;
+    this.stopping = stopping;
   }
   
   public SshMachine getMachine(String publicIp) {
@@ -91,7 +91,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   @Override
   public void run() {
     logger.info(String.format("Machines-Monitor started for '%s' d'-'", clusterName));
-    while (true && !stoping) {
+    while (true && !stopping) {
       try {
         Set<Map.Entry<String, SshMachine>> entrySet = new HashSet<>();
         entrySet.addAll(machines.entrySet());
@@ -103,7 +103,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
         try {
           Thread.currentThread().sleep(Settings.SSH_PING_INTERVAL);
         } catch (InterruptedException ex) {
-          if (stoping) {
+          if (stopping) {
             logger.error("Terminating machines threadpool");
             executor.shutdownNow();
             try {
@@ -132,6 +132,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
     SshMachine machine = machines.get(machineName);
     machine.enqueue(task);
+    // TODO - check if there is a return value....
   }
   
   public void disconnect() throws KaramelException {

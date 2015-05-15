@@ -64,6 +64,12 @@ public abstract class Task implements DagTask, TaskCallback {
   }
 
   @Override
+  public String asJson() {
+    return String.format("\"name\": \"%s\", \"machine\": \"%s\"", name, machineId);
+  }
+
+  
+  @Override
   public String toString() {
     return name + " on " + machineId;
   }
