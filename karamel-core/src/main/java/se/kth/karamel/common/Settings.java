@@ -90,6 +90,7 @@ public class Settings {
   public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
+  public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
   public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
   public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
   public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";

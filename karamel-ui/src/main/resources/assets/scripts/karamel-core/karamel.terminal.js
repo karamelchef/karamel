@@ -372,6 +372,11 @@ angular.module('karamel.terminal', [])
           var url = _defaultHost.concat("/loadSshKeys");
           return _getPromiseObject(method, url, _defaultContentType);
         },
+        registerSshKeys: function(sshKeypair) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/registerSshKeys");
+          return _getPromiseObject(method, url, _defaultContentType, sshKeypair);
+        },
         generateSshKeys: function() {
           var method = 'PUT';
           var url = _defaultHost.concat("/generateSshKeys");

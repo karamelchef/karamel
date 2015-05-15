@@ -16,14 +16,14 @@ public class SshKeyPair {
   private String publicKeyPath;
   private String privateKey;
   private String publicKey;
-  private String password;
+  private String passphrase;
 
-  public String getPassword() {
-    return password;
+  public String getPassphrase() {
+    return passphrase;
   }
 
-  public void setPassword(String password) {
-    this.password = password;
+  public void setPassphrase(String password) {
+    this.passphrase = password;
   }
 
   public String getPrivateKey() {

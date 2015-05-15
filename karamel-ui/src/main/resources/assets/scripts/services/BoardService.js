@@ -186,16 +186,13 @@ KaramelCoreRestServices, KaramelSyncService, AlertService) {
               closeOnCancel: false},
             function(isConfirm) {
               if (isConfirm) {
-                SweetAlert.swal("Exiting!", "Karamel is exiting.", "success");
-                
-            KaramelCoreRestServices.exitKaramel()
+                   KaramelCoreRestServices.exitKaramel()
                 .success(function(data, status, headers, config) {
-                    $window.close()
+                    $window.close();
                  })
                 .error(function(data, status, headers, config) {
                   $log.info("Error Received.");
-                });                
-     
+                });                     
                 
               } else {
                 SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");

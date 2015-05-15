@@ -70,7 +70,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist(String passphrase) throws KaramelException;
+  public SshKeyPair loadSshKeysIfExist() throws KaramelException;
   
   /**
    * Loads cluster specific keys
@@ -79,7 +79,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist(String clusterName, String passphrase) throws KaramelException;
+  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
 
   /**
    * Generates a common ssh keys in the karamel folder
@@ -99,17 +99,19 @@ public interface KaramelApi {
   /**
    * Register ssh keys for the current runtime of karamel
    * @param keypair
+   * @return 
    * @throws KaramelException 
    */
-  public void registerSshKeys(SshKeyPair keypair) throws KaramelException;
+  public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
   
   /**
    * Register ssh keys for the specified cluster
    * @param clusterName
    * @param keypair
+   * @return 
    * @throws KaramelException 
    */
-  public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
+  public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file

@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.jclouds.ssh.SshKeys;
 import se.kth.karamel.common.exception.SshKeysNotfoundException;
 
-
 /**
  *
  * @author kamal
@@ -51,9 +50,9 @@ public class SshKeyService {
     perms.add(PosixFilePermission.OWNER_READ);
     perms.add(PosixFilePermission.OWNER_WRITE);
     try {
-       Files.setPosixFilePermissions(priFile.toPath(), perms);
+      Files.setPosixFilePermissions(priFile.toPath(), perms);
     } catch (IOException ex) {
-	logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on generated private ssh-key. ", ex);
+      logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on generated private ssh-key. ", ex);
     }
     Map<String, String> keys = SshKeys.generate();
     String pub = keys.get("public");
@@ -88,10 +87,10 @@ public class SshKeyService {
   public static SshKeyPair loadSshKeys(Confs confs) throws SshKeysNotfoundException {
     String pubkeyPath = confs.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
     String privKeyPath = confs.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
-    return loadSshKeys(pubkeyPath, privKeyPath);
+    return loadSshKeys(pubkeyPath, privKeyPath, "");
   }
 
-  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath) throws SshKeysNotfoundException {
+  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath, String passphrase) throws SshKeysNotfoundException {
     String pubKey = null;
     String priKey = null;
     try {
@@ -113,6 +112,7 @@ public class SshKeyService {
       keypair.setPublicKey(pubKey);
       keypair.setPrivateKeyPath(prikeyPath);
       keypair.setPrivateKey(priKey);
+      keypair.setPassphrase(passphrase);
       return keypair;
     }
     throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", pubkeyPath, prikeyPath));
