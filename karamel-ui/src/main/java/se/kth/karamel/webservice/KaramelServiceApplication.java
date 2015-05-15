@@ -14,9 +14,12 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -68,7 +71,21 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static final Options options = new Options();
   private static final CommandLineParser parser = new GnuParser();
 
+  private static final int PORT = 58931;
+  private static ServerSocket s;
+
   static {
+// Ensure a single instance of the app is running
+    try {
+      s = new ServerSocket(PORT, 10, InetAddress.getLocalHost());
+    } catch (UnknownHostException e) {
+      // shouldn't happen for localhost
+    } catch (IOException e) {
+      // port taken, so app is already running
+      System.out.println("An instance of Karamel is already running. Exiting...");
+      System.exit(10);
+    }
+
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
         .hasArg()
@@ -91,7 +108,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       if (cb.exists()) {
         boolean wiped = false;
         while (!wiped) {
-          System.out.print("Do you want to over-write the existing cookbook " + name + "? (y/n) ");
+          System.out.print("Do you wan  t to over-write the existing cookbook " + name + "? (y/n) ");
           String overwrite = br.readLine();
           if (overwrite.compareToIgnoreCase("n") == 0 || overwrite.compareToIgnoreCase("no") == 0) {
             System.out.println("Not over-writing. Exiting.");
@@ -113,6 +130,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
+  /**
+   * Usage instructions
+   *
+   * @param exitValue
+   */
   public static void usage(int exitValue) {
     HelpFormatter formatter = new HelpFormatter();
     formatter.printHelp("karamel", options);
@@ -120,7 +142,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   public static void main(String[] args) throws Exception {
-    System.out.println("");
+
     System.setProperty("java.net.preferIPv4Stack", "true");
     boolean cli = false;
     String yamlTxt;
@@ -182,7 +204,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             credentials.setAccessKey(ec2AccessKey);
             valid = karamelApiHandler.updateEc2CredentialsIfValid(credentials);
             if (!valid) {
-              System.out.println("Invalid Ec2 Credentials. Try again.");
+              Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.WARNING, 
+                  "Invalid Ec2 Credentials. Try again.");
               ec2AccountId = null;
               ec2AccessKey = null;
             }
@@ -210,7 +233,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     if (!cli) {
       new KaramelServiceApplication().run(modifiedArgs);
     }
- 
+
     Runtime.getRuntime().addShutdownHook(new KaramelCleanupBeforeShutdownThread());
   }
 
@@ -283,9 +306,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     new Thread("webpage opening..") {
       public void run() {
         try {
-          Thread.sleep(1000);
+//          Thread.sleep(2000);
           openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
-        } catch (InterruptedException e) {
+//        } catch (InterruptedException e) {
 //           swallow the exception
         } catch (java.net.MalformedURLException e) {
           // swallow the exception
@@ -386,7 +409,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     @PUT
     public Response getYamlForJSON(KaramelBoardJSON karamelBoardJSON) {
       Response response = null;
-      System.out.println("Fetch Yaml Called ... ");
+      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Fetch Yaml Called ... ");
 
       try {
         String yml = karamelApiHandler.jsonToYaml(karamelBoardJSON.getJson());
@@ -410,8 +433,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public Response getCookbook(CookbookJSON cookbookJSON) {
       Response response = null;
 
-      System.out.println("Received Call For the cookbook.");
-      System.out.println(cookbookJSON.getUrl());
+      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Received Call For the cookbook.");
+      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, cookbookJSON.getUrl());
       try {
         String cookbookDetails = karamelApiHandler.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
         response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
@@ -435,9 +458,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadSshKeys() {
         Response response = null;
-        System.out.println(" Received request to load ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load ssh keys.");
         try {
-          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();          
+          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();
           if (sshKeypair == null) {
             sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           }
@@ -452,7 +475,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
 
     }
-    
+
     @Path("/registerSshKeys")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -461,7 +484,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response registerSshKeys(SshKeyJSON sshKeysJSON) {
         Response response = null;
-        System.out.println(" Received request to register ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to register ssh keys.");
         SshKeyPair sshKeypair = new SshKeyPair();
         sshKeypair.setPublicKeyPath(sshKeysJSON.getPubKeyPath());
         sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
@@ -487,7 +510,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response generateSshKeys() {
         Response response = null;
-        System.out.println(" Received request to generate ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to generate ssh keys.");
         try {
           SshKeyPair sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           karamelApiHandler.registerSshKeys(sshKeypair);
@@ -512,7 +535,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response getCommandCheetSheet() {
         Response response = null;
-        System.out.println(" Received request to load the command cheatsheet.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load the command cheatsheet.");
         try {
           String cheatSheet = karamelApiHandler.commandCheatSheet();
           response = Response.status(Response.Status.OK).entity(cheatSheet).build();
@@ -564,7 +587,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadCredentials() {
         Response response = null;
-        System.out.println(" Received request to load the ec2 credentials.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load the ec2 credentials.");
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           ProviderJSON provider = new ProviderJSON();
@@ -594,7 +617,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response validateCredentials(ProviderJSON providerJSON) {
 
         Response response = null;
-        System.out.println(" Received request to validate the ec2 credentials.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to validate the ec2 credentials.");
 
         try {
           Ec2Credentials credentials = new Ec2Credentials();
@@ -654,7 +677,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response viewCluster(ClusterJSON clusterJSON) {
 
         Response response = null;
-        System.out.println(" Received request to view the cluster.... ");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to view the cluster.... ");
 
         try {
 
@@ -684,7 +707,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response scaffold(ScaffoldJSON cbName) {
         Response response = null;
-        System.out.println(" Received request to scaffold a new cookbook.... ");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to scaffold a new cookbook.... ");
         try {
           CookbookScaffolder.create(cbName.getName());
           response = Response.status(Response.Status.OK).build();
@@ -703,7 +726,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     @GET
     public Response exitKaramel() {
       Response response = Response.status(Response.Status.OK).build();
-      
+
       new Thread() {
         @Override
         public void run() {
@@ -715,7 +738,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           }
         }
       }.start();
-      
+
       return response;
     }
   }
@@ -724,7 +747,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     @Override
     public void run() {
-      System.out.println("Bye! Cleaning up first....");
+      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Bye! Cleaning up first....");
       // TODO - interrupt all threads
       // Should we cleanup AMIs?
     }
