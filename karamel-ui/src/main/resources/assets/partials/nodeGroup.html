@@ -21,8 +21,16 @@
             </div>
         </div>
 
+        <div class="form-group" ng-show="true">
+            <label class="control-label col-xs-2" for="ipAddresses">Ip Addresses</label>
+            <div class="col-xs-8">
+                <textarea type="text" rows="20" class="form-control" id="nodeGroupName" placeholder="Enter one Ip Address per line (no commas)." ng-model="ips" required></textarea>
+            </div>
+        </div>
     </div>
-
+    
+    
+    
     <div class="modal-footer">
         <div class="pull-left">
             <span ng-show="nodeGroupForm.nodeGroupName.$dirty && nodeGroupForm.nodeGroupName.$invalid" class="pull-left">
