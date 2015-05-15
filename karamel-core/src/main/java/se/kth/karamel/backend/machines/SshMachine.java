@@ -58,7 +58,7 @@ public class SshMachine implements Runnable {
   private final MachineRuntime machineEntity;
   private final String serverPubKey;
   private final String serverPrivateKey;
-  private final String sshKeyPassphrase;
+  private final String passphrase;
   private SSHClient client;
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
@@ -71,14 +71,15 @@ public class SshMachine implements Runnable {
    * @param machineEntity
    * @param serverPubKey
    * @param serverPrivateKey
-   * @param sshKeyPassphrase
+   * @param passphrase
    */
-  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey, String sshKeyPassphrase) {
+  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey, String passphrase) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
-    this.sshKeyPassphrase = sshKeyPassphrase;
-    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
+    this.passphrase = passphrase;
+    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), 
+        machineEntity.getSshUser(), passphrase, machineEntity.getSshPort());
   }
 
   public MachineRuntime getMachineEntity() {
@@ -233,7 +234,7 @@ public class SshMachine implements Runnable {
 
       @Override
       public char[] reqPassword(Resource<?> resource) {
-        return sshKeyPassphrase.toCharArray();
+        return passphrase.toCharArray();
       }
 
       @Override
@@ -250,7 +251,7 @@ public class SshMachine implements Runnable {
       client.addHostKeyVerifier(new PromiscuousVerifier());
       client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
       client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      if (sshKeyPassphrase == null) {
+      if (passphrase == null) {
         keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
       } else {
         keys = client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
@@ -260,7 +261,7 @@ public class SshMachine implements Runnable {
         client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
       } catch (IOException ex) {
         logger.warn(String.format("Opps!! coudln' t connect to '%s' :@", machineEntity.getId()));
-        if (sshKeyPassphrase != null) {
+        if (passphrase != null) {
           logger.warn(String.format("Is the passphrase for your private key correct?"));
         }
         logger.debug(ex);
@@ -273,7 +274,7 @@ public class SshMachine implements Runnable {
         return true;
       } else {
         logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
-        if (sshKeyPassphrase != null) {
+        if (passphrase != null) {
           logger.warn(String.format("Is the passphrase for your private key correct?"));
         }
         machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
@@ -281,7 +282,7 @@ public class SshMachine implements Runnable {
       }
     } catch (UserAuthException ex) {
       String message = "Authentication problem using ssh keys.";
-      if (sshKeyPassphrase != null) {
+      if (passphrase != null) {
         message = message + " Is the passphrase for your private key correct?";
       }
       KaramelException exp = new KaramelException(message, ex);
