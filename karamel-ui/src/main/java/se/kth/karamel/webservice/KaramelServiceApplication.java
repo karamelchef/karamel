@@ -267,6 +267,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new ConvertJSONToYaml());
     environment.jersey().register(new Cookbook());
     environment.jersey().register(new Ssh.Load());
+    environment.jersey().register(new Ssh.Register());
     environment.jersey().register(new Ssh.Generate());
     environment.jersey().register(new Ec2.Load());
     environment.jersey().register(new Ec2.Validate());
@@ -282,10 +283,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     new Thread("webpage opening..") {
       public void run() {
         try {
-          Thread.sleep(2000);
-          openWebpage(new URL("http://localhost:" + webPort + "/index.html"));
+          Thread.sleep(1000);
+          openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
         } catch (InterruptedException e) {
-          // swallow the exception
+//           swallow the exception
         } catch (java.net.MalformedURLException e) {
           // swallow the exception
         }
@@ -435,12 +436,37 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response loadSshKeys() {
         Response response = null;
         System.out.println(" Received request to load ssh keys.");
-        SshKeyPair sshKeypair = null;
         try {
-          sshKeypair = karamelApiHandler.loadSshKeysIfExist();
+          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();          
           if (sshKeypair == null) {
             sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           }
+          karamelApiHandler.registerSshKeys(sshKeypair);
+          response = Response.status(Response.Status.OK).entity(sshKeypair).build();
+        } catch (KaramelException ex) {
+          ex.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
+        }
+
+        return response;
+      }
+
+    }
+    
+    @Path("/registerSshKeys")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Register {
+
+      @PUT
+      public Response registerSshKeys(SshKeyJSON sshKeysJSON) {
+        Response response = null;
+        System.out.println(" Received request to register ssh keys.");
+        SshKeyPair sshKeypair = new SshKeyPair();
+        sshKeypair.setPublicKeyPath(sshKeysJSON.getPubKeyPath());
+        sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
+        sshKeypair.setPassphrase(sshKeysJSON.getPassphrase());
+        try {
           karamelApiHandler.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {

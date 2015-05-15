@@ -16,15 +16,6 @@
     <link rel="stylesheet" type="text/css" href="styles/d3dag.css">
   </head>
   <body ng-app="demoApp">
-
-    <div class="notifications" ng-controller="MainCtrl">
-      <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
-    </div>
-
-    <div ng-include='"templates/header.html"'></div>
-
-    <div ng-view></div>
-
     <!--scripts-->
     <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -66,5 +57,13 @@
     <!--<script type="text/javascript" src="scripts/d3/dagre-d3.min.js" charset="utf-8"></script>-->
     <!--<script type="text/javascript" src="scripts/d3/graphlib.min.js"></script>-->
     <!--<script type="text/javascript" src="scripts/services/ClusterFactory.js"></script>-->        
+
+    <div class="notifications" ng-controller="MainCtrl">
+      <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
+    </div>
+
+    <div ng-include='"templates/header.html"'></div>
+
+    <div ng-view></div>
   </body>
 </html>

@@ -89,7 +89,8 @@ public class Settings {
   public static final String DEFAULT_PUBKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa.pub" : null;
   public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
-  public static final String SSH_PRIKEY_PATH_KEY = "ssh.privatekey.path";
+  public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
+  public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
   public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
   public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
   public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";
@@ -119,7 +120,7 @@ public class Settings {
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
   public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;    
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
-  public static final String SSH_PRIKEY_FILENAME = "ida_rsa";
+  public static final String SSH_PRIVKEY_FILENAME = "ida_rsa";
 
   public static String CLUSTER_LOG_FOLDER(String clusterName) {
     return CLUSTER_ROOT_PATH(clusterName) + File.separator + "logs";

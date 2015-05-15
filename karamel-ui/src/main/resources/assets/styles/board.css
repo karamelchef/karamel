@@ -372,3 +372,9 @@ textarea[name="pubkey"]{
 .commandControllerForm{
   padding: 5px;
 }
+
+#keyPassphrase {
+  vertical-align: bottom;
+  margin-bottom: -4px;
+  height: 10px;
+}
