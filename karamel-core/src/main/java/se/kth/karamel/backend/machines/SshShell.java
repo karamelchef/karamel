@@ -18,6 +18,8 @@ import net.schmizz.sshj.connection.channel.direct.SessionChannel;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
+import net.schmizz.sshj.userauth.password.PasswordFinder;
+import net.schmizz.sshj.userauth.password.Resource;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -31,6 +33,7 @@ public class SshShell {
   private final String publicKey;
   private final String ipAddress;
   private final String sshUser;
+  private final String passphrase;
   private final int sshPort;
   private SSHClient client = null;
   private SessionChannel shell = null;
@@ -41,14 +44,31 @@ public class SshShell {
   private StringBuilder builder = new StringBuilder();
   private Thread streamReader;
 
-  public SshShell(String privateKey, String publicKey, String ipAddress, String sshUser, int sshPort) {
+  public SshShell(String privateKey, String publicKey, String ipAddress, String sshUser, 
+      String passphrase, int sshPort) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
     this.ipAddress = ipAddress;
     this.sshUser = sshUser;
+    this.passphrase = passphrase;
     this.sshPort = sshPort;
   }
 
+  
+  private PasswordFinder getPasswordFinder() {
+    return new PasswordFinder() {
+
+      @Override
+      public char[] reqPassword(Resource<?> resource) {
+        return passphrase.toCharArray();
+      }
+
+      @Override
+      public boolean shouldRetry(Resource<?> resource) {
+        return false;
+      }
+    };
+  }  
   public void connect() throws KaramelException {
     try {
       if (isConnected()) {
@@ -57,8 +77,12 @@ public class SshShell {
 
       client = new SSHClient();
       client.addHostKeyVerifier(new PromiscuousVerifier());
-
-      KeyProvider keys = client.loadKeys(privateKey, publicKey, null);
+      KeyProvider keys;
+      if (passphrase == null) {
+        keys = client.loadKeys(privateKey, publicKey, null);
+      } else {
+        keys = client.loadKeys(privateKey, publicKey, getPasswordFinder());
+      }
       client.connect(ipAddress, sshPort);
       client.authPublickey(sshUser, keys);
 
