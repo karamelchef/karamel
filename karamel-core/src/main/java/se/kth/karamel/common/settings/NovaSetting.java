@@ -12,7 +12,8 @@ public enum NovaSetting {
     OPENSTACK_NOVA_DEFAULT_FLAVOR("default flavor here!"),
     OPENSTACK_NOVA_DEFAULT_REGION("default region here!"),
     OPENSTACK_NOVA_DEFAULT_IMAGE("default image here!"),
-    OPENSTACK_NOVA_DEFAULT_USERNAME("default username here!");
+    OPENSTACK_NOVA_DEFAULT_USERNAME("default username here!"),
+    OPENSTACK_NOVA_DEFAULT_ENDPOINT("default endpoint here!");
 
     private String parameter;
 

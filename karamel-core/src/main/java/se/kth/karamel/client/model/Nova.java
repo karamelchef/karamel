@@ -11,6 +11,15 @@ public class Nova extends Provider{
     private String flavor;
     private String region;
     private String image;
+    private String endpoint;
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
 
     public String getFlavor() {
         return flavor;
@@ -48,6 +57,7 @@ public class Nova extends Provider{
         nova.setImage(image);
         nova.setFlavor(flavor);
         nova.setRegion(region);
+        nova.setEndpoint(endpoint);
         return nova;
     }
 
@@ -64,6 +74,9 @@ public class Nova extends Provider{
             }
             if (clone.getRegion() == null) {
                 clone.setRegion(parentNova.getRegion());
+            }
+            if (clone.getEndpoint() == null) {
+                clone.setEndpoint(parentNova.getEndpoint());
             }
         }
         return clone;
@@ -84,6 +97,9 @@ public class Nova extends Provider{
         }
         if(clone.getRegion() == null){
             clone.setImage(NovaSetting.OPENSTACK_NOVA_DEFAULT_REGION.getParameter());
+        }
+        if(clone.getEndpoint() == null){
+            clone.setImage(NovaSetting.OPENSTACK_NOVA_DEFAULT_ENDPOINT.getParameter());
         }
         return clone;
     }
