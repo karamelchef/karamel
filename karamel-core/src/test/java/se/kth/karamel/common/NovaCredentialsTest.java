@@ -7,7 +7,7 @@ import static org.junit.Assert.*;
 public class NovaCredentialsTest {
 
     @Test
-    public void novaCredentiaslSanityCheck() {
+    public void novaCredentialsSanityCheck() {
         NovaCredentials nova = new NovaCredentials();
         nova.setAccountName("pepe");
         nova.setAccountPass("12345");
