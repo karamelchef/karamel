@@ -15,7 +15,8 @@ public enum Ec2Setting {
     PROVIDER_EC2_DEFAULT_TYPE(InstanceType.M1_MEDIUM),
     PROVIDER_EC2_DEFAULT_REGION(Region.EU_WEST_1),
     PROVIDER_EC2_DEFAULT_IMAGE("ami-0307ce74"),
-    PROVIDER_EC2_DEFAULT_USERNAME("ubuntu");
+    PROVIDER_EC2_DEFAULT_USERNAME("ubuntu"),
+    EC2_GROUPNAME_PATTERN ("[a-z0-9][[a-z0-9]|[-]]*");
     //12.04  "ami-896c96fe"; // 14.04
     //12.04  "ami-896c96fe"; // 14.04
 

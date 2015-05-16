@@ -47,7 +47,7 @@ public class Settings {
   public static final String REPO_NO_BRANCH_PATTERN = "[^\\/]*/[^\\/]*";
   public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
   public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
-  public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
+  public static final String EC2_GROUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
   public static final int SSH_CONNECT_RETRIES = 5;
