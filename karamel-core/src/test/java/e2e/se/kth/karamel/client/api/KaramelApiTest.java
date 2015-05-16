@@ -61,7 +61,7 @@ public class KaramelApiTest {
     String clusterName = "spark";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
@@ -95,7 +95,7 @@ public class KaramelApiTest {
     String clusterName = "bigspark";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/bigspark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
@@ -121,7 +121,7 @@ public class KaramelApiTest {
     String clusterName = "sparkonvpc";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/sparkonvpc.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
@@ -147,7 +147,7 @@ public class KaramelApiTest {
     String clusterName = "spark";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
@@ -169,7 +169,7 @@ public class KaramelApiTest {
     String clusterName = "flink";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist();
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }

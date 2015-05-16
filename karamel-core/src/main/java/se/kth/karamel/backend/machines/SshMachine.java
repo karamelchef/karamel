@@ -7,7 +7,6 @@ package se.kth.karamel.backend.machines;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
@@ -35,8 +34,9 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
-import java.util.Iterator;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.userauth.password.PasswordFinder;
+import net.schmizz.sshj.userauth.password.Resource;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.dag.DagParams;
@@ -58,17 +58,28 @@ public class SshMachine implements Runnable {
   private final MachineRuntime machineEntity;
   private final String serverPubKey;
   private final String serverPrivateKey;
+  private final String passphrase;
   private SSHClient client;
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stopping = false;
   private SshShell shell;
 
-  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
+  /**
+   * This constructor is used for users with SSH keys protected by a password
+   *
+   * @param machineEntity
+   * @param serverPubKey
+   * @param serverPrivateKey
+   * @param passphrase
+   */
+  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey, String passphrase) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
-    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
+    this.passphrase = passphrase;
+    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), 
+        machineEntity.getSshUser(), passphrase, machineEntity.getSshPort());
   }
 
   public MachineRuntime getMachineEntity() {
@@ -186,19 +197,19 @@ public class SshMachine implements Runnable {
         shellCommand.setStatus(ShellCommand.Status.FAILED);
       } else {
         shellCommand.setStatus(ShellCommand.Status.DONE);
-                if (task instanceof RunRecipeTask) {
-                    RunRecipeTask rrt = (RunRecipeTask) task;
-                    try {
-                        processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
-                    } catch (JsonParseException p) {
-                        logger.error("Bug in Chef Cookbook - Results were not a valid json document: " 
-                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
-                    } catch (IOException e) {
-                        logger.error("Possible network problem. No results were able to be downloaded for: " 
-                                + rrt.getCookbookName()+ "::" + rrt.getRecipeCanonicalName());
-                    }
-                }
-	
+        if (task instanceof RunRecipeTask) {
+          RunRecipeTask rrt = (RunRecipeTask) task;
+          try {
+            processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
+          } catch (JsonParseException p) {
+            logger.error("Bug in Chef Cookbook - Return JSON was not a valid json document from: "
+                + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
+          } catch (IOException e) {
+            logger.error("No return values for: "
+                + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
+          }
+        }
+
       }
       SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
       LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
@@ -218,6 +229,21 @@ public class SshMachine implements Runnable {
     }
   }
 
+  private PasswordFinder getPasswordFinder() {
+    return new PasswordFinder() {
+
+      @Override
+      public char[] reqPassword(Resource<?> resource) {
+        return passphrase.toCharArray();
+      }
+
+      @Override
+      public boolean shouldRetry(Resource<?> resource) {
+        return false;
+      }
+    };
+  }
+
   private boolean connect() throws KaramelException {
     try {
       KeyProvider keys = null;
@@ -225,12 +251,19 @@ public class SshMachine implements Runnable {
       client.addHostKeyVerifier(new PromiscuousVerifier());
       client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
       client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
+      if (passphrase == null) {
+        keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
+      } else {
+        keys = client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
+      }
       logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
       try {
         client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
       } catch (IOException ex) {
-        logger.warn(String.format("Opps!! coudln't connect to '%s' :@", machineEntity.getId()));
+        logger.warn(String.format("Opps!! coudln' t connect to '%s' :@", machineEntity.getId()));
+        if (passphrase != null) {
+          logger.warn(String.format("Is the passphrase for your private key correct?"));
+        }
         logger.debug(ex);
       }
       if (client.isConnected()) {
@@ -241,11 +274,17 @@ public class SshMachine implements Runnable {
         return true;
       } else {
         logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
+        if (passphrase != null) {
+          logger.warn(String.format("Is the passphrase for your private key correct?"));
+        }
         machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
         return false;
       }
     } catch (UserAuthException ex) {
-      String message = "Issue for using ssh keys, make sure you keypair is not password protected..";
+      String message = "Authentication problem using ssh keys.";
+      if (passphrase != null) {
+        message = message + " Is the passphrase for your private key correct?";
+      }
       KaramelException exp = new KaramelException(message, ex);
       machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
       throw exp;
@@ -281,36 +320,37 @@ public class SshMachine implements Runnable {
     lastHeartbeat = System.currentTimeMillis();
   }
 
-    /**
-     * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
-     *
-     * This method downloads the return values from a chef recipe as a JSON object.
-     * It then parses the JSON object and updates a central location for Chef Attributes.
-     * 
-     * @param cookbook Chef solo cookbook name
-     * @param recipe Chef solo recipe name
-     */
-    private synchronized void processReturnValues(String cookbook, String recipe) throws IOException {
-        String postfix = "__out.json";
-        String recipeSeparator = "__";
-        String remoteFile = Settings.SYSTEM_TMP_FOLDER_NAME + File.separator + cookbook + recipeSeparator + recipe + postfix;
-        SCPFileTransfer scp = client.newSCPFileTransfer();
-        String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
-        File f = new File(localResultsFile);
-        f.mkdirs();
-        // Don't collect logs of values, just overwrite
-        if (f.exists()) {
-            f.delete();
-        }
-        // If the file doesn't exist, it should quickly throw an IOException
-        scp.download(remoteFile, localResultsFile);
-        JsonReader reader = new JsonReader(new FileReader(localResultsFile));
-        JsonParser jsonParser = new JsonParser();
-        try {
-            JsonElement el = jsonParser.parse(reader);
-            DagParams.setGlobalParams(el);
-        } catch (JsonIOException | JsonSyntaxException ex) {
-            logger.error(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), reader.toString()));            
-        }
+  /**
+   * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
+   *
+   * This method downloads the return values from a chef recipe as a JSON
+   * object. It then parses the JSON object and updates a central location for
+   * Chef Attributes.
+   *
+   * @param cookbook Chef solo cookbook name
+   * @param recipe Chef solo recipe name
+   */
+  private synchronized void processReturnValues(String cookbook, String recipe) throws IOException {
+    String postfix = "__out.json";
+    String recipeSeparator = "__";
+    String remoteFile = Settings.SYSTEM_TMP_FOLDER_NAME + File.separator + cookbook + recipeSeparator + recipe + postfix;
+    SCPFileTransfer scp = client.newSCPFileTransfer();
+    String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
+    File f = new File(localResultsFile);
+    f.mkdirs();
+    // Don't collect logs of values, just overwrite
+    if (f.exists()) {
+      f.delete();
     }
+    // If the file doesn't exist, it should quickly throw an IOException
+    scp.download(remoteFile, localResultsFile);
+    JsonReader reader = new JsonReader(new FileReader(localResultsFile));
+    JsonParser jsonParser = new JsonParser();
+    try {
+      JsonElement el = jsonParser.parse(reader);
+      DagParams.setGlobalParams(el);
+    } catch (JsonIOException | JsonSyntaxException ex) {
+      logger.error(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), reader.toString()));
+    }
+  }
 }

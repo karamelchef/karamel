@@ -6,6 +6,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
@@ -88,7 +89,8 @@ public class RunRecipeTask extends Task {
               merge(jsonObj, paramObj);
             }
           }
-          json = new Gson().toJson(jsonObj);
+          Gson gson =  new GsonBuilder().setPrettyPrinting().create();
+          json = gson.toJson(jsonObj);
         } else {
           Logger.getLogger(RunRecipeTask.class.getName()).warning(
               String.format("Invalid json object for chef-solo: \n %s'", json));

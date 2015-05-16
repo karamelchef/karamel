@@ -24,7 +24,7 @@ angular.module('demoApp')
 //          }
             KaramelCoreRestServices.scaffoldCookbook($scope.cbName)
               .success(function(data) {
-//                scope.sshKeyPair.priKeyPath = data.privateKeyPath;
+//                scope.sshKeyPair.privKeyPath = data.privateKeyPath;
               })
               .error(function(data) {
                 $log.warn("Scaffolding a cookbook failed.");

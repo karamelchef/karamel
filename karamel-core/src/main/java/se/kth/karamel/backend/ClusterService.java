@@ -6,9 +6,9 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -70,6 +70,16 @@ public class ClusterService {
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {
+    
+    File pubKey = new File(sshKeyPair.getPublicKeyPath());
+    if (pubKey.exists() == false) {
+      throw new KaramelException("Could not find public key: " + sshKeyPair.getPublicKeyPath());
+    }
+    File privKey = new File(sshKeyPair.getPrivateKeyPath());
+    if (privKey.exists() == false) {
+      throw new KaramelException("Could not find private key: " + sshKeyPair.getPrivateKeyPath());
+    }
+    
     commonContext.setSshKeyPair(sshKeyPair);
   }
 
