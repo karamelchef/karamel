@@ -87,19 +87,19 @@ public class Nova extends Provider{
         Nova clone = cloneMe();
         //TODO add default settings for openstack
         if(clone.getUsername() == null){
-            clone.setUsername(NovaSetting.OPENSTACK_NOVA_DEFAULT_USERNAME.getParameter());
+            clone.setUsername(NovaSetting.NOVA_DEFAULT_USERNAME.getParameter());
         }
         if(clone.getImage() == null){
-            clone.setImage(NovaSetting.OPENSTACK_NOVA_DEFAULT_IMAGE.getParameter());
+            clone.setImage(NovaSetting.NOVA_DEFAULT_IMAGE.getParameter());
         }
         if(clone.getFlavor() == null){
-            clone.setFlavor(NovaSetting.OPENSTACK_NOVA_DEFAULT_FLAVOR.getParameter());
+            clone.setFlavor(NovaSetting.NOVA_DEFAULT_FLAVOR.getParameter());
         }
         if(clone.getRegion() == null){
-            clone.setImage(NovaSetting.OPENSTACK_NOVA_DEFAULT_REGION.getParameter());
+            clone.setImage(NovaSetting.NOVA_DEFAULT_REGION.getParameter());
         }
         if(clone.getEndpoint() == null){
-            clone.setImage(NovaSetting.OPENSTACK_NOVA_DEFAULT_ENDPOINT.getParameter());
+            clone.setImage(NovaSetting.NOVA_DEFAULT_ENDPOINT.getParameter());
         }
         return clone;
     }

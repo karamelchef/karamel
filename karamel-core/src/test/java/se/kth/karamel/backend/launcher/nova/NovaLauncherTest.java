@@ -10,9 +10,11 @@ import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
 import org.junit.Before;
 import org.junit.Test;
+import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
+import se.kth.karamel.common.settings.NovaSetting;
 
 import static org.mockito.Mockito.*;
 
@@ -77,7 +79,16 @@ public class NovaLauncherTest {
     public void validateNovaCredentialsTestException() throws InvalidNovaCredentialsException {
         when(securityGroupApi.list()).thenThrow(AuthorizationException.class);
         NovaContext context = NovaLauncher.validateCredentials(novaCredentials,builder);
+    }
 
+    @Test
+    public void readNovaCredentialsTest() {
+        Confs confs = mock(Confs.class);
+        when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter())).thenReturn(novaCredentials.getAccountName());
+        when(confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter())).thenReturn(novaCredentials.getAccountPass());
+        when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter())).thenReturn(novaCredentials.getEndpoint());
+        NovaCredentials credentials = NovaLauncher.readCredentials(confs);
+        assertNotNull(credentials);
     }
 
 }
