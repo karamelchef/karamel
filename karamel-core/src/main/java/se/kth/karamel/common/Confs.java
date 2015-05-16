@@ -105,13 +105,13 @@ public class Confs<K extends String, V extends String> extends Properties {
 
   public static Confs applyDefaults(Confs prop) {
     String pubKeyPath = prop.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
-    String priKeyPath = prop.getProperty(Settings.SSH_PRIKEY_PATH_KEY);
+    String priKeyPath = prop.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
     if ((pubKeyPath == null || priKeyPath == null)) {
       if (Settings.DEFAULT_PRIKEY_PATH != null) {
         pubKeyPath = Settings.DEFAULT_PUBKEY_PATH;
         priKeyPath = Settings.DEFAULT_PRIKEY_PATH;
         prop.put(Settings.SSH_PUBKEY_PATH_KEY, pubKeyPath);
-        prop.put(Settings.SSH_PRIKEY_PATH_KEY, priKeyPath);
+        prop.put(Settings.SSH_PRIVKEY_PATH_KEY, priKeyPath);
       }
     }
     return prop;

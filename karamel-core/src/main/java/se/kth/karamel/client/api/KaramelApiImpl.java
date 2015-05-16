@@ -96,17 +96,17 @@ public class KaramelApiImpl implements KaramelApi {
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
     Gson gson = new GsonBuilder().
-            registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
-            registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
-            registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
-            registerTypeAdapter(ShellCommand.class, new ShellCommandSerializer()).
-            registerTypeAdapter(RunRecipeTask.class, new DefaultTaskSerializer()).
-            registerTypeAdapter(MakeSoloRbTask.class, new DefaultTaskSerializer()).
-            registerTypeAdapter(VendorCookbookTask.class, new DefaultTaskSerializer()).
-            registerTypeAdapter(AptGetEssentialsTask.class, new DefaultTaskSerializer()).
-            registerTypeAdapter(InstallBerkshelfTask.class, new DefaultTaskSerializer()).
-            setPrettyPrinting().
-            create();
+        registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
+        registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
+        registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
+        registerTypeAdapter(ShellCommand.class, new ShellCommandSerializer()).
+        registerTypeAdapter(RunRecipeTask.class, new DefaultTaskSerializer()).
+        registerTypeAdapter(MakeSoloRbTask.class, new DefaultTaskSerializer()).
+        registerTypeAdapter(VendorCookbookTask.class, new DefaultTaskSerializer()).
+        registerTypeAdapter(AptGetEssentialsTask.class, new DefaultTaskSerializer()).
+        registerTypeAdapter(InstallBerkshelfTask.class, new DefaultTaskSerializer()).
+        setPrettyPrinting().
+        create();
     String json = gson.toJson(clusterManager);
     return json;
   }
@@ -154,7 +154,7 @@ public class KaramelApiImpl implements KaramelApi {
   public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException {
     SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys();
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
     confs.writeKaramelConfs();
     return sshkeys;
@@ -164,28 +164,41 @@ public class KaramelApiImpl implements KaramelApi {
   public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException {
     SshKeyPair sshkeys = SshKeyService.generateAndStoreSshKeys(clusterName);
     Confs confs = Confs.loadJustClusterConfs(clusterName);
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, sshkeys.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, sshkeys.getPublicKeyPath());
     confs.writeClusterConfs(clusterName);
     return sshkeys;
   }
 
   @Override
-  public void registerSshKeys(SshKeyPair keypair) throws KaramelException {
-    clusterService.registerSshKeyPair(keypair);
+  public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
-    confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
+    saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
+//    keypair = SshKeyService.loadSshKeys(confs);
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
+        , keypair.getPassphrase());
+    clusterService.registerSshKeyPair(keypair);
+    return keypair;
+  }
+  
+  private void saveSshConfs(SshKeyPair keypair, Confs confs) {
+    confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
+    confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
+    if (keypair.getPassphrase() != null && keypair.getPassphrase().isEmpty() == false) {
+      confs.put(Settings.SSH_PRIVKEY_PASSPHRASE, keypair.getPassphrase());
+    }    
   }
 
   @Override
-  public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException {
-    clusterService.registerSshKeyPair(clusterName, keypair);
+  public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException {
     Confs confs = Confs.loadJustClusterConfs(clusterName);
-    confs.put(Settings.SSH_PRIKEY_PATH_KEY, keypair.getPrivateKeyPath());
-    confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
+    saveSshConfs(keypair, confs);
     confs.writeClusterConfs(clusterName);
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
+        , keypair.getPassphrase());
+    clusterService.registerSshKeyPair(clusterName, keypair);
+    return keypair;
   }
 
 }

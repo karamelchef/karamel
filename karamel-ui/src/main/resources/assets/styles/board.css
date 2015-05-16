@@ -229,7 +229,7 @@ div.task h3 {
 .specializeProvider {
   float: right;
   padding-left: 7px;
-  padding-top: 3px ;
+  padding-top: 17px ;
   /*color:  black;*/
 }
 
@@ -276,7 +276,8 @@ div.task h3 {
   font-size: 16px;
   font-weight: normal;
   /*text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);*/
-  color: #ab9ba9;
+  /*color: #ab9ba9;*/
+  color: #ffffff;
   /*padding-right: 40px !important;*/
   border-radius: 5px;
   border-bottom: 2px solid #eeeeee;
@@ -371,4 +372,10 @@ textarea[name="pubkey"]{
 
 .commandControllerForm{
   padding: 5px;
+}
+
+#keyPassphrase {
+  vertical-align: bottom;
+  margin-bottom: -4px;
+  height: 10px;
 }

@@ -186,16 +186,13 @@ KaramelCoreRestServices, KaramelSyncService, AlertService) {
               closeOnCancel: false},
             function(isConfirm) {
               if (isConfirm) {
-                SweetAlert.swal("Exiting!", "Karamel is exiting.", "success");
-                
-            KaramelCoreRestServices.exitKaramel()
+                   KaramelCoreRestServices.exitKaramel()
                 .success(function(data, status, headers, config) {
-                    $window.close()
+                    $window.close();
                  })
                 .error(function(data, status, headers, config) {
                   $log.info("Error Received.");
-                });                
-     
+                });                     
                 
               } else {
                 SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
@@ -441,23 +438,6 @@ KaramelCoreRestServices, KaramelSyncService, AlertService) {
                   AlertService.addAlert({type: 'danger', msg: 'Provider details not set.'});
                 }
               }
-            });
-
-          },
-          editSshKeys: function() {
-
-            $log.info("Edit SSH Keys.");
-
-            var modalInstance = $modal.open({
-              templateUrl: "partials/sshKeys.html",
-              controller: "SshKeysController",
-              backdrop: "static",
-              resolve: {
-              }
-            });
-
-            modalInstance.result.then(function() {
-
             });
 
           },
