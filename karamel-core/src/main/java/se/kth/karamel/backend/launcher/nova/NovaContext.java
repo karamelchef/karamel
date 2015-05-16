@@ -29,8 +29,36 @@ public class NovaContext {
     private final SecurityGroupApi securityGroupApi;
     private final KeyPairApi keyPairApi;
 
-    public NovaContext(NovaCredentials credentials){
+    public NovaContext(NovaCredentials credentials,ContextBuilder builder){
         this.novaCredentials = credentials;
+        ComputeServiceContext context = builder.buildView(ComputeServiceContext.class);
+        this.computeService = (NovaComputeService) context.getComputeService();
+        this.novaApi = computeService.getContext().unwrapApi(NovaApi.class);
+        this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getEndpoint()).get();
+        this.keyPairApi = novaApi.getKeyPairApi(credentials.getEndpoint()).get();
+    }
+
+    public NovaCredentials getNovaCredentials() {
+        return novaCredentials;
+    }
+
+    public NovaComputeService getComputeService() {
+        return computeService;
+    }
+
+    public NovaApi getNovaApi() {
+        return novaApi;
+    }
+
+    public SecurityGroupApi getSecurityGroupApi() {
+        return securityGroupApi;
+    }
+
+    public KeyPairApi getKeyPairApi() {
+        return keyPairApi;
+    }
+
+    public static ContextBuilder buildContext(NovaCredentials credentials){
         Properties properties = new Properties();
         Iterable<Module> modules = ImmutableSet.<Module>of(
                 new SshjSshClientModule(),
@@ -43,11 +71,7 @@ public class NovaContext {
                 .modules(modules)
                 .overrides(properties);
 
-        ComputeServiceContext context = build.buildView(ComputeServiceContext.class);
-        this.computeService = (NovaComputeService) context.getComputeService();
-        this.novaApi = computeService.getContext().unwrapApi(NovaApi.class);
-        this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getEndpoint()).get();
-        this.keyPairApi = (KeyPairApi) novaApi.getKeyPairApi(credentials.getEndpoint()).get();
+        return build;
     }
 
 }
