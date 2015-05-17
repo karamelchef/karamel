@@ -118,7 +118,7 @@ public class SshMachine implements Runnable {
               && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
             try {
               logger.debug("Taking a new task from the queue.");
-              if (this.activeTask != null) {
+              if (this.activeTask == null) {
                 this.activeTask = taskQueue.take();
               } else {
                 logger.debug("Retrying a task that didn't complete on last execution attempt.");
@@ -191,10 +191,10 @@ public class SshMachine implements Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task) {
+  private void runSshCmd(ShellCommand shellCommand, Task task) throws InterruptedException {
 
-    int numRetries = 4;
-    int timeBetweenRetries = 1000;
+    int numRetries = 2;
+    int timeBetweenRetries = 3000;
     float scaleRetryTimeout = 1.5f;
     boolean finished = false;
     Session session = null;
@@ -222,7 +222,7 @@ public class SshMachine implements Runnable {
               logger.error("Bug in Chef Cookbook - Return JSON was not a valid json document from: "
                   + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
             } catch (IOException e) {
-              logger.error("No return values for: "
+              logger.info("No return values for: "
                   + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
             }
           }
@@ -240,7 +240,10 @@ public class SshMachine implements Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            java.util.logging.Logger.getLogger(SshMachine.class.getName()).log(Level.SEVERE, null, ex);
+            if (this.stopping == true) {
+              throw ex;
+            }
+            logger.warn("Interrupted waiting to retry a task. Continuing... " + ex.getMessage());
           }
           timeBetweenRetries *= scaleRetryTimeout;
         }
@@ -295,8 +298,13 @@ public class SshMachine implements Runnable {
           client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
         } catch (IOException ex) {
           logger.warn(String.format("Opps!! coudln' t connect to '%s' :@", machineEntity.getId()));
-          if (passphrase != null) {
-            logger.warn(String.format("Is the passphrase for your private key correct?"));
+          if (passphrase != null && passphrase.isEmpty() == false) {
+            if (numRetries > 1) {
+              logger.warn(String.format("Could be a slow network, will retry. "));
+            } else {
+              logger.warn(String.format("Could be a network problem. But if your network is fine,"
+                + "then you have probably entered an incorrect the passphrase for your private key."));
+            }
           }
           logger.debug(ex);
         }
