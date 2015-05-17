@@ -42,4 +42,8 @@ public enum GitHubSetting {
     public String getParameter() {
         return parameter;
     }
+
+    public static GitHubSetting get(String parameter) {
+        return lookup.get(parameter);
+    }
 }

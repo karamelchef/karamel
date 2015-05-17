@@ -34,7 +34,7 @@ public class NovaContext {
         ComputeServiceContext context = builder.buildView(ComputeServiceContext.class);
         this.computeService = (NovaComputeService) context.getComputeService();
         this.novaApi = computeService.getContext().unwrapApi(NovaApi.class);
-        this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getEndpoint()).get();
+        this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getRegion()).get();
         this.keyPairApi = novaApi.getKeyPairApi(credentials.getEndpoint()).get();
     }
 

@@ -36,4 +36,8 @@ public enum KaramelSetting {
     public String getParameter(){
         return parameter;
     }
+
+    public static KaramelSetting get(String parameter) {
+        return lookup.get(parameter);
+    }
 }

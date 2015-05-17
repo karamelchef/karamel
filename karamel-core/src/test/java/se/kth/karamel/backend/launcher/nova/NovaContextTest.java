@@ -42,6 +42,7 @@ public class NovaContextTest {
         when(credentials.getAccountName()).thenReturn("pepe");
         when(credentials.getAccountPass()).thenReturn("1234");
         when(credentials.getEndpoint()).thenReturn("nova endpoint");
+        when(credentials.getRegion()).thenReturn("region");
 
         when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
         when(serviceContext.getComputeService()).thenReturn(novaComputeService);
@@ -49,7 +50,7 @@ public class NovaContextTest {
         when(novaComputeService.getContext()).thenReturn(context);
         when(context.unwrapApi(NovaApi.class)).thenReturn(novaApi);
 
-        when(novaApi.getSecurityGroupApi(credentials.getEndpoint())).thenReturn(securityGroupApiOptional);
+        when(novaApi.getSecurityGroupApi(credentials.getRegion())).thenReturn(securityGroupApiOptional);
         when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
 
         when(novaApi.getKeyPairApi(credentials.getEndpoint())).thenReturn(keyPairApiOptional);

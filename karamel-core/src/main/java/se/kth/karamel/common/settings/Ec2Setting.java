@@ -37,4 +37,8 @@ public enum Ec2Setting {
     public String getParameter() {
         return parameter;
     }
+
+    public static Ec2Setting get(String parameter) {
+        return lookup.get(parameter);
+    }
 }

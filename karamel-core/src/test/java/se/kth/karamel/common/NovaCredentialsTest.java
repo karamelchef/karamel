@@ -12,8 +12,10 @@ public class NovaCredentialsTest {
         nova.setAccountName("pepe");
         nova.setAccountPass("12345");
         nova.setEndpoint("endpoint");
+        nova.setRegion("region");
         assertEquals("pepe", nova.getAccountName());
         assertEquals("12345", nova.getAccountPass());
         assertEquals("endpoint",nova.getEndpoint());
+        assertEquals("region",nova.getRegion());
     }
 }

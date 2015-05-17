@@ -35,4 +35,8 @@ public enum KaramelTimeSetting {
     public int getTimeConstrain(){
         return timeConstrain;
     }
+
+    public static KaramelTimeSetting get(int code) {
+        return lookup.get(code);
+    }
 }
