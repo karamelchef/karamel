@@ -27,6 +27,7 @@ public class Settings {
   //read
   public static final String ATTR_DELIMITER = "/";
   public static final String COOOKBOOK_DELIMITER = "::";
+  public static final String COOOKBOOK_FS_PATH_DELIMITER = "__";
   public static final String INSTALL_RECIPE = "install";
   public final static String CHEF_PRIVATE_IPS = "private_ips";
   public final static String CHEF_PUBLIC_IPS = "public_ips";
@@ -116,11 +117,12 @@ public class Settings {
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
   public static final String TMP_FOLDER_NAME = "tmp";
-  public static final String SYSTEM_TMP_FOLDER_NAME = "/tmp";
+  public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
-  public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;    
+  public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
   public static final String SSH_PRIVKEY_FILENAME = "ida_rsa";
+  public static final String RECIPE_RESULT_POSFIX = "__out.json";
 
   public static String CLUSTER_LOG_FOLDER(String clusterName) {
     return CLUSTER_ROOT_PATH(clusterName) + File.separator + "logs";
@@ -154,6 +156,36 @@ public class Settings {
     }
   }
 
+  public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
+      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+  }
+
+  public static String CLUSTER_TEMP_FOLDER(String clusterName) {
+    return CLUSTER_ROOT_PATH(clusterName) + File.separator + "tmp";
+  }
+
+  public static String MACHINE_TEMP_FOLDER(String clusterName, String machineIp) {
+    return CLUSTER_TEMP_FOLDER(clusterName) + File.separator + machineIp;
+  }
+
+  public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
+    String recName;
+    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
+      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+    return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator
+        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+  }
+
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
@@ -161,6 +193,11 @@ public class Settings {
 
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
+  public static final int SSH_CMD_RETRY_NUM = 2;
+  public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
+  public static final float SSH_CMD_RETRY_SCALE = 1.5f;
+  public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
+  
   //Git cookbook metadata 
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";

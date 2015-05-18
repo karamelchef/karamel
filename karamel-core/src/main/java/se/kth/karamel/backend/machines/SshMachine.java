@@ -5,14 +5,7 @@
  */
 package se.kth.karamel.backend.machines;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.stream.JsonReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.List;
@@ -40,16 +33,14 @@ import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
-import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
-import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 
 /**
  *
  * @author kamal
  */
-public class SshMachine implements Runnable {
+public class SshMachine implements MachineInterface, Runnable {
 
   static {
     Security.addProvider(new BouncyCastleProvider());
@@ -112,7 +103,7 @@ public class SshMachine implements Runnable {
   public void run() {
     logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
     try {
-      while (true && !stopping) {
+      while (!stopping) {
         try {
           if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
               && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
@@ -180,6 +171,13 @@ public class SshMachine implements Runnable {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
             task.failed(String.format("Incompleted command '%s", cmd.getCmdStr()));
             break;
+          } else {
+            try {
+              task.collectResults(this);
+            } catch (KaramelException ex) {
+              logger.error("Error in the resutls", ex);
+              task.failed(ex.getMessage());
+            }
           }
         }
       }
@@ -191,22 +189,20 @@ public class SshMachine implements Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task) throws InterruptedException {
-
-    int numRetries = 2;
-    int timeBetweenRetries = 3000;
-    float scaleRetryTimeout = 1.5f;
+  private void runSshCmd(ShellCommand shellCommand, Task task) {
+    int numRetries = Settings.SSH_CMD_RETRY_NUM;
+    int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
     Session session = null;
 
-    while (!finished && numRetries > 0) {
+    while (!stopping && !finished && numRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
         logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
         session = client.startSession();
         Session.Command cmd = session.exec(shellCommand.getCmdStr());
-        cmd.join(60 * 24, TimeUnit.MINUTES);
+        cmd.join(Settings.SSH_CMD_LONGEST, TimeUnit.MINUTES);
         updateHeartbeat();
         if (cmd.getExitStatus() != 0) {
           shellCommand.setStatus(ShellCommand.Status.FAILED);
@@ -214,18 +210,6 @@ public class SshMachine implements Runnable {
         } else {
           shellCommand.setStatus(ShellCommand.Status.DONE);
           finished = true;
-          if (task instanceof RunRecipeTask) {
-            RunRecipeTask rrt = (RunRecipeTask) task;
-            try {
-              processReturnValues(rrt.getCookbookName(), rrt.getRecipeName());
-            } catch (JsonParseException p) {
-              logger.error("Bug in Chef Cookbook - Return JSON was not a valid json document from: "
-                  + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
-            } catch (IOException e) {
-              logger.info("No return values for: "
-                  + rrt.getCookbookName() + "::" + rrt.getRecipeCanonicalName());
-            }
-          }
         }
         SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
         LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
@@ -240,12 +224,11 @@ public class SshMachine implements Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            if (this.stopping == true) {
-              throw ex;
+            if (!stopping) {
+              logger.warn("Interrupted waiting to retry a task. Continuing...");
             }
-            logger.warn("Interrupted waiting to retry a task. Continuing... " + ex.getMessage());
           }
-          timeBetweenRetries *= scaleRetryTimeout;
+          timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
         }
       }
     }
@@ -303,7 +286,7 @@ public class SshMachine implements Runnable {
               logger.warn(String.format("Could be a slow network, will retry. "));
             } else {
               logger.warn(String.format("Could be a network problem. But if your network is fine,"
-                + "then you have probably entered an incorrect the passphrase for your private key."));
+                  + "then you have probably entered an incorrect the passphrase for your private key."));
             }
           }
           logger.debug(ex);
@@ -376,37 +359,20 @@ public class SshMachine implements Runnable {
     lastHeartbeat = System.currentTimeMillis();
   }
 
-  /**
-   * http://unix.stackexchange.com/questions/136165/java-code-to-copy-files-from-one-linux-machine-to-another-linux-machine
-   *
-   * This method downloads the return values from a chef recipe as a JSON
-   * object. It then parses the JSON object and updates a central location for
-   * Chef Attributes.
-   *
-   * @param cookbook Chef solo cookbook name
-   * @param recipe Chef solo recipe name
-   */
-  private synchronized void processReturnValues(String cookbook, String recipe) throws IOException {
-    String postfix = "__out.json";
-    String recipeSeparator = "__";
-    String remoteFile = Settings.SYSTEM_TMP_FOLDER_NAME + File.separator + cookbook + recipeSeparator + recipe + postfix;
+  @Override
+  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) throws KaramelException, IOException {
     SCPFileTransfer scp = client.newSCPFileTransfer();
-    String localResultsFile = Settings.KARAMEL_TMP_PATH + File.separator + cookbook + recipeSeparator + recipe + postfix;
-    File f = new File(localResultsFile);
+    File f = new File(localFilePath);
     f.mkdirs();
     // Don't collect logs of values, just overwrite
     if (f.exists()) {
-      f.delete();
+      if (overwrite) {
+        f.delete();
+      } else {
+        throw new KaramelException(String.format("Local file already exist %s", localFilePath));
+      }
     }
     // If the file doesn't exist, it should quickly throw an IOException
-    scp.download(remoteFile, localResultsFile);
-    JsonReader reader = new JsonReader(new FileReader(localResultsFile));
-    JsonParser jsonParser = new JsonParser();
-    try {
-      JsonElement el = jsonParser.parse(reader);
-      DagParams.setGlobalParams(el);
-    } catch (JsonIOException | JsonSyntaxException ex) {
-      logger.error(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), reader.toString()));
-    }
+    scp.download(remoteFilePath, localFilePath);
   }
 }
