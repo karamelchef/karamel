@@ -6,7 +6,6 @@
 package se.kth.karamel.common;
 
 import org.junit.Ignore;
-import org.junit.Test;
 
 /**
  *

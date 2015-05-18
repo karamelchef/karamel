@@ -12,17 +12,22 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.stream.JsonReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.dag.DagParams;
+import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -30,6 +35,7 @@ import se.kth.karamel.common.Settings;
  */
 public class RunRecipeTask extends Task {
 
+  private static final Logger logger = Logger.getLogger(RunRecipeTask.class);
   private final String recipeCanonicalName;
   private String json;
   private final String cookbookId;
@@ -44,8 +50,7 @@ public class RunRecipeTask extends Task {
   }
 
   /**
-   * Recursive method to merge two json objects. Scales O(N^2) - only viable for
-   * small json objects.
+   * Recursive method to merge two json objects. Scales O(N^2) - only viable for small json objects.
    *
    * @param origObj
    * @param paramObj
@@ -89,15 +94,13 @@ public class RunRecipeTask extends Task {
               merge(jsonObj, paramObj);
             }
           }
-          Gson gson =  new GsonBuilder().setPrettyPrinting().create();
+          Gson gson = new GsonBuilder().setPrettyPrinting().create();
           json = gson.toJson(jsonObj);
         } else {
-          Logger.getLogger(RunRecipeTask.class.getName()).warning(
-              String.format("Invalid json object for chef-solo: \n %s'", json));
+          logger.warn(String.format("Invalid json object for chef-solo: \n %s'", json));
         }
       } catch (JsonIOException | JsonSyntaxException ex) {
-        Logger.getLogger(RunRecipeTask.class.getName()).warning(
-            String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), json));
+        logger.warn(String.format("Invalid return value as Json object: %s \n %s'", ex.toString(), json));
       }
     }
 
@@ -159,4 +162,39 @@ public class RunRecipeTask extends Task {
     }
     return deps;
   }
+
+  /**
+   * It then parses the JSON object and updates a central location for Chef Attributes.
+   *
+   * @param sshMachine
+   * @throws se.kth.karamel.common.exception.KaramelException
+   */
+  @Override
+  public void collectResults(MachineInterface sshMachine) throws KaramelException {
+    String remoteFile = Settings.RECIPE_RESULT_REMOTE_PATH(getRecipeCanonicalName());
+    String localResultsFile = Settings.RECIPE_RESULT_LOCAL_PATH(getRecipeCanonicalName(),
+        getMachine().getGroup().getCluster().getName(), getMachine().getPublicIp());
+    try {
+      sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
+    } catch (IOException ex) {
+      logger.debug(String.format("No return values for %s on %s", getRecipeCanonicalName(), getMachine().getPublicIp()));
+      return;
+    }
+    JsonReader reader;
+    try {
+      reader = new JsonReader(new FileReader(localResultsFile));
+    } catch (FileNotFoundException ex) {
+      String msg = String.format("Cannot find the results file for %s on %s", getRecipeCanonicalName(), getMachine().getPublicIp());
+      throw new KaramelException(msg, ex);
+    }
+    JsonParser jsonParser = new JsonParser();
+    try {
+      JsonElement el = jsonParser.parse(reader);
+      DagParams.setGlobalParams(el);
+    } catch (JsonIOException | JsonSyntaxException ex) {
+      throw new KaramelException(String.format("Invalid return value as Json object for %s on %s",
+          getRecipeCanonicalName(), getMachine().getPublicIp()), ex);
+    }
+  }
+
 }

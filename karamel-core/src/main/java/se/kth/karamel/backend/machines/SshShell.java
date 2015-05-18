@@ -44,7 +44,11 @@ public class SshShell {
   private StringBuilder builder = new StringBuilder();
   private Thread streamReader;
 
-  public SshShell(String privateKey, String publicKey, String ipAddress, String sshUser, 
+  public SshShell(String privateKey, String publicKey, String ipAddress, String sshUser, int sshPort) {
+    this(privateKey, publicKey, ipAddress, sshUser, null, sshPort);
+  }
+
+  public SshShell(String privateKey, String publicKey, String ipAddress, String sshUser,
       String passphrase, int sshPort) {
     this.privateKey = privateKey;
     this.publicKey = publicKey;
@@ -54,7 +58,6 @@ public class SshShell {
     this.sshPort = sshPort;
   }
 
-  
   private PasswordFinder getPasswordFinder() {
     return new PasswordFinder() {
 
@@ -68,7 +71,8 @@ public class SshShell {
         return false;
       }
     };
-  }  
+  }
+
   public void connect() throws KaramelException {
     try {
       if (isConnected()) {
