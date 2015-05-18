@@ -21,6 +21,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.scanner.ScannerException;
+import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.json.JsonCluster;
@@ -50,6 +51,7 @@ public class ClusterDefinitionService {
     YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
     yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);

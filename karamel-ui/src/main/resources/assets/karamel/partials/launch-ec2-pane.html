@@ -1,0 +1,32 @@
+<div class="tab-pane" ng-show="selected">
+
+  <div class="form-group">
+    <label for="accountId" class="control-label col-xs-3" style="text-align: left">Account-ID</label>
+    <div class="col-xs-9">
+      <input type="text" class="form-control" name="accountId" id="accountId" required ng-model="account.accountId" placeholder="Account ID" tabindex="1" ng-change="warnUser()">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="accountKey" class="control-label col-xs-3" style="text-align: left">Account-Key</label>
+    <div class="col-xs-9">
+      <input type="password" class="form-control" name="accountKey" id="accountKey" required ng-model="account.accountKey" placeholder="Account Key" tabindex="2" ng-change="warnUser()">
+    </div>
+  </div>
+
+  <div class="form-group">
+
+    <div class="col-xs-3">
+      <button type="button" class="btn btn-default" ng-click="validateCredentials()" tabindex="3">Validate</button>
+    </div>
+    <div class="col-xs-9">
+      <span ng-show="currentState == availableStates.success"><span class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>{{stateMessage.success}}</span>
+      <span ng-show="currentState == availableStates.failure"><span class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>{{stateMessage.failure}}</span>
+      <span ng-show="currentState == availableStates.initialWarn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>{{stateMessage.initialWarn}}</span>
+      <span ng-show="currentState == availableStates.userWarn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>{{stateMessage.userWarn}}</span>
+      <span ng-show="currentState == availableStates.specialWarn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>{{stateMessage.specialWarn}}</span>
+    </div>
+
+  </div>
+
+</div>

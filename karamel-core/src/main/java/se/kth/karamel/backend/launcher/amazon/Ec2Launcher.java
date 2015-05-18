@@ -10,7 +10,7 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +29,17 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.launcher.Launcher;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.Provider;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -42,7 +48,7 @@ import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 /**
  * @author kamal
  */
-public final class Ec2Launcher {
+public final class Ec2Launcher extends Launcher {
 
   private static final Logger logger = Logger.getLogger(Ec2Launcher.class);
   public static boolean TESTING = true;
@@ -81,6 +87,17 @@ public final class Ec2Launcher {
     return credentials;
   }
 
+  @Override
+  public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
+    JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
+    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    Ec2 ec2 = (Ec2) provider;
+    Set<String> ports = new HashSet<>();
+    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    String groupId = createSecurityGroup(definition.getName(), jg.getName(), ec2, ports);
+    return groupId;
+  }
+
   public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
@@ -93,7 +110,7 @@ public final class Ec2Launcher {
     }
 
     Optional<? extends org.jclouds.ec2.features.SecurityGroupApi> securityGroupExt
-            = context.getEc2api().getSecurityGroupApiForRegion(ec2.getRegion());
+        = context.getEc2api().getSecurityGroupApiForRegion(ec2.getRegion());
     if (securityGroupExt.isPresent()) {
       AWSSecurityGroupApi client = (AWSSecurityGroupApi) securityGroupExt.get();
       String groupId = null;
@@ -117,7 +134,7 @@ public final class Ec2Launcher {
             pr = IpProtocol.TCP;
           }
           client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(),
-                  uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
+              uniqeGroupName, pr, p, Integer.valueOf(port), "0.0.0.0/0");
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
@@ -157,8 +174,26 @@ public final class Ec2Launcher {
     }
   }
 
+  Set<String> keys = new HashSet<>();
+
+  @Override
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
+    Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
+    GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
+    HashSet<String> gids = new HashSet<>();
+    gids.add(group.getId());
+
+    String keypairname = Settings.EC2_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+    if (!keys.contains(keypairname)) {
+      uploadSshPublicKey(keypairname, ec2, true);
+      keys.add(keypairname);
+    }
+    return forkMachines(keypairname, group, gids, Integer.valueOf(definedGroup.getSize()), ec2);
+  }
+
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
-          Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
+      Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
     List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), totalSize);
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
@@ -207,23 +242,23 @@ public final class Ec2Launcher {
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
         succ.addAll(context.getComputeService().createNodesInGroup(
-                uniqeGroupName, requestSize, template.build()));
+            uniqeGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (AWSResponseException e) {
         if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
           throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
-                  + "size of your cluster or increase the limitation of your account.", e);
+              + "size of your cluster or increase the limitation of your account.", e);
         } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
           throw new KaramelException(String.format("It seems your ec2 account doesn't have sufficent capacity for %s "
-                  + "instances", ec2.getType()), e);
+              + "instances", ec2.getType()), e);
         } else {
           logger.error("", e);
         }
       } catch (IllegalStateException ex) {
         logger.error("", ex);
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-                uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+            uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
@@ -232,8 +267,8 @@ public final class Ec2Launcher {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-                  + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
-                  totalSize, uniqeGroupName));
+              + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
+              totalSize, uniqeGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
@@ -275,7 +310,7 @@ public final class Ec2Launcher {
       }
       logger.info(String.format("Destroying failed nodes with ids: %s", lostIds.toString()));
       Set<? extends NodeMetadata> destroyedNodes = context.getComputeService().destroyNodesMatching(
-              Predicates.in(failedNodes.keySet()));
+          Predicates.in(failedNodes.keySet()));
       lostIds.clear();
       for (NodeMetadata destroyed : destroyedNodes) {
         lostIds.add(destroyed.getId());
@@ -317,6 +352,31 @@ public final class Ec2Launcher {
       }
     }
     return leftVmNames;
+  }
+
+  @Override
+  public void cleanup(JsonCluster definition, ClusterRuntime runtime) throws KaramelException {
+    runtime.resolveFailures();
+    List<GroupRuntime> groups = runtime.getGroups();
+    Set<String> allEc2Vms = new HashSet<>();
+    Set<String> allEc2VmsIds = new HashSet<>();
+    Map<String, String> groupRegion = new HashMap<>();
+    for (GroupRuntime group : groups) {
+      group.getCluster().resolveFailures();
+      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      if (provider instanceof Ec2) {
+        for (MachineRuntime machine : group.getMachines()) {
+          if (machine.getEc2Id() != null) {
+            allEc2VmsIds.add(machine.getEc2Id());
+          }
+        }
+        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
+        List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(), jg.getSize());
+        allEc2Vms.addAll(vmNames);
+        groupRegion.put(group.getName(), ((Ec2) provider).getRegion());
+      }
+    }
+    cleanup(definition.getName(), allEc2VmsIds, allEc2Vms, groupRegion);
   }
 
   public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion) throws KaramelException {
