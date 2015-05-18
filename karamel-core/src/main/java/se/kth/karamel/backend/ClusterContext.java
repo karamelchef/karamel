@@ -43,7 +43,8 @@ public class ClusterContext {
     }
   }
 
-  public static ClusterContext validateContext(ClusterContext context, ClusterContext commonContext) throws KaramelException {
+  public static ClusterContext validateContext(ClusterContext context, ClusterContext commonContext) 
+      throws KaramelException {
     if (context == null) {
       context = new ClusterContext();
     }

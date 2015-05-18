@@ -294,12 +294,14 @@ public class SshMachine implements MachineInterface, Runnable {
         if (client.isConnected()) {
           succeeded = true;
           logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
-          machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp()));
+          machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, 
+              machineEntity.getPublicIp()));
           client.authPublickey(machineEntity.getSshUser(), keys);
           machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
           return true;
         } else {
-          logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
+          logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), 
+              machineEntity.getSshPort()));
           if (passphrase != null) {
             logger.warn(String.format("Is the passphrase for your private key correct?"));
           }
@@ -324,7 +326,8 @@ public class SshMachine implements MachineInterface, Runnable {
         message = message + " Is the passphrase for your private key correct?";
       }
       KaramelException exp = new KaramelException(message, ex);
-      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
+      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, 
+          machineEntity.getPublicIp(), message));
       throw exp;
     } catch (IOException e) {
       throw new KaramelException(e);
@@ -360,7 +363,8 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   @Override
-  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) throws KaramelException, IOException {
+  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) 
+      throws KaramelException, IOException {
     SCPFileTransfer scp = client.newSCPFileTransfer();
     File f = new File(localFilePath);
     f.mkdirs();

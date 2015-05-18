@@ -41,7 +41,8 @@ public class RunRecipeTask extends Task {
   private final String cookbookId;
   private final String cookbookName;
 
-  public RunRecipeTask(MachineRuntime machine, String recipe, String json, TaskSubmitter submitter, String cookbookId, String cookbookName) {
+  public RunRecipeTask(MachineRuntime machine, String recipe, String json, TaskSubmitter submitter, String cookbookId, 
+      String cookbookName) {
     super("recipe " + recipe, machine, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
@@ -177,14 +178,16 @@ public class RunRecipeTask extends Task {
     try {
       sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
     } catch (IOException ex) {
-      logger.debug(String.format("No return values for %s on %s", getRecipeCanonicalName(), getMachine().getPublicIp()));
+      logger.debug(String.format("No return values for %s on %s", getRecipeCanonicalName(), 
+          getMachine().getPublicIp()));
       return;
     }
     JsonReader reader;
     try {
       reader = new JsonReader(new FileReader(localResultsFile));
     } catch (FileNotFoundException ex) {
-      String msg = String.format("Cannot find the results file for %s on %s", getRecipeCanonicalName(), getMachine().getPublicIp());
+      String msg = String.format("Cannot find the results file for %s on %s", getRecipeCanonicalName(), 
+          getMachine().getPublicIp());
       throw new KaramelException(msg, ex);
     }
     JsonParser jsonParser = new JsonParser();

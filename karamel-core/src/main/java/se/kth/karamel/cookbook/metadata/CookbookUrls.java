@@ -81,7 +81,9 @@ public class CookbookUrls {
           branch = GITHUB_DEFAULT_BRANCH;
         }
       } else {
-        throw new CookbookUrlException(String.format("'%s' is not a valid Github url, it must be one the following formats: \n'http(s)://github.com/<user_name>/<repo>', \n'http(s)://github.com/<user_name>/<repo>/tree/<branch>', \n'<user_name>/<repo>', or \n'<user_name>/<repo>/tree/<branch>'", url));
+        throw new CookbookUrlException(String.format("'%s' is not a valid Github url, it must be one the following "
+            + "formats: \n'http(s)://github.com/<user_name>/<repo>', \n'http(s)://github.com/<user_name>/<repo>/tree/"
+            + "<branch>', \n'<user_name>/<repo>', or \n'<user_name>/<repo>/tree/<branch>'", url));
       }
 
       String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL; 
@@ -95,7 +97,8 @@ public class CookbookUrls {
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
-      CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, berksFile);
+      CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
+          berksFile);
       return urls;
     }
 

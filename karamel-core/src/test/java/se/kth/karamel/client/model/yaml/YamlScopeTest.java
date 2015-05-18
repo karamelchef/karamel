@@ -24,7 +24,7 @@ public class YamlScopeTest {
 
       @Override
       public void validate() throws ValidationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported yet."); 
       }
     };
     Map<String, Object> attrs = new HashMap<>();

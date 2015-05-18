@@ -81,7 +81,8 @@ public final class Ec2Launcher {
     return credentials;
   }
 
-  public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports) throws KaramelException {
+  public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports) 
+      throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
     if (context == null) {
@@ -121,7 +122,8 @@ public final class Ec2Launcher {
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
-        IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).
+            cidrBlock("0.0.0.0/0").build();
         client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, ippermission);
         logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
       }
@@ -142,7 +144,8 @@ public final class Ec2Launcher {
 
     HashSet<String> regions = new HashSet();
     if (!regions.contains(ec2.getRegion())) {
-      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), new String[]{keyPairName});
+      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), 
+          new String[]{keyPairName});
       if (keypairs.isEmpty()) {
         logger.info(String.format("New keypair '%s' is being uploaded to EC2", keyPairName));
         context.getKeypairApi().importKeyPairInRegion(ec2.getRegion(), keyPairName, sshKeyPair.getPublicKey());
@@ -160,7 +163,8 @@ public final class Ec2Launcher {
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
           Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
-    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), totalSize);
+    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), 
+        totalSize);
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
 
     if (context == null) {
@@ -205,7 +209,8 @@ public final class Ec2Launcher {
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();
       try {
-        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
+        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", 
+            requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
         succ.addAll(context.getComputeService().createNodesInGroup(
                 uniqeGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
@@ -232,7 +237,8 @@ public final class Ec2Launcher {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-                  + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), failedNodes.size(),
+                  + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), 
+                  failedNodes.size(),
                   totalSize, uniqeGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
@@ -240,7 +246,8 @@ public final class Ec2Launcher {
         }
       } else {
         succeed = true;
-        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill before we go on..", totalSize, uniqeGroupName, failedNodes.size()));
+        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
+            + "before we go on..", totalSize, uniqeGroupName, failedNodes.size()));
         if (failedNodes.size() > 0) {
           cleanupFailedNodes(failedNodes);
         }
@@ -284,7 +291,8 @@ public final class Ec2Launcher {
     }
   }
 
-  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata, Throwable> lostNodes) {
+  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata, 
+      Throwable> lostNodes) {
     // workaround https://code.google.com/p/jclouds/issues/detail?id=923 
     // by ensuring that any nodes in the "NodeErrors" do not get considered 
     // successful 
@@ -319,7 +327,8 @@ public final class Ec2Launcher {
     return leftVmNames;
   }
 
-  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion) throws KaramelException {
+  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion) 
+      throws KaramelException {
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -331,7 +340,8 @@ public final class Ec2Launcher {
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
       groupNames.add(Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
     }
-    logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: %s", vmNames.toString(), groupNames, vmIds));
+    logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: "
+        + "%s", vmNames.toString(), groupNames, vmIds));
     logger.info(String.format("Killing all machines in groups: %s", groupNames.toString()));
     context.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
     logger.info(String.format("All machines destroyed in all the security groups. :) "));
@@ -346,13 +356,16 @@ public final class Ec2Launcher {
             count++;
             try {
               logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
-              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(gp.getValue(), secgroup.getId());
+              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(gp.getValue(), 
+                  secgroup.getId());
             } catch (IllegalStateException ex) {
               Throwable cause = ex.getCause();
               if (cause instanceof AWSResponseException) {
                 AWSResponseException e = (AWSResponseException) cause;
-                if (e.getError().getCode().equals("InvalidGroup.InUse") || e.getError().getCode().equals("DependencyViolation")) {
-                  logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@", uniqueGroupName, Settings.EC2_RETRY_INTERVAL));
+                if (e.getError().getCode().equals("InvalidGroup.InUse") || e.getError().getCode().
+                    equals("DependencyViolation")) {
+                  logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@", 
+                      uniqueGroupName, Settings.EC2_RETRY_INTERVAL));
                   retry = true;
                   try {
                     Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
@@ -371,14 +384,16 @@ public final class Ec2Launcher {
     }
   }
 
-  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names, final Set<String> groupNames) {
+  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names, 
+      final Set<String> groupNames) {
     return new Predicate<NodeMetadata>() {
       @Override
       public boolean apply(NodeMetadata nodeMetadata) {
         String id = nodeMetadata.getId();
         String name = nodeMetadata.getName();
         String group = nodeMetadata.getGroup();
-        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) || (group != null && groupNames.contains(group))));
+        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) || 
+            (group != null && groupNames.contains(group))));
       }
 
       @Override

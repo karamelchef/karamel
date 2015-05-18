@@ -91,7 +91,8 @@ public class JsonGroup extends JsonScope {
 
   public final void setName(String name) throws ValidationException {
     if (!name.matches(Settings.EC2_GEOUPNAME_PATTERN))
-      throw new ValidationException("Group name '%s' must start with letter/number and just lowercase ASCII letters, numbers and dashes are accepted in the name.");
+      throw new ValidationException("Group name '%s' must start with letter/number and just lowercase ASCII letters, "
+          + "numbers and dashes are accepted in the name.");
     this.name = name;
   }
 

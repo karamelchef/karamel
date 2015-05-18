@@ -29,10 +29,14 @@ public class Berksfile {
   private final List<String> fileLines;
   protected final Map<String, String> deps = new HashMap<>();
   protected final Map<String, String> branches = new HashMap<>();
-  public static Pattern LINE_PATTERN_WITH_TAG = Pattern.compile("cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*tag\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_WITH_VERSION = Pattern.compile("cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*version\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_WITH_BRANCH = Pattern.compile("cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*branch\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_BASIC = Pattern.compile("cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)'");
+  public static Pattern LINE_PATTERN_WITH_TAG = Pattern.compile(
+      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*tag\\s*:\\s*'([^,^'^\"]*)'");
+  public static Pattern LINE_PATTERN_WITH_VERSION = Pattern.compile(
+      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*version\\s*:\\s*'([^,^'^\"]*)'");
+  public static Pattern LINE_PATTERN_WITH_BRANCH = Pattern.compile(
+      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*branch\\s*:\\s*'([^,^'^\"]*)'");
+  public static Pattern LINE_PATTERN_BASIC = Pattern.compile(
+      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)'");
   public static Set<String> validUrls = new HashSet<>();
 
   public Berksfile(List<String> fileLines) throws CookbookUrlException {

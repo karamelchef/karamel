@@ -123,7 +123,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void purgeCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   @Override
@@ -133,7 +133,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getInstallationDag(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   @Override

@@ -46,8 +46,10 @@ public class Settings {
   public static final String GITHUB_DEFAULT_REPO_URL3 = GITHUB_BASE_URL + "/hopstart";
   public static final String REPO_WITH_BRANCH_PATTERN = "[^\\/]*/[^\\/]*/tree/[^\\/]*";
   public static final String REPO_NO_BRANCH_PATTERN = "[^\\/]*/[^\\/]*";
-  public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
-  public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^" + GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
+  public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^" + 
+      GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
+  public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^" + 
+      GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
   public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
@@ -70,7 +72,8 @@ public class Settings {
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF = "install_ruby_chef_berkshelf.sh";
-  public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT + SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF;
+  public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT + 
+      SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF;
   public static final String SCRIPT_PATH_MAKE_SOLO_RB = SCRIPT_PATH_ROOT + "make_solo_rb.sc";
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
 
@@ -86,7 +89,8 @@ public class Settings {
   public static final String USER_NAME = System.getProperty("user.name");
   public static final String OS_NAME = System.getProperty("os.name");
   public static final String IP_Address = loadIpAddress();
-  public static final boolean UNIX_OS = OS_NAME.toLowerCase().contains("mac") || OS_NAME.toLowerCase().contains("linux");
+  public static final boolean UNIX_OS = OS_NAME.toLowerCase().contains("mac") || 
+      OS_NAME.toLowerCase().contains("linux");
   public static final String DEFAULT_PUBKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa.pub" : null;
   public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
@@ -133,7 +137,8 @@ public class Settings {
   }
 
   public static String TASK_LOG_FILE_PATH(String clusterName, String machinIp, String taskName) {
-    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + taskName.toLowerCase().replaceAll("\\W", "_") + ".log";
+    return MACHINE_LOG_FOLDER(clusterName, machinIp) + File.separator + 
+        taskName.toLowerCase().replaceAll("\\W", "_") + ".log";
   }
 
   public static String CLUSTER_ROOT_PATH(String clusterName) {
@@ -164,7 +169,8 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + 
+        recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {
@@ -220,7 +226,8 @@ public class Settings {
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
 
   // Relative file locations of files in cookbook scaffolding
-  public static final String COOKBOOK_DEFAULTRB_REL_PATH = File.separator + "attributes" + File.separator + "default.rb";
+  public static final String COOKBOOK_DEFAULTRB_REL_PATH = File.separator + "attributes" + File.separator + 
+      "default.rb";
   public static final String COOKBOOK_METADATARB_REL_PATH = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
@@ -228,9 +235,12 @@ public class Settings {
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";
   public static final String COOKBOOK_RECIPE_SLAVE_PATH = File.separator + "recipes" + File.separator + "slave.rb";
-  public static final String COOKBOOK_CONFIG_FILE_PATH = File.separator + "templates" + File.separator + "default" + File.separator + "config.props.erb";
-  public static final String COOKBOOK_MASTER_SH_PATH = File.separator + "templates" + File.separator + "default" + File.separator + "master.sh.erb";
-  public static final String COOKBOOK_SLAVE_SH_PATH = File.separator + "templates" + File.separator + "default" + File.separator + "slave.sh.erb";
+  public static final String COOKBOOK_CONFIG_FILE_PATH = File.separator + "templates" + File.separator + "default" + 
+      File.separator + "config.props.erb";
+  public static final String COOKBOOK_MASTER_SH_PATH = File.separator + "templates" + File.separator + "default" + 
+      File.separator + "master.sh.erb";
+  public static final String COOKBOOK_SLAVE_SH_PATH = File.separator + "templates" + File.separator + "default" + 
+      File.separator + "slave.sh.erb";
   public static final String COOKBOOK_KITCHEN_YML_PATH = File.separator + ".kitchen.yml";
 
   public static final String METADATA_INCOMMENT_HOST_KEY = "%host%";

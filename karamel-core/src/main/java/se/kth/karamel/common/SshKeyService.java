@@ -52,7 +52,8 @@ public class SshKeyService {
     try {
       Files.setPosixFilePermissions(priFile.toPath(), perms);
     } catch (IOException ex) {
-      logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on generated private ssh-key. ", ex);
+      logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on "
+          + "generated private ssh-key. ", ex);
     }
     Map<String, String> keys = SshKeys.generate();
     String pub = keys.get("public");
@@ -90,7 +91,8 @@ public class SshKeyService {
     return loadSshKeys(pubkeyPath, privKeyPath, "");
   }
 
-  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath, String passphrase) throws SshKeysNotfoundException {
+  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath, String passphrase) 
+      throws SshKeysNotfoundException {
     String pubKey = null;
     String priKey = null;
     try {
@@ -104,7 +106,8 @@ public class SshKeyService {
       }
 
     } catch (IOException ex) {
-      throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", pubkeyPath, prikeyPath), ex);
+      throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", 
+          pubkeyPath, prikeyPath), ex);
     }
     if (pubKey != null && priKey != null) {
       SshKeyPair keypair = new SshKeyPair();
@@ -115,7 +118,8 @@ public class SshKeyService {
       keypair.setPassphrase(passphrase);
       return keypair;
     }
-    throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", pubkeyPath, prikeyPath));
+    throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", 
+        pubkeyPath, prikeyPath));
 
   }
 

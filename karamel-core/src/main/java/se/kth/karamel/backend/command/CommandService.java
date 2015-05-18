@@ -146,7 +146,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.pauseCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for pausing, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for pausing, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -154,7 +155,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.resumeCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for resuming, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for resuming, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -162,7 +164,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.purgeCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for purging, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -499,7 +502,8 @@ public class CommandService {
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();
           if (sshKeyPair != null) {
-            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), sshKeyPair.getPrivateKeyPath());
+            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), 
+                sshKeyPair.getPrivateKeyPath());
           } else {
             throw new KaramelException("no ssh keys has been chosen yet!!");
           }
@@ -562,7 +566,10 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + 
+          name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + 
+          name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + 
+          name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -576,7 +583,9 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + 
+          yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + 
+          yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -664,7 +673,8 @@ public class CommandService {
 
   }
 
-  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) throws KaramelException {
+  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) 
+      throws KaramelException {
     Pattern p = Pattern.compile(cmd + "(\\s+(\\w+))?");
     Matcher matcher = p.matcher(userinput);
     if (matcher.matches()) {
@@ -674,7 +684,8 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the context.");
+          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the "
+              + "context.");
         }
       } else {
         clusterName = matcher.group(2);

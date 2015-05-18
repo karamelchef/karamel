@@ -15,15 +15,15 @@ import java.util.List;
  */
 public class MetadataRb {
 
-  String name;
-  String description;
-  String version;
-  List<Recipe> recipes = new ArrayList<>();
-  List<Attribute> attributes = new ArrayList<>();
+    String name;
+    String description;
+    String version;
+    List<Recipe> recipes = new ArrayList<>();
+    List<Attribute> attributes = new ArrayList<>();
 
-  public void setAttributes(List<Attribute> attributes) {
-    this.attributes = attributes;
-  }
+    public void setAttributes(List<Attribute> attributes) {
+        this.attributes = attributes;
+    }
 
   public List<Attribute> getAttributes() {
     return attributes;

@@ -57,7 +57,8 @@ public class ClusterService {
   public synchronized void registerEc2Context(String clusterName, Ec2Context ec2Context) throws KaramelException {
     String name = clusterName.toLowerCase();
     if (repository.containsKey(name)) {
-      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", clusterName));
+      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", 
+          clusterName));
       throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
     }
 
@@ -171,7 +172,8 @@ public class ClusterService {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
-          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", runtime.getName()));
+          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", 
+              runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {
         } catch (KaramelException ex) {

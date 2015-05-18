@@ -186,7 +186,7 @@ public class KaramelApiTest {
     }
   }
 
-  @Test
+//  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/ndb.yml"), Charsets.UTF_8);
