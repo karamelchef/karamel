@@ -12,10 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
@@ -47,6 +46,7 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class CommandService {
 
+  private static final Logger logger = Logger.getLogger(CommandService.class);
   private static String chosenCluster = null;
   private static String autoselectedCluster = null;
   private static String chosenMachine = "";
@@ -264,8 +264,7 @@ public class CommandService {
                   Thread.sleep(200);
 
                 } catch (InterruptedException ex) {
-                  Logger.getLogger(CommandService.class
-                      .getName()).log(Level.SEVERE, null, ex);
+                  logger.error("", ex);
                 }
                 result = shell.readStreams();
                 renderer = CommandResponse.Renderer.SSH;
@@ -311,8 +310,7 @@ public class CommandService {
                 Thread.sleep(100);
 
               } catch (InterruptedException ex) {
-                Logger.getLogger(CommandService.class
-                    .getName()).log(Level.SEVERE, null, ex);
+                logger.error("", ex);
               }
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
@@ -359,8 +357,7 @@ public class CommandService {
 
             @Override
             public void submitTask(Task task) throws KaramelException {
-              Logger.getLogger(CommandService.class.getName()).log(Level.FINEST,
-                  " Received request to process a command with info: {0}", task.uniqueId());
+              logger.info(" Received request to process a command with info: " + task.uniqueId());
               task.succeed();
             }
 
@@ -449,6 +446,7 @@ public class CommandService {
           clusterService.startCluster(json);
           successMessage = String.format("cluster %s launched successfully..", clusterName);
           nextCmd = "status";
+          addActiveClusterMenus(response);
         }
       }
 
@@ -474,6 +472,7 @@ public class CommandService {
           if (!taskFound) {
             throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
           }
+          addActiveClusterMenus(response);
         } else {
           throw new KaramelException("no cluster has been chosen yet!!");
         }
