@@ -11,23 +11,23 @@ package se.kth.karamel.webservicemodel;
  */
 public class ProviderJSON {
 
-  public String accountId;
-  public String accountKey;
+  public String accessKey;
+  public String secretKey;
 
   public String getAccountId() {
-    return accountId;
+    return accessKey;
   }
 
-  public void setAccountId(String accountId) {
-    this.accountId = accountId;
+  public void setAccountId(String accessKey) {
+    this.accessKey = accessKey;
   }
 
   public String getAccountKey() {
-    return accountKey;
+    return secretKey;
   }
 
-  public void setAccountKey(String accountKey) {
-    this.accountKey = accountKey;
+  public void setAccountKey(String secretKey) {
+    this.secretKey = secretKey;
   }
 
 }

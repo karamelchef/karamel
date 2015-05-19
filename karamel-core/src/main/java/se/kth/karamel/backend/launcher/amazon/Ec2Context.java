@@ -58,7 +58,7 @@ public class Ec2Context {
         new EnterpriseConfigurationModule());
 
     ContextBuilder build = ContextBuilder.newBuilder("aws-ec2")
-        .credentials(credentials.getAccountId(), credentials.getAccessKey())
+        .credentials(credentials.getAccessKey(), credentials.getSecretKey())
         .modules(modules)
         .overrides(properties);
     ComputeServiceContext context = build.buildView(ComputeServiceContext.class);
