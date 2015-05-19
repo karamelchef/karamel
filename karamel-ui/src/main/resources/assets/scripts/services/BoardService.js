@@ -189,6 +189,7 @@ KaramelCoreRestServices, KaramelSyncService, AlertService) {
                    KaramelCoreRestServices.exitKaramel()
                 .success(function(data, status, headers, config) {
                     $window.close();
+                   SweetAlert.swal("Close this tab!", "Karamel has been shutdown. Close this tab. \\\m/", "success");
                  })
                 .error(function(data, status, headers, config) {
                   $log.info("Error Received.");
