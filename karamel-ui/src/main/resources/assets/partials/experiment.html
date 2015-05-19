@@ -1,0 +1,27 @@
+<!-- New Card template -->
+
+<form novalidate ng-submit = "updateBoardDataObject()" class="noMargin" name="editYamlForm">
+    <div class="modal-header">
+        <button type="button" class="close" ng-click="close()">&times;</button>
+        <h4 class="modal-title" ng-model="columnName">Edit Cluster Information</h4>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <div>
+                <!--<textarea ng-model="cluster.yaml" class="form-control" rows="27" name="yamlTextArea" allow-tabs ng-model-options="{updateOn: 'blur'}" ng-bind="cluster.yml">-->
+                    <!--&lt;!&ndash;{{cluster.yaml}} &ndash;&gt;-->
+                <!--</textarea>-->
+                <!--<textarea rows="27">-->
+                    <pre ng-bind="cluster.yaml">
+                    </pre>
+                <!--</textarea>-->
+            </div>
+
+        </div>
+
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </div>
+</form>
