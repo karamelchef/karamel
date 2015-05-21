@@ -10,14 +10,14 @@ angular.module("demoApp")
 
 
           scope.account = {
-            accountId: null,
-            accountKey: null
+            accessKey: null,
+            secretKey: null
           };
 
           KaramelCoreRestServices.loadCredentials()
               .success(function(data) {
-                scope.account.accountId = data.accountId;
-                scope.account.accountKey = data.accountKey;
+                scope.account.accessKey = data.accessKey;
+                scope.account.secretKey = data.secretKey;
               })
               .error(function(data) {
                 $log.warn("No Ec2 credentials is available");
@@ -62,7 +62,7 @@ angular.module("demoApp")
           $scope.connectionState = $scope.states.initial;
 
           // If basic validations passed, then move forward.
-          if (this.ec2ProviderForm.accountId.$valid && this.ec2ProviderForm.accountKey.$valid) {
+          if (this.ec2ProviderForm.accessKey.$valid && this.ec2ProviderForm.secretKey.$valid) {
 
             validate($scope.account)
                 .success(function(data, status, header, config) {

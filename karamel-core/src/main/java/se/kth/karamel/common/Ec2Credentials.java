@@ -12,8 +12,16 @@ package se.kth.karamel.common;
  */
 public class Ec2Credentials {
   
-  private String accountId;
   private String accessKey;
+  private String secretKey;
+
+  public String getSecretKey() {
+    return secretKey;
+  }
+
+  public void setSecretKey(String accessKey) {
+    this.secretKey = accessKey;
+  }
 
   public String getAccessKey() {
     return accessKey;
@@ -21,14 +29,6 @@ public class Ec2Credentials {
 
   public void setAccessKey(String accessKey) {
     this.accessKey = accessKey;
-  }
-
-  public String getAccountId() {
-    return accountId;
-  }
-
-  public void setAccountId(String accountId) {
-    this.accountId = accountId;
   }
   
 }

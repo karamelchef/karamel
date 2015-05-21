@@ -31,8 +31,6 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>3.7.0.201502260915-r</version>
         </dependency>
-       
-
 <!--        <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
@@ -60,11 +58,6 @@
             <artifactId>snakeyaml</artifactId>
             <version>1.11</version>
         </dependency>
-        <!--        <dependency>
-            <groupId>org.jclouds.provider</groupId>
-            <artifactId>aws-ec2</artifactId>
-            <version>1.1.0</version>
-        </dependency>-->
         <dependency>
             <groupId>org.apache.jclouds.api</groupId>
             <artifactId>openstack-nova</artifactId>

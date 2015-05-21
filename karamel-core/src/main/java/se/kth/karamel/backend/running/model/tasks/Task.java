@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.dag.DagTask;
 import se.kth.karamel.backend.dag.DagTaskCallback;
+import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -68,7 +69,6 @@ public abstract class Task implements DagTask, TaskCallback {
     return String.format("\"name\": \"%s\", \"machine\": \"%s\"", name, machineId);
   }
 
-  
   @Override
   public String toString() {
     return name + " on " + machineId;
@@ -137,4 +137,7 @@ public abstract class Task implements DagTask, TaskCallback {
     dagCallback.failed(reason);
   }
 
+  public void collectResults(MachineInterface sshMachine) throws KaramelException {
+    //override it in the subclasses if needed
+  }
 }

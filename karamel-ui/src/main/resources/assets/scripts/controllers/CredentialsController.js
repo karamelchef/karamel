@@ -103,8 +103,8 @@ angular.module('demoApp')
                             scp.bootUp = true;
 
                             scp.account = {
-                                accountId: null,
-                                accountKey: null
+                                accessKey: null,
+                                secretKey: null
                             };
 
 
@@ -173,8 +173,8 @@ angular.module('demoApp')
                                     KaramelCoreRestServices.loadCredentials()
 
                                             .success(function (data) {
-                                                scope.account.accountId = data.accountId;
-                                                scope.account.accountKey = data.accountKey;
+                                                scope.account.accessKey = data.accessKey;
+                                                scope.account.secretKey = data.secretKey;
                                                 _updateState('specialWarn', scope.provider);
                                                 validateCredentials();
                                             })
@@ -197,7 +197,7 @@ angular.module('demoApp')
 
                         scope.validateCredentials = function () {
 
-                            if (scope.account.accountId != null && scope.account.accountKey != null) {
+                            if (scope.account.accessKey != null && scope.account.secretKey != null) {
 
                                 KaramelCoreRestServices.validateCredentials(scope.account)
                                         .success(function (data) {
