@@ -1,13 +1,14 @@
 package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
-import com.google.inject.matcher.Matchers;
+import com.google.common.collect.FluentIterable;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.NovaComputeService;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
+import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroupRule;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
@@ -15,7 +16,6 @@ import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.internal.matchers.Any;
 import se.kth.karamel.client.model.Nova;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.NovaCredentials;
@@ -24,12 +24,14 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-import static org.mockito.Mockito.*;
-
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NovaLauncherTest {
 
@@ -98,6 +100,7 @@ public class NovaLauncherTest {
 
         when(novaContext.getNovaCredentials()).thenReturn(novaCredentials);
         when(novaContext.getNovaApi()).thenReturn(novaApi);
+        when(novaContext.getKeyPairApi()).thenReturn(keyPairApi);
 
         when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
         when(serviceContext.getComputeService()).thenReturn(novaComputeService);
@@ -174,15 +177,44 @@ public class NovaLauncherTest {
 
     @Test
     public void createSecurityGroupTestWithTestingFlagAndNoSecurityAPIPresent()throws KaramelException{
-        //Initializing and mocking need for method test
-        String uniqueGroup = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName,groupName);
-        String uniqueDescription = NovaSetting.NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName,groupName);
-
         when(securityGroupApiOptional.isPresent()).thenReturn(false);
 
         NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
         String groupId = novaLauncher.createSecurityGroup(clusterName,groupName,nova,ports);
         assertNull(groupId);
+    }
+
+    @Test
+    public void uploadSSHPublicKeyAndCreate() throws KaramelException{
+        String keypairName = "pepeKeyPair";
+        KeyPair pair = mock(KeyPair.class);
+        List<KeyPair> keyPairList = new ArrayList<>();
+        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+
+        when(keyPairApi.list()).thenReturn(keys);
+        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,false);
+        assertTrue(uploadSuccessful);
+    }
+
+    @Test
+    public void uploadSSHPublicKeyAndRecreateOld() throws KaramelException{
+        String keypairName = "pepeKeyPair";
+        KeyPair pair = mock(KeyPair.class);
+
+        List<KeyPair> keyPairList = new ArrayList<>();
+        keyPairList.add(pair);
+        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+
+        when(keyPairApi.list()).thenReturn(keys);
+        when(keyPairApi.delete(keypairName)).thenReturn(true);
+        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,true);
+        assertTrue(uploadSuccessful);
     }
 
 }

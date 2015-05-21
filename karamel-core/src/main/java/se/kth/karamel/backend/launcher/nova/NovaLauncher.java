@@ -1,11 +1,12 @@
 package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import org.apache.log4j.Logger;
 import org.jclouds.ContextBuilder;
-
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
+import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
@@ -16,7 +17,6 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
-
 
 import java.util.Set;
 
@@ -121,5 +121,23 @@ public final class NovaLauncher {
             return groupId;
         }
         return null;
+    }
+
+    public boolean uploadSshPublicKey(String keyPairName, Nova nova, boolean removeOld) {
+        boolean uploadSuccesful;
+        FluentIterable<KeyPair> keyPairs = novaContext.getKeyPairApi().list();
+        if(keyPairs.isEmpty()){
+            logger.info(String.format("New keypair '%s' is being uploaded to Nova OpenStack", keyPairName));
+            novaContext.getKeyPairApi().createWithPublicKey(keyPairName, sshKeyPair.getPublicKey());
+            uploadSuccesful = true;
+        }else if(removeOld){
+            logger.info(String.format("Removing the old keypair '%s' and uploading the new one ...", keyPairName));
+            boolean deleteSuccesful = novaContext.getKeyPairApi().delete(keyPairName);
+            KeyPair pair = novaContext.getKeyPairApi().createWithPublicKey(keyPairName, sshKeyPair.getPublicKey());
+            uploadSuccesful = deleteSuccesful && pair != null;
+        }else{
+            uploadSuccesful = false;
+        }
+        return uploadSuccesful;
     }
 }

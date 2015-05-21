@@ -8,17 +8,15 @@ import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.NovaComputeService;
-import org.jclouds.openstack.nova.v2_0.compute.extensions.NovaSecurityGroupExtension;
-import org.jclouds.openstack.nova.v2_0.config.NovaProperties;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.sshj.config.SshjSshClientModule;
 import se.kth.karamel.common.NovaCredentials;
-import org.jclouds.compute.ComputeService;
 
 import java.util.Properties;
 
 /**
+ * Nova Context
  * Created by Alberto on 2015-05-16.
  */
 public class NovaContext {

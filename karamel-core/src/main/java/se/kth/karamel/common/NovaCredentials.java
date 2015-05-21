@@ -1,6 +1,7 @@
 package se.kth.karamel.common;
 
 /**
+ * Nova Credentials
  * Created by Alberto on 2015-05-16.
  */
 public class NovaCredentials {
