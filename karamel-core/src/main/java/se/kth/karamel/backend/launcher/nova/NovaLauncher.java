@@ -1,9 +1,12 @@
 package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.jclouds.ContextBuilder;
+import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
@@ -18,6 +21,7 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -139,5 +143,31 @@ public final class NovaLauncher {
             uploadSuccesful = false;
         }
         return uploadSuccesful;
+    }
+
+
+    public boolean cleanupFailedNodes(Map<NodeMetadata, Throwable> failedNodes) {
+        boolean success;
+        if(failedNodes.size()>0){
+            Set<String> lostIds = Sets.newLinkedHashSet();
+            for(Map.Entry<NodeMetadata,Throwable> lostNode: failedNodes.entrySet()){
+                lostIds.add(lostNode.getKey().getId());
+            }
+            int numberOfNodesToDelete = lostIds.size();
+            logger.info(String.format("Destroying failed nodes with ids: %s", lostIds.toString()));
+            Set<? extends NodeMetadata> destroyedNodes = novaContext.getComputeService().destroyNodesMatching(
+                    Predicates.in(failedNodes.keySet()));
+            lostIds.clear();
+            for (NodeMetadata destroyed : destroyedNodes) {
+                lostIds.add(destroyed.getId());
+            }
+            logger.info("Failed nodes destroyed ;)");
+            int numberOfNodesSuccesfullyDeleted = lostIds.size();
+            success = numberOfNodesSuccesfullyDeleted == numberOfNodesToDelete;
+        }else{
+            success = true;
+        }
+        return success;
+
     }
 }

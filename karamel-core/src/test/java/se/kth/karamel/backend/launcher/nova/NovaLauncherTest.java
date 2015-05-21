@@ -1,9 +1,11 @@
 package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.NovaComputeService;
@@ -24,12 +26,10 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -101,6 +101,7 @@ public class NovaLauncherTest {
         when(novaContext.getNovaCredentials()).thenReturn(novaCredentials);
         when(novaContext.getNovaApi()).thenReturn(novaApi);
         when(novaContext.getKeyPairApi()).thenReturn(keyPairApi);
+        when(novaContext.getComputeService()).thenReturn(novaComputeService);
 
         when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
         when(serviceContext.getComputeService()).thenReturn(novaComputeService);
@@ -217,4 +218,60 @@ public class NovaLauncherTest {
         assertTrue(uploadSuccessful);
     }
 
+    @Test
+    public void uploadSSHPublicKeyAndNotRecreateOldFail() throws KaramelException{
+        String keypairName = "pepeKeyPair";
+        KeyPair pair = mock(KeyPair.class);
+
+        List<KeyPair> keyPairList = new ArrayList<>();
+        keyPairList.add(pair);
+        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+
+        when(keyPairApi.list()).thenReturn(keys);
+        when(keyPairApi.delete(keypairName)).thenReturn(true);
+        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,false);
+        assertFalse(uploadSuccessful);
+    }
+
+    @Test
+    public void cleanupFailedNodesEmpty() throws KaramelException{
+        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+        assertTrue(cleanupSuccessful);
+    }
+
+    @Test
+    public void cleanupFailedNodesNotEmpty() throws KaramelException{
+        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
+        Throwable exception = mock(Throwable.class);
+        NodeMetadata meta = mock(NodeMetadata.class);
+        failedNodes.put(meta,exception);
+
+        Set<NodeMetadata> destroyedNodes = new HashSet<>();
+        destroyedNodes.add(meta);
+        when(meta.getId()).thenReturn("20");
+        doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+        assertTrue(cleanupSuccessful);
+    }
+
+    @Test
+    public void cleanupFailedNodesSomethingWentWrong() throws KaramelException{
+        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
+        Throwable exception = mock(Throwable.class);
+        NodeMetadata meta = mock(NodeMetadata.class);
+        failedNodes.put(meta,exception);
+
+        Set<NodeMetadata> destroyedNodes = new HashSet<>();
+        when(meta.getId()).thenReturn("20");
+        doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
+        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
+        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+        assertFalse(cleanupSuccessful);
+    }
 }
