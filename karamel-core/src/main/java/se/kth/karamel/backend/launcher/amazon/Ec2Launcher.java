@@ -9,12 +9,6 @@ import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -31,13 +25,15 @@ import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
+import se.kth.karamel.common.exception.KaramelException;
+
+import java.util.*;
 
 /**
  * @author kamal

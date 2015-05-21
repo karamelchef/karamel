@@ -5,12 +5,8 @@
  */
 package e2e.se.kth.karamel.client.api;
 
-import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -18,6 +14,11 @@ import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.exception.KaramelException;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertFalse;
 
 /**
  *
@@ -186,7 +187,7 @@ public class KaramelApiTest {
     }
   }
 
-  @Test
+ /* @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/ndb.yml"), Charsets.UTF_8);
@@ -206,6 +207,6 @@ public class KaramelApiTest {
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
     }
-  }
+  }*/
 
 }
