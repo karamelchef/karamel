@@ -85,6 +85,11 @@
             <artifactId>jclouds-enterprise</artifactId>
             <version>${jclouds.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.jclouds.labs</groupId>
+            <artifactId>google-compute-engine</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>  
     </dependencies>
   
   

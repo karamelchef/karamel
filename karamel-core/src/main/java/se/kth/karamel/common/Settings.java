@@ -93,6 +93,7 @@ public class Settings {
   public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
   public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
   public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";
+  public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
     return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_Address).toLowerCase();
@@ -100,6 +101,10 @@ public class Settings {
 
   public static final String EC2_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
     return (USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
+  }
+  
+  public static final String GCE_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
+    return ("gce" + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
   }
 
   public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int size) {
