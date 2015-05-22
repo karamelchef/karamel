@@ -9,16 +9,21 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.compute.domain.SecurityGroup;
 import org.jclouds.compute.extensions.SecurityGroupExtension;
 import org.jclouds.domain.Credentials;
 import org.jclouds.domain.Location;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
+import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
+import org.jclouds.providers.ProviderMetadata;
+import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.InvalidCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -50,6 +55,25 @@ public class GceLauncher {
         return credentials;
     }
 
+    /**
+     *
+     * @param credentials
+     * @return
+     * @throws InvalidCredentialsException
+     */
+    public static GceContext validateCredentials(Credentials credentials) throws InvalidCredentialsException {
+        try {
+            GceContext context = new GceContext(credentials);
+            GoogleComputeEngineApi gceApi = context.getGceApi();
+            String projectName = gceApi.project().get().name();
+            logger.info(String.format("Sucessfully Authenticated to project %s\n", projectName));
+            return context;
+        } catch (AuthorizationException e) {
+            throw new InvalidCredentialsException("accountid:" + credentials.identity, e);
+        }
+    }
+
+    // FireWalls in Google
     public String createSecurityGroup(String clusterName, String groupName, Location location, Set<String> ports) throws KaramelException {
         String uniqeGroupName = Settings.GCE_UNIQUE_GROUP_NAME(clusterName, groupName);
         logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
