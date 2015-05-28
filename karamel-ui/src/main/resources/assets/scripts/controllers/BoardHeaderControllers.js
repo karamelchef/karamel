@@ -116,6 +116,11 @@ function($log, BoardService, $rootScope, $scope, $window, $location, AlertServic
           $log.info('Switching to Command Page.');
           $location.path('/terminal');
         };
+        
+        $scope.switchDesigner = function() {
+          $log.info('Switching to Experiment Designer.');
+          $location.path('/designer');
+        };
 
         $scope.exitKaramel = function() {
           $log.info('Request to exit Karamel.');
