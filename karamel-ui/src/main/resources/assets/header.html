@@ -1,0 +1,64 @@
+<nav class="navbar navbar-fixed-top headerbackground" role="navigation">
+  <div class="container-fluid" ng-controller="BoardController">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
+      <a class="navbar-brand logoFont" href="#/">Karamel</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse navbar-ex1-collapse">
+      <ul class="nav navbar-nav navbar-left header-karamel">
+        <li class="dropdown">
+          <a class="dropdown-toggle headerFont" data-toggle="dropdown"> File <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li class="custom-font"><a href="#/yaml/open" click-directive>Load Definition</a></li>
+            <li class="custom-font"><input type="file" id="fileUploader" style="display: none"
+                                           file-uploader></li>
+            <li class="divider"></li>
+            <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
+            <li class="divider"></li>
+            <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="nav navbar-nav navbar-left">
+        <li><span/></li>
+        <li><span/></li>
+        <li>
+          <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
+        </li>
+        <li class="custom-font"><a title="Set Global Provider" class="headerFont" 
+                                   ng-click="configureGlobalProvider()">Provider</a></li>
+        <li><span/></li>
+        <li>
+          <i class="glyphicon glyphicon-tasks specializeProvider"></i> 
+        </li>
+        <li class="custom-font"><a title="Set Cookbook Attributes" class="headerFont" 
+                                   ng-click="configureGlobalAttributes()">Configure</a></li>
+        <li><span/></li>
+        <!-- Launch a cluster. 
+        It should present a model dialog that asks you to paste in your public openssh key
+        if you want to (optional). The same dialog should ask for your AWS key/secret
+        -->
+        <li class="glyphicon glyphicon-play specializeProvider">
+        </li>
+        <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
+      </ul>
+
+      <ul class="nav navbar-nav navbar-right" style="padding-right: 30px">
+        <li>
+          <a title="Cluster Name" class="headerFont"><span ng-bind="$root.activeCluster.name"></span> </a>
+        </li>
+      </ul>
+
+    </div>
+    <!-- /.navbar-collapse -->
+  </div>
+  <!-- /.container -->
+</nav>

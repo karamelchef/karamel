@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.RecipeNotfoundException;
@@ -31,7 +32,7 @@ public class JsonGroup extends JsonScope {
   }
 
   public JsonGroup(YamlCluster cluster, YamlGroup group, String name) throws KaramelException {
-    super(cluster);
+    super(cluster, group);
     setName(name);
     this.size = group.getSize();
     List<String> recipes = group.getRecipes();
@@ -90,9 +91,10 @@ public class JsonGroup extends JsonScope {
   }
 
   public final void setName(String name) throws ValidationException {
-    if (!name.matches(Settings.EC2_GEOUPNAME_PATTERN))
+    if (!name.matches(Settings.EC2_GEOUPNAME_PATTERN)) {
       throw new ValidationException("Group name '%s' must start with letter/number and just lowercase ASCII letters, "
           + "numbers and dashes are accepted in the name.");
+    }
     this.name = name;
   }
 
@@ -102,6 +104,19 @@ public class JsonGroup extends JsonScope {
 
   public void setSize(int size) {
     this.size = size;
+  }
+
+  @Override
+  public void validate() throws ValidationException {
+    super.validate();
+    Baremetal baremetal = getBaremetal();
+    if (baremetal != null) {
+      int s1 = baremetal.retriveAllIps().size();
+      if (s1 != size) {
+        throw new ValidationException(
+            String.format("Number of ip addresses is not equal to the group size %d != %d", s1, size));
+      }
+    }
   }
 
 }

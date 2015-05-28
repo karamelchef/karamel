@@ -27,7 +27,7 @@ public class JsonCluster extends JsonScope {
   }
 
   public JsonCluster(YamlCluster cluster) throws KaramelException {
-    super(cluster);
+    super(cluster, cluster);
     this.name = cluster.getName();
     Set<Map.Entry<String, YamlGroup>> entrySet = cluster.getGroups().entrySet();
     for (Map.Entry<String, YamlGroup> entry : entrySet) {

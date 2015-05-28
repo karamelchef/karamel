@@ -17,7 +17,7 @@ remove   <cluster_name> : deletes cluster definition if it is not running
 yaml     <cluster_name> : returns cluster definition from the cache
 launch   <cluster_name> : launches denoted cluster if it is not already running
 links    <cluster_name> : useful links of the cluster's services
-which ec2               : ec2 account-id 
+which aws               : aws access-key
 which ssh               : ssh keys' path
 clusters                : lists available running clusters
 use      <cluster_name> : switches the active cluster in terminal

@@ -31,20 +31,11 @@
       <artifactId>org.eclipse.jgit</artifactId>
       <version>3.7.0.201502260915-r</version>
     </dependency>
-       
-
-    <!--        <dependency>
-        <groupId>org.kohsuke</groupId>
-        <artifactId>github-api</artifactId>
-        <version>1.68</version>
-    </dependency>
-    -->
     <dependency>
       <groupId>org.eclipse.mylyn.github</groupId>
       <artifactId>org.eclipse.egit.github.core</artifactId>
       <version>2.1.5</version>
     </dependency>        
-        
     <dependency>
       <groupId>dnl.utils</groupId>
       <artifactId>j-text-utils</artifactId>
@@ -60,11 +51,6 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.11</version>
     </dependency>
-    <!--        <dependency>
-        <groupId>org.jclouds.provider</groupId>
-        <artifactId>aws-ec2</artifactId>
-        <version>1.1.0</version>
-    </dependency>-->
     <dependency>
       <groupId>org.apache.jclouds.provider</groupId>
       <artifactId>aws-ec2</artifactId>
@@ -86,8 +72,6 @@
       <version>${jclouds.version}</version>
     </dependency>
   </dependencies>
-  
-  
   <build>
     <plugins>
       <plugin>
@@ -100,6 +84,13 @@
             <exclude>**/e2e/*.java</exclude>
           </excludes>
         </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.surefire</groupId>
+            <artifactId>surefire-junit47</artifactId>
+            <version>2.18.1</version>
+          </dependency>
+        </dependencies>
       </plugin>        
     </plugins>
     <extensions>
@@ -110,6 +101,5 @@
       </extension>
     </extensions>
   </build>    
-
 
 </project>

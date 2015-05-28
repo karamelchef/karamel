@@ -19,7 +19,8 @@ public class CookbooksJSON {
     private ArrayList<String> mandatoryAttrs;
     private ArrayList<String> optionalAttrs;
 
-    public CookbooksJSON(String cookbookName, String repo, ArrayList<String> mandatoryAttrs, ArrayList<String> optionalAttrs) {
+    public CookbooksJSON(String cookbookName, String repo, ArrayList<String> mandatoryAttrs, 
+        ArrayList<String> optionalAttrs) {
         this.cookbookName = cookbookName;
         this.repo = repo;
         this.mandatoryAttrs = mandatoryAttrs;

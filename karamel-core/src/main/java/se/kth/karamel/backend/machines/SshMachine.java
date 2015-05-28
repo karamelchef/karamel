@@ -55,7 +55,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stopping = false;
-  private SshShell shell;
+  private final SshShell shell;
   private Task activeTask;
 
   /**
@@ -264,11 +264,10 @@ public class SshMachine implements MachineInterface, Runnable {
       client.addHostKeyVerifier(new PromiscuousVerifier());
       client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
       client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      if (passphrase == null) {
-        keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
-      } else {
-        keys = client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
-      }
+      keys = (passphrase == null)
+          ? client.loadKeys(serverPrivateKey, serverPubKey, null)
+          : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
+
       logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
 
       int numRetries = 3;
@@ -306,7 +305,6 @@ public class SshMachine implements MachineInterface, Runnable {
             logger.warn(String.format("Is the passphrase for your private key correct?"));
           }
           machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
-//        return false;
         }
 
         numRetries--;

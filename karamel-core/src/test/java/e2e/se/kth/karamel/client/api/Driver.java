@@ -33,8 +33,8 @@ public class Driver {
 
     //pass in your ec2 credentials here, 
     Ec2Credentials credentials = new Ec2Credentials();
-    credentials.setAccountId("<ec2-accoun-id>");
-    credentials.setAccessKey("<ec2-access-key>");
+    credentials.setAccessKey("<ec2-accoun-id>");
+    credentials.setSecretKey("<ec2-access-key>");
     if (!api.updateEc2CredentialsIfValid(credentials))
       throw new IllegalThreadStateException("Ec2 credentials is not valid");
     

@@ -481,7 +481,7 @@ public class CommandService {
         }
       }
 
-      p = Pattern.compile("which\\s+(cluster|ec2|ssh)");
+      p = Pattern.compile("which\\s+(cluster|aws|ssh)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -492,12 +492,12 @@ public class CommandService {
           } else {
             throw new KaramelException("no cluster has been chosen yet!!");
           }
-        } else if (subcmd.equals("ec2")) {
+        } else if (subcmd.equals("aws")) {
           Ec2Context ec2Context = clusterService.getCommonContext().getEc2Context();
           if (ec2Context != null) {
-            result = String.format("ec2 account id is %s", ec2Context.getCredentials().getAccountId());
+            result = String.format("aws account id is %s", ec2Context.getCredentials().getAccessKey());
           } else {
-            throw new KaramelException("no ec2 account has been chosen yet!!");
+            throw new KaramelException("no aws account has been chosen yet!!");
           }
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();
