@@ -21,11 +21,6 @@ public class YamlScopeTest {
   @Test
   public void foldOutAttrTest() throws MetadataParseException {
     YamlScope yamlScope = new YamlScope() {
-
-      @Override
-      public void validate() throws ValidationException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-      }
     };
     Map<String, Object> attrs = new HashMap<>();
     yamlScope.foldOutAttr("mysql/user", "admin", attrs);
