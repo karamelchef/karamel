@@ -96,7 +96,8 @@ public class Dag {
     for (DagNode node : allNodes.values()) {
       if (node.getTask() == null) {
         throw new DagConstructionException(String.format("No task assigned to '%s' while it appreard in dependencies.. "
-            + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(), node.getSuccessors().toString()));
+            + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(), 
+            node.getSuccessors().toString()));
       }
     }
   }

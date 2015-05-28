@@ -83,7 +83,7 @@ public class CommandJSON {
   public void setSuccessmsg(String successmsg) {
     this.successmsg = successmsg;
   }
-  
+
   public List<CommandResponse.MenuItem> getMenuItems() {
     return menuItems;
   }

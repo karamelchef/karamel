@@ -47,7 +47,8 @@ public class BaremetalLauncher extends Launcher {
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 
+      throws KaramelException {
     logger.info(String.format("Provider of %s is baremetal, available machines expected.", groupName));
     GroupRuntime gr = UserClusterDataExtractor.findGroup(runtime, groupName);
     Baremetal baremetal = (Baremetal) UserClusterDataExtractor.getGroupProvider(definition, groupName);

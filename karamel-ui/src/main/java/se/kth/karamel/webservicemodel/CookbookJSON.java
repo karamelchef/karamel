@@ -5,23 +5,23 @@ package se.kth.karamel.webservicemodel;
  */
 public class CookbookJSON {
 
-    String url;
-    boolean refresh;
+  String url;
+  boolean refresh;
 
-    public boolean isRefresh() {
-        return refresh;
-    }
+  public boolean isRefresh() {
+    return refresh;
+  }
 
-    public void setRefresh(boolean refresh) {
-        this.refresh = refresh;
-    }
+  public void setRefresh(boolean refresh) {
+    this.refresh = refresh;
+  }
 
-    public String getUrl() {
+  public String getUrl() {
 
-        return url;
-    }
+    return url;
+  }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+  public void setUrl(String url) {
+    this.url = url;
+  }
 }

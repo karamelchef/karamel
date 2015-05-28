@@ -13,26 +13,26 @@ import org.hibernate.validator.constraints.NotEmpty;
  */
 public class KaramelServiceConfiguration extends Configuration implements AssetsBundleConfiguration {
 
-    @Valid
-    @NotNull
-    @JsonProperty
-    private final AssetsConfiguration assets = new AssetsConfiguration();
+  @Valid
+  @NotNull
+  @JsonProperty
+  private final AssetsConfiguration assets = new AssetsConfiguration();
 
-    @NotEmpty
-    private String name;
+  @NotEmpty
+  private String name;
 
-    @Override
-    public AssetsConfiguration getAssetsConfiguration() {
-        return assets;
-    }
+  @Override
+  public AssetsConfiguration getAssetsConfiguration() {
+    return assets;
+  }
 
-    @JsonProperty
-    public String getName() {
-        return this.name;
-    }
+  @JsonProperty
+  public String getName() {
+    return this.name;
+  }
 
-    @JsonProperty
-    public void setName(String name) {
-        this.name = name;
-    }
+  @JsonProperty
+  public void setName(String name) {
+    this.name = name;
+  }
 }

@@ -33,7 +33,8 @@ public abstract class Launcher {
    * @return group id 
    * @throws se.kth.karamel.common.exception.KaramelException 
    */
-  public abstract String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException;
+  public abstract String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) 
+      throws KaramelException;
 
   /**
    * 
@@ -43,7 +44,8 @@ public abstract class Launcher {
    * @return 
    * @throws KaramelException 
    */
-  public abstract List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException;
+  public abstract List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name) 
+      throws KaramelException;
 
 
 }

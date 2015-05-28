@@ -14,6 +14,7 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public interface MachineInterface {
 
-  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) throws KaramelException, IOException;
+  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) 
+      throws KaramelException, IOException;
 
 }

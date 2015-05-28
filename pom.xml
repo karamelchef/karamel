@@ -1,24 +1,25 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>se.kth.karamel</groupId>
-    <artifactId>karamel-parent</artifactId>
-    <packaging>pom</packaging>
-    <version>0.1</version>
-    <name>karamel-parent</name>
-    <url>http://maven.apache.org</url>
+  <groupId>se.kth.karamel</groupId>
+  <artifactId>karamel-parent</artifactId>
+  <packaging>pom</packaging>
+  <version>0.1</version>
+  <name>karamel-parent</name>
+  <url>http://maven.apache.org</url>
 
-    <!-- Modules in the Project.-->
-    <modules>
-        <module>karamel-ui</module>
-        <module>karamel-core</module>
-    </modules>
+  <!-- Modules in the Project.-->
+  <modules>
+    <module>karamel-build</module>
+    <module>karamel-ui</module>
+    <module>karamel-core</module>
+  </modules>
 
-    <properties>
-        <java.compiler.version>1.7</java.compiler.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+  <properties>
+    <java.compiler.version>1.7</java.compiler.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
     <dependencies>
         <dependency>
@@ -29,115 +30,141 @@
         </dependency>
     </dependencies>
 
-    <developers>
-        <developer>
-            <id>jdowling</id>
-            <name>Jim Dowling</name>
-            <email>jdowling&gt;sics.se</email>
-            <url>http://www.sics.se/node/1405</url>
-            <organization>Swedish Institute of Computer Science (SICS)</organization>
-            <organizationUrl>http://www.sics.se/</organizationUrl>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-        <developer>
-            <id>kamal</id>
-            <name>Kamal Hakimzadeh</name>
-            <email>kamal@kth.se</email>
-            <organization>KTH</organization>
-            <organizationUrl>http://www.kth.se/</organizationUrl>
-            <roles>
-                <role>architect</role>
-                <role>developer</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-        <developer>
-            <id>abhi</id>
-            <name>Abhimanyu Babbar</name>
-            <email>babbar&gt;kth.se</email>
-            <organization>KTH</organization>
-            <organizationUrl>http://www.kth.se/</organizationUrl>
-            <roles>
-                <role>developer</role>
-            </roles>
-            <timezone>+1</timezone>
-        </developer>
-    </developers>
+  <developers>
+    <developer>
+      <id>jdowling</id>
+      <name>Jim Dowling</name>
+      <email>jdowling&gt;sics.se</email>
+      <url>http://www.sics.se/node/1405</url>
+      <organization>Swedish Institute of Computer Science (SICS)</organization>
+      <organizationUrl>http://www.sics.se/</organizationUrl>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>kamal</id>
+      <name>Kamal Hakimzadeh</name>
+      <email>kamal@kth.se</email>
+      <organization>KTH</organization>
+      <organizationUrl>http://www.kth.se/</organizationUrl>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+    <developer>
+      <id>abhi</id>
+      <name>Abhimanyu Babbar</name>
+      <email>babbar&gt;kth.se</email>
+      <organization>KTH</organization>
+      <organizationUrl>http://www.kth.se/</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+1</timezone>
+    </developer>
+  </developers>
 
 
-    <distributionManagement>
-        <repository>
-            <id>sics-release-repository</id>
-            <name>SICS Repository</name>
-            <url>scpexe://kompics.i.sics.se/home/maven/repository</url>
-        </repository>
-        <snapshotRepository>
-            <id>sics-snapshot-repository</id>
-            <name>SICS Snapshot Repository</name>
-            <url>scpexe://kompics.i.sics.se/home/maven/snapshotrepository</url>
-        </snapshotRepository>
-        <site>
-            <id>kompics-site</id>
-            <url>scpexe://kompics.i.sics.se/var/www/kompics/report/trunk</url>
-        </site>
-        <downloadUrl>http://kompics.i.sics.se/maven/repository</downloadUrl>
-    </distributionManagement>
+  <distributionManagement>
+    <repository>
+      <id>sics-release-repository</id>
+      <name>SICS Repository</name>
+      <url>scpexe://kompics.i.sics.se/home/maven/repository</url>
+    </repository>
+    <snapshotRepository>
+      <id>sics-snapshot-repository</id>
+      <name>SICS Snapshot Repository</name>
+      <url>scpexe://kompics.i.sics.se/home/maven/snapshotrepository</url>
+    </snapshotRepository>
+    <site>
+      <id>kompics-site</id>
+      <url>scpexe://kompics.i.sics.se/var/www/kompics/report/trunk</url>
+    </site>
+    <downloadUrl>http://kompics.i.sics.se/maven/repository</downloadUrl>
+  </distributionManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>${java.compiler.version}</source>
-                    <target>${java.compiler.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-                <version>2.1</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-scm-plugin</artifactId>
-                <version>1.8.1</version>
-                <configuration>
-                    <tag>${project.artifactId}-${project.version}</tag>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.15</version>
+        <dependencies>
+          <dependency>
+            <groupId>se.kth.karamel</groupId>
+            <artifactId>karamel-build</artifactId>
+            <version>0.1</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <configuration>
+              <configLocation>checkstyle.xml</configLocation>
+              <suppressionsLocation>suppressions.xml</suppressionsLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <linkXRef>false</linkXRef>
+            </configuration>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>${java.compiler.version}</source>
+          <target>${java.compiler.version}</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>2.1</version>
+      </plugin>
+      <plugin>
+        <artifactId>maven-scm-plugin</artifactId>
+        <version>1.8.1</version>
+        <configuration>
+          <tag>${project.artifactId}-${project.version}</tag>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <scm>
+    <connection>scm:git:git@github.com:karamelchef/karamel.git</connection>
+  </scm>
 
-    <scm>
-        <connection>scm:git:git@github.com:karamelchef/karamel.git</connection>
-    </scm>
-
-    <repositories>
-        <repository>
-            <id>sics-release</id>
-            <name>SICS Release Repository</name>
-            <url>http://kompics.sics.se/maven/repository</url>
-            <releases>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>sics-snapshot</id>
-            <name>SICS Snapshot Repository</name>
-            <url>http://kompics.sics.se/maven/snapshotrepository</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-            </snapshots>
-        </repository>
-    </repositories>
+  <repositories>
+    <repository>
+      <id>sics-release</id>
+      <name>SICS Release Repository</name>
+      <url>http://kompics.sics.se/maven/repository</url>
+      <releases>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>sics-snapshot</id>
+      <name>SICS Snapshot Repository</name>
+      <url>http://kompics.sics.se/maven/snapshotrepository</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+      </snapshots>
+    </repository>
+  </repositories>
 
 </project>

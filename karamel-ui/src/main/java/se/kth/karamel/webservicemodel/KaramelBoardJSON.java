@@ -5,22 +5,23 @@ package se.kth.karamel.webservicemodel;
  *
  */
 public class KaramelBoardJSON {
-    // Create setter and getter properties. Should be a JSON Object.
+  // Create setter and getter properties. Should be a JSON Object.
 
-    private String json;
+  private String json;
 
-    public KaramelBoardJSON(){}
+  public KaramelBoardJSON() {
+  }
 
-    public KaramelBoardJSON(String json){
-        this.json = json;
-    }
+  public KaramelBoardJSON(String json) {
+    this.json = json;
+  }
 
-    public String getJson() {
-        return json;
-    }
+  public String getJson() {
+    return json;
+  }
 
-    public void setJson(String json) {
-        this.json = json;
-    }
+  public void setJson(String json) {
+    this.json = json;
+  }
 
 }

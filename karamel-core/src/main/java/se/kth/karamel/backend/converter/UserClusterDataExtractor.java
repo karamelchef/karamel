@@ -122,7 +122,8 @@ public class UserClusterDataExtractor {
     for (JsonGroup gr : cluster.getGroups()) {
       for (JsonCookbook cb : gr.getCookbooks()) {
         CookbookUrls urls = cb.getUrls();
-        paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + urls.repoName + Settings.SLASH + Settings.COOKBOOKS_VENDOR_SUBFOLDER);
+        paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + urls.repoName + Settings.SLASH + 
+            Settings.COOKBOOKS_VENDOR_SUBFOLDER);
       }
     }
     Object[] arr = paths.toArray();

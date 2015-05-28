@@ -31,7 +31,8 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB, "cookbooks_path", vendorPath);
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB, "cookbooks_path", 
+          vendorPath);
     }
     return commands;
   }
