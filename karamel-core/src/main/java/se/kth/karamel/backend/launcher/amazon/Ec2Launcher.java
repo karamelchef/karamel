@@ -58,7 +58,7 @@ public final class Ec2Launcher extends Launcher {
   public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
     this.context = context;
     this.sshKeyPair = sshKeyPair;
-    logger.info(String.format("Account-id='%s'", context.getCredentials().getAccountId()));
+    logger.info(String.format("Access-key='%s'", context.getCredentials().getAccessKey()));
     logger.info(String.format("Public-key='%s'", sshKeyPair.getPublicKeyPath()));
     logger.info(String.format("Private-key='%s'", sshKeyPair.getPrivateKeyPath()));
   }
@@ -70,18 +70,18 @@ public final class Ec2Launcher extends Launcher {
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
       return cxt;
     } catch (AuthorizationException e) {
-      throw new InvalidEc2CredentialsException("accountid:" + credentials.getAccountId(), e);
+      throw new InvalidEc2CredentialsException("accountid:" + credentials.getAccessKey(), e);
     }
   }
 
   public static Ec2Credentials readCredentials(Confs confs) {
-    String accountId = confs.getProperty(Settings.EC2_ACCOUNT_ID_KEY);
-    String accessKey = confs.getProperty(Settings.EC2_ACCESSKEY_KEY);
+    String accessKey = confs.getProperty(Settings.AWS_ACCESS_KEY);
+    String secretKey = confs.getProperty(Settings.AWS_SECRET_KEY);
     Ec2Credentials credentials = null;
-    if (accountId != null && !accountId.isEmpty() && accessKey != null && !accessKey.isEmpty()) {
+    if (accessKey != null && !accessKey.isEmpty() && secretKey != null && !accessKey.isEmpty()) {
       credentials = new Ec2Credentials();
-      credentials.setAccountId(accountId);
       credentials.setAccessKey(accessKey);
+      credentials.setSecretKey(secretKey);
 
     }
     return credentials;

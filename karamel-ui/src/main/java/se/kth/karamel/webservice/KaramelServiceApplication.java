@@ -193,15 +193,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           String ec2AccessKey = null;
           while (!valid) {
             if (ec2AccountId == null || ec2AccountId.isEmpty()) {
-              ec2AccountId = c.readLine("Enter your Ec2 Account-Id:");
+              ec2AccountId = c.readLine("Enter your Ec2 Access Key:");
             }
             if (ec2AccessKey == null || ec2AccessKey.isEmpty()) {
-              char[] secretKeyChars = c.readPassword("Enter your Ec2 Access-Key:");
+              char[] secretKeyChars = c.readPassword("Enter your Ec2 Secret Key:");
               ec2AccessKey = new String(secretKeyChars);
             }
             credentials = new Ec2Credentials();
-            credentials.setAccountId(ec2AccountId);
-            credentials.setAccessKey(ec2AccessKey);
+            credentials.setAccessKey(ec2AccountId);
+            credentials.setSecretKey(ec2AccessKey);
             valid = karamelApiHandler.updateEc2CredentialsIfValid(credentials);
             if (!valid) {
               Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.WARNING, 
@@ -590,8 +590,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           ProviderJSON provider = new ProviderJSON();
-          provider.setAccountId((credentials == null) ? "" : credentials.getAccountId());
-          provider.setAccountKey((credentials == null) ? "" : credentials.getAccessKey());
+          provider.setAccountId((credentials == null) ? "" : credentials.getAccessKey());
+          provider.setAccountKey((credentials == null) ? "" : credentials.getSecretKey());
           response = Response.status(Response.Status.OK).entity(provider).build();
         } catch (KaramelException e) {
           e.printStackTrace();
@@ -620,8 +620,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         try {
           Ec2Credentials credentials = new Ec2Credentials();
-          credentials.setAccountId(providerJSON.getAccountId());
-          credentials.setAccessKey(providerJSON.getAccountKey());
+          credentials.setAccessKey(providerJSON.getAccountId());
+          credentials.setSecretKey(providerJSON.getAccountKey());
           if (karamelApiHandler.updateEc2CredentialsIfValid(credentials)) {
             response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
           } else {

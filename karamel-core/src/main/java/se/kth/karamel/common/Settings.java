@@ -92,9 +92,9 @@ public class Settings {
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
   public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
-  public static final String EC2_ACCOUNT_ID_KEY = "ect2.account.id";
-  public static final String EC2_ACCESSKEY_KEY = "ec2.access.key";
-  public static final String EC2_KEYPAIR_NAME_KEY = "ec2.keypair.name";
+  public static final String AWS_ACCESS_KEY = "aws.access.key";
+  public static final String AWS_SECRET_KEY = "aws.secret.key";
+  public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
     return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_Address).toLowerCase();

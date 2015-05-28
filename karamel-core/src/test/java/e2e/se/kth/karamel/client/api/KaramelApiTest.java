@@ -208,7 +208,7 @@ public class KaramelApiTest {
     }
   }
   
-  @Test
+//  @Test
   public void testBaremetal() throws KaramelException, IOException, InterruptedException {
 //    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_baremetal.yml"), Charsets.UTF_8);
 //    String json = api.yamlToJson(ymlString);
