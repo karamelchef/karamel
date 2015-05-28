@@ -25,7 +25,7 @@ import se.kth.karamel.common.exception.KaramelException;
  * @author kamal
  */
 public class MachinesMonitor implements TaskSubmitter, Runnable {
-  
+
   private static final Logger logger = Logger.getLogger(MachinesMonitor.class);
   private final String clusterName;
   private final Map<String, SshMachine> machines = new HashMap<>();
@@ -47,7 +47,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
     this.stopping = stopping;
   }
-  
+
   public SshMachine getMachine(String publicIp) {
     for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
@@ -57,16 +57,16 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
     return null;
   }
-  
+
   public void addMachines(List<MachineRuntime> machineEntities) {
     for (MachineRuntime machineEntity : machineEntities) {
-      SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey(), 
+      SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey(),
           keyPair.getPassphrase());
       machines.put(machineEntity.getId(), sshMachine);
       executor.execute(sshMachine);
     }
   }
-  
+
   public void resume() {
     if (paused) {
       logger.info("Sending resume signal to all machines");
@@ -77,7 +77,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
       paused = false;
     }
   }
-  
+
   public void pause() {
     if (!paused) {
       logger.info("Sending pause signal to all machines");
@@ -88,7 +88,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
       paused = true;
     }
   }
-  
+
   @Override
   public void run() {
     logger.info(String.format("Machines-Monitor started for '%s' d'-'", clusterName));
@@ -98,9 +98,9 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
         entrySet.addAll(machines.entrySet());
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
-            machine.ping();
+          machine.ping();
         }
-        
+
         try {
           Thread.currentThread().sleep(Settings.SSH_PING_INTERVAL);
         } catch (InterruptedException ex) {
@@ -123,7 +123,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
       }
     }
   }
-  
+
   @Override
   public void submitTask(Task task) throws KaramelException {
     logger.debug(String.format("Recieved '%s' from DAG", task.toString()));
@@ -135,7 +135,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     machine.enqueue(task);
     // TODO - check if there is a return value....
   }
-  
+
   public void disconnect() throws KaramelException {
     Set<Map.Entry<String, SshMachine>> entrySet = machines.entrySet();
     for (Map.Entry<String, SshMachine> entry : entrySet) {

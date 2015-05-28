@@ -204,7 +204,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             credentials.setSecretKey(ec2AccessKey);
             valid = karamelApiHandler.updateEc2CredentialsIfValid(credentials);
             if (!valid) {
-              Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.WARNING, 
+              Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.WARNING,
                   "Invalid Ec2 Credentials. Try again.");
               ec2AccountId = null;
               ec2AccessKey = null;
@@ -378,8 +378,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   /**
-   * For the cluster yml supplied by the UI, convert it into JSON Object and
-   * return.
+   * For the cluster yml supplied by the UI, convert it into JSON Object and return.
    */
   @Path("/fetchJson")
   @Consumes(MediaType.APPLICATION_JSON)

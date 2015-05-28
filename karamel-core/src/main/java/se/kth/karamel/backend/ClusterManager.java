@@ -93,7 +93,7 @@ public class ClusterManager implements Runnable {
   public void enqueue(Command command) throws KaramelException {
     if (command != Command.PAUSE && command != Command.RESUME) {
       if (!cmdQueue.offer(command)) {
-        String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command, 
+        String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command,
             definition.getName());
         logger.error(msg);
         throw new KaramelException(msg);
@@ -203,8 +203,8 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailures();
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
-      if (group.getPhase() == GroupRuntime.GroupPhase.PRECLEANED || 
-          (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
+      if (group.getPhase() == GroupRuntime.GroupPhase.PRECLEANED
+          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
         runtime.resolveFailure(Failure.hash(Failure.Type.CREATING_SEC_GROUPS_FAILE, group.getName()));
         group.setPhase(GroupRuntime.GroupPhase.FORKING_GROUPS);
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
@@ -227,7 +227,7 @@ public class ClusterManager implements Runnable {
 
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.GROUPS_FORKED);
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' GROUPS_FORKED \\o/\\o/\\o/\\o/\\o/", 
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' GROUPS_FORKED \\o/\\o/\\o/\\o/\\o/",
           definition.getName()));
     }
   }
@@ -293,8 +293,8 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, null));
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
-      if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED || 
-          (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
+      if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED
+          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
         runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, group.getName()));
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
