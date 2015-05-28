@@ -5,6 +5,10 @@
  */
 package se.kth.karamel.client.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import se.kth.karamel.common.IpAddressUtil;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.ValidationException;
 
@@ -14,31 +18,71 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public class Baremetal extends Provider {
 
-  @Override
-  public Baremetal cloneMe() {
-    Baremetal baremetal = new Baremetal();
-    baremetal.setUsername(Settings.PROVIDER_BAREMETAL_DEFAULT_USERNAME);
-    return baremetal;
+  private final List<String> ips = new ArrayList<>();
+
+  public List<String> getIps() {
+    return ips;
+  }
+
+  public void setIps(List<String> ips) {
+    for (String ip : ips) {
+      this.ips.add(ip);
+    }
+  }
+
+  public void setIp(String ip) {
+    ips.add(ip);
+  }
+  
+  public HashSet<String> retriveAllIps() throws ValidationException {
+      HashSet<String> indivIps = new HashSet<>();
+    for (String iprange : ips) {
+      List<String> ips1 = IpAddressUtil.ipRange(iprange);
+      for (String ip1 : ips1) {
+        if (indivIps.contains(ip1))
+          throw new ValidationException("ip-address already exist " + ip1);
+        indivIps.add(ip1);
+      }
+    }
+    return indivIps;
   }
 
   public static Baremetal makeDefault() {
     Baremetal baremetal = new Baremetal();
-    baremetal.setUsername(Settings.PROVIDER_BAREMETAL_DEFAULT_USERNAME);
+    return baremetal.applyDefaults();
+  }
+
+  @Override
+  public Baremetal applyDefaults() {
+    Baremetal clone = cloneMe();
+    if (clone.getUsername() == null) {
+      clone.setUsername(Settings.PROVIDER_BAREMETAL_DEFAULT_USERNAME);
+    }
+    return clone;
+  }
+
+  @Override
+  public Baremetal cloneMe() {
+    Baremetal baremetal = new Baremetal();
+    baremetal.setUsername(getUsername());
+    baremetal.setIps(ips);
     return baremetal;
   }
 
   @Override
   public Provider applyParentScope(Provider parentScopeProvider) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
-
-  @Override
-  public Provider applyDefaults() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    Baremetal clone = cloneMe();
+    if (parentScopeProvider instanceof Baremetal) {
+      Baremetal parentBm = (Baremetal) parentScopeProvider;
+      if (clone.getUsername() == null) {
+        clone.setUsername(parentBm.getUsername());
+      }
+    }
+    return clone;
   }
 
   @Override
   public void validate() throws ValidationException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    retriveAllIps();
   }
 }

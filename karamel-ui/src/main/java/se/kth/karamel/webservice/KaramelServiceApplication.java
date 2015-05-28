@@ -295,7 +295,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ec2.Load());
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Cluster.StartCluster());
-    environment.jersey().register(new Cluster.ViewCluster());
     environment.jersey().register(new Scaffolder.ScaffoldCluster());
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
@@ -658,31 +657,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         try {
           karamelApiHandler.startCluster(boardJSON.getJson());
           response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-    @Path("/viewCluster")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class ViewCluster {
-
-      @PUT
-      public Response viewCluster(ClusterJSON clusterJSON) {
-
-        Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to view the cluster.... ");
-
-        try {
-
-          String clusterInfo = karamelApiHandler.getClusterStatus(clusterJSON.getClusterName());
-          response = Response.status(Response.Status.OK).entity(clusterInfo).build();
 
         } catch (KaramelException e) {
           e.printStackTrace();

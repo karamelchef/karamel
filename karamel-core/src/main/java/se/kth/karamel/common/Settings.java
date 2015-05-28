@@ -237,6 +237,11 @@ public class Settings {
   //settings on vm machines
   public static final String COOKBOOKS_ROOT_VENDOR_PATH = "/tmp/cookbooks";
   public static final String COOKBOOKS_VENDOR_SUBFOLDER = "berks-cookbooks";
+  
+  public static final String IP_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+      + "\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+      + "\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
+      + "\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
 
   public static String loadIpAddress() {
     String address = "UnknownHost";
@@ -246,5 +251,7 @@ public class Settings {
     }
     return address;
   }
+  
+    public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
 
 }

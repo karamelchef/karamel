@@ -1,0 +1,28 @@
+
+<!--Main Wrapper Class-->
+<div class="container" style="width: 100%;">
+  <div id="commandControllerWrapper0" class="col-xs-12">
+    <form class="commandControllerForm well" ng-submit= "processTerminal(0)" style="margin-bottom: 0px;">
+      <p>
+        <span ng-repeat="item in commandObj[0].menuitems">
+          <button type="button" class="btn btn-info btn-sm" ng-click="processCommand(0, item.command)">{{item.label}}</button>
+        </span>
+      </p>
+      <p style="color:red;" ng-show="commandObj[0].errormsg !== null">{{commandObj[0].errormsg}}</p>
+      <p style="color:green;" ng-show="commandObj[0].successmsg !== null">{{commandObj[0].successmsg}}</p>
+      <input type="text" id="command0" class="form-control" placeholder="Enter Command.. (Ex. help)" ng-model="commandObj[0].commandName" />
+      <div  id="response00" ng-show="commandObj[0].renderer === 'info'" class="infoResponseArea" compile-data ></div>
+      <textarea id="response01" ng-show="commandObj[0].renderer === 'yaml'" class="editorResponseArea" placeholder="Write or copy/paste your yaml here ..." rows="20" ng-model="commandObj[0].commandResult"/>
+      <div id="d3dag" ng-show="commandObj[0].renderer === 'dag'" class="live map d3body" ac-dagre>
+        <svg class="dagViewer" >
+        <g />
+        </svg>
+      </div>
+    </form>
+    <div ng-show="commandObj[0].renderer === 'ssh'" class="sshResponseArea">
+      <terminal >
+      </terminal>
+    </div>
+  </div>
+
+</div>
