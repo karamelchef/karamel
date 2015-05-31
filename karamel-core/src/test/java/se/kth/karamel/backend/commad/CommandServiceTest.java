@@ -41,7 +41,7 @@ public class CommandServiceTest {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/hopshub.yml");
     ClusterDefinitionService.saveYaml(yaml);
-    CommandResponse commandResponse = CommandService.processCommand("dag hopshub");
+    CommandResponse commandResponse = CommandService.processCommand("tdag hopshub");
     assertEquals(CommandResponse.Renderer.INFO, commandResponse.getRenderer());
     assertNotNull(commandResponse.getResult());
     System.out.println(commandResponse.getResult());

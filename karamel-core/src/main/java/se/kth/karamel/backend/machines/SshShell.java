@@ -157,7 +157,8 @@ public class SshShell {
 
   public boolean isConnected() throws KaramelException {
     try {
-      return client != null && client.isConnected() && session != null && session.isOpen() && shell != null && shell.isOpen();
+      return client != null && client.isConnected() && session != null && session.isOpen() && shell != null && 
+          shell.isOpen();
     } catch (Exception ex) {
       logger.error("", ex);
       throw new KaramelException("Exception occured", ex);

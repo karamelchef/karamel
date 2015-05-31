@@ -57,7 +57,8 @@ public class ClusterService {
   public synchronized void registerEc2Context(String clusterName, Ec2Context ec2Context) throws KaramelException {
     String name = clusterName.toLowerCase();
     if (repository.containsKey(name)) {
-      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", clusterName));
+      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", 
+          clusterName));
       throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
     }
 
@@ -123,7 +124,7 @@ public class ClusterService {
       logger.info(String.format("'%s' is already running :-|", jsonCluster.getName()));
       throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
     }
-    ClusterContext checkedContext = checkContext(name);
+    ClusterContext checkedContext = checkContext(jsonCluster);
     ClusterManager cluster = new ClusterManager(jsonCluster, checkedContext);
     repository.put(name, cluster);
     cluster.start();
@@ -136,8 +137,8 @@ public class ClusterService {
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
-    checkContext(name);
     ClusterManager cluster = repository.get(name);
+    checkContext(cluster.getDefinition());
     cluster.enqueue(ClusterManager.Command.PAUSE);
   }
 
@@ -147,8 +148,8 @@ public class ClusterService {
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
-    checkContext(name);
-    ClusterManager cluster = repository.get(name);
+    ClusterManager cluster = repository.get(name);    
+    checkContext(cluster.getDefinition());
     cluster.enqueue(ClusterManager.Command.RESUME);
 
   }
@@ -171,7 +172,8 @@ public class ClusterService {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
-          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", runtime.getName()));
+          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", 
+              runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {
         } catch (KaramelException ex) {
@@ -182,10 +184,10 @@ public class ClusterService {
     t.start();
   }
 
-  private ClusterContext checkContext(String clusterName) throws KaramelException {
-    String name = clusterName.toLowerCase();
+  private ClusterContext checkContext(JsonCluster definition) throws KaramelException {
+    String name = definition.getName().toLowerCase();
     ClusterContext context = clusterContexts.get(name);
-    ClusterContext validatedContext = ClusterContext.validateContext(context, commonContext);
+    ClusterContext validatedContext = ClusterContext.validateContext(definition, context, commonContext);
     clusterContexts.put(name, validatedContext);
     return validatedContext;
   }

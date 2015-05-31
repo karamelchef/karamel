@@ -80,8 +80,12 @@ groups:
         - hop::jhs                                                              #Single recipe is acceptable, all will be added to the list of recipes for this group
   ndb:
     size: 2 
-    ec2: 
-        type: m3.medium
+    baremetal: 
+        username: kamal
+        ips:
+          - 192.168.33.11-192.168.33.13
+          - 192.168.33.14
+        ip: 192.168.33.15
     recipes: 
         - hopagent
         - ndb::ndbd
