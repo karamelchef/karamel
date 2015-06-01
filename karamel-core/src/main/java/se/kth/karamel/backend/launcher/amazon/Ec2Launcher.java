@@ -89,7 +89,7 @@ public final class Ec2Launcher extends Launcher {
     Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
     Ec2 ec2 = (Ec2) provider;
     Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    ports.addAll(Settings.DEFAULT_PORTS);
     String groupId = createSecurityGroup(definition.getName(), jg.getName(), ec2, ports);
     return groupId;
   }

@@ -18,7 +18,10 @@ import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
 import org.junit.Before;
 import org.junit.Test;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.model.Nova;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -277,6 +280,37 @@ public class NovaLauncherTest {
 
   @Test
   public void forkGroup() throws KaramelException{
+    //Same test parameters as the securityGroup Test
+    //Initializing and mocking need for method test
+    SecurityGroupRule rule = mock(SecurityGroupRule.class);
+    String uniqueGroup = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, groupName);
+    String uniqueDescription = NovaSetting.NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName, groupName);
 
+    Ingress ingress = Ingress.builder()
+            .fromPort(0)
+            .toPort(65535)
+            .ipProtocol(IpProtocol.TCP)
+            .build();
+
+    when(securityGroupApi.createWithDescription(uniqueGroup, uniqueDescription)).thenReturn(securityGroupCreated);
+    when(securityGroupCreated.getId()).thenReturn("10");
+    when(securityGroupApi.createRuleAllowingCidrBlock("10", ingress, "0.0.0.0/0")).thenReturn(rule);
+
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    //String groupId = novaLauncher.createSecurityGroup(clusterName, groupName, nova, ports);
+
+    JsonCluster cluster = mock(JsonCluster.class);
+    ClusterRuntime clusterRuntime = mock(ClusterRuntime.class);
+    List<JsonGroup> groups = new ArrayList<>();
+    JsonGroup group = mock(JsonGroup.class);
+    groups.add(group);
+    when(group.getName()).thenReturn(groupName);
+    when(cluster.getGroups()).thenReturn(groups);
+    when(group.getProvider()).thenReturn(nova);
+    when(cluster.getProvider()).thenReturn(nova);
+    when(cluster.getName()).thenReturn(clusterName);
+    String groupId = novaLauncher.forkGroup(cluster,clusterRuntime,groupName);
+
+    assertEquals("10", groupId);
   }
 }

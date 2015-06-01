@@ -13,18 +13,23 @@ import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Nova;
+import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.NovaCredentials;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,7 +188,13 @@ public final class NovaLauncher extends Launcher{
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
-    return null;
+    JsonGroup jg = UserClusterDataExtractor.findGroup(definition,name);
+    Provider provider = UserClusterDataExtractor.getGroupProvider(definition,name);
+    Nova nova = (Nova) provider;
+    Set<String> ports = new HashSet<>();
+    ports.addAll(Settings.DEFAULT_PORTS);
+    String groupId = createSecurityGroup(definition.getName(), jg.getName(), nova, ports);
+    return groupId;
   }
 
   @Override
