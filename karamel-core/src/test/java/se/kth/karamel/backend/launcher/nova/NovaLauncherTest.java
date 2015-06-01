@@ -35,243 +35,248 @@ import static org.mockito.Mockito.when;
 
 public class NovaLauncherTest {
 
-    private NovaContext novaContext;
-    private SshKeyPair sshKeyPair;
-    private NovaCredentials novaCredentials;
-    private ContextBuilder builder;
-    private ComputeServiceContext serviceContext;
-    private NovaComputeService novaComputeService;
-    private NovaApi novaApi;
-    private SecurityGroupApi securityGroupApi;
-    private KeyPairApi keyPairApi;
-    private Optional securityGroupApiOptional;
-    private Optional keyPairApiOptional;
-    private SecurityGroup securityGroupCreated;
+  private static final Set<String> ports = new HashSet<>();
 
-    private String clusterName;
-    private String groupName;
-    private Nova nova;
-    private static final Set<String> ports= new HashSet<>();
-
-    static{
-        for(int i=100;i<=250;i++){
-            ports.add(i+"");
-        }
+  static {
+    for (int i = 100; i <= 250; i++) {
+      ports.add(i + "");
     }
+  }
 
-    @Before
-    public void setup(){
+  private NovaContext novaContext;
+  private SshKeyPair sshKeyPair;
+  private NovaCredentials novaCredentials;
+  private ContextBuilder builder;
+  private ComputeServiceContext serviceContext;
+  private NovaComputeService novaComputeService;
+  private NovaApi novaApi;
+  private SecurityGroupApi securityGroupApi;
+  private KeyPairApi keyPairApi;
+  private Optional securityGroupApiOptional;
+  private Optional keyPairApiOptional;
+  private SecurityGroup securityGroupCreated;
+  private String clusterName;
+  private String groupName;
+  private Nova nova;
 
-        //initialize value objects
-        novaCredentials = new NovaCredentials();
-        novaCredentials.setAccountName("pepe");
-        novaCredentials.setAccountPass("1234");
-        novaCredentials.setEndpoint("http://sics-nova.se:8080");
-        novaCredentials.setRegion("SICSRegion");
+  @Before
+  public void setup() {
 
-
-        nova = new Nova();
-        nova.setRegion("SICSRegion");
-        nova.setEndpoint(novaCredentials.getEndpoint());
-        nova.setImage("ubuntu14.04");
-        nova.setFlavor("1");
-
-        sshKeyPair = new SshKeyPair();
-        sshKeyPair.setPrivateKey("this is my private key");
-        sshKeyPair.setPublicKey("this is my public key");
-        sshKeyPair.setPassphrase("helloworld");
-        sshKeyPair.setPrivateKeyPath("/pathToPrivateKey");
-        sshKeyPair.setPublicKeyPath("/pathToPublicKey");
-
-        clusterName = "novaTest";
-        groupName = "dummyGroup";
-
-        //Mocking external dependencies
-        builder = mock(ContextBuilder.class);
-        serviceContext = mock(ComputeServiceContext.class);
-        novaComputeService = mock(NovaComputeService.class);
-        securityGroupApi = mock(SecurityGroupApi.class);
-        novaApi = mock(NovaApi.class);
-        keyPairApi = mock(KeyPairApi.class);
-        securityGroupApiOptional = mock(Optional.class);
-        keyPairApiOptional = mock(Optional.class);
-        novaContext = mock(NovaContext.class);
-        securityGroupCreated = mock(SecurityGroup.class);
-
-        when(novaContext.getNovaCredentials()).thenReturn(novaCredentials);
-        when(novaContext.getNovaApi()).thenReturn(novaApi);
-        when(novaContext.getKeyPairApi()).thenReturn(keyPairApi);
-        when(novaContext.getComputeService()).thenReturn(novaComputeService);
-
-        when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
-        when(serviceContext.getComputeService()).thenReturn(novaComputeService);
-
-        when(novaComputeService.getContext()).thenReturn(serviceContext);
-        when(serviceContext.unwrapApi(NovaApi.class)).thenReturn(novaApi);
-
-        when(novaApi.getSecurityGroupApi(nova.getRegion())).thenReturn(securityGroupApiOptional);
-        when(securityGroupApiOptional.isPresent()).thenReturn(true);
-        when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
-
-        when(novaApi.getKeyPairApi(novaCredentials.getEndpoint())).thenReturn(keyPairApiOptional);
-        when(keyPairApiOptional.get()).thenReturn(keyPairApi);
+    //initialize value objects
+    novaCredentials = new NovaCredentials();
+    novaCredentials.setAccountName("pepe");
+    novaCredentials.setAccountPass("1234");
+    novaCredentials.setEndpoint("http://sics-nova.se:8080");
+    novaCredentials.setRegion("SICSRegion");
 
 
-    }
+    nova = new Nova();
+    nova.setRegion("SICSRegion");
+    nova.setEndpoint(novaCredentials.getEndpoint());
+    nova.setImage("ubuntu14.04");
+    nova.setFlavor("1");
+
+    sshKeyPair = new SshKeyPair();
+    sshKeyPair.setPrivateKey("this is my private key");
+    sshKeyPair.setPublicKey("this is my public key");
+    sshKeyPair.setPassphrase("helloworld");
+    sshKeyPair.setPrivateKeyPath("/pathToPrivateKey");
+    sshKeyPair.setPublicKeyPath("/pathToPublicKey");
+
+    clusterName = "novaTest";
+    groupName = "dummyGroup";
+
+    //Mocking external dependencies
+    builder = mock(ContextBuilder.class);
+    serviceContext = mock(ComputeServiceContext.class);
+    novaComputeService = mock(NovaComputeService.class);
+    securityGroupApi = mock(SecurityGroupApi.class);
+    novaApi = mock(NovaApi.class);
+    keyPairApi = mock(KeyPairApi.class);
+    securityGroupApiOptional = mock(Optional.class);
+    keyPairApiOptional = mock(Optional.class);
+    novaContext = mock(NovaContext.class);
+    securityGroupCreated = mock(SecurityGroup.class);
+
+    when(novaContext.getNovaCredentials()).thenReturn(novaCredentials);
+    when(novaContext.getNovaApi()).thenReturn(novaApi);
+    when(novaContext.getKeyPairApi()).thenReturn(keyPairApi);
+    when(novaContext.getComputeService()).thenReturn(novaComputeService);
+
+    when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
+    when(serviceContext.getComputeService()).thenReturn(novaComputeService);
+
+    when(novaComputeService.getContext()).thenReturn(serviceContext);
+    when(serviceContext.unwrapApi(NovaApi.class)).thenReturn(novaApi);
+
+    when(novaApi.getSecurityGroupApi(nova.getRegion())).thenReturn(securityGroupApiOptional);
+    when(securityGroupApiOptional.isPresent()).thenReturn(true);
+    when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
+
+    when(novaApi.getKeyPairApi(novaCredentials.getEndpoint())).thenReturn(keyPairApiOptional);
+    when(keyPairApiOptional.get()).thenReturn(keyPairApi);
 
 
-    @Test
-    public void validateNovaCredentialsTest() throws InvalidNovaCredentialsException {
-        NovaContext context = NovaLauncher.validateCredentials(novaCredentials,builder);
-        assertNotNull(context);
-        assertNotNull(context.getSecurityGroupApi());
-    }
+  }
 
-    @Test(expected = InvalidNovaCredentialsException.class)
-    public void validateNovaCredentialsTestException() throws InvalidNovaCredentialsException {
-        when(securityGroupApi.list()).thenThrow(AuthorizationException.class);
-        NovaContext context = NovaLauncher.validateCredentials(novaCredentials,builder);
-    }
 
-    @Test
-    public void readNovaCredentialsTest() {
-        Confs confs = mock(Confs.class);
-        when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter())).thenReturn(novaCredentials.getAccountName());
-        when(confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter())).thenReturn(novaCredentials.getAccountPass());
-        when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter())).thenReturn(novaCredentials.getEndpoint());
-        when(confs.getProperty(NovaSetting.NOVA_REGION.getParameter())).thenReturn(novaCredentials.getRegion());
-        NovaCredentials credentials = NovaLauncher.readCredentials(confs);
-        assertNotNull(credentials);
-    }
+  @Test
+  public void validateNovaCredentialsTest() throws InvalidNovaCredentialsException {
+    NovaContext context = NovaLauncher.validateCredentials(novaCredentials, builder);
+    assertNotNull(context);
+    assertNotNull(context.getSecurityGroupApi());
+  }
 
-    @Test(expected = KaramelException.class)
-    public void createNovaLauncherTestNullContext() throws KaramelException{
-        NovaLauncher launcher = new NovaLauncher(null,sshKeyPair);
-    }
+  @Test(expected = InvalidNovaCredentialsException.class)
+  public void validateNovaCredentialsTestException() throws InvalidNovaCredentialsException {
+    when(securityGroupApi.list()).thenThrow(AuthorizationException.class);
+    NovaContext context = NovaLauncher.validateCredentials(novaCredentials, builder);
+  }
 
-    @Test(expected = KaramelException.class)
-    public void createNovaLauncherTestNullSSHKey() throws KaramelException{
-        NovaLauncher launcher = new NovaLauncher(novaContext,null);
-    }
+  @Test
+  public void readNovaCredentialsTest() {
+    Confs confs = mock(Confs.class);
+    when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter())).thenReturn(novaCredentials.getAccountName());
+    when(confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter())).thenReturn(novaCredentials.getAccountPass());
+    when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter())).thenReturn(novaCredentials.getEndpoint());
+    when(confs.getProperty(NovaSetting.NOVA_REGION.getParameter())).thenReturn(novaCredentials.getRegion());
+    NovaCredentials credentials = NovaLauncher.readCredentials(confs);
+    assertNotNull(credentials);
+  }
 
-    @Test
-    public void createSecurityGroupTestWithTestingFlag()throws KaramelException{
-        //Initializing and mocking need for method test
-        SecurityGroupRule rule = mock(SecurityGroupRule.class);
-        String uniqueGroup = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName,groupName);
-        String uniqueDescription = NovaSetting.NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName,groupName);
+  @Test(expected = KaramelException.class)
+  public void createNovaLauncherTestNullContext() throws KaramelException {
+    NovaLauncher launcher = new NovaLauncher(null, sshKeyPair);
+  }
 
-        Ingress ingress = Ingress.builder()
-                .fromPort(0)
-                .toPort(65535)
-                .ipProtocol(IpProtocol.TCP)
-                .build();
+  @Test(expected = KaramelException.class)
+  public void createNovaLauncherTestNullSSHKey() throws KaramelException {
+    NovaLauncher launcher = new NovaLauncher(novaContext, null);
+  }
 
-        when(securityGroupApi.createWithDescription(uniqueGroup,uniqueDescription)).thenReturn(securityGroupCreated);
-        when(securityGroupCreated.getId()).thenReturn("10");
-        when(securityGroupApi.createRuleAllowingCidrBlock("10", ingress, "0.0.0.0/0")).thenReturn(rule);
+  @Test
+  public void createSecurityGroupTestWithTestingFlag() throws KaramelException {
+    //Initializing and mocking need for method test
+    SecurityGroupRule rule = mock(SecurityGroupRule.class);
+    String uniqueGroup = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, groupName);
+    String uniqueDescription = NovaSetting.NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName, groupName);
 
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        String groupId = novaLauncher.createSecurityGroup(clusterName,groupName,nova,ports);
-        assertEquals("10",groupId);
-    }
+    Ingress ingress = Ingress.builder()
+            .fromPort(0)
+            .toPort(65535)
+            .ipProtocol(IpProtocol.TCP)
+            .build();
 
-    @Test
-    public void createSecurityGroupTestWithTestingFlagAndNoSecurityAPIPresent()throws KaramelException{
-        when(securityGroupApiOptional.isPresent()).thenReturn(false);
+    when(securityGroupApi.createWithDescription(uniqueGroup, uniqueDescription)).thenReturn(securityGroupCreated);
+    when(securityGroupCreated.getId()).thenReturn("10");
+    when(securityGroupApi.createRuleAllowingCidrBlock("10", ingress, "0.0.0.0/0")).thenReturn(rule);
 
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        String groupId = novaLauncher.createSecurityGroup(clusterName,groupName,nova,ports);
-        assertNull(groupId);
-    }
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    String groupId = novaLauncher.createSecurityGroup(clusterName, groupName, nova, ports);
+    assertEquals("10", groupId);
+  }
 
-    @Test
-    public void uploadSSHPublicKeyAndCreate() throws KaramelException{
-        String keypairName = "pepeKeyPair";
-        KeyPair pair = mock(KeyPair.class);
-        List<KeyPair> keyPairList = new ArrayList<>();
-        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+  @Test
+  public void createSecurityGroupTestWithTestingFlagAndNoSecurityAPIPresent() throws KaramelException {
+    when(securityGroupApiOptional.isPresent()).thenReturn(false);
 
-        when(keyPairApi.list()).thenReturn(keys);
-        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    String groupId = novaLauncher.createSecurityGroup(clusterName, groupName, nova, ports);
+    assertNull(groupId);
+  }
 
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,false);
-        assertTrue(uploadSuccessful);
-    }
+  @Test
+  public void uploadSSHPublicKeyAndCreate() throws KaramelException {
+    String keypairName = "pepeKeyPair";
+    KeyPair pair = mock(KeyPair.class);
+    List<KeyPair> keyPairList = new ArrayList<>();
+    FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
 
-    @Test
-    public void uploadSSHPublicKeyAndRecreateOld() throws KaramelException{
-        String keypairName = "pepeKeyPair";
-        KeyPair pair = mock(KeyPair.class);
+    when(keyPairApi.list()).thenReturn(keys);
+    when(keyPairApi.createWithPublicKey(keypairName, sshKeyPair.getPublicKey())).thenReturn(pair);
 
-        List<KeyPair> keyPairList = new ArrayList<>();
-        keyPairList.add(pair);
-        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova, false);
+    assertTrue(uploadSuccessful);
+  }
 
-        when(keyPairApi.list()).thenReturn(keys);
-        when(keyPairApi.delete(keypairName)).thenReturn(true);
-        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+  @Test
+  public void uploadSSHPublicKeyAndRecreateOld() throws KaramelException {
+    String keypairName = "pepeKeyPair";
+    KeyPair pair = mock(KeyPair.class);
 
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,true);
-        assertTrue(uploadSuccessful);
-    }
+    List<KeyPair> keyPairList = new ArrayList<>();
+    keyPairList.add(pair);
+    FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
 
-    @Test
-    public void uploadSSHPublicKeyAndNotRecreateOldFail() throws KaramelException{
-        String keypairName = "pepeKeyPair";
-        KeyPair pair = mock(KeyPair.class);
+    when(keyPairApi.list()).thenReturn(keys);
+    when(keyPairApi.delete(keypairName)).thenReturn(true);
+    when(keyPairApi.createWithPublicKey(keypairName, sshKeyPair.getPublicKey())).thenReturn(pair);
 
-        List<KeyPair> keyPairList = new ArrayList<>();
-        keyPairList.add(pair);
-        FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova, true);
+    assertTrue(uploadSuccessful);
+  }
 
-        when(keyPairApi.list()).thenReturn(keys);
-        when(keyPairApi.delete(keypairName)).thenReturn(true);
-        when(keyPairApi.createWithPublicKey(keypairName,sshKeyPair.getPublicKey())).thenReturn(pair);
+  @Test
+  public void uploadSSHPublicKeyAndNotRecreateOldFail() throws KaramelException {
+    String keypairName = "pepeKeyPair";
+    KeyPair pair = mock(KeyPair.class);
 
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova,false);
-        assertFalse(uploadSuccessful);
-    }
+    List<KeyPair> keyPairList = new ArrayList<>();
+    keyPairList.add(pair);
+    FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
 
-    @Test
-    public void cleanupFailedNodesEmpty() throws KaramelException{
-        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
-        assertTrue(cleanupSuccessful);
-    }
+    when(keyPairApi.list()).thenReturn(keys);
+    when(keyPairApi.delete(keypairName)).thenReturn(true);
+    when(keyPairApi.createWithPublicKey(keypairName, sshKeyPair.getPublicKey())).thenReturn(pair);
 
-    @Test
-    public void cleanupFailedNodesNotEmpty() throws KaramelException{
-        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
-        Throwable exception = mock(Throwable.class);
-        NodeMetadata meta = mock(NodeMetadata.class);
-        failedNodes.put(meta,exception);
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova, false);
+    assertFalse(uploadSuccessful);
+  }
 
-        Set<NodeMetadata> destroyedNodes = new HashSet<>();
-        destroyedNodes.add(meta);
-        when(meta.getId()).thenReturn("20");
-        doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
-        assertTrue(cleanupSuccessful);
-    }
+  @Test
+  public void cleanupFailedNodesEmpty() throws KaramelException {
+    Map<NodeMetadata, Throwable> failedNodes = new HashMap<>();
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+    assertTrue(cleanupSuccessful);
+  }
 
-    @Test
-    public void cleanupFailedNodesSomethingWentWrong() throws KaramelException{
-        Map<NodeMetadata,Throwable> failedNodes = new HashMap<>();
-        Throwable exception = mock(Throwable.class);
-        NodeMetadata meta = mock(NodeMetadata.class);
-        failedNodes.put(meta,exception);
+  @Test
+  public void cleanupFailedNodesNotEmpty() throws KaramelException {
+    Map<NodeMetadata, Throwable> failedNodes = new HashMap<>();
+    Throwable exception = mock(Throwable.class);
+    NodeMetadata meta = mock(NodeMetadata.class);
+    failedNodes.put(meta, exception);
 
-        Set<NodeMetadata> destroyedNodes = new HashSet<>();
-        when(meta.getId()).thenReturn("20");
-        doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
-        NovaLauncher novaLauncher = new NovaLauncher(novaContext,sshKeyPair);
-        boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
-        assertFalse(cleanupSuccessful);
-    }
+    Set<NodeMetadata> destroyedNodes = new HashSet<>();
+    destroyedNodes.add(meta);
+    when(meta.getId()).thenReturn("20");
+    doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+    assertTrue(cleanupSuccessful);
+  }
+
+  @Test
+  public void cleanupFailedNodesSomethingWentWrong() throws KaramelException {
+    Map<NodeMetadata, Throwable> failedNodes = new HashMap<>();
+    Throwable exception = mock(Throwable.class);
+    NodeMetadata meta = mock(NodeMetadata.class);
+    failedNodes.put(meta, exception);
+
+    Set<NodeMetadata> destroyedNodes = new HashSet<>();
+    when(meta.getId()).thenReturn("20");
+    doReturn(destroyedNodes).when(novaComputeService).destroyNodesMatching(Predicates.in(failedNodes.keySet()));
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    boolean cleanupSuccessful = novaLauncher.cleanupFailedNodes(failedNodes);
+    assertFalse(cleanupSuccessful);
+  }
+
+  @Test
+  public void forkGroup() throws KaramelException{
+
+  }
 }

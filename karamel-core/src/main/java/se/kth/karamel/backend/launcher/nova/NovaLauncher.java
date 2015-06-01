@@ -13,7 +13,11 @@ import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.launcher.Launcher;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Nova;
+import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -21,13 +25,14 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Created by Alberto on 2015-05-16.
  */
-public final class NovaLauncher {
+public final class NovaLauncher extends Launcher{
   private static final Logger logger = Logger.getLogger(NovaLauncher.class);
   public static boolean TESTING = true;
   public final NovaContext novaContext;
@@ -169,5 +174,20 @@ public final class NovaLauncher {
     }
     return success;
 
+  }
+
+  @Override
+  public void cleanup(JsonCluster definition, ClusterRuntime runtime) throws KaramelException {
+
+  }
+
+  @Override
+  public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
+    return null;
+  }
+
+  @Override
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
+    return null;
   }
 }
