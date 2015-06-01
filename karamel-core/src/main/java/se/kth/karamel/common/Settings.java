@@ -5,14 +5,15 @@
  */
 package se.kth.karamel.common;
 
+import org.jclouds.aws.domain.Region;
+import org.jclouds.ec2.domain.InstanceType;
+
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.jclouds.aws.domain.Region;
-import org.jclouds.ec2.domain.InstanceType;
 
 /**
  *

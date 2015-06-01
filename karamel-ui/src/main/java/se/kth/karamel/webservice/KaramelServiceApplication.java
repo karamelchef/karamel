@@ -6,55 +6,35 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jetty.MutableServletContextHandler;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import java.awt.Desktop;
-import java.awt.Image;
-import java.awt.SystemTray;
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import org.apache.commons.cli.*;
+import org.eclipse.jetty.server.AbstractNetworkConnector;
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
+import se.kth.karamel.backend.ClusterDefinitionService;
+import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
+import se.kth.karamel.client.model.yaml.YamlCluster;
+import se.kth.karamel.common.CookbookScaffolder;
+import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.webservicemodel.*;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.swing.*;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.awt.*;
+import java.io.*;
+import java.net.*;
 import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.ImageIcon;
-import javax.ws.rs.GET;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.eclipse.jetty.server.AbstractNetworkConnector;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Server;
-import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.command.CommandResponse;
-import se.kth.karamel.client.model.yaml.YamlCluster;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.common.CookbookScaffolder;
+
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
 /**
@@ -365,7 +345,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           + "Are you running a window manager?");
       System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
       System.err.println("Retrying to launch the browser now using a different method.");
-      BareBonesBrowserLaunch.openURL(uri.toASCIIString());
+      se.kth.karamel.webservice.BareBonesBrowserLaunch.openURL(uri.toASCIIString());
     }
   }
 

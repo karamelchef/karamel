@@ -20,56 +20,55 @@ import java.util.Properties;
  * Created by Alberto on 2015-05-16.
  */
 public class NovaContext {
+  private final NovaCredentials novaCredentials;
+  private final NovaComputeService computeService;
+  private final NovaApi novaApi;
+  private final SecurityGroupApi securityGroupApi;
+  private final KeyPairApi keyPairApi;
 
-    private final NovaCredentials novaCredentials;
-    private final NovaComputeService computeService;
-    private final NovaApi novaApi;
-    private final SecurityGroupApi securityGroupApi;
-    private final KeyPairApi keyPairApi;
+  public NovaContext(NovaCredentials credentials, ContextBuilder builder) {
+    this.novaCredentials = credentials;
+    ComputeServiceContext context = builder.buildView(ComputeServiceContext.class);
+    this.computeService = (NovaComputeService) context.getComputeService();
+    this.novaApi = computeService.getContext().unwrapApi(NovaApi.class);
+    this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getRegion()).get();
+    this.keyPairApi = novaApi.getKeyPairApi(credentials.getEndpoint()).get();
+  }
 
-    public NovaContext(NovaCredentials credentials,ContextBuilder builder){
-        this.novaCredentials = credentials;
-        ComputeServiceContext context = builder.buildView(ComputeServiceContext.class);
-        this.computeService = (NovaComputeService) context.getComputeService();
-        this.novaApi = computeService.getContext().unwrapApi(NovaApi.class);
-        this.securityGroupApi = novaApi.getSecurityGroupApi(credentials.getRegion()).get();
-        this.keyPairApi = novaApi.getKeyPairApi(credentials.getEndpoint()).get();
-    }
+  public static ContextBuilder buildContext(NovaCredentials credentials) {
+    Properties properties = new Properties();
+    Iterable<Module> modules = ImmutableSet.<Module>of(
+            new SshjSshClientModule(),
+            new SLF4JLoggingModule(),
+            new EnterpriseConfigurationModule());
 
-    public NovaCredentials getNovaCredentials() {
-        return novaCredentials;
-    }
+    ContextBuilder build = ContextBuilder.newBuilder("aws-ec2")
+            .credentials(credentials.getAccountName(), credentials.getAccountPass())
+            .endpoint(credentials.getEndpoint())
+            .modules(modules)
+            .overrides(properties);
 
-    public NovaComputeService getComputeService() {
-        return computeService;
-    }
+    return build;
+  }
 
-    public NovaApi getNovaApi() {
-        return novaApi;
-    }
+  public NovaCredentials getNovaCredentials() {
+    return novaCredentials;
+  }
 
-    public SecurityGroupApi getSecurityGroupApi() {
-        return securityGroupApi;
-    }
+  public NovaComputeService getComputeService() {
+    return computeService;
+  }
 
-    public KeyPairApi getKeyPairApi() {
-        return keyPairApi;
-    }
+  public NovaApi getNovaApi() {
+    return novaApi;
+  }
 
-    public static ContextBuilder buildContext(NovaCredentials credentials){
-        Properties properties = new Properties();
-        Iterable<Module> modules = ImmutableSet.<Module>of(
-                new SshjSshClientModule(),
-                new SLF4JLoggingModule(),
-                new EnterpriseConfigurationModule());
+  public SecurityGroupApi getSecurityGroupApi() {
+    return securityGroupApi;
+  }
 
-        ContextBuilder build = ContextBuilder.newBuilder("aws-ec2")
-                .credentials(credentials.getAccountName(), credentials.getAccountPass())
-                .endpoint(credentials.getEndpoint())
-                .modules(modules)
-                .overrides(properties);
-
-        return build;
-    }
+  public KeyPairApi getKeyPairApi() {
+    return keyPairApi;
+  }
 
 }
