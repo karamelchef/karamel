@@ -63,6 +63,6 @@ public class GceLauncherTest {
         gce.setZone("europe-west1-b");
         gce.setMachineType(Gce.MachineType.n1_standard_1);
         GceLauncher launcher = new GceLauncher(context);
-        launcher.forkMachines("c1", "g1", 10, gce);
+        launcher.forkMachines("c1", "g1", 8, gce);
     }
 }

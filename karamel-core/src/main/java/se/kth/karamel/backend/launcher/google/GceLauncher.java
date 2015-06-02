@@ -129,7 +129,8 @@ public class GceLauncher {
             URI imageType = Gce.buildImageUri(gce.getImageType(), gce.getImageName());
             ArrayList<Operation> operations = new ArrayList<Operation>();
             for (String name : allVmNames) {
-                Operation operation = instanceApi.create(NewInstance.create(allVmNames.get(0), machineType, networkType, imageType));
+                Operation operation = instanceApi.create(NewInstance.create(name, machineType, networkType, imageType));
+                System.out.println("Starting instance " + name);
                 operations.add(operation);
             }
             ArrayList<URI> instances = new ArrayList<URI>();
