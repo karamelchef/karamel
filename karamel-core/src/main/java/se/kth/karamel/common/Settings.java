@@ -103,8 +103,16 @@ public class Settings {
     return (USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
   }
   
-  public static final String GCE_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
-    return ("gce" + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
+  public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {
+    return (provider + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
+  }
+  
+  public static final List<String> UNIQUE_VM_NAMES(String provider, String clusterName, String groupName, int size) {
+    List<String> names = new ArrayList<>();
+    for (int i = 1; i <= size; i++) {
+      names.add(UNIQUE_GROUP_NAME(provider, clusterName, groupName) + "-" + i);
+    }
+    return names;
   }
 
   public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int size) {
