@@ -14,10 +14,11 @@ import java.io.FileNotFoundException;
  */
 public class FilesystemUtil {
 
-    public static boolean deleteRecursive(String path) throws FileNotFoundException {
-      File file = new File(path);
-      return deleteRecursive(file);
-    }
+  public static boolean deleteRecursive(String path) throws FileNotFoundException {
+    File file = new File(path);
+    return deleteRecursive(file);
+  }
+
   /**
    * By default File#delete fails for non-empty directories, it works like "rm". We need something a little more brutual
    * - this does the equivalent of "rm -r"

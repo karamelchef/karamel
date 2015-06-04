@@ -26,7 +26,8 @@ public class VendorCookbookTask extends Task {
   private final String cookbookUrl;
   private final String branch;
 
-  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
+  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, 
+      String cookbookName, String cookbookUrl, String branch) {
     super("clone and vendor " + cookbookUrl, machine, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;

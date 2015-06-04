@@ -3,9 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.kth.karamel.webservicemodel;
-
 
 /**
  *
@@ -13,16 +11,14 @@ package se.kth.karamel.webservicemodel;
  */
 public class ClusterJSON {
 
-    public String clusterName;
+  public String clusterName;
 
+  public String getClusterName() {
+    return clusterName;
+  }
 
-    public String getClusterName(){
-        return clusterName;
-    }
-
-    public void setClusterName(String clusterName){
-        this.clusterName = clusterName;
-    }
-
+  public void setClusterName(String clusterName) {
+    this.clusterName = clusterName;
+  }
 
 }

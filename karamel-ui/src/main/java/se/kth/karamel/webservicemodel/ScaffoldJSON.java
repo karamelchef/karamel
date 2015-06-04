@@ -6,19 +6,20 @@ package se.kth.karamel.webservicemodel;
  */
 public class ScaffoldJSON {
 
-    private String name;
+  private String name;
 
-    public ScaffoldJSON(){}
+  public ScaffoldJSON() {
+  }
 
-    public ScaffoldJSON(String name){
-        this.name = name;
-    }
+  public ScaffoldJSON(String name) {
+    this.name = name;
+  }
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+  public void setName(String name) {
+    this.name = name;
+  }
 }

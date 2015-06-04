@@ -33,14 +33,15 @@ public class Baremetal extends Provider {
   public void setIp(String ip) {
     ips.add(ip);
   }
-  
+
   public HashSet<String> retriveAllIps() throws ValidationException {
-      HashSet<String> indivIps = new HashSet<>();
+    HashSet<String> indivIps = new HashSet<>();
     for (String iprange : ips) {
       List<String> ips1 = IpAddressUtil.ipRange(iprange);
       for (String ip1 : ips1) {
-        if (indivIps.contains(ip1))
+        if (indivIps.contains(ip1)) {
           throw new ValidationException("ip-address already exist " + ip1);
+        }
         indivIps.add(ip1);
       }
     }

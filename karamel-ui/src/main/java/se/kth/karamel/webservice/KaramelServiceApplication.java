@@ -361,7 +361,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         e.printStackTrace();
       }
     } else {
-      System.err.println("Brower UI could not be launched using Java's Desktop library. Are you running a window manager?");
+      System.err.println("Brower UI could not be launched using Java's Desktop library. "
+          + "Are you running a window manager?");
       System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
       System.err.println("Retrying to launch the browser now using a different method.");
       BareBonesBrowserLaunch.openURL(uri.toASCIIString());
@@ -377,8 +378,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   }
 
   /**
-   * For the cluster yml supplied by the UI, convert it into JSON Object and
-   * return.
+   * For the cluster yml supplied by the UI, convert it into JSON Object and return.
    */
   @Path("/fetchJson")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -394,7 +394,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         response = Response.status(Response.Status.OK).entity(jsonClusterString).build();
       } catch (KaramelException e) {
         e.printStackTrace();
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
       }
       return response;
     }
@@ -416,7 +417,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         response = Response.status(Response.Status.OK).entity(karamelBoardYaml).build();
 
       } catch (KaramelException e) {
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         e.printStackTrace();
       }
       return response;
@@ -440,7 +442,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
       } catch (KaramelException e) {
         e.printStackTrace();
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
       }
 
       return response;
@@ -457,7 +460,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadSshKeys() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to load ssh keys.");
         try {
           SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();
           if (sshKeypair == null) {
@@ -467,7 +471,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
         }
 
         return response;
@@ -483,7 +488,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response registerSshKeys(SshKeyJSON sshKeysJSON) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to register ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to register ssh keys.");
         SshKeyPair sshKeypair = new SshKeyPair();
         sshKeypair.setPublicKeyPath(sshKeysJSON.getPubKeyPath());
         sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
@@ -493,7 +499,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
         }
 
         return response;
@@ -509,14 +516,16 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response generateSshKeys() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to generate ssh keys.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to generate ssh keys.");
         try {
           SshKeyPair sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           karamelApiHandler.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
         }
         return response;
       }
@@ -534,13 +543,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response getCommandCheetSheet() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load the command cheatsheet.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to load the command cheatsheet.");
         try {
           String cheatSheet = karamelApiHandler.commandCheatSheet();
           response = Response.status(Response.Status.OK).entity(cheatSheet).build();
         } catch (KaramelException e) {
           e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
         return response;
       }
@@ -586,7 +597,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadCredentials() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to load the ec2 credentials.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to load the ec2 credentials.");
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           ProviderJSON provider = new ProviderJSON();
@@ -595,7 +607,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           response = Response.status(Response.Status.OK).entity(provider).build();
         } catch (KaramelException e) {
           e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
         return response;
       }
@@ -616,21 +629,25 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response validateCredentials(ProviderJSON providerJSON) {
 
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to validate the ec2 credentials.");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to validate the ec2 credentials.");
 
         try {
           Ec2Credentials credentials = new Ec2Credentials();
           credentials.setAccessKey(providerJSON.getAccountId());
           credentials.setSecretKey(providerJSON.getAccountKey());
           if (karamelApiHandler.updateEc2CredentialsIfValid(credentials)) {
-            response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+            response = Response.status(Response.Status.OK).
+                entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
           } else {
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
           }
 
         } catch (KaramelException e) {
           e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
         return response;
       }
@@ -656,11 +673,13 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         try {
           karamelApiHandler.startCluster(boardJSON.getJson());
-          response = Response.status(Response.Status.OK).entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+          response = Response.status(Response.Status.OK).
+              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
 
         } catch (KaramelException e) {
           e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
 
         return response;
@@ -681,13 +700,15 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response scaffold(ScaffoldJSON cbName) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, " Received request to scaffold a new cookbook.... ");
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to scaffold a new cookbook.... ");
         try {
           CookbookScaffolder.create(cbName.getName());
           response = Response.status(Response.Status.OK).build();
         } catch (IOException e) {
           e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
         return response;
       }

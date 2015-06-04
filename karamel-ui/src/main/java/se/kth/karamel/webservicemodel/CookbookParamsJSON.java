@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.kth.karamel.webservicemodel;
 
 /**
@@ -11,20 +10,21 @@ package se.kth.karamel.webservicemodel;
  * @author jdowling
  */
 public class CookbookParamsJSON {
-    private final String cluster;
-    private final String cookbook;
 
-    public CookbookParamsJSON(String cluster, String cb) {
-        this.cluster = cluster;
-        this.cookbook = cb;
-    }
+  private final String cluster;
+  private final String cookbook;
 
-    public String getCookbook() {
-        return cookbook;
-    }
+  public CookbookParamsJSON(String cluster, String cb) {
+    this.cluster = cluster;
+    this.cookbook = cb;
+  }
 
-    public String getCluster() {
-        return cluster;
-    }
+  public String getCookbook() {
+    return cookbook;
+  }
+
+  public String getCluster() {
+    return cluster;
+  }
 
 }

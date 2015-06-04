@@ -35,7 +35,8 @@ public final class DefaultRb {
     for (String line : contentLines) {
       if (line.matches(LINE_PATTERN)) {
         int indx = line.indexOf("=");
-        String key = line.substring(0, indx - 1).trim().substring(9).replaceAll("\\[\\:", "/").replaceAll("\\[\\'", "/").replaceAll("\\]", "").replaceAll("\\'", "").trim();
+        String key = line.substring(0, indx - 1).trim().substring(9).replaceAll("\\[\\:", "/").
+            replaceAll("\\[\\'", "/").replaceAll("\\]", "").replaceAll("\\'", "").trim();
         String value = line.substring(indx + 1).trim();
         Matcher m1 = VALUE_PATTERN.matcher(value);
         Matcher m2 = SKIP_VALUE_PATTERN.matcher(value);
