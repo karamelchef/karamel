@@ -51,6 +51,8 @@ public final class Ec2Launcher extends Launcher {
   public final Ec2Context context;
   public final SshKeyPair sshKeyPair;
 
+  Set<String> keys = new HashSet<>();
+
   public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
     this.context = context;
     this.sshKeyPair = sshKeyPair;
@@ -94,7 +96,7 @@ public final class Ec2Launcher extends Launcher {
     return groupId;
   }
 
-  public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports) 
+  public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports)
       throws KaramelException {
     String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
@@ -157,7 +159,7 @@ public final class Ec2Launcher extends Launcher {
 
     HashSet<String> regions = new HashSet();
     if (!regions.contains(ec2.getRegion())) {
-      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(), 
+      Set<KeyPair> keypairs = context.getKeypairApi().describeKeyPairsInRegion(ec2.getRegion(),
           new String[]{keyPairName});
       if (keypairs.isEmpty()) {
         logger.info(String.format("New keypair '%s' is being uploaded to EC2", keyPairName));
@@ -172,8 +174,6 @@ public final class Ec2Launcher extends Launcher {
       regions.add(ec2.getRegion());
     }
   }
-
-  Set<String> keys = new HashSet<>();
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 

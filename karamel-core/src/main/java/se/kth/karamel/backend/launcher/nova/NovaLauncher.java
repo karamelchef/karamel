@@ -16,6 +16,7 @@ import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Nova;
 import se.kth.karamel.client.model.Provider;
@@ -42,6 +43,8 @@ public final class NovaLauncher extends Launcher{
   public static boolean TESTING = true;
   public final NovaContext novaContext;
   public final SshKeyPair sshKeyPair;
+
+  Set<String> keys = new HashSet<>();
 
   public NovaLauncher(NovaContext novaContext, SshKeyPair sshKeyPair) throws KaramelException {
     if (novaContext == null) {
@@ -198,7 +201,24 @@ public final class NovaLauncher extends Launcher{
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
+          throws KaramelException {
+    Nova nova = (Nova) UserClusterDataExtractor.getGroupProvider(definition,name);
+    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition,name);
+    GroupRuntime groupRuntime = UserClusterDataExtractor.findGroup(runtime,name);
+    Set<String> groupIds = new HashSet<>();
+    groupIds.add(groupRuntime.getId());
+
+    String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(),nova.getRegion());
+    if(!keys.contains(keypairName)){
+      uploadSshPublicKey(keypairName,nova,true);
+      keys.add(keypairName);
+    }
+    return requestNodes(keypairName,groupRuntime,groupIds,Integer.valueOf(definedGroup.getSize()),nova);
+  }
+
+  private List<MachineRuntime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
+                                            Integer integer, Nova nova) {
     return null;
   }
 }

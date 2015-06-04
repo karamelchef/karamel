@@ -19,6 +19,7 @@ import org.jclouds.rest.AuthorizationException;
 import org.junit.Before;
 import org.junit.Test;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Nova;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -279,7 +280,7 @@ public class NovaLauncherTest {
   }
 
   @Test
-  public void forkGroup() throws KaramelException{
+  public void testForkGroup() throws KaramelException{
     //Same test parameters as the securityGroup Test
     //Initializing and mocking need for method test
     SecurityGroupRule rule = mock(SecurityGroupRule.class);
@@ -312,5 +313,26 @@ public class NovaLauncherTest {
     String groupId = novaLauncher.forkGroup(cluster,clusterRuntime,groupName);
 
     assertEquals("10", groupId);
+  }
+
+  @Test
+  public void testForkMachines() throws KaramelException{
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    //mocking
+    JsonCluster cluster = mock(JsonCluster.class);
+    ClusterRuntime clusterRuntime = mock(ClusterRuntime.class);
+    List<JsonGroup> groups = new ArrayList<>();
+    JsonGroup group = mock(JsonGroup.class);
+    groups.add(group);
+    when(group.getName()).thenReturn(groupName);
+    when(cluster.getGroups()).thenReturn(groups);
+    when(group.getProvider()).thenReturn(nova);
+    when(cluster.getProvider()).thenReturn(nova);
+    when(cluster.getName()).thenReturn(clusterName);
+    //testing method
+    List<MachineRuntime> forkedMachines =novaLauncher.forkMachines(cluster,clusterRuntime,groupName);
+
+    assertNotNull(forkedMachines);
+    assertFalse(forkedMachines.isEmpty());
   }
 }
