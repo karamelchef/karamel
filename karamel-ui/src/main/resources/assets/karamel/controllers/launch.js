@@ -83,8 +83,8 @@ angular.module('karamel.main')
             scp.mapKey = 'ec2';
             scp.bootUp = true;
             scp.account = {
-              accountId: null,
-              accountKey: null
+              accessKey: null,
+              secretKey: null
             };
             scp.availableStates = {
               success: 'success',
@@ -143,8 +143,8 @@ angular.module('karamel.main')
               if (scope.bootUp) {
                 KaramelCoreRestServices.loadCredentials()
                   .success(function(data) {
-                    scope.account.accountId = data.accountId;
-                    scope.account.accountKey = data.accountKey;
+                    scope.account.accessKey = data.accessKey;
+                    scope.account.secretKey = data.secretKey;
                     _updateState('specialWarn', scope.ec2);
                     scope.validateCredentials();
                   })
@@ -162,7 +162,7 @@ angular.module('karamel.main')
 
           scope.validateCredentials = function() {
 
-            if (scope.account.accountId != null && scope.account.accountKey != null) {
+            if (scope.account.accessKey != null && scope.account.secretKey != null) {
               KaramelCoreRestServices.validateCredentials(scope.account)
                 .success(function(data) {
                   _updateState('success', scope.ec2);
