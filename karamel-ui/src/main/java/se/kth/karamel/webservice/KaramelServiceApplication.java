@@ -302,22 +302,22 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
+
+    if (SystemTray.isSupported()) {
+      trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
+    }
     new Thread("webpage opening..") {
       public void run() {
         try {
-//          Thread.sleep(2000);
+          Thread.sleep(1500);
           openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
-//        } catch (InterruptedException e) {
+        } catch (InterruptedException e) {
 //           swallow the exception
         } catch (java.net.MalformedURLException e) {
           // swallow the exception
         }
       }
     }.start();
-
-    if (SystemTray.isSupported()) {
-      trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
-    }
 
   }
 

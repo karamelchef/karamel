@@ -25,7 +25,7 @@ angular.module('karamel.main')
             }
           }
           else {
-            AlertService.addAlert({type: 'info', msg: 'Couldn\'t find any model in cache.'});
+            AlertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
           }
         }
         else {
