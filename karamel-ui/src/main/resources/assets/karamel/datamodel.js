@@ -249,8 +249,8 @@ function Ec2() {
   this.price = null;
   this.vpc = null;
   this.subnet = null;
-  this.accountId = null;
-  this.accountKey = null;
+  this.accessKey = null;
+  this.secretKey = null;
 
   this.load = function(other) {
     this.type = other.type || null;
@@ -268,13 +268,13 @@ function Ec2() {
     this.price = other.price || null;
     this.vpc = other.vpc || null;
     this.subnet = other.subnet || null;
-    this.accountId = other.accountId || null;
-    this.accountKey = other.accountKey || null;
+    this.accessKey = other.accessKey || null;
+    this.secretKey = other.secretKey || null;
   };
 
   this.addAccountDetails = function(other) {
-    this.accountId = other.accountId || null;
-    this.accountKey = other.accountKey || null;
+    this.accessKey = other.accessKey || null;
+    this.secretKey = other.secretKey || null;
   };
 }
 

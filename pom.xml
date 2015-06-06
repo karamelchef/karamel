@@ -11,7 +11,6 @@
 
   <!-- Modules in the Project.-->
   <modules>
-  <!--  <module>karamel-build</module> -->
     <module>karamel-ui</module>
     <module>karamel-core</module>
   </modules>
@@ -94,28 +93,22 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>2.15</version>
-        <dependencies>
-          <dependency>
-            <groupId>se.kth.karamel</groupId>
-            <artifactId>karamel-build</artifactId>
-            <version>0.1</version>
-          </dependency>
-        </dependencies>
-        <executions>
-          <execution>
-            <configuration>
-              <configLocation>checkstyle.xml</configLocation>
-              <suppressionsLocation>suppressions.xml</suppressionsLocation>
-              <encoding>UTF-8</encoding>
-              <consoleOutput>true</consoleOutput>
-              <failsOnError>true</failsOnError>
-              <linkXRef>false</linkXRef>
-            </configuration>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
+	<executions>
+	  <execution>
+	    <id>validate</id>
+	    <phase>validate</phase>
+	    <goals>
+	      <goal>check</goal>
+	    </goals>
+	  </execution>
+	</executions>
+	<configuration>
+	  <suppressionsLocation>/tools/maven/suppressions.xml</suppressionsLocation>
+	  <suppressionsFileExpression>/checkstyle.suppressions.file</suppressionsFileExpression>
+	  <configLocation>/tools/maven/checkstyle.xml</configLocation>
+	  <logViolationsToConsole>true</logViolationsToConsole>
+          <failsOnError>true</failsOnError>
+	</configuration>	
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
