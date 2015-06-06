@@ -10,7 +10,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import static org.junit.Assert.*;
-import org.junit.Ignore;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;

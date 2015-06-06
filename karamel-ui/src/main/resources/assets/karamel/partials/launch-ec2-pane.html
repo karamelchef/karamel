@@ -1,16 +1,16 @@
 <div class="tab-pane" ng-show="selected">
 
   <div class="form-group">
-    <label for="accessKey" class="control-label col-xs-3" style="text-align: left">Access Key</label>
+    <label for="accessKey" class="control-label col-xs-3" style="text-align: left">Access Key ID</label>
     <div class="col-xs-9">
-      <input type="text" class="form-control" name="accessKey" id="accessKey" required ng-model="account.accessKey" placeholder="Access Key" tabindex="1" ng-change="warnUser()">
+      <input type="text" class="form-control" name="accessKey" id="accessKey" required ng-model="account.accessKey" placeholder="Access Key ID" tabindex="1" ng-change="warnUser()">
     </div>
   </div>
 
   <div class="form-group">
-    <label for="secretKey" class="control-label col-xs-3" style="text-align: left">Secret Key</label>
+    <label for="secretKey" class="control-label col-xs-3" style="text-align: left">Secret Access Key</label>
     <div class="col-xs-9">
-      <input type="password" class="form-control" name="secretKey" id="secretKey" required ng-model="account.secretKey" placeholder="Secret Key" tabindex="2" ng-change="warnUser()">
+      <input type="password" class="form-control" name="secretKey" id="secretKey" required ng-model="account.secretKey" placeholder="Secret Access Key" tabindex="2" ng-change="warnUser()">
     </div>
   </div>
 

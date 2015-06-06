@@ -97,7 +97,9 @@ public class Settings {
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
   public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
   public static final String AWS_ACCESS_KEY = "aws.access.key";
+  public static final String AWS_ACCESS_KEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRET_KEY = "aws.secret.key";
+  public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
