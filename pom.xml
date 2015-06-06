@@ -11,7 +11,7 @@
 
   <!-- Modules in the Project.-->
   <modules>
-    <module>karamel-build</module>
+  <!--  <module>karamel-build</module> -->
     <module>karamel-ui</module>
     <module>karamel-core</module>
   </modules>
