@@ -35,3 +35,12 @@ ec2:
     vpc: vpc-f70ea392
     subnet: subnet-e7830290
 ```
+
+### Build and run from Source
+
+Requirements: 
+     apt-get install lib32z1 lib32ncurses5 lib32bz2-1.0
+     mvn install 
+     cd karamel-ui/target/appassembler
+     ./bin/karamel
+
