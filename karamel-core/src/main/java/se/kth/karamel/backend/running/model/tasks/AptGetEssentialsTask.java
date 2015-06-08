@@ -31,7 +31,7 @@ public class AptGetEssentialsTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS, 
           "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand(),
-          "github_username", ClusterService.getInstance().getCommonContext().getGithubEmail());
+          "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername());
     }
     return commands;
   }

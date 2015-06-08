@@ -24,7 +24,7 @@ public class ClusterContext {
   private SshKeyPair sshKeyPair;
   private String sudoAccountPassword="";
   private boolean sudoAccountPasswordRequired=false;
-  private String githubEmail;
+  private String githubEmail = "anonymous@anonymous.org";
   private String githubPassword;
 
   public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
@@ -50,6 +50,10 @@ public class ClusterContext {
   public String getGithubEmail() {
     return githubEmail;
   }
+  
+  public String getGithubUsername() {
+    return githubEmail.substring(0, githubEmail.lastIndexOf("@"));
+  }
 
   public String getGithubPassword() {
     return githubPassword;
@@ -60,9 +64,8 @@ public class ClusterContext {
   }
 
   public String getSudoCommand() {
-    return sudoAccountPassword.isEmpty() ? "sudo" : "echo " + sudoAccountPassword + " | sudo -S ";
+    return sudoAccountPassword.isEmpty() ? "sudo" : "echo \"" + sudoAccountPassword + "\" | sudo -S ";
   }
-  
   
   public Ec2Context getEc2Context() {
     return ec2Context;
