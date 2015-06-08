@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
-import se.kth.karamel.backend.machines.MachineInterface;
+import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
@@ -31,8 +31,9 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB, "cookbooks_path", 
-          vendorPath);
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB, 
+          "cookbooks_path", vendorPath,
+          "sudo_command", DagParams.getSudoCommand());
     }
     return commands;
   }

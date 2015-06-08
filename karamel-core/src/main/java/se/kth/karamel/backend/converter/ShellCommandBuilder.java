@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Scanner;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *

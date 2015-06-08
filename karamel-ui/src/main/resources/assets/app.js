@@ -47,7 +47,7 @@ angular.module('demoApp', [
 //                    }
 //                });
                 $routeProvider.when('/terminal', {templateUrl: 'partials/command-page/karamelTerminal.html', controller: 'karamelTerminalController'});
-                $routeProvider.when('/designer', {templateUrl: 'partials/designer.html', controller: 'DesignerController'});
+                $routeProvider.when('/designer', {templateUrl: 'karamel/partials/designer.html', controller: 'DesignerController'});
                 $routeProvider.otherwise({redirectTo: '/'});
             }], function ($httpProvider, $rootScope) {
             $httpProvider.interceptors.push(function ($q) {

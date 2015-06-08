@@ -70,6 +70,7 @@ public class Settings {
   //Shell scripts
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
+  public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF = "install_ruby_chef_berkshelf.sh";
   public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT
@@ -202,7 +203,7 @@ public class Settings {
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
   public static final int SSH_CMD_RETRY_NUM = 2;
-  public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
+  public static final int SSH_CMD_RETRY_INTERVALS = 1000; //ms
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
 

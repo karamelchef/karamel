@@ -110,7 +110,8 @@ public class RunRecipeTask extends Task {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE,
           "chef_json", json,
           "json_file_name", jsonFileName,
-          "log_file_name", jsonFileName);
+          "log_file_name", jsonFileName,
+          "sudo_command", DagParams.getSudoCommand());
     }
     return commands;
   }
