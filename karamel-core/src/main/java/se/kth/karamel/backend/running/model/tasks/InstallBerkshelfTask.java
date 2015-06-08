@@ -28,8 +28,6 @@ public class InstallBerkshelfTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-//      commands = ShellCommandBuilder.makeSingleFileCommands(
-//              Settings.SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF, Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF);
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF, 
           "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
     }
