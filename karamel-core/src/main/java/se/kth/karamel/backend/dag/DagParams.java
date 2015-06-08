@@ -16,43 +16,6 @@ public class DagParams {
   private static final Map<String, Map<String, Set<JsonElement>>> cookbooks = new HashMap<>();
   private static final Set<JsonElement> globalParams = new HashSet<>();
 
-  private static volatile boolean sudoPasswordReqd = false;
-  private static volatile String sudoPassword = "";
-  private static volatile String githubUsername = "";
-  private static volatile String githubPassword = "";
-
-  public static String getGithubUsername() {
-    return githubUsername;
-  }
-
-  public static void setGithubUsername(String username) {
-    DagParams.githubUsername = username;
-  }
-  
-  public static String getGithubPassword() {
-    return githubPassword;
-  }
-
-  public static void setGithubPassword(String password) {
-    DagParams.githubPassword = password;
-  }  
-
-  public static String getSudoCommand() {
-    return sudoPassword.isEmpty() ? "sudo" : "echo " + sudoPassword + " | sudo -S ";
-  }
-
-  public static void setSudoPassword(String sudoPassword) {
-    DagParams.sudoPassword = sudoPassword;
-  }
-
-  public static void setSudoPasswordRequired() {
-    sudoPasswordReqd = true;
-  }
-
-  public static boolean isSudoPasswordReqd() {
-    return sudoPasswordReqd;
-  }
-
   public static synchronized void setGlobalParams(JsonElement obj) {
     globalParams.add(obj);
   }

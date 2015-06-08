@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.TaskSubmitter;
@@ -46,7 +47,7 @@ public class SudoPasswordCheckTask extends Task {
   @Override
   public void failed(String msg) {
     super.failed(msg); 
-    DagParams.setSudoPasswordRequired();
+    ClusterService.getInstance().getCommonContext().setSudoAccountPasswordRequired(true);
   }
 
     

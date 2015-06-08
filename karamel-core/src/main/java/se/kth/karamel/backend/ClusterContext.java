@@ -22,7 +22,48 @@ public class ClusterContext {
 
   private Ec2Context ec2Context;
   private SshKeyPair sshKeyPair;
+  private String sudoAccountPassword="";
+  private boolean sudoAccountPasswordRequired=false;
+  private String githubEmail;
+  private String githubPassword;
 
+  public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
+    this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
+  }
+
+  public boolean isSudoAccountPasswordRequired() {
+    return sudoAccountPasswordRequired;
+  }
+
+  public void setGithubEmail(String githubEmail) {
+    this.githubEmail = githubEmail;
+  }
+
+  public void setGithubPassword(String githubPassword) {
+    this.githubPassword = githubPassword;
+  }
+
+  public void setSudoAccountPassword(String sudoAccountPassword) {
+    this.sudoAccountPassword = sudoAccountPassword;
+  }
+
+  public String getGithubEmail() {
+    return githubEmail;
+  }
+
+  public String getGithubPassword() {
+    return githubPassword;
+  }
+
+  public String getSudoAccountPassword() {
+    return sudoAccountPassword;
+  }
+
+  public String getSudoCommand() {
+    return sudoAccountPassword.isEmpty() ? "sudo" : "echo " + sudoAccountPassword + " | sudo -S ";
+  }
+  
+  
   public Ec2Context getEc2Context() {
     return ec2Context;
   }

@@ -205,7 +205,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void registerSudoPassword(String password) {
-    DagParams.setSudoPassword(password);
+    ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
   }
 
 
@@ -213,8 +213,8 @@ public class KaramelApiImpl implements KaramelApi {
   public void registerGithubAccount(String email, String password) 
   {
     // TODO - test github credentials
-    DagParams.setGithubUsername(email);
-    DagParams.setGithubPassword(password);
+    ClusterService.getInstance().getCommonContext().setGithubEmail(email);
+    ClusterService.getInstance().getCommonContext().setGithubPassword(password);
     
   }
   

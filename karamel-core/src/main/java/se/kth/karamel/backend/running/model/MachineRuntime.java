@@ -34,7 +34,6 @@ public class MachineRuntime {
   private String publicIp;
   private int sshPort;
   private String sshUser;
-  private String sshPasword;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -123,15 +122,6 @@ public class MachineRuntime {
   public String getId() {
     return publicIp;
   }
-
-  public String getSshPasword() {
-    return sshPasword;
-  }
-
-  public void setSshPasword(String sshPasword) {
-    this.sshPasword = sshPasword;
-  }
-  
   
   
 }

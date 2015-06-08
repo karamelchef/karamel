@@ -11,7 +11,7 @@ groups:
   hops:
     size: 1 
     baremetal:
-        ip: 192.168.33.11
+        ip: 172.16.5.49
     recipes:                                                                    
         - ndb::mgmd
         - ndb::ndbd
@@ -20,6 +20,6 @@ groups:
         - hops::ndb
         - hops::rm
         - hops::nn
-        - hops::jh`s                                                            
+        - hops::jhs                                                            
         - hops::nm
         - hops::nm
