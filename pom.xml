@@ -108,6 +108,7 @@
                     <configLocation>/tools/maven/checkstyle.xml</configLocation>
                     <logViolationsToConsole>true</logViolationsToConsole>
                     <failsOnError>true</failsOnError>
+                    <consoleOutput>true</consoleOutput>
                 </configuration>	
             </plugin>
             <plugin>

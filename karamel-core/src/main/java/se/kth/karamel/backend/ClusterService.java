@@ -37,7 +37,7 @@ public class ClusterService {
   public ClusterContext getCommonContext() {
     return commonContext;
   }
-
+  
   public Map<String, ClusterManager> getRepository() {
     return repository;
   }
@@ -50,6 +50,16 @@ public class ClusterService {
 
   }
 
+  public synchronized void registerGithubContext(String email, String password) throws KaramelException {
+    commonContext.setGithubEmail(email);
+    commonContext.setGithubPassword(password);
+    // TODO  - login to validate github credentials
+  }
+
+  public synchronized void registerSudoAccountPassword(String password) {
+    commonContext.setSudoAccountPassword(password);
+  }
+  
   public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
     commonContext.setEc2Context(ec2Context);
   }

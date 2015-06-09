@@ -56,6 +56,15 @@ angular.module('karamel.main')
         BoardService.exitKaramel();
       };
 
+      $scope.sudoPassword = function(password) {
+        BoardService.sudoPassword(password);
+      };
+
+      $scope.githubCredentials = function(email, password) {
+        BoardService.githubCredentials(email, password);
+      };
+
+
       $scope.removeRecipe = function(group, cookbook, recipe) {
         BoardService.removeRecipe(group, cookbook, recipe);
       };
@@ -255,6 +264,33 @@ angular.module('karamel.main')
               SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
             }
           });
+        },
+        sudoPassword: function(password) {
+
+              KaramelCoreRestServices.sudoPassword(password)
+                .success(function(data, status, headers, config) {
+                    $log.info("Sudo password updated.");
+                })
+                .error(function(data, status, headers, config) {
+                  $log.info("Error Received.");
+                });
+        
+        },
+        githubCredentials: function(email, password) {
+            
+              var githubCredentials = {
+                email: email,
+                password: password
+              };
+            
+              KaramelCoreRestServices.githubCredentials(githubCredentials)
+                .success(function(data, status, headers, config) {
+                    $log.info("Github credentials updated.");
+                })
+                .error(function(data, status, headers, config) {
+                  $log.info("Error Received.");
+                });
+
         },
         addGroup: function() {
           var modalInstance = $modal.open({

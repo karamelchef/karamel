@@ -182,5 +182,23 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String getInstallationDag(String clusterName) throws KaramelException;
+
+  
+  /**
+   * Register password for Baremetal sudo account
+   * @param password
+   * @throws KaramelException 
+   */
+  public void registerSudoPassword(String password) throws KaramelException;
+  
+  
+  /**
+   * Register username/password for github account
+   * @param email github account name or email address
+   * @param password github password
+   * @throws KaramelException 
+   */
+  public void registerGithubAccount(String email, String password) throws KaramelException;
+  
   
 }

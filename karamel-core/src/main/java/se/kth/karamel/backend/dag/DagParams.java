@@ -11,10 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * @author jdowling
- */
 public class DagParams {
 
   private static final Map<String, Map<String, Set<JsonElement>>> cookbooks = new HashMap<>();

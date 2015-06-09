@@ -1,0 +1,31 @@
+name: hops
+baremetal:
+    username: vagrant
+    
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+    
+groups: 
+groups: 
+  datanodes:
+    baremetal:
+        ip: 192.168.0.3
+        ip: 192.168.0.4	
+    recipes: 
+        - ndb::ndbd
+        - hops::dn
+        - hops::nm
+  metanodes:
+    baremetal:
+        ip: 192.168.33.11
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+        - hops::ndb                                                          
+        - hops::rm
+        - hops::nn
+        - hops::jhs
