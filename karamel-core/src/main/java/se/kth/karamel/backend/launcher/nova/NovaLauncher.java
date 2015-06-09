@@ -3,11 +3,16 @@ package se.kth.karamel.backend.launcher.nova;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.jclouds.ContextBuilder;
+import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.http.HttpResponseException;
 import org.jclouds.net.domain.IpProtocol;
+import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
@@ -30,10 +35,7 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Alberto on 2015-05-16.
@@ -218,7 +220,102 @@ public final class NovaLauncher extends Launcher{
   }
 
   private List<MachineRuntime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
-                                            Integer integer, Nova nova) {
-    return null;
+                                            Integer totalSize, Nova nova) {
+    String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(groupRuntime.getCluster().getName(),
+            groupRuntime.getName());
+
+    List<String> allVmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
+            groupRuntime.getName(),totalSize.intValue());
+
+    logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqueGroupName));
+
+    NovaTemplateOptions options = novaContext.getComputeService().templateOptions().as(NovaTemplateOptions.class);
+
+    boolean succeed = false;
+    int tries = 0;
+    Set<NodeMetadata> successfullNodes = Sets.newLinkedHashSet();
+    List<String> unforkedVmNames = new ArrayList<>();
+    List<String> toBeForkedVmNames;
+    unforkedVmNames.addAll(allVmNames);
+    Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
+    while (!succeed && tries < Settings.EC2_RETRY_MAX) {
+      int requestSize = totalSize - successfullNodes.size();
+      int maxForkRequests = Integer.parseInt(NovaSetting.NOVA_MAX_FORK_VMS_PER_REQUEST.getParameter());
+      if (requestSize > maxForkRequests) {
+        requestSize = maxForkRequests;
+        toBeForkedVmNames = unforkedVmNames.subList(0, maxForkRequests);
+      } else {
+        toBeForkedVmNames = unforkedVmNames;
+      }
+      TemplateBuilder template = novaContext.getComputeService().templateBuilder();
+      options.keyPairName(keypairName);
+      options.as(NovaTemplateOptions.class).securityGroups(groupIds);
+      options.nodeNames(toBeForkedVmNames);
+
+      template.options(options);
+      template.os64Bit(true);
+      template.hardwareId(nova.getFlavor());
+      template.imageId(nova.getImage());
+      template.locationId(nova.getRegion());
+      tries++;
+      Set<NodeMetadata> succ = new HashSet<>();
+      try {
+        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
+                requestSize, uniqueGroupName, successfullNodes.size(), failedNodes.size(), totalSize));
+        succ.addAll(novaContext.getComputeService().createNodesInGroup(
+                uniqueGroupName, requestSize, template.build()));
+      } catch (RunNodesException ex) {
+        addSuccessAndLostNodes(ex, succ, failedNodes);
+      } catch (HttpResponseException e) {
+          //Need error handling on the different possible
+          logger.error("", e);
+
+      } catch (IllegalStateException ex) {
+        logger.error("", ex);
+        logger.info(String.format("#%d Hurry up Nova!! I want machines for %s, will ask you again in %d ms :@", tries,
+                uniqueGroupName, NovaSetting.NOVA_RETRY_INTERVAL), ex);
+      }
+
+      unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
+      successfullNodes.addAll(succ);
+      if (successfullNodes.size() < totalSize) {
+        try {
+          succeed = false;
+          logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
+                          + "original-number for '%s'. Failed nodes will be killed later.", successfullNodes.size(),
+                  failedNodes.size(),
+                  totalSize, uniqueGroupName));
+          Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
+        } catch (InterruptedException ex1) {
+          logger.error("", ex1);
+        }
+      } else {
+        succeed = true;
+        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
+                + "before we go on..", totalSize, uniqueGroupName, failedNodes.size()));
+        if (failedNodes.size() > 0) {
+          cleanupFailedNodes(failedNodes);
+        }
+        List<MachineRuntime> machines = new ArrayList<>();
+        for (NodeMetadata node : successfullNodes) {
+          if (node != null) {
+            MachineRuntime machine = new MachineRuntime(groupRuntime);
+            ArrayList<String> privateIps = new ArrayList();
+            ArrayList<String> publicIps = new ArrayList();
+            privateIps.addAll(node.getPrivateAddresses());
+            publicIps.addAll(node.getPublicAddresses());
+            machine.setEc2Id(node.getId());
+            machine.setName(node.getName());
+            machine.setPrivateIp(privateIps.get(0));
+            machine.setPublicIp(publicIps.get(0));
+            machine.setSshPort(node.getLoginPort());
+            machine.setSshUser(node.getCredentials().getUser());
+            machines.add(machine);
+          }
+        }
+        return machines;
+      }
+    }
+    throw new KaramelException(String.format("Couldn't fork machines for group'%s'", groupRuntime.getName()));
   }
 }
