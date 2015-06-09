@@ -1,17 +1,19 @@
-name: hopsBareMetalSingleNode
-baremetal:
-    username: vagrant
-    
+name: HopsOneNode
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
 cookbooks:                                                                      
-  hadoop: 
+  hops: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
-    
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
 groups: 
   hops:
     size: 1 
-    baremetal:
-        ip: 192.168.0.3
     recipes:                                                                    
         - ndb::mgmd
         - ndb::ndbd

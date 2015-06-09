@@ -11,6 +11,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
+import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -201,4 +202,20 @@ public class KaramelApiImpl implements KaramelApi {
     return keypair;
   }
 
+
+  @Override
+  public void registerSudoPassword(String password) {
+    ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
+  }
+
+
+  @Override
+  public void registerGithubAccount(String email, String password) 
+  {
+    // TODO - test github credentials
+    ClusterService.getInstance().getCommonContext().setGithubEmail(email);
+    ClusterService.getInstance().getCommonContext().setGithubPassword(password);
+    
+  }
+  
 }
