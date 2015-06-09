@@ -1,0 +1,4 @@
+
+Click on the action "status" below to see the cluster progress or "purge" to terminate the cluster (will also destroy any virtual machines that have been created).
+
+%CLUSTERS_TABLE%

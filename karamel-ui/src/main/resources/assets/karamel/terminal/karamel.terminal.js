@@ -37,7 +37,8 @@ angular.module('karamel.terminal', [])
 
         scope.htmlSafeData = undefined;
         scope.dagData = undefined;
-        scope.processCommand(0, "home");
+//        scope.processCommand(0, "home");
+        scope.processCommand(0, "running");
       }
 
       $scope.htmlsafe = function(index) {
