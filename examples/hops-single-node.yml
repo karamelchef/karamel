@@ -20,8 +20,8 @@ groups:
         - ndb::mysqld                                                       
         - ndb::memcached
         - hops::ndb
-        - hops::rm
         - hops::nn
+        - hops::dn
+        - hops::rm
+        - hops::nm
         - hops::jhs                                                            
-        - hops::nm
-        - hops::nm
