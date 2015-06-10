@@ -24,6 +24,7 @@ angular.module('karamel.main', [
   .config(['$routeProvider', function($routeProvider) {
       $routeProvider.when('/', {templateUrl: 'board.html', controller: 'BoardController'});
       $routeProvider.when('/terminal', {templateUrl: 'terminal.html', controller: 'karamelTerminalController'});
+      $routeProvider.when('/experiment-designer', {templateUrl: 'experiment-designer.html', controller: 'githubController'});
       $routeProvider.otherwise({redirectTo: '/'});
     }], function($httpProvider, $rootScope) {
     $httpProvider.interceptors.push(function($q) {

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel')
+angular.module('karamel.main')
     .controller('Github', ['$cookies', '$location', 'AuthService', 'md5','ModalService',
         function ($cookies, $location, AuthService, md5, ModalService) {
 

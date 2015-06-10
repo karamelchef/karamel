@@ -51,6 +51,10 @@ angular.module('karamel.main')
       $scope.switchToTerminal = function() {
         $location.path('/terminal');
       };
+      
+      $scope.switchToExperimentDesigner = function() {
+        $location.path('/experiment-designer');
+      };
 
       $scope.exitKaramel = function() {
         BoardService.exitKaramel();
@@ -446,23 +450,7 @@ angular.module('karamel.main')
           else {
             _launchCluster();
           }
-        },
-        scaffoldCookbook: function(cluster) {
-          $log.info("Scaffold Cookbook function invoked.");
-          var modalInstance = $modal.open({
-            templateUrl: "karamel/partials/scaffold.html",
-            controller: "ScaffoldController",
-            backdrop: "static",
-            resolve: {
-              info: function() {
-                return {
-                  cluster: {
-                    clusterName: cluster.name
-                  }
-                }
-              }
-            }
-          });
+        };
           var data = {
             json: angular.toJson(cluster)
           };
