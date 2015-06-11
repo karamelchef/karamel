@@ -5,8 +5,11 @@
  */
 package se.kth.karamel.client.api;
 
-import java.io.IOException;
+import java.util.List;
 import se.kth.karamel.backend.command.CommandResponse;
+import se.kth.karamel.backend.github.GithubUser;
+import se.kth.karamel.backend.github.OrgItem;
+import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -199,6 +202,38 @@ public interface KaramelApi {
    * @throws KaramelException 
    */
   public void registerGithubAccount(String email, String password) throws KaramelException;
+
+  /**
+   * Load any existing credentials stored locally
+   * @return GithubUser object
+   * @throws KaramelException 
+   */
+  public GithubUser loadGithubCredentials() throws KaramelException;
+  
+  /**
+   * Lists the available repos in a github organization.
+   * @param organization
+   * @return List of available repos
+   * @throws KaramelException 
+   */
+  public List<RepoItem> listGithubRepos(String organization) throws KaramelException;
+
+  /**
+   * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
+   * @return List of available orgs
+   * @throws KaramelException 
+   */
+  public List<OrgItem> listGithubOrganizations() throws KaramelException;
+
+  
+  /**
+   * Create a new github repo in an organization
+   * @param organization if organization is empty or null, create the repo for the authenticated user
+   * @param repo the name of the repo to create
+   * @param description of what's in the repository
+   * @throws KaramelException 
+   */
+  public void createGithubRepo(String organization, String repo, String description) throws KaramelException;
   
   
 }

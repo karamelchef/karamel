@@ -49,13 +49,7 @@ public class ClusterService {
   public synchronized void saveYaml(String yaml) throws KaramelException {
 
   }
-
-  public synchronized void registerGithubContext(String email, String password) throws KaramelException {
-    commonContext.setGithubEmail(email);
-    commonContext.setGithubPassword(password);
-    // TODO  - login to validate github credentials
-  }
-
+  
   public synchronized void registerSudoAccountPassword(String password) {
     commonContext.setSudoAccountPassword(password);
   }

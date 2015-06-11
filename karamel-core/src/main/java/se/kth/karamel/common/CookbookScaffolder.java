@@ -9,12 +9,12 @@ import java.nio.file.Paths;
 
 public class CookbookScaffolder {
 
-  public static boolean mkdirs(String path) {
+  static boolean mkdirs(String path) {
     File cbDir = new File(path);
     return cbDir.mkdirs();
   }
 
-  public static boolean mkFile(String path, StringBuffer contents) throws IOException {
+  static boolean mkFile(String path, StringBuffer contents) throws IOException {
     File f = new File(path);
     return f.createNewFile();
   }
@@ -51,8 +51,14 @@ public class CookbookScaffolder {
     out.close();
   }
 
+  /**
+   * Scaffold a new cookbook with 'name' in the /user/home/.karamel/cookbook_designer/name folder.
+   * @param name
+   * @return path to newly scaffolded cookbook
+   * @throws IOException 
+   */
   public static String create(String name) throws IOException {
-    String cbName = "cookbooks" + File.separator + name + File.separator;
+    String cbName = Settings.COOKBOOK_DESIGNER_PATH + File.separator + name + File.separator;
 
     // Create all the directories for the coookbook 
     mkdirs(cbName + "recipes");
@@ -75,7 +81,7 @@ public class CookbookScaffolder {
     System.out.println("Cookbook scaffolding created.");
     System.out.println("Cookbook now in folder: ./cookbooks/" + name);
 
-    File f = new File("cookbooks" + File.separator + name);
+    File f = new File(cbName);
     return f.getAbsolutePath();
   }
 

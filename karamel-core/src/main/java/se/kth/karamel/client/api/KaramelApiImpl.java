@@ -7,11 +7,18 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.IOException;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
-import se.kth.karamel.backend.dag.DagParams;
+import se.kth.karamel.backend.github.Github;
+import se.kth.karamel.backend.github.GithubUser;
+import se.kth.karamel.backend.github.OrgItem;
+import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -124,7 +131,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void purgeCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); 
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -134,7 +141,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getInstallationDag(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); 
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -177,18 +184,18 @@ public class KaramelApiImpl implements KaramelApi {
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
 //    keypair = SshKeyService.loadSshKeys(confs);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(),
+        keypair.getPrivateKeyPath(), keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);
     return keypair;
   }
-  
+
   private void saveSshConfs(SshKeyPair keypair, Confs confs) {
     confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
     if (keypair.getPassphrase() != null && keypair.getPassphrase().isEmpty() == false) {
       confs.put(Settings.SSH_PRIVKEY_PASSPHRASE, keypair.getPassphrase());
-    }    
+    }
   }
 
   @Override
@@ -196,26 +203,60 @@ public class KaramelApiImpl implements KaramelApi {
     Confs confs = Confs.loadJustClusterConfs(clusterName);
     saveSshConfs(keypair, confs);
     confs.writeClusterConfs(clusterName);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(),
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(clusterName, keypair);
     return keypair;
   }
-
 
   @Override
   public void registerSudoPassword(String password) {
     ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
   }
 
+  @Override
+  public List<OrgItem> listGithubOrganizations() throws KaramelException {
+    try {
+      return Github.getOrganizations();
+    } catch (IOException ex) {
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+
+    }
+  }
 
   @Override
-  public void registerGithubAccount(String email, String password) 
-  {
-    // TODO - test github credentials
-    ClusterService.getInstance().getCommonContext().setGithubEmail(email);
-    ClusterService.getInstance().getCommonContext().setGithubPassword(password);
-    
+  public List<RepoItem> listGithubRepos(String organization) throws KaramelException {
+    try {
+      return Github.getRepos(organization);
+    } catch (IOException ex) {
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    }
   }
-  
+
+  @Override
+  public void registerGithubAccount(String user, String password) throws KaramelException {
+    Github.registerCredentials(user, password);
+  }
+
+  @Override
+  public GithubUser loadGithubCredentials() throws KaramelException {
+    return Github.loadGithubCredentials();
+  }
+
+  @Override
+  public void createGithubRepo(String org, String repo, String description) throws KaramelException {
+    try {
+      if (org == null || org.isEmpty()) {
+        Github.createRepoForUser(repo, description);
+      } else {
+        Github.createRepoForOrg(org, repo, description);
+      }
+    } catch (IOException ex) {
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    }
+  }
+
 }

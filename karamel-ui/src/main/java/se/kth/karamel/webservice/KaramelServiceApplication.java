@@ -1,5 +1,7 @@
 package se.kth.karamel.webservice;
 
+import se.kth.karamel.webservice.utils.BareBonesBrowserLaunch;
+import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 import icons.TrayUI;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;

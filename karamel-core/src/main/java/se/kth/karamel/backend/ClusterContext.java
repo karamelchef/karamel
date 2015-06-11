@@ -6,6 +6,7 @@
 package se.kth.karamel.backend;
 
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.github.Github;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.Provider;
@@ -24,8 +25,6 @@ public class ClusterContext {
   private SshKeyPair sshKeyPair;
   private String sudoAccountPassword="";
   private boolean sudoAccountPasswordRequired=false;
-  private String githubEmail = "anonymous@anonymous.org";
-  private String githubPassword;
 
   public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
     this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
@@ -35,28 +34,21 @@ public class ClusterContext {
     return sudoAccountPasswordRequired;
   }
 
-  public void setGithubEmail(String githubEmail) {
-    this.githubEmail = githubEmail;
-  }
-
-  public void setGithubPassword(String githubPassword) {
-    this.githubPassword = githubPassword;
-  }
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
     this.sudoAccountPassword = sudoAccountPassword;
   }
 
   public String getGithubEmail() {
-    return githubEmail;
+    return Github.getUser();
   }
   
   public String getGithubUsername() {
-    return githubEmail.substring(0, githubEmail.lastIndexOf("@"));
+    return Github.getUser().substring(0, Github.getUser().lastIndexOf("@"));
   }
 
   public String getGithubPassword() {
-    return githubPassword;
+    return Github.getPassword();
   }
 
   public String getSudoAccountPassword() {

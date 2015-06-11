@@ -1,4 +1,4 @@
-package se.kth.karamel.webservice;
+package se.kth.karamel.webservice.utils;
 
 import java.util.Arrays;
 import javax.swing.JOptionPane;

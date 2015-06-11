@@ -102,6 +102,8 @@ public class Settings {
   public static final String AWS_SECRET_KEY = "aws.secret.key";
   public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
+  public static final String GITHUB_USER = "github.email";
+  public static final String GITHUB_PASSWORD = "github.password";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
     return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_Address).toLowerCase();
@@ -120,6 +122,7 @@ public class Settings {
   }
 
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
+  public static final String COOKBOOK_DESIGNER_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbook_designer";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
