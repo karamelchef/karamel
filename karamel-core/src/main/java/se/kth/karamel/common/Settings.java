@@ -229,6 +229,7 @@ public class Settings {
   public static final String CB_TEMPLATE_METADATA = CB_TEMPLATE_PATH_ROOT + "metadata";
   public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
+  public static final String CB_TEMPLATE_README = CB_TEMPLATE_PATH_ROOT + "README.md";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
 
   // Relative file locations of files in cookbook scaffolding
@@ -237,6 +238,7 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_PATH = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
+  public static final String COOKBOOK_README_PATH = File.separator + "README.md";
   public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";

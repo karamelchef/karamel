@@ -78,6 +78,7 @@ public class CookbookScaffolder {
     createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, Settings.CB_TEMPLATE_CONFIG_PROPS, name);
     createFile(cbName + Settings.COOKBOOK_MASTER_SH_PATH, Settings.CB_TEMPLATE_MASTER_SH, name);
     createFile(cbName + Settings.COOKBOOK_SLAVE_SH_PATH, Settings.CB_TEMPLATE_SLAVE_SH, name);
+    createFile(cbName + Settings.COOKBOOK_README_PATH, Settings.CB_TEMPLATE_README, name);
     System.out.println("Cookbook scaffolding created.");
     System.out.println("Cookbook now in folder: ./cookbooks/" + name);
 
