@@ -1,0 +1,24 @@
+libpath = File.expand_path '../../../kagent/libraries', __FILE__
+
+master_private_ip = private_recipe_ip("%%name%%","master")
+
+private_ip = my_private_ip()
+public_ip = my_public_ip()
+
+# command == command for execute
+# command == code for bash
+
+%%pre_chef_commands%%
+
+
+%%script_type%% 'run_experiment_%%experiment_name%%' do
+  cwd "/usr/local/%%name%%"
+  user '%%user%%'
+  group '%%group%%'
+  %%command%% <<-EOM
+    %%script_contents%%
+    EOM
+end
+
+
+%%post_chef_commands%%

@@ -1,14 +1,16 @@
-libpath = File.expand_path '../../../kagent/libraries', __FILE__
-
-node.default['java']['jdk_version'] = 7
-include_recipe "java"
-
 user node[:%%NAME%%][:user] do
   action :create
   system true
   shell "/bin/bash"
   not_if "getent passwd #{node[:%%NAME%%]['user']}"
 end
+
+group node[:%%NAME%%][:group] do
+  action :modify
+  members ["#{node[:%%NAME%%][:user]}"
+  append true
+end
+
 
 # See ark resource here: https://github.com/burtlo/ark
 # It will: fetch it to to /var/cache/chef/
@@ -25,10 +27,6 @@ end
    owner node[:%%NAME%%][:user]
  end
 
-private_ip = my_private_ip()
-public_ip = my_public_ip()
-
-
 bash "%%NAME%%_install_bash" do
     user "root"
     code <<-EOF
@@ -40,8 +38,6 @@ EOF
   not_if { ::File.exists?( "#{node[:%%NAME%%][:version_dir]}/.installed" ) }
 end
 
-# returns the first %%NAME%%::master private_ip in the list
-master_private_ip = private_recipe_ip("%%NAME%%","master")
 
 
 template "#{node[:%%NAME%%][:version_dir]}/config/config.props" do

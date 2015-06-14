@@ -7,12 +7,15 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
+import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.github.Github;
@@ -237,7 +240,12 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void registerGithubAccount(String user, String password) throws KaramelException {
-    Github.registerCredentials(user, password);
+    try {
+      Github.registerCredentials(user, password);
+    } catch (IOException ex) {
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    }
   }
 
   @Override
@@ -245,15 +253,32 @@ public class KaramelApiImpl implements KaramelApi {
     return Github.loadGithubCredentials();
   }
 
-  @Override
-  public void createGithubRepo(String org, String repo, String description) throws KaramelException {
+  private void createGithubRepo(String owner, String repo, String description) throws KaramelException {
     try {
-      if (org == null || org.isEmpty()) {
+      if (owner == null || owner.isEmpty()) {
         Github.createRepoForUser(repo, description);
       } else {
-        Github.createRepoForOrg(org, repo, description);
+        Github.createRepoForOrg(owner, repo, description);
       }
-    } catch (IOException ex) {
+    } catch (IOException | GitAPIException ex) {
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    }
+  }
+
+  @Override
+  public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment)
+      throws KaramelException {
+    try {
+
+      File f = Github.getRepoDirectory(repoName);
+      if (f.exists() == false) {
+        createGithubRepo(owner, repoName, experiment.getDescription());
+        Github.cloneRepo(owner, repoName);
+      }
+
+      Github.updateExperiment(owner, repoName, experiment);
+    } catch (GitAPIException | IOException ex) {
       Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     }
