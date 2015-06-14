@@ -5,13 +5,20 @@ import java.util.Map;
 
 public class ExperimentContext {
 
-  public static enum Script {bash, csh, perl, python, ruby, execute};
-  
-  /**
-   * Type of script to execute.
-   */
-  private Script script;
-  
+  public static enum ScriptType {
+
+    bash("code"), perl("code"), python("code"), ruby("code"), execute("command");
+
+    private final String blockCommand;
+    private ScriptType(String blockCommand) {
+      this.blockCommand =blockCommand;
+    }
+
+    public String getBlockCommand() {
+      return blockCommand;
+    }
+  };
+
   /**
    * Url for the experiment code. Can have a .jar or .tar.gz extention.
    */
@@ -37,22 +44,79 @@ public class ExperimentContext {
    */
   private String resultsDirectory = "results";
 
-  /**
-   * Experiment name - recipe name in Chef
-   */
-  private String recipeName = "default";
+  private final Map<String, Experiment> mapExperiments = new HashMap<>();
 
-  /**
-   *
-   */
-  /**
-   * Bash script pair: <relativePath,contents>
-   */
-  private final Map<String, String> scripts = new HashMap<>();
-  /**
-   * Config file pair: <relativePath,contents>
-   */
-  private final Map<String, String> configFiles = new HashMap<>();
+  public static class Experiment {
+
+    private String scriptContents;
+    private String configFileName;
+    private String configFileContents;
+    private String preScriptChefCode;
+    private ScriptType scriptType;
+
+    /**
+     * Create an experiment as a Chef recipe.
+     *
+     * @param scriptContents
+     * @param configFileName
+     * @param configFileContents
+     * @param preScriptChefCode
+     * @param scriptType
+     */
+    public Experiment(String scriptContents, String configFileName, String configFileContents,
+        String preScriptChefCode, ScriptType scriptType) {
+      this.scriptContents = scriptContents;
+      this.configFileName = configFileName;
+      this.configFileContents = configFileContents;
+      this.preScriptChefCode = preScriptChefCode;
+      this.scriptType = scriptType;
+    }
+
+    public String getPreScriptChefCode() {
+      return preScriptChefCode;
+    }
+
+    public void setPreScriptChefCode(String preScriptChefCode) {
+      this.preScriptChefCode = preScriptChefCode;
+    }
+
+    public void setScriptContents(String script) {
+      this.scriptContents = script;
+    }
+
+    public String getScriptContents() {
+      return scriptContents;
+    }
+
+    public String getConfigFileContents() {
+      return configFileContents;
+    }
+
+    public String getConfigFileName() {
+      return configFileName;
+    }
+
+    public ScriptType getScriptType() {
+      return scriptType;
+    }
+    
+    public String getScriptCommand() {
+      return scriptType.getBlockCommand();
+    }
+
+    public void setConfigFileContents(String configFileContents) {
+      this.configFileContents = configFileContents;
+    }
+
+    public void setConfigFileName(String configFileName) {
+      this.configFileName = configFileName;
+    }
+
+    public void setScriptType(ScriptType scriptType) {
+      this.scriptType = scriptType;
+    }
+
+  }
 
   public ExperimentContext() {
   }
@@ -65,20 +129,14 @@ public class ExperimentContext {
     this.url = url;
   }
 
-  public void addScript(String filename, String contents) {
-    scripts.put(filename, contents);
+  public void addExperiment(String recipeName, String scriptContents, String configFileName, String configFileContents,
+      String preScriptChefCode, ScriptType scriptType) {
+    Experiment exp = new Experiment(scriptContents, configFileName, configFileContents, preScriptChefCode, scriptType);
+    mapExperiments.put(recipeName, exp);
   }
 
-  public void addConfigFile(String filename, String contents) {
-    configFiles.put(filename, contents);
-  }
-
-  public Map<String, String> getScripts() {
-    return scripts;
-  }
-
-  public Map<String, String> getConfigFiles() {
-    return configFiles;
+  public Map<String, Experiment> getExperiments() {
+    return mapExperiments;
   }
 
   public String getGroup() {
@@ -105,22 +163,6 @@ public class ExperimentContext {
     this.user = user;
   }
 
-  public void setScript(Script script) {
-    this.script = script;
-  }
-
-  public Script getScript() {
-    return script;
-  }
-
-  public String getRecipeName() {
-    return recipeName;
-  }
-
-  public void setRecipeName(String recipeName) {
-    this.recipeName = recipeName;
-  }
-
   public String getDescription() {
     return description;
   }
@@ -128,5 +170,5 @@ public class ExperimentContext {
   public void setDescription(String description) {
     this.description = description;
   }
-  
+
 }

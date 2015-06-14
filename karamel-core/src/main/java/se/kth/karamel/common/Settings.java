@@ -220,7 +220,7 @@ public class Settings {
   public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
-  public static final String CB_TEMPLATE_RECIPE_MASTER = CB_TEMPLATE_PATH_ROOT + "recipe_master";
+  public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
   public static final String CB_TEMPLATE_RECIPE_SLAVE = CB_TEMPLATE_PATH_ROOT + "recipe_slave";
   public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + "config.props";
   public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";

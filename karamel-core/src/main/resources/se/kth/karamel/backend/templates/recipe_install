@@ -1,13 +1,13 @@
-user node[:%%NAME%%][:user] do
+user node[:%%name%%][:user] do
   action :create
   system true
   shell "/bin/bash"
-  not_if "getent passwd #{node[:%%NAME%%]['user']}"
+  not_if "getent passwd #{node[:%%name%%]['user']}"
 end
 
-group node[:%%NAME%%][:group] do
+group node[:%%name%%][:group] do
   action :modify
-  members ["#{node[:%%NAME%%][:user]}"
+  members ["#{node[:%%name%%][:user]}"
   append true
 end
 
@@ -17,36 +17,36 @@ end
 # unpack it to the default path (/usr/local/XXX-1.2.3)
 # create a symlink for :home_dir (/usr/local/XXX) 
 # add /user/local/XXX/bin to the enviroment PATH variable
- ark '%%NAME%%' do
-   url node[:%%NAME%%][:url]
-   version node[:%%NAME%%][:version]
-   path node[:%%NAME%%][:version_dir]
-   home_dir node[:%%NAME%%][:home_dir]
+ ark '%%name%%' do
+   url node[:%%name%%][:url]
+   version node[:%%name%%][:version]
+   path node[:%%name%%][:version_dir]
+   home_dir node[:%%name%%][:home_dir]
 #   checksum  '89ba5fde0c596db388c3bbd265b63007a9cc3df3a8e6d79a46780c1a39408cb5'
    append_env_path true
-   owner node[:%%NAME%%][:user]
+   owner node[:%%name%%][:user]
  end
 
-bash "%%NAME%%_install_bash" do
+bash "%%name%%_install_bash" do
     user "root"
     code <<-EOF
 
 # Do something here...
 
-touch #{node[:%%NAME%%][:version_dir]}/.installed
+touch #{node[:%%name%%][:version_dir]}/.installed
 EOF
-  not_if { ::File.exists?( "#{node[:%%NAME%%][:version_dir]}/.installed" ) }
+  not_if { ::File.exists?( "#{node[:%%name%%][:version_dir]}/.installed" ) }
 end
 
 
 
-template "#{node[:%%NAME%%][:version_dir]}/config/config.props" do
+template "#{node[:%%name%%][:version_dir]}/config/config.props" do
   source "config.props.erb"
-  owner node[:%%NAME%%][:user]
-  group node[:%%NAME%%][:group]
+  owner node[:%%name%%][:user]
+  group node[:%%name%%][:group]
   mode "755"
-  variables({
-              :master_ip => master_private_ip
-            })
+#  variables({
+#              :master_ip => master_private_ip
+#            })
   action :create_if_missing
 end

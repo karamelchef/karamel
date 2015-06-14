@@ -8,11 +8,13 @@ package se.kth.karamel.backend.github.util;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.ExperimentContext.Experiment;
 import se.kth.karamel.backend.github.Github;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
@@ -32,7 +34,7 @@ public class ChefExperimentExtractor {
    * @param experiment input scripts/config filenames and content
    * @throws KaramelException
    */
-  public static void firstPassAttributeParsing(String owner, String repoName, ExperimentContext experiment)
+  public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
 
     // <ParamName, ParamValue> 
@@ -40,9 +42,10 @@ public class ChefExperimentExtractor {
     Map<String, String> metadataAttrs = new HashMap<>();
 
     // Parse all the config variables and put them into attributes/default.rb
-    Map<String, String> configFiles = experiment.getConfigFiles();
-    for (String configFile : configFiles.keySet()) {
-      String str = configFiles.get(configFile);
+    Map<String, Experiment> experiments = experiment.getExperiments();
+    for (String recipeName : experiments.keySet()) {
+      Experiment exp = experiments.get(recipeName);
+      String str = exp.getConfigFileContents();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
       while (m.find()) {
@@ -54,10 +57,9 @@ public class ChefExperimentExtractor {
       }
     }
 
-    // Parse all the params defined in scripts and put them into metadata.rb
-    Map<String, String> scripts = experiment.getScripts();
-    for (String script : scripts.keySet()) {
-      String str = scripts.get(script);
+    for (String recipeName : experiments.keySet()) {
+      Experiment exp = experiments.get(recipeName);
+      String str = exp.getScriptContents();
       Pattern p = Pattern.compile("%%[--]*[-D]*(.*)%%\\s*=\\s*(.*)[\\s]+");
       Matcher m = p.matcher(str);
       while (m.find()) {
@@ -68,8 +70,7 @@ public class ChefExperimentExtractor {
       }
     }
 
-    // 2. write them to attributes/defaults.rb and metadata.rb
-    
+    // 2. write them to attributes/default.rb and metadata.rb
     String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
     try {
       StringBuilder defaults_rb = CookbookGenerator.instantiateFromTemplate(
@@ -79,12 +80,12 @@ public class ChefExperimentExtractor {
           "group", experiment.getGroup(),
           "http_binaries", experiment.getUrl()
       );
-      
+
       for (String key : defaultAttrs.keySet()) {
         String entry = "default[:" + repoName + "][:" + key + "] = \"" + defaultAttrs.get(key) + "\"";
         defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
-      
+
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_METADATA,
           "name", repoName,
@@ -97,15 +98,60 @@ public class ChefExperimentExtractor {
             + ":type => \"string\"";
         defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
-      
+
       // 3. write them to files and push to github
-      
-      Github.addCommitPushFile(owner, repoName, "attributes/defaults.rb" , defaults_rb.toString());      
-      Github.addCommitPushFile(owner, repoName, "metadata.rb" , metadata_rb.toString());      
-      
+      Github.addFile(owner, repoName, "attributes/default.rb", defaults_rb.toString());
+      Github.addFile(owner, repoName, "metadata.rb", metadata_rb.toString());
+
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     }
+  }
+
+  /**
+   * Parses the user-defined script files and for each script, a recipe file is generated and added to the git repo.
+   *
+   * @param owner
+   * @param repoName
+   * @param experimentContext
+   * @throws KaramelException
+   */
+  public static void parseRecipesAddToGit(String owner, String repoName, ExperimentContext experimentContext)
+      throws KaramelException {
+
+    try {
+      StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
+          Settings.CB_TEMPLATE_RECIPE_INSTALL,
+          "name", repoName
+      );
+      Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
+
+      Map<String, Experiment> experiments = experimentContext.getExperiments();
+      Set<String> recipeNames = experiments.keySet();
+
+      // 2. write them to recipes/default.rb and metadata.rb
+      for (String recipe : recipeNames) {
+        String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
+        Experiment experiment = experiments.get(recipe);
+        StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
+            Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
+            "name", recipe,
+            "pre_chef_commands", experiment.getPreScriptChefCode(),
+            "script_type", experiment.getScriptCommand(),
+            "experiment_name", recipe,
+            "user", experimentContext.getUser(),
+            "group", experimentContext.getGroup(),
+            "script_contents", experiment.getScriptContents()
+        );
+
+        // 3. write them to files and push to github
+        Github.addFile(owner, repoName, "recipes/" + recipe + ".rb", recipe_rb.toString());
+      }
+    } catch (IOException ex) {
+      Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    }
+
   }
 }

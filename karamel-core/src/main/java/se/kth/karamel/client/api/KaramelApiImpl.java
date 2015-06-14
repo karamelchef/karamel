@@ -8,11 +8,8 @@ package se.kth.karamel.client.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import java.util.Map;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.ExperimentContext;
@@ -22,6 +19,7 @@ import se.kth.karamel.backend.github.Github;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
+import se.kth.karamel.backend.github.util.ChefExperimentExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -219,33 +217,17 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public List<OrgItem> listGithubOrganizations() throws KaramelException {
-    try {
-      return Github.getOrganizations();
-    } catch (IOException ex) {
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
-
-    }
+    return Github.getOrganizations();
   }
 
   @Override
   public List<RepoItem> listGithubRepos(String organization) throws KaramelException {
-    try {
-      return Github.getRepos(organization);
-    } catch (IOException ex) {
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
-    }
+    return Github.getRepos(organization);
   }
 
   @Override
   public void registerGithubAccount(String user, String password) throws KaramelException {
-    try {
-      Github.registerCredentials(user, password);
-    } catch (IOException ex) {
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
-    }
+    Github.registerCredentials(user, password);
   }
 
   @Override
@@ -254,34 +236,42 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   private void createGithubRepo(String owner, String repo, String description) throws KaramelException {
-    try {
-      if (owner == null || owner.isEmpty()) {
-        Github.createRepoForUser(repo, description);
-      } else {
-        Github.createRepoForOrg(owner, repo, description);
-      }
-    } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+    if (owner == null || owner.isEmpty()) {
+      Github.createRepoForUser(repo, description);
+    } else {
+      Github.createRepoForOrg(owner, repo, description);
     }
   }
 
   @Override
   public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
-    try {
 
-      File f = Github.getRepoDirectory(repoName);
-      if (f.exists() == false) {
-        createGithubRepo(owner, repoName, experiment.getDescription());
-        Github.cloneRepo(owner, repoName);
-      }
-
-      Github.updateExperiment(owner, repoName, experiment);
-    } catch (GitAPIException | IOException ex) {
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+    // 1. Create the repo if it doesn't exist and clone it to a local directory
+    File f = Github.getRepoDirectory(repoName);
+    if (f.exists() == false) {
+      createGithubRepo(owner, repoName, experiment.getDescription());
+      Github.cloneRepo(owner, repoName);
     }
+    
+    // 2. Scaffold a new experiment project with Karamel/Chef
+    
+    Github.scaffoldRepo(repoName);
+    
+    // 3. For all config and script files, compile them and generate Karamel/Chef files
+
+    ChefExperimentExtractor.parseAttributesAddToGit(owner, repoName, experiment);
+    
+    ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
+    
+    
+//    Map<String,String> configFiles = experiment.getConfigFiles();
+//    Map<String,String> scripts = experiment.getScripts();
+
+
+    // 4. Commit and push all changes to github
+    Github.commitPush(owner, repoName);
+
   }
 
 }
