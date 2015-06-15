@@ -220,7 +220,7 @@ public final class NovaLauncher extends Launcher{
   }
 
   private List<MachineRuntime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
-                                            Integer totalSize, Nova nova) {
+                                            Integer totalSize, Nova nova) throws KaramelException {
     String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(groupRuntime.getCluster().getName(),
             groupRuntime.getName());
 
@@ -317,5 +317,41 @@ public final class NovaLauncher extends Launcher{
       }
     }
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", groupRuntime.getName()));
+  }
+
+  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata,
+          Throwable> lostNodes) {
+    // workaround https://code.google.com/p/jclouds/issues/detail?id=923
+    // by ensuring that any nodes in the "NodeErrors" do not get considered
+    // successful
+    Set<? extends NodeMetadata> reportedSuccessfulNodes = rnex.getSuccessfulNodes();
+    Map<? extends NodeMetadata, ? extends Throwable> errorNodesMap = rnex.getNodeErrors();
+    Set<? extends NodeMetadata> errorNodes = errorNodesMap.keySet();
+
+    // "actual" successful nodes are ones that don't appear in the errorNodes
+    successfulNodes.addAll(Sets.difference(reportedSuccessfulNodes, errorNodes));
+    lostNodes.putAll(errorNodesMap);
+  }
+
+  private List<String> findLeftVmNames(Set<? extends NodeMetadata> successfulNodes, List<String> vmNames) {
+    List<String> leftVmNames = new ArrayList<>();
+    leftVmNames.addAll(vmNames);
+    int unnamedVms = 0;
+    for (NodeMetadata nodeMetadata : successfulNodes) {
+      String nodeName = nodeMetadata.getName();
+      if (leftVmNames.contains(nodeName)) {
+        leftVmNames.remove(nodeName);
+      } else {
+        unnamedVms++;
+      }
+    }
+
+    for (int i = 0; i < unnamedVms; i++) {
+      if (leftVmNames.size() > 0) {
+        logger.debug(String.format("Taking %s as one of the unnamed vms.", leftVmNames.get(0)));
+        leftVmNames.remove(0);
+      }
+    }
+    return leftVmNames;
   }
 }
