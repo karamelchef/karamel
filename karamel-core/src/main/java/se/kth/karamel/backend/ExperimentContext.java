@@ -71,7 +71,7 @@ public class ExperimentContext {
       this.scriptContents = scriptContents;
       this.configFileName = configFileName;
       this.configFileContents = configFileContents;
-      this.preScriptChefCode = preScriptChefCode;
+      this.preScriptChefCode = preScriptChefCode == null ? "" : preScriptChefCode;
       this.scriptType = scriptType;
     }
 

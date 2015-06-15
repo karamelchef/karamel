@@ -21,10 +21,17 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
+ * How to use. Invoke methods in this order: (1) @see ChefExperimentExtractor#parseAttributesAddToGit() (2) @see
+ * ChefExperimentExtractor#parseRecipesAddToGit()
  *
  * @author jdowling
  */
 public class ChefExperimentExtractor {
+
+  // <AttrName, AttrValue> pair added to attributes/default.rb 
+  private static final Map<String, String> defaultAttrs = new HashMap<>();
+  // <AttrName, AttrValue> pair added to metadata.rb 
+  private static final Map<String, String> metadataAttrs = new HashMap<>();
 
   /**
    * Parses all scripts and config files and outputs to metadata.rb and attributes/default.rb the configuration values
@@ -38,15 +45,10 @@ public class ChefExperimentExtractor {
   public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
 
-    // <AttrName, AttrValue> pair added to attributes/default.rb 
-    Map<String, String> defaultAttrs = new HashMap<>();
-    // <AttrName, AttrValue> pair added to metadata.rb 
-    Map<String, String> metadataAttrs = new HashMap<>();
-    // List of recipes added to metadata.rb
-    Set<String> recipeNames = new HashSet<>();
-
+    defaultAttrs.clear();
+    metadataAttrs.clear();
     // Add recipeNames to metadata.rb
-    recipeNames = experiment.getExperiments().keySet();
+    Set<String> recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
     Map<String, Experiment> experiments = experiment.getExperiments();
 
@@ -64,18 +66,18 @@ public class ChefExperimentExtractor {
       }
     }
 
-    for (String recipeName : recipeNames) {
-      Experiment exp = experiments.get(recipeName);
-      String str = exp.getScriptContents();
-      Pattern p = Pattern.compile("%%[--]*[-D]*(.*)%%\\s*=\\s*(.*)[\\s]+");
-      Matcher m = p.matcher(str);
-      while (m.find()) {
-        String name = m.group(1);
-        String value = m.group(2);
-        defaultAttrs.put(name, value);
-        metadataAttrs.put(name, value);
-      }
-    }
+//    for (String recipeName : recipeNames) {
+//      Experiment exp = experiments.get(recipeName);
+//      String str = exp.getScriptContents();
+//      Pattern p = Pattern.compile("%%[--]*[-D]*(.*)%%\\s*=\\s*(.*)[\\s]+");
+//      Matcher m = p.matcher(str);
+//      while (m.find()) {
+//        String name = m.group(1);
+//        String value = m.group(2);
+//        defaultAttrs.put(name, value);
+//        metadataAttrs.put(name, value);
+//      }
+//    }
 
     // 2. write them to attributes/default.rb and metadata.rb
     String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
@@ -150,15 +152,21 @@ public class ChefExperimentExtractor {
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
             "name", recipe,
             "pre_chef_commands", experiment.getPreScriptChefCode(),
-            "script_type", experiment.getScriptCommand(),
+            "script_type", experiment.getScriptType().toString(),
+            "command", experiment.getScriptCommand(),
             "experiment_name", recipe,
             "user", experimentContext.getUser(),
             "group", experimentContext.getGroup(),
             "script_contents", experiment.getScriptContents()
         );
+        // Replace all parameters with chef attribute values
+        String recipeContents = recipe_rb.toString();
+        for (String attr : defaultAttrs.keySet()) {
+          recipeContents = recipeContents.replaceAll("%%" + attr + "%%", "#{node[:" + repoName + "][:" + attr + "]}");
+        }
 
         // 3. write them to files and push to github
-        Github.addFile(owner, repoName, "recipes/" + recipe + ".rb", recipe_rb.toString());
+        Github.addFile(owner, repoName, "recipes/" + recipe + ".rb", recipeContents);
       }
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);

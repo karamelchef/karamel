@@ -15,7 +15,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import se.kth.karamel.backend.ExperimentContext;
-import se.kth.karamel.backend.github.util.ChefExperimentExtractor;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.exception.KaramelException;
@@ -108,9 +107,8 @@ public class GithubUserTest {
   public void testCreateRepo() {
     try {
       ExperimentContext ec = new ExperimentContext();
-      ExperimentContext.Experiment exp = new ExperimentContext.Experiment("#!/bin/bash\n"
-          + "echo \"jim\"\n"
-          + "java -jar -D%%maxHeapSize%%=250m prog.jar", "blah", "%%maxHeapSize%%=128m\n%%log%%=true\n",
+      ExperimentContext.Experiment exp = new ExperimentContext.Experiment("echo \"jim\"\n"
+          + "java -jar -D%%maxHeapSize%% prog.jar", "blah", "%%maxHeapSize%%=128m\n%%log%%=true\n",
           "", ExperimentContext.ScriptType.bash);
       ec.addExperiment("experiment", exp);
       ec.setUser("blah");
