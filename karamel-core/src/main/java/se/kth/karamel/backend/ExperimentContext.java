@@ -2,7 +2,9 @@ package se.kth.karamel.backend;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class ExperimentContext {
 
   public static enum ScriptType {
@@ -10,8 +12,9 @@ public class ExperimentContext {
     bash("code"), perl("code"), python("code"), ruby("code"), execute("command");
 
     private final String blockCommand;
+
     private ScriptType(String blockCommand) {
-      this.blockCommand =blockCommand;
+      this.blockCommand = blockCommand;
     }
 
     public String getBlockCommand() {
@@ -99,7 +102,7 @@ public class ExperimentContext {
     public ScriptType getScriptType() {
       return scriptType;
     }
-    
+
     public String getScriptCommand() {
       return scriptType.getBlockCommand();
     }
@@ -127,6 +130,10 @@ public class ExperimentContext {
 
   public void setUrl(String url) {
     this.url = url;
+  }
+
+  public void addExperiment(String recipeName, Experiment exp) {
+    mapExperiments.put(recipeName, exp);
   }
 
   public void addExperiment(String recipeName, String scriptContents, String configFileName, String configFileContents,

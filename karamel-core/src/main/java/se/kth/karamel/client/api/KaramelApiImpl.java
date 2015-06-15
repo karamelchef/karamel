@@ -251,7 +251,6 @@ public class KaramelApiImpl implements KaramelApi {
     File f = Github.getRepoDirectory(repoName);
     if (f.exists() == false) {
       createGithubRepo(owner, repoName, experiment.getDescription());
-      Github.cloneRepo(owner, repoName);
     }
     
     // 2. Scaffold a new experiment project with Karamel/Chef
@@ -264,11 +263,6 @@ public class KaramelApiImpl implements KaramelApi {
     
     ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
     
-    
-//    Map<String,String> configFiles = experiment.getConfigFiles();
-//    Map<String,String> scripts = experiment.getScripts();
-
-
     // 4. Commit and push all changes to github
     Github.commitPush(owner, repoName);
 

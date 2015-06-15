@@ -106,21 +106,22 @@ public class GithubUserTest {
 
   @Test
   public void testCreateRepo() {
-//    try {
-      
-//      ExperimentContext ec = new ExperimentContext();
-//      ec.addConfigFile("blah", "%%maxHeapSize%%=128m\n%%log%%=true\n");
-//      ec.addScript("blah", "#!/bin/bash\n"
-//          + "echo \"jim\"\n"
-//          + "java -jar -D%%maxHeapSize%%=250m prog.jar");
-//      ec.setGroup("blah");
-//      ec.setResultsDirectory("results");
-//      ec.setUrl("http://snurran.sics.se/hops/prog.jar");
-//      
-//      ChefExperimentExtractor.parseAttributesAddToGit("hopshub", "jdowling", ec);
-//          } catch (KaramelException ex) {
-//      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
-//    }
+    try {
+      ExperimentContext ec = new ExperimentContext();
+      ExperimentContext.Experiment exp = new ExperimentContext.Experiment("#!/bin/bash\n"
+          + "echo \"jim\"\n"
+          + "java -jar -D%%maxHeapSize%%=250m prog.jar", "blah", "%%maxHeapSize%%=128m\n%%log%%=true\n",
+          "", ExperimentContext.ScriptType.bash);
+      ec.addExperiment("experiment", exp);
+      ec.setUser("blah");
+      ec.setGroup("blah");
+      ec.setResultsDirectory("results");
+      ec.setUrl("http://snurran.sics.se/hops/prog.jar");
+      ec.setDescription("Nice experiment");
+      api.commitAndPushExperiment("hopshadoop", "test", ec);
+    } catch (KaramelException ex) {
+      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 
 }

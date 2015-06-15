@@ -7,6 +7,7 @@ package se.kth.karamel.backend.github.util;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -37,13 +38,19 @@ public class ChefExperimentExtractor {
   public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
 
-    // <ParamName, ParamValue> 
+    // <AttrName, AttrValue> pair added to attributes/default.rb 
     Map<String, String> defaultAttrs = new HashMap<>();
+    // <AttrName, AttrValue> pair added to metadata.rb 
     Map<String, String> metadataAttrs = new HashMap<>();
+    // List of recipes added to metadata.rb
+    Set<String> recipeNames = new HashSet<>();
 
+    // Add recipeNames to metadata.rb
+    recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
     Map<String, Experiment> experiments = experiment.getExperiments();
-    for (String recipeName : experiments.keySet()) {
+
+    for (String recipeName : recipeNames) {
       Experiment exp = experiments.get(recipeName);
       String str = exp.getConfigFileContents();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
@@ -57,7 +64,7 @@ public class ChefExperimentExtractor {
       }
     }
 
-    for (String recipeName : experiments.keySet()) {
+    for (String recipeName : recipeNames) {
       Experiment exp = experiments.get(recipeName);
       String str = exp.getScriptContents();
       Pattern p = Pattern.compile("%%[--]*[-D]*(.*)%%\\s*=\\s*(.*)[\\s]+");
@@ -92,11 +99,16 @@ public class ChefExperimentExtractor {
           "user", owner,
           "email", email
       );
+      for (String recipe : recipeNames) {
+        String entry = "recipe \"" + repoName + "::" + recipe + "\", \"Executes experiment as "
+            + experiments.get(recipe).getScriptType() + " script.\"";
+        metadata_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
+      }
       for (String key : metadataAttrs.keySet()) {
-        String entry = "attribute " + repoName + "/" + key + "\"" + System.lineSeparator()
+        String entry = "attribute \"" + repoName + "/" + key + "\"," + System.lineSeparator()
             + ":description => \"" + key + " parameter value\"," + System.lineSeparator()
             + ":type => \"string\"";
-        defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
+        metadata_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
 
       // 3. write them to files and push to github

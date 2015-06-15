@@ -52,6 +52,7 @@ import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
+import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.Ec2Credentials;
@@ -303,6 +304,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new ExitKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
     environment.jersey().register(new Github.GithubCredentials());
+    environment.jersey().register(new Github.PushExperiment());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -782,6 +784,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
           karamelApiHandler.registerGithubAccount(githubCreds.getEmail(), githubCreds.getPassword());
+          response = Response.status(Response.Status.OK).
+              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+
+        return response;
+      }
+    }
+    
+    @Path("/pushExperiment")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class PushExperiment {
+
+      @PUT
+      public Response pushExperiment(String owner, String repoName, ExperimentContext experiment) {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        try {
+          karamelApiHandler.commitAndPushExperiment(owner, repoName, experiment);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {
