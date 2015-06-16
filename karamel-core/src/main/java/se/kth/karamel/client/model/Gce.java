@@ -10,6 +10,8 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public class Gce extends Provider {
 
+    public static final String DEFAULT_NETWORK_NAME = "default";
+
     /**
      * @return the imageName
      */
@@ -142,8 +144,12 @@ public class Gce extends Provider {
         return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s", projectName, zone, machineType.toString()));
     }
 
-    public static URI buildNetworkUri(String projectName) throws URISyntaxException {
-        return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/default", projectName));
+    public static URI buildDefaultNetworkUri(String projectName) throws URISyntaxException {
+        return buildNetworkUri(projectName, DEFAULT_NETWORK_NAME);
+    }
+
+    public static URI buildNetworkUri(String projectName, String networkName) throws URISyntaxException {
+        return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectName, networkName));
     }
 
     public static URI buildImageUri(ImageType imageType, String imageName) throws URISyntaxException {
