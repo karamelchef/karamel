@@ -19,7 +19,6 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.egit.github.core.service.UserService;
-import org.eclipse.jgit.api.AddCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -299,8 +298,8 @@ public class Github {
 
       CookbookScaffolder.create(repoName);
 
-      git.add().addFilepattern("Berksfile").addFilepattern("metadata.rb").addFilepattern(
-          "Karamelfile")
+      git.add().addFilepattern("Berksfile").addFilepattern("metadata.rb")
+          .addFilepattern("Karamelfile")
           .addFilepattern(".kitchen.yml").addFilepattern("attributes").addFilepattern("recipes")
           .addFilepattern("templates").addFilepattern("README.md").call();
 

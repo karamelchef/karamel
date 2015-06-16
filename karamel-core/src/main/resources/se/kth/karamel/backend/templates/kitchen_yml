@@ -17,20 +17,12 @@ suites:
   - name: default
     run_list:
       - recipe[kagent::install]
-      - recipe[%%NAME%%::install]
-      - recipe[%%NAME%%::default]
-      - recipe[%%NAME%%::master]
-      - recipe[%%NAME%%::slave]
+      - recipe[%%name%%::install]
+      - recipe[%%name%%::experiment]
 
     attributes:
-         %%NAME%%:
-            user: %%USER%%
-            master:
-               private_ips: ["10.0.2.15"]
-               public_ips: ["10.0.2.15"]
-            slave:
-               private_ips: ["10.0.2.15"]
-               public_ips: ["10.0.2.15"]
+         %%name%%:
+            user: %%user%%
             private_ips: ["10.0.2.15"]
             public_ips: ["10.0.2.15"]
          kagent:

@@ -1,13 +1,8 @@
 dependencies:
-  - recipe: %%NAME%%::install
-  - recipe: %%NAME%%::default
+  - recipe: %%name%%::install
+  - recipe: %%name%%::default
     local:
-      - %%NAME%%::install
-  - recipe: %%NAME%%::master
+      - %%name%%::install
+  - recipe: %%name%%::default
     local:
-      - %%NAME%%::install
-  - recipe: %%NAME%%::slave
-    local:
-      - %%NAME%%::install
-    global:
-      - %%NAME%%::master
+      - %%name%%::install

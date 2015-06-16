@@ -5,6 +5,8 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -12,29 +14,53 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
 /**
- * Represents attributes/default.rb file in cookbook
  *
  * @author kamal
  */
 public final class KaramelFile {
 
-  private final String fileContent;
-
-  private Map<String, YamlDependency> kv;
-
-  public KaramelFile(String fileContent) {
-    this.fileContent = fileContent;
-    loadDependencies();
+  private List<YamlDependency> dependencies;
+  
+  public static class Recipe {
+    
   }
-
-  public void loadDependencies() {
+  public KaramelFile(String fileContent) {
     Yaml yaml = new Yaml(new Constructor(YamlKaramelFile.class));
     YamlKaramelFile file = (YamlKaramelFile) yaml.load(fileContent);
-    kv = file.getDependencyMap();
+//    dependencies = file.getDependencyMap();
+    dependencies = new ArrayList<>();
+    dependencies.addAll(file.getDependencies());
   }
 
-  public YamlDependency getDepenency(String recipeName) {
-    return kv.get(recipeName);
+  public YamlDependency getDependency(String recipeName) {
+    for (YamlDependency yd : dependencies) {
+      if (yd.getRecipe().compareToIgnoreCase(recipeName)==0 || yd.getRecipeCanonicalName().compareToIgnoreCase(
+          recipeName)==0) {
+        return yd;
+      }
+    }
+//    return dependencies.get(recipeName);
+    return null;
+  }
+
+//  public void setDependency(String recipeName, YamlDependency yd) {
+//    dependencies.put(recipeName, yd);
+//  }
+
+//  public Map<String, YamlDependency> getDependencies() {
+//    return dependencies;
+//  }
+//
+//  public void setDependencies(Map<String, YamlDependency> dependencies) {
+//    this.dependencies = dependencies;
+//  }
+
+  public List<YamlDependency> getDependencies() {
+    return dependencies;
+  }
+
+  public void setDependencies(List<YamlDependency> dependencies) {
+    this.dependencies = dependencies;
   }
 
 }

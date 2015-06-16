@@ -211,13 +211,14 @@ public class Settings {
   public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
 
   //Git cookbook metadata 
-  public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
-  public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
-  public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
-  public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
+  public static final String COOKBOOK_DEFAULTRB_REL_URL = File.separator + "attributes" + File.separator + "default.rb";
+  public static final String COOKBOOK_METADATARB_REL_URL = File.separator + "metadata.rb";
+  public static final String COOKBOOK_KARAMELFILE_REL_URL = File.separator + "Karamelfile";
+  public static final String COOKBOOK_BERKSFILE_REL_URL = File.separator + "Berksfile";
 
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
-  public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
+  public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel" 
+      + File.separator + "backend" + File.separator + "templates" + File.separator;
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
   public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";

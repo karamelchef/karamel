@@ -26,6 +26,12 @@ public class ExperimentContext {
    * Url for the experiment code. Can have a .jar or .tar.gz extention.
    */
   private String url;
+  
+  
+  /**
+   * YAML for the Cluster context
+   */
+  private String clusterDefinition;
 
   /**
    * username to run program as
@@ -47,7 +53,7 @@ public class ExperimentContext {
    */
   private String resultsDirectory = "results";
 
-  private final Map<String, Experiment> mapExperiments = new HashMap<>();
+  private Map<String, Experiment> mapExperiments = new HashMap<>();
 
   public static class Experiment {
 
@@ -148,6 +154,22 @@ public class ExperimentContext {
 
   public String getGroup() {
     return group;
+  }
+
+  public String getClusterDefinition() {
+    return clusterDefinition;
+  }
+
+  public void setClusterDefinition(String clusterDefinition) {
+    this.clusterDefinition = clusterDefinition;
+  }
+
+  public Map<String, Experiment> getMapExperiments() {
+    return mapExperiments;
+  }
+
+  public void setMapExperiments(Map<String, Experiment> mapExperiments) {
+    this.mapExperiments = mapExperiments;
   }
 
   public String getResultsDirectory() {

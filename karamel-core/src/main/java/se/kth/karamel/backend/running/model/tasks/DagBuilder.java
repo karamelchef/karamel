@@ -49,24 +49,24 @@ public class DagBuilder {
     cookbookLevelTasks(cluster, clusterEntity, chefJsons, submitter, allRecipeTasks, dag);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, chefJsons, submitter, allRecipeTasks,
         dag);
-    updateKaramelDependecnies(allRecipeTasks, dag, rlts);
+    updateKaramelDependencies(allRecipeTasks, dag, rlts);
     return dag;
   }
 
-  private static boolean updateKaramelDependecnies(Map<String, RunRecipeTask> allRecipeTasks, Dag dag, Map<String, 
+  private static boolean updateKaramelDependencies(Map<String, RunRecipeTask> allRecipeTasks, Dag dag, Map<String, 
       Map<String, Task>> rlts) throws KaramelException {
     boolean newDepFound = false;
     for (RunRecipeTask task : allRecipeTasks.values()) {
       String tid = task.uniqueId();
       KaramelizedCookbook kcb = CookbookCache.get(task.getCookbookId());
-      YamlDependency depenency = kcb.getKaramelFile().getDepenency(task.getRecipeCanonicalName());
-      if (depenency != null) {
-        for (String depRec : depenency.getLocal()) {
+      YamlDependency dependency = kcb.getKaramelFile().getDependency(task.getRecipeCanonicalName());
+      if (dependency != null) {
+        for (String depRec : dependency.getLocal()) {
           String depId = RunRecipeTask.makeUniqueId(task.getMachineId(), depRec);
           newDepFound |= dag.addDependency(depId, tid);
         }
 
-        for (String depRec : depenency.getGlobal()) {
+        for (String depRec : dependency.getGlobal()) {
           Map<String, Task> rlt2 = rlts.get(depRec);
           if (rlt2 != null) {
             for (Map.Entry<String, Task> entry : rlt2.entrySet()) {

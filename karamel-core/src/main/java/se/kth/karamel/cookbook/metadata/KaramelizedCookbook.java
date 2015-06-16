@@ -36,8 +36,8 @@ public class KaramelizedCookbook {
       String metadataContent = IoUtils.readContent(urls.metadataFile);
       metadataRb = MetadataParser.parse(metadataContent);
       metadataRb.setDefaults(defaultRb);
-      String karamelFileConent = IoUtils.readContent(urls.karamelFile);
-      karamelFile = new KaramelFile(karamelFileConent);
+      String karamelFileContent = IoUtils.readContent(urls.karamelFile);
+      karamelFile = new KaramelFile(karamelFileContent);
       List<String> berksfileLines = IoUtils.readLines(urls.berksfile);
       berksfile = new Berksfile(berksfileLines);
     } catch (IOException e) {

@@ -5,6 +5,12 @@
  */
 package se.kth.karamel.backend.github;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,10 +20,25 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.github.util.CookbookGenerator;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonCookbook;
+import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.client.model.json.JsonRecipe;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.cookbook.metadata.KaramelFile;
+import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
+import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
 /**
  *
@@ -104,6 +125,68 @@ public class GithubUserTest {
   }
 
   @Test
+  public void testKaramelfile() {
+
+    try {
+      StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
+          Settings.CB_TEMPLATE_KARAMELFILE,
+          "name", "jim"
+      );
+//      String c = Files.toString(new File("/tmp/karamelfile1055263075551995081out"), Charsets.UTF_8);
+//      KaramelFile karamelFile = new KaramelFile(c);
+      KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
+
+      String ymlString = "name: MySqlCluster\n"
+          + "ec2:\n"
+          + "    type: m3.medium\n"
+          + "    region: eu-west-1\n"
+          + "\n"
+          + "cookbooks:\n"
+          + "  ndb:\n"
+          + "    github: \"hopshadoop/ndb-chef\"\n"
+          + "    branch: \"master\"\n"
+          + "    \n"
+          + "groups: \n"
+          + "  nodes:\n"
+          + "    size: 1 \n"
+          + "    recipes: \n"
+          + "        - ndb::mgmd\n"
+          + "        - ndb::ndbd\n"
+          + "        - ndb::mysqld\n"
+          + "        - ndb::memcached";
+      JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
+      YamlDependency yd = new YamlDependency();
+      List<String> clusterDependencies = new ArrayList<>();
+      for (JsonGroup g : jsonCluster.getGroups()) {
+        for (JsonCookbook cb : g.getCookbooks()) {
+          for (JsonRecipe r : cb.getRecipes()) {
+            clusterDependencies.add(r.getCanonicalName());
+          }
+        }
+      }
+      yd.setRecipe("test::test");
+      yd.setGlobal(clusterDependencies);
+      yd.setLocal(null);
+      List<YamlDependency> yds = karamelFile.getDependencies();
+      yds.add(yd);
+      DumperOptions options = new DumperOptions();
+      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+      Representer r = new Representer();
+      r.addClassTag(KaramelFile.class, Tag.MAP);
+      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
+      String karamelFileContents = karamelYml.dump(karamelFile);
+
+      File f = File.createTempFile("karamelfile", "out");
+      try (PrintWriter out = new PrintWriter(f)) {
+        out.println(karamelFileContents);
+      }
+    } catch (KaramelException | IOException ex) {
+      fail(ex.getMessage());
+    }
+
+  }
+
+  @Test
   public void testCreateRepo() {
     try {
       ExperimentContext ec = new ExperimentContext();
@@ -115,8 +198,28 @@ public class GithubUserTest {
       ec.setGroup("blah");
       ec.setResultsDirectory("results");
       ec.setUrl("http://snurran.sics.se/hops/prog.jar");
-      ec.setDescription("Nice experiment");
+      ec.setDescription("Test experiment");
+      ec.setClusterDefinition("name: MySqlCluster\n"
+          + "ec2:\n"
+          + "    type: m3.medium\n"
+          + "    region: eu-west-1\n"
+          + "\n"
+          + "cookbooks:\n"
+          + "  ndb:\n"
+          + "    github: \"hopshadoop/ndb-chef\"\n"
+          + "    branch: \"master\"\n"
+          + "    \n"
+          + "groups: \n"
+          + "  nodes:\n"
+          + "    size: 1 \n"
+          + "    recipes: \n"
+          + "        - ndb::mgmd\n"
+          + "        - ndb::ndbd\n"
+          + "        - ndb::mysqld\n"
+          + "        - ndb::memcached"
+      );
       api.commitAndPushExperiment("hopshadoop", "test", ec);
+
     } catch (KaramelException ex) {
       Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
     }

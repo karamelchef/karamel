@@ -262,6 +262,8 @@ public class KaramelApiImpl implements KaramelApi {
     ChefExperimentExtractor.parseAttributesAddToGit(owner, repoName, experiment);
     
     ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
+
+    
     
     // 4. Commit and push all changes to github
     Github.commitPush(owner, repoName);
