@@ -46,17 +46,21 @@ public abstract class YamlScope extends Scope {
     for (int i = 0; i < comps.length; i++) {
       String comp = comps[i];
       if (i == comps.length - 1) {
-        if (parent.containsKey(comp) && !parent.get(comp).equals(value))
-          throw new MetadataParseException(String.format("Ambiguous value for attribute '%s' 1st '%s' 2nd '%s' ", key, parent.get(comp), value));
-        else
+        if (parent.containsKey(comp) && !parent.get(comp).equals(value)) {
+          throw new MetadataParseException(String.format("Ambiguous value for attribute '%s' 1st '%s' 2nd '%s' ", key, 
+              parent.get(comp), value));
+        } else {
           parent.put(comp, value);
+        }
       } else {
         Object next = parent.get(comp);
         if (next == null) {
           next = new HashMap<>();
           parent.put(comp, next);
-        } else if (!(next instanceof Map))
-          throw new MetadataParseException(String.format("Component '%s' in attributed has both simple value '%s' and compound value '%s' ", comp, key, next, comps[i+1]));
+        } else if (!(next instanceof Map)) {
+          throw new MetadataParseException(String.format("Component '%s' in attributed has both simple value '%s' and "
+              + "compound value '%s' ", comp, key, next, comps[i + 1]));
+        }
         parent = (Map<String, Object>) next;
       }
     }

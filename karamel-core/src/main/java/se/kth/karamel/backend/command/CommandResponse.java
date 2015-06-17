@@ -36,7 +36,7 @@ public class CommandResponse {
 
   public static enum Renderer {
 
-    INFO, YAML, SSH
+    INFO, YAML, SSH, DAG
   };
 
   private String result;

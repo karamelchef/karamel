@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -27,9 +28,8 @@ public class InstallBerkshelfTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.makeSingleFileCommands(
-              Settings.SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF, 
-              Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF);
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF, 
+          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
     }
     return commands;
   }

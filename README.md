@@ -35,3 +35,19 @@ ec2:
     vpc: vpc-f70ea392
     subnet: subnet-e7830290
 ```
+
+### Build and run from Source
+
+Ubuntu Requirements: 
+     apt-get install lib32z1 lib32ncurses5 lib32bz2-1.0
+
+Centos 7 Requirements:
+Install zlib.i686, ncurses-libs.i686, and bzip2-libs.i686 on CentOS 7
+
+Building from root directory:
+     mvn install 
+
+Running:
+     cd karamel-ui/target/appassembler
+     ./bin/karamel
+

@@ -8,19 +8,20 @@
                                                                                                     
 ########################################################################################################################
 
-Our interactive terminal helps you to quickly run a cluster of your choice with a few clicks. You get to choose among our 
-<a target='_blank' href='https://github.com/karamelchef/karamel/tree/master/examples'>predefined clusters</a>  of well-known big data stacks or you can create your own cluster. To get started copy content of 
-one of the yaml files and paste it in our <a kref='new'>yaml editor</a>. For more information about our yaml syntax visit <a target='_blank' href='http://www.karamel.io/?q=content/getting-started-karamel'>our web site</a>. 
+Our interactive terminal helps you to quickly run a cluster of your choice with a few clicks. You can choose from our 
+<a target='_blank' href='https://github.com/karamelchef/karamel/tree/master/examples'>predefined clusters</a>  of well-known big data stacks or 
+you can create your own cluster. To get started copy content of one of the yaml files and paste it into our 
+<a kref='new'>yaml editor</a>. For more information about our yaml syntax visit <a target='_blank' href='http://www.karamel.io/?q=content/getting-started-karamel'>our web site</a>. 
 Don't forget to issue 'save' command after you finish to edit your yaml, all the cluster definitions will be stored locally 
-in the .karamel folder under your user home folder.
+in the .karamel folder under your user's home folder.
 
 
-Your running clusters show up in the bellow table, click on the actions to see the its status or purge(terminate) it.
+Click on the action "status" below to see the cluster progress or "purge" to terminate the cluster.
+Running clusters:
 
 %CLUSTERS_TABLE%
 
 
-Presently you have following cluster definitions, don't hesitate to click on the actions if you want to edit/launch/remove 
-each definition.
+The following cluster definitions are available locally. Click on an actions to edit/launch/remove a cluster definition.
 
 %YAMLS_TABLE%

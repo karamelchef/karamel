@@ -37,7 +37,8 @@ public class ChefJsonGenerator {
    * @param clusterEntity
    * @return map of machineId-recipeName->json
    */
-  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, ClusterRuntime clusterEntity) {
+  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, 
+      ClusterRuntime clusterEntity) {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
@@ -52,7 +53,8 @@ public class ChefJsonGenerator {
     return chefJsons;
   }
 
-  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, GroupRuntime groupEntity) {
+  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, 
+      GroupRuntime groupEntity) {
     Map<String, JsonObject> groupJsons = new HashMap<>();
     addCookbookAttributes(cb, json);
     for (MachineRuntime me : groupEntity.getMachines()) {

@@ -6,9 +6,9 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -37,7 +37,7 @@ public class ClusterService {
   public ClusterContext getCommonContext() {
     return commonContext;
   }
-
+  
   public Map<String, ClusterManager> getRepository() {
     return repository;
   }
@@ -50,6 +50,16 @@ public class ClusterService {
 
   }
 
+  public synchronized void registerGithubContext(String email, String password) throws KaramelException {
+    commonContext.setGithubEmail(email);
+    commonContext.setGithubPassword(password);
+    // TODO  - login to validate github credentials
+  }
+
+  public synchronized void registerSudoAccountPassword(String password) {
+    commonContext.setSudoAccountPassword(password);
+  }
+  
   public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
     commonContext.setEc2Context(ec2Context);
   }
@@ -57,7 +67,8 @@ public class ClusterService {
   public synchronized void registerEc2Context(String clusterName, Ec2Context ec2Context) throws KaramelException {
     String name = clusterName.toLowerCase();
     if (repository.containsKey(name)) {
-      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", clusterName));
+      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|", 
+          clusterName));
       throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
     }
 
@@ -70,6 +81,16 @@ public class ClusterService {
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {
+    
+    File pubKey = new File(sshKeyPair.getPublicKeyPath());
+    if (pubKey.exists() == false) {
+      throw new KaramelException("Could not find public key: " + sshKeyPair.getPublicKeyPath());
+    }
+    File privKey = new File(sshKeyPair.getPrivateKeyPath());
+    if (privKey.exists() == false) {
+      throw new KaramelException("Could not find private key: " + sshKeyPair.getPrivateKeyPath());
+    }
+    
     commonContext.setSshKeyPair(sshKeyPair);
   }
 
@@ -113,7 +134,7 @@ public class ClusterService {
       logger.info(String.format("'%s' is already running :-|", jsonCluster.getName()));
       throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
     }
-    ClusterContext checkedContext = checkContext(name);
+    ClusterContext checkedContext = checkContext(jsonCluster);
     ClusterManager cluster = new ClusterManager(jsonCluster, checkedContext);
     repository.put(name, cluster);
     cluster.start();
@@ -126,8 +147,8 @@ public class ClusterService {
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
-    checkContext(name);
     ClusterManager cluster = repository.get(name);
+    checkContext(cluster.getDefinition());
     cluster.enqueue(ClusterManager.Command.PAUSE);
   }
 
@@ -137,8 +158,8 @@ public class ClusterService {
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
-    checkContext(name);
-    ClusterManager cluster = repository.get(name);
+    ClusterManager cluster = repository.get(name);    
+    checkContext(cluster.getDefinition());
     cluster.enqueue(ClusterManager.Command.RESUME);
 
   }
@@ -161,7 +182,8 @@ public class ClusterService {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
-          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", runtime.getName()));
+          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", 
+              runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {
         } catch (KaramelException ex) {
@@ -172,10 +194,10 @@ public class ClusterService {
     t.start();
   }
 
-  private ClusterContext checkContext(String clusterName) throws KaramelException {
-    String name = clusterName.toLowerCase();
+  private ClusterContext checkContext(JsonCluster definition) throws KaramelException {
+    String name = definition.getName().toLowerCase();
     ClusterContext context = clusterContexts.get(name);
-    ClusterContext validatedContext = ClusterContext.validateContext(context, commonContext);
+    ClusterContext validatedContext = ClusterContext.validateContext(definition, context, commonContext);
     clusterContexts.put(name, validatedContext);
     return validatedContext;
   }

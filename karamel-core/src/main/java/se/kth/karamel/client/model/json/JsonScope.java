@@ -17,6 +17,7 @@ import se.kth.karamel.client.model.Scope;
 import se.kth.karamel.cookbook.metadata.Attribute;
 import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 import se.kth.karamel.client.model.yaml.YamlCluster;
+import se.kth.karamel.client.model.yaml.YamlScope;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -30,8 +31,8 @@ public class JsonScope extends Scope {
   public JsonScope() {
   }
 
-  public JsonScope(YamlCluster cluster) throws KaramelException {
-    super(cluster);
+  public JsonScope(YamlCluster cluster, YamlScope scope) throws KaramelException {
+    super(scope);
     Map<String, String> attrs = cluster.flattenAttrs();
     Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
     for (Map.Entry<String, Cookbook> entry : cks) {
@@ -78,7 +79,7 @@ public class JsonScope extends Scope {
 
   @Override
   public String getAttr(String key) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   @Override

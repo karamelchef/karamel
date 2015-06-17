@@ -6,6 +6,7 @@
 package se.kth.karamel.backend.dag;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -205,6 +206,23 @@ public class DagNode implements DagTaskCallback {
   public void failed(String reason) {
     logger.error(String.format("Failed '%s', DAG is stuck here :(", id));
     status = Status.FAILED;
+  }
+
+  public String toJson() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("[");
+    int i = 0;
+    for (DagNode dagNode : predecessors) {
+      i++;
+      builder.append("\"").append(dagNode.getId()).append("\"");
+      if (i != predecessors.size()) {
+        builder.append(",");
+      }
+    }
+    builder.append("]");
+
+    return String.format("{\"id\": \"%s\", %s, \"status\": \"%s\", \"preds\": %s}",
+        id, task.asJson(), status.toString(), builder.toString());
   }
 
 }

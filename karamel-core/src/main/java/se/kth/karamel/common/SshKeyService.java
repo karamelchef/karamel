@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.jclouds.ssh.SshKeys;
 import se.kth.karamel.common.exception.SshKeysNotfoundException;
 
-
 /**
  *
  * @author kamal
@@ -46,14 +45,15 @@ public class SshKeyService {
       folder.mkdirs();
     }
     File pubFile = new File(folder, Settings.SSH_PUBKEY_FILENAME);
-    File priFile = new File(folder, Settings.SSH_PRIKEY_FILENAME);
+    File priFile = new File(folder, Settings.SSH_PRIVKEY_FILENAME);
     Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
     perms.add(PosixFilePermission.OWNER_READ);
     perms.add(PosixFilePermission.OWNER_WRITE);
     try {
-       Files.setPosixFilePermissions(priFile.toPath(), perms);
+      Files.setPosixFilePermissions(priFile.toPath(), perms);
     } catch (IOException ex) {
-	logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on generated private ssh-key. ", ex);
+      logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on "
+          + "generated private ssh-key. ", ex);
     }
     Map<String, String> keys = SshKeys.generate();
     String pub = keys.get("public");
@@ -80,18 +80,19 @@ public class SshKeyService {
     SshKeyPair keyPair = new SshKeyPair();
     keyPair.setPrivateKey(pri);
     keyPair.setPublicKey(pub);
-    keyPair.setPrivateKeyPath(folder + File.separator + Settings.SSH_PRIKEY_FILENAME);
+    keyPair.setPrivateKeyPath(folder + File.separator + Settings.SSH_PRIVKEY_FILENAME);
     keyPair.setPublicKeyPath(folder + File.separator + Settings.SSH_PUBKEY_FILENAME);
     return keyPair;
   }
 
   public static SshKeyPair loadSshKeys(Confs confs) throws SshKeysNotfoundException {
     String pubkeyPath = confs.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
-    String prikeyPath = confs.getProperty(Settings.SSH_PRIKEY_PATH_KEY);
-    return loadSshKeys(pubkeyPath, prikeyPath);
+    String privKeyPath = confs.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
+    return loadSshKeys(pubkeyPath, privKeyPath, "");
   }
 
-  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath) throws SshKeysNotfoundException {
+  public static SshKeyPair loadSshKeys(String pubkeyPath, String prikeyPath, String passphrase) 
+      throws SshKeysNotfoundException {
     String pubKey = null;
     String priKey = null;
     try {
@@ -105,7 +106,8 @@ public class SshKeyService {
       }
 
     } catch (IOException ex) {
-      throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", pubkeyPath, prikeyPath), ex);
+      throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", 
+          pubkeyPath, prikeyPath), ex);
     }
     if (pubKey != null && priKey != null) {
       SshKeyPair keypair = new SshKeyPair();
@@ -113,9 +115,11 @@ public class SshKeyService {
       keypair.setPublicKey(pubKey);
       keypair.setPrivateKeyPath(prikeyPath);
       keypair.setPrivateKey(priKey);
+      keypair.setPassphrase(passphrase);
       return keypair;
     }
-    throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", pubkeyPath, prikeyPath));
+    throw new SshKeysNotfoundException(String.format("Unsuccessful to load ssh keys from '%s' and/or '%s'", 
+        pubkeyPath, prikeyPath));
 
   }
 

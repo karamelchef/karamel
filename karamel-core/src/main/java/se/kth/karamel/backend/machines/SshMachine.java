@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.machines;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.util.List;
@@ -26,7 +27,11 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.logging.Level;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.userauth.password.PasswordFinder;
+import net.schmizz.sshj.userauth.password.Resource;
+import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
@@ -35,7 +40,7 @@ import se.kth.karamel.backend.running.model.Failure;
  *
  * @author kamal
  */
-public class SshMachine implements Runnable {
+public class SshMachine implements MachineInterface, Runnable {
 
   static {
     Security.addProvider(new BouncyCastleProvider());
@@ -45,17 +50,29 @@ public class SshMachine implements Runnable {
   private final MachineRuntime machineEntity;
   private final String serverPubKey;
   private final String serverPrivateKey;
+  private final String passphrase;
   private SSHClient client;
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stopping = false;
-  private SshShell shell;
+  private final SshShell shell;
+  private Task activeTask;
 
-  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey) {
+  /**
+   * This constructor is used for users with SSH keys protected by a password
+   *
+   * @param machineEntity
+   * @param serverPubKey
+   * @param serverPrivateKey
+   * @param passphrase
+   */
+  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey, String passphrase) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
-    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(), machineEntity.getSshUser(), machineEntity.getSshPort());
+    this.passphrase = passphrase;
+    this.shell = new SshShell(serverPrivateKey, serverPubKey, machineEntity.getPublicIp(),
+        machineEntity.getSshUser(), passphrase, machineEntity.getSshPort());
   }
 
   public MachineRuntime getMachineEntity() {
@@ -86,16 +103,20 @@ public class SshMachine implements Runnable {
   public void run() {
     logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
     try {
-      while (true && !stopping) {
+      while (!stopping) {
         try {
           if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
               && machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING) {
-            Task task = null;
             try {
-              logger.debug("Going to take a task from the queue");
-              task = taskQueue.take();
-              logger.debug(String.format("Task was taken from the queue.. '%s'", task.getName()));
-              runTask(task);
+              logger.debug("Taking a new task from the queue.");
+              if (this.activeTask == null) {
+                this.activeTask = taskQueue.take();
+              } else {
+                logger.debug("Retrying a task that didn't complete on last execution attempt.");
+              }
+              logger.debug(String.format("Task for execution.. '%s'", activeTask.getName()));
+              runTask(this.activeTask);
+              this.activeTask = null;
             } catch (InterruptedException ex) {
               if (stopping) {
                 logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
@@ -144,10 +165,19 @@ public class SshMachine implements Runnable {
 
       for (ShellCommand cmd : commands) {
         if (cmd.getStatus() != ShellCommand.Status.DONE) {
+
           runSshCmd(cmd, task);
+
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
             task.failed(String.format("Incompleted command '%s", cmd.getCmdStr()));
             break;
+          } else {
+            try {
+              task.collectResults(this);
+            } catch (KaramelException ex) {
+              logger.error("Error in the resutls", ex);
+              task.failed(ex.getMessage());
+            }
           }
         }
       }
@@ -160,72 +190,147 @@ public class SshMachine implements Runnable {
   }
 
   private void runSshCmd(ShellCommand shellCommand, Task task) {
-    shellCommand.setStatus(ShellCommand.Status.ONGOING);
+    int numRetries = Settings.SSH_CMD_RETRY_NUM;
+    int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
+    boolean finished = false;
     Session session = null;
-    try {
-      logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
-      session = client.startSession();
-      Session.Command cmd = session.exec(shellCommand.getCmdStr());
-      cmd.join(60 * 24, TimeUnit.MINUTES);
-      updateHeartbeat();
-      if (cmd.getExitStatus() != 0) {
-        shellCommand.setStatus(ShellCommand.Status.FAILED);
-      } else {
-        shellCommand.setStatus(ShellCommand.Status.DONE);
-      }
-      SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
-      LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
+    while (!stopping && !finished && numRetries > 0) {
+      shellCommand.setStatus(ShellCommand.Status.ONGOING);
+      try {
+        logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
-    } catch (ConnectionException | TransportException ex) {
-      if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
-        logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
-      }
-    } finally {
-      if (session != null) {
-        try {
-          session.close();
-        } catch (TransportException | ConnectionException ex) {
-          logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+        session = client.startSession();
+        Session.Command cmd = session.exec(shellCommand.getCmdStr());
+        cmd.join(Settings.SSH_CMD_LONGEST, TimeUnit.MINUTES);
+        updateHeartbeat();
+        if (cmd.getExitStatus() != 0) {
+          shellCommand.setStatus(ShellCommand.Status.FAILED);
+          // Retry just in case there was a network problem somewhere on the server side
+        } else {
+          shellCommand.setStatus(ShellCommand.Status.DONE);
+          finished = true;
+        }
+        SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
+        LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
+      } catch (ConnectionException | TransportException ex) {
+        if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+          logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
+        }
+      } finally {
+        // Retry if we have a network problem
+        numRetries--;
+        if (!finished) {
+          try {
+            Thread.sleep(timeBetweenRetries);
+          } catch (InterruptedException ex) {
+            if (!stopping) {
+              logger.warn("Interrupted waiting to retry a task. Continuing...");
+            }
+          }
+          timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
         }
       }
     }
+    if (session != null) {
+      try {
+        session.close();
+      } catch (TransportException | ConnectionException ex) {
+        logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+      }
+    }
+
+  }
+
+  private PasswordFinder getPasswordFinder() {
+    return new PasswordFinder() {
+
+      @Override
+      public char[] reqPassword(Resource<?> resource) {
+        return passphrase.toCharArray();
+      }
+
+      @Override
+      public boolean shouldRetry(Resource<?> resource) {
+        return false;
+      }
+    };
   }
 
   private boolean connect() throws KaramelException {
     try {
-      KeyProvider keys = null;
+      KeyProvider keys;
       client = new SSHClient();
       client.addHostKeyVerifier(new PromiscuousVerifier());
       client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
       client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      keys = client.loadKeys(serverPrivateKey, serverPubKey, null);
+      keys = (passphrase == null)
+          ? client.loadKeys(serverPrivateKey, serverPubKey, null)
+          : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
+
       logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
-      try {
-        client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
-      } catch (IOException ex) {
-        logger.warn(String.format("Opps!! coudln't connect to '%s' :@", machineEntity.getId()));
-        logger.debug(ex);
+
+      int numRetries = 3;
+      int timeBetweenRetries = 2000;
+      float scaleRetryTimeout = 1.0f;
+      boolean succeeded = false;
+      while (!succeeded && numRetries > 0) {
+
+        try {
+          client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
+        } catch (IOException ex) {
+          logger.warn(String.format("Opps!! coudln' t connect to '%s' :@", machineEntity.getId()));
+          if (passphrase != null && passphrase.isEmpty() == false) {
+            if (numRetries > 1) {
+              logger.warn(String.format("Could be a slow network, will retry. "));
+            } else {
+              logger.warn(String.format("Could be a network problem. But if your network is fine,"
+                  + "then you have probably entered an incorrect the passphrase for your private key."));
+            }
+          }
+          logger.debug(ex);
+        }
+        if (client.isConnected()) {
+          succeeded = true;
+          logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
+          machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, 
+              machineEntity.getPublicIp()));
+          client.authPublickey(machineEntity.getSshUser(), keys);
+          machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
+          return true;
+        } else {
+          logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), 
+              machineEntity.getSshPort()));
+          if (passphrase != null) {
+            logger.warn(String.format("Is the passphrase for your private key correct?"));
+          }
+          machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
+        }
+
+        numRetries--;
+        if (!succeeded) {
+          try {
+            Thread.sleep(timeBetweenRetries);
+          } catch (InterruptedException ex) {
+            java.util.logging.Logger.getLogger(SshMachine.class.getName()).log(Level.SEVERE, null, ex);
+          }
+          timeBetweenRetries *= scaleRetryTimeout;
+        }
       }
-      if (client.isConnected()) {
-        logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
-        machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp()));
-        client.authPublickey(machineEntity.getSshUser(), keys);
-        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
-        return true;
-      } else {
-        logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(), machineEntity.getSshPort()));
-        machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
-        return false;
-      }
+
     } catch (UserAuthException ex) {
-      String message = "Issue for using ssh keys, make sure you keypair is not password protected..";
+      String message = "Authentication problem using ssh keys.";
+      if (passphrase != null) {
+        message = message + " Is the passphrase for your private key correct?";
+      }
       KaramelException exp = new KaramelException(message, ex);
-      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, machineEntity.getPublicIp(), message));
+      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH, 
+          machineEntity.getPublicIp(), message));
       throw exp;
     } catch (IOException e) {
       throw new KaramelException(e);
     }
+    return false;
   }
 
   public void disconnect() {
@@ -253,5 +358,23 @@ public class SshMachine implements Runnable {
 
   private void updateHeartbeat() {
     lastHeartbeat = System.currentTimeMillis();
+  }
+
+  @Override
+  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite) 
+      throws KaramelException, IOException {
+    SCPFileTransfer scp = client.newSCPFileTransfer();
+    File f = new File(localFilePath);
+    f.mkdirs();
+    // Don't collect logs of values, just overwrite
+    if (f.exists()) {
+      if (overwrite) {
+        f.delete();
+      } else {
+        throw new KaramelException(String.format("Local file already exist %s", localFilePath));
+      }
+    }
+    // If the file doesn't exist, it should quickly throw an IOException
+    scp.download(remoteFilePath, localFilePath);
   }
 }

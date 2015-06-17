@@ -23,8 +23,9 @@ import org.yaml.snakeyaml.representer.Representer;
  */
 public class YamlPropertyRepresenter extends Representer {
 
-  List<String> CLUSTER_ORDER = new ArrayList<>(Arrays.asList("name", "ec2", "vagrant", "baremetal", "cookbooks", "attrs", "groups"));
-  List<String> GROUP_ORDER = new ArrayList<>(Arrays.asList("size", "attrs", "recipes"));
+  List<String> CLUSTER_ORDER = new ArrayList<>(Arrays.asList("name", "ec2", "vagrant", "baremetal", "cookbooks", 
+      "attrs", "groups"));
+  List<String> GROUP_ORDER = new ArrayList<>(Arrays.asList("size", "ec2", "vagrant", "baremetal", "attrs", "recipes"));
 
   @Override
   protected Set<Property> getProperties(Class<? extends Object> type)

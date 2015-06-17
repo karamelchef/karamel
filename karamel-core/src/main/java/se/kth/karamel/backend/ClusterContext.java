@@ -5,7 +5,12 @@
  */
 package se.kth.karamel.backend;
 
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
+import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.Provider;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -17,7 +22,51 @@ public class ClusterContext {
 
   private Ec2Context ec2Context;
   private SshKeyPair sshKeyPair;
+  private String sudoAccountPassword="";
+  private boolean sudoAccountPasswordRequired=false;
+  private String githubEmail = "anonymous@anonymous.org";
+  private String githubPassword;
 
+  public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
+    this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
+  }
+
+  public boolean isSudoAccountPasswordRequired() {
+    return sudoAccountPasswordRequired;
+  }
+
+  public void setGithubEmail(String githubEmail) {
+    this.githubEmail = githubEmail;
+  }
+
+  public void setGithubPassword(String githubPassword) {
+    this.githubPassword = githubPassword;
+  }
+
+  public void setSudoAccountPassword(String sudoAccountPassword) {
+    this.sudoAccountPassword = sudoAccountPassword;
+  }
+
+  public String getGithubEmail() {
+    return githubEmail;
+  }
+  
+  public String getGithubUsername() {
+    return githubEmail.substring(0, githubEmail.lastIndexOf("@"));
+  }
+
+  public String getGithubPassword() {
+    return githubPassword;
+  }
+
+  public String getSudoAccountPassword() {
+    return sudoAccountPassword;
+  }
+
+  public String getSudoCommand() {
+    return sudoAccountPassword.isEmpty() ? "sudo" : "echo \"" + sudoAccountPassword + "\" | sudo -S ";
+  }
+  
   public Ec2Context getEc2Context() {
     return ec2Context;
   }
@@ -43,14 +92,18 @@ public class ClusterContext {
     }
   }
 
-  public static ClusterContext validateContext(ClusterContext context, ClusterContext commonContext) throws KaramelException {
+  public static ClusterContext validateContext(JsonCluster definition,
+      ClusterContext context, ClusterContext commonContext) throws KaramelException {
     if (context == null) {
       context = new ClusterContext();
     }
     context.mergeContext(commonContext);
 
-    if (context.getEc2Context() == null) {
-      throw new KaramelException("No valid Ec2 credentials registered :-|");
+    for (JsonGroup group : definition.getGroups()) {
+      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      if (provider instanceof Ec2 && context.getEc2Context() == null) {
+        throw new KaramelException("No valid Ec2 credentials registered :-|");
+      }
     }
 
     if (context.getSshKeyPair() == null) {

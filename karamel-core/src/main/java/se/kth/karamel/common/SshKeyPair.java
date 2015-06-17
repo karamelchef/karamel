@@ -16,6 +16,15 @@ public class SshKeyPair {
   private String publicKeyPath;
   private String privateKey;
   private String publicKey;
+  private String passphrase;
+
+  public String getPassphrase() {
+    return passphrase;
+  }
+
+  public void setPassphrase(String password) {
+    this.passphrase = password;
+  }
 
   public String getPrivateKey() {
     return privateKey;

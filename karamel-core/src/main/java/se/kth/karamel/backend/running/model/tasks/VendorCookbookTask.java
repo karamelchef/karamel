@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.Settings;
@@ -26,7 +28,8 @@ public class VendorCookbookTask extends Task {
   private final String cookbookUrl;
   private final String branch;
 
-  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, String cookbookName, String cookbookUrl, String branch) {
+  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, 
+      String cookbookName, String cookbookUrl, String branch) {
     super("clone and vendor " + cookbookUrl, machine, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;
@@ -43,7 +46,8 @@ public class VendorCookbookTask extends Task {
               "cookbook_name", cookbookName,
               "cookbook_url", cookbookUrl,
               "branch_name", branch,
-              "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER);
+              "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER,
+              "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
     }
     return commands;
   }

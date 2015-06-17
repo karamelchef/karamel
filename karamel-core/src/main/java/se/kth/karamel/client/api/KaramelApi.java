@@ -66,6 +66,7 @@ public interface KaramelApi {
   
   /**
    * Loads Karamel common keys
+   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -74,6 +75,7 @@ public interface KaramelApi {
   /**
    * Loads cluster specific keys
    * @param clusterName
+   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -97,17 +99,19 @@ public interface KaramelApi {
   /**
    * Register ssh keys for the current runtime of karamel
    * @param keypair
+   * @return 
    * @throws KaramelException 
    */
-  public void registerSshKeys(SshKeyPair keypair) throws KaramelException;
+  public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
   
   /**
    * Register ssh keys for the specified cluster
    * @param clusterName
    * @param keypair
+   * @return 
    * @throws KaramelException 
    */
-  public void registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
+  public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file
@@ -178,6 +182,23 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String getInstallationDag(String clusterName) throws KaramelException;
+
+  
+  /**
+   * Register password for Baremetal sudo account
+   * @param password
+   * @throws KaramelException 
+   */
+  public void registerSudoPassword(String password) throws KaramelException;
+  
+  
+  /**
+   * Register username/password for github account
+   * @param email github account name or email address
+   * @param password github password
+   * @throws KaramelException 
+   */
+  public void registerGithubAccount(String email, String password) throws KaramelException;
   
   
 }

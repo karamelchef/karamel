@@ -1,0 +1,81 @@
+<form name="providerForm" class="form-horizontal nodeGroupForm" ng-submit="pushNodeGroup()">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="close()">&times;</button>
+    <h4 class="modal-title" >Modify Provider</h4>
+  </div>
+  <div class="modal-body">
+
+    <div class="form-group">
+      <label class="control-label col-xs-2">Region</label>
+      <div class="col-xs-10">
+        <select class="form-control" ng-model="ec2.region">
+          <option value="eu-west-1">eu-west-1 (Ireland)</option>
+          <option value="eu-central-1">eu-central-1 (Frankfurt)</option>
+          <option value="us-east-1">us-east-1 (N. Virgina)</option>
+          <option value="us-west-1">us-west-1 (Oregon)</option>
+          <option value="us-west-2">us-west-2 (California)</option>
+          <option value="sa-east-1">sa-east-1 (São Paulo)</option>
+          <option value="ap-southeast-1">ap-southeast-1 (Singapore)</option>
+          <option value="ap-northeast-1">ap-northeast-1 (Tokyo)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-xs-2">AMI</label>
+        <div class="col-xs-10">
+          <input type="text" class="form-control" ng-model="ec2.ami" placeholder="ami-0307ce74" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-xs-2">Instance</label>
+        <div class="col-xs-10">
+          <select class="form-control" ng-model="ec2.type">
+            <option value="t2.micro">t2.micro</option>
+            <option value="t2.small">t2.small</option>
+            <option value="t2.medium">t2.medium</option>
+            <option value="m3.medium">m3.medium</option>
+            <option value="m3.large">m3.large</option>
+            <option value="m3.xlarge">m3.xlarge</option>
+            <option value="m3.2xlarge">m3.2xlarge</option>
+            <option value="c4.large">c4.large</option>
+            <option value="c4.xlarge">c4.xlarge</option>
+            <option value="c4.2xlarge">c4.2xlarge</option>
+            <option value="c4.4xlarge">c4.4xlarge</option>
+            <option value="c4.8xlarge">c4.8xlarge</option>
+            <option value="c3.large">c3.large</option>
+            <option value="c3.xlarge">c3.xlarge</option>
+            <option value="c3.2xlarge">c3.2xlarge</option>
+            <option value="c3.4xlarge">c3.4xlarge</option>
+            <option value="c3.8xlarge">c3.8xlarge</option>
+            <option value="r3.large">r3.large</option>
+            <option value="r3.xlarge">r3.xlarge</option>
+            <option value="r3.2xlarge">r3.2xlarge</option>
+            <option value="r3.4xlarge">r3.4xlarge</option>
+            <option value="r3.8xlarge">r3.8xlarge</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-xs-2">Price</label>
+        <div class="col-xs-10">
+          <input type="text" class="form-control" ng-model="ec2.price" placeholder="0.2 (for 2 USD cents)" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-xs-2">VPC Id</label>
+        <div class="col-xs-10">
+          <input type="text" class="form-control" ng-model="ec2.vpc" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-xs-2">Subnet Id</label>
+        <div class="col-xs-10">
+          <input type="text" class="form-control" ng-model="ec2.subnet" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" ng-click="close()">Cancel</button>
+    <button type="submit" class="btn btn-primary" ng-click="submit()">Submit</button>
+  </div>
+</form>

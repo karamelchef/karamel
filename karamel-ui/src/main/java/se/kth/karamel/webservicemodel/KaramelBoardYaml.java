@@ -7,20 +7,21 @@ package se.kth.karamel.webservicemodel;
  */
 public class KaramelBoardYaml {
 
-    private String yml;
+  private String yml;
 
-    public KaramelBoardYaml(){}
+  public KaramelBoardYaml() {
+  }
 
-    public KaramelBoardYaml(String yml){
-        this.yml = yml;
-    }
+  public KaramelBoardYaml(String yml) {
+    this.yml = yml;
+  }
 
-    public String getYml() {
-        return yml;
-    }
+  public String getYml() {
+    return yml;
+  }
 
-    public void setYml(String yml) {
-        this.yml = yml;
-    }
+  public void setYml(String yml) {
+    this.yml = yml;
+  }
 
 }

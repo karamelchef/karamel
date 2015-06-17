@@ -12,10 +12,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
@@ -47,6 +46,7 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class CommandService {
 
+  private static final Logger logger = Logger.getLogger(CommandService.class);
   private static String chosenCluster = null;
   private static String autoselectedCluster = null;
   private static String chosenMachine = "";
@@ -55,6 +55,7 @@ public class CommandService {
   private static String MENU_BAR = "";
   private static String HELP_PAGE_TEMPLATE = "";
   private static String HOME_PAGE_TEMPLATE = "";
+  private static String RUNNING_PAGE_TEMPLATE = "";
   private static String YAMLS_TABLE_PLH = "%YAMLS_TABLE%";
   private static String CLUSTERS_TABLE_PLH = "%CLUSTERS_TABLE%";
 
@@ -62,6 +63,7 @@ public class CommandService {
     try {
       HELP_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/helppage");
       HOME_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/homepage");
+      RUNNING_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/running");
     } catch (IOException e) {
 
     }
@@ -81,6 +83,9 @@ public class CommandService {
     String successMessage = null;
     if (cmd.equals("help")) {
       result = HELP_PAGE_TEMPLATE;
+    } else if (cmd.equals("running")) {
+      result = RUNNING_PAGE_TEMPLATE.replace(CLUSTERS_TABLE_PLH, clustersTable());
+      nextCmd = "running";
     } else if (cmd.equals("home")) {
       result = HOME_PAGE_TEMPLATE.replace(YAMLS_TABLE_PLH, yamlsTable());
       result = result.replace(CLUSTERS_TABLE_PLH, clustersTable());
@@ -146,7 +151,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.pauseCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for pausing, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for pausing, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -154,7 +160,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.resumeCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for resuming, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for resuming, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -162,7 +169,8 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.purgeCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for purging, it might take some time please be patient!";
+        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+            + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
@@ -264,8 +272,7 @@ public class CommandService {
                   Thread.sleep(200);
 
                 } catch (InterruptedException ex) {
-                  Logger.getLogger(CommandService.class
-                          .getName()).log(Level.SEVERE, null, ex);
+                  logger.error("", ex);
                 }
                 result = shell.readStreams();
                 renderer = CommandResponse.Renderer.SSH;
@@ -311,8 +318,7 @@ public class CommandService {
                 Thread.sleep(100);
 
               } catch (InterruptedException ex) {
-                Logger.getLogger(CommandService.class
-                        .getName()).log(Level.SEVERE, null, ex);
+                logger.error("", ex);
               }
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
@@ -348,7 +354,7 @@ public class CommandService {
 
       }
 
-      p = Pattern.compile("dag\\s+(\\w+)");
+      p = Pattern.compile("tdag\\s+(\\w+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -359,7 +365,7 @@ public class CommandService {
 
             @Override
             public void submitTask(Task task) throws KaramelException {
-              System.out.println(task.uniqueId());
+              logger.info(" Received request to process a command with info: " + task.uniqueId());
               task.succeed();
             }
 
@@ -381,6 +387,40 @@ public class CommandService {
         }
 
         renderer = CommandResponse.Renderer.INFO;
+      }
+
+      p = Pattern.compile("vdag\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        ClusterManager cluster = cluster(clusterName);
+        if (cluster == null || cluster.getInstallationDag() == null) {
+          TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+            @Override
+            public void submitTask(Task task) throws KaramelException {
+              task.succeed();
+            }
+
+            @Override
+            public void prepareToStart(Task task) throws KaramelException {
+            }
+          };
+          String yml = ClusterDefinitionService.loadYaml(clusterName);
+          JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+          ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, dummyTaskSubmitter, chefJsons);
+          installationDag.validate();
+          result = installationDag.asJson();
+        } else {
+          result = cluster.getInstallationDag().asJson();
+          addActiveClusterMenus(response);
+          nextCmd = cmd;
+        }
+
+        renderer = CommandResponse.Renderer.DAG;
       }
 
       p = Pattern.compile("links\\s+(\\w+)");
@@ -414,6 +454,7 @@ public class CommandService {
           clusterService.startCluster(json);
           successMessage = String.format("cluster %s launched successfully..", clusterName);
           nextCmd = "status";
+          addActiveClusterMenus(response);
         }
       }
 
@@ -439,12 +480,13 @@ public class CommandService {
           if (!taskFound) {
             throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
           }
+          addActiveClusterMenus(response);
         } else {
           throw new KaramelException("no cluster has been chosen yet!!");
         }
       }
 
-      p = Pattern.compile("which\\s+(cluster|ec2|ssh)");
+      p = Pattern.compile("which\\s+(cluster|aws|ssh)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -455,17 +497,18 @@ public class CommandService {
           } else {
             throw new KaramelException("no cluster has been chosen yet!!");
           }
-        } else if (subcmd.equals("ec2")) {
+        } else if (subcmd.equals("aws")) {
           Ec2Context ec2Context = clusterService.getCommonContext().getEc2Context();
           if (ec2Context != null) {
-            result = String.format("ec2 account id is %s", ec2Context.getCredentials().getAccountId());
+            result = String.format("aws account id is %s", ec2Context.getCredentials().getAccessKey());
           } else {
-            throw new KaramelException("no ec2 account has been chosen yet!!");
+            throw new KaramelException("no aws account has been chosen yet!!");
           }
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();
           if (sshKeyPair != null) {
-            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), sshKeyPair.getPrivateKeyPath());
+            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), 
+                sshKeyPair.getPrivateKeyPath());
           } else {
             throw new KaramelException("no ssh keys has been chosen yet!!");
           }
@@ -528,7 +571,10 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='dag " + name + "'>dag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + 
+          name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + 
+          name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + 
+          name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -542,7 +588,9 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='dag " + yaml + "'>dag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + 
+          yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + 
+          yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -614,7 +662,8 @@ public class CommandService {
     ClusterRuntime clusterEntity = cluster.getRuntime();
     response.addMenuItem("View Definition", "yaml");
     response.addMenuItem("Status", "status");
-    response.addMenuItem("DAG", "dag " + clusterName);
+    response.addMenuItem("TDAG", "tdag " + clusterName);
+    response.addMenuItem("VDAG", "vdag " + clusterName);
     response.addMenuItem("Detail", "detail");
     response.addMenuItem("Groups", "groups");
     response.addMenuItem("Machines", "machines");
@@ -629,7 +678,8 @@ public class CommandService {
 
   }
 
-  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) throws KaramelException {
+  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) 
+      throws KaramelException {
     Pattern p = Pattern.compile(cmd + "(\\s+(\\w+))?");
     Matcher matcher = p.matcher(userinput);
     if (matcher.matches()) {
@@ -639,7 +689,8 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the context.");
+          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the "
+              + "context.");
         }
       } else {
         clusterName = matcher.group(2);

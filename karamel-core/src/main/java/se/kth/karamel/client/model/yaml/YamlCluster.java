@@ -69,7 +69,7 @@ public class YamlCluster extends YamlScope {
 
   @Override
   public void validate() throws ValidationException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
 }

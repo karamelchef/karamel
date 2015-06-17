@@ -7,7 +7,10 @@ package se.kth.karamel.client.model.yaml;
 
 import java.util.ArrayList;
 import java.util.List;
+import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -22,7 +25,8 @@ public class YamlGroup extends YamlScope {
   public YamlGroup() {
   }
 
-  YamlGroup(JsonGroup jsonGroup) {
+  YamlGroup(JsonGroup jsonGroup) throws MetadataParseException {
+    super(jsonGroup);
     this.size = jsonGroup.getSize();
     recipes.addAll(jsonGroup.flattenRecipes());
   }
@@ -51,7 +55,14 @@ public class YamlGroup extends YamlScope {
 
   @Override
   public void validate() throws ValidationException {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    super.validate();
+    Baremetal baremetal = getBaremetal();
+    if (baremetal != null) {
+      int s1 = baremetal.retriveAllIps().size();
+      if (s1 != size)
+        throw new ValidationException(
+            String.format("Number of ip addresses is not equal to the group size %d != %d", s1, size));
+    }
   }
 
 }

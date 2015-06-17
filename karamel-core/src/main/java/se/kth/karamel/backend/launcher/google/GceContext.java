@@ -18,62 +18,65 @@ import org.jclouds.sshj.config.SshjSshClientModule;
  */
 public class GceContext {
 
-    private String projectName;
-    Credentials credentials;
-    private final ComputeService computeService;
-    private final GoogleComputeEngineApi gceApi;
-    private final FirewallApi fireWallApi;
-    private final NetworkApi networkApi;
+  private String projectName;
+  Credentials credentials;
+  private final ComputeService computeService;
+  private final GoogleComputeEngineApi gceApi;
+  private final FirewallApi fireWallApi;
+  private final NetworkApi networkApi;
 
-    public GceContext(Credentials credentials) {
-        ComputeServiceContext context = ContextBuilder.newBuilder("google-compute-engine")
-                .modules(Arrays.asList(new SshjSshClientModule(), new EnterpriseConfigurationModule(), new SLF4JLoggingModule()))
-                .credentials(credentials.identity, credentials.credential)
-                .buildView(ComputeServiceContext.class);
-        computeService = context.getComputeService();
-        gceApi = context.unwrapApi(GoogleComputeEngineApi.class);
-        fireWallApi = gceApi.firewalls();
-        networkApi = gceApi.networks();
-        this.credentials = credentials;
-    }
+  public GceContext(Credentials credentials) {
+    ComputeServiceContext context = ContextBuilder.newBuilder("google-compute-engine")
+        .modules(Arrays.asList(
+                new SshjSshClientModule(),
+                new EnterpriseConfigurationModule(),
+                new SLF4JLoggingModule()))
+        .credentials(credentials.identity, credentials.credential)
+        .buildView(ComputeServiceContext.class);
+    computeService = context.getComputeService();
+    gceApi = context.unwrapApi(GoogleComputeEngineApi.class);
+    fireWallApi = gceApi.firewalls();
+    networkApi = gceApi.networks();
+    this.credentials = credentials;
+  }
 
-    public Credentials getCredentials() {
-        return credentials;
-    }
+  public Credentials getCredentials() {
+    return credentials;
+  }
 
-    public ComputeService getComputeService() {
-        return computeService;
-    }
+  public ComputeService getComputeService() {
+    return computeService;
+  }
 
-    public GoogleComputeEngineApi getGceApi() {
-        return gceApi;
-    }
+  public GoogleComputeEngineApi getGceApi() {
+    return gceApi;
+  }
 
-    /**
-     * @return the projectName
-     */
-    public String getProjectName() {
-        return projectName;
-    }
+  /**
+   * @return the projectName
+   */
+  public String getProjectName() {
+    return projectName;
+  }
 
-    /**
-     * @param projectName the projectName to set
-     */
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
+  /**
+   * @param projectName the projectName to set
+   */
+  public void setProjectName(String projectName) {
+    this.projectName = projectName;
+  }
 
-    /**
-     * @return the fireWallApi
-     */
-    public FirewallApi getFireWallApi() {
-        return fireWallApi;
-    }
+  /**
+   * @return the fireWallApi
+   */
+  public FirewallApi getFireWallApi() {
+    return fireWallApi;
+  }
 
-    /**
-     * @return the networkApi
-     */
-    public NetworkApi getNetworkApi() {
-        return networkApi;
-    }
+  /**
+   * @return the networkApi
+   */
+  public NetworkApi getNetworkApi() {
+    return networkApi;
+  }
 }
