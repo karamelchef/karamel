@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.ExperimentContext;
@@ -43,6 +42,9 @@ import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.SshKeyService;
+import se.kth.karamel.cookbook.metadata.Berksfile;
+import se.kth.karamel.cookbook.metadata.KaramelFile;
+import se.kth.karamel.cookbook.metadata.MetadataRb;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -232,7 +234,11 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public GithubUser loadGithubCredentials() throws KaramelException {
-    return Github.loadGithubCredentials();
+    GithubUser user =  Github.loadGithubCredentials();
+    if (!user.getUser().isEmpty() && !user.getPassword().isEmpty()) {
+      registerGithubAccount(user.getUser(), user.getPassword());
+    }
+    return user;
   }
 
   private void createGithubRepo(String owner, String repo, String description) throws KaramelException {
@@ -268,6 +274,23 @@ public class KaramelApiImpl implements KaramelApi {
     // 4. Commit and push all changes to github
     Github.commitPush(owner, repoName);
 
+  }
+  
+  @Override
+  public ExperimentContext loadExperiment(String httpUrlGithubRepo) throws KaramelException {
+    ExperimentContext ec = new ExperimentContext();
+
+    KaramelizedCookbook kc = new KaramelizedCookbook(httpUrlGithubRepo);
+    MetadataRb metadata = kc.getMetadataRb();
+    KaramelFile kf = kc.getKaramelFile();
+    String metadataJson = kc.getMetadataJson();
+    String configFile = kc.getConfigFile();
+    Berksfile bf = kc.getBerksFile();
+// 1. Parse metadata.rb to return the list of recipe names. Download recipes from recipes/*.rb
+    // 3. Parse and Download templates/default/konfig-*.props.erb files
+    // 
+    
+    return ec;
   }
 
 }

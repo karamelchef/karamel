@@ -37,7 +37,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls1.metadataFile);
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
-    assertEquals(berksFile, urls1.berksfile);
+    assertEquals(berksFile, urls1.CookbookUrls.this.berksFile);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
 
@@ -49,7 +49,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls2.metadataFile);
     assertEquals(attFile, urls2.attrFile);
     assertEquals(karamelFile, urls2.karamelFile);
-    assertEquals(berksFile, urls2.berksfile);
+    assertEquals(berksFile, urls2.CookbookUrls.this.berksFile);
     assertEquals(repo, urls2.repoName);
     assertEquals(branch, urls2.branch);
 
@@ -61,7 +61,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls3.metadataFile);
     assertEquals(attFile, urls3.attrFile);
     assertEquals(karamelFile, urls3.karamelFile);
-    assertEquals(berksFile, urls3.berksfile);
+    assertEquals(berksFile, urls3.CookbookUrls.this.berksFile);
     assertEquals(repo, urls3.repoName);
     assertEquals(branch, urls3.branch);
 
@@ -73,7 +73,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls4.metadataFile);
     assertEquals(attFile, urls4.attrFile);
     assertEquals(karamelFile, urls4.karamelFile);
-    assertEquals(berksFile, urls3.berksfile);
+    assertEquals(berksFile, urls3.CookbookUrls.this.berksFile);
     assertEquals(repo, urls4.repoName);
     assertEquals(branch, urls4.branch);
 
@@ -85,7 +85,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls5.metadataFile);
     assertEquals(attFile, urls5.attrFile);
     assertEquals(karamelFile, urls5.karamelFile);
-    assertEquals(berksFile, urls5.berksfile);
+    assertEquals(berksFile, urls5.CookbookUrls.this.berksFile);
     assertEquals(repo, urls5.repoName);
     assertEquals(branch, urls5.branch);
 
@@ -97,7 +97,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls6.metadataFile);
     assertEquals(attFile, urls6.attrFile);
     assertEquals(karamelFile, urls6.karamelFile);
-    assertEquals(berksFile, urls6.berksfile);
+    assertEquals(berksFile, urls6.CookbookUrls.this.berksFile);
     assertEquals(repo, urls6.repoName);
     assertEquals(branch, urls6.branch);
   }
@@ -123,7 +123,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls1.metadataFile);
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
-    assertEquals(berksFile, urls1.berksfile);
+    assertEquals(berksFile, urls1.CookbookUrls.this.berksFile);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
 
@@ -135,7 +135,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls2.metadataFile);
     assertEquals(attFile, urls2.attrFile);
     assertEquals(karamelFile, urls2.karamelFile);
-    assertEquals(berksFile, urls2.berksfile);
+    assertEquals(berksFile, urls2.CookbookUrls.this.berksFile);
     assertEquals(repo, urls2.repoName);
     assertEquals(branch, urls2.branch);
 
@@ -147,7 +147,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls3.metadataFile);
     assertEquals(attFile, urls3.attrFile);
     assertEquals(karamelFile, urls3.karamelFile);
-    assertEquals(berksFile, urls3.berksfile);
+    assertEquals(berksFile, urls3.CookbookUrls.this.berksFile);
     assertEquals(repo, urls3.repoName);
     assertEquals(branch, urls3.branch);
 
@@ -159,7 +159,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls4.metadataFile);
     assertEquals(attFile, urls4.attrFile);
     assertEquals(karamelFile, urls4.karamelFile);
-    assertEquals(berksFile, urls4.berksfile);
+    assertEquals(berksFile, urls4.CookbookUrls.this.berksFile);
     assertEquals(repo, urls4.repoName);
     assertEquals(branch, urls4.branch);
 
@@ -171,7 +171,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls5.metadataFile);
     assertEquals(attFile, urls5.attrFile);
     assertEquals(karamelFile, urls5.karamelFile);
-    assertEquals(berksFile, urls5.berksfile);
+    assertEquals(berksFile, urls5.CookbookUrls.this.berksFile);
     assertEquals(repo, urls5.repoName);
     assertEquals(branch, urls5.branch);
 
@@ -181,7 +181,7 @@ public class CookbookUrlsTest {
     assertEquals(home, urls6.home);
     assertEquals(rawHome, urls6.rawHome);
     assertEquals(metadataFile, urls6.metadataFile);
-    assertEquals(berksFile, urls6.berksfile);
+    assertEquals(berksFile, urls6.CookbookUrls.this.berksFile);
     assertEquals(attFile, urls6.attrFile);
     assertEquals(karamelFile, urls6.karamelFile);
   }
@@ -206,7 +206,7 @@ public class CookbookUrlsTest {
     assertEquals(metadataFile, urls1.metadataFile);
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
-    assertEquals(berksFile, urls1.berksfile);
+    assertEquals(berksFile, urls1.CookbookUrls.this.berksFile);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
   }

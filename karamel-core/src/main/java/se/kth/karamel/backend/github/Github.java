@@ -28,7 +28,9 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * 1. Call registerCredentials() to store your github credentials in memory.
+ * 2. Then call methods like addFile(), commitPush(repo,..)
+ * 
  * @author jdowling
  */
 public class Github {
@@ -82,10 +84,13 @@ public class Github {
     return email;
   }
 
-  public static GithubUser loadGithubCredentials() {
+  public static GithubUser loadGithubCredentials() throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
     Github.user = confs.getProperty(Settings.GITHUB_USER);
     Github.password = confs.getProperty(Settings.GITHUB_PASSWORD);
+    if (Github.user != null && Github.password != null) {
+      registerCredentials(Github.user, Github.password);
+    }
     return new GithubUser(Github.user, Github.password);
   }
 
@@ -321,6 +326,9 @@ public class Github {
    */
   public synchronized static void commitPush(String owner, String repoName)
       throws KaramelException {
+    if (email == null || user == null) {
+      throw new KaramelException("You forgot to call registerCredentials. You must call this method first.");
+    }
     File repoDir = getRepoDirectory(repoName);
     Git git = null;
     try {

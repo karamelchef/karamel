@@ -24,27 +24,37 @@ public class KaramelizedCookbook {
   private final DefaultRb defaultRb;
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
-  private final Berksfile berksfile;
+  private final Berksfile berksFile;
+  private final String configFile;
   private String json;
 
   public KaramelizedCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
     try {
       CookbookUrls.Builder builder = new CookbookUrls.Builder();
-      urls = builder.url(homeUrl).build();
+      this.urls = builder.url(homeUrl).build();
       List<String> lines1 = IoUtils.readLines(urls.attrFile);
-      defaultRb = new DefaultRb(lines1);
+      this.defaultRb = new DefaultRb(lines1);
       String metadataContent = IoUtils.readContent(urls.metadataFile);
-      metadataRb = MetadataParser.parse(metadataContent);
-      metadataRb.setDefaults(defaultRb);
+      this.metadataRb = MetadataParser.parse(metadataContent);
+      this.metadataRb.setDefaults(defaultRb);
       String karamelFileContent = IoUtils.readContent(urls.karamelFile);
-      karamelFile = new KaramelFile(karamelFileContent);
-      List<String> berksfileLines = IoUtils.readLines(urls.berksfile);
-      berksfile = new Berksfile(berksfileLines);
+      this.karamelFile = new KaramelFile(karamelFileContent);
+      List<String> berksfileLines = IoUtils.readLines(urls.berksFile);
+      this.berksFile = new Berksfile(berksfileLines);
+      this.configFile = IoUtils.readContent(urls.configFile);
     } catch (IOException e) {
       throw new CookbookUrlException("", e);
     }
   }
 
+  public String getConfigFile() {
+    return configFile;
+  }
+
+  public Berksfile getBerksFile() {
+    return berksFile;
+  }
+  
   public String getMetadataJson() {
     if (json == null) {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();

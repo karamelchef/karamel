@@ -246,15 +246,21 @@ public interface KaramelApi {
 //   * @throws KaramelException
 //   */
 //  public void createGithubRepo(String organization, String repo, String description) throws KaramelException;
-
   /**
    * Add a file to an existing repo, commit it, and push it to github.
+   *
    * @param owner organization or user
    * @param repoName name of repo
    * @param experiment bash scripts and config files to add, commit, and push.
-   * @throws KaramelException 
+   * @throws KaramelException
    */
-  public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment) 
+  public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException;
 
+  /**
+   * Loads an experiment into the Designer, given its clone URL
+   * @param httpUrlGithubRepo url for github repo
+   * @return 
+   */
+  public ExperimentContext loadExperiment(String httpUrlGithubRepo) throws KaramelException;
 }

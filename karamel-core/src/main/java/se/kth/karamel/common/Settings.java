@@ -215,6 +215,8 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_URL = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_URL = File.separator + "Berksfile";
+  public static final String COOKBOOK_CONFIGFILE_REL_URL = File.separator + "templates" + File.separator +
+      "defaults" + File.separator + "config.props";
 
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
   public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel" 

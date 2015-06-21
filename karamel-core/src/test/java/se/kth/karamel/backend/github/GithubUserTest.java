@@ -69,7 +69,7 @@ public class GithubUserTest {
       user = u2.getUser();
       password = u2.getPassword();
     } catch (KaramelException ex) {
-      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
+      fail(ex.getMessage());
     }
   }
 
@@ -132,8 +132,6 @@ public class GithubUserTest {
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", "jim"
       );
-//      String c = Files.toString(new File("/tmp/karamelfile1055263075551995081out"), Charsets.UTF_8);
-//      KaramelFile karamelFile = new KaramelFile(c);
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
 
       String ymlString = "name: MySqlCluster\n"
@@ -180,6 +178,8 @@ public class GithubUserTest {
       try (PrintWriter out = new PrintWriter(f)) {
         out.println(karamelFileContents);
       }
+      String contents = Files.toString(f, Charsets.UTF_8);
+      KaramelFile karamelFile2 = new KaramelFile(contents);
     } catch (KaramelException | IOException ex) {
       fail(ex.getMessage());
     }
@@ -218,10 +218,10 @@ public class GithubUserTest {
           + "        - ndb::mysqld\n"
           + "        - ndb::memcached"
       );
-      api.commitAndPushExperiment("hopshadoop", "test", ec);
+      api.commitAndPushExperiment("karamelchef", "test", ec);
 
     } catch (KaramelException ex) {
-      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
+      fail(ex.getMessage());
     }
   }
 

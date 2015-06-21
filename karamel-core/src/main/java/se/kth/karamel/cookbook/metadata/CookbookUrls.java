@@ -30,10 +30,11 @@ public class CookbookUrls {
   public String attrFile;
   public String metadataFile;
   public String karamelFile;
-  public String berksfile;
+  public String berksFile;
+  public String configFile;
 
   public CookbookUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile,
-      String metadataFile, String karamelFile, String berksfile) {
+      String metadataFile, String karamelFile, String berksFile, String configFile) {
     this.repoName = repoName;
     this.branch = branch;
     this.id = id;
@@ -42,7 +43,8 @@ public class CookbookUrls {
     this.attrFile = attrFile;
     this.metadataFile = metadataFile;
     this.karamelFile = karamelFile;
-    this.berksfile = berksfile;
+    this.berksFile = berksFile;
+    this.configFile = configFile;
   }
 
   public static class Builder {
@@ -97,8 +99,9 @@ public class CookbookUrls {
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
+      String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
       CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
-          berksFile);
+          berksFile, configFile);
       return urls;
     }
 

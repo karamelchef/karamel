@@ -5,10 +5,8 @@
  */
 package se.kth.karamel.backend.github.util;
 
-import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,14 +16,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Representer;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.backend.ExperimentContext.Experiment;
 import se.kth.karamel.backend.github.Github;
-import static se.kth.karamel.backend.github.Github.getRepoDirectory;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -202,7 +201,11 @@ public class ChefExperimentExtractor {
         karamelFile.getDependencies().add(yd);
       }
       
-      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class));
+      DumperOptions options = new DumperOptions();
+      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+      Representer r = new Representer();
+      r.addClassTag(KaramelFile.class, Tag.MAP);
+      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
       String karamelFileContents = karamelYml.dump(karamelFile);
       Github.addFile(owner, repoName, "Karamelfile", karamelFileContents);
       
