@@ -5,10 +5,15 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import org.jclouds.ContextBuilder;
 import org.jclouds.compute.ComputeServiceContext;
+import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
+import org.jclouds.compute.domain.Template;
+import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.domain.LoginCredentials;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.NovaComputeService;
+import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
@@ -18,7 +23,9 @@ import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Nova;
 import se.kth.karamel.client.model.json.JsonCluster;
@@ -33,9 +40,7 @@ import se.kth.karamel.common.settings.NovaSetting;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class NovaLauncherTest {
 
@@ -316,19 +321,79 @@ public class NovaLauncherTest {
   }
 
   @Test
-  public void testForkMachines() throws KaramelException{
+  public void testForkMachines() throws KaramelException, RunNodesException {
     NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    //mocking uploadSSHPublicKey
+    String keypairName = "pepeKeyPair";
+    KeyPair pair = mock(KeyPair.class);
+
+    List<KeyPair> keyPairList = new ArrayList<>();
+    keyPairList.add(pair);
+    FluentIterable<KeyPair> keys = FluentIterable.from(keyPairList);
+
+    when(keyPairApi.list()).thenReturn(keys);
+    when(keyPairApi.delete(keypairName)).thenReturn(true);
+    when(keyPairApi.createWithPublicKey(keypairName, sshKeyPair.getPublicKey())).thenReturn(pair);
+
+    /*boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova, true);*/
+
     //mocking
     JsonCluster cluster = mock(JsonCluster.class);
     ClusterRuntime clusterRuntime = mock(ClusterRuntime.class);
+    when(clusterRuntime.getName()).thenReturn(clusterName);
     List<JsonGroup> groups = new ArrayList<>();
+
+    //mocking json group
     JsonGroup group = mock(JsonGroup.class);
     groups.add(group);
     when(group.getName()).thenReturn(groupName);
-    when(cluster.getGroups()).thenReturn(groups);
     when(group.getProvider()).thenReturn(nova);
+    when(group.getSize()).thenReturn(1);
+
+    //mocking json cluster
+    when(cluster.getGroups()).thenReturn(groups);
     when(cluster.getProvider()).thenReturn(nova);
     when(cluster.getName()).thenReturn(clusterName);
+
+    //mocking group runtime
+    List<GroupRuntime> groupRuntimes = new ArrayList<>();
+    GroupRuntime groupRuntime = mock(GroupRuntime.class);
+    when(groupRuntime.getName()).thenReturn(groupName);
+    when(groupRuntime.getId()).thenReturn("10");
+    when(groupRuntime.getCluster()).thenReturn(clusterRuntime);
+    groupRuntimes.add(groupRuntime);
+
+    //mocking clusterRuntime
+    when(clusterRuntime.getGroups()).thenReturn(groupRuntimes);
+
+    //mocking templateOptions
+    NovaTemplateOptions novaTemplateOptions = mock(NovaTemplateOptions.class);
+    TemplateBuilder templateBuilder = mock(TemplateBuilder.class);
+
+    when(novaContext.getComputeService()).thenReturn(novaComputeService);
+    when(novaComputeService.templateOptions()).thenReturn(novaTemplateOptions);
+    when(novaComputeService.templateBuilder()).thenReturn(templateBuilder);
+
+    //mock builder
+    when(novaTemplateOptions.keyPairName(keypairName)).thenReturn(novaTemplateOptions);
+
+    //mock success nodes
+    Set<NodeMetadata> succeededNodes = new HashSet<>();
+    NodeMetadata succeededNode = mock(NodeMetadata.class);
+
+    succeededNodes.add(succeededNode);
+    doReturn(succeededNodes).when(novaComputeService)
+            .createNodesInGroup(Matchers.anyString(), eq(1), Matchers.any(Template.class));
+
+    LoginCredentials loginCredentials = mock(LoginCredentials.class);
+    Set<String> ipAddresses = new HashSet<>();
+    ipAddresses.add("127.0.0.1");
+    when(succeededNode.getPublicAddresses()).thenReturn(ipAddresses);
+    when(succeededNode.getPrivateAddresses()).thenReturn(ipAddresses);
+    when(succeededNode.getLoginPort()).thenReturn(22);
+    when(succeededNode.getCredentials()).thenReturn(loginCredentials);
+    when(loginCredentials.getUser()).thenReturn("ubuntu");
+
     //testing method
     List<MachineRuntime> forkedMachines =novaLauncher.forkMachines(cluster,clusterRuntime,groupName);
 

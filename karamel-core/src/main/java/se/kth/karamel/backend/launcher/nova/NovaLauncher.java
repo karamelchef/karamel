@@ -42,11 +42,11 @@ import java.util.*;
  */
 public final class NovaLauncher extends Launcher{
   private static final Logger logger = Logger.getLogger(NovaLauncher.class);
-  public static boolean TESTING = true;
-  public final NovaContext novaContext;
-  public final SshKeyPair sshKeyPair;
+  private static boolean TESTING = true;
+  private final NovaContext novaContext;
+  private final SshKeyPair sshKeyPair;
 
-  Set<String> keys = new HashSet<>();
+  private Set<String> keys = new HashSet<>();
 
   public NovaLauncher(NovaContext novaContext, SshKeyPair sshKeyPair) throws KaramelException {
     if (novaContext == null) {
@@ -229,17 +229,17 @@ public final class NovaLauncher extends Launcher{
 
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqueGroupName));
 
-    NovaTemplateOptions options = novaContext.getComputeService().templateOptions().as(NovaTemplateOptions.class);
+    NovaTemplateOptions options = novaContext.getComputeService().templateOptions();
 
     boolean succeed = false;
     int tries = 0;
-    Set<NodeMetadata> successfullNodes = Sets.newLinkedHashSet();
+    Set<NodeMetadata> successfulNodes = Sets.newLinkedHashSet();
     List<String> unforkedVmNames = new ArrayList<>();
     List<String> toBeForkedVmNames;
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
-      int requestSize = totalSize - successfullNodes.size();
+      int requestSize = totalSize - successfulNodes.size();
       int maxForkRequests = Integer.parseInt(NovaSetting.NOVA_MAX_FORK_VMS_PER_REQUEST.getParameter());
       if (requestSize > maxForkRequests) {
         requestSize = maxForkRequests;
@@ -249,7 +249,7 @@ public final class NovaLauncher extends Launcher{
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
       options.keyPairName(keypairName);
-      options.as(NovaTemplateOptions.class).securityGroups(groupIds);
+      options.securityGroups(groupIds);
       options.nodeNames(toBeForkedVmNames);
 
       template.options(options);
@@ -261,7 +261,7 @@ public final class NovaLauncher extends Launcher{
       Set<NodeMetadata> succ = new HashSet<>();
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
-                requestSize, uniqueGroupName, successfullNodes.size(), failedNodes.size(), totalSize));
+                requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
         succ.addAll(novaContext.getComputeService().createNodesInGroup(
                 uniqueGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
@@ -277,12 +277,12 @@ public final class NovaLauncher extends Launcher{
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
-      successfullNodes.addAll(succ);
-      if (successfullNodes.size() < totalSize) {
+      successfulNodes.addAll(succ);
+      if (successfulNodes.size() < totalSize) {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-                          + "original-number for '%s'. Failed nodes will be killed later.", successfullNodes.size(),
+                          + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
                   failedNodes.size(),
                   totalSize, uniqueGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
@@ -297,7 +297,7 @@ public final class NovaLauncher extends Launcher{
           cleanupFailedNodes(failedNodes);
         }
         List<MachineRuntime> machines = new ArrayList<>();
-        for (NodeMetadata node : successfullNodes) {
+        for (NodeMetadata node : successfulNodes) {
           if (node != null) {
             MachineRuntime machine = new MachineRuntime(groupRuntime);
             ArrayList<String> privateIps = new ArrayList();
