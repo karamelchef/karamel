@@ -110,8 +110,8 @@ public class GceLauncherTest {
 
   private List<MachineRuntime> forkMachines(int size, String zone) throws InvalidCredentialsException, RunNodesException {
     Gce gce = new Gce();
-    gce.setImageName("centos-6-v20150423");
-    gce.setImageType(Gce.ImageType.centos);
+    gce.setImageName("ubuntu-1404-trusty-v20150316");
+    gce.setImageType(Gce.ImageType.ubuntu);
     gce.setZone(zone);
     gce.setMachineType(Gce.MachineType.n1_standard_1);
     GceLauncher launcher = new GceLauncher(context);

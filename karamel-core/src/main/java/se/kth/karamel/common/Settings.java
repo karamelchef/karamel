@@ -124,6 +124,13 @@ public class Settings {
     return names;
   }
 
+  /**
+   * GCE firewall name.
+   * @param networkName
+   * @param port
+   * @param protocol
+   * @return 
+   */
   public static final String UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
   }

@@ -57,8 +57,8 @@ public class Gce extends Provider {
     centos("centos-cloud"),
     ceros("ceros-cloud"),
     opensuse("opensuse-cloud"),
-    ubuntu("ubuntu-cloud"),
-    redhat("redhat-cloud"),
+    ubuntu("ubuntu-os-cloud"),
+    redhat("rhel-cloud"),
     suse("suse-cloud");
     private final String type;
 

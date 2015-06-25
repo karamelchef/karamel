@@ -98,7 +98,7 @@ public class GceLauncher {
     try {
       networkUri = Gce.buildNetworkUri(context.getProjectName(), networkName);
     } catch (URISyntaxException ex) {
-      logger.error(ipRange);
+      logger.error(ipRange, ex);
       return;
     }
     List<Operation> operations = new ArrayList<>(ports.size());
