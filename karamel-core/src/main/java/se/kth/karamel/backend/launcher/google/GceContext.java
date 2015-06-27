@@ -9,6 +9,7 @@ import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.features.FirewallApi;
 import org.jclouds.googlecomputeengine.features.NetworkApi;
+import org.jclouds.googlecomputeengine.features.RouteApi;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
 
@@ -24,6 +25,7 @@ public class GceContext {
   private final GoogleComputeEngineApi gceApi;
   private final FirewallApi fireWallApi;
   private final NetworkApi networkApi;
+  private final RouteApi routeApi;
 
   public GceContext(Credentials credentials) {
     ComputeServiceContext context = ContextBuilder.newBuilder("google-compute-engine")
@@ -37,6 +39,7 @@ public class GceContext {
     gceApi = context.unwrapApi(GoogleComputeEngineApi.class);
     fireWallApi = gceApi.firewalls();
     networkApi = gceApi.networks();
+    routeApi = gceApi.routes();
     this.credentials = credentials;
   }
 
@@ -78,5 +81,12 @@ public class GceContext {
    */
   public NetworkApi getNetworkApi() {
     return networkApi;
+  }
+
+  /**
+   * @return the routeApi
+   */
+  public RouteApi getRouteApi() {
+    return routeApi;
   }
 }

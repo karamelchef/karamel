@@ -9,8 +9,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.domain.Credentials;
@@ -18,32 +24,49 @@ import org.jclouds.googlecloud.GoogleCredentialsFromJson;
 import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.domain.Instance;
+import org.jclouds.googlecomputeengine.domain.Metadata;
 import org.jclouds.googlecomputeengine.domain.NewInstance;
 import org.jclouds.googlecomputeengine.domain.Operation;
+import org.jclouds.googlecomputeengine.domain.Route;
+import org.jclouds.googlecomputeengine.features.FirewallApi;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.features.NetworkApi;
 import org.jclouds.googlecomputeengine.features.OperationApi;
+import org.jclouds.googlecomputeengine.features.RouteApi;
 import org.jclouds.googlecomputeengine.options.FirewallOptions;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.launcher.Launcher;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.Provider;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.GceSettings;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.UnsupportedImageType;
 
 /**
  *
  * @author Hooman
  */
-public class GceLauncher {
+public class GceLauncher extends Launcher {
 
+  private static final int DEFAULT_SSH_PORT = 22;
   private static final String GCE_PROVIDER = "gce";
   private static final Logger logger = Logger.getLogger(GceLauncher.class);
   public final GceContext context;
+  public final SshKeyPair sshKeyPair;
 
-  public GceLauncher(GceContext context) {
+  public GceLauncher(GceContext context, SshKeyPair sshKeyPair) {
     this.context = context;
+    this.sshKeyPair = sshKeyPair;
   }
 
   /**
@@ -85,56 +108,75 @@ public class GceLauncher {
     }
   }
 
-  // TODO: FireWalls in Google
+  @Override
+  public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
+    JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
+    Set<String> ports = new HashSet<>();
+    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    // TODO: assign arbitrary ip range.
+    String groupId = createFirewall(definition.getName(), jg.getName(), Settings.GCE_DEFAULT_IP_RANGE, ports);
+    return groupId;
+  }
+
   // TODO: Tags can be added.
-  public void createFirewall(String clusterName, String groupName, String ipRange, Set<String> ports)
+  public String createFirewall(String clusterName, String groupName, String ipRange, Set<String> ports)
       throws KaramelException {
     String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
     NetworkApi netApi = context.getNetworkApi();
     if (waitForOperation(context.getGceApi().operations(), netApi.createInIPv4Range(networkName, ipRange)) == 1) {
       throw new KaramelException("Failed to create network with name " + networkName);
     }
-    URI networkUri = null;
     try {
-      networkUri = Gce.buildNetworkUri(context.getProjectName(), networkName);
-    } catch (URISyntaxException ex) {
-      logger.error(ipRange, ex);
-      return;
-    }
-    List<Operation> operations = new ArrayList<>(ports.size());
-    for (String port : ports) {
-      String p;
-      String pr;
-      if (port.contains("/")) {
-        String[] s = port.split("/");
-        p = s[0];
-        pr = s[1];
-      } else {
-        p = port;
-        pr = "tcp";
+      URI networkUri = GceSettings.buildNetworkUri(context.getProjectName(), networkName);
+      List<Operation> operations = new ArrayList<>(ports.size());
+      for (String port : ports) {
+        String p;
+        String pr;
+        if (port.contains("/")) {
+          String[] s = port.split("/");
+          p = s[0];
+          pr = s[1];
+        } else {
+          p = port;
+          pr = "tcp";
+        }
+        FirewallOptions firewall = new FirewallOptions()
+            .addAllowedRule(Firewall.Rule.create(pr, ImmutableList.of(p)))
+            .addSourceRange("0.0.0.0/0");
+        String fwName = Settings.UNIQUE_FIREWALL_NAME(networkName, p, pr);
+        operations.add(context.getFireWallApi().createInNetwork(fwName, networkUri, firewall));
+        logger.info(String.format("Ports became open for '%s'", networkName));
       }
-      FirewallOptions firewall = new FirewallOptions()
-          .addAllowedRule(Firewall.Rule.create(pr, ImmutableList.of(p)))
-          .addSourceRange("0.0.0.0/0");
-      String fwName = Settings.UNIQUE_FIREWALL_NAME(networkName, p, pr);
-      operations.add(context.getFireWallApi().createInNetwork(fwName, networkUri, firewall));
-      logger.info(String.format("Ports became open for '%s'", networkName));
+
+      for (Operation op : operations) {
+        // TODO: Handle failed operations and report them.
+        waitForOperation(context.getGceApi().operations(), op);
+      }
+    } catch (URISyntaxException ex) {
+      logger.error(ex.getMessage(), ex);
     }
 
-    for (Operation op : operations) {
-      // TODO: Handle failed operations and report them.
-      waitForOperation(context.getGceApi().operations(), op);
-    }
+    return networkName;
   }
 
-  public List<MachineRuntime> forkMachines(String clusterName, String groupName, int totalSize, Gce gce)
-      throws RunNodesException {
+  @Override
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
+      throws KaramelException {
+    Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
+    GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
+
+    return forkMachines(group, definedGroup.getSize(), gce);
+  }
+
+  public List<MachineRuntime> forkMachines(GroupRuntime group, int totalSize, Gce gce) {
     List<MachineRuntime> machines = new ArrayList<>(totalSize);
     try {
-      URI machineType = Gce.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getMachineType());
-      URI networkType = Gce.buildDefaultNetworkUri(context.getProjectName());
-      URI imageType = Gce.buildImageUri(gce.getImageType(), gce.getImageName());
-
+      URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getMachineType());
+      URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
+      URI imageType = GceSettings.buildImageUri(gce.getImageName());
+      String clusterName = group.getCluster().getName();
+      String groupName = group.getName();
       String uniqeGroupName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
       List<String> allVmNames = Settings.UNIQUE_VM_NAMES(GCE_PROVIDER, clusterName, groupName, totalSize);
       ArrayList<Operation> operations = new ArrayList<>(totalSize);
@@ -145,40 +187,121 @@ public class GceLauncher {
         logger.info("Starting instance " + name);
         operations.add(operation);
       }
+      ArrayList<Operation> metadataOperations = new ArrayList<>(totalSize);
       for (int i = 0; i < totalSize; i++) {
         if (waitForOperation(context.getGceApi().operations(), operations.get(i)) == 0) {
           Instance vm = instanceApi.get(allVmNames.get(i));
-          MachineRuntime machine = new MachineRuntime(null); // TODO: add group run time.
+          Metadata metadata;
+          if (vm.metadata() != null) {
+            metadata = vm.metadata().clone();
+          } else {
+            metadata = Metadata.create();
+          }
+          // Username given for provider is used as SSH user for VMs. 
+          metadata.put("sshKeys", gce.getUsername() + ":" + sshKeyPair.getPublicKey());
+          metadataOperations.add(instanceApi.setMetadata(allVmNames.get(i), metadata));
+          MachineRuntime machine = new MachineRuntime(group);
           machine.setEc2Id(vm.id());
           machine.setName(vm.name());
           Instance.NetworkInterface netInterface = vm.networkInterfaces().get(0);
           machine.setPrivateIp(netInterface.networkIP());
           machine.setPublicIp(netInterface.accessConfigs().get(0).natIP());
           machines.add(machine);
-          //TODO: get instance's ssh port and user.
-//                    machine.setSshPort(vm);
-//                    machine.setSshUser(node.getCredentials().getUser());
+          machine.setSshPort(DEFAULT_SSH_PORT);
+          machine.setSshUser(gce.getUsername());
         }
       }
+      // TODO handle failure for setting metadata using metadataOperations list.
     } catch (URISyntaxException ex) {
       logger.error("Wrong URI.", ex);
+    } catch (UnsupportedImageType ex) {
+      logger.error(ex.getMessage(), ex);
     }
 
     return machines;
   }
 
-  public void cleanup(List<String> vmNames, String zone) throws KaramelException {
-    logger.info(String.format("Killing following machines with names: \n %s.", vmNames.toString()));
-    InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
-    ArrayList<Operation> operations = new ArrayList<>(vmNames.size());
-    for (String vm : vmNames) {
-      operations.add(instanceApi.delete(vm));
+  @Override
+  public void cleanup(JsonCluster definition, ClusterRuntime runtime) throws KaramelException {
+    runtime.resolveFailures();
+    List<GroupRuntime> groups = runtime.getGroups();
+    Map<String, List<String>> vmZone = new HashMap<>();
+    Set<String> networks = new HashSet<>();
+    for (GroupRuntime group : groups) {
+      group.getCluster().resolveFailures();
+      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      if (provider instanceof Gce) {
+        networks.add(group.getId());
+        Gce gce = (Gce) provider;
+        List<String> vms;
+        if (vmZone.containsKey(gce.getZone())) {
+          vms = vmZone.get(gce.getZone());
+        } else {
+          vms = new LinkedList<>();
+          vmZone.put(gce.getZone(), vms);
+        }
+        for (MachineRuntime machine : group.getMachines()) {
+          if (machine.getEc2Id() != null) {
+            vms.add(machine.getEc2Id());
+          }
+        }
+      }
     }
-    for (int i = 0; i < operations.size(); i++) {
-      if (waitForOperation(context.getGceApi().operations(), operations.get(i)) == 1) {
-        logger.warn(String.format("Delete operations has timedout for vm %s.", vmNames.get(i)));
+    cleanup(vmZone, networks);
+  }
+
+  /**
+   *
+   * @param vmZone
+   * @param networks
+   * @throws KaramelException
+   */
+  public void cleanup(Map<String, List<String>> vmZone, Set<String> networks) throws KaramelException {
+    Iterator<Map.Entry<String, List<String>>> iterator = vmZone.entrySet().iterator();
+    LinkedList<Operation> operations = new LinkedList<>();
+    while (iterator.hasNext()) {
+      Map.Entry<String, List<String>> entry = iterator.next();
+      String zone = entry.getKey();
+      List<String> vms = entry.getValue();
+      logger.info(String.format("Killing following machines with names: \n %s.", vms.toString()));
+      InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
+      for (String vm : vms) {
+        operations.add(instanceApi.delete(vm));
+      }
+    }
+
+    for (Operation operation : operations) {
+      if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
+        logger.warn(String.format("%s operation has timedout: %s\n",
+            operation.operationType(), operation.httpErrorMessage()));
       } else {
-        logger.info(String.format("Successfully deleted vm %s.", vmNames.get(i)));
+        logger.info(String.format("Operation %s  was successfully done on %s\n.",
+            operation.operationType(), operation.targetLink()));
+      }
+    }
+
+    operations.clear();
+    NetworkApi netApi = context.getNetworkApi();
+    FirewallApi fwApi = context.getFireWallApi();
+    RouteApi routeApi = context.getRouteApi();
+    //TODO: Delete network firewalls and routes first and then delete network. 
+    // Otherwise network deletion will not work.
+    for (String network : networks) {
+      try {
+        URI networkUri = GceSettings.buildNetworkUri(context.getProjectName(), network);
+        operations.add(netApi.delete(network));
+      } catch (URISyntaxException ex) {
+        logger.error(ex.getMessage(), ex);
+      }
+    }
+
+    for (Operation operation : operations) {
+      if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
+        logger.warn(String.format("%s operation has timedout: %s\n",
+            operation.operationType(), operation.httpErrorMessage()));
+      } else {
+        logger.info(String.format("Operation %s  was successfully done on %s\n.",
+            operation.operationType(), operation.targetLink()));
       }
     }
   }
@@ -189,7 +312,7 @@ public class GceLauncher {
     int timeout = 60; // seconds
     int time = 0;
 
-    while (operation.status() != Operation.Status.DONE) {
+    while (operation != null && operation.status() != Operation.Status.DONE) {
       if (time >= timeout) {
         return 1;
       }

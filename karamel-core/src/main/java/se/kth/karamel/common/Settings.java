@@ -290,5 +290,7 @@ public class Settings {
   }
 
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
+  
+  public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
 }

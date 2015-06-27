@@ -4,22 +4,29 @@ import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.domain.Credentials;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.features.FirewallApi;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
-import org.jclouds.googlecomputeengine.options.ListOptions;
+import org.jclouds.googlecomputeengine.features.NetworkApi;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.GceSettings;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -27,7 +34,6 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class GceLauncherTest {
 
-  private static final String PROJECT_NAME = "fine-blueprint-95313";
   static GceContext context;
 
   @BeforeClass
@@ -62,9 +68,10 @@ public class GceLauncherTest {
   }
 
   @Test
-  public void testForkMachines() throws InvalidCredentialsException, RunNodesException, URISyntaxException {
-    int size = 8;
-    List<MachineRuntime> machines = forkMachines(size, "europe-west1-b");
+  public void testForkMachines()
+      throws InvalidCredentialsException, RunNodesException, URISyntaxException, ValidationException {
+    int size = 1;
+    List<MachineRuntime> machines = forkMachines("c1", "g1", size, "europe-west1-b");
     assert machines.size() == size;
     for (MachineRuntime machine : machines) {
       assert machine.getId() != null && !machine.getId().isEmpty();
@@ -74,48 +81,71 @@ public class GceLauncherTest {
     }
   }
 
-  @Test
+//  @Test
   public void testCleanUp() throws InvalidCredentialsException, RunNodesException, URISyntaxException, KaramelException {
-    int size = 8;
+    int size = 1;
+    String clusterName = "c1";
+    String groupName = "g1";
     String zone = "europe-west1-b";
-    List<MachineRuntime> machines = forkMachines(size, zone);
+    List<MachineRuntime> machines = forkMachines(clusterName, groupName, size, zone);
     List<String> vms = new ArrayList<>(machines.size());
     for (MachineRuntime machine : machines) {
       vms.add(machine.getName());
     }
-    GceLauncher launcher = new GceLauncher(context);
-    launcher.cleanup(vms, zone);
+    Map<String, List<String>> vmZone = new HashMap<>();
+    vmZone.put(zone, vms);
+    GceLauncher launcher = new GceLauncher(context, new SshKeyPair());
+    String networkName = launcher.createFirewall(clusterName, groupName, Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of("22/tcp"));
+    launcher.cleanup(vmZone, ImmutableSet.of(networkName));
     InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
-    assert !instanceApi.list().hasNext();
+    for (String vm : vms) {
+      assert instanceApi.get(vm) == null;
+    }
+    NetworkApi netApi = context.getNetworkApi();
+    assert netApi.get(networkName) == null;
   }
 
-  @Test
+//  @Test
   public void testCreateFirewall() throws KaramelException {
-    GceLauncher launcher = new GceLauncher(context);
+    GceLauncher launcher = new GceLauncher(context, new SshKeyPair());
     String clusterName = "c1";
     String groupName = "g1";
     String p1 = "22";
     String p2 = "80";
     String pr = "tcp";
-    launcher.createFirewall(clusterName, groupName, "10.240.0.0/16", ImmutableSet.of(p1 + "/" + pr, p2 + "/" + pr));
-    String networkName = Settings.UNIQUE_GROUP_NAME("gce", clusterName, groupName);
+    String networkName = launcher.createFirewall(clusterName, groupName,
+        Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of(p1 + "/" + pr, p2 + "/" + pr));
     String fw1Name = Settings.UNIQUE_FIREWALL_NAME(networkName, p1, pr);
     String fw2Name = Settings.UNIQUE_FIREWALL_NAME(networkName, p2, pr);
     FirewallApi fwApi = context.getFireWallApi();
     Firewall fw = fwApi.get(fw1Name);
-    assert fw != null && !fw.allowed().isEmpty() && !fw.allowed().get(0).ports().isEmpty() && fw.allowed().get(0).ports().get(0).equalsIgnoreCase(p1);
+    assert fw != null && !fw.allowed().isEmpty()
+        && !fw.allowed().get(0).ports().isEmpty() && fw.allowed().get(0).ports().get(0).equalsIgnoreCase(p1);
     fw = fwApi.get(fw2Name);
-    assert fw != null && !fw.allowed().isEmpty() && !fw.allowed().get(0).ports().isEmpty() && fw.allowed().get(0).ports().get(0).equalsIgnoreCase(p2);
+    assert fw != null && !fw.allowed().isEmpty()
+        && !fw.allowed().get(0).ports().isEmpty() && fw.allowed().get(0).ports().get(0).equalsIgnoreCase(p2);
   }
 
-  private List<MachineRuntime> forkMachines(int size, String zone) throws InvalidCredentialsException, RunNodesException {
+  private List<MachineRuntime> forkMachines(String clusterName, String groupName, int size, String zone)
+      throws InvalidCredentialsException, RunNodesException, ValidationException {
+    SshKeyPair keypair = new SshKeyPair();
+    //TODO: read the public key from the configured path.
+    keypair.setPublicKey("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCl4GSkn3cO2pl18ZJiPE9wKmoSJRDuL+JFoVQlrmpcw/"
+        + "a2tcvS1Bjf2YlNVdDpDQ8vYNgkQjuZ4f2O7dDeMC/vi9eHOe3xZxBvTGpZREkKrQrUg9VfVYriYo8VvyPlXnRbim4wr9yPGdo"
+        + "YPMRBoXkheGQiAI7pk7OG0JjLp8Jm0keBQb/J/Lbe/2zFIi/zQzmOPliNs7HVV/4R/QytmYpJyhZU3mJIhiWC7Hu1lZqMAJco"
+        + "GRuhkisQt0VYoOZC8wgAkkthloOXamKztraG2Azseohk7sHiBEHsUdlxgivIM9ItUqa1x/4xI9u/AIztaPJrJiy2Syi3kZc0oe56G9WZ");
     Gce gce = new Gce();
     gce.setImageName("ubuntu-1404-trusty-v20150316");
-    gce.setImageType(Gce.ImageType.ubuntu);
     gce.setZone(zone);
-    gce.setMachineType(Gce.MachineType.n1_standard_1);
-    GceLauncher launcher = new GceLauncher(context);
-    List<MachineRuntime> machines = launcher.forkMachines("c1", "g1", size, gce);
+    gce.setMachineType(GceSettings.MachineType.n1_standard_1.toString());
+    gce.setUsername("hooman");
+    GceLauncher launcher = new GceLauncher(context, keypair);
+    ClusterRuntime cluster = new ClusterRuntime(clusterName);
+    JsonGroup jsonGroup = new JsonGroup();
+    jsonGroup.setName(groupName);
+    GroupRuntime group = new GroupRuntime(cluster, jsonGroup);
+
+    List<MachineRuntime> machines = launcher.forkMachines(group, size, gce);
 
     return machines;
   }
