@@ -238,14 +238,14 @@ public final class NovaLauncher extends Launcher{
               logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
               novaContext.getSecurityGroupApi().delete(secgroup.getId());
             } catch (IllegalStateException ex) {
-                  logger.info(String.format("Hurry up Nova!! terminate machines!! '%s', will retry in %d ms :@",
+              logger.info(String.format("Hurry up Nova!! terminate machines!! '%s', will retry in %d ms :@",
                           uniqueGroupName, NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
-                  retry = true;
-                  try {
-                    Thread.currentThread().sleep(Long.parseLong(NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
-                  } catch (InterruptedException ex1) {
-                    logger.error("", ex1);
-                  }
+              retry = true;
+              try {
+                Thread.currentThread().sleep(Long.parseLong(NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
+              } catch (InterruptedException ex1) {
+                logger.error("", ex1);
+              }
             }
           } while (retry);
           logger.info(String.format("The security group '%s' destroyed ^-^", secgroup.getName()));
@@ -330,8 +330,8 @@ public final class NovaLauncher extends Launcher{
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (HttpResponseException e) {
-          //Need error handling on the different possible
-          logger.error("", e);
+        //Need error handling on the different possible
+        logger.error("", e);
 
       } catch (IllegalStateException ex) {
         logger.error("", ex);
