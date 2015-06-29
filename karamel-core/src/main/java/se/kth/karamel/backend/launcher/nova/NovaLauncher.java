@@ -1,6 +1,7 @@
 package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
@@ -188,7 +189,69 @@ public final class NovaLauncher extends Launcher{
 
   @Override
   public void cleanup(JsonCluster definition, ClusterRuntime runtime) throws KaramelException {
+    runtime.resolveFailures();
+    List<GroupRuntime> groups = runtime.getGroups();
+    Set<String> allNovaVms = new HashSet<>();
+    Set<String> allNovaVmsIds = new HashSet<>();
+    Map<String, String> groupRegion = new HashMap<>();
+    for (GroupRuntime group : groups) {
+      group.getCluster().resolveFailures();
+      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      if (provider instanceof Nova) {
+        for (MachineRuntime machine : group.getMachines()) {
+          if (machine.getEc2Id() != null) {
+            allNovaVmsIds.add(machine.getEc2Id());
+          }
+        }
+        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
+        List<String> vmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
+                jg.getSize());
+        allNovaVms.addAll(vmNames);
+        groupRegion.put(group.getName(), ((Nova) provider).getRegion());
+      }
+    }
+    cleanup(definition.getName(), allNovaVmsIds, allNovaVms, groupRegion);
+  }
 
+  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion)
+          throws KaramelException {
+    Set<String> groupNames = new HashSet<>();
+    for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
+      groupNames.add(NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
+    }
+    logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: "
+            + "%s", vmNames.toString(), groupNames, vmIds));
+    logger.info(String.format("Killing all machines in groups: %s", groupNames.toString()));
+    novaContext.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
+    logger.info(String.format("All machines destroyed in all the security groups. :) "));
+    for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
+      String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
+      for (SecurityGroup secgroup : novaContext.getSecurityGroupApi().list()) {
+        //TODO find the real name of the jclouds groups in openstack
+        if (secgroup.getName().startsWith("jclouds#" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
+          logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
+          boolean retry = false;
+          int count = 0;
+          do {
+            count++;
+            try {
+              logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
+              novaContext.getSecurityGroupApi().delete(secgroup.getId());
+            } catch (IllegalStateException ex) {
+                  logger.info(String.format("Hurry up Nova!! terminate machines!! '%s', will retry in %d ms :@",
+                          uniqueGroupName, NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
+                  retry = true;
+                  try {
+                    Thread.currentThread().sleep(Long.parseLong(NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
+                  } catch (InterruptedException ex1) {
+                    logger.error("", ex1);
+                  }
+            }
+          } while (retry);
+          logger.info(String.format("The security group '%s' destroyed ^-^", secgroup.getName()));
+        }
+      }
+    }
   }
 
   @Override
@@ -206,12 +269,12 @@ public final class NovaLauncher extends Launcher{
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
           throws KaramelException {
     Nova nova = (Nova) UserClusterDataExtractor.getGroupProvider(definition,name);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition,name);
+    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, name);
     GroupRuntime groupRuntime = UserClusterDataExtractor.findGroup(runtime,name);
     Set<String> groupIds = new HashSet<>();
     groupIds.add(groupRuntime.getId());
 
-    String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(),nova.getRegion());
+    String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(), nova.getRegion());
     if(!keys.contains(keypairName)){
       uploadSshPublicKey(keypairName,nova,true);
       keys.add(keypairName);
@@ -225,7 +288,7 @@ public final class NovaLauncher extends Launcher{
             groupRuntime.getName());
 
     List<String> allVmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
-            groupRuntime.getName(),totalSize.intValue());
+            groupRuntime.getName(), totalSize.intValue());
 
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqueGroupName));
 
@@ -353,5 +416,24 @@ public final class NovaLauncher extends Launcher{
       }
     }
     return leftVmNames;
+  }
+
+  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names,
+                                                      final Set<String> groupNames) {
+    return new Predicate<NodeMetadata>() {
+      @Override
+      public boolean apply(NodeMetadata nodeMetadata) {
+        String id = nodeMetadata.getId();
+        String name = nodeMetadata.getName();
+        String group = nodeMetadata.getGroup();
+        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) ||
+                (group != null && groupNames.contains(group))));
+      }
+
+      @Override
+      public String toString() {
+        return "machines predicate";
+      }
+    };
   }
 }
