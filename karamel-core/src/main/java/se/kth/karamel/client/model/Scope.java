@@ -16,6 +16,7 @@ public abstract class Scope {
   private Ec2 ec2;
   private Vagrant vagrant;
   private Baremetal baremetal;
+  private Gce gce;
 
   public Scope() {
   }
@@ -24,6 +25,7 @@ public abstract class Scope {
     this.ec2 = scope.getEc2();
     this.vagrant = scope.getVagrant();
     this.baremetal = scope.getBaremetal();
+    this.gce = scope.getGce();
   }
 
   public abstract String getAttr(String key);
@@ -31,6 +33,8 @@ public abstract class Scope {
   public Provider getProvider() {
     if (ec2 != null) {
       return ec2;
+    } else if (gce != null) {
+      return gce;
     } else if (vagrant != null) {
       return vagrant;
     } else {
@@ -62,12 +66,24 @@ public abstract class Scope {
     this.vagrant = vagrant;
   }
 
+  public Gce getGce() {
+    return gce;
+  }
+
+  public void setGce(Gce gce) {
+    this.gce = gce;
+  }
+
   public void validate() throws ValidationException {
-    if (ec2 != null)
+    if (ec2 != null) {
       ec2.validate();
-    if (baremetal != null)
+    }
+    if (baremetal != null) {
       baremetal.validate();
-    if(vagrant != null)
+    }
+    if (vagrant != null) {
       vagrant.validate();
-  };
+    }
+  }
+;
 }

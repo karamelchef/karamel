@@ -20,7 +20,6 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.GceSettings;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
@@ -38,9 +37,8 @@ public class GceLauncherTest {
 
   @BeforeClass
   public static void init() throws InvalidCredentialsException {
-    Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, Settings.KARAMEL_ROOT_PATH + File.separator + "gce-key.json");
-    Credentials credentials = GceLauncher.readCredentials(confs);
+    String jsonKeyPath = Settings.KARAMEL_ROOT_PATH + File.separator + "gce-key.json";
+    Credentials credentials = GceLauncher.readCredentials(jsonKeyPath);
     context = GceLauncher.validateCredentials(credentials);
   }
 
@@ -49,9 +47,8 @@ public class GceLauncherTest {
    */
   @Test
   public void testReadCredentials() {
-    Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, Settings.KARAMEL_ROOT_PATH + File.separator + "gce-key.json");
-    Credentials credentials = GceLauncher.readCredentials(confs);
+    String jsonKeyPath = Settings.KARAMEL_ROOT_PATH + File.separator + "gce-key.json";
+    Credentials credentials = GceLauncher.readCredentials(jsonKeyPath);
     assert credentials != null;
     assert credentials.identity != null && !credentials.identity.isEmpty();
     assert credentials.credential != null && !credentials.credential.isEmpty();
@@ -67,7 +64,7 @@ public class GceLauncherTest {
     assert context != null;
   }
 
-  @Test
+//  @Test
   public void testForkMachines()
       throws InvalidCredentialsException, RunNodesException, URISyntaxException, ValidationException {
     int size = 1;
@@ -81,8 +78,9 @@ public class GceLauncherTest {
     }
   }
 
-//  @Test
-  public void testCleanUp() throws InvalidCredentialsException, RunNodesException, URISyntaxException, KaramelException {
+  @Test
+  public void testCleanUp() throws
+      InvalidCredentialsException, RunNodesException, URISyntaxException, KaramelException, InterruptedException {
     int size = 1;
     String clusterName = "c1";
     String groupName = "g1";
@@ -96,6 +94,7 @@ public class GceLauncherTest {
     vmZone.put(zone, vms);
     GceLauncher launcher = new GceLauncher(context, new SshKeyPair());
     String networkName = launcher.createFirewall(clusterName, groupName, Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of("22/tcp"));
+    Thread.sleep(60000);
     launcher.cleanup(vmZone, ImmutableSet.of(networkName));
     InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
     for (String vm : vms) {
@@ -135,9 +134,9 @@ public class GceLauncherTest {
         + "YPMRBoXkheGQiAI7pk7OG0JjLp8Jm0keBQb/J/Lbe/2zFIi/zQzmOPliNs7HVV/4R/QytmYpJyhZU3mJIhiWC7Hu1lZqMAJco"
         + "GRuhkisQt0VYoOZC8wgAkkthloOXamKztraG2Azseohk7sHiBEHsUdlxgivIM9ItUqa1x/4xI9u/AIztaPJrJiy2Syi3kZc0oe56G9WZ");
     Gce gce = new Gce();
-    gce.setImageName("ubuntu-1404-trusty-v20150316");
+    gce.setImage("ubuntu-1404-trusty-v20150316");
     gce.setZone(zone);
-    gce.setMachineType(GceSettings.MachineType.n1_standard_1.toString());
+    gce.setType(GceSettings.MachineType.n1_standard_1.toString());
     gce.setUsername("hooman");
     GceLauncher launcher = new GceLauncher(context, keypair);
     ClusterRuntime cluster = new ClusterRuntime(clusterName);

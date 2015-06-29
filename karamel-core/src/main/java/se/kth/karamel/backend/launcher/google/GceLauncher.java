@@ -16,11 +16,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
-import org.jclouds.compute.RunNodesException;
 import org.jclouds.domain.Credentials;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
+import org.jclouds.googlecloud.domain.ListPage;
 import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.domain.Instance;
@@ -44,7 +43,6 @@ import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.GceSettings;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
@@ -71,15 +69,14 @@ public class GceLauncher extends Launcher {
 
   /**
    *
-   * @param confs
+   * @param jsonKeyPath
    * @return
    */
-  public static Credentials readCredentials(Confs confs) {
-    String jsonKeyFile = confs.getProperty(Settings.GCE_JSON_KEY_FILE_PATH);
+  public static Credentials readCredentials(String jsonKeyPath) {
     Credentials credentials = null;
-    if (jsonKeyFile != null && !jsonKeyFile.isEmpty()) {
+    if (jsonKeyPath != null && !jsonKeyPath.isEmpty()) {
       try {
-        String fileContents = Files.toString(new File(jsonKeyFile), Charset.defaultCharset());
+        String fileContents = Files.toString(new File(jsonKeyPath), Charset.defaultCharset());
         Supplier<Credentials> credentialSupplier = new GoogleCredentialsFromJson(fileContents);
         credentials = credentialSupplier.get();
       } catch (IOException ex) {
@@ -172,9 +169,9 @@ public class GceLauncher extends Launcher {
   public List<MachineRuntime> forkMachines(GroupRuntime group, int totalSize, Gce gce) {
     List<MachineRuntime> machines = new ArrayList<>(totalSize);
     try {
-      URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getMachineType());
+      URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
       URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
-      URI imageType = GceSettings.buildImageUri(gce.getImageName());
+      URI imageType = GceSettings.buildImageUri(gce.getImage());
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
       String uniqeGroupName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
@@ -280,19 +277,48 @@ public class GceLauncher extends Launcher {
       }
     }
 
+    // TODO: Handle the operations failures situation.
     operations.clear();
     NetworkApi netApi = context.getNetworkApi();
     FirewallApi fwApi = context.getFireWallApi();
     RouteApi routeApi = context.getRouteApi();
-    //TODO: Delete network firewalls and routes first and then delete network. 
-    // Otherwise network deletion will not work.
+    //Delete network firewalls and routes first and then delete network, Otherwise network deletion will not work.
     for (String network : networks) {
-      try {
-        URI networkUri = GceSettings.buildNetworkUri(context.getProjectName(), network);
-        operations.add(netApi.delete(network));
-      } catch (URISyntaxException ex) {
-        logger.error(ex.getMessage(), ex);
+      URI networkUri = netApi.get(network).selfLink();
+      Iterator<ListPage<Firewall>> fwIterator = fwApi.list();
+      while (fwIterator.hasNext()) {
+        ListPage<Firewall> page = fwIterator.next();
+        for (Firewall fw : page) {
+          if (fw.network().equals(networkUri)) {
+            operations.add(fwApi.delete(fw.name()));
+          }
+        }
       }
+      Iterator<ListPage<Route>> routeIterator = routeApi.list();
+      while (routeIterator.hasNext()) {
+        ListPage<Route> page = routeIterator.next();
+        for (Route route : page) {
+          if (route.network().equals(networkUri)) {
+            operations.add(routeApi.delete(route.name()));
+          }
+        }
+      }
+    }
+
+    for (Operation operation : operations) {
+      if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
+        logger.warn(String.format("%s operation has timedout: %s\n",
+            operation.operationType(), operation.httpErrorMessage()));
+      } else {
+        logger.info(String.format("Operation %s  was successfully done on %s\n.",
+            operation.operationType(), operation.targetLink()));
+      }
+    }
+
+    operations.clear();
+
+    for (String network : networks) {
+      operations.add(netApi.delete(network));
     }
 
     for (Operation operation : operations) {

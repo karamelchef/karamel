@@ -74,9 +74,7 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
-  public static Ec2Credentials readCredentials(Confs confs) {
-    
-    
+  public static Ec2Credentials readCredentials(Confs confs) {  
     String accessKey =  System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
     String secretKey = System.getenv(Settings.AWS_SECRET_KEY_ENV_VAR);
 

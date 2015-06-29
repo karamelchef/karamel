@@ -10,18 +10,28 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public class Gce extends Provider {
 
-  private String machineType;
+  private String type;
   // TODO: IP range to give to VMs.
 //  private String network;
   private String zone;
-  private String imageName;
+  private String image;
 
-  public String getMachineType() {
-    return machineType;
+  /**
+   * Machine type.
+   *
+   * @return
+   */
+  public String getType() {
+    return type;
   }
 
-  public void setMachineType(String type) {
-    this.machineType = type;
+  /**
+   * Machine type.
+   *
+   * @param type
+   */
+  public void setType(String type) {
+    this.type = type;
   }
 
   public String getZone() {
@@ -46,25 +56,29 @@ public class Gce extends Provider {
 //    this.network = network;
 //  }
   /**
-   * @return the imageName
+   * Image name
+   *
+   * @return the image
    */
-  public String getImageName() {
-    return imageName;
+  public String getImage() {
+    return image;
   }
 
   /**
-   * @param imageName the imageName to set
+   * Image name
+   *
+   * @param image the image to set
    */
-  public void setImageName(String imageName) {
-    this.imageName = imageName;
+  public void setImage(String image) {
+    this.image = image;
   }
 
   @Override
   public Gce cloneMe() {
     Gce gce = new Gce();
     gce.setUsername(this.getUsername());
-    gce.setImageName(imageName);
-    gce.setMachineType(machineType);
+    gce.setImage(image);
+    gce.setType(type);
 //    gce.setNetwork(network);
     gce.setZone(zone);
 
@@ -79,14 +93,14 @@ public class Gce extends Provider {
       if (clone.getUsername() == null) {
         clone.setUsername(parentGce.getUsername());
       }
-      if (clone.getImageName() == null) {
-        clone.setImageName(parentGce.getImageName());
+      if (clone.getImage() == null) {
+        clone.setImage(parentGce.getImage());
       }
       if (clone.getZone() == null) {
         clone.setZone(parentGce.getZone());
       }
-      if (clone.getMachineType() == null) {
-        clone.setMachineType(parentGce.getMachineType());
+      if (clone.getType() == null) {
+        clone.setType(parentGce.getType());
       }
     }
     return clone;
@@ -98,14 +112,14 @@ public class Gce extends Provider {
     if (clone.getUsername() == null) {
       clone.setUsername(Settings.PROVIDER_EC2_DEFAULT_USERNAME);
     }
-    if (clone.getImageName() == null) {
-      clone.setImageName(GceSettings.DEFAULT_IMAGE);
+    if (clone.getImage() == null) {
+      clone.setImage(GceSettings.DEFAULT_IMAGE);
     }
     if (clone.getZone() == null) {
       clone.setZone(GceSettings.DEFAULT_ZONE);
     }
-    if (clone.getMachineType() == null) {
-      clone.setMachineType(GceSettings.DEFAULT_MACHINE_TYPE);
+    if (clone.getType() == null) {
+      clone.setType(GceSettings.DEFAULT_MACHINE_TYPE);
     }
     return clone;
   }
