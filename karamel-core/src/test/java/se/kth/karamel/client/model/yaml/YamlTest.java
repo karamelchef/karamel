@@ -14,6 +14,7 @@ import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.client.model.Cookbook;
+import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -105,6 +106,11 @@ public class YamlTest {
     assertTrue(groups.get("datanodes").getProvider() instanceof Ec2);
     Ec2 provider4 = (Ec2) groups.get("datanodes").getProvider();
     assertEquals("m3.medium", provider4.getType());
+
+    Gce provider5 = (Gce) groups.get("gcevms").getProvider();
+    assertEquals("n1-standard-1", provider5.getType());
+    assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
+    assertEquals("europe-west1-b", provider5.getZone());
   }
 
 }

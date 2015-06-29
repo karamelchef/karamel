@@ -9,13 +9,16 @@ import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import org.jclouds.domain.Credentials;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
+import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 
 /**
@@ -26,7 +29,7 @@ import se.kth.karamel.common.SshKeyPair;
 public class KaramelApiTest {
 
   KaramelApi api = new KaramelApiImpl();
-  
+
   @Test
   public void dummyTest() {
     //just that we dont need to ignore this class all the time
@@ -162,7 +165,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-  
+
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flink";
@@ -206,13 +209,13 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-  
+
 //  @Test
   public void testBaremetal() throws KaramelException, IOException, InterruptedException {
 //    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_baremetal.yml"), Charsets.UTF_8);
 //    String json = api.yamlToJson(ymlString);
-    String json = "{\"name\":\"flink\",\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]}],\"groups\":[{\"name\":\"namenodes\",\"provider\":\"\",\"attrs\":[],\"instances\":1,\"baremetal\":{\"ips\":[\"192.168.33.11\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::nn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::wordcount\"},{\"title\":\"flink::jobmanager\"}]}]},{\"name\":\"datanodes\",\"provider\":\"\",\"attrs\":[],\"instances\":2,\"baremetal\":{\"ips\":[\"192.168.33.12\",\"192.168.33.13\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::dn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::taskmanager\"}]}]}],\"ec2\":null,\"baremetal\":{\"mapKey\":\"baremetal\",\"username\":\"vagrant\",\"ips\":[]},\"sshKeyPair\":{\"mapKey\":\"ssh\",\"pubKey\":null,\"priKey\":null,\"pubKeyPath\":null,\"privKeyPath\":null,\"passphrase\":null,\"isValid\":true}}\n" +
-"";
+    String json = "{\"name\":\"flink\",\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]}],\"groups\":[{\"name\":\"namenodes\",\"provider\":\"\",\"attrs\":[],\"instances\":1,\"baremetal\":{\"ips\":[\"192.168.33.11\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::nn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::wordcount\"},{\"title\":\"flink::jobmanager\"}]}]},{\"name\":\"datanodes\",\"provider\":\"\",\"attrs\":[],\"instances\":2,\"baremetal\":{\"ips\":[\"192.168.33.12\",\"192.168.33.13\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::dn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::taskmanager\"}]}]}],\"ec2\":null,\"baremetal\":{\"mapKey\":\"baremetal\",\"username\":\"vagrant\",\"ips\":[]},\"sshKeyPair\":{\"mapKey\":\"ssh\",\"pubKey\":null,\"priKey\":null,\"pubKeyPath\":null,\"privKeyPath\":null,\"passphrase\":null,\"isValid\":true}}\n"
+        + "";
     SshKeyPair keyPair = new SshKeyPair();
     keyPair.setPrivateKeyPath("/Users/kamal/.vagrant.d/insecure_private_key");
     keyPair.setPublicKeyPath("/Users/kamal/.vagrant.d/id_rsa.pub");
@@ -225,6 +228,27 @@ public class KaramelApiTest {
     int mins = 0;
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
+      System.out.println(api.processCommand("status").getResult());
+      Thread.currentThread().sleep(60000);
+    }
+  }
+
+  @Test
+  public void testGce() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "flinkgce";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_gce.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    System.out.println(json);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+//    String keyPath = api.loadGceCredentialsIfExist();
+    api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH+"/gce-key.json");
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
     }

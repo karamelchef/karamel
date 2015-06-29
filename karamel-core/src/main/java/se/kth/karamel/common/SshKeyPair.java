@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.kth.karamel.common;
 
 /**
@@ -11,7 +10,7 @@ package se.kth.karamel.common;
  * @author kamal
  */
 public class SshKeyPair {
-  
+
   private String privateKeyPath;
   private String publicKeyPath;
   private String privateKey;
@@ -33,7 +32,7 @@ public class SshKeyPair {
   public void setPrivateKey(String privateKey) {
     this.privateKey = privateKey;
   }
-  
+
   public String getPrivateKeyPath() {
     return privateKeyPath;
   }
@@ -57,5 +56,5 @@ public class SshKeyPair {
   public void setPublicKeyPath(String publicKeyPath) {
     this.publicKeyPath = publicKeyPath;
   }
-  
+
 }
