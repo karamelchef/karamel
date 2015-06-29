@@ -29,7 +29,7 @@ public class MachineRuntime {
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.ONGOING;
   private String name;
-  private String ec2Id;
+  private String vmId;
   private String privateIp;
   private String publicIp;
   private int sshPort;
@@ -45,12 +45,12 @@ public class MachineRuntime {
     return group;
   }
 
-  public String getEc2Id() {
-    return ec2Id;
+  public String getVmId() {
+    return vmId;
   }
 
-  public void setEc2Id(String ec2Id) {
-    this.ec2Id = ec2Id;
+  public void setVmId(String vmId) {
+    this.vmId = vmId;
   }
 
   public String getName() {

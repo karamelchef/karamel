@@ -24,6 +24,7 @@ import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.domain.Metadata;
+import org.jclouds.googlecomputeengine.domain.Network;
 import org.jclouds.googlecomputeengine.domain.NewInstance;
 import org.jclouds.googlecomputeengine.domain.Operation;
 import org.jclouds.googlecomputeengine.domain.Route;
@@ -198,7 +199,7 @@ public class GceLauncher extends Launcher {
           metadata.put("sshKeys", gce.getUsername() + ":" + sshKeyPair.getPublicKey());
           metadataOperations.add(instanceApi.setMetadata(allVmNames.get(i), metadata));
           MachineRuntime machine = new MachineRuntime(group);
-          machine.setEc2Id(vm.id());
+          machine.setVmId(vm.id());
           machine.setName(vm.name());
           Instance.NetworkInterface netInterface = vm.networkInterfaces().get(0);
           machine.setPrivateIp(netInterface.networkIP());
@@ -228,7 +229,7 @@ public class GceLauncher extends Launcher {
       group.getCluster().resolveFailures();
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Gce) {
-        networks.add(group.getId());
+        networks.add(group.getName());
         Gce gce = (Gce) provider;
         List<String> vms;
         if (vmZone.containsKey(gce.getZone())) {
@@ -238,22 +239,24 @@ public class GceLauncher extends Launcher {
           vmZone.put(gce.getZone(), vms);
         }
         for (MachineRuntime machine : group.getMachines()) {
-          if (machine.getEc2Id() != null) {
-            vms.add(machine.getEc2Id());
+          if (machine.getVmId() != null) {
+            vms.add(machine.getVmId());
           }
         }
       }
     }
-    cleanup(vmZone, networks);
+    cleanup(vmZone, definition.getName(), networks);
   }
 
   /**
    *
    * @param vmZone
-   * @param networks
+   * @param clusterName
+   * @param groupNames
    * @throws KaramelException
    */
-  public void cleanup(Map<String, List<String>> vmZone, Set<String> networks) throws KaramelException {
+  public void cleanup(Map<String, List<String>> vmZone, String clusterName, Set<String> groupNames)
+      throws KaramelException {
     Iterator<Map.Entry<String, List<String>>> iterator = vmZone.entrySet().iterator();
     LinkedList<Operation> operations = new LinkedList<>();
     while (iterator.hasNext()) {
@@ -263,7 +266,10 @@ public class GceLauncher extends Launcher {
       logger.info(String.format("Killing following machines with names: \n %s.", vms.toString()));
       InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
       for (String vm : vms) {
-        operations.add(instanceApi.delete(vm));
+        Operation op = instanceApi.delete(vm);
+        if (op != null) {
+          operations.add(op);
+        }
       }
     }
 
@@ -283,23 +289,27 @@ public class GceLauncher extends Launcher {
     FirewallApi fwApi = context.getFireWallApi();
     RouteApi routeApi = context.getRouteApi();
     //Delete network firewalls and routes first and then delete network, Otherwise network deletion will not work.
-    for (String network : networks) {
-      URI networkUri = netApi.get(network).selfLink();
-      Iterator<ListPage<Firewall>> fwIterator = fwApi.list();
-      while (fwIterator.hasNext()) {
-        ListPage<Firewall> page = fwIterator.next();
-        for (Firewall fw : page) {
-          if (fw.network().equals(networkUri)) {
-            operations.add(fwApi.delete(fw.name()));
+    for (String group : groupNames) {
+      String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
+      Network network = netApi.get(networkName);
+      if (network != null) {
+        URI networkUri = network.selfLink();
+        Iterator<ListPage<Firewall>> fwIterator = fwApi.list();
+        while (fwIterator.hasNext()) {
+          ListPage<Firewall> page = fwIterator.next();
+          for (Firewall fw : page) {
+            if (fw.network().equals(networkUri)) {
+              operations.add(fwApi.delete(fw.name()));
+            }
           }
         }
-      }
-      Iterator<ListPage<Route>> routeIterator = routeApi.list();
-      while (routeIterator.hasNext()) {
-        ListPage<Route> page = routeIterator.next();
-        for (Route route : page) {
-          if (route.network().equals(networkUri)) {
-            operations.add(routeApi.delete(route.name()));
+        Iterator<ListPage<Route>> routeIterator = routeApi.list();
+        while (routeIterator.hasNext()) {
+          ListPage<Route> page = routeIterator.next();
+          for (Route route : page) {
+            if (route.network().equals(networkUri)) {
+              operations.add(routeApi.delete(route.name()));
+            }
           }
         }
       }
@@ -317,8 +327,14 @@ public class GceLauncher extends Launcher {
 
     operations.clear();
 
-    for (String network : networks) {
-      operations.add(netApi.delete(network));
+    for (String group : groupNames) {
+      String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
+      Operation op = netApi.delete(networkName);
+      if (op != null) {
+        operations.add(op);
+      } else {
+        logger.info(String.format("Network %s does not exist.", networkName));
+      }
     }
 
     for (Operation operation : operations) {
