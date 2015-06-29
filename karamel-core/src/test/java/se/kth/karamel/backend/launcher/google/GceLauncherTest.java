@@ -93,9 +93,10 @@ public class GceLauncherTest {
     Map<String, List<String>> vmZone = new HashMap<>();
     vmZone.put(zone, vms);
     GceLauncher launcher = new GceLauncher(context, new SshKeyPair());
-    String networkName = launcher.createFirewall(clusterName, groupName, Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of("22/tcp"));
+    String networkName = launcher.createFirewall(
+        clusterName, groupName, Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of("22/tcp"));
     Thread.sleep(60000);
-    launcher.cleanup(vmZone, ImmutableSet.of(networkName));
+    launcher.cleanup(vmZone, clusterName, ImmutableSet.of(groupName));
     InstanceApi instanceApi = context.getGceApi().instancesInZone(zone);
     for (String vm : vms) {
       assert instanceApi.get(vm) == null;
