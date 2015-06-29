@@ -73,14 +73,22 @@ public final class Ec2Launcher extends Launcher {
   }
 
   public static Ec2Credentials readCredentials(Confs confs) {
-    String accessKey = confs.getProperty(Settings.AWS_ACCESS_KEY);
-    String secretKey = confs.getProperty(Settings.AWS_SECRET_KEY);
+    
+    
+    String accessKey =  System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
+    String secretKey = System.getenv(Settings.AWS_SECRET_KEY_ENV_VAR);
+
+    if (accessKey == null || accessKey.isEmpty()) {
+      accessKey = confs.getProperty(Settings.AWS_ACCESS_KEY);
+    }
+    if (secretKey == null || secretKey.isEmpty()) {
+      secretKey = confs.getProperty(Settings.AWS_SECRET_KEY);
+    }
     Ec2Credentials credentials = null;
     if (accessKey != null && !accessKey.isEmpty() && secretKey != null && !accessKey.isEmpty()) {
       credentials = new Ec2Credentials();
       credentials.setAccessKey(accessKey);
       credentials.setSecretKey(secretKey);
-
     }
     return credentials;
   }

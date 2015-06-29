@@ -71,6 +71,7 @@ public class Settings {
   //Shell scripts
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
+  public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF = "install_ruby_chef_berkshelf.sh";
   public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT
@@ -98,7 +99,9 @@ public class Settings {
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
   public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
   public static final String AWS_ACCESS_KEY = "aws.access.key";
+  public static final String AWS_ACCESS_KEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRET_KEY = "aws.secret.key";
+  public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {

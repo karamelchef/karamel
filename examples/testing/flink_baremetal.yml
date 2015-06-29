@@ -1,0 +1,30 @@
+name: flink
+baremetal:
+    username: vagrant
+    
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink: 
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+    
+groups: 
+  namenodes:
+    size: 1
+    baremetal:
+        ip: 192.168.33.11
+    recipes: 
+        - hadoop::nn
+        - flink::jobmanager
+        - flink::wordcount
+  datanodes:
+    size: 2
+    baremetal:
+        ips: 
+            - 192.168.33.12
+            - 192.168.33.13
+    recipes: 
+        - hadoop::dn
+        - flink::taskmanager

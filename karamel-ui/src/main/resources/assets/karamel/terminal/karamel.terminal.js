@@ -37,7 +37,8 @@ angular.module('karamel.terminal', [])
 
         scope.htmlSafeData = undefined;
         scope.dagData = undefined;
-        scope.processCommand(0, "home");
+//        scope.processCommand(0, "home");
+        scope.processCommand(0, "running");
       }
 
       $scope.htmlsafe = function(index) {
@@ -426,6 +427,16 @@ angular.module('karamel.terminal', [])
           var method = 'GET';
           var url = _defaultHost.concat("/exitKaramel");
           return _getPromiseObject(method, url, _defaultContentType);
+        },
+        sudoPassword: function(sudoAccount) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/sudoPassword");
+          return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
+        },
+        githubCredentials: function(githubCredentials) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/githubCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, githubCredentials);
         },
         processCommand: function(commandName) {
           var method = 'PUT';

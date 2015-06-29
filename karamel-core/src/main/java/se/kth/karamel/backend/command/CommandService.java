@@ -55,6 +55,7 @@ public class CommandService {
   private static String MENU_BAR = "";
   private static String HELP_PAGE_TEMPLATE = "";
   private static String HOME_PAGE_TEMPLATE = "";
+  private static String RUNNING_PAGE_TEMPLATE = "";
   private static String YAMLS_TABLE_PLH = "%YAMLS_TABLE%";
   private static String CLUSTERS_TABLE_PLH = "%CLUSTERS_TABLE%";
 
@@ -62,6 +63,7 @@ public class CommandService {
     try {
       HELP_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/helppage");
       HOME_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/homepage");
+      RUNNING_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/running");
     } catch (IOException e) {
 
     }
@@ -81,6 +83,9 @@ public class CommandService {
     String successMessage = null;
     if (cmd.equals("help")) {
       result = HELP_PAGE_TEMPLATE;
+    } else if (cmd.equals("running")) {
+      result = RUNNING_PAGE_TEMPLATE.replace(CLUSTERS_TABLE_PLH, clustersTable());
+      nextCmd = "running";
     } else if (cmd.equals("home")) {
       result = HOME_PAGE_TEMPLATE.replace(YAMLS_TABLE_PLH, yamlsTable());
       result = result.replace(CLUSTERS_TABLE_PLH, clustersTable());

@@ -83,8 +83,8 @@ angular.module('karamel.main')
             scp.mapKey = 'ec2';
             scp.bootUp = true;
             scp.account = {
-              accountId: null,
-              accountKey: null
+              accessKey: null,
+              secretKey: null
             };
             scp.availableStates = {
               success: 'success',
@@ -143,8 +143,8 @@ angular.module('karamel.main')
               if (scope.bootUp) {
                 KaramelCoreRestServices.loadCredentials()
                   .success(function(data) {
-                    scope.account.accountId = data.accountId;
-                    scope.account.accountKey = data.accountKey;
+                    scope.account.accessKey = data.accessKey;
+                    scope.account.secretKey = data.secretKey;
                     _updateState('specialWarn', scope.ec2);
                     scope.validateCredentials();
                   })
@@ -162,7 +162,7 @@ angular.module('karamel.main')
 
           scope.validateCredentials = function() {
 
-            if (scope.account.accountId != null && scope.account.accountKey != null) {
+            if (scope.account.accessKey != null && scope.account.secretKey != null) {
               KaramelCoreRestServices.validateCredentials(scope.account)
                 .success(function(data) {
                   _updateState('success', scope.ec2);
@@ -217,6 +217,11 @@ angular.module('karamel.main')
               initialWarn: 'Enter SSH Key Pair Paths (and password). Then click Validate.'
               , userWarn: 'Please generate a new one, instead of manual changing.'
             };
+            scp.sudoAccount = {
+              password: null
+            };
+            scp.sudoPasswordEnabled = false;
+            scp.sshPassphraseEnabled = false;
             scp.currentState = scp.availableStates.initialWarn;
             scp.sshKeyObj = scp.credentialsHolderMap[scp.mapKey];
           }
@@ -252,7 +257,11 @@ angular.module('karamel.main')
           scope.usingPassword = function() {
             _updateState('initialWarn', scope.sshKeyObj);
           };
-
+          
+          scope.usingSudoPassword = function() {
+              return sudoAccount === null;
+          };
+          
           scope.$watch('selected', function() {
 
             if (scope.selected) {
@@ -303,13 +312,28 @@ angular.module('karamel.main')
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                 scope.sshKeyPair.privKeyPath = data.privateKeyPath;
                 _updateState('success', scope.sshKeyObj);
-              })
+                scope.sshPassphraseEnabled = true;
+v              })
               .error(function(data) {
                 $log.warn("Couldn't generate ssh-keys");
                 _updateState('failure', scope.sshKeyObj);
-
+                scope.sshPassphraseEnabled = false;
               });
           };
+          
+          scope.registerSudoPassword = function() {
+            KaramelCoreRestServices.sudoPassword(scope.sudoAccount)
+              .success(function(data) {
+                _updateState('success', scope.sshKeyObj);
+                scope.sudoPasswordEnabled = true;
+              })
+              .error(function(data) {
+                $log.warn("Couldn't register sudo account password");
+                _updateState('failure', scope.sshKeyObj);
+                scope.sudoPasswordEnabled = false;
+              });
+          };          
+          
 
           _initScope(scope);
         },

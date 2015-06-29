@@ -1,0 +1,56 @@
+<div>
+    <form name = "githubForm" ng-submit="githubLogin()" class="form-horizontal" novalidate>
+        
+        <div class="modal-header">
+            <button type="button" class="close" ng-click="close()">&times;</button>
+            <h4>Github Login</h4>
+        </div>
+
+        <div class="modal-body">
+
+            <github-tab>
+
+                <br>
+                <hr/>
+                <br>
+                
+                <ssh-user-pane title="SSH Key Pair" map-key={{mapKeys.ssh}} credentials-holder-map="credentialsHolderMap">
+                </ssh-user-pane>
+                
+                
+                <repo-pane title = "Ec2 Provider" map-key={{mapKeys.provider}} credentials-holder-map="credentialsHolderMap">
+                </repo-pane>
+                
+                
+                <summary-pane title="Summary" map-key={{mapKeys.summary}} all-keys="mapKeys" credentials-holder-map="credentialsHolderMap">
+                </summary-pane>
+                
+            </github-tab>
+        </div>
+
+
+        <div class="modal-footer">
+            <div class="row">
+                <div class="col-xs-8">
+                    <div class="" style="color:tomato; text-align: left" ng-show="credentialsForm.accessKey.$dirty && credentialsForm.accessKey.$error.required || credentialsForm.secretKey.$dirty && credentialsForm.secretKey.$error.required">
+                        <span>Missing Mandatory Fields in Provider.</span>
+                    </div>
+                    <div class="" style="color:tomato; text-align: left" ng-show="credentialsForm.privateKey.$dirty && credentialsForm.privateKey.$error.required || credentialsForm.publicKey.$dirty && credentialsForm.publicKey.$error.required">
+                        <span>Missing Mandatory Fields in Ssh Section.</span>
+                    </div>
+                    <div class="" style="color:tomato; text-align: left" ng-show="!summaryValid">
+                        <span>Please check faulty tabs in summary page.</span>
+                    </div>
+                    
+                </div>
+                <div class="col-xs-4">
+                    <button class="btn btn-default" ng-click="close()">Cancel</button>
+                    <button class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+    </form>
+
+
+</div>

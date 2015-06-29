@@ -19,6 +19,16 @@ import se.kth.karamel.common.exception.ValidationException;
 public class Baremetal extends Provider {
 
   private final List<String> ips = new ArrayList<>();
+  
+  private String sudoPassword="";
+
+  public void setSudoPassword(String sudoPassword) {
+    this.sudoPassword = sudoPassword;
+  }
+
+  public String getSudoPassword() {
+    return sudoPassword;
+  }
 
   public List<String> getIps() {
     return ips;
@@ -67,6 +77,7 @@ public class Baremetal extends Provider {
     Baremetal baremetal = new Baremetal();
     baremetal.setUsername(getUsername());
     baremetal.setIps(ips);
+    baremetal.setSudoPassword(getSudoPassword());
     return baremetal;
   }
 
