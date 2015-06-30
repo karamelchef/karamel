@@ -22,12 +22,12 @@ public class MachineRuntime {
 
   public static enum TasksStatus {
 
-    ONGOING, FAILED, PAUSING, PAUSED
+    ONGOING, FAILED, PAUSING, PAUSED, EMPTY
   }
 
   private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
-  private TasksStatus tasksStatus = TasksStatus.ONGOING;
+  private TasksStatus tasksStatus = TasksStatus.EMPTY;
   private String name;
   private String ec2Id;
   private String privateIp;

@@ -48,6 +48,10 @@ public class DagNode implements DagTaskCallback {
     return id;
   }
 
+  public Status getStatus() {
+    return status;
+  }
+  
   public void setTask(DagTask task) throws DagConstructionException {
     if (this.task == null) {
       this.task = task;
