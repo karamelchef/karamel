@@ -31,16 +31,13 @@ public abstract class YamlScope extends Scope {
     List<JsonCookbook> cookbooks = scope.getCookbooks();
     for (JsonCookbook cb : cookbooks) {
       Set<Map.Entry<String, String>> entries = cb.getAttrs().entrySet();
-      System.out.println("size:" + entries.size());
       for (Map.Entry<String, String> entry : entries) {
-        System.out.println("------------");
         foldOutAttr(entry.getKey(), entry.getValue(), attrs);
       }
     }
   }
 
   protected void foldOutAttr(String key, String value, Map<String, Object> map) throws MetadataParseException {
-    System.out.println("<<<<<<<<   " + key + " " + value);
     String[] comps = key.split(Settings.ATTR_DELIMITER);
     Map<String, Object> parent = map;
     for (int i = 0; i < comps.length; i++) {
