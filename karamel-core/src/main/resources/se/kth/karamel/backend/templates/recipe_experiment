@@ -1,16 +1,14 @@
 private_ip = my_private_ip()
 public_ip = my_public_ip()
 
-# command == command for execute
-# command == code for bash
-
 %%pre_chef_commands%%
 
-%%script_type%% 'run_experiment_%%experiment_name%%' do
+script 'run_experiment' do
   cwd "/usr/local/%%name%%"
   user '%%user%%'
   group '%%group%%'
-  %%command%% <<-EOM
+  interpreter "%%interpreter%%"
+  code <<-EOM
     %%script_contents%%
-    EOM
+  EOM
 end

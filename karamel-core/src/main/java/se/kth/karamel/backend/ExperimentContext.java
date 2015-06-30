@@ -9,7 +9,7 @@ public class ExperimentContext {
 
   public static enum ScriptType {
 
-    bash("code"), perl("code"), python("code"), ruby("code"), execute("command");
+    bash("bash"), csh("csh"), perl("perl"), python("python"), ruby("ruby");
 
     private final String blockCommand;
 
@@ -55,6 +55,7 @@ public class ExperimentContext {
 
   private Map<String, Experiment> mapExperiments = new HashMap<>();
 
+  @XmlRootElement
   public static class Experiment {
 
     private String scriptContents;
@@ -79,6 +80,9 @@ public class ExperimentContext {
       this.configFileContents = configFileContents;
       this.preScriptChefCode = preScriptChefCode == null ? "" : preScriptChefCode;
       this.scriptType = scriptType;
+    }
+
+    public Experiment() {
     }
 
     public String getPreScriptChefCode() {

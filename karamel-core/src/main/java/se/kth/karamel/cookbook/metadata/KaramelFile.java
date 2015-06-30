@@ -7,7 +7,6 @@ package se.kth.karamel.cookbook.metadata;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;

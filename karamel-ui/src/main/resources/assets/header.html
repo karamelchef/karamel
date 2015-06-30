@@ -23,6 +23,8 @@
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
             <li class="divider"></li>
+            <li class="custom-font"><a ng-click="switchToExperiment()">Experiment</a> </li>
+            <li class="divider"></li>
             <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
           </ul>
         </li>
@@ -30,10 +32,11 @@
       <ul class="nav navbar-nav navbar-left">
         <li><span/></li>
         <li><span/></li>
-        <li  ng-show="activeProvider === 'ec2'">
+        <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
+        <!--<li  ng-show="activeCluster.activeProvider === 'ec2'">-->
           <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
         </li>
-        <li ng-show="activeProvider === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
+        <li ng-show="activeCluster.activeProvider.name === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
                                    ng-click="configureGlobalProvider()">Provider</a></li>
         <li><span/></li>
 	<li class="glyphicon glyphicon-tasks specializeProvider"></li> 

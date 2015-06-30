@@ -12,7 +12,7 @@ angular.module('karamel.main')
           var clusterObj = $window.sessionStorage.getItem('karamel');
           clusterObj = angular.fromJson(clusterObj);
 
-          if (clusterObj !== null) {
+              if (clusterObj !== null) {
             try {
               var cluster = new Cluster();
               cluster.copy(clusterObj);
@@ -52,7 +52,11 @@ angular.module('karamel.main')
         $location.path('/terminal');
       };
 
-      $scope.exitKaramel = function() {
+      $scope.switchToExperiment = function() {
+        $location.path('/experiment');
+      };
+
+        $scope.exitKaramel = function() {
         BoardService.exitKaramel();
       };
 
@@ -101,6 +105,8 @@ angular.module('karamel.main')
     function(SweetAlert, $log, $modal, $location, $rootScope, $window,
       KaramelCoreRestServices, BrowserCacheService, AlertService) {
 
+
+      
       function _normalizeUrl(originalUrl, pattern, replaceStr) {
 
         if (originalUrl.indexOf(pattern) !== -1) {
@@ -276,22 +282,6 @@ angular.module('karamel.main')
                 });
         
         },
-        githubCredentials: function(email, password) {
-            
-              var githubCredentials = {
-                email: email,
-                password: password
-              };
-            
-              KaramelCoreRestServices.githubCredentials(githubCredentials)
-                .success(function(data, status, headers, config) {
-                    $log.info("Github credentials updated.");
-                })
-                .error(function(data, status, headers, config) {
-                  $log.info("Error Received.");
-                });
-
-        },
         addGroup: function() {
           var modalInstance = $modal.open({
             templateUrl: "karamel/partials/editor-group.html",
@@ -446,36 +436,6 @@ angular.module('karamel.main')
           else {
             _launchCluster();
           }
-        },
-        scaffoldCookbook: function(cluster) {
-          $log.info("Scaffold Cookbook function invoked.");
-          var modalInstance = $modal.open({
-            templateUrl: "karamel/partials/scaffold.html",
-            controller: "ScaffoldController",
-            backdrop: "static",
-            resolve: {
-              info: function() {
-                return {
-                  cluster: {
-                    clusterName: cluster.name
-                  }
-                }
-              }
-            }
-          });
-          var data = {
-            json: angular.toJson(cluster)
-          };
-          KaramelCoreRestServices.scaffoldCookbook(data)
-            .success(function(data, status, headers, config) {
-              $log.info("Connection Successful.");
-              AlertService.addAlert({type: 'success', msg: 'Cookbook created successfully.'});
-            })
-            .error(function(data, status, headers, config) {
-              $log.info("Error Received.");
-              $log.info(data.message);
-              AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to create cookbook'});
-            });
         },
         setCredentials: function(isLaunch) {
           var modalInstance = $modal.open({

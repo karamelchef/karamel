@@ -3,18 +3,21 @@
   <head>
     <title>Karamel</title>
     <!--styles -->
+  <a href="index.html"></a>
     <!--<link href='http://fonts.googleapis.com/css?family=Lobster|Open+Sans' rel='stylesheet' type='text/css'>-->
     <link href='http://fonts.googleapis.com/css?family=Quicksand|Josefin+Sans|Lobster|Yanone+Kaffeesatz' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="bower_components/angular-xeditable/dist/css/xeditable.css" rel="stylesheet">
 
     <link rel="stylesheet" type="text/css" href="karamel/styles/angular-block-ui.css">
-    <link rel="stylesheet" type="text/css" href="karamel/styles/angular-block-ui.css.map">
+    <link rel="stylesheet" href="karamel/styles/angular-block-ui.css.map">
     <link rel="stylesheet" type="text/css" href="karamel/styles/board.css">
     <link rel="stylesheet" type="text/css" href="karamel/styles/d3dag.css">
     <link rel="stylesheet" type="text/css" href="karamel/styles/karamel.shell.emulator.css">
     <link rel="stylesheet" type="text/css" href="karamel/styles/ng-sortable.min.css">
     <link rel="stylesheet" type="text/css" href="karamel/styles/sweet-alert.css">
+    <link rel="stylesheet" type="text/css" href="karamel/styles/timeline.css">
+
 
   </head>
   <body ng-app="karamel.main">
@@ -36,6 +39,8 @@
     <script type="text/javascript" src="karamel/dist/underscore-min.js"></script>
     <script type="text/javascript" src="karamel/dist/ng-sortable.js"></script>
 
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-md5/0.1.7/angular-md5.js"></script>
+
 
     <script type="text/javascript" src="karamel/karamel.main.js"></script>
     <script type="text/javascript" src="karamel/terminal/karamel.terminal.js"></script>
@@ -48,8 +53,9 @@
     <script type="text/javascript" src="karamel/controllers/sshkeys.js"></script>
     <script type="text/javascript" src="karamel/controllers/scaffold.js"></script>
     <script type="text/javascript" src="karamel/controllers/board.js"></script>
-    <!--<script type="text/javascript" src="karamel/controllers/DesignerController.js"></script>-->
+    <script type="text/javascript" src="karamel/controllers/ExperimentCtrl.js"></script>
     <script type="text/javascript" src="karamel/controllers/new.recipe.js"></script>
+    <script type="text/javascript" src="karamel/services/KaramelCoreRestServices.js"></script>
 
     <script type="text/javascript" src="d3/d3.v3.min.js"></script>
     <script type="text/javascript" src="d3/dagre-d3.js"></script>
@@ -60,6 +66,6 @@
 
     <div ng-include='"header.html"'></div>
 
-    <div class="ng-view"></div>
+    <div ng-view></div>
   </body>
 </html>

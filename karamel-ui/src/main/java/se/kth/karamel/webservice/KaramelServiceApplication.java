@@ -40,7 +40,9 @@ import java.util.EnumSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -54,6 +56,7 @@ import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.backend.command.CommandResponse;
+import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -298,12 +301,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ec2.Load());
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Cluster.StartCluster());
-    environment.jersey().register(new Scaffolder.ScaffoldCluster());
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
     environment.jersey().register(new ExitKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
-    environment.jersey().register(new Github.GithubCredentials());
+    environment.jersey().register(new Github.LoadGithubCredentials());
+    environment.jersey().register(new Github.LoadExperiment());
     environment.jersey().register(new Github.PushExperiment());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
@@ -694,32 +697,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
   }
 
-  /**
-   * Place holder class dealing with separate cluster state handling.
-   */
-  public static class Scaffolder {
-
-    @Path("/scaffold")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public static class ScaffoldCluster {
-
-      @PUT
-      public Response scaffold(ScaffoldJSON cbName) {
-        Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to scaffold a new cookbook.... ");
-        try {
-          CookbookScaffolder.create(cbName.getName());
-          response = Response.status(Response.Status.OK).build();
-        } catch (IOException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-  }
 
   @Path("/exitKaramel")
   public static class ExitKaramel {
@@ -772,18 +749,43 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
   public static class Github {
 
-    @Path("/githubCredentials")
-    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/loadGithubCredentials")
     @Produces(MediaType.APPLICATION_JSON)
-    public static class GithubCredentials {
+    public static class LoadGithubCredentials {
 
-      @PUT
-      public Response githubCredentials(GithubCredentialsJSON githubCreds) {
+      @GET
+      public Response getGithubCredentials() {
         Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
-          karamelApiHandler.registerGithubAccount(githubCreds.getEmail(), githubCreds.getPassword());
+          GithubUser credentials = karamelApiHandler.loadGithubCredentials();
+          response = Response.status(Response.Status.OK).
+              entity(credentials).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+
+        return response;
+      }
+      
+    }
+
+    @Path("/setGithubCredentials")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public static class SetGithubCredentials {
+
+      @POST
+      public Response setGithubCredentials(@FormParam("email") String email, @FormParam("password") String password) {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        try {
+//          karamelApiHandler.registerGithubAccount(githubCreds.getEmail(), githubCreds.getPassword());
+          karamelApiHandler.registerGithubAccount(email, password);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {
@@ -819,6 +821,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         return response;
       }
     }
+
+    @Path("/loadExperiment")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public static class LoadExperiment {
+
+      @POST
+      public Response loadExperiment(@FormParam("experimentUrl") String experimentUrl) {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        try {
+          ExperimentContext ec = karamelApiHandler.loadExperiment(experimentUrl);
+          response = Response.status(Response.Status.OK).entity(ec).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+
+        return response;
+      }
+    }
+  
   }
 
   static class KaramelCleanupBeforeShutdownThread extends Thread {

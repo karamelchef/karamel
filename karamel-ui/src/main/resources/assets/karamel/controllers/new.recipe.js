@@ -1,9 +1,4 @@
-/*jshint undef: false, unused: false, indent: 2*/
-/*global angular: false */
-
-
 'use strict';
-
 angular.module('karamel.main')
   .controller('NewRecipeController', ['$scope', '$log', '$modalInstance', 'group', 'KaramelCoreRestServices', function($scope, $log, $modalInstance, group, KaramelCoreRestServices) {
 

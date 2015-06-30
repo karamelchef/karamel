@@ -73,7 +73,6 @@ public class ChefExperimentExtractor {
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
       while (m.find()) {
-        String matched = m.group();
         String name = m.group(1);
         String value = m.group(2);
         defaultAttrs.put(name, value);
@@ -181,9 +180,9 @@ public class ChefExperimentExtractor {
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
             "name", recipe,
             "pre_chef_commands", experiment.getPreScriptChefCode(),
-            "script_type", experiment.getScriptType().toString(),
-            "command", experiment.getScriptCommand(),
-            "experiment_name", recipe,
+            "interpreter", experiment.getScriptType().toString(),
+//            "command", experiment.getScriptCommand(),
+//            "experiment_name", recipe,
             "user", experimentContext.getUser(),
             "group", experimentContext.getGroup(),
             "script_contents", experiment.getScriptContents()
