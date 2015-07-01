@@ -9,6 +9,7 @@ public class ExperimentRecipeParser {
 
   public static Pattern EXPERIMENT_SCRIPT = Pattern.compile("script \'run_experiment\'");
   public static Pattern EXPERIMENT_DELIMITER = Pattern.compile("EOM");
+  public static Pattern EXPERIMENT_INTERPRETER = Pattern.compile("interpreter \"(.*)\"");
 
   /**
    *
@@ -35,7 +36,7 @@ public class ExperimentRecipeParser {
           "Could not find in the recipe a script resource like \"script 'run_experiment' do\" ");
     }
     int startPos = ms.end();
-
+    
     boolean foundEnd = ms.find();
     if (!foundEnd) {
       throw new RecipeParseException(
@@ -45,7 +46,16 @@ public class ExperimentRecipeParser {
     
     String script = postScript.substring(startPos, endPos);
 
-    return new ExperimentRecipe("experiment", ScriptType.bash, script, preScript);
+    Matcher mi = EXPERIMENT_INTERPRETER.matcher(postScript);
+    boolean foundInterpreter = mi.find();
+    if (!foundInterpreter) {
+      throw new RecipeParseException(
+          "Could not find in the Interpreter in script experiment recipe.");
+    }
+    String interpreter = mi.group(1);
+    
+    
+    return new ExperimentRecipe("experiment", ScriptType.valueOf(interpreter), script, preScript);
   }
 
 }
