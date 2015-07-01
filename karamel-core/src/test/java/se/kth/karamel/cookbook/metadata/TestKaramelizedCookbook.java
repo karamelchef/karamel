@@ -10,13 +10,17 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.RecipeParseException;
 
 /**
  *
@@ -36,7 +40,8 @@ public class TestKaramelizedCookbook {
 
   @Test
   public void testMetadata() throws MetadataParseException, IOException {
-    String file = Resources.toString(Resources.getResource("se/kth/karamel/cookbook/metadata/metadata.rb"), Charsets.UTF_8);
+    String file = Resources.toString(Resources.getResource("se/kth/karamel/cookbook/metadata/metadata.rb"),
+        Charsets.UTF_8);
     MetadataRb metadatarb = MetadataParser.parse(file);
     List<Recipe> recipes = metadatarb.getRecipes();
     assertEquals(recipes.size(), 2);
@@ -57,5 +62,23 @@ public class TestKaramelizedCookbook {
     Settings.CB_CLASSPATH_MODE = true;
     List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopshub-chef/master/Berksfile");
     Berksfile berksfile = new Berksfile(list);
+  }
+
+  @Test
+  public void testParseRecipe() throws CookbookUrlException, IOException {
+    try {
+      Settings.CB_CLASSPATH_MODE = true;
+      String recipe = Resources.toString(Resources.getResource(
+          "cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
+//    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb");
+      ExperimentRecipe er = ExperimentRecipeParser.parse(recipe);
+      assertEquals("experiment", er.getRecipeName());
+      assert(er.getPreChefScript().length() > 0);
+      assert(er.getScriptContents().length() > 0);
+      assertEquals(er.getScriptType(), ExperimentContext.ScriptType.bash);
+    } catch (RecipeParseException ex) {
+      Assert.fail(ex.toString());
+    }
+    
   }
 }
