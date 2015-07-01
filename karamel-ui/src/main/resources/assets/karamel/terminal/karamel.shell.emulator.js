@@ -128,7 +128,9 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
       return prompt;
     }])
 
-  .controller('sshTerminalController', ['$scope', '$log', '$interval', 'terminalConfiguration', 'promptCreator', 'sshIps', 'KaramelCoreRestServices', function($scope, $log, $interval, terminalConfiguration, promptCreator, sshIps, KaramelCoreRestServices) {
+  .controller('sshTerminalController', ['$scope', '$log', '$interval', 'terminalConfiguration', 'promptCreator', 'sshIps', 
+      'KaramelCoreRestServices', 
+      function($scope, $log, $interval, terminalConfiguration, promptCreator, sshIps, KaramelCoreRestServices) {
 
       $scope.commandLine = '';
 

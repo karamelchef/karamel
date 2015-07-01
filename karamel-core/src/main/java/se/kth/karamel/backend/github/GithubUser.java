@@ -1,24 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.github;
 
-/**
- *
- * @author jdowling
- */
 public class GithubUser {
   private String user;
   private String password;
+  private String email;
 
-  public GithubUser(String user, String password) {
+  public GithubUser(String user, String password, String email) {
     this.user = (user == null) ? "" : user;
     this.password = (password == null) ? "" : password;
+    this.email = (email == null) ? "" : email;
   }
 
   public GithubUser() {
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getEmail() {
+    return email;
   }
  
   public String getUser() {

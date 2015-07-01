@@ -33,13 +33,12 @@
     <script type="text/javascript" src="bower_components/angular-block-ui/dist/angular-block-ui.min.js"></script>
     <script type="text/javascript" src='bower_components/angular-upload/angular-upload.min.js'></script>        
     <script type="text/javascript" src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
+    <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
     <script type="text/javascript" src="karamel/dist/FileSaver.js"></script>
     <script type="text/javascript" src="karamel/dist/yaml.js"></script> 
     <script type="text/javascript" src="karamel/dist/underscore-min.js"></script>
     <script type="text/javascript" src="karamel/dist/ng-sortable.js"></script>
-
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-md5/0.1.7/angular-md5.js"></script>
 
 
     <script type="text/javascript" src="karamel/karamel.main.js"></script>
@@ -54,11 +53,16 @@
     <script type="text/javascript" src="karamel/controllers/scaffold.js"></script>
     <script type="text/javascript" src="karamel/controllers/board.js"></script>
     <script type="text/javascript" src="karamel/controllers/ExperimentCtrl.js"></script>
+    <script type="text/javascript" src="karamel/controllers/ProfileCtrl.js"></script>
     <script type="text/javascript" src="karamel/controllers/new.recipe.js"></script>
-    <script type="text/javascript" src="karamel/services/KaramelCoreRestServices.js"></script>
-
     <script type="text/javascript" src="d3/d3.v3.min.js"></script>
     <script type="text/javascript" src="d3/dagre-d3.js"></script>
+
+<!-- services -->
+    <script type="text/javascript" src="karamel/services/KaramelCoreRestServices.js"></script>
+    <script type="text/javascript" src="karamel/services/ModalService.js"></script>
+    <script type="text/javascript" src="karamel/services/GithubService.js"></script>
+
 
     <div class="notifications" ng-controller="MainCtrl">
       <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>

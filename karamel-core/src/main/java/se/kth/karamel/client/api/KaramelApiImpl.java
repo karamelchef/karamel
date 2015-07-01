@@ -228,17 +228,13 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void registerGithubAccount(String user, String password) throws KaramelException {
-    Github.registerCredentials(user, password);
+  public GithubUser registerGithubAccount(String user, String password) throws KaramelException {
+    return Github.registerCredentials(user, password);
   }
 
   @Override
   public GithubUser loadGithubCredentials() throws KaramelException {
-    GithubUser user =  Github.loadGithubCredentials();
-    if (!user.getUser().isEmpty() && !user.getPassword().isEmpty()) {
-      registerGithubAccount(user.getUser(), user.getPassword());
-    }
-    return user;
+    return Github.loadGithubCredentials();
   }
 
   private void createGithubRepo(String owner, String repo, String description) throws KaramelException {

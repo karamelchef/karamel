@@ -206,11 +206,12 @@ public interface KaramelApi {
   /**
    * Register username/password for github account
    *
-   * @param email github account name or email address
+   * @param user github account name 
    * @param password github password
+   * @return GithubUser Json object also containing primary github email address
    * @throws KaramelException
    */
-  public void registerGithubAccount(String email, String password) throws KaramelException;
+  public GithubUser registerGithubAccount(String user, String password) throws KaramelException;
 
   /**
    * Load any existing credentials stored locally

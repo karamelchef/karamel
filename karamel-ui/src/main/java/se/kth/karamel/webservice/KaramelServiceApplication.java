@@ -749,7 +749,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
   public static class Github {
 
-    @Path("/loadGithubCredentials")
+    @Path("/getGithubCredentials")
     @Produces(MediaType.APPLICATION_JSON)
     public static class LoadGithubCredentials {
 
@@ -779,15 +779,14 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static class SetGithubCredentials {
 
       @POST
-      public Response setGithubCredentials(@FormParam("email") String email, @FormParam("password") String password) {
+      public Response setGithubCredentials(@FormParam("user") String user, @FormParam("password") String password) {
         Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
-//          karamelApiHandler.registerGithubAccount(githubCreds.getEmail(), githubCreds.getPassword());
-          karamelApiHandler.registerGithubAccount(email, password);
+          GithubUser githubUser = karamelApiHandler.registerGithubAccount(user, password);
           response = Response.status(Response.Status.OK).
-              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+              entity(githubUser).build();
         } catch (KaramelException e) {
           e.printStackTrace();
           response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).

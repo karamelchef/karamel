@@ -29,9 +29,9 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- * 1. Call registerCredentials() to store your github credentials in memory.
- * 2. Then call methods like addFile(), commitPush(repo,..)
- * 
+ * 1. Call registerCredentials() to store your github credentials in memory. 2. Then call methods like addFile(),
+ * commitPush(repo,..)
+ *
  * @author jdowling
  */
 public class Github {
@@ -51,9 +51,10 @@ public class Github {
    *
    * @param user
    * @param password
+   * @return primary github email for the user
    * @throws se.kth.karamel.common.exception.KaramelException
    */
-  public synchronized static void registerCredentials(String user, String password) throws KaramelException {
+  public synchronized static GithubUser registerCredentials(String user, String password) throws KaramelException {
     try {
       Github.user = user;
       Github.password = password;
@@ -71,10 +72,11 @@ public class Github {
       if (u == null) {
         throw new KaramelException("Could not find user or password incorret: " + user);
       }
-      email = u.getEmail();
+      Github.email = u.getEmail();
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
     }
+    return new GithubUser(Github.user, Github.password, Github.email);
   }
 
   /**
@@ -82,7 +84,7 @@ public class Github {
    * @return email or null if not set yet.
    */
   public static String getEmail() {
-    return email;
+    return Github.email;
   }
 
   public static GithubUser loadGithubCredentials() throws KaramelException {
@@ -92,7 +94,7 @@ public class Github {
     if (Github.user != null && Github.password != null) {
       registerCredentials(Github.user, Github.password);
     }
-    return new GithubUser(Github.user, Github.password);
+    return new GithubUser(Github.user, Github.password, Github.email);
   }
 
   public synchronized static String getUser() {
@@ -259,12 +261,13 @@ public class Github {
   }
 
   /**
-   * Adds a file to the Github repo's index. You then need to commit the change and push the commit to github. 
+   * Adds a file to the Github repo's index. You then need to commit the change and push the commit to github.
+   *
    * @param owner
    * @param repoName
    * @param fileName
    * @param contents
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public synchronized static void addFile(String owner, String repoName, String fileName, String contents)
       throws KaramelException {
@@ -290,10 +293,11 @@ public class Github {
   }
 
   /**
-   * Scaffolds a Karamel/chef project for an experiment and adds it to the github repo.
-   * You still need to commit and push the changes to github.
+   * Scaffolds a Karamel/chef project for an experiment and adds it to the github repo. You still need to commit and
+   * push the changes to github.
+   *
    * @param repoName
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public static void scaffoldRepo(String repoName) throws KaramelException {
     File repoDir = getRepoDirectory(repoName);
@@ -321,9 +325,10 @@ public class Github {
 
   /**
    * Synchronizes your updates on your local repository with github.
+   *
    * @param owner
    * @param repoName
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public synchronized static void commitPush(String owner, String repoName)
       throws KaramelException {
@@ -351,8 +356,9 @@ public class Github {
 
   /**
    * Search github for organizations/repositories/users using the GitHub API.
+   *
    * @param query
-   * @throws IOException 
+   * @throws IOException
    */
   public synchronized static void searchRepos(String query) throws IOException {
     RepositoryService rs = new RepositoryService(client);

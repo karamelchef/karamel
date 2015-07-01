@@ -15,6 +15,7 @@ angular.module('karamel.main', [
     , "xeditable"// edit project name
     , "oitozero.ngSweetAlert"
     , 'karamel.terminal'
+    , 'angular-md5'
     , 'blockUI'
     , 'karamel.shell.emulator'
 ])

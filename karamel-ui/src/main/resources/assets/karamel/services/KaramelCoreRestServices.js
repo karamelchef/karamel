@@ -1,4 +1,4 @@
-  angular.module('karamel.terminal', [])
+  angular.module('karamel.terminal')
           .service('KaramelCoreRestServices', ['$log', '$http', '$location', function($log, $http, $location) {
 
       // Return the promise object to the users.
@@ -115,11 +115,11 @@
           var url = _defaultHost.concat("/sudoPassword");
           return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
-        setGithubCredentials: function(email, password) {
+        setGithubCredentials: function(username, password) {
           var method = 'POST';
           var url = _defaultHost.concat("/setGithubCredentials");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "email" : email , "password" : password }));
+          $.param({ "user" : username , "password" : password }));
         },
         getGithubCredentials: function() {
           var method = 'GET';

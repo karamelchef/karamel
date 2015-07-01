@@ -1,12 +1,12 @@
 
-    <div class="modal-header">
-        <button class="close" ng-click="profileCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
-        <h2 class="modal-title">Profile</h2>
-    </div>
-    <div class="modal-body" id="profileModal">
+<div class="modal-header">
+    <button class="close" ng-click="profileCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
+    <h2 class="modal-title">Profile</h2>
+</div>
+<div class="modal-body" id="profileModal">
     <div class="row">
 
-        <div growl class="pull-right"></div>
+        <!--<div growl class="pull-right"></div>-->
 
         <div class="col-md-9 pull-right">
             <form method="post"
@@ -20,41 +20,25 @@
                     <div class="col-xs-12 col-sm-6 col-md-6">
                         <div class="form-group has-feedback">
                             <label class="text-muted">Email</label>
-                            <input name="email" placeholder="Your github email address" autocomplete="off"
-                                   ng-model="profileCtrl.githubCredentials.email" required class="form-control "
+                            <input name="user" placeholder="Your github username" autocomplete="off"
+                                   ng-model="profileCtrl.user" class="form-control "
                                    type="text">
-                                    <span ng-show="(githubCredentialsForm.$submitted || githubCredentialsForm.email.$dirty) &amp;&amp; githubCredentialsForm.email.$error.required"
-                                          class="text-danger ng-hide">This field is required</span>
                         </div>
                     </div>
                     <div class="col-xs-12 col-sm-6 col-md-6">
                         <div class="form-group has-feedback">
                             <label class="text-muted">Password</label>
-                            <input name="password" placeholder="Last Name" autocomplete="off"
-                                   ng-model="profileCtrl.user.lastName" required class="form-control "
-                                   type="password">
-                                    <span ng-show="(githubCredentialsForm.$submitted ||githubCredentialsForm.password.$dirty) &amp;&amp; githubCredentialsForm.password.$error.required"
-                                          class="text-danger ng-hide">This field is required</span>
+                            <input name="password" placeholder="Github Password" autocomplete="off"
+                                   ng-model="profileCtrl.password" class="form-control "
+                                   type="text">
                         </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-xs-12 col-sm-3 col-md-3 pull-right">
-                        <input type="submit" class="btn btn-block btn-primary mt-lg" value="Login"
-                               ng-disabled="githubCredentialsForm.$pristine"/>
-                    </div>
-                    <div class="col-xs-12 col-sm-3 col-md-3 pull-right">
-                        <input type="button" class="btn btn-block btn-primary mt-lg" ng-click="profileCtrl.reset()"
-                               value="Reset" ng-disabled="githubCredentialsForm.$pristine"/>
-                    </div>
-
                 </div>
             </form>
         </div>
         <div class="col-md-3">
             <img class="img-thumbnail"
-                 ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.emailHash + '?s=300&d=mm' }}"/>
+                 ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
         </div>
     </div>
 </div>

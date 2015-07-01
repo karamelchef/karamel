@@ -1,32 +1,40 @@
 'use strict';
 
 angular.module('karamel.main')
-        .controller('ExperimentCtrl', ['$log', '$scope', 'md5', 'KaramelCoreRestServices', 'info',
-            function ($log, $scope, md5, KaramelCoreRestServices, info) {
+        .controller('ExperimentCtrl', ['$log', '$scope', 'KaramelCoreRestServices', 'GithubService', 'ModalService',
+            function ($log, $scope, KaramelCoreRestServices, GithubService, ModalService) {
 
-
-
-                $scope.selectedIcon = "";
-                $scope.icons = [{value: "New", label: "New Experiment"},
-                    {value: "Load", label: "Load Experiment"}];
-
-                $scope.tooltip = {
-                    title: "Experiment Designer<br />This is a multiline message!",
-                    checked: false
+                $scope.status = {
+                    isopen: false
+                };
+                $scope.toggleDropdown = function ($event) {
+                    $event.preventDefault();
+                    $event.stopPropagation();
+                    $scope.status.isopen = !$scope.status.isopen;
                 };
 
                 $scope.profileModal = function () {
+                    $log.info("Loading profile by launching modal dialog.");
                     ModalService.profile('md');
                 };
 
+                $scope.getEmailHash = function () {
+                    return GithubService.getEmailHash();
+                }
 
-//                $scope.emailHash = "";
-                $scope.githubRepoUrl = "";
+                $scope.getEmail = function () {
+                    return GithubService.getEmail();
+                }
+
+                $scope.getUser = function () {
+                    return GithubService.getUser();
+                }
+
+                $scope.getPassword = function () {
+                    return GithubService.getPassword();
+                }
+
                 $scope.loading = false;
-//                $scope.githubCredentials = {
-//                    email: "",
-//                    password: ""
-//                };
                 $scope.experimentContext = {
                     githubUrl: "",
                     experimentName: "",
@@ -36,15 +44,9 @@ angular.module('karamel.main')
                     experimentScript: ""
                 };
 
-                function _initScope(scope) {
-                    KaramelCoreRestServices.getGithubCredentials()
-                            .success(function (data, status, headers, config) {
-                                $scope.githubCredentials = data;
-                                $log.info("Experiment Details Fetched Successfully.");
-                            })
-                            .error(function (data, status, headers, config) {
-                                $log.info("Experiment Details can't be Fetched.");
-                            });
+                function _initScope() {
+                    $log.log("Looking for cached GitHub Credentials...");
+                    GithubService.getCredentials();
                 }
 
                 function loadExperiment(experimentUrl) {
@@ -59,48 +61,46 @@ angular.module('karamel.main')
 
                 }
 
-
-
-                _initScope($scope);
+                _initScope();
             }])
         .directive('modal', function () {
-  return {
-    template: '<div class="modal fade">' +
-    '<div class="modal-dialog modal-md">' +
-    '<div class="modal-content">' +
-    '<div class="modal-header">' +
-    '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-    '<h2 class="modal-title">{{ title }}</h2>' +
-    '</div>' +
-    '<div class="modal-body" ng-transclude></div>' +
-    '</div>' +
-    '</div>' +
-    '</div>',
-    restrict: 'E',
-    transclude: true,
-    replace: true,
-    scope: true,
-    link: function postLink(scope, element, attrs) {
-      scope.title = attrs.title;
+            return {
+                template: '<div class="modal fade">' +
+                        '<div class="modal-dialog modal-md">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header">' +
+                        '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+                        '<h2 class="modal-title">{{ title }}</h2>' +
+                        '</div>' +
+                        '<div class="modal-body" ng-transclude></div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>',
+                restrict: 'E',
+                transclude: true,
+                replace: true,
+                scope: true,
+                link: function postLink(scope, element, attrs) {
+                    scope.title = attrs.title;
 
-      scope.$watch(attrs.visible, function (value) {
-        if (value == true)
-          $(element).modal('show');
-        else
-          $(element).modal('hide');
-      });
+                    scope.$watch(attrs.visible, function (value) {
+                        if (value == true)
+                            $(element).modal('show');
+                        else
+                            $(element).modal('hide');
+                    });
 
-      $(element).on('shown.bs.modal', function () {
-        scope.$apply(function () {
-          scope.$parent[attrs.visible] = true;
+                    $(element).on('shown.bs.modal', function () {
+                        scope.$apply(function () {
+                            scope.$parent[attrs.visible] = true;
+                        });
+                    });
+
+                    $(element).on('hidden.bs.modal', function () {
+                        scope.$apply(function () {
+                            scope.$parent[attrs.visible] = false;
+                        });
+                    });
+                }
+            };
         });
-      });
-
-      $(element).on('hidden.bs.modal', function () {
-        scope.$apply(function () {
-          scope.$parent[attrs.visible] = false;
-        });
-      });
-    }
-  };
-});

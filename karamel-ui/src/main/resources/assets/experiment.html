@@ -11,58 +11,83 @@
 
 
 
-<!--    <div class="form-group col-xs-6">
-            <span class="input-group-btn">
-                <button class="btn btn-sm btn-info" ng-click="loadExperiment()" tabindex="1" bs-tooltip>Load Experiment</button>
-            </span>
-            <input type="text" class="form-control" data-placement="right" data-type="info" placeholder="https://github.com/.repo/experimentName" ng-model="ExperimentCtrl.githubRepoUrl" tabindex="2">
-    </div>
-
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title">
-                <a href="#" ng-click="preScriptChefCollapsed = !preScriptChefCollapsed">
-                    Pre-script Chef Code
-                </a>
-            </h4>
+    <!--    <div class="form-group col-xs-6">
+                <span class="input-group-btn">
+                    <button class="btn btn-sm btn-info" ng-click="loadExperiment()" tabindex="1" bs-tooltip>Load Experiment</button>
+                </span>
+                <input type="text" class="form-control" data-placement="right" data-type="info" placeholder="https://github.com/.repo/experimentName" ng-model="ExperimentCtrl.githubRepoUrl" tabindex="2">
         </div>
-        <div collapse="preScriptChefCollapsed">
-            <div class="panel-body">My experiment setup Chef code.
+    
+    
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 class="panel-title">
+                    <a href="#" ng-click="preScriptChefCollapsed = !preScriptChefCollapsed">
+                        Pre-script Chef Code
+                    </a>
+                </h4>
             </div>
-        </div>
-    </div>-->
-
+            <div collapse="preScriptChefCollapsed">
+                <div class="panel-body">My experiment setup Chef code.
+                </div>
+            </div>
+        </div>-->
 
 
     <div class="btn-group" dropdown is-open="status.isopen">
-      <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-        Experiment<span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-        <li><a href="#">Login Github</a></li>
-        <li><a href="#">New Experiment</a></li>
-        <li><button type="button" class="btn btn-default btn-sm" ng-click="loading = true">Load Experiment</button></li>
-      </ul>
+        <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+            Experiment<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="#">New Experiment</a></li>
+            <!--<li><button type="button" class="btn btn-default btn-sm" ng-click="loading = true">Load Experiment</button></li>-->
+        </ul>
     </div>
 
     <div class="btn-group" dropdown is-open="status.isopen">
-      <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-        Github Account<span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu" role="menu">
-          <li class="dropdown">
-            <a class="dropdown-toggle" style="padding:7px 0 8px 10px;" data-toggle="dropdown" role="button" aria-expanded="false">
-
-              <img src="http://gravatar.com/avatar/{{experimentCtrl.emailHash}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
-              {{experimentCtrl.email}} <b class="caret"></b>
-            </a>
-            <ul class="dropdown-menu">
-              <li><a ng-click="experimentCtrl.profileModal()"><i class="fa fa-cog"></i> Github Login</a></li>
-            </ul>
-          </li>
-      </ul>
+        <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+            Github Account<span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li><a href="#">Login Github</a></li>
+        </ul>
     </div>
+
+
+
+    <button type="button" class="btn btn-primary" ng-click="profileModal()">GitHub Login</button>
+
+
+    <a style="padding:7px 0 8px 10px;" role="button" aria-expanded="false">
+
+        <img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
+        {{getUser()}} <b class="caret"></b>
+    </a>
+    <ul class="dropdown-menu">
+        <li><a ng-click="profileModal()"><i class="fa fa-cog"></i> Github Login</a></li>
+    </ul>
+</li>
+</ul>
+
+
+<img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
+
+<div class="dropdown small-caret">
+    <a class="dropdown-toggle projectNameLeft" data-toggle="dropdown"><b class="glyphicon glyphicon-cog launch"></b></a>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+        <li class="custom-font"><a title="GitHub Login" class="leftTextAlign" ng-click="profileModal()">GitHub Login</a></li>
+
+    </ul>
+</div>
+
+<p>user: {{getUser()}}</p>
+<p>password: {{getPassword()}}</p>
+<p>email: {{getEmail()}}</p>
+
+
+
+<button type="button" class="btn btn-primary" ng-click="profileModal()">Click</button>
+
 
 
 </div>
