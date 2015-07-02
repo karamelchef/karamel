@@ -34,7 +34,11 @@ public class IoUtils {
   }
 
   public static String readContentFromClasspath(String path) throws IOException {
-    return Resources.toString(Resources.getResource(path), Charsets.UTF_8);
+    URL url = Resources.getResource(path);
+    if (url == null) {
+      throw new IOException("No config.props file found in cookbook");
+    }
+    return Resources.toString(url, Charsets.UTF_8);
   }
 
   public static List<String> readLinesFromClasspath(String url) throws IOException {

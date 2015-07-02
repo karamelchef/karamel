@@ -10,8 +10,6 @@ import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
@@ -70,11 +68,10 @@ public class TestKaramelizedCookbook {
       Settings.CB_CLASSPATH_MODE = true;
       String recipe = Resources.toString(Resources.getResource(
           "cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
-//    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb");
       ExperimentRecipe er = ExperimentRecipeParser.parse(recipe);
       assertEquals("experiment", er.getRecipeName());
-      assert(er.getPreChefScript().length() > 0);
-      assert(er.getScriptContents().length() > 0);
+      assertEquals(er.getPreScriptContents().isEmpty(), false);
+      assertEquals(er.getScriptContents().isEmpty(), false);
       assertEquals(er.getScriptType(), ExperimentContext.ScriptType.bash);
     } catch (RecipeParseException ex) {
       Assert.fail(ex.toString());

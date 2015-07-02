@@ -18,7 +18,6 @@ public class ExperimentRecipeParser {
    * @throws se.kth.karamel.common.exception.RecipeParseException
    */
   public static ExperimentRecipe parse(String content) throws RecipeParseException {
-//    String[] lines = content.split("\\r?\\n");
 
     Matcher mp = EXPERIMENT_SCRIPT.matcher(content);
     boolean foundPreScript = mp.find();

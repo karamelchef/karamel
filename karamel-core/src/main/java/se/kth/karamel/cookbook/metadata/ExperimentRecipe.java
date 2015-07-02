@@ -37,11 +37,6 @@ public class ExperimentRecipe {
     return recipeName;
   }
 
-  public String getPreChefScript() {
-    StringBuilder contents = new StringBuilder();
-    return contents.toString();
-  }
-
   public ExperimentContext.ScriptType getScriptType() {
     return scriptType;
   }

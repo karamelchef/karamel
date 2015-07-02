@@ -1,10 +1,9 @@
 <div class="container" style="width: 100%;">
 
-    <!--    <label>Single select:&nbsp;</label>
-        <button type="button" class="btn btn-default" ng-model="ExperimentCtrl.selectedIcon" data-html="1" bs-options="icon.value as icon.label for icon in icons" bs-select>
-            Action <span class="caret"></span>    
-        </button>
-        <hr>-->
+    <!--    <label>Script Type</label>
+            <button type="button" class="btn btn-default" ng-model="ExperimentCtrl.selectedIcon" data-html="1" bs-options="icon.value as icon.label for icon in icons" bs-select>
+                Action <span class="caret"></span>    
+            </button>-->
 
     <!--<p><a href data-animation="am-flip-x" bs-tooltip="tooltip">Experiment.</a></p>-->
 
@@ -34,60 +33,87 @@
         </div>-->
 
 
-    <div class="btn-group" dropdown is-open="status.isopen">
-        <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
-            Experiment<span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu">
-            <li><a href="#">New Experiment</a></li>
-            <!--<li><button type="button" class="btn btn-default btn-sm" ng-click="loading = true">Load Experiment</button></li>-->
-        </ul>
+    <!--    <div class="btn-group" dropdown is-open="status.isopen">
+            <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+                Experiment<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#">New Experiment</a></li>
+                <li><button type="button" class="btn btn-default btn-sm" ng-click="loading = true">Load Experiment</button></li>
+            </ul>
+        </div>
+    
+        <div class="btn-group" dropdown is-open="status.isopen">
+            <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
+                Github Account<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Login Github</a></li>
+            </ul>
+        </div>-->
+
+    <div class="row">
+
+        <!--<div growl class="pull-right"></div>-->
+
+        <div class="col-xs-12 col-sm-9 col-md-9">
+
+            <div class="col-xs-12 col-sm-9 col-md-9">
+                <div class="form-group">
+                    <label class="text-muted">Github Url</label>
+                    <input name="user" placeholder="https://github.com/hopshadoop/experiment" 
+                           ng-model="experimentContext.githubUrl" class="form-control "
+                           type="text" tabindex="1">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">    
+                    <button type="button" class="btn btn-default pull-right" ng-click="loadExperiment()" tabindex="2">Load</button>
+                </div>
+            </div>
+
+            <div class="col-xs-9 col-sm-6 col-md-6">
+                <div class="form-group">
+                    <label class="text-muted">Experiment Name</label>
+                    <input name="password" placeholder="Github Password" 
+                           ng-model="profileCtrl.password" class="form-control "
+                           type="password" tabindex="2">
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-3">
+            <!--            <div class="row">
+                            <img class="img-thumbnail"
+                                 ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
+            
+                                        <a style="padding:7px 0 8px 10px;" role="button" aria-expanded="false">
+                                            <img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
+                                            {{getUser()}} <b class="caret"></b>
+                                        </a>
+                        </div>-->
+            <div class="row">
+                <img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle pull-right">
+            </div>   
+            <div class="row">
+                <button type="button" class="btn btn-primary pull-right" ng-click="profileModal()">GitHub Login</button>
+            </div>   
+
+        </div>        
+
+
+
+        <!--<p>user: {{getUser()}}</p>
+        <p>password: {{getPassword()}}</p>
+        <p>email: {{getEmail()}}</p>-->
+
+
+
+        <!--<button type="button" class="btn btn-primary" ng-click="profileModal()">Click</button>-->
+
+
+
     </div>
-
-    <div class="btn-group" dropdown is-open="status.isopen">
-        <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
-            Github Account<span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu">
-            <li><a href="#">Login Github</a></li>
-        </ul>
-    </div>
-
-
-
-    <button type="button" class="btn btn-primary" ng-click="profileModal()">GitHub Login</button>
-
-
-    <a style="padding:7px 0 8px 10px;" role="button" aria-expanded="false">
-
-        <img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
-        {{getUser()}} <b class="caret"></b>
-    </a>
-    <ul class="dropdown-menu">
-        <li><a ng-click="profileModal()"><i class="fa fa-cog"></i> Github Login</a></li>
-    </ul>
-</li>
-</ul>
-
-
-<img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" style="height: 35px; margin-right: 10px;border: 2px solid white;" class="profile-image img-circle">
-
-<div class="dropdown small-caret">
-    <a class="dropdown-toggle projectNameLeft" data-toggle="dropdown"><b class="glyphicon glyphicon-cog launch"></b></a>
-    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-        <li class="custom-font"><a title="GitHub Login" class="leftTextAlign" ng-click="profileModal()">GitHub Login</a></li>
-
-    </ul>
-</div>
-
-<p>user: {{getUser()}}</p>
-<p>password: {{getPassword()}}</p>
-<p>email: {{getEmail()}}</p>
-
-
-
-<button type="button" class="btn btn-primary" ng-click="profileModal()">Click</button>
-
-
-
 </div>

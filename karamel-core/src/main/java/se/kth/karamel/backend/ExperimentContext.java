@@ -7,26 +7,12 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class ExperimentContext {
 
-  public static enum ScriptType {
-
-    bash("bash"), csh("csh"), perl("perl"), python("python"), ruby("ruby");
-
-    private final String blockCommand;
-
-    private ScriptType(String blockCommand) {
-      this.blockCommand = blockCommand;
-    }
-
-    public String getBlockCommand() {
-      return blockCommand;
-    }
-  };
+  public static enum ScriptType { bash, csh, perl, python, ruby };
 
   /**
    * Url for the experiment code. Can have a .jar or .tar.gz extention.
    */
   private String url;
-  
   
   /**
    * YAML for the Cluster context
@@ -114,7 +100,7 @@ public class ExperimentContext {
     }
 
     public String getScriptCommand() {
-      return scriptType.getBlockCommand();
+      return scriptType.toString();
     }
 
     public void setConfigFileContents(String configFileContents) {

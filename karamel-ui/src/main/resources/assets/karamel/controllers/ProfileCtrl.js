@@ -9,12 +9,19 @@ angular.module('karamel.main')
 
                 self.profile = function () {
                     GithubService.getCredentials();
+                    self.user = GithubService.getUser();
                 };
-
+                
+                
                 self.login = function () {
                     GithubService.setCredentials(self.user, self.password);
 
                 };
+
+                $scope.githubUser = function() {
+                    return self.user;
+//                    return GithubService.getUser();
+                }
 
                 self.close = function () {
                     $modalInstance.dismiss('cancel');
@@ -27,4 +34,6 @@ angular.module('karamel.main')
                 self.getEmailHash = function() {
                     return GithubService.getEmailHash();
                 }
+                
+                self.profile();
             }]);

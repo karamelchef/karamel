@@ -9,37 +9,46 @@
         <!--<div growl class="pull-right"></div>-->
 
         <div class="col-md-9 pull-right">
-            <form method="post"
-                  name="githubCredentialsForm"
-                  ng-submit="profileCtrl.login()"
-                  class="form-validate"
-                  novalidate>
 
-
-                <div class="row">
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group has-feedback">
-                            <label class="text-muted">Email</label>
-                            <input name="user" placeholder="Your github username" autocomplete="off"
-                                   ng-model="profileCtrl.user" class="form-control "
-                                   type="text">
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6">
-                        <div class="form-group has-feedback">
-                            <label class="text-muted">Password</label>
-                            <input name="password" placeholder="Github Password" autocomplete="off"
-                                   ng-model="profileCtrl.password" class="form-control "
-                                   type="text">
-                        </div>
+            <div class="row">
+                <div class="form-group" ng-show="profileCtrl.user != \"\"">    
+                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Already logged in.</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-9 col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label class="text-muted">Username</label>
+                        <input name="user" placeholder="Your github username" 
+                               ng-model="profileCtrl.user" class="form-control "
+                               type="text" tabindex="1">
                     </div>
                 </div>
-            </form>
+                <div class="col-xs-9 col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label class="text-muted">Password</label>
+                        <input name="password" placeholder="Github Password" 
+                               ng-model="profileCtrl.password" class="form-control "
+                               type="password" tabindex="2">
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <div class="form-group">    
+                        <button type="button" class="btn btn-default" ng-click="profileCtrl.login()" tabindex="8">Login</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--</form>-->
         </div>
         <div class="col-md-3">
             <img class="img-thumbnail"
                  ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
         </div>
+
+
+
     </div>
 </div>
 
