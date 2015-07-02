@@ -335,8 +335,6 @@ public class NovaLauncherTest {
     when(keyPairApi.delete(keypairName)).thenReturn(true);
     when(keyPairApi.createWithPublicKey(keypairName, sshKeyPair.getPublicKey())).thenReturn(pair);
 
-    /*boolean uploadSuccessful = novaLauncher.uploadSshPublicKey(keypairName, nova, true);*/
-
     //mocking
     JsonCluster cluster = mock(JsonCluster.class);
     ClusterRuntime clusterRuntime = mock(ClusterRuntime.class);
@@ -399,5 +397,51 @@ public class NovaLauncherTest {
 
     assertNotNull(forkedMachines);
     assertFalse(forkedMachines.isEmpty());
+  }
+
+  @Test
+  public void cleanup() throws KaramelException{
+    String uniqueGroup = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, groupName);
+
+    //mocking
+    JsonCluster cluster = mock(JsonCluster.class);
+    ClusterRuntime clusterRuntime = mock(ClusterRuntime.class);
+    when(clusterRuntime.getName()).thenReturn(clusterName);
+
+    List<JsonGroup> groups = new ArrayList<>();
+    JsonGroup group = mock(JsonGroup.class);
+    groups.add(group);
+    when(cluster.getGroups()).thenReturn(groups);
+    when(cluster.getProvider()).thenReturn(nova);
+    when(cluster.getName()).thenReturn(clusterName);
+
+    //mocking json group
+    when(group.getName()).thenReturn(groupName);
+    when(group.getProvider()).thenReturn(nova);
+    when(group.getSize()).thenReturn(1);
+
+    //mocking group runtime
+    List<GroupRuntime> groupRuntimes = new ArrayList<>();
+    GroupRuntime groupRuntime = mock(GroupRuntime.class);
+    when(groupRuntime.getName()).thenReturn(groupName);
+    when(groupRuntime.getId()).thenReturn("10");
+    when(groupRuntime.getCluster()).thenReturn(clusterRuntime);
+    groupRuntimes.add(groupRuntime);
+
+    //mocking clusterRuntime
+    when(clusterRuntime.getGroups()).thenReturn(groupRuntimes);
+
+    //mocking securityGroups
+    SecurityGroup securityGroup = mock(SecurityGroup.class);
+    List<SecurityGroup> securityGroupList = new ArrayList<>();
+    securityGroupList.add(securityGroup);
+    FluentIterable<SecurityGroup> securityGroupFluentIterable = FluentIterable.from(securityGroupList);
+
+    when(novaContext.getSecurityGroupApi()).thenReturn(securityGroupApi);
+    when(securityGroupApi.list()).thenReturn(securityGroupFluentIterable);
+    when(securityGroup.getName()).thenReturn(uniqueGroup);
+
+    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
+    novaLauncher.cleanup(cluster, clusterRuntime);
   }
 }
