@@ -13,6 +13,22 @@ angular.module('karamel.terminal')
                     password: ''
                 };
 
+                self.orgs = [];
+
+                self.repos = [];
+
+                self.org = {
+                    name: '',
+                    gravitar: ''
+                };
+
+                self.repo = {
+                    name: '',
+                    description: '',
+                    sshUrl: ''
+                };
+
+
                 return {
                     getEmailHash: function () {
                         return self.emailHash;
@@ -49,6 +65,72 @@ angular.module('karamel.terminal')
                                     $log.info("GitHub Credentials not found.");
                                 });
                         return self.githubCredentials;
+                    },
+                    getOrgs: function () {
+                        KaramelCoreRestServices.getGithubOrgs()
+                                .success(function (data, status, headers, config) {
+                                    self.orgs = data.orgs;
+                                })
+                                .error(function (data, status, headers, config) {
+                                    $log.info("GitHub Orgs not found.");
+                                });
+                        return self.orgs;
+                    },
+                    getRepos: function (org) {
+                        KaramelCoreRestServices.getGithubRepos(self.org)
+                                .success(function (data, status, headers, config) {
+                                    self.repos = data.repos;
+                                })
+                                .error(function (data, status, headers, config) {
+                                    $log.info("GitHub Orgs not found.");
+                                });
+                        return self.repos;
+                    },
+                    setOrg: function (org) {
+                        if (self.orgs !== null) {
+                            for (var i = 0, len = self.orgs.length; i < len; i++) {
+                                if (self.orgs[i].name === org) {
+                                    self.org.name = self.orgs[i].name;
+                                    self.org.gravitar = self.orgs[i].gravitar;
+                                    break;
+                                }
+                            }
+                        }
+                        return null;
+                    },
+                    setRepo: function (repo) {
+                        if (self.repos !== null) {
+                            for (var i = 0, len = self.repos.length; i < len; i++) {
+                                if (self.repos[i].name === repo) {
+                                    self.repo.name = self.repos[i].name;
+                                    self.repo.description = self.repos[i].description;
+                                    self.repo.sshUrl = self.repos[i].sshUrl;
+                                    break;
+                                }
+                            }
+                        }
+                        return null;
+                    },
+                    getOrg: function () {
+                        return self.org;
+                    },
+                    getRepo: function () {
+                        return self.repo;
+                    },
+                    getOrgName: function () {
+                        return self.org.name;
+                    },
+                    getOrgGravitar: function () {
+                        return self.org.name.gravitar;
+                    },
+                    getRepoName: function () {
+                        return self.repo.name;
+                    },
+                    getRepoDescription: function () {
+                        return self.repo.description;
+                    },
+                    getRepoSshUrl: function () {
+                        return self.repo.sshUrl;
                     },
                     getEmail: function () {
                         return self.githubCredentials.email;

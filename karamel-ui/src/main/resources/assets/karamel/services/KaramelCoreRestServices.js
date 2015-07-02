@@ -126,6 +126,17 @@
           var url = _defaultHost.concat("/getGithubCredentials");
           return _getPromiseObject(method, url, _defaultContentType);
         },
+        getGithubOrgs: function() {
+          var method = 'POST';
+          var url = _defaultHost.concat("/getGithubOrgs");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        getGithubRepos: function(username, org) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/getGithubRepos");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "user" : username, "org" : org}));
+        },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
           var url = _defaultHost.concat("/loadExperiment");

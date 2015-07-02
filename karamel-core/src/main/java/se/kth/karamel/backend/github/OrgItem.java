@@ -1,14 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.github;
 
-/**
- *
- * @author jdowling
- */
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class OrgItem {
   private String name;
   private String gravitar;
@@ -18,12 +12,23 @@ public class OrgItem {
     this.gravitar = gravitar;
   }
 
+  public OrgItem() {
+  }
+
   public String getGravitar() {
     return gravitar;
   }
 
   public String getName() {
     return name;
+  }
+
+  public void setGravitar(String gravitar) {
+    this.gravitar = gravitar;
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
   
 }

@@ -1,19 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.github;
 
-/**
- *
- * @author jdowling
- */
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class RepoItem {
 
-  private final String name;
-  private final String description;
-  private final String sshUrl;
+  private String name;
+  private String description;
+  private String sshUrl;
 
   public RepoItem(String name, String description, String sshUrl) {
     this.name = name;
@@ -21,6 +15,10 @@ public class RepoItem {
     this.sshUrl = sshUrl;
   }
 
+  public RepoItem() {
+  }
+
+  
   public String getDescription() {
     return description;
   }
@@ -31,6 +29,18 @@ public class RepoItem {
 
   public String getSshUrl() {
     return sshUrl;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setSshUrl(String sshUrl) {
+    this.sshUrl = sshUrl;
   }
 
 }

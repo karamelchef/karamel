@@ -37,6 +37,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
@@ -50,6 +51,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import static org.bouncycastle.cms.RecipientId.password;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -57,6 +59,8 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ExperimentContext;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
+import se.kth.karamel.backend.github.OrgItem;
+import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
@@ -307,6 +311,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Sudo.SudoPassword());
     environment.jersey().register(new Github.LoadGithubCredentials());
     environment.jersey().register(new Github.LoadExperiment());
+    environment.jersey().register(new Github.GetGithubOrgs());
+    environment.jersey().register(new Github.GetGithubRepos());
     environment.jersey().register(new Github.PushExperiment());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
@@ -785,6 +791,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
           GithubUser githubUser = karamelApiHandler.registerGithubAccount(user, password);
+          
           response = Response.status(Response.Status.OK).
               entity(githubUser).build();
         } catch (KaramelException e) {
@@ -796,6 +803,55 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         return response;
       }
     }
+    
+    
+    @Path("/getGithubOrgs")
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class GetGithubOrgs {
+
+      @POST
+      public Response getGithubOrgs() {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        try {
+          List<OrgItem> orgs = karamelApiHandler.listGithubOrganizations();
+          response = Response.status(Response.Status.OK).
+              entity(orgs).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+
+        return response;
+      }
+    }    
+    
+    @Path("/getGithubRepos")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public static class GetGithubRepos {
+
+      @POST
+      public Response getGithubRepos(@FormParam("org") String org) {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        try {
+          List<RepoItem> repos = karamelApiHandler.listGithubRepos(org);
+          response = Response.status(Response.Status.OK).
+              entity(repos).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+
+        return response;
+      }
+    }    
+    
     
     @Path("/pushExperiment")
     @Consumes(MediaType.APPLICATION_JSON)

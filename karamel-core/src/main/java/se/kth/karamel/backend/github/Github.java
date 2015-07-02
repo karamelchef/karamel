@@ -131,7 +131,6 @@ public class Github {
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
-
     }
   }
 

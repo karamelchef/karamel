@@ -39,6 +39,35 @@
                 </div>
             </div>
 
+            <div class="row">
+                <div class="form-group" ng-show="profileCtrl.isLoggedIn">    
+                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Already logged in.</label>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group" ng-show="profileCtrl.isOrgSelected">    
+                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">orgs.</label>
+                    <input type="search" ng-model="q" placeholder="filter orgs..." aria-label="filter orgs" />
+                    <ul class="example-animate-container">
+                        <li class="animate-repeat" ng-repeat="org in profileCtrl.getOrgs() | filter:q as results">
+                            Select repo: {{org.name}}
+                        </li>
+                        <li class="animate-repeat" ng-if="results.length == 0">
+                            <strong>No orgs found...</strong>
+                        </li>
+                    </ul>                    
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group" ng-show="profileCtrl.isRepoSelected">    
+                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Repos.</label>
+                </div>
+            </div>
+
+
 
             <!--</form>-->
         </div>
@@ -47,9 +76,12 @@
                  ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
         </div>
 
-
-
     </div>
 </div>
 
+<div class="modal-footer" id="profileFooter">
+    <div class="row">
+        Select your repo
+    </div>
+</div>
 

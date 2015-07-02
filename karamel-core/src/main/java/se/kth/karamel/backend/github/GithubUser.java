@@ -1,5 +1,8 @@
 package se.kth.karamel.backend.github;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class GithubUser {
   private String user;
   private String password;
