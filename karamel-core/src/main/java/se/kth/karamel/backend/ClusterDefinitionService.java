@@ -31,7 +31,6 @@ import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.FilesystemUtil;
-import se.kth.karamel.common.IoUtils;
 
 /**
  *

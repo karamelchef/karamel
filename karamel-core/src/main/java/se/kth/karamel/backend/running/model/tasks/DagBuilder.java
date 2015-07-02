@@ -13,7 +13,6 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import static se.kth.karamel.backend.converter.UserClusterDataExtractor.*;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -97,7 +96,7 @@ public class DagBuilder {
       Dag dag) throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = findGroup(cluster, ge.getName());
+      JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getUrls();
@@ -160,7 +159,7 @@ public class DagBuilder {
       Dag dag) throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = findGroup(cluster, ge.getName());
+      JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
@@ -189,7 +188,7 @@ public class DagBuilder {
 
   public static void machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, TaskSubmitter submitter,
       Dag dag) throws KaramelException {
-    String vendorPath = makeVendorPath(cluster);
+    String vendorPath = UserClusterDataExtractor.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
 

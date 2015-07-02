@@ -165,8 +165,8 @@ public class KaramelApiTest {
   
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "flink";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink.yml"), Charsets.UTF_8);
+    String clusterName = "hiway";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {

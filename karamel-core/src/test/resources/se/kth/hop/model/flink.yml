@@ -1,7 +1,8 @@
 name: flink
 ec2:
-    type: m3.medium
-    region: eu-west-1
+  type: c3.2xlarge
+  region: us-east-1
+  ami: ami-d05e75b8
     
 cookbooks:                                                                      
   hadoop: 

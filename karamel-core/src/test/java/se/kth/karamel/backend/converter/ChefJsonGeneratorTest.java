@@ -31,7 +31,7 @@ public class ChefJsonGeneratorTest {
         + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
         + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
         + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
-        + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"image\":null,\"region\":\"eu-west-1\",\"price\":"
+        + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
         + "null,\"vpc\":null,\"subnet\":null}}";
     //Workaround for https://github.com/karamelchef/karamel/issues/28
     String yaml = ClusterDefinitionService.jsonToYaml(jsonString);

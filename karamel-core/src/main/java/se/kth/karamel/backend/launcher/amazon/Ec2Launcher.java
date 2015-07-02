@@ -244,7 +244,7 @@ public final class Ec2Launcher extends Launcher {
       template.options(options);
       template.os64Bit(true);
       template.hardwareId(ec2.getType());
-      template.imageId(ec2.getRegion() + "/" + ec2.getImage());
+      template.imageId(ec2.getRegion() + "/" + ec2.getAmi());
       template.locationId(ec2.getRegion());
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();

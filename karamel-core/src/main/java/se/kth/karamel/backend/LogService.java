@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.FilesystemUtil;
