@@ -39,7 +39,13 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * @author kamal
@@ -184,7 +190,7 @@ public final class Ec2Launcher extends Launcher {
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 
+  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
     Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);

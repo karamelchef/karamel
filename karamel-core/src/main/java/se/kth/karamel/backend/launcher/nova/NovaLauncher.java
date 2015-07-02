@@ -36,7 +36,13 @@ import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * Created by Alberto on 2015-05-16.

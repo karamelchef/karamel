@@ -6,7 +6,13 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jetty.MutableServletContextHandler;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.OptionBuilder;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
@@ -20,21 +26,6 @@ import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.swing.*;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.awt.*;
-import java.io.*;
-import java.net.*;
-import java.util.EnumSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
 import se.kth.karamel.webservicemodel.GithubCredentialsJSON;
@@ -45,6 +36,36 @@ import se.kth.karamel.webservicemodel.ScaffoldJSON;
 import se.kth.karamel.webservicemodel.SshKeyJSON;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
 import se.kth.karamel.webservicemodel.SudoPasswordJSON;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import javax.swing.ImageIcon;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.EnumSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
 /**
  * Created by babbarshaer on 2014-11-20.
