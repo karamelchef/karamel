@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend;
 
+import se.kth.karamel.backend.evaluation.ClusterStatistics;
 import se.kth.karamel.backend.launcher.Launcher;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;

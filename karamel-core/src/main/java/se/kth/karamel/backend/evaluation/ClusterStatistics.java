@@ -1,11 +1,10 @@
-package se.kth.karamel.backend;
+package se.kth.karamel.backend.evaluation;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import se.kth.karamel.common.Settings;
 

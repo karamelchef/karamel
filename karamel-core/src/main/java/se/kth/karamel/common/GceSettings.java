@@ -2,7 +2,6 @@ package se.kth.karamel.common;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.UnsupportedImageType;
 
 /**

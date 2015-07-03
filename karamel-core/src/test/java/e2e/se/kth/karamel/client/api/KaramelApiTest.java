@@ -9,15 +9,13 @@ import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import org.jclouds.domain.Credentials;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
-import se.kth.karamel.backend.ClusterStatistics;
+import se.kth.karamel.backend.evaluation.ClusterStatistics;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
@@ -237,11 +235,11 @@ public class KaramelApiTest {
   @Test
   public void testGce() throws KaramelException, IOException, InterruptedException {
     String fileName = "ambari_gce";
+    String clusterName = "ambari";
     int vms = 3;
     ClusterStatistics.setFileName("timestat.txt");
-    ClusterStatistics.setExperimentName(String.format("%s%d",fileName,vms));
-    String clusterName = "flinkgce";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/"+fileName+".yml"), Charsets.UTF_8);
+    ClusterStatistics.setExperimentName(String.format("%s%d", fileName, vms));
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/" + fileName + ".yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
@@ -252,8 +250,14 @@ public class KaramelApiTest {
 //    String keyPath = api.loadGceCredentialsIfExist();
     api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH + "/gce-key.json");
     api.startCluster(json);
-    long ms1 = System.currentTimeMillis();
-    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+    Thread.sleep(2000);
+
+    ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
+    while (clusterRuntime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED || clusterRuntime.isFailed()) {
+
+      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
+        api.processCommand("purge " + clusterName);
+      }
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(10000);
     }

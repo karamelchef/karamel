@@ -34,7 +34,6 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.GceSettings;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.SshKeyService;
