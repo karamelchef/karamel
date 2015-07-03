@@ -234,8 +234,8 @@ public class KaramelApiTest {
 
   @Test
   public void testGce() throws KaramelException, IOException, InterruptedException {
-    String fileName = "ambari_gce";
-    String clusterName = "ambari";
+    String fileName = "flink_gce";
+    String clusterName = "flinkgce";
     int vms = 3;
     ClusterStatistics.setFileName("timestat.txt");
     ClusterStatistics.setExperimentName(String.format("%s%d", fileName, vms));
