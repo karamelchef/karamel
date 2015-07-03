@@ -23,7 +23,7 @@ import se.kth.karamel.common.exception.DagConstructionException;
 public class Dag {
 
   private static final Logger logger = Logger.getLogger(Dag.class);
-  private Map<String, DagNode> allNodes = new HashMap<>();
+  private final Map<String, DagNode> allNodes = new HashMap<>();
 
   public void addNode(String nodeId) throws DagConstructionException {
     if (allNodes.containsKey(nodeId)) {
@@ -89,6 +89,22 @@ public class Dag {
     for (DagNode node : findRootNodes()) {
       node.start();
     }
+  }
+  
+  public boolean isFailed()  {
+    for (DagNode node : allNodes.values()) {
+      if (node.getStatus() == DagNode.Status.FAILED)
+        return true;
+    }
+    return false;
+  }
+
+  public boolean isDone()  {
+    for (DagNode node : allNodes.values()) {
+      if (node.getStatus() != DagNode.Status.DONE)
+        return false;
+    }
+    return true;
   }
 
   public void validate() throws DagConstructionException {

@@ -1,6 +1,6 @@
 name: ambari
 ec2:
-    image: ami-029f9476
+    ami: ami-029f9476
     type: m3.medium
     region: eu-west-1
 

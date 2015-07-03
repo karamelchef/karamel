@@ -16,7 +16,7 @@ public class Ec2 extends Provider {
 
   private String type;
   private String region;
-  private String image;
+  private String ami;
   private Float price;
   private String vpc;
   private String subnet;
@@ -37,12 +37,12 @@ public class Ec2 extends Provider {
     this.region = region;
   }
 
-  public String getImage() {
-    return image;
+  public String getAmi() {
+    return ami;
   }
 
-  public void setImage(String image) {
-    this.image = image;
+  public void setAmi(String ami) {
+    this.ami = ami;
   }
 
   public Float getPrice() {
@@ -80,8 +80,8 @@ public class Ec2 extends Provider {
     if (clone.getUsername() == null) {
       clone.setUsername(Settings.PROVIDER_EC2_DEFAULT_USERNAME);
     }
-    if (clone.getImage() == null) {
-      clone.setImage(Settings.PROVIDER_EC2_DEFAULT_IMAGE);
+    if (clone.getAmi() == null) {
+      clone.setAmi(Settings.PROVIDER_EC2_DEFAULT_AMI);
     }
     if (clone.getRegion() == null) {
       clone.setRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
@@ -96,7 +96,7 @@ public class Ec2 extends Provider {
   public Ec2 cloneMe() {
     Ec2 ec2 = new Ec2();
     ec2.setUsername(getUsername());
-    ec2.setImage(image);
+    ec2.setAmi(ami);
     ec2.setRegion(region);
     ec2.setType(type);
     ec2.setPrice(price);
@@ -113,8 +113,8 @@ public class Ec2 extends Provider {
       if (clone.getUsername() == null) {
         clone.setUsername(parentEc2.getUsername());
       }
-      if (clone.getImage() == null) {
-        clone.setImage(parentEc2.getImage());
+      if (clone.getAmi() == null) {
+        clone.setAmi(parentEc2.getAmi());
       }
       if (clone.getRegion() == null) {
         clone.setRegion(parentEc2.getRegion());

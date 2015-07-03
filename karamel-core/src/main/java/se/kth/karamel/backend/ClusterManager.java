@@ -254,7 +254,7 @@ public class ClusterManager implements Runnable {
       throw ex;
     }
 
-    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING) {
+    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && !installationDag.isDone()) {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
