@@ -2,12 +2,15 @@
           .service('KaramelCoreRestServices', ['$log', '$http', '$location', function($log, $http, $location) {
 
       // Return the promise object to the users.
-      var _getPromiseObject = function(method, url, contentType, data) {
+      var _getPromiseObject = function(method, url, contentType, data, isArray) {
 
+        isArray = typeof isArray !== 'undefined' ? isArray : false;
+        
         var promiseObject = $http({
           method: method,
           url: url,
           headers: {'Content-Type': contentType},
+          isArray: isArray,
           data: data
         });
 
@@ -129,22 +132,32 @@
         getGithubOrgs: function() {
           var method = 'POST';
           var url = _defaultHost.concat("/getGithubOrgs");
-          return _getPromiseObject(method, url, _defaultContentType);
+          return _getPromiseObject(method, url, _defaultContentType, "", true);
         },
         getGithubRepos: function(username, org) {
           var method = 'POST';
           var url = _defaultHost.concat("/getGithubRepos");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "user" : username, "org" : org}));
+          $.param({ "user" : username, "org" : org}), true);
+        },
+        createGithubRepo: function(org, repo, description) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/createGithubRepo");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "org" : org, "repo" : repo, "description" : description}));
         },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
           var url = _defaultHost.concat("/loadExperiment");
-          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  $.param({ "experimentUrl" : experimentUrl }));
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "experimentUrl" : experimentUrl }));
         },        
         pushExperiment: function(experimentJson) {
           var method = 'PUT';
           var url = _defaultHost.concat("/pushExperiment");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "owner" : owner, "repo" : repo, "description" : description}));          
+          
           return _getPromiseObject(method, url, _defaultContentType, experimentJson);
         },        
         processCommand: function(commandName) {

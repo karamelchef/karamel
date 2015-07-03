@@ -59,17 +59,17 @@ public class ChefExperimentExtractor {
    */
   public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
-    
+
     defaultAttrs.clear();
     metadataAttrs.clear();
     // Add recipeNames to metadata.rb
     Set<String> recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
     Map<String, Experiment> experiments = experiment.getExperiments();
-    
+
     for (String recipeName : recipeNames) {
       Experiment exp = experiments.get(recipeName);
-      String str = exp.getConfigFileContents();
+      String str = exp.getDefaultAttributes();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
       while (m.find()) {
@@ -90,12 +90,12 @@ public class ChefExperimentExtractor {
           "group", experiment.getGroup(),
           "http_binaries", experiment.getUrl()
       );
-      
+
       for (String key : defaultAttrs.keySet()) {
         String entry = "default[:" + repoName + "][:" + key + "] = \"" + defaultAttrs.get(key) + "\"";
         defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
-      
+
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_METADATA,
           "name", repoName,
@@ -117,7 +117,7 @@ public class ChefExperimentExtractor {
       // 3. write them to files and push to github
       Github.addFile(owner, repoName, "attributes/default.rb", defaults_rb.toString());
       Github.addFile(owner, repoName, "metadata.rb", metadata_rb.toString());
-      
+
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
@@ -134,23 +134,23 @@ public class ChefExperimentExtractor {
    */
   public static void parseRecipesAddToGit(String owner, String repoName, ExperimentContext experimentContext)
       throws KaramelException {
-    
+
     try {
       StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_RECIPE_INSTALL,
           "name", repoName
       );
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
-      
+
       Map<String, Experiment> experiments = experimentContext.getExperiments();
       Set<String> recipeNames = experiments.keySet();
-      
+
       StringBuilder kitchenContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KITCHEN_YML,
           "name", repoName
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
-      
+
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName
@@ -160,7 +160,7 @@ public class ChefExperimentExtractor {
       String ymlString = experimentContext.getClusterDefinition();
       JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
       List<String> clusterDependencies = new ArrayList<>();
-      
+
       for (JsonGroup g : jsonCluster.getGroups()) {
         for (JsonCookbook cb : g.getCookbooks()) {
           for (JsonRecipe r : cb.getRecipes()) {
@@ -181,8 +181,8 @@ public class ChefExperimentExtractor {
             "name", recipe,
             "pre_chef_commands", experiment.getPreScriptChefCode(),
             "interpreter", experiment.getScriptType().toString(),
-//            "command", experiment.getScriptCommand(),
-//            "experiment_name", recipe,
+            //            "command", experiment.getScriptCommand(),
+            //            "experiment_name", recipe,
             "user", experimentContext.getUser(),
             "group", experimentContext.getGroup(),
             "script_contents", experiment.getScriptContents()
@@ -196,10 +196,16 @@ public class ChefExperimentExtractor {
         // 3. write them to files and push to github
         Github.addFile(owner, repoName, "recipes" + File.separator + recipe + ".rb", recipeContents);
 
+        String defaultAttrsContents = experiment.getDefaultAttributes();
+        if (defaultAttrsContents != null && defaultAttrsContents.isEmpty()) {
+          Github.addFile(owner, repoName, "attributes" + File.separator + "defaults.rb",
+              defaultAttrsContents);
+        }
+
 //        karamelFile.setDependency(repoName + Settings.COOOKBOOK_DELIMITER + recipe, yd);
         karamelFile.getDependencies().add(yd);
       }
-      
+
       DumperOptions options = new DumperOptions();
       options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
       Representer r = new Representer();
@@ -207,11 +213,11 @@ public class ChefExperimentExtractor {
       Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
       String karamelFileContents = karamelYml.dump(karamelFile);
       Github.addFile(owner, repoName, "Karamelfile", karamelFileContents);
-      
+
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     }
-    
+
   }
 }

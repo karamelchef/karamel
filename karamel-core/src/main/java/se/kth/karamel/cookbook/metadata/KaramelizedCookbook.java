@@ -97,4 +97,8 @@ public class KaramelizedCookbook {
     return experimentRecipe;
   }
 
+  public DefaultRb getDefaultRb() {
+    return defaultRb;
+  }
+
 }

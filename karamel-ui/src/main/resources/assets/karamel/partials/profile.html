@@ -4,84 +4,134 @@
     <h2 class="modal-title">Profile</h2>
 </div>
 <div class="modal-body" id="profileModal">
-    <div class="row">
 
-        <!--<div growl class="pull-right"></div>-->
+    <!--<div growl class="pull-right"></div>-->
 
-        <div class="col-md-9 pull-right">
+    <div class="container">
+        <div class="col-md-5 col-xs-3 col-sm-4">
 
             <div class="row">
-                <div class="form-group" ng-show="profileCtrl.user != \"\"">    
-                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Already logged in.</label>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-9 col-sm-6 col-md-6">
-                    <div class="form-group">
-                        <label class="text-muted">Username</label>
-                        <input name="user" placeholder="Your github username" 
-                               ng-model="profileCtrl.user" class="form-control "
-                               type="text" tabindex="1">
+                <div class="col-xs-3 col-sm-4 col-md-4">
+                    <div class="form-group" ng-show="profileCtrl.isLoggedIn">    
+                        <label class="control-label" style="text-align: left">Already logged in.</label>
                     </div>
                 </div>
-                <div class="col-xs-9 col-sm-6 col-md-6">
-                    <div class="form-group">
-                        <label class="text-muted">Password</label>
-                        <input name="password" placeholder="Github Password" 
-                               ng-model="profileCtrl.password" class="form-control "
-                               type="password" tabindex="2">
-                    </div>
-                </div>
-                <div class="col-xs-3">
+                <div class="col-xs-2 col-sm-3 col-md-3">
                     <div class="form-group">    
                         <button type="button" class="btn btn-default" ng-click="profileCtrl.login()" tabindex="8">Login</button>
                     </div>
                 </div>
             </div>
-
             <div class="row">
-                <div class="form-group" ng-show="profileCtrl.isLoggedIn">    
-                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Already logged in.</label>
+                <div class="col-xs-6 col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label for="userInput" class="text-muted">Username</label>
+                        <input id="userInput" name="user" placeholder="Your github username" 
+                               ng-model="profileCtrl.user" class="form-control "
+                               type="text" tabindex="1">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-6 col-sm-6 col-md-6">
+                    <div class="form-group">
+                        <label for="passwordInput" class="text-muted">Password</label>
+                        <input id="passwordInput" name="password" placeholder="Github Password" 
+                               ng-model="profileCtrl.password" class="form-control "
+                               type="password" tabindex="2">
+                    </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="form-group" ng-show="profileCtrl.isOrgSelected">    
-                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">orgs.</label>
-                    <input type="search" ng-model="q" placeholder="filter orgs..." aria-label="filter orgs" />
+            <div class="row pull-left" ng-show="profileCtrl.isLoggedIn" >
+            <hr>
+                <div class="form-group col-xs-4 col-sm-6 col-md-6" ng-show="profileCtrl.isOrgSelected">
+                    <p>Organization selected: {{profileCtrl.githubService.org.name}} </p>
+                </div>
+                <div class="form-group col-xs-4 col-sm-6 col-md-6" ng-show="!profileCtrl.isOrgSelected">
+                    <p>First, select an Organization below.</p>
+                </div>            
+                <div class="form-group col-xs-4 col-sm-6 col-md-6" ng-show="profileCtrl.isRepoSelected">
+                    <p>Repository selected: {{profileCtrl.githubService.repo.name}} </p>
+                </div>
+                <div class="form-group col-xs-4 col-sm-6 col-md-6" ng-show="!profileCtrl.isRepoSelected">
+                    <p>No repository selected.</p>
+                </div>
+            </div>
+
+            
+            <div class="row" ng-show="profileCtrl.isOrgSelected">
+            <hr>
+                <div class="form-group col-xs-4 col-sm-4 col-md-4" >    
+                    <div class="form-group">
+                        <label for="newRepo" class="text-muted">New Repository</label>
+                        <input id="newRepo" name="user" placeholder="Enter the name of the new repo" 
+                               ng-model="repoName" class="form-control" type="text" tabindex="6">
+                    </div>
+                </div>
+                            <div class="col-xs-2 col-sm-3 col-md-3">
+                    <div class="form-group">    
+                        <button type="button" class="btn btn-default" ng-click="profileCtrl.newRepo()" tabindex="8">Create</button>
+                    </div>
+                </div>
+
+                <div class="form-group col-xs-4 col-sm-4 col-md-4">    
+                    <label class="control-label" style="text-align :left">Repos.</label>
                     <ul class="example-animate-container">
-                        <li class="animate-repeat" ng-repeat="org in profileCtrl.getOrgs() | filter:q as results">
-                            Select repo: {{org.name}}
+                        <li class="animate-repeat" ng-repeat="repo in repos" style="list-style-type: none;">
+                            <div class="col-xs-3 col-sm-3 col-md-3">
+                                {{repo.name}} 
+                            </div>
+                            <div class="col-xs-3 col-sm-3 col-md-3 pull-left">
+                                <img class="img-thumbnail" style="height: 40px;"
+                                     ng-src="{{ repo.sslUrl}}"/>
+                            </div>
+                        </li>
+                        <li class="animate-repeat" ng-if="results.length == 0">
+                            <strong>No repo found...</strong>
+                        </li>
+                    </ul>                                        
+
+                </div>
+            </div>
+            
+            <hr>
+
+            <div class="row">
+                <div class="form-group" ng-show="profileCtrl.isLoggedIn">    
+                    <label class="control-label col-xs-3 col-sm-10 col-md-10 col-lg-10" style="text-align: left">Select a Github Organization</label>
+                    <ul class="example-animate-container">
+                        <li class="animate-repeat" ng-repeat="org in orgs" style="list-style-type: none;">
+                            <div class="col-xs-3 col-sm-3 col-md-3">
+                                {{org.name}} 
+                            </div>
+                            <div class="col-xs-3 col-sm-3 col-md-3 pull-left">
+                                <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
+                                     ng-src="{{ org.gravitar}}"/>
+                            </div>
                         </li>
                         <li class="animate-repeat" ng-if="results.length == 0">
                             <strong>No orgs found...</strong>
                         </li>
                     </ul>                    
-
                 </div>
             </div>
 
+        </div>
+
+        <div class="col-xs-1 col-sm-1 col-md-1">
             <div class="row">
-                <div class="form-group" ng-show="profileCtrl.isRepoSelected">    
-                    <label for="LoggedIn" class="control-label col-xs-9  col-sm-6 col-md-6" style="text-align: left">Repos.</label>
-                </div>
+                <img style="height: 100px; margin-right: 5px;border: 2px solid white;" class="profile-image img-circle pull-right"
+                     ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
             </div>
-
-
-
-            <!--</form>-->
         </div>
-        <div class="col-md-3">
-            <img class="img-thumbnail"
-                 ng-src="http://www.gravatar.com/avatar/{{ profileCtrl.getEmailHash() + '?s=300&d=mm'}}"/>
-        </div>
-
     </div>
+
 </div>
 
 <div class="modal-footer" id="profileFooter">
-    <div class="row">
-        Select your repo
+    <div class="row pull-left">
+        Select your repo.
     </div>
 </div>
 

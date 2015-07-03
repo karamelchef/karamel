@@ -43,6 +43,8 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.SshKeyService;
 import se.kth.karamel.cookbook.metadata.Berksfile;
+import se.kth.karamel.cookbook.metadata.DefaultRb;
+import se.kth.karamel.cookbook.metadata.ExperimentRecipe;
 import se.kth.karamel.cookbook.metadata.KaramelFile;
 import se.kth.karamel.cookbook.metadata.MetadataRb;
 
@@ -237,7 +239,7 @@ public class KaramelApiImpl implements KaramelApi {
     return Github.loadGithubCredentials();
   }
 
-  private void createGithubRepo(String owner, String repo, String description) throws KaramelException {
+  private void initGithubRepo(String owner, String repo, String description) throws KaramelException {
     if (owner == null || owner.isEmpty()) {
       Github.createRepoForUser(repo, description);
     } else {
@@ -252,41 +254,71 @@ public class KaramelApiImpl implements KaramelApi {
     // 1. Create the repo if it doesn't exist and clone it to a local directory
     File f = Github.getRepoDirectory(repoName);
     if (f.exists() == false) {
-      createGithubRepo(owner, repoName, experiment.getDescription());
+      initGithubRepo(owner, repoName, experiment.getDescription());
     }
-    
-    // 2. Scaffold a new experiment project with Karamel/Chef
-    
-    Github.scaffoldRepo(repoName);
-    
-    // 3. For all config and script files, compile them and generate Karamel/Chef files
 
+    // 2. Scaffold a new experiment project with Karamel/Chef
+    Github.scaffoldRepo(repoName);
+
+    // 3. For all config and script files, compile them and generate Karamel/Chef files
     ChefExperimentExtractor.parseAttributesAddToGit(owner, repoName, experiment);
-    
+
     ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
 
-    
-    
     // 4. Commit and push all changes to github
     Github.commitPush(owner, repoName);
 
   }
-  
+
   @Override
-  public ExperimentContext loadExperiment(String httpUrlGithubRepo) throws KaramelException {
+  public ExperimentContext loadExperiment(String githubRepoUrl) throws KaramelException {
     ExperimentContext ec = new ExperimentContext();
 
-    KaramelizedCookbook kc = new KaramelizedCookbook(httpUrlGithubRepo);
+    int e = githubRepoUrl.lastIndexOf(".git");
+    int s = githubRepoUrl.lastIndexOf("/");
+    if (s == -1 || e == -1) {
+      throw new KaramelException("Misformed url: " + githubRepoUrl);
+    }
+    int s1 = githubRepoUrl.lastIndexOf("/", s - 1);
+    if (s1 == -1) {
+      throw new KaramelException("Misformed url: " + githubRepoUrl);
+    }
+
+    String repoName = githubRepoUrl.substring(s, e);
+    ec.setGithubRepo(repoName);
+    String owner = githubRepoUrl.substring(s1, s);
+    ec.setGithubOwner(owner);
+    if (repoName == null || owner == null || repoName.isEmpty() || owner.isEmpty()) {
+      throw new KaramelException("Misformed url repo/owner: " + githubRepoUrl);
+    }
+
+    Github.cloneRepo(owner, repoName);
+
+    KaramelizedCookbook kc = new KaramelizedCookbook(githubRepoUrl);
     MetadataRb metadata = kc.getMetadataRb();
     KaramelFile kf = kc.getKaramelFile();
     String metadataJson = kc.getMetadataJson();
-    String configFile = kc.getConfigFile();
+//    String configFile = kc.getConfigFile();
     Berksfile bf = kc.getBerksFile();
-// 1. Parse metadata.rb to return the list of recipe names. Download recipes from recipes/*.rb
-    // 3. Parse and Download templates/default/konfig-*.props.erb files
-    // 
+    DefaultRb attributes = kc.getDefaultRb();
+    ExperimentRecipe er = kc.getExperimentRecipe();
     
+    ec.setUser(attributes.getValue(repoName + "/user"));
+    ec.setGroup(attributes.getValue(repoName + "/group"));
+    ec.setUrl(attributes.getValue(repoName + "/url"));
+    
+    ExperimentContext.Experiment exp = new ExperimentContext.Experiment();
+    ec.addExperiment("experiment", exp);
+    exp.setDefaultAttributes(attributes.getExperimentContextFormat());
+    exp.setPreScriptChefCode(er.getPreScriptContents());
+    exp.setScriptContents(er.getScriptContents());
+    exp.setScriptType(er.getScriptType());
     return ec;
+  }
+
+  @Override
+  public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException {
+    return Github.createRepoForOrg(org, repo, description);
   }
 
 }

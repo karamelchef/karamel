@@ -176,9 +176,10 @@ public class Github {
    * @param org
    * @param repoName
    * @param description
+   * @return RepoItem bean/json object
    * @throws KaramelException
    */
-  public synchronized static void createRepoForOrg(String org, String repoName, String description) throws
+  public synchronized static RepoItem createRepoForOrg(String org, String repoName, String description) throws
       KaramelException {
 
     try {
@@ -190,6 +191,7 @@ public class Github {
       r.setDescription(description);
       rs.createRepository(org, r);
       cloneRepo(org, repoName);
+      return new RepoItem(repoName, description, r.getSshUrl());
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
@@ -276,6 +278,7 @@ public class Github {
       git = Git.open(repoDir);
 
       new File(repoDir + File.separator + fileName).delete();
+      new File(repoDir + File.separator + fileName).getParentFile().mkdirs();
       try (PrintWriter out = new PrintWriter(repoDir + File.separator + fileName)) {
         out.println(contents);
       }

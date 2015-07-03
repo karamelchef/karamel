@@ -191,7 +191,7 @@ public class GithubUserTest {
     try {
       ExperimentContext ec = new ExperimentContext();
       ExperimentContext.Experiment exp = new ExperimentContext.Experiment("echo \"jim\"\n"
-          + "java -jar -D%%maxHeapSize%% prog.jar", "blah", "%%maxHeapSize%%=128m\n%%log%%=true\n",
+          + "java -jar -D%%maxHeapSize%% prog.jar", "%%maxHeapSize%%=128m\n%%log%%=true\n",
           "", ExperimentContext.ScriptType.bash);
       ec.addExperiment("experiment", exp);
       ec.setUser("blah");
@@ -218,6 +218,9 @@ public class GithubUserTest {
           + "        - ndb::mysqld\n"
           + "        - ndb::memcached"
       );
+      ec.setAttributes("default[:hops][:user] = jim \n"
+          + " default[:hops][:group] = jim");
+      
       api.commitAndPushExperiment("karamelchef", "test", ec);
 
     } catch (KaramelException ex) {

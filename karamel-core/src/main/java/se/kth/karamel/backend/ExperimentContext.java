@@ -41,12 +41,18 @@ public class ExperimentContext {
 
   private Map<String, Experiment> mapExperiments = new HashMap<>();
 
+  private String githubRepo = "";
+  
+  private String githubOwner = "";
+  
+  private String attributes = "";
+  
+  
   @XmlRootElement
   public static class Experiment {
 
     private String scriptContents;
-    private String configFileName;
-    private String configFileContents;
+    private String defaultAttributes;
     private String preScriptChefCode;
     private ScriptType scriptType;
 
@@ -55,15 +61,14 @@ public class ExperimentContext {
      *
      * @param scriptContents
      * @param configFileName
-     * @param configFileContents
+     * @param defaultAttributes
      * @param preScriptChefCode
      * @param scriptType
      */
-    public Experiment(String scriptContents, String configFileName, String configFileContents,
+    public Experiment(String scriptContents, String defaultAttributes,
         String preScriptChefCode, ScriptType scriptType) {
       this.scriptContents = scriptContents;
-      this.configFileName = configFileName;
-      this.configFileContents = configFileContents;
+      this.defaultAttributes = defaultAttributes;
       this.preScriptChefCode = preScriptChefCode == null ? "" : preScriptChefCode;
       this.scriptType = scriptType;
     }
@@ -87,12 +92,8 @@ public class ExperimentContext {
       return scriptContents;
     }
 
-    public String getConfigFileContents() {
-      return configFileContents;
-    }
-
-    public String getConfigFileName() {
-      return configFileName;
+    public String getDefaultAttributes() {
+      return defaultAttributes;
     }
 
     public ScriptType getScriptType() {
@@ -103,12 +104,8 @@ public class ExperimentContext {
       return scriptType.toString();
     }
 
-    public void setConfigFileContents(String configFileContents) {
-      this.configFileContents = configFileContents;
-    }
-
-    public void setConfigFileName(String configFileName) {
-      this.configFileName = configFileName;
+    public void setDefaultAttributes(String defaultAttributes) {
+      this.defaultAttributes = defaultAttributes;
     }
 
     public void setScriptType(ScriptType scriptType) {
@@ -118,6 +115,22 @@ public class ExperimentContext {
   }
 
   public ExperimentContext() {
+  }
+
+  public void setGithubOwner(String githubOwner) {
+    this.githubOwner = githubOwner;
+  }
+
+  public String getGithubOwner() {
+    return githubOwner;
+  }
+
+  public String getGithubRepo() {
+    return githubRepo;
+  }
+
+  public void setGithubRepo(String githubRepo) {
+    this.githubRepo = githubRepo;
   }
 
   public String getUrl() {
@@ -132,9 +145,9 @@ public class ExperimentContext {
     mapExperiments.put(recipeName, exp);
   }
 
-  public void addExperiment(String recipeName, String scriptContents, String configFileName, String configFileContents,
+  public void addExperiment(String recipeName, String scriptContents, String defaultAttrContents,
       String preScriptChefCode, ScriptType scriptType) {
-    Experiment exp = new Experiment(scriptContents, configFileName, configFileContents, preScriptChefCode, scriptType);
+    Experiment exp = new Experiment(scriptContents, defaultAttrContents, preScriptChefCode, scriptType);
     mapExperiments.put(recipeName, exp);
   }
 
@@ -190,4 +203,12 @@ public class ExperimentContext {
     this.description = description;
   }
 
+  public String getAttributes() {
+    return attributes;
+  }
+
+  public void setAttributes(String attributes) {
+    this.attributes = attributes;
+  }
+  
 }

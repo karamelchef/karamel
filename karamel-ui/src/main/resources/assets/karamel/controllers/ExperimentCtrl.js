@@ -15,7 +15,8 @@ angular.module('karamel.main')
 
                 $scope.profileModal = function () {
                     $log.info("Loading profile by launching modal dialog.");
-                    ModalService.profile('md');
+                    ModalService.profile('lg');
+//                    ModalService.profile('md');
                 };
 
                 $scope.getEmailHash = function () {

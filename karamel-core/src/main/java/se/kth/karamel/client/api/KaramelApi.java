@@ -260,8 +260,20 @@ public interface KaramelApi {
 
   /**
    * Loads an experiment into the Designer, given its clone URL
-   * @param httpUrlGithubRepo url for github repo
-   * @return 
+   * @param githubRepoUrl url for github repo
+   * @return Json object for the ExperimentContext
+   * @throws se.kth.karamel.common.exception.KaramelException 
    */
-  public ExperimentContext loadExperiment(String httpUrlGithubRepo) throws KaramelException;
+  public ExperimentContext loadExperiment(String githubRepoUrl) throws KaramelException;
+
+  /**
+   *
+   * @param org github org name
+   * @param repo github repo name
+   * @param description repo description
+   * @return RepoItem bean/json containing name, description of repo.
+   * @throws KaramelException
+   */
+  public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
+
 }

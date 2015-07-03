@@ -57,4 +57,15 @@ public final class DefaultRb {
     return kv.get(key);
   }
 
+  public String getExperimentContextFormat() {
+    StringBuilder sb = new StringBuilder();
+
+    for (String key : kv.keySet()) {
+      String k = key.substring(key.lastIndexOf("/") + 1);
+      sb.append(k).append("=").append(kv.get(key)).append(System.lineSeparator());
+    }
+
+    return sb.toString();
+  }
+
 }

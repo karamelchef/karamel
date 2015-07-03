@@ -7,25 +7,29 @@ angular.module('karamel.main')
                 self.isLoggedIn = false;
                 self.isOrgSelected = false;
                 self.isRepoSelected = false;
-                
+
                 self.user = '';
                 self.password = '';
-                self.org = '';
-                self.repo = '';
+                $scope.githubService = GithubService;
+               
+                $scope.orgs = {};
 
                 self.profile = function () {
                     GithubService.getCredentials();
                     self.user = GithubService.getUser();
+                    if (self.user !== "") {
+                        self.isLoggedIn = true;
+                    }
+                    self.getOrgs();
                 };
-                
-                
+
                 self.login = function () {
                     var credentials = GithubService.setCredentials(self.user, self.password);
                     if (credentials.email !== "") {
                         self.isLoggedIn = true;
                     }
                 };
-                
+
                 self.setOrg = function () {
                     var ret = GithubService.setOrg(self.org);
                     if (ret !== null) {
@@ -34,43 +38,47 @@ angular.module('karamel.main')
                 };
 
                 self.getOrg = function () {
-                    return GithubService.getOrg();
+                    $scope.org = GithubService.getOrg();
                 };
 
                 self.getOrgs = function () {
-                    return GithubService.getOrgs();
+                    $scope.orgs = GithubService.getOrgs();
                 };
 
                 self.setRepo = function () {
                     var ret = GithubService.setRepo(self.repo);
                     if (ret !== null) {
                         self.isRepoSelected = true;
-                    }                    
-                };
-                
-                self.getRepo = function () {
-                    return GithubService.getRepo();
+                    }
                 };
 
+                self.getRepo = function () {
+                    $scope.repo = GithubService.getRepo();
+                };
+                
+                self.newRepo = function (name) {
+//                    GithubService.newRepo(name);
+                };
+na
                 self.getRepos = function () {
                     return GithubService.getRepos();
                 };
 
-                $scope.githubUser = function() {
+                $scope.githubUser = function () {
                     return self.user;
-                }
+                };
 
                 self.close = function () {
                     $modalInstance.dismiss('cancel');
                 };
-                
+
                 self.reset = function () {
                     return null;
                 };
-                
-                self.getEmailHash = function() {
+
+                self.getEmailHash = function () {
                     return GithubService.getEmailHash();
-                }
-                
+                };
+
                 self.profile();
             }]);

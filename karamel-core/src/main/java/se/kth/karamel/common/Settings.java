@@ -215,8 +215,9 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_URL = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_URL = File.separator + "Berksfile";
+  public static final String COOKBOOK_CONFIGFILE = "config.props";
   public static final String COOKBOOK_CONFIGFILE_REL_URL = File.separator + "templates" + File.separator
-      + "default" + File.separator + "config.props";
+      + "default" + File.separator + COOKBOOK_CONFIGFILE;
   public static final String COOKBOOK_EXP_RECIPE_REL_URL = File.separator + "recipes" + File.separator 
       + "experiment.rb";
 
@@ -227,7 +228,7 @@ public class Settings {
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
   public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
   public static final String CB_TEMPLATE_RECIPE_SLAVE = CB_TEMPLATE_PATH_ROOT + "recipe_slave";
-  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + "config.props";
+  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + COOKBOOK_CONFIGFILE;
   public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";
   public static final String CB_TEMPLATE_MASTER_SH = CB_TEMPLATE_PATH_ROOT + "master_sh";
   public static final String CB_TEMPLATE_SLAVE_SH = CB_TEMPLATE_PATH_ROOT + "slave_sh";

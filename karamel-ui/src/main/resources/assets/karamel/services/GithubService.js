@@ -14,8 +14,9 @@ angular.module('karamel.terminal')
                 };
 
                 self.orgs = [];
+//                self.orgs = {};
 
-                self.repos = [];
+                self.repos = {};
 
                 self.org = {
                     name: '',
@@ -69,7 +70,20 @@ angular.module('karamel.terminal')
                     getOrgs: function () {
                         KaramelCoreRestServices.getGithubOrgs()
                                 .success(function (data, status, headers, config) {
-                                    self.orgs = data.orgs;
+                                    $log.info("GitHub Orgs found: " + data.length);
+                            for (var i = 0, len = data.length; i < len; i++) {
+//                                self.orgs[i].name = data[i].name;
+//                                self.orgs[i].gravitar = data[i].gravitar;
+
+                                $log.info("GitHub Org: " + data[i]);
+                                $log.info("GitHub Org name: " + data[i].name);
+                                $log.info("GitHub Org name: " + data[i].gravitar);
+                                self.orgs[i] = {
+                                  name: data[i].name,
+                                  gravitar: data[i].gravitar
+                                };
+                            }
+//                                    self.orgs = data.orgs;
                                 })
                                 .error(function (data, status, headers, config) {
                                     $log.info("GitHub Orgs not found.");
@@ -110,6 +124,21 @@ angular.module('karamel.terminal')
                             }
                         }
                         return null;
+                    },
+
+                    createRepo: function (repo, description) {
+
+                        KaramelCoreRestServices.createGithubRepo(self.org.name, repo, description)
+                                .success(function (data, status, headers, config) {
+                                    self.repo.name = data.name;
+                                    self.repo.description = data.description;
+                                    self.repo.sslUrl = data.sslUrl;
+                                    $log.info("GitHub Repo created");
+                                })
+                                .error(function (data, status, headers, config) {
+                                    $log.info("GitHub Credentials not found.");
+                                });
+                        return self.githubCredentials;
                     },
                     getOrg: function () {
                         return self.org;
