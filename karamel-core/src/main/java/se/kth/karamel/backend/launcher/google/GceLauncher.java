@@ -239,8 +239,8 @@ public class GceLauncher extends Launcher {
           vmZone.put(gce.getZone(), vms);
         }
         for (MachineRuntime machine : group.getMachines()) {
-          if (machine.getVmId() != null) {
-            vms.add(machine.getVmId());
+          if (machine.getName() != null) {
+            vms.add(machine.getName());
           }
         }
       }
