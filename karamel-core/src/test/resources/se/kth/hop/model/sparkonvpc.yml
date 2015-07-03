@@ -2,7 +2,7 @@ name: sparkonvpc
 ec2:
     type: c4.large
     region: eu-west-1
-    image: ami-47a23a30
+    ami: ami-47a23a30
     vpc: vpc-f70ea392
     subnet: subnet-e7830290
 

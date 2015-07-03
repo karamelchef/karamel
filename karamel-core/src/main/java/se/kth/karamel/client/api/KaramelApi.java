@@ -28,16 +28,16 @@ public interface KaramelApi {
   public String commandCheatSheet() throws KaramelException;
 
   /**
-   * Parses the command, if valid fetches the result in string, result could have different formatting depends on the
-   * command.
-   *
+   * Parses the command, if valid fetches the result in string, result could have different 
+   * formatting depends on the command.
+   * 
    * @param command
    * @param args
    * @return
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public CommandResponse processCommand(String command, String... args) throws KaramelException;
-
+  
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
    *
@@ -65,7 +65,7 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String yamlToJson(String yaml) throws KaramelException;
-
+  
   /**
    * Loads Karamel common keys
    *
@@ -87,48 +87,43 @@ public interface KaramelApi {
 
   /**
    * Generates a common ssh keys in the karamel folder
-   *
    * @return
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
-
+  
   /**
    * Generates cluster specific ssh keys
-   *
    * @param clusterName
    * @return
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
    * Register ssh keys for the current runtime of karamel
-   *
    * @param keypair
-   * @return
-   * @throws KaramelException
+   * @return 
+   * @throws KaramelException 
    */
   public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
-
+  
   /**
    * Register ssh keys for the specified cluster
-   *
    * @param clusterName
    * @param keypair
-   * @return
-   * @throws KaramelException
+   * @return 
+   * @throws KaramelException 
    */
   public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file
-   *
    * @return
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
-
+  
   /**
    * Validates user's credentials before starting the cluster
    *
@@ -192,20 +187,20 @@ public interface KaramelApi {
    */
   public String getInstallationDag(String clusterName) throws KaramelException;
 
+  
   /**
    * Register password for Baremetal sudo account
-   *
    * @param password
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public void registerSudoPassword(String password) throws KaramelException;
-
+  
+  
   /**
    * Register username/password for github account
-   *
    * @param email github account name or email address
    * @param password github password
-   * @throws KaramelException
+   * @throws KaramelException 
    */
   public void registerGithubAccount(String email, String password) throws KaramelException;
 

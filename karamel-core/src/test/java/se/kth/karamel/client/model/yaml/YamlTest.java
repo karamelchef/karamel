@@ -40,7 +40,7 @@ public class YamlTest {
     assertTrue(cluster.getProvider() instanceof Ec2);
     Ec2 provider = (Ec2) cluster.getProvider();
     assertEquals("m1.small", provider.getType());
-    assertEquals("ami-0307ce74", provider.getImage());
+    assertEquals("ami-0307ce74", provider.getAmi());
     assertEquals("eu-west-1", provider.getRegion());
     assertEquals("ubuntu", provider.getUsername());
     assertEquals(0.1f, provider.getPrice());
