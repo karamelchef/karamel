@@ -1,15 +1,14 @@
-name: flinkgce
+name: bigspark
 gce:
   type: n1-standard-2
   zone: europe-west1-b
   image: ubuntu-1404-trusty-v20150316
-    
+
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-    branch: "master"
-  flink: 
-    github: "hopshadoop/flink-chef"
+  spark: 
+    github: "hopshadoop/spark-chef"
     branch: "master"
     
 groups: 
@@ -17,10 +16,12 @@ groups:
     size: 1
     recipes: 
         - hadoop::nn
-        - flink::jobmanager
-        - flink::wordcount
+        - hadoop::rm
+        - hadoop::jhs
+        - spark::master
   datanodes:
-    size: 2
+    size: 5
     recipes: 
         - hadoop::dn
-        - flink::taskmanager
+        - hadoop::nm
+        - spark::slave

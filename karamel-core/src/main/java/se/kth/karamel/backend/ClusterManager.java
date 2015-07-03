@@ -332,23 +332,37 @@ public class ClusterManager implements Runnable {
           case LAUNCH:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               clean(false);
+              ClusterStatistics.addTimeStat(
+                  ClusterRuntime.ClusterPhases.PRECLEANING.name(), ClusterStatistics.stopTimer());
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               forkGroups();
+              ClusterStatistics.addTimeStat(
+                  ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), ClusterStatistics.stopTimer());
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               forkMachines();
+              ClusterStatistics.addTimeStat(
+                  ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), ClusterStatistics.stopTimer());
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               install();
+              ClusterStatistics.addTimeStat(
+                  ClusterRuntime.ClusterPhases.INSTALLING.name(), ClusterStatistics.stopTimer());
             }
             break;
           case PURGE:
+            ClusterStatistics.startTimer();
             purge();
+            ClusterStatistics.addTimeStat(ClusterRuntime.ClusterPhases.PURGING.name(), ClusterStatistics.stopTimer());
             break;
         }
       } catch (java.lang.InterruptedException ex) {
