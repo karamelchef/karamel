@@ -6,7 +6,6 @@ angular.module('karamel.main')
                 var self = this;
 
                 $scope.githubRef = GithubService;
-
                 $scope.orgs = {};
                 $scope.githubUser= "";
                 $scope.orgName = "";
@@ -43,6 +42,12 @@ angular.module('karamel.main')
                 self.newExperiment = function (name, description) {
                     $scope.githubRef.repo.name = name;
                     $scope.githubRef.repo.description = description;
+                    self.experiment.url = "git@github.com:" + self.orgName 
+                            + "/" + $scope.repoName + ".git";
+                    self.experiment.user = self.repoName;
+                    self.experiment.group = self.repoName;
+                    self.experiment.githubRepo = self.repoName;
+                    self.experiment.githubOwner = self.orgName;
                 };
 
                 self.selectOrg = function (name) {
@@ -61,10 +66,10 @@ angular.module('karamel.main')
                     githubRepo: '',
                     githubOwner: '',
                     experimentContext: [
-                        {scriptContents: '',
+                        {   scriptContents: '',
                             defaultAttributes: '',
                             preScriptChefCode: '',
-                            scriptType: ''
+                            scriptType: 'bash'
                         }
                     ]
                 };
