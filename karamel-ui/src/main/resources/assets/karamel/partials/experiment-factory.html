@@ -1,0 +1,100 @@
+
+<div class="modal-header">
+    <button class="close" ng-click="newExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
+    <h2 class="modal-title">New Experiment</h2>
+</div>
+<div class="modal-body" id="experimentFactoryModal">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="form-group">
+                <label class="control-label">GitHub User: {{githubUser}} </label>
+                <label class="control-label">GitHub User 2: {{githubRef.githubCredentials.user}} </label>
+            </div>  
+        </div>
+        <div class = "row" >
+            <div class = "form-group col-xs-3 col-sm-3 col-md-3" >
+                <p> Organization: <b>{{orgName}}</b> </p>
+                <p> Organization 2: <b>{{githubRef.org.name}}</b> </p>
+            </div>
+        </div>
+        <div class = "row" >
+            <div class="form-group col-xs-9 col-sm-9 col-md-9">
+                <label class="control-label">Select a Github Organization</label>
+            </div>
+        </div>
+        <div class = "row" >
+            <div class="form-group col-xs-9 col-sm-9 col-md-9 vcenter text-center">
+                <ul class="example-animate-container">
+                    <li class="animate-repeat" style="list-style-type: none;">
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-default" ng-click="selectOrg(githubRef.githubCredentials.user)">
+                                {{githubRef.githubCredentials.user}} 
+                            </button></div>
+                        <!--                            <div class="col-md-1" ng-click="selectOrg(org.name)">
+                                                        <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
+                                                             ng-src="{{ org.gravitar}}"/>
+                                                    </div>-->
+                    </li>
+
+                    <li class="animate-repeat" ng-repeat="org in orgs" style="list-style-type: none;">
+                        
+                        <div class="col-md-2">
+                          <button type="button" class="btn btn-default" ng-click="selectOrg(org.name)">{{org.name}}</button></div>
+                        </div>
+<!--                        <div class="col-md-1" ng-click="selectOrg(org.name)">
+                            <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
+                                 ng-src="{{ org.gravitar}}"/>
+                        </div>-->
+                    </li>
+                    <li class="animate-repeat" ng-if="results.length == 0">
+                        <strong>No orgs found...</strong>
+                    </li>
+                </ul>                    
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="form-group col-xs-4 col-sm-4 col-md-4">
+                <div class = "row" >
+                    <label for="newRepo" class="control-label">Repository Name</label>
+                </div>
+                <div class = "row" >
+                    <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repo" 
+                           ng-model="repoName" class="form-control" type="text" tabindex="4">
+                </div>
+            </div>
+        </div> 
+        <div class="row">
+            <div class="form-group col-xs-6 col-sm-6 col-md-6" >    
+                <div class = "row" >
+                    <label for="repoDesc" class="control-label">Repository Description</label>
+                </div>
+                <div class = "row" >
+
+                    <textarea id="repoDesc" style="width:80%; float:left;" ng-model="githubRef.repo.description" placeholder="Enter a description for the new experiment"  tabindex="5"  class="form-control "></textarea>
+                    <!--                    <a href="#" editable-textarea="githubRef.repo.description" e-rows="5" e-cols="40">
+                                            <pre>{{ githubRef.repo.description || 'no description' }}</pre>
+                                        </a>-->
+                </div>
+            </div> 
+        </div> 
+        <div class="row">
+            <div class="form-group col-xs-6 col-sm-6 col-md-6" >    
+                <button for="newRepo" type="button" class="btn btn-default" ng-click="newExperiment()" tabindex="3">Create New Experiment</button>
+            </div>                
+        </div>                
+    </div>
+
+
+
+</div>
+
+
+<!--<div class="modal-footer" id="profileFooter">
+    <div class="row pull-left">
+        Select your repo.
+    </div>
+</div>-->
+

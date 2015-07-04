@@ -152,14 +152,11 @@
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
           $.param({ "experimentUrl" : experimentUrl }));
         },        
-        pushExperiment: function(experimentJson) {
+        pushExperiment: function(experimentContext) {
           var method = 'PUT';
           var url = _defaultHost.concat("/pushExperiment");
-          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "owner" : owner, "repo" : repo, "description" : description}));          
-          
-          return _getPromiseObject(method, url, _defaultContentType, experimentJson);
-        },        
+          return _getPromiseObject(method, url, _defaultContentType, experimentContext);
+        },
         processCommand: function(commandName) {
           var method = 'PUT';
           var url = _defaultHost.concat("/processCommand");

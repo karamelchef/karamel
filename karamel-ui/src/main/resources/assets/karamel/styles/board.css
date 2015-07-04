@@ -378,3 +378,48 @@ textarea[name="pubkey"]{
   margin-bottom: -4px;
   height: 10px;
 }
+
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+
+.jumboNarrow {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.app-modal-window .modal-dialog {
+  width: 1000px;
+}
+
+#promos{
+    position: relative;
+    margin: 10px 5px 10px 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    width:150px;
+    height:80px;
+    /*background-color: #fff;*/
+    border-style:solid;
+    border-width:1px;
+    border-color: #cacaca;
+/*    -moz-box-shadow: 0 0 4px #dadada;
+    -webkit-box-shadow: 0 0 4px#dadada;
+    box-shadow: 0 0 3px #dadada;*/
+}
+
+.promoinside{
+    position: absolute;
+    margin: 3px 4px 4px 3px;
+    width: 219px;
+    height: 154px;
+    /*background: #f5f5f5;*/
+    background: transparent !important; 
+    /*background:-webkit-gradient(linear, left top, left bottom, from(#fafafa), to(#eeeeee));     background: -moz-linear-gradient(top, #fafafa, #eeeeee);*/ 
+}
+
+.promoinside:hover{
+    background: #fbfbfb;
+}

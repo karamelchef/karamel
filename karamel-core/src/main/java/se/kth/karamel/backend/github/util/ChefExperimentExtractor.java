@@ -44,9 +44,7 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 public class ChefExperimentExtractor {
 
   // <AttrName, AttrValue> pair added to attributes/default.rb 
-  private static final Map<String, String> defaultAttrs = new HashMap<>();
-  // <AttrName, AttrValue> pair added to metadata.rb 
-  private static final Map<String, String> metadataAttrs = new HashMap<>();
+  private static final Map<String, String> attrs = new HashMap<>();
 
   /**
    * Parses all scripts and config files and outputs to metadata.rb and attributes/default.rb the configuration values
@@ -60,8 +58,7 @@ public class ChefExperimentExtractor {
   public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
       throws KaramelException {
 
-    defaultAttrs.clear();
-    metadataAttrs.clear();
+    attrs.clear();
     // Add recipeNames to metadata.rb
     Set<String> recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
@@ -75,8 +72,7 @@ public class ChefExperimentExtractor {
       while (m.find()) {
         String name = m.group(1);
         String value = m.group(2);
-        defaultAttrs.put(name, value);
-        metadataAttrs.put(name, value);
+        attrs.put(name, value);
       }
     }
 
@@ -91,23 +87,35 @@ public class ChefExperimentExtractor {
           "http_binaries", experiment.getUrl()
       );
 
-      for (String key : defaultAttrs.keySet()) {
-        String entry = "default[:" + repoName + "][:" + key + "] = \"" + defaultAttrs.get(key) + "\"";
+      for (String key : attrs.keySet()) {
+        String entry = "default[:" + repoName + "][:" + key + "] = \"" + attrs.get(key) + "\"";
         defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
 
+      StringBuilder config_props = CookbookGenerator.instantiateFromTemplate(
+          Settings.CB_TEMPLATE_CONFIG_PROPS,
+          "name", repoName,
+          "user", experiment.getUser(),
+          "group", experiment.getGroup(),
+          "http_binaries", experiment.getUrl()
+      );
+      for (String key : attrs.keySet()) {
+        String entry = key + " = " + attrs.get(key);
+        config_props.append(entry).append(System.lineSeparator());
+      }
+      
+      // TODO: jim - resolve_ips
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_METADATA,
-          "name", repoName,
-          "user", owner,
-          "email", email
+          "resolve_ips", "",
+          "ip_params", ""
       );
       for (String recipe : recipeNames) {
         String entry = "recipe \"" + repoName + "::" + recipe + "\", \"Executes experiment as "
             + experiments.get(recipe).getScriptType() + " script.\"";
         metadata_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
       }
-      for (String key : metadataAttrs.keySet()) {
+      for (String key : attrs.keySet()) {
         String entry = "attribute \"" + repoName + "/" + key + "\"," + System.lineSeparator()
             + ":description => \"" + key + " parameter value\"," + System.lineSeparator()
             + ":type => \"string\"";
@@ -117,6 +125,7 @@ public class ChefExperimentExtractor {
       // 3. write them to files and push to github
       Github.addFile(owner, repoName, "attributes/default.rb", defaults_rb.toString());
       Github.addFile(owner, repoName, "metadata.rb", metadata_rb.toString());
+      Github.addFile(owner, repoName, "templates/defaults/config.props.erb", config_props.toString());
 
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
@@ -189,7 +198,7 @@ public class ChefExperimentExtractor {
         );
         // Replace all parameters with chef attribute values
         String recipeContents = recipe_rb.toString();
-        for (String attr : defaultAttrs.keySet()) {
+        for (String attr : attrs.keySet()) {
           recipeContents = recipeContents.replaceAll("%%" + attr + "%%", "#{node[:" + repoName + "][:" + attr + "]}");
         }
 

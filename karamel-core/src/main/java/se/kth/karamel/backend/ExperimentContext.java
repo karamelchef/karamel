@@ -45,7 +45,7 @@ public class ExperimentContext {
   
   private String githubOwner = "";
   
-  private String attributes = "";
+//  private String attributes = "";
   
   
   @XmlRootElement
@@ -203,12 +203,4 @@ public class ExperimentContext {
     this.description = description;
   }
 
-  public String getAttributes() {
-    return attributes;
-  }
-
-  public void setAttributes(String attributes) {
-    this.attributes = attributes;
-  }
-  
 }

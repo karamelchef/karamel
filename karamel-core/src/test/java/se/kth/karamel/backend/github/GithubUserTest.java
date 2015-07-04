@@ -218,8 +218,6 @@ public class GithubUserTest {
           + "        - ndb::mysqld\n"
           + "        - ndb::memcached"
       );
-      ec.setAttributes("default[:hops][:user] = jim \n"
-          + " default[:hops][:group] = jim");
       
       api.commitAndPushExperiment("karamelchef", "test", ec);
 

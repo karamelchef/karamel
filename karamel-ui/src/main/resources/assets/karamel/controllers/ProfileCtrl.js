@@ -1,8 +1,8 @@
 'use strict'
 
 angular.module('karamel.main')
-        .controller('ProfileCtrl', ['$scope', '$log', '$modalInstance', 'GithubService',
-            function ($scope, $log, $modalInstance, GithubService) {
+        .controller('ProfileCtrl', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
+            function ($scope, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
                 var self = this;
                 self.isLoggedIn = false;
                 self.isOrgSelected = false;
@@ -11,8 +11,12 @@ angular.module('karamel.main')
                 self.user = '';
                 self.password = '';
                 $scope.githubService = GithubService;
-               
-                $scope.orgs = {};
+
+//                $scope.orgs = {};
+
+                self.load = function () {
+                    GithubService.loadExperiment(self.experimentUrl);
+                };
 
                 self.profile = function () {
                     GithubService.getCredentials();
@@ -20,7 +24,7 @@ angular.module('karamel.main')
                     if (self.user !== "") {
                         self.isLoggedIn = true;
                     }
-                    self.getOrgs();
+//                    self.getOrgs();
                 };
 
                 self.login = function () {
@@ -30,20 +34,20 @@ angular.module('karamel.main')
                     }
                 };
 
-                self.setOrg = function () {
-                    var ret = GithubService.setOrg(self.org);
-                    if (ret !== null) {
-                        self.isOrgSelected = true;
-                    }
-                };
+//                self.setOrg = function () {
+//                    var ret = GithubService.setOrg(self.org);
+//                    if (ret !== null) {
+//                        self.isOrgSelected = true;
+//                    }
+//                };
 
-                self.getOrg = function () {
-                    $scope.org = GithubService.getOrg();
-                };
-
-                self.getOrgs = function () {
-                    $scope.orgs = GithubService.getOrgs();
-                };
+//                self.getOrg = function () {
+//                    $scope.org = GithubService.getOrg();
+//                };
+//
+//                self.getOrgs = function () {
+//                    $scope.orgs = GithubService.getOrgs();
+//                };
 
                 self.setRepo = function () {
                     var ret = GithubService.setRepo(self.repo);
@@ -55,11 +59,8 @@ angular.module('karamel.main')
                 self.getRepo = function () {
                     $scope.repo = GithubService.getRepo();
                 };
-                
-                self.newRepo = function (name) {
-//                    GithubService.newRepo(name);
-                };
-na
+
+
                 self.getRepos = function () {
                     return GithubService.getRepos();
                 };
@@ -79,6 +80,20 @@ na
                 self.getEmailHash = function () {
                     return GithubService.getEmailHash();
                 };
+
+//                self.loadExperiment = function (sshUrl) {
+//
+//                    KaramelCoreRestServices.loadExperiment(sshUrl)
+//                            .success(function (data, status, headers, config) {
+//                                self.experiment = data.experiment;
+//                                $log.info("GitHub Experiment Loaded");
+//                            })
+//                            .error(function (data, status, headers, config) {
+//                                $log.info("GitHub Credentials not found.");
+//                            });
+//                    return self.githubCredentials;
+//                };
+
 
                 self.profile();
             }]);
