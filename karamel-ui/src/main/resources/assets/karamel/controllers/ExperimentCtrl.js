@@ -6,11 +6,11 @@ angular.module('karamel.main')
 
                 var self = this;
                 self.isExpLoaded = false;
-                
+
                 $scope.githubStatus = GithubService;
-                
+
                 self.load = true;
-                
+
                 $scope.status = {
                     isopen: false
                 };
@@ -21,8 +21,25 @@ angular.module('karamel.main')
                 };
 
                 $scope.experimentFactoryModal = function () {
-                    $log.info("New experiment profile loading.");
-                    ModalService.experimentFactory('lg');
+                    $log.info("New experiment...");
+                    ModalService.experimentFactory('lg').then(
+                            function (success) {
+                                $log.info("new experiment modal success ...");
+                                self.isExpLoaded = true;
+                            }).then(
+                            function (experiment) {
+                                $log.info("new experiment modal experiment results ...");
+                                self.experiment.url = experiment.url;
+                                self.experiment.user = experiment.repoName;
+                                self.experiment.group = experiment.repoName;
+                                self.experiment.githubRepo = experiment.repoName;
+                                self.experiment.githubOwner = experiment.orgName;
+                                self.experiment.experimentContext.scriptContents = experiment.experimentContext.scriptContents;
+                                self.experiment.experimentContext.preScriptChefCode = experiment.experimentContext.preScriptChefCode;
+                                self.experiment.experimentContext.defaultAttributes = experiment.experimentContext.defaultAttributes;
+                                self.experiment.experimentContext.scriptType = experiment.experimentContext.scriptType;
+                            });
+
                     // experimentContext = ret.experimentContext;
                 };
 
@@ -57,14 +74,14 @@ angular.module('karamel.main')
                     githubRepo: '',
                     githubOwner: '',
                     experimentContext: [
-                        { scriptContents: '',
-                          defaultAttributes: '',
-                          preScriptChefCode: '',
-                          scriptType: ''
+                        {scriptContents: '',
+                            defaultAttributes: '',
+                            preScriptChefCode: '',
+                            scriptType: ''
                         }
                     ]
                 };
-                
+
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
                     GithubService.getCredentials();
@@ -75,44 +92,45 @@ angular.module('karamel.main')
                             .success(function (data, status, headers, config) {
 //                                $scope.experimentContext = data;
                                 $log.info("Experiment Loaded Successfully.");
+                                self.isExpLoaded = true;
                             })
                             .error(function (data, status, headers, config) {
                                 $log.info("Experiment can't be Loaded.");
                             });
 
                 }
-                
+
                 $scope.pushExperiment = function pushExperiment() {
-                    
-          SweetAlert.swal({
-            title: "Commit and Push Experiment to GitHub?",
-            text: "This requires a functioning Internet connection. The Experiment will generate a commit and push to the master branch of your GitHub repository.",
-            type: "info",
-            showCancelButton: true,
-            confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, push it!",
-            cancelButtonText: "Cancel",
-            closeOnConfirm: false,
-            closeOnCancel: false},
-          function(isConfirm) {
 
-            if (isConfirm) {
-                    KaramelCoreRestServices.pushExperiment(experimentContext)
-                            .success(function (data, status, headers, config) {
+                    SweetAlert.swal({
+                        title: "Commit and Push Experiment to GitHub?",
+                        text: "This requires a functioning Internet connection. The Experiment will generate a commit and push to the master branch of your GitHub repository.",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, push it!",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: false,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+
+                        if (isConfirm) {
+                            KaramelCoreRestServices.pushExperiment(experimentContext)
+                                    .success(function (data, status, headers, config) {
 //                                $scope.experimentContext = data;
-                              SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
-                                $log.info("Experiment Pushed Successfully.");
-                            })
-                            .error(function (data, status, headers, config) {
-                                $log.info("Experiment can't be Pushed.");
-                            });
+                                        SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
+                                        $log.info("Experiment Pushed Successfully.");
+                                    })
+                                    .error(function (data, status, headers, config) {
+                                        $log.info("Experiment can't be Pushed.");
+                                    });
 
-              } else {
-              SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
-            }
-          });
-                    
-                    
-                    
+                        } else {
+                            SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
+                        }
+                    });
+
+
+
 
                 }
 

@@ -30,7 +30,7 @@ angular.module('karamel.main')
                         });
                         return modalInstance.result;
                     },
-                    experimentFactory: function (size) {
+                    experimentFactory: function (size, experiment) {
                         var modalInstance = $modal.open({
                             templateUrl: 'karamel/partials/experiment-factory.html',
                             controller: 'NewExperimentCtrl as newExperimentCtrl',
@@ -44,6 +44,10 @@ angular.module('karamel.main')
 //                                orgName: function () {
 //                                    return githubService.org.name;
 //                                }
+                                experiment: function () {
+                                    return experiment;
+                                }
+
                             }
                         });
                         return modalInstance.result;

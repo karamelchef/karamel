@@ -1,8 +1,8 @@
 'use strict'
 
 angular.module('karamel.main')
-        .controller('NewExperimentCtrl', ['$scope', '$log', '$modalInstance', 'GithubService',
-            function ($scope, $log, $modalInstance, GithubService) {
+        .controller('NewExperimentCtrl', ['$scope', '$log', '$modalInstance', 'GithubService', 'experiment',
+            function ($scope, $log, $modalInstance, GithubService, experiment) {
                 var self = this;
 
                 $scope.githubRef = GithubService;
