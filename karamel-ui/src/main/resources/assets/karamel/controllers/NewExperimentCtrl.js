@@ -5,11 +5,12 @@ angular.module('karamel.main')
             function ($scope, $log, $modalInstance, GithubService, experiment) {
                 var self = this;
 
-                $scope.githubRef = GithubService;
+                $scope.githubService = GithubService;
                 $scope.orgs = {};
                 $scope.githubUser= "";
                 $scope.orgName = "";
                 $scope.repoName = "";
+                $scope.repoDesc = "";
 
                 self.setOrg = function (name) {
                     GithubService.setOrg(name);
@@ -31,7 +32,11 @@ angular.module('karamel.main')
                     $scope.repoName = GithubService.getRepoName();
                 };
 
-                self.close = function () {
+                self.close = function (feedback) {
+                    $modalInstance.close(feedback);
+                };
+                
+                self.cancel = function () {
                     $modalInstance.dismiss('cancel');
                 };
 
@@ -39,15 +44,17 @@ angular.module('karamel.main')
                     return null;
                 };
 
-                self.newExperiment = function (name, description) {
-                    $scope.githubRef.repo.name = name;
-                    $scope.githubRef.repo.description = description;
+                self.newExperiment = function () {
+
+                    $log.info("new experiment executed ...");
+                    GithubService.newRepo(self.repoName, self.repoDesc);
                     self.experiment.url = "git@github.com:" + self.orgName 
                             + "/" + $scope.repoName + ".git";
                     self.experiment.user = self.repoName;
                     self.experiment.group = self.repoName;
                     self.experiment.githubRepo = self.repoName;
                     self.experiment.githubOwner = self.orgName;
+                    self.close(self.experiment);
                 };
 
                 self.selectOrg = function (name) {

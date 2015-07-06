@@ -128,29 +128,48 @@
             </div>
     
         </div>-->
-    <div class="row col-xs-6 col-sm-12 col-md-12 col-lg-12" ng-show="experimentCtrl.isExpLoaded">
+    <div class="row col-xs-6 col-sm-12 col-md-12 col-lg-12" ng-show="isExpLoaded">
 
     
         <div class="row">
             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
                 <label class="control-label">Experiment Name: </label>{{experiment.repoName}}
             </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <button ng-click="toggleIsBinary()">Run experiment from a binary distribution</button>
+            </div>
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <button ng-click="toggleIsSource()">Build an experiment from source</button>
+            </div>
+        </div>
+
+        <div class="row" ng-show="isBinary">
             <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
                 <label class="control-label">Github URL: </label>{{experiment.url}}
             </div>
         </div>
+        
+        <div class="row" ng-show="isSource">
+            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
+                <label class="control-label">Select programming language (java-maven/python/other).</label> Dropdown list here. Update preChefScript with packages for git, jdk, maven, etc
+            </div>
+        </div>
+
         <div class="row">
             <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                 <div class="form-group">
                     <label class="control-label">Username</label>
-                    <input name="user" ng-model="profileCtrl.experiment.user" class="form-control "
+                    <input name="user" ng-model="experiment.user" class="form-control "
                            type="text" tabindex="4">
                 </div>
             </div>
             <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                 <div class="form-group">
                     <label class="control-label">Group</label>
-                    <input name="text" ng-model="profileCtrl.experiment.group" class="form-control "
+                    <input name="text" ng-model="experiment.group" class="form-control "
                            type="text" tabindex="4">
                 </div>
             </div>
@@ -168,20 +187,20 @@
         <div class="row form-group">
             <label for="textareaEdit" class="text">Experiment Setup Chef/Ruby</label>
             <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.preScriptChefCode" e-rows="100" e-cols="80">
-                <pre>{{ profileCtrl.experiment.experimentContext.scriptContents || 'Enter Chef setup code (called before experiment script).' }}</pre>
+                <pre>{{ experiment.experimentContext.scriptContents || 'Enter Chef setup code (called before experiment script).' }}</pre>
             </a>
         </div>
         <div class="row form-group">
             <label for="textareaEdit" class="text">Config File</label>
             <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.scriptContents" e-rows="100" e-cols="80">
-                <pre>{{ profileCtrl.experiment.experimentContext.defaultAttributes || 'Properties file. Line-separated \"key=value\" pairs' }}</pre>
+                <pre>{{ experiment.experimentContext.defaultAttributes || 'Properties file. Line-separated \"key=value\" pairs' }}</pre>
             </a>
 
         </div>
         <div class="row form-group">
             <label for="textareaEdit" class="text">Experiment Script</label>
             <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.scriptContents" e-rows="100" e-cols="80">
-                <pre>{{ profileCtrl.experiment.experimentContext.scriptContents || 'Enter bash/perl/php/ruby code here.' }}</pre>
+                <pre>{{ experiment.experimentContext.scriptContents || 'Enter bash/perl/php/ruby code here.' }}</pre>
             </a>
 
         </div>

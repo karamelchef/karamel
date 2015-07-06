@@ -168,7 +168,11 @@ angular.module('karamel.terminal')
                     },
                     getUser: function () {
                         return self.githubCredentials.user;
+                    },
+                    setOrgName: function (name) {
+                        self.org.name = name;
                     }
+
                 }
 
             }]);
