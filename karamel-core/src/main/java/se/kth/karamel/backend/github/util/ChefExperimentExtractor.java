@@ -100,7 +100,8 @@ public class ChefExperimentExtractor {
           "http_binaries", experiment.getUrl()
       );
       for (String key : attrs.keySet()) {
-        String entry = key + " = " + attrs.get(key);
+//        String entry = key + " = " + attrs.get(key);
+        String entry = key + " = <%= node[:" + repoName + "][:" + key + "] %>";
         config_props.append(entry).append(System.lineSeparator());
       }
       
