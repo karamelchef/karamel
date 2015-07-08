@@ -1,65 +1,16 @@
 <div class="container" style="width: 100%;">
 
-    <!--    
-    <label>Script Type</label>
-            <button type="button" class="btn btn-default" ng-model="ExperimentCtrl.selectedIcon" data-html="1" bs-options="icon.value as icon.label for icon in icons" bs-select>
-                Action <span class="caret"></span>    
-            </button>-->
 
-    <!--<p><a href data-animation="am-flip-x" bs-tooltip="tooltip">Experiment.</a></p>-->
-
-
-
-
-    <!--    <div class="form-group col-xs-6">
-                <span class="input-group-btn">
-                    <button class="btn btn-sm btn-info" ng-click="loadExperiment()" tabindex="1" bs-tooltip>Load Experiment</button>
-                </span>
-                <input type="text" class="form-control" data-placement="right" data-type="info" placeholder="https://github.com/.repo/experimentName" ng-model="ExperimentCtrl.githubRepoUrl" tabindex="2">
-        </div>
-    
-    
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h4 class="panel-title">
-                    <a href="#" ng-click="preScriptChefCollapsed = !preScriptChefCollapsed">
-                        Pre-script Chef Code
-                    </a>
-                </h4>
-            </div>
-            <div collapse="preScriptChefCollapsed">
-                <div class="panel-body">My experiment setup Chef code.
-                </div>
-            </div>
-        </div>-->
-
-
-    <!--    <div class="btn-group" dropdown is-open="status.isopen">
-            <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
-                Experiment<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="#">New Experiment</a></li>
-                <li><button type="button" class="btn btn-default btn-sm" ng-click="loading = true">Load Experiment</button></li>
-            </ul>
-        </div>
-    
-        <div class="btn-group" dropdown is-open="status.isopen">
-            <button type="button" class="btn btn-primary dropdown-toggle" dropdown-toggle>
-                Github Account<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="#">Login Github</a></li>
-            </ul>
-        </div>-->
-
-    <div class="row">
+    <div class="row" ng-show="landing">
 
         <!--<div growl class="pull-right"></div>-->
         <div class="col-xs-1 col-sm-1 col-md-1">
             <div class="row">
-                <label style="margin-left: 10px;" for="githubId" class="text-muted" ng-show="githubStatus.githubCredentials.email === ''"> Github Login</label>
-                <label style="margin-left: 10px;" for="githubId" class="text-muted" ng-show="githubStatus.githubCredentials.email != ''"> Logged in</label>
+                <label style="margin-left: 10px;" for="githubId" class="text-muted" ng-show="getEmail === ''"> Github Login</label>
+                <label style="margin-left: 10px;" for="githubId" class="text-muted" ng-show="getEmail != ''"> Logged in: {{getEmail}}</label>
+            </div>   
+            <div class="row">
+                <label style="margin-left: 10px;" for="githubId" class="text-muted" ng-show="getOrg != ''"> Organization: {{getOrg}}</label>
             </div>   
             <div class="row">
                 <img src="http://gravatar.com/avatar/{{getEmailHash()}}?d=mm" ng-click="profileModal()" tabindex="1" id="githubId"
@@ -101,115 +52,118 @@
     </div>
 
 
-    <!--                <div class="row">
-                        <div class="col-md-6">
-                            <label for="expName" class="text-muted">Github Clone URL</label>
-                        </div>
-                    </div>-->
-
-
-    <!--<button type="button" class="btn btn-primary" ng-click="profileModal()">Click</button>-->
-
-    <!--    <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
-    
-            <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
-                <div class="form-group">
-                    <label class="text-muted">Github Ssh Url for Experiment Repository</label>
-                    <input name="password" placeholder="git@github.com:hopshadoop/spark-chef.git" 
-                           ng-model="profileCtrl.experiment.url" class="form-control "
-                           type="text" tabindex="4">
-                </div>
-    
-            </div>
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-left">
-                <div class="form-group">    
-                    <button type="button" class="btn btn-default" ng-click="loadExperiment()" tabindex="2">Load</button>
-                </div>                
-            </div>
-    
-        </div>-->
     <div class="row col-xs-6 col-sm-12 col-md-12 col-lg-12" ng-show="isExpLoaded">
+        <form name="uploadExperiment" ng-submit="pushExperiment()" editable-form novalidate>    
 
-    
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <label class="control-label">Experiment Name: </label>{{experiment.repoName}}
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <button ng-click="toggleIsBinary()">Run experiment from a binary distribution</button>
-            </div>
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                <button ng-click="toggleIsSource()">Build an experiment from source</button>
-            </div>
-        </div>
 
-        <div class="row" ng-show="isBinary">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
-                <label class="control-label">Github URL: </label>{{experiment.url}}
-            </div>
-        </div>
-        
-        <div class="row" ng-show="isSource">
-            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
-                <label class="control-label">Select programming language (java-maven/python/other).</label> Dropdown list here. Update preChefScript with packages for git, jdk, maven, etc
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                <div class="form-group">
-                    <label class="control-label">Username</label>
-                    <input name="user" ng-model="experiment.user" class="form-control "
-                           type="text" tabindex="4">
-                </div>
-            </div>
-            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                <div class="form-group">
-                    <label class="control-label">Group</label>
-                    <input name="text" ng-model="experiment.group" class="form-control "
-                           type="text" tabindex="4">
-                </div>
-            </div>
-        </div>
-        
-        <div class="row col-lg-4">
             <div class="row">
-                <label>Script Type</label>
-                <button type="button" class="btn btn-default" ng-model="experiment.experimentContext.scriptType" data-html="1" bs-options="scriptType as icon.label for icon in icons" bs-select>
-                    Action <span class="caret"></span>    
-                </button>
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <label class="control-label" for="experimentName">Experiment Name:</label>
+                    <input type="text" placeholder="Experiment Name" name="experimentName" ng-model="experiment.githubRepo" required>
+                </div>
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <span ng-show="experimentNameInvalid">Enter a valid Experiment Name.</span>                    
+                </div>
             </div>
-        </div>
+            <br/>
+            
+            <div class="row">
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <label class="control-label" for="githubOwner">Github Organization.</label>
+                    <input type="text" placeholder="Github Path" name="githubOwner" ng-model="experiment.githubOwner" required>
+                </div>
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <span ng-show="experimentNameInvalid">Enter a valid Github Organization for {{getEmail()}}</span>
+                </div>
+            </div>
+            <br/>
+            <div class="row">
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <button ng-click="toggleIsBinary()">Run experiment from a binary distribution</button>
+                </div>
+                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"/>
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <button ng-click="toggleIsSource()">Build an experiment from source</button>
+                </div>
+            </div>
+            <br/>
 
-        <div class="row form-group">
-            <label for="textareaEdit" class="text">Experiment Setup Chef/Ruby</label>
-            <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.preScriptChefCode" e-rows="100" e-cols="80">
-                <pre>{{ experiment.experimentContext.scriptContents || 'Enter Chef setup code (called before experiment script).' }}</pre>
-            </a>
-        </div>
-        <div class="row form-group">
-            <label for="textareaEdit" class="text">Config File</label>
-            <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.scriptContents" e-rows="100" e-cols="80">
-                <pre>{{ experiment.experimentContext.defaultAttributes || 'Properties file. Line-separated \"key=value\" pairs' }}</pre>
-            </a>
+            <div class="row" ng-show="isBinary || isSource">
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
+                    <label class="control-label">Github URL: </label>{{experiment.url}}
+                </div>
+            </div>
 
-        </div>
-        <div class="row form-group">
-            <label for="textareaEdit" class="text">Experiment Script</label>
-            <a href="#" editable-textarea="profileCtrl.experiment.experimentContext.scriptContents" e-rows="100" e-cols="80">
-                <pre>{{ experiment.experimentContext.scriptContents || 'Enter bash/perl/php/ruby code here.' }}</pre>
-            </a>
+            <br/>
+            <div class="row" ng-show="isSource">
+                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
+                    <select name="sourceType" ng-model="scriptType"
+                            ng-options="obj.label as obj.value for obj in scriptTypes">
+                            <option value="">Select a source code distribution type</option>
+                    </select>
+                </div>
+            </div>
 
-        </div>
+            <br/>
+            <div class="row">
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <div class="form-group">
+                        <label class="control-label">Username</label>
+                        <input name="user" ng-model="experiment.user" class="form-control "
+                               type="text" tabindex="4" required>
+                    </div>
+                </div>
+                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"/>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <div class="form-group">
+                        <label class="control-label">Group</label>
+                        <input name="text" ng-model="experiment.group" class="form-control "
+                               type="text" tabindex="4" required>
+                    </div>
+                </div>
+            </div>
 
-        <div class="row form-group col-lg-4">    
-            <button type="button" class="btn btn-default" ng-click="pushExperiment()" tabindex="2">Upload</button>
-        </div>                
-        
+            <br/>
+            <div class="row col-lg-4">
+                    <select name="scriptTypes" ng-model="scriptTypes"
+                            ng-options="obj.value as obj.label for obj in scriptTypes">
+                        <option value="">Select script type for your experiment.</option>
+                    </select>                    
+<!--                    <label>Script Type</label>
+                    <button type="button" class="btn btn-default" ng-model="experiment.experimentContext.scriptType" data-html="1" bs-options="scriptType as icon.label for icon in icons" bs-select>
+                        Action <span class="caret"></span>    
+                    </button>-->
+            </div>
+            <br/>
+
+            <div class="row form-group">
+                <label for="textareaEdit" class="text">Experiment Setup Chef/Ruby</label>
+                <a href="#" editable-textarea="experiment.experimentContext.preScriptChefCode" e-rows="20" e-cols="40">
+                    <pre>{{ experiment.experimentContext.scriptContents || 'Enter Chef setup code (called before experiment script).' }}</pre>
+                </a>
+            </div>
+            <div class="row form-group">
+                <label for="textareaEdit" class="text">Config File</label>
+                <a href="#" editable-textarea="experiment.experimentContext.scriptContents" e-rows="20" e-cols="40">
+                    <pre>{{ experiment.experimentContext.defaultAttributes || 'Properties file. Line-separated \"key=value\" pairs' }}</pre>
+                </a>
+
+            </div>
+            <div class="row form-group">
+                <label for="textareaEdit" class="text">Experiment Script</label>
+                <a href="#" editable-textarea="experiment.experimentContext.scriptContents" e-rows="20" e-cols="40">
+                    <pre>{{ experiment.experimentContext.scriptContents || 'Enter bash/perl/php/ruby code here.' }}</pre>
+                </a>
+
+            </div>
+            <br/>
+
+            <div class="row form-group col-lg-4">    
+                <input type="submit" class="btn btn-primary" value="Push Experiment to Github" tabindex="9"/>
+<!--                <button type="button" class="btn btn-default" ng-click="pushExperiment()" tabindex="2">Upload</button>-->
+            </div>                
+
+
+        </form>
     </div>    
-
-
 </div>

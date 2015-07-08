@@ -9,14 +9,17 @@
 
         <div class="row">
             <div class="form-group">
-                <label class="control-label">GitHub User: {{githubUser}} </label>
-                <label class="control-label">GitHub User 2: {{githubService.githubCredentials.user}} </label>
+                <label class="control-label">GitHub User: {{user}} </label>
+            </div>  
+        </div>
+        <div class="row">
+            <div class="form-group">
+                <label class="control-label">GitHub Email: {{email}} </label>
             </div>  
         </div>
         <div class = "row" >
             <div class = "form-group col-xs-3 col-sm-3 col-md-3" >
                 <p> Organization: <b>{{orgName}}</b> </p>
-                <p> Organization 2: <b>{{githubService.org.name}}</b> </p>
             </div>
         </div>
         <div class = "row" >
@@ -29,8 +32,8 @@
                 <ul class="example-animate-container">
                     <li class="animate-repeat" style="list-style-type: none;">
                         <div class="col-md-2">
-                            <button type="button" class="btn btn-default" ng-click="selectOrg(githubService.githubCredentials.user)">
-                                {{githubService.githubCredentials.user}} 
+                            <button type="button" class="btn btn-default" ng-click="selectOrg(user)">
+                                {{user}} 
                             </button></div>
                         <!--                            <div class="col-md-1" ng-click="selectOrg(org.name)">
                                                         <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
@@ -62,7 +65,7 @@
                 </div>
                 <div class = "row" >
                     <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repo" 
-                           ng-model="newExperimentCtrl.repoName" class="form-control" type="text" tabindex="4">
+                           ng-model="repoName" class="form-control" type="text" tabindex="4">
                 </div>
             </div>
         </div> 
@@ -73,7 +76,7 @@
                 </div>
                 <div class = "row" >
 
-                    <textarea id="repoDesc" style="width:80%; float:left;" ng-model="newExperimentCtrl.repoDesc" placeholder="Enter a description for the new experiment"  tabindex="5"  class="form-control "></textarea>
+                    <textarea id="repoDesc" style="width:80%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment"  tabindex="5"  class="form-control "></textarea>
                     <!--                    <a href="#" editable-textarea="githubService.repo.description" e-rows="5" e-cols="40">
                                             <pre>{{ githubService.repo.description || 'no description' }}</pre>
                                         </a>-->

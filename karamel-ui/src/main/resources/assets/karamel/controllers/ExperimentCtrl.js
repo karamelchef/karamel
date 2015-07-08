@@ -11,15 +11,42 @@ angular.module('karamel.main')
 
                 $scope.githubStatus = GithubService;
 
+                $scope.landing = true;
                 $scope.load = true;
+
+                $scope.experimentNameInvalid = false;
+                $scope.githubOwnerInvalid = false;
+                $scope.userInvalid = false;
+                $scope.groupInvalid = false;
+                $scope.scriptTypeInvalid = false;
+                $scope.sourceTypeInvalid = false;
+                $scope.configInvalid = false;
+                $scope.preScriptInvalid = false;
+                $scope.scriptInvalid = false;
 
                 $scope.toggleIsBinary = function () {
                     $scope.isBinary = $scope.isBinary === false ? true : false;
                 };
-                
+
                 $scope.toggleIsSource = function () {
                     $scope.isSource = $scope.isSource === false ? true : false;
                 };
+
+                $scope.scriptTypes = [
+                    {value: "bash", label: "Bash"},
+                    {value: "python", label: "Python"},
+                    {value: "ruby", label: "Ruby"},
+                    {value: "perl", label: "Perl"}
+                ];
+                $scope.scriptType = {};
+                $scope.sourceType = {};
+
+                $scope.sourceTypes = [
+                    {value: "maven", label: "Git-Maven-Jave"},
+                    {value: "python", label: "Python-Eggs"},
+                    {value: "ruby", label: "Ruby-Gems"}
+                ];
+
 
                 $scope.status = {
                     isopen: false
@@ -45,6 +72,7 @@ angular.module('karamel.main')
                                 $scope.experiment.experimentContext.preScriptChefCode = result.experimentContext.preScriptChefCode;
                                 $scope.experiment.experimentContext.defaultAttributes = result.experimentContext.defaultAttributes;
                                 $scope.experiment.experimentContext.scriptType = result.experimentContext.scriptType;
+                                $scope.landing = false;
                             });
                 };
 
@@ -54,21 +82,15 @@ angular.module('karamel.main')
 //                    ModalService.profile('md');
                 };
 
-                $scope.getEmailHash = function () {
-                    return GithubService.getEmailHash();
-                }
+                $scope.getEmailHash = GithubService.emailhash;
 
-                $scope.getEmail = function () {
-                    return GithubService.getEmail();
-                }
+                $scope.getEmail = GithubService.githubCredentials.email;
+                
+                $scope.getOrg = GithubService.org;
 
-                $scope.getUser = function () {
-                    return GithubService.getUser();
-                }
+                $scope.getUser = GithubService.githubCredentials.user;
 
-                $scope.getPassword = function () {
-                    return GithubService.getPassword();
-                }
+                $scope.getPassword = GithubService.githubCredentials.password;
 
                 $scope.loading = false;
 
@@ -94,7 +116,7 @@ angular.module('karamel.main')
                 }
 
                 $scope.loadExperiment = function loadExperiment() {
-                    KaramelCoreRestServices.loadExperiment(experimentContext.githubUrl)
+                    KaramelCoreRestServices.loadExperiment(experiment.url)
                             .success(function (data, status, headers, config) {
                                 $log.info("Experiment Loaded Successfully.");
                                 $scope.isExpLoaded = true;
@@ -107,8 +129,7 @@ angular.module('karamel.main')
                                 $scope.experiment.experimentContext.preScriptChefCode = data.experimentContext.preScriptChefCode;
                                 $scope.experiment.experimentContext.defaultAttributes = data.experimentContext.defaultAttributes;
                                 $scope.experiment.experimentContext.scriptType = data.experimentContext.scriptType;
-
-
+                                $scope.landing = false;
                             })
                             .error(function (data, status, headers, config) {
                                 $log.info("Experiment can't be Loaded.");
@@ -117,6 +138,29 @@ angular.module('karamel.main')
                 }
 
                 $scope.pushExperiment = function pushExperiment() {
+
+                    $scope.experimentNameInvalid = false;
+                    $scope.githubOwnerInvalid = false;
+                    $scope.userInvalid = false;
+                    $scope.groupInvalid = false;
+
+                    if (!$scope.uploadExperiment.experimentName.$valid) {
+                        $scope.experimentNameInvalid = true;
+                    }
+                    
+                    if (!$scope.uploadExperiment.experimentName.$valid) {
+                        $scope.experimentNameInvalid = true;
+                    }
+
+                    if (!$scope.uploadExperiment.user.$valid) {
+                        $scope.userInvalid = true;
+                    }
+
+                    if (!$scope.uploadExperiment.group.$valid) {
+                        $scope.groupInvalid = true;
+                    }
+
+
 
                     SweetAlert.swal({
                         title: "Commit and Push Experiment to GitHub?",
@@ -152,44 +196,3 @@ angular.module('karamel.main')
 
                 _initScope();
             }])
-//        .directive('modal', function () {
-//            return {
-//                template: '<div class="modal fade">' +
-//                        '<div class="modal-dialog modal-md">' +
-//                        '<div class="modal-content">' +
-//                        '<div class="modal-header">' +
-//                        '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
-//                        '<h2 class="modal-title">{{ title }}</h2>' +
-//                        '</div>' +
-//                        '<div class="modal-body" ng-transclude></div>' +
-//                        '</div>' +
-//                        '</div>' +
-//                        '</div>',
-//                restrict: 'E',
-//                transclude: true,
-//                replace: true,
-//                scope: true,
-//                link: function postLink(scope, element, attrs) {
-//                    scope.title = attrs.title;
-//
-//                    scope.$watch(attrs.visible, function (value) {
-//                        if (value == true)
-//                            $(element).modal('show');
-//                        else
-//                            $(element).modal('hide');
-//                    });
-//
-//                    $(element).on('shown.bs.modal', function () {
-//                        scope.$apply(function () {
-//                            scope.$parent[attrs.visible] = true;
-//                        });
-//                    });
-//
-//                    $(element).on('hidden.bs.modal', function () {
-//                        scope.$apply(function () {
-//                            scope.$parent[attrs.visible] = false;
-//                        });
-//                    });
-//                }
-//            };
-//        });
