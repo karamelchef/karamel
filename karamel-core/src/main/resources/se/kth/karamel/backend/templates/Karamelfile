@@ -1,8 +1,7 @@
 dependencies:
   - recipe: %%name%%::install
-  - recipe: %%name%%::default
+  - recipe: %%name%%::experiment
     local:
       - %%name%%::install
-  - recipe: %%name%%::default
-    local:
-      - %%name%%::install
+    global:
+      %%dependencies%%

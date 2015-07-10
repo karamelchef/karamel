@@ -66,6 +66,8 @@ angular.module('karamel.main')
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
+                    resultsDir: 'results',
+                    dependencies: '',
                     experimentContext: [
                         {scriptContents: '',
                             defaultAttributes: '',

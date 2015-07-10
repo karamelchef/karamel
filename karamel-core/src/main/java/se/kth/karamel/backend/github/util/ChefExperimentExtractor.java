@@ -163,7 +163,8 @@ public class ChefExperimentExtractor {
 
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
-          "name", repoName
+          "name", repoName,
+          "dependencies", "hadoop::nn, spark::master"
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition

@@ -68,6 +68,8 @@ angular.module('karamel.main')
                                     $scope.experiment.group = result.group;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
+                                    $scope.experiment.resultsDir = result.resultsDir;
+                                    $scope.experiment.dependencies = result.dependencies;
                                     $scope.experiment.experimentContext.scriptContents = result.experimentContext.scriptContents;
                                     $scope.experiment.experimentContext.preScriptChefCode = result.experimentContext.preScriptChefCode;
                                     $scope.experiment.experimentContext.defaultAttributes = result.experimentContext.defaultAttributes;
@@ -89,12 +91,14 @@ angular.module('karamel.main')
                 $scope.loading = false;
 
                 $scope.experiment = {
-                    url: '',
+                    binaryUrl: '',
+                    sourceUrl: '',
                     user: '',
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
-                    resultsDir: '',
+                    resultsDir: 'results',
+                    dependencies: '',
                     experimentContext: [
                         {   
                             scriptContents: '',
@@ -122,6 +126,8 @@ angular.module('karamel.main')
                                     $scope.experiment.group = data.group;
                                     $scope.experiment.githubRepo = data.githubRepo;
                                     $scope.experiment.githubOwner = data.githubOwner;
+                                    $scope.experiment.resultsDir = data.resultsDir;
+                                    $scope.experiment.dependencies = data.dependencies;
                                     $scope.experiment.experimentContext.scriptContents = data.experimentContext.scriptContents;
                                     $scope.experiment.experimentContext.preScriptChefCode = data.experimentContext.preScriptChefCode;
                                     $scope.experiment.experimentContext.defaultAttributes = data.experimentContext.defaultAttributes;

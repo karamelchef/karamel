@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-xs-2 col-sm-2 col-md-2">
                         <div class="form-group">    
-                            <button for="expName" type="button" class="btn btn-primary" ng-click="loadExperiment()" tabindex="4">Load</button>
+                            <button for="expName" type="button" class="btn btn-primary" ng-click="loadExperiment()" tabindex="1">Load</button>
                         </div>
                     </div>
                 </div>
@@ -79,139 +79,139 @@
         <form name="uploadExperiment" ng-submit="pushExperiment()" editable-form novalidate="">    
 
             <div class="row form-group">    
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <input type="submit" class="btn btn-primary" value="Push Experiment to Github" tabindex="1"/>
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <input type="submit" class="btn btn-primary" value="Push Experiment to Github" tabindex="2">
                 </div>
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <label class="control-label" for="experimentName">Experiment Name: </label> {{gs.repo.name}}
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <label class="control-label" for="experimentName">Name: </label>
+                    <span name="experimentName">{{gs.repo.name}}</span>     
                 </div>
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <label class="control-label" for="githubOwner">Github URL: </label> {{gs.repo.sshUrl}}
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <label class="control-label" for="githubUrl">URL:</label>
+                    <span name="githubUrl">{{gs.repo.sshUrl}}</span>
                 </div>
             </div>
 
             <div class="row form-group">    
-                <label for="advancedExperiment" class="control-label col-xs-1 col-sm-1 col-md-1 col-lg-1 text-right">Advanced</label>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                    <input type="checkbox" id="advancedExperiment" name="advancedExperiment" ng-model="advancedExperiment" tabindex="3"/>
-                </div>
-            </div>
-
-            <div class="row" ng-show="advancedExperiment">
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <button ng-click="toggleIsBinary()">Run experiment from a binary distribution</button>
-                </div>
-                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"></div>
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <button ng-click="toggleIsSource()">Build an experiment from source</button>
-                </div>
-                <br/>
+                <span class="col-md-1 col-lg-1"></span>
+                <label for="advancedExperiment" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
+                    <input type="checkbox" id="advancedExperiment" name="advancedExperiment" ng-model="advancedExperiment" tabindex="4">
+                </label>
             </div>
 
 
-            <div class="row" ng-show="isSource"  ng-show="advancedExperiment">
-                <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 pull-right">
-                    <select name="sourceType" ng-model="scriptType"
-                            ng-options="obj.label as obj.value for obj in scriptTypes">
-                        <option value="">Select a source code distribution type</option>
+            <!--            <div class="row form-group" ng-show="isSource"  ng-show="advancedExperiment">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                <select name="sourceType" ng-model="scriptType"
+                                        ng-options="obj.label as obj.value for obj in scriptTypes">
+                                    <option value="">Select a source code distribution type</option>
+                                </select>
+                            </div>
+                        </div>-->
+
+            <div class="row form-group" ng-show="advancedExperiment">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <label class="control-label" for="user">Username
+                        <input name="user" ng-model="experiment.user" class="form-control "
+                               type="text" tabindex="7" required>
+                    </label>
+                </div>
+                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                    <label class="control-label" for="group">Group
+                        <input name="group" ng-model="experiment.group" class="form-control "
+                               type="text" tabindex="8" required>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row form-group"  ng-show="advancedExperiment">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
+                    <label class="text" for="chefCode">Chef Setup Code</label>
+                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
+                </div>
+            </div>
+
+            <div class="row form-group"  ng-show="advancedExperiment">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
+                    <label for="configFile" class="text">Config File</label>
+                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                </div>
+            </div>
+
+
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
+                    <label for="downloadBinary" class="control-label">Download Binary 
+                        <input type="checkbox" name="downloadBinary" ng-model="isBinary" tabindex="11">
+                    </label>
+                </div>
+            </div>        
+            <div class="row" ng-show="isBinary">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
+                    <label for="experimentBinaryUrl" class="control-label">URL: </label>
+                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.binaryUrl" type="text" tabindex="12" required>
+                </div>
+            </div>
+
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
+                    <label for="downloadSource" class="control-label">Build Maven project from GitHub <input type="checkbox" name="downloadSource" ng-model="isSource" tabindex="5">
+                    </label> 
+                </div>
+            </div>        
+            <div class="row form-group" ng-show="isSource">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
+                    <label for="experimentSourceUrl" class="control-label">GitHub URL: </label>
+                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.sourceUrl" type="text" tabindex="13" required>
+                </div>        
+            </div>
+
+
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">    
+                    <label for="dependencies" class="control-label">Dependencies </label>
+                    <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
+                </div>        
+            </div>        
+
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                    <select name="scriptTypes" ng-model="scriptTypes"
+                            ng-options="obj.value as obj.label for obj in scriptTypes">
+                        <option value="">Script type for your experiment.</option>
                     </select>
                 </div>
-                <br/>
+            </div>
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
+                    <label for="experimentScript">Experiment Code</label>
+                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
+                </div>
             </div>
 
-
-
-            <div class="row" ng-show="advancedExperiment">
-                <div class="col-xs-0 col-sm-0 col-md-1 col-lg-2"></div>
+            <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
                 <div class="col-xs-3 col-sm-3 col-md-6 col-lg-6">
-                    <div class="form-group">
-                        <label class="control-label">Results Directory on Remote Host:</label>
-                        <input name="user" ng-model="experiment.resultsDir" class="form-control "
-                               type="text" tabindex="4" required>
-                    </div>
-                </div>
-                <br/>
-            </div>
-
-            <div class="row" ng-show="advancedExperiment">
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <div class="form-group">
-                        <label class="control-label">Username</label>
-                        <input name="user" ng-model="experiment.user" class="form-control "
-                               type="text" tabindex="4" required>
-                    </div>
-                </div>
-                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2"/>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <div class="form-group">
-                        <label class="control-label">Group</label>
-                        <input name="text" ng-model="experiment.group" class="form-control "
-                               type="text" tabindex="4" required>
-                    </div>
-                </div>
-                <br/>
-            </div>
-
-            <div class="row form-group"  ng-show="advancedExperiment">
-                <div class="row">
-                    <label class="text">Chef Code run before the Experiment is executed.</label>
-                </div>
-                <div class="row">
-                    <div class="col-xs-0 col-sm-0 col-md-1 col-lg-2"></div>
-                    <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                        <textarea id="textareaEdit" style="width:100%; float:left; height:200px; overflow:scroll;" ng-model="experiment.experimentContext.preScriptChefCode" placeholder="Chef code"  tabindex="3"  class="form-control"></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="row form-group"  ng-show="advancedExperiment">
-                <div class="row">
-                    <label for="textareaEdit" class="text">Config File</label>
-                </div>
-                <div class="row">
-                    <div class="col-xs-0 col-sm-0 col-md-1 col-lg-2"></div>
-                    <div class="col-md-8">
-                        <textarea id="textareaEdit" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="5"  class="form-control"></textarea>
-                    </div>y f
-                </div>
-
-            </div>
-
-            <div class="row form-group" ng-show="!landing">
-
-                <div class="row form-group">    
-                    <label for="downloadBinary" class="control-label col-xs-1 col-sm-2 col-md-2 col-lg-2 text-right">
-                        Download Binary
-                    </label>
-                    <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
-                        <input type="checkbox" name="downloadBinary" ng-model="isBinary" tabindex="3"/>
-                    </div>
-                    <label for="experimentBinaryUrl" class="control-label col-xs-1 col-sm-2 col-md-2 col-lg-2 text-right">
-                        URL: </label>
-                    <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6" ng-show="isBinary">
-                        <input name="experimentBinaryUrl" ng-model="experiment.url" type="text" tabindex="5" required>
-                    </div>
-                </div>        
-
-                <div class="row ">
-                    <div class="col-xs-0 col-sm-0 col-md-1 col-lg-1"></div>
-                    <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                        <select name="scriptTypes" ng-model="scriptTypes"
-                                ng-options="obj.value as obj.label for obj in scriptTypes">
-                            <option value="">Script type for your experiment.</option>
-                        </select>
-                    </div>
-
-                    <!--            <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                    <label for="textareaEdit">Experiment Script</label>
-                                </div>-->
-                </div>
-                <div class="row">
-                    <div class="col-xs-0 col-sm-0 col-md-1 col-lg-2"></div>
-                    <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                        <textarea id="textareaEdit" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.scriptContents" placeholder="Enter the experiment code."  tabindex="2"  class="form-control"></textarea>
-                    </div>
+                    <label class="control-label">Results Directory</label>
+                    <input name="user" ng-model="experiment.resultsDir" class="form-control "
+                           type="text" tabindex="15" required>
                 </div>
             </div>
 
-        </form>
     </div>
+
+</form>
+</div>
