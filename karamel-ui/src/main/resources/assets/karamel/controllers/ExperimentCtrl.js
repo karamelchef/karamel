@@ -63,7 +63,7 @@ angular.module('karamel.main')
                                 if (angular.isDefined(result)) {
                                     $scope.isExpLoaded = true;
                                     $log.info("new experiment modal experiment results ...");
-                                    $scope.experiment.url = result.url;
+                                    $scope.experiment.url = "";
                                     $scope.experiment.user = result.user;
                                     $scope.experiment.group = result.group;
                                     $scope.experiment.githubRepo = result.githubRepo;
@@ -80,18 +80,11 @@ angular.module('karamel.main')
                 $scope.profileModal = function () {
                     $log.info("Loading profile by launching modal dialog.");
                     ModalService.profile('lg');
-//                    ModalService.profile('md');
                 };
 
                 self.getEmailHash = function () {
                     return GithubService.getEmailhash();
                 }
-
-//                $scope.email = $scope.githubStatus.githubCredentials.email;
-//                $scope.orgName = $scope.githubStatus.org.name;
-//                $scope.orgGravitar = $scope.githubStatus.org.gravitar;
-//                $scope.user = $scope.githubStatus.githubCredentials.user;
-//                $scope.password = $scope.githubStatus.githubCredentials.password;
 
                 $scope.loading = false;
 
@@ -101,8 +94,10 @@ angular.module('karamel.main')
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
+                    resultsDir: '',
                     experimentContext: [
-                        {scriptContents: '',
+                        {   
+                            scriptContents: '',
                             defaultAttributes: '',
                             preScriptChefCode: '',
                             scriptType: ''
