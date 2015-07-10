@@ -1,31 +1,24 @@
 'use strict'
 
 angular.module('karamel.main')
-        .controller('NewExperimentCtrl', ['$scope', '$log', '$modalInstance', 'GithubService', 
+        .controller('NewExperimentCtrl', ['$scope', '$log', '$modalInstance', 'GithubService',
             function ($scope, $log, $modalInstance, GithubService) {
                 var self = this;
 
-                $scope.orgs = {};
+                $scope.github = GithubService;
 
-                self.getOrgs = function () {
-                    $scope.orgs = GithubService.getOrgs();
+                $scope.submitted = true;
+                $scope.submittedOngoing = false;
+                $scope.submittedMsg = "";
+
+                self.selectOrg = function (name) {
+                    GithubService.setOrg(name);
                 };
-                
-                $scope.user = GithubService.githubCredentials.user;
-                
-                $scope.email = GithubService.githubCredentials.email;
-                
-                $scope.orgName = GithubService.org.name;
-                
-                $scope.repoName = GithubService.repo.name;
-                
-                $scope.repoDesc = GithubService.repo.description;
-                
-                
+
                 self.close = function (feedback) {
                     $modalInstance.close(feedback);
                 };
-                
+
                 self.cancel = function () {
                     $modalInstance.dismiss('cancel');
                 };
@@ -35,19 +28,38 @@ angular.module('karamel.main')
                 };
 
                 self.newExperiment = function () {
-
-                    $log.info("new experiment executed ...");
-                    GithubService.newRepo($scope.repoName, $scope.repoDesc);
-                    self.experimentContext.url = "git@github.com:" + $scope.orgName 
-                            + "/" + $scope.repoName + ".git";
-                    self.experimentContext.user = $scope.repoName;
-                    self.experimentContext.group = $scope.repoName;
-                    self.experimentContext.githubRepo = $scope.repoName;
-                    self.experimentContext.githubOwner = $scope.orgName;
-                    self.close(self.experimentContext);
+                    $scope.submittedOngoing = true;
+                    $scope.submitted = true;
+                    $scope.submittedMsg = "";
+                    GithubService.getRepos($scope.github.org.name).then(
+                            function () {
+                                // Check if the repository already exists for this user or organization
+                                for (var i = 0; i < $scope.github.repos.length; i++) {
+                                    if ($scope.github.repos[i].name.localeCompare($scope.repoName) === 0) {
+                                        $scope.submittedMsg = "Repo already exists!";
+                                        $scope.submittedOngoing = false;
+                                        return;
+                                    }
+                                }
+                                $log.info("new experiment being created...");
+                                GithubService.newRepo($scope.repoName, $scope.repoDesc);
+                                self.experimentContext.url = "git@github.com:" + $scope.orgName
+                                        + "/" + $scope.repoName + ".git";
+                                self.experimentContext.user = $scope.github.repo.name;
+                                self.experimentContext.group = $scope.github.repo.name;
+                                self.experimentContext.githubRepo = $scope.github.repo.name;
+                                self.experimentContext.githubOwner = $scope.github.org.name;
+                                $scope.submittedMsg = "Repo doesn't exist yet.";
+                                $scope.submittedOngoing = false;
+                                self.close(self.experimentContext);
+                            }
+                    );
                 };
 
-                
+                self.getOrgs = function () {
+                    GithubService.getOrgs();
+                }
+
                 self.experimentContext = {
                     url: '',
                     user: '',
@@ -55,14 +67,15 @@ angular.module('karamel.main')
                     githubRepo: '',
                     githubOwner: '',
                     experimentContext: [
-                        {   scriptContents: '',
+                        {scriptContents: '',
                             defaultAttributes: '',
                             preScriptChefCode: '',
                             scriptType: 'bash'
                         }
                     ]
                 };
-                
+
                 $scope.experiment = self.experimentContext;
 
+                self.getOrgs();
             }]);

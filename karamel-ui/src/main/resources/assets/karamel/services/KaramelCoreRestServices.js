@@ -134,11 +134,11 @@
           var url = _defaultHost.concat("/getGithubOrgs");
           return _getPromiseObject(method, url, _defaultContentType, "", true);
         },
-        getGithubRepos: function(username, org) {
+        getGithubRepos: function(org) {
           var method = 'POST';
           var url = _defaultHost.concat("/getGithubRepos");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "user" : username, "org" : org}), true);
+          $.param({"org" : org}), true);
         },
         createGithubRepo: function(org, repo, description) {
           var method = 'POST';

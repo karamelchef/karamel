@@ -37,13 +37,6 @@ angular.module('karamel.main')
                             size: size,
                             windowClass: 'app-modal-window',
                             resolve: {
-                                 // return experiment context details - needed to fill in user/url/etc
-//                                repoName: function () {
-//                                    return githubService.repo.name;
-//                                },
-//                                orgName: function () {
-//                                    return githubService.org.name;
-//                                }
                                 experiment: function () {
                                     return experiment;
                                 }

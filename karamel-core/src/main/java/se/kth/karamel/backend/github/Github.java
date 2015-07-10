@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.xml.bind.annotation.XmlRootElement;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.User;
@@ -144,7 +143,14 @@ public class Github {
   public synchronized static List<RepoItem> getRepos(String orgName) throws KaramelException {
     try {
       RepositoryService rs = new RepositoryService(client);
-      List<Repository> repos = rs.getOrgRepositories(orgName);
+      List<Repository> repos;
+      // If we are looking for the repositories for the current user
+      if (Github.getUser().equalsIgnoreCase(orgName)) {
+        repos = rs.getRepositories(orgName);
+      } else {       // If we are looking for the repositories for a given organization
+        repos = rs.getOrgRepositories(orgName);        
+      }
+      
       List<RepoItem> repoItems = new ArrayList<>();
       for (Repository r : repos) {
         repoItems.add(new RepoItem(r.getName(), r.getDescription(), r.getSshUrl()));

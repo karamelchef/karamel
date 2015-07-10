@@ -5,11 +5,10 @@ angular.module('karamel.main')
             function ($log, $scope, SweetAlert, KaramelCoreRestServices, GithubService, ModalService) {
 
                 var self = this;
-                $scope.isExpLoaded = false;
                 $scope.isBinary = false;
                 $scope.isSource = false;
 
-                $scope.githubStatus = GithubService;
+                $scope.gs = GithubService;
 
                 $scope.landing = true;
                 $scope.load = true;
@@ -61,18 +60,20 @@ angular.module('karamel.main')
                     $log.info("New experiment...");
                     ModalService.experimentFactory('lg').then(
                             function (result) {
-                                $scope.isExpLoaded = true;
-                                $log.info("new experiment modal experiment results ...");
-                                $scope.experiment.url = result.url;
-                                $scope.experiment.user = result.user;
-                                $scope.experiment.group = result.group;
-                                $scope.experiment.githubRepo = result.githubRepo;
-                                $scope.experiment.githubOwner = result.githubOwner;
-                                $scope.experiment.experimentContext.scriptContents = result.experimentContext.scriptContents;
-                                $scope.experiment.experimentContext.preScriptChefCode = result.experimentContext.preScriptChefCode;
-                                $scope.experiment.experimentContext.defaultAttributes = result.experimentContext.defaultAttributes;
-                                $scope.experiment.experimentContext.scriptType = result.experimentContext.scriptType;
-                                $scope.landing = false;
+                                if (angular.isDefined(result)) {
+                                    $scope.isExpLoaded = true;
+                                    $log.info("new experiment modal experiment results ...");
+                                    $scope.experiment.url = result.url;
+                                    $scope.experiment.user = result.user;
+                                    $scope.experiment.group = result.group;
+                                    $scope.experiment.githubRepo = result.githubRepo;
+                                    $scope.experiment.githubOwner = result.githubOwner;
+                                    $scope.experiment.experimentContext.scriptContents = result.experimentContext.scriptContents;
+                                    $scope.experiment.experimentContext.preScriptChefCode = result.experimentContext.preScriptChefCode;
+                                    $scope.experiment.experimentContext.defaultAttributes = result.experimentContext.defaultAttributes;
+                                    $scope.experiment.experimentContext.scriptType = result.experimentContext.scriptType;
+                                    $scope.landing = false;
+                                }
                             });
                 };
 
@@ -82,15 +83,15 @@ angular.module('karamel.main')
 //                    ModalService.profile('md');
                 };
 
-                $scope.getEmailHash = GithubService.emailhash;
+                self.getEmailHash = function () {
+                    return GithubService.getEmailhash();
+                }
 
-                $scope.getEmail = GithubService.githubCredentials.email;
-                
-                $scope.getOrg = GithubService.org;
-
-                $scope.getUser = GithubService.githubCredentials.user;
-
-                $scope.getPassword = GithubService.githubCredentials.password;
+//                $scope.email = $scope.githubStatus.githubCredentials.email;
+//                $scope.orgName = $scope.githubStatus.org.name;
+//                $scope.orgGravitar = $scope.githubStatus.org.gravitar;
+//                $scope.user = $scope.githubStatus.githubCredentials.user;
+//                $scope.password = $scope.githubStatus.githubCredentials.password;
 
                 $scope.loading = false;
 
@@ -112,24 +113,26 @@ angular.module('karamel.main')
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
                     GithubService.getCredentials();
-                    GithubService.setOrgName(GithubService.getUser());
                 }
 
                 $scope.loadExperiment = function loadExperiment() {
                     KaramelCoreRestServices.loadExperiment(experiment.url)
-                            .success(function (data, status, headers, config) {
-                                $log.info("Experiment Loaded Successfully.");
-                                $scope.isExpLoaded = true;
-                                $scope.experiment.url = data.url;
-                                $scope.experiment.user = data.user;
-                                $scope.experiment.group = data.group;
-                                $scope.experiment.githubRepo = data.githubRepo;
-                                $scope.experiment.githubOwner = data.githubOwner;
-                                $scope.experiment.experimentContext.scriptContents = data.experimentContext.scriptContents;
-                                $scope.experiment.experimentContext.preScriptChefCode = data.experimentContext.preScriptChefCode;
-                                $scope.experiment.experimentContext.defaultAttributes = data.experimentContext.defaultAttributes;
-                                $scope.experiment.experimentContext.scriptType = data.experimentContext.scriptType;
-                                $scope.landing = false;
+                            .then(function (data, status, headers, config) {
+
+                                if (angular.isDefined(data)) {
+                                    $log.info("Experiment Loaded Successfully.");
+                                    $scope.isExpLoaded = true;
+                                    $scope.experiment.url = data.url;
+                                    $scope.experiment.user = data.user;
+                                    $scope.experiment.group = data.group;
+                                    $scope.experiment.githubRepo = data.githubRepo;
+                                    $scope.experiment.githubOwner = data.githubOwner;
+                                    $scope.experiment.experimentContext.scriptContents = data.experimentContext.scriptContents;
+                                    $scope.experiment.experimentContext.preScriptChefCode = data.experimentContext.preScriptChefCode;
+                                    $scope.experiment.experimentContext.defaultAttributes = data.experimentContext.defaultAttributes;
+                                    $scope.experiment.experimentContext.scriptType = data.experimentContext.scriptType;
+                                    $scope.landing = false;
+                                }
                             })
                             .error(function (data, status, headers, config) {
                                 $log.info("Experiment can't be Loaded.");
@@ -147,7 +150,7 @@ angular.module('karamel.main')
                     if (!$scope.uploadExperiment.experimentName.$valid) {
                         $scope.experimentNameInvalid = true;
                     }
-                    
+
                     if (!$scope.uploadExperiment.experimentName.$valid) {
                         $scope.experimentNameInvalid = true;
                     }

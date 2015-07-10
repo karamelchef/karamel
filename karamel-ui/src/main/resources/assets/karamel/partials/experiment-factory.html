@@ -1,101 +1,81 @@
-
 <div class="modal-header">
     <button class="close" ng-click="newExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
-    <h2 class="modal-title">New Experiment</h2>
+    <h2 class="modal-title">Enter New GitHub Repository Details</h2>
 </div>
 <div class="modal-body" id="experimentFactoryModal">
 
-    <div class="container">
+    <div class="container" style="width: 100%">
 
-        <div class="row">
-            <div class="form-group">
-                <label class="control-label">GitHub User: {{user}} </label>
-            </div>  
-        </div>
-        <div class="row">
-            <div class="form-group">
-                <label class="control-label">GitHub Email: {{email}} </label>
-            </div>  
-        </div>
-        <div class = "row" >
-            <div class = "form-group col-xs-3 col-sm-3 col-md-3" >
-                <p> Organization: <b>{{orgName}}</b> </p>
+        <div class="row text-left">
+            <div class = "col-xs-3 col-sm-3 col-md-3" >
+                <label class="control-label">User: </label> {{github.githubCredentials.user| limitTo: 12}}{{github.githubCredentials.user > 12 ? '...' : ''}}
+            </div>
+            <div class = "col-xs-3 col-sm-3 col-md-3" >
+                <label class="control-label">Email: </label> {{github.githubCredentials.email| limitTo: 12}}{{github.githubCredentials.email > 12 ? '...' : ''}}
             </div>
         </div>
+        <hr>
         <div class = "row" >
-            <div class="form-group col-xs-9 col-sm-9 col-md-9">
-                <label class="control-label">Select a Github Organization</label>
+            <div class = "col-xs-6 col-sm-6 col-md-12" >
+                <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected2" class="text-primary"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
             </div>
         </div>
+        <br/>
         <div class = "row" >
-            <div class="form-group col-xs-9 col-sm-9 col-md-9 vcenter text-center">
-                <ul class="example-animate-container">
-                    <li class="animate-repeat" style="list-style-type: none;">
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-default" ng-click="selectOrg(user)">
-                                {{user}} 
+            <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
+                <ul style="list-style-type: none;">
+                    <li >
+                        <div class="col-md-3 repoIcon">
+                            <button type="button" style="margin: 5px;" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(github.githubCredentials.user)">
+                                {{github.githubCredentials.user}} 
                             </button></div>
-                        <!--                            <div class="col-md-1" ng-click="selectOrg(org.name)">
-                                                        <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
-                                                             ng-src="{{ org.gravitar}}"/>
-                                                    </div>-->
                     </li>
+                    <li ng-repeat="org in github.orgs">
+                        <div class="col-md-3 repoIcon">
 
-                    <li class="animate-repeat" ng-repeat="org in orgs" style="list-style-type: none;">
+                            <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)"> <img class="img-thumbnail" style="height: 30px;"
+                                                                                                                                 ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 20}}{{org.name.length > 20 ? '...' : ''}}</button>
 
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-default" ng-click="selectOrg(org.name)">{{org.name}}</button></div>
                         </div>
-                        <!--                        <div class="col-md-1" ng-click="selectOrg(org.name)">
-                                                    <img class="img-thumbnail" style="height: 36px; margin-bottom: 5px; border: 2px solid white;"
-                                                         ng-src="{{ org.gravitar}}"/>
-                                                </div>-->
                     </li>
-                    <li class="animate-repeat" ng-if="results.length == 0">
-                        <strong>No orgs found...</strong>
+                    <li ng-if="results.length == 0">
+                        <strong>No GitHub organizations found for user: {{github.githubCredentials.user}}</strong>
                     </li>
                 </ul>                    
             </div>
         </div>
 
-        <div class="row">
-            <div class="form-group col-xs-4 col-sm-4 col-md-6">
-                <div class = "row" >
+        <div class="row col-md-12">
+            <div class="form-group col-xs-6 col-sm-6 col-md-6">
+                <div class = "  row" >
                     <label for="newRepo" class="control-label">Repository Name</label>
                 </div>
-                <div class = "row" >
-                    <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repo" 
+                <div class="row" >
+                    <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repository" 
                            ng-model="repoName" class="form-control" type="text" tabindex="4">
                 </div>
             </div>
         </div> 
         <div class="row">
-            <div class="form-group col-xs-6 col-sm-6 col-md-10" >    
-                <div class = "row" >
+            <div class="form-group col-xs-9 col-sm-9 col-md-10" >    
+                <div class = "row col-md-6" >
                     <label for="repoDesc" class="control-label">Repository Description</label>
                 </div>
-                <div class = "row" >
-
-                    <textarea id="repoDesc" style="width:80%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment"  tabindex="5"  class="form-control "></textarea>
-                    <!--                    <a href="#" editable-textarea="githubService.repo.description" e-rows="5" e-cols="40">
-                                            <pre>{{ githubService.repo.description || 'no description' }}</pre>
-                                        </a>-->
+                <div class="row col-md-12" >
+                    <textarea id="repoDesc" style="width:100%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment repository"  tabindex="5"  class="form-control "></textarea>
                 </div>
             </div> 
         </div> 
         <div class="row">
-            <div class="form-group col-xs-6 col-sm-6 col-md-6" >    
-                <button for="newRepo" type="button" class="btn btn-default" ng-click="newExperimentCtrl.newExperiment()" tabindex="6">Create New Experiment</button>
+            <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
+                <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="6">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
             </div>                
         </div>                
     </div>
-
-
-
-
-    <!--<div class="modal-footer" id="profileFooter">
-        <div class="row pull-left">
-            Select your repo.
+    <div class="row" ng-show="submitted">
+        <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >   
+            <div class="text-warning" > {{submittedMsg}} </div>                
         </div>
-    </div>-->
+    </div>                
+</div>
 

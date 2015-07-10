@@ -12,8 +12,6 @@ angular.module('karamel.main')
                 self.password = '';
                 $scope.githubService = GithubService;
 
-//                $scope.orgs = {};
-
                 self.load = function () {
                     GithubService.loadExperiment(self.experimentUrl);
                 };
@@ -24,7 +22,6 @@ angular.module('karamel.main')
                     if (self.user !== "") {
                         self.isLoggedIn = true;
                     }
-//                    self.getOrgs();
                 };
 
                 self.login = function () {
@@ -34,20 +31,6 @@ angular.module('karamel.main')
                     }
                 };
 
-//                self.setOrg = function () {
-//                    var ret = GithubService.setOrg(self.org);
-//                    if (ret !== null) {
-//                        self.isOrgSelected = true;
-//                    }
-//                };
-
-//                self.getOrg = function () {
-//                    $scope.org = GithubService.getOrg();
-//                };
-//
-//                self.getOrgs = function () {
-//                    $scope.orgs = GithubService.getOrgs();
-//                };
 
                 self.setRepo = function () {
                     var ret = GithubService.setRepo(self.repo);
@@ -80,20 +63,6 @@ angular.module('karamel.main')
                 self.getEmailHash = function () {
                     return GithubService.getEmailHash();
                 };
-
-//                self.loadExperiment = function (sshUrl) {
-//
-//                    KaramelCoreRestServices.loadExperiment(sshUrl)
-//                            .success(function (data, status, headers, config) {
-//                                self.experiment = data.experiment;
-//                                $log.info("GitHub Experiment Loaded");
-//                            })
-//                            .error(function (data, status, headers, config) {
-//                                $log.info("GitHub Credentials not found.");
-//                            });
-//                    return self.githubCredentials;
-//                };
-
 
                 self.profile();
             }]);
