@@ -6,9 +6,8 @@
 
 // Declare app level module which depends on other modules
 angular.module('karamel.main', [
-    'ngRoute'
+              'ngRoute'
             , 'ngCookies'
-//    ,'ngResource' // REST apis
             , 'ui.sortable' // moving cards on the board
             , 'ui.bootstrap' // UI framework
             , 'lr.upload' // uploading files
