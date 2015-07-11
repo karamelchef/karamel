@@ -91,20 +91,33 @@
                     <label class="control-label">URL:</label>
                     <span>{{gs.repo.sshUrl| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
                 </div>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center" ng-click="toggle">
-                    View <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
-                </div>
             </div>
 
             <div class="row form-group">    
+                <div class="col-sm-10 col-md-10 col-lg-10">    
                 <span class="col-md-1 col-lg-1"></span>
-                <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
-                    <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
-                </label>
+                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
+                        <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
+                    </label>
+                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="toggle()">
+                        <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
+                    </span>
+                </div>
             </div>
 
-            <div class="row form-group" ng-show="status.advanced">
-                <span class="col-md-1 col-lg-1"></span>
+            <div class="row form-group col-lg-12" ng-show="status.advanced">
+                <div class="row form-group col-lg-10" style="margin-left:10px">
+
+                    <accordion close-others="false">
+
+                        <span class="col-md-1 col-lg-1"></span>
+                        <accordion-group is-open="status.userGroup">
+                            <accordion-heading>
+                                Run experiment as user/group<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.userGroup, 'glyphicon-resize-full': !status.userGroup}"></i>
+                            </accordion-heading>
+                            Username/group that owns the binaries/source-code installed and the experiment scripts and results.
+                            <div class="row">
+                                <span class="col-md-1 col-lg-1"></span>
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                     <label class="control-label" for="user">Username
                         <input name="user" ng-model="experiment.user" class="form-control "
@@ -118,14 +131,10 @@
                                type="text" tabindex="8" required>
                     </label>
                 </div>
-            </div>
 
+                            </div>
 
-            <div class="row form-group" ng-show="status.advanced">
-                <div class="row form-group col-lg-10">
-
-                    <accordion close-others="false">
-
+                        </accordion-group>
                         <span class="col-md-1 col-lg-1"></span>
                         <accordion-group is-open="status.binaryOpen">
                             <accordion-heading>
@@ -133,9 +142,9 @@
                             </accordion-heading>
                             <div class="row">
                                 <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
-                                    <label for="experimentBinaryUrl" class="control-label">URL to download and extract program. </label>
-                                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.binaryUrl" type="text" tabindex="12" required>
+                                <div class="col-xs-4 col-sm-10 col-md-10 col-lg-10">
+                                    <label for="experimentBinaryUrl" class="control-label">URL for binary that is downloaded and extracted to /usr/local/<experimentName>. Uses Chef's 'ark' resource. </label>
+                                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="12" required>
                                 </div>
                             </div>
 
@@ -143,13 +152,13 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <accordion-group is-open="status.sourceOpen">
                             <accordion-heading>
-                                Build Maven Project from GitHub Repository<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
+                                Clones source code from GitHub URL, then builds it using the Maven command below. <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
                                     <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
-                                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.sourceUrl" type="text" tabindex="13" required>
+                                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="13" required>
                                 </div>        
                             </div>
                             <div class="row form-group">
@@ -168,8 +177,8 @@
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-8 col-sm-10 col-md-10 col-lg-10">    
-                                    <label for="dependencies" class="control-label">Comma-separated list of cookbook::recipe entries. Generates the Karamelfile to orchestrate when to run the experiment.</label>
+                                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
+                                    <label for="dependencies" class="control-label">Comma-separated list of cookbook::recipe entries. Generates the Karamelfile to orchestrate the experiment.</label>
                                     <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
                                 </div>        
                             </div>        
@@ -182,11 +191,11 @@
 
 
 
-            <div class="row form-group">
-                <div class="row form-group col-lg-10">
+            <div class="row form-group col-lg-12">
+                <div class="row form-group col-lg-10" style="margin-left:10px">
 
                     <accordion close-others="false">
-                        <span class="col-md-1 col-lg-1"></span>
+                        <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
                         <accordion-group is-open="status.configOpen" ng-show="status.advanced">
                             <accordion-heading>
                                 Configuration <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.configOpen, 'glyphicon-resize-full': !status.configOpen}"></i>
@@ -197,13 +206,13 @@
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <!--<div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">-->
                                     <!--<label for="configFile" class="text">Config File</label>-->
-                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.code.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
                                 </div>
                             </div>
 
                         </accordion-group>
 
-                        <span class="col-md-1 col-lg-1"></span>
+                        <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
                         <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
                             <accordion-heading>
                                 Pre-Experiment Chef Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
@@ -212,7 +221,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
-                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
+                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.code.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
                                 </div>
                             </div>
                         </accordion-group>
@@ -236,7 +245,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
                                     <!--<label for="experimentScript">Experiment Code</label>-->
-                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
+                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.code.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
                                 </div>
                             </div>
                             <br/>
@@ -244,9 +253,10 @@
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-8 col-md-10 col-lg-10">
-                                    <label for="results" class="control-label">Canonical (full) path for the Results Directory on the Experiment Server. The contents of this directory will be downloaded to the machine running Karamel and stored in the directory: $HOME_DIR/.karamel/results.</label>
+                                    <label for="results" class="control-label">Full path to the Results Directory on the Experiment Server. </label>
                                     <input name="results" ng-model="experiment.resultsDir" class="form-control "
                                            type="text" tabindex="15" required>
+                                    <span>The contents of this directory will be downloaded using scp to this machine running Karamel and stored in: $HOME_DIR/.karamel/results.</span>
                                 </div>
                             </div>
 

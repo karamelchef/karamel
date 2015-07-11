@@ -6,7 +6,7 @@
 package se.kth.karamel.client.api;
 
 import java.util.List;
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
@@ -255,7 +255,7 @@ public interface KaramelApi {
    * @param experiment bash scripts and config files to add, commit, and push.
    * @throws KaramelException
    */
-  public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment)
+  public void commitAndPushExperiment(String owner, String repoName, Experiment experiment)
       throws KaramelException;
 
   /**
@@ -264,7 +264,7 @@ public interface KaramelApi {
    * @return Json object for the ExperimentContext
    * @throws se.kth.karamel.common.exception.KaramelException 
    */
-  public ExperimentContext loadExperiment(String githubRepoUrl) throws KaramelException;
+  public Experiment loadExperiment(String githubRepoUrl) throws KaramelException;
 
   /**
    *

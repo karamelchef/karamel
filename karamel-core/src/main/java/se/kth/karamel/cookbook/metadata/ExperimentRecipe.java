@@ -5,7 +5,7 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 
 /**
  *
@@ -15,9 +15,9 @@ public class ExperimentRecipe {
   private final String recipeName;
   private final String preScriptContents;
   private final String scriptContents;
-  private final ExperimentContext.ScriptType scriptType;
+  private final Experiment.ScriptType scriptType;
 
-  public ExperimentRecipe(String recipeName, ExperimentContext.ScriptType scriptType, String preScriptContents,
+  public ExperimentRecipe(String recipeName, Experiment.ScriptType scriptType, String preScriptContents,
       String scriptContents) {
     this.recipeName = recipeName;
     this.scriptContents = scriptContents;
@@ -37,7 +37,7 @@ public class ExperimentRecipe {
     return recipeName;
   }
 
-  public ExperimentContext.ScriptType getScriptType() {
+  public Experiment.ScriptType getScriptType() {
     return scriptType;
   }
 

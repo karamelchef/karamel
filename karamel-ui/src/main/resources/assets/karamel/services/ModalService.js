@@ -30,15 +30,15 @@ angular.module('karamel.main')
                         });
                         return modalInstance.result;
                     },
-                    experimentFactory: function (size, experiment) {
+                    experimentFactory: function (size, githubDetails) {
                         var modalInstance = $modal.open({
                             templateUrl: 'karamel/partials/experiment-factory.html',
                             controller: 'NewExperimentCtrl as newExperimentCtrl',
                             size: size,
                             windowClass: 'app-modal-window',
                             resolve: {
-                                experiment: function () {
-                                    return experiment;
+                                githubDetails: function () {
+                                    return githubDetails;
                                 }
 
                             }

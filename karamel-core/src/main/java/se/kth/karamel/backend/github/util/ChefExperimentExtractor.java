@@ -22,8 +22,8 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.ExperimentContext;
-import se.kth.karamel.backend.ExperimentContext.Experiment;
+import se.kth.karamel.backend.Experiment;
+import se.kth.karamel.backend.Experiment.Code;
 import se.kth.karamel.backend.github.Github;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
@@ -55,17 +55,17 @@ public class ChefExperimentExtractor {
    * @param experiment input scripts/config filenames and content
    * @throws KaramelException
    */
-  public static void parseAttributesAddToGit(String owner, String repoName, ExperimentContext experiment)
+  public static void parseAttributesAddToGit(String owner, String repoName, Experiment experiment)
       throws KaramelException {
 
     attrs.clear();
     // Add recipeNames to metadata.rb
     Set<String> recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
-    Map<String, Experiment> experiments = experiment.getExperiments();
+    Map<String, Code> experiments = experiment.getExperiments();
 
     for (String recipeName : recipeNames) {
-      Experiment exp = experiments.get(recipeName);
+      Code exp = experiments.get(recipeName);
       String str = exp.getDefaultAttributes();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
@@ -84,7 +84,7 @@ public class ChefExperimentExtractor {
           "name", repoName,
           "user", experiment.getUser(),
           "group", experiment.getGroup(),
-          "http_binaries", experiment.getUrl()
+          "http_binaries", experiment.getUrlBinary()
       );
 
       for (String key : attrs.keySet()) {
@@ -97,18 +97,20 @@ public class ChefExperimentExtractor {
           "name", repoName,
           "user", experiment.getUser(),
           "group", experiment.getGroup(),
-          "http_binaries", experiment.getUrl()
+          "http_binaries", experiment.getUrlBinary()
       );
       for (String key : attrs.keySet()) {
 //        String entry = key + " = " + attrs.get(key);
         String entry = key + " = <%= node[:" + repoName + "][:" + key + "] %>";
         config_props.append(entry).append(System.lineSeparator());
       }
-      
+
       // TODO: jim - resolve_ips
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_METADATA,
           "resolve_ips", "",
+          "results_dir", experiment.getResultsDir(),
+          "build_command", experiment.getMavenCommand(),
           "ip_params", ""
       );
       for (String recipe : recipeNames) {
@@ -142,7 +144,7 @@ public class ChefExperimentExtractor {
    * @param experimentContext
    * @throws KaramelException
    */
-  public static void parseRecipesAddToGit(String owner, String repoName, ExperimentContext experimentContext)
+  public static void parseRecipesAddToGit(String owner, String repoName, Experiment experimentContext)
       throws KaramelException {
 
     try {
@@ -152,7 +154,7 @@ public class ChefExperimentExtractor {
       );
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
 
-      Map<String, Experiment> experiments = experimentContext.getExperiments();
+      Map<String, Code> experiments = experimentContext.getExperiments();
       Set<String> recipeNames = experiments.keySet();
 
       StringBuilder kitchenContents = CookbookGenerator.instantiateFromTemplate(
@@ -161,10 +163,16 @@ public class ChefExperimentExtractor {
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
+      String dependencies = experimentContext.getDependencies();
+      if (!dependencies.isEmpty()) {
+        String yamlEntryPrefix = "      -";
+        dependencies = dependencies.replaceAll(",", System.lineSeparator() + yamlEntryPrefix);
+        dependencies = yamlEntryPrefix + dependencies;
+      }
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
-          "dependencies", "hadoop::nn, spark::master"
+          "dependencies", dependencies
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition
@@ -186,7 +194,7 @@ public class ChefExperimentExtractor {
         yd.setGlobal(clusterDependencies);
         yd.setRecipe(repoName + Settings.COOOKBOOK_DELIMITER + recipe);
 //        String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
-        Experiment experiment = experiments.get(recipe);
+        Code experiment = experiments.get(recipe);
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
             "name", recipe,

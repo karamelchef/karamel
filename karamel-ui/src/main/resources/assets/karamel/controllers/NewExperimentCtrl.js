@@ -43,15 +43,13 @@ angular.module('karamel.main')
                                 }
                                 $log.info("new experiment being created...");
                                 GithubService.newRepo($scope.repoName, $scope.repoDesc);
-                                self.experimentContext.url = "git@github.com:" + $scope.orgName
-                                        + "/" + $scope.repoName + ".git";
-                                self.experimentContext.user = $scope.github.repo.name;
-                                self.experimentContext.group = $scope.github.repo.name;
-                                self.experimentContext.githubRepo = $scope.github.repo.name;
-                                self.experimentContext.githubOwner = $scope.github.org.name;
+                                self.githubDetails.user = $scope.github.repo.name;
+                                self.githubDetails.group = $scope.github.repo.name;
+                                self.githubDetails.githubRepo = $scope.github.repo.name;
+                                self.githubDetails.githubOwner = $scope.github.org.name;
                                 $scope.submittedMsg = "Repo doesn't exist yet.";
                                 $scope.submittedOngoing = false;
-                                self.close(self.experimentContext);
+                                self.close(self.githubDetails);
                             }
                     );
                 };
@@ -60,24 +58,12 @@ angular.module('karamel.main')
                     GithubService.getOrgs();
                 }
 
-                self.experimentContext = {
-                    url: '',
+                self.githubDetails = {
                     user: '',
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
-                    resultsDir: 'results',
-                    dependencies: '',
-                    experimentContext: [
-                        {scriptContents: '',
-                            defaultAttributes: '',
-                            preScriptChefCode: '',
-                            scriptType: 'bash'
-                        }
-                    ]
                 };
-
-                $scope.experiment = self.experimentContext;
 
                 self.getOrgs();
             }]);

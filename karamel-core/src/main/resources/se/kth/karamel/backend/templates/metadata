@@ -10,6 +10,11 @@ recipe            "%%name%%::experiment", "Runs %%name%% experiment"
 depends 'kagent'
 depends 'ark'
 
+results_dir       "%%results_dir%%"
+build_command     "%%build_command%%"
+url_binary        "%%url_binary%%"
+url_gitclone      "%%url_gitclone%%"
+
 %w{ ubuntu debian rhel centos }.each do |os|
   supports os
 end

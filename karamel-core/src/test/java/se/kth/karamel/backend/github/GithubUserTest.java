@@ -26,7 +26,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.github.util.CookbookGenerator;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
@@ -189,15 +189,15 @@ public class GithubUserTest {
   @Test
   public void testCreateRepo() {
     try {
-      ExperimentContext ec = new ExperimentContext();
-      ExperimentContext.Experiment exp = new ExperimentContext.Experiment("echo \"jim\"\n"
+      Experiment ec = new Experiment();
+      Experiment.Code exp = new Experiment.Code("echo \"jim\"\n"
           + "java -jar -D%%maxHeapSize%% prog.jar", "%%maxHeapSize%%=128m\n%%log%%=true\n",
-          "", ExperimentContext.ScriptType.bash);
+          "", Experiment.ScriptType.bash);
       ec.addExperiment("experiment", exp);
       ec.setUser("blah");
       ec.setGroup("blah");
-      ec.setResultsDirectory("results");
-      ec.setUrl("http://snurran.sics.se/hops/prog.jar");
+      ec.setResultsDir("results");
+      ec.setUrlBinary("http://snurran.sics.se/hops/prog.jar");
       ec.setDescription("Test experiment");
       ec.setClusterDefinition("name: MySqlCluster\n"
           + "ec2:\n"

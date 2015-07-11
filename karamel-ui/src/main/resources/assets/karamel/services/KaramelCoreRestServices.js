@@ -152,10 +152,10 @@
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
           $.param({ "experimentUrl" : experimentUrl }));
         },        
-        pushExperiment: function(experimentContext) {
+        pushExperiment: function(experiment) {
           var method = 'PUT';
           var url = _defaultHost.concat("/pushExperiment");
-          return _getPromiseObject(method, url, _defaultContentType, experimentContext);
+          return _getPromiseObject(method, url, _defaultContentType, experiment);
         },
         processCommand: function(commandName) {
           var method = 'PUT';

@@ -19,9 +19,13 @@ import se.kth.karamel.common.exception.MetadataParseException;
  */
 public class MetadataParser {
 
-  public static Pattern NAME = Pattern.compile("name\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
-  public static Pattern DESC = Pattern.compile("description\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
-  public static Pattern VERSION = Pattern.compile("version\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
+  public static Pattern NAME = singleValueEntry("name");
+  public static Pattern DESC = singleValueEntry("description");
+  public static Pattern VERSION = singleValueEntry("version");
+  public static Pattern RESULTS_DIR = singleValueEntry("results_dir");
+  public static Pattern URL_BINARY = singleValueEntry("url_binary");
+  public static Pattern URL_GITCLONE = singleValueEntry("url_gitclone");
+  public static Pattern BUILD_COMMAND = singleValueEntry("build_command");
   public static Pattern RECIPE = Pattern.compile(
       "recipe\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(\\,\\s*[\\\"|\\'](.+)[\\\"|\\'])+");
   public static Pattern ATTR = Pattern.compile("attribute\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(,)?\\s*");
@@ -31,6 +35,10 @@ public class MetadataParser {
   public static Pattern ATTR_DEFAULT = Pattern.compile(":default\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_REQUIRED = Pattern.compile(":required\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static String COMMA_CLOSING_LINE = ".*,\\s*$";
+
+  private static Pattern singleValueEntry(String name) {
+    return Pattern.compile(name + "\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
+  }
 
   /**
    *
@@ -48,59 +56,79 @@ public class MetadataParser {
       if (line.startsWith("#")) {
         comments.add(line);
       } else {
-        Matcher m1 = NAME.matcher(line);
-        if (m1.matches()) {
-          metadata.setName(m1.group(1));
+        Matcher mName = NAME.matcher(line);
+        if (mName.matches()) {
+          metadata.setName(mName.group(1));
         } else {
-          Matcher m2 = DESC.matcher(line);
-          if (m2.matches()) {
-            metadata.setDescription(m2.group(1));
+          Matcher mDesc = DESC.matcher(line);
+          if (mDesc.matches()) {
+            metadata.setDescription(mDesc.group(1));
           } else {
-            Matcher m3 = VERSION.matcher(line);
-            if (m3.matches()) {
-              metadata.setVersion(m3.group(1));
+            Matcher mVer = VERSION.matcher(line);
+            if (mVer.matches()) {
+              metadata.setVersion(mVer.group(1));
             } else {
-              Matcher m4 = RECIPE.matcher(line);
-              if (m4.matches()) {
+              Matcher mRecipe = RECIPE.matcher(line);
+              if (mRecipe.matches()) {
                 Recipe r = new Recipe();
-                r.setName(m4.group(1));
-                r.setDescription(m4.group(3));
+                r.setName(mRecipe.group(1));
+                r.setDescription(mRecipe.group(3));
                 r.parseComments(comments);
                 metadata.getRecipes().add(r);
               } else {
-                Matcher m5 = ATTR.matcher(line);
-                if (m5.matches()) {
-                  Attribute attr = new Attribute();
-                  attr.setName(m5.group(1));
-                  while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
-                    line = scanner.nextLine();
-                    Matcher m6 = ATTR_DISP_NAME.matcher(line);
-                    if (m6.matches()) {
-                      attr.setDisplayName(m6.group(1));
+                Matcher mRes = RESULTS_DIR.matcher(line);
+                if (mRes.matches()) {
+                  metadata.setResultsDir(mRes.group(1));
+                } else {
+                  Matcher mBuild = BUILD_COMMAND.matcher(line);
+                  if (mBuild.matches()) {
+                    metadata.setBuildCommand(mBuild.group(1));
+                  } else {
+                    Matcher mUrlBinary = URL_BINARY.matcher(line);
+                    if (mUrlBinary.matches()) {
+                      metadata.setUrlBinary(mUrlBinary.group(1));
                     } else {
-                      Matcher m7 = ATTR_TYPE.matcher(line);
-                      if (m7.matches()) {
-                        attr.setType(m7.group(1));
+                      Matcher mUrlGitclone = URL_GITCLONE.matcher(line);
+                      if (mUrlGitclone.matches()) {
+                        metadata.setBuildCommand(mUrlGitclone.group(1));
                       } else {
-                        Matcher m8 = ATTR_DESC.matcher(line);
-                        if (m8.matches()) {
-                          attr.setDescription(m8.group(1));
-                        } else {
-                          Matcher m9 = ATTR_DEFAULT.matcher(line);
-                          if (m9.matches()) {
-                            attr.setDefault(m9.group(1));
-                          } else {
-                            Matcher m10 = ATTR_REQUIRED.matcher(line);
-                            if (m10.matches()) {
-                              attr.setRequired(m10.group(1));
+                        Matcher mAttr = ATTR.matcher(line);
+                        if (mAttr.matches()) {
+                          Attribute attr = new Attribute();
+                          attr.setName(mAttr.group(1));
+                          while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
+                            line = scanner.nextLine();
+                            Matcher mGroup = ATTR_DISP_NAME.matcher(line);
+                            if (mGroup.matches()) {
+                              attr.setDisplayName(mGroup.group(1));
+                            } else {
+                              Matcher mAttrType = ATTR_TYPE.matcher(line);
+                              if (mAttrType.matches()) {
+                                attr.setType(mAttrType.group(1));
+                              } else {
+                                Matcher mAttrDesc = ATTR_DESC.matcher(line);
+                                if (mAttrDesc.matches()) {
+                                  attr.setDescription(mAttrDesc.group(1));
+                                } else {
+                                  Matcher mAttrDef = ATTR_DEFAULT.matcher(line);
+                                  if (mAttrDef.matches()) {
+                                    attr.setDefault(mAttrDef.group(1));
+                                  } else {
+                                    Matcher mAreqd = ATTR_REQUIRED.matcher(line);
+                                    if (mAreqd.matches()) {
+                                      attr.setRequired(mAreqd.group(1));
+                                    }
+                                  }
+                                }
+                              }
+
                             }
                           }
+                          metadata.getAttributes().add(attr);
                         }
                       }
-
                     }
                   }
-                  metadata.getAttributes().add(attr);
                 }
               }
             }

@@ -9,7 +9,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,6 +56,10 @@ public class Confs<K extends String, V extends String> extends Properties {
       File file = new File(folder, Settings.KARAMEL_CONF_NAME);
       out = new FileOutputStream(file);
       store(out, "Karamel configurations");
+      Set<PosixFilePermission> perms = new HashSet<>();
+      perms.add(PosixFilePermission.OWNER_READ);
+      perms.add(PosixFilePermission.OWNER_WRITE);
+      Files.setPosixFilePermissions(file.toPath(), perms);
     } catch (IOException ex) {
       logger.error("", ex);
     } finally {

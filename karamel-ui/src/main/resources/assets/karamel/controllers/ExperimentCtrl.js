@@ -6,8 +6,11 @@ angular.module('karamel.main')
 
                 var self = this;
 
+                $scope.gs = GithubService;
+
                 $scope.status = {
-                    experimentOpen: true,
+                    experimentOpen: false,
+                    userGroup: false,
                     sourceOpen: false,
                     binaryOpen: false,
                     configOpen: false,
@@ -16,19 +19,30 @@ angular.module('karamel.main')
                     advanced: false,
                     expanded: false
                 };
-                
-                $scope.toggle = function() {
-                    $scope.status.experimentOpen = !$scope.status.experimentOpen;
-                    $scope.status.sourceOpen = !$scope.status.sourceOpen;
-                    $scope.status.binaryOpen = !$scope.status.binaryOpen;
-                    $scope.status.configOpen = !$scope.status.configOpen;
-                    $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
-                    $scope.status.chefOpen = !$scope.status.chefOpen;
-                    $scope.status.advanced = true;
-                    $scope.status.expanded = !$scope.status.expanded;
-                }
 
-                $scope.gs = GithubService;
+
+                $scope.loading = false;
+
+                $scope.experiment = {
+                    user: '',
+                    group: '',
+                    githubRepo: '',
+                    githubOwner: '',
+                    dependencies: '',
+                    urlBinary: '',
+                    urlGitClone: '',
+                    mavenCommand: 'mvn install -DskipTests',
+                    resultsDir: '/tmp/results',
+                    code: [
+                        {
+                            scriptContents: '',
+                            defaultAttributes: '',
+                            preScriptChefCode: '',
+                            scriptType: ''
+                        }
+                    ]
+                };
+
 
                 $scope.landing = true;
                 $scope.load = true;
@@ -59,6 +73,19 @@ angular.module('karamel.main')
                     {value: "ruby", label: "Ruby-Gems"}
                 ];
 
+                
+                $scope.toggle = function() {
+                    $scope.status.advanced = true;
+                    $scope.status.userGroup = !$scope.status.userGroup;
+                    $scope.status.experimentOpen = !$scope.status.experimentOpen;
+                    $scope.status.sourceOpen = !$scope.status.sourceOpen;
+                    $scope.status.binaryOpen = !$scope.status.binaryOpen;
+                    $scope.status.configOpen = !$scope.status.configOpen;
+                    $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
+                    $scope.status.chefOpen = !$scope.status.chefOpen;
+                    $scope.status.expanded = !$scope.status.expanded;
+                }
+
                 $scope.toggleDropdown = function ($event) {
                     $event.preventDefault();
                     $event.stopPropagation();
@@ -72,17 +99,10 @@ angular.module('karamel.main')
                                 if (angular.isDefined(result)) {
                                     $scope.isExpLoaded = true;
                                     $log.info("new experiment modal experiment results ...");
-                                    $scope.experiment.url = "";
                                     $scope.experiment.user = result.user;
                                     $scope.experiment.group = result.group;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
-                                    $scope.experiment.resultsDir = result.resultsDir;
-                                    $scope.experiment.dependencies = result.dependencies;
-                                    $scope.experiment.experimentContext.scriptContents = result.experimentContext.scriptContents;
-                                    $scope.experiment.experimentContext.preScriptChefCode = result.experimentContext.preScriptChefCode;
-                                    $scope.experiment.experimentContext.defaultAttributes = result.experimentContext.defaultAttributes;
-                                    $scope.experiment.experimentContext.scriptType = result.experimentContext.scriptType;
                                     $scope.landing = false;
                                 }
                             });
@@ -97,28 +117,6 @@ angular.module('karamel.main')
                     return GithubService.getEmailhash();
                 }
 
-                $scope.loading = false;
-
-                $scope.experiment = {
-                    binaryUrl: '',
-                    sourceUrl: '',
-                    mavenCommand: 'mvn install -DskipTests',
-                    user: '',
-                    group: '',
-                    githubRepo: '',
-                    githubOwner: '',
-                    resultsDir: '/var/karamel/results',
-                    dependencies: '',
-                    experimentContext: [
-                        {
-                            scriptContents: '',
-                            defaultAttributes: '',
-                            preScriptChefCode: '',
-                            scriptType: ''
-                        }
-                    ]
-                };
-
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
                     GithubService.getCredentials();
@@ -131,17 +129,19 @@ angular.module('karamel.main')
                                 if (angular.isDefined(data)) {
                                     $log.info("Experiment Loaded Successfully.");
                                     $scope.isExpLoaded = true;
-                                    $scope.experiment.url = data.url;
+                                    $scope.experiment.urlBinary = data.urlBinary;
+                                    $scope.experiment.urlGitClone = data.urlGitClone;
+                                    $scope.experiment.mavenCommand = data.mavenCommand;
+                                    $scope.experiment.dependencies = data.dependencies;
                                     $scope.experiment.user = data.user;
                                     $scope.experiment.group = data.group;
                                     $scope.experiment.githubRepo = data.githubRepo;
                                     $scope.experiment.githubOwner = data.githubOwner;
-                                    $scope.experiment.resultsDir = data.resultsDir;
-                                    $scope.experiment.dependencies = data.dependencies;
-                                    $scope.experiment.experimentContext.scriptContents = data.experimentContext.scriptContents;
-                                    $scope.experiment.experimentContext.preScriptChefCode = data.experimentContext.preScriptChefCode;
-                                    $scope.experiment.experimentContext.defaultAttributes = data.experimentContext.defaultAttributes;
-                                    $scope.experiment.experimentContext.scriptType = data.experimentContext.scriptType;
+                                    $scope.experiment.context.resultsDir = data.context.resultsDir;
+                                    $scope.experiment.context.scriptContents = data.context.scriptContents;
+                                    $scope.experiment.context.preScriptChefCode = data.context.preScriptChefCode;
+                                    $scope.experiment.context.defaultAttributes = data.context.defaultAttributes;
+                                    $scope.experiment.context.scriptType = data.context.scriptType;
                                     $scope.landing = false;
                                 }
                             })
@@ -188,7 +188,7 @@ angular.module('karamel.main')
                     function (isConfirm) {
 
                         if (isConfirm) {
-                            KaramelCoreRestServices.pushExperiment(experimentContext)
+                            KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
 //                                $scope.experimentContext = data;
                                         SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");

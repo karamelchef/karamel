@@ -13,7 +13,7 @@ import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
@@ -72,7 +72,7 @@ public class TestKaramelizedCookbook {
       assertEquals("experiment", er.getRecipeName());
       assertEquals(er.getPreScriptContents().isEmpty(), false);
       assertEquals(er.getScriptContents().isEmpty(), false);
-      assertEquals(er.getScriptType(), ExperimentContext.ScriptType.bash);
+      assertEquals(er.getScriptType(), Experiment.ScriptType.bash);
     } catch (RecipeParseException ex) {
       Assert.fail(ex.toString());
     }

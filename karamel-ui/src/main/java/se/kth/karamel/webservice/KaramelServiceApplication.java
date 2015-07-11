@@ -51,12 +51,11 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import static org.bouncycastle.cms.RecipientId.password;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
@@ -882,7 +881,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public static class PushExperiment {
 
       @PUT
-      public Response pushExperiment(ExperimentContext experiment) {
+      public Response pushExperiment(Experiment experiment) {
         Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
@@ -912,7 +911,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
-          ExperimentContext ec = karamelApiHandler.loadExperiment(experimentUrl);
+          Experiment ec = karamelApiHandler.loadExperiment(experimentUrl);
           response = Response.status(Response.Status.OK).entity(ec).build();
         } catch (KaramelException e) {
           e.printStackTrace();

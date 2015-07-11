@@ -11,7 +11,7 @@ import java.io.File;
 import java.util.List;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
-import se.kth.karamel.backend.ExperimentContext;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.github.Github;
@@ -248,7 +248,7 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void commitAndPushExperiment(String owner, String repoName, ExperimentContext experiment)
+  public void commitAndPushExperiment(String owner, String repoName, Experiment experiment)
       throws KaramelException {
 
     // 1. Create the repo if it doesn't exist and clone it to a local directory
@@ -271,8 +271,8 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public ExperimentContext loadExperiment(String githubRepoUrl) throws KaramelException {
-    ExperimentContext ec = new ExperimentContext();
+  public Experiment loadExperiment(String githubRepoUrl) throws KaramelException {
+    Experiment ec = new Experiment();
 
     int e = githubRepoUrl.lastIndexOf(".git");
     int s = githubRepoUrl.lastIndexOf("/");
@@ -305,9 +305,9 @@ public class KaramelApiImpl implements KaramelApi {
     
     ec.setUser(attributes.getValue(repoName + "/user"));
     ec.setGroup(attributes.getValue(repoName + "/group"));
-    ec.setUrl(attributes.getValue(repoName + "/url"));
+    ec.setUrlBinary(attributes.getValue(repoName + "/url"));
     
-    ExperimentContext.Experiment exp = new ExperimentContext.Experiment();
+    Experiment.Code exp = new Experiment.Code();
     ec.addExperiment("experiment", exp);
     exp.setDefaultAttributes(attributes.getExperimentContextFormat());
     exp.setPreScriptChefCode(er.getPreScriptContents());
