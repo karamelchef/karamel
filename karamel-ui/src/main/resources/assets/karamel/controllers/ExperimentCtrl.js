@@ -107,7 +107,7 @@ angular.module('karamel.main')
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
-                    resultsDir: 'results',
+                    resultsDir: '/var/karamel/results',
                     dependencies: '',
                     experimentContext: [
                         {
