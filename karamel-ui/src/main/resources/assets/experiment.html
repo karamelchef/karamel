@@ -91,16 +91,19 @@
                     <label class="control-label" for="githubUrl">URL:</label>
                     <span name="githubUrl">{{gs.repo.sshUrl| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
                 </div>
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1">
+                    Expand All<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}" ng-click="experimentCtrl.expandAll()" >
+                </div>
             </div>
 
             <div class="row form-group">    
                 <span class="col-md-1 col-lg-1"></span>
-                <label for="advancedExperiment" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
-                    <input type="checkbox" id="advancedExperiment" name="advancedExperiment" ng-model="advancedExperiment" tabindex="4">
+                <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
+                    <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                 </label>
             </div>
 
-            <div class="row form-group" ng-show="advancedExperiment">
+            <div class="row form-group" ng-show="status.advanced">
                 <span class="col-md-1 col-lg-1"></span>
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                     <label class="control-label" for="user">Username
@@ -117,89 +120,139 @@
                 </div>
             </div>
 
-            <div class="row form-group"  ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                    <label class="text" for="chefCode">Chef Setup Code</label>
-                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
-                </div>
+
+            <div class="row form-group col-lg-10"  ng-show="status.advanced">
+
+                <accordion close-others="false">
+
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.binaryOpen">
+                        <accordion-heading>
+                            Download Binary using Http<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.binaryOpen, 'glyphicon-resize-full': !status.binaryOpen}"></i>
+                        </accordion-heading>
+                        <div class="row">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
+                                <label for="experimentBinaryUrl" class="control-label">URL to download and extract program. </label>
+                                <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.binaryUrl" type="text" tabindex="12" required>
+                            </div>
+                        </div>
+
+                    </accordion-group>
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.sourceOpen">
+                        <accordion-heading>
+                            Build Maven Project from GitHub Repository<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
+                        </accordion-heading>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
+                                <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
+                                <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.sourceUrl" type="text" tabindex="13" required>
+                            </div>        
+                        </div>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
+                                <label for="mavenCommand" class="control-label">Maven command</label>
+                                <input name="mavenCommand" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="13" required>
+                            </div>        
+                        </div>
+
+                    </accordion-group>
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.dependenciesOpen">
+                        <accordion-heading>
+                            Dependencies: Services that should be running for my Experiment <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.dependenciesOpen, 'glyphicon-resize-full': !status.dependenciesOpen}"></i>
+                        </accordion-heading>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">    
+                                <label for="dependencies" class="control-label">Comma-separated list of cookbook::recipe entries. Generates the Karamelfile to orchestrate when to run the experiment.</label>
+                                <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
+                            </div>        
+                        </div>        
+                    </accordion-group>
+                </accordion>
+            </div>
+            <br/>
+
+
+
+
+            <div class="row form-group col-lg-10">
+
+                <accordion close-others="false">
+
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.experimentOpen">
+                        <accordion-heading>
+                            Experiment Code<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.experimentOpen, 'glyphicon-resize-full': !status.experimentOpen}"></i>
+                        </accordion-heading>
+
+                        <div class="row form-group">
+                            <!--<span class="col-md-1 col-lg-1"></span>-->
+                            <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                <select name="scriptTypes" ng-model="scriptTypes"
+                                        ng-options="obj.value as obj.label for obj in scriptTypes">
+                                    <option value="">Script type for your experiment.</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <!--<span class="col-md-1 col-lg-1"></span>-->
+                            <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                <!--<label for="experimentScript">Experiment Code</label>-->
+                                <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row form-group" ng-show="status.advanced">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-3 col-sm-3 col-md-6 col-lg-6">
+                                <label for="results" class="control-label">Results Directory</label>
+                                <input name="results" ng-model="experiment.resultsDir" class="form-control "
+                                       type="text" tabindex="15" required>
+                            </div>
+                        </div>
+
+
+                    </accordion-group>
+
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.configOpen">
+                        <accordion-heading>
+                            Configuration <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.configOpen, 'glyphicon-resize-full': !status.configOpen}"></i>
+                        </accordion-heading>
+
+                        <div class="row form-group">
+                            <!--<span class="col-md-1 col-lg-1"></span>-->
+                            <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                <!--<div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">-->
+                                <!--<label for="configFile" class="text">Config File</label>-->
+                                <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                    </accordion-group>
+
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.chefOpen">
+                        <accordion-heading>
+                            Pre-Experiment Chef Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
+                        </accordion-heading>
+                        <div class="row form-group">
+                            <!--<span class="col-md-1 col-lg-1"></span>-->
+                            <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
+                                <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
+                            </div>
+                        </div>
+                    </accordion-group>
+                </accordion>            
             </div>
 
-            <div class="row form-group"  ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                    <label for="configFile" class="text">Config File</label>
-                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
-                </div>
-            </div>
 
-
-            <div class="row form-group" ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
-                    <label for="downloadBinary" class="control-label">Download Binary 
-                        <input type="checkbox" name="downloadBinary" ng-model="isBinary" tabindex="11">
-                    </label>
-                </div>
-            </div>        
-            <div class="row" ng-show="isBinary && advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
-                    <label for="experimentBinaryUrl" class="control-label">URL: </label>
-                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.binaryUrl" type="text" tabindex="12" required>
-                </div>
-            </div>
-
-            <div class="row form-group" ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">
-                    <label for="downloadSource" class="control-label">Build Maven project from GitHub <input type="checkbox" name="downloadSource" ng-model="isSource" tabindex="5">
-                    </label> 
-                </div>
-            </div>        
-            <div class="row form-group" ng-show="isSource && advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
-                    <label for="experimentSourceUrl" class="control-label">GitHub URL: </label>
-                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.sourceUrl" type="text" tabindex="13" required>
-                </div>        
-            </div>
-
-
-            <div class="row form-group" ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-6 col-md-6 col-lg-6">    
-                    <label for="dependencies" class="control-label">Dependencies </label>
-                    <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
-                </div>        
-            </div>        
-
-            <div class="row form-group" ng-show="advancedExperiment">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-3 col-sm-3 col-md-6 col-lg-6">
-                    <label class="control-label">Results Directory</label>
-                    <input name="user" ng-model="experiment.resultsDir" class="form-control "
-                           type="text" tabindex="15" required>
-                </div>
-            </div>
-            
-            
-            <div class="row form-group">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                    <select name="scriptTypes" ng-model="scriptTypes"
-                            ng-options="obj.value as obj.label for obj in scriptTypes">
-                        <option value="">Script type for your experiment.</option>
-                    </select>
-                </div>
-            </div>
-            <div class="row form-group">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                    <label for="experimentScript">Experiment Code</label>
-                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.experimentContext.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
-                </div>
-            </div>
 
     </div>
 

@@ -5,8 +5,28 @@ angular.module('karamel.main')
             function ($log, $scope, SweetAlert, KaramelCoreRestServices, GithubService, ModalService) {
 
                 var self = this;
-                $scope.isBinary = false;
-                $scope.isSource = false;
+
+                $scope.status = {
+                    experimentOpen: true,
+                    sourceOpen: false,
+                    binaryOpen: false,
+                    configOpen: false,
+                    depdenciesOpen: false,
+                    chefOpen: false,
+                    advanced: false,
+                    expanded: false
+                };
+                
+                self.expandAll = function() {
+                    $scope.status.experimentOpen = !$scope.status.experimentOpen;
+                    $scope.status.sourceOpen = !$scope.status.sourceOpen;
+                    $scope.status.binaryOpen = !$scope.status.binaryOpen;
+                    $scope.status.configOpen = !$scope.status.configOpen;
+                    $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
+                    $scope.status.chefOpen = !$scope.status.chefOpen;
+                    $scope.status.advanced = true;
+                    $scope.status.expanded = !$scope.status.expanded;
+                }
 
                 $scope.gs = GithubService;
 
@@ -23,13 +43,6 @@ angular.module('karamel.main')
                 $scope.preScriptInvalid = false;
                 $scope.scriptInvalid = false;
 
-                $scope.toggleIsBinary = function () {
-                    $scope.isBinary = $scope.isBinary === false ? true : false;
-                };
-
-                $scope.toggleIsSource = function () {
-                    $scope.isSource = $scope.isSource === false ? true : false;
-                };
 
                 $scope.scriptTypes = [
                     {value: "bash", label: "Bash"},
@@ -46,10 +59,6 @@ angular.module('karamel.main')
                     {value: "ruby", label: "Ruby-Gems"}
                 ];
 
-
-                $scope.status = {
-                    isopen: false
-                };
                 $scope.toggleDropdown = function ($event) {
                     $event.preventDefault();
                     $event.stopPropagation();
@@ -93,6 +102,7 @@ angular.module('karamel.main')
                 $scope.experiment = {
                     binaryUrl: '',
                     sourceUrl: '',
+                    mavenCommand: 'mvn install -DskipTests',
                     user: '',
                     group: '',
                     githubRepo: '',
@@ -100,7 +110,7 @@ angular.module('karamel.main')
                     resultsDir: 'results',
                     dependencies: '',
                     experimentContext: [
-                        {   
+                        {
                             scriptContents: '',
                             defaultAttributes: '',
                             preScriptChefCode: '',
