@@ -60,11 +60,13 @@ public class ChefExperimentExtractor {
 
     attrs.clear();
     // Add recipeNames to metadata.rb
+    StringBuilder recipeDescriptions = new StringBuilder();
     Set<String> recipeNames = experiment.getExperiments().keySet();
     // Parse all the config variables and put them into attributes/default.rb
     Map<String, Code> experiments = experiment.getExperiments();
 
     for (String recipeName : recipeNames) {
+      recipeDescriptions.append("recipe            " + repoName + "::" + recipeName + ", Experiment: " + recipeName).append(System.lineSeparator());
       Code exp = experiments.get(recipeName);
       String str = exp.getDefaultAttributes();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
@@ -111,7 +113,8 @@ public class ChefExperimentExtractor {
           "resolve_ips", "",
           "results_dir", experiment.getResultsDir(),
           "build_command", experiment.getMavenCommand(),
-          "ip_params", ""
+          "ip_params", "",
+          "%%more_recipes%%", recipeDescriptions.toString()
       );
       for (String recipe : recipeNames) {
         String entry = "recipe \"" + repoName + "::" + recipe + "\", \"Executes experiment as "
@@ -150,7 +153,9 @@ public class ChefExperimentExtractor {
     try {
       StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_RECIPE_INSTALL,
-          "name", repoName
+          "name", repoName,
+          "checksum", "",
+          "setup_code", experimentContext.getExperimentSetupCode()
       );
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
 
@@ -206,14 +211,34 @@ public class ChefExperimentExtractor {
             "group", experimentContext.getGroup(),
             "script_contents", experiment.getScriptContents()
         );
+        
+        StringBuilder experimentProvider = CookbookGenerator.instantiateFromTemplate(
+            Settings.CB_TEMPLATE_PROVIDERS_START,
+            "name", recipe,
+            "interpreter", experiment.getScriptType().toString(),
+            "user", experimentContext.getUser(),
+            "group", experimentContext.getGroup(),
+            "script_contents", experiment.getScriptContents()
+        );
+        
+        StringBuilder experimentResources = CookbookGenerator.instantiateFromTemplate(
+            Settings.CB_TEMPLATE_RESOURCES_START);
         // Replace all parameters with chef attribute values
         String recipeContents = recipe_rb.toString();
         for (String attr : attrs.keySet()) {
           recipeContents = recipeContents.replaceAll("%%" + attr + "%%", "#{node[:" + repoName + "][:" + attr + "]}");
         }
+        
+        // Replace all parameters with chef attribute values
+        String experimentContents = experimentProvider.toString();
+        for (String attr : attrs.keySet()) {
+          experimentContents = experimentContents.replaceAll("%%" + attr + "%%", "#{node[:" + repoName + "][:" + attr + "]}");
+        }
 
         // 3. write them to files and push to github
         Github.addFile(owner, repoName, "recipes" + File.separator + recipe + ".rb", recipeContents);
+        Github.addFile(owner, repoName, "providers" + File.separator + recipe + ".rb", experimentContents);
+        Github.addFile(owner, repoName, "resources" + File.separator + recipe + ".rb", experimentResources.toString());
 
         String defaultAttrsContents = experiment.getDefaultAttributes();
         if (defaultAttrsContents != null && defaultAttrsContents.isEmpty()) {

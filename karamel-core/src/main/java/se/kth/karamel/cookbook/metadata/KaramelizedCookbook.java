@@ -8,6 +8,7 @@ package se.kth.karamel.cookbook.metadata;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,6 +31,8 @@ public class KaramelizedCookbook {
   private final Berksfile berksFile;
   private String configFile;
   private ExperimentRecipe experimentRecipe;
+  private List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
+  private ExperimentRecipe installRecipe;
   private String json;
 
   public KaramelizedCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
@@ -56,8 +59,11 @@ public class KaramelizedCookbook {
           + urls.configFile, ex);
     }
     try {
+      List<Recipe> recipes = this.metadataRb.getRecipes();
+      String experimentContents = IoUtils.readContent(urls.experimentRecipe);
+      this.experimentRecipe = ExperimentRecipeParser.parse(experimentContents);
       String recipeContents = IoUtils.readContent(urls.experimentRecipe);
-      this.experimentRecipe = ExperimentRecipeParser.parse(recipeContents);
+      this.installRecipe = ExperimentRecipeParser.parse(recipeContents);
     } catch (IOException ex) {
       Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
           + urls.experimentRecipe, ex);

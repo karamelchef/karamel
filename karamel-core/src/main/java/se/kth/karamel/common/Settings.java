@@ -224,6 +224,7 @@ public class Settings {
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
   public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"
       + File.separator + "backend" + File.separator + "templates" + File.separator;
+  public static final String CB_TEMPLATE_EXPERIMENT_CLUSTER = CB_TEMPLATE_PATH_ROOT + "experiment_cluster";
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
   public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
@@ -236,6 +237,8 @@ public class Settings {
   public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
   public static final String CB_TEMPLATE_README = CB_TEMPLATE_PATH_ROOT + "README.md";
+  public static final String CB_TEMPLATE_PROVIDERS_START = CB_TEMPLATE_PATH_ROOT + "providers_start";
+  public static final String CB_TEMPLATE_RESOURCES_START = CB_TEMPLATE_PATH_ROOT + "resources_start";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
 
   // Relative file locations of files in cookbook scaffolding
@@ -245,6 +248,9 @@ public class Settings {
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
   public static final String COOKBOOK_README_PATH = File.separator + "README.md";
+  public static final String COOKBOOK_EXPERIMENT_CLUSTER_PATH = File.separator + "experiments" + File.separator + "experiment.yml";
+  public static final String COOKBOOK_PROVIDERS_EXP_PATH = File.separator + "providers" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RESOURCES_EXP_PATH = File.separator + "resources" + File.separator + "experiment.rb";
   public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";

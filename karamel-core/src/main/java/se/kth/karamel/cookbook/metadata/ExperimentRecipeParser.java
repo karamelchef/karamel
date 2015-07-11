@@ -13,20 +13,20 @@ public class ExperimentRecipeParser {
 
   /**
    *
-   * @param content
+   * @param recipeContent
    * @return an experiment recipe
    * @throws se.kth.karamel.common.exception.RecipeParseException
    */
-  public static ExperimentRecipe parse(String content) throws RecipeParseException {
+  public static ExperimentRecipe parse(String recipeContent, String installContent) throws RecipeParseException {
 
-    Matcher mp = EXPERIMENT_SCRIPT.matcher(content);
+    Matcher mp = EXPERIMENT_SCRIPT.matcher(recipeContent);
     boolean foundPreScript = mp.find();
     if (!foundPreScript) {
       throw new RecipeParseException(
           "Could not find in the recipe any chef code before a script resource like \"script 'run_experiment' do\" ");
     }
-    String preScript = content.substring(0, mp.start());
-    String postScript = content.substring(mp.start());
+    String preScript = recipeContent.substring(0, mp.start());
+    String postScript = recipeContent.substring(mp.start());
     
     Matcher ms = EXPERIMENT_DELIMITER.matcher(postScript);
     boolean foundStart = ms.find();

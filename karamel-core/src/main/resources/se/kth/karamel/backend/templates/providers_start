@@ -1,0 +1,13 @@
+action :start do
+
+    script 'run_experiment' do
+      cwd "/usr/local/%%name%%"
+      user '%%user%%'
+      group '%%group%%'
+      interpreter "%%interpreter%%"
+      code <<-EOM
+        %%script_contents%%
+      EOM
+    end
+
+end

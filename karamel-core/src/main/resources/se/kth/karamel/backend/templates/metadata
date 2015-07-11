@@ -5,7 +5,9 @@ license          "Apache v2.0"
 description      'Installs/Configures/Runs %%name%%'
 version          "0.1"
 
+recipe            "%%name%%::install", "Experiment setup for %%name%%"
 recipe            "%%name%%::experiment", "Runs %%name%% experiment"
+%%more_recipes%%
 
 depends 'kagent'
 depends 'ark'

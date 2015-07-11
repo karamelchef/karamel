@@ -34,10 +34,12 @@ angular.module('karamel.main')
                     urlGitClone: '',
                     mavenCommand: 'mvn install -DskipTests',
                     resultsDir: '/tmp/results',
+                    experimentSetupCode: '',
+                    defaultAttributes: '',
                     code: [
                         {
+                            name: 'experiment',
                             scriptContents: '',
-                            defaultAttributes: '',
                             preScriptChefCode: '',
                             scriptType: ''
                         }
@@ -139,6 +141,7 @@ angular.module('karamel.main')
                                     $scope.experiment.group = data.group;
                                     $scope.experiment.githubRepo = data.githubRepo;
                                     $scope.experiment.githubOwner = data.githubOwner;
+                                    $scope.experiment.experimentSetupCode = data.experimentSetupCode;
                                     $scope.experiment.context.resultsDir = data.context.resultsDir;
                                     $scope.experiment.context.scriptContents = data.context.scriptContents;
                                     $scope.experiment.context.preScriptChefCode = data.context.preScriptChefCode;

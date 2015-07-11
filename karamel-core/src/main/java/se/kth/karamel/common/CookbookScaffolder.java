@@ -63,6 +63,9 @@ public class CookbookScaffolder {
     // Create all the directories for the coookbook 
     mkdirs(cbName + "recipes");
     mkdirs(cbName + "attributes");
+    mkdirs(cbName + "resources");
+    mkdirs(cbName + "providers");
+    mkdirs(cbName + "experiments");
     mkdirs(cbName + "templates" + File.separator + "default");
 
     // Create all the files for the coookbook using the file-templates in the resources

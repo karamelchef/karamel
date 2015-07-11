@@ -62,6 +62,8 @@ public class Experiment {
 
   private String githubOwner = "";
 
+  private String experimentSetupCode = "";
+
 //  private String attributes = "";
   @XmlRootElement
   public static class Code {
@@ -70,7 +72,6 @@ public class Experiment {
     private String defaultAttributes;
     private String preScriptChefCode;
     private ScriptType scriptType;
-    private String resultsDir;
 
     /**
      * Create an experiment as a Chef recipe.
@@ -130,6 +131,14 @@ public class Experiment {
   }
 
   public Experiment() {
+  }
+
+  public String getExperimentSetupCode() {
+    return experimentSetupCode;
+  }
+
+  public void setExperimentSetupCode(String experimentSetupCode) {
+    this.experimentSetupCode = experimentSetupCode;
   }
 
   public String getResultsDir() {

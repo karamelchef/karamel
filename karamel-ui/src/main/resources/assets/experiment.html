@@ -95,7 +95,7 @@
 
             <div class="row form-group">    
                 <div class="col-sm-10 col-md-10 col-lg-10">    
-                <span class="col-md-1 col-lg-1"></span>
+                    <span class="col-md-1 col-lg-1"></span>
                     <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
@@ -118,19 +118,19 @@
                             Username/group that owns the binaries/source-code installed and the experiment scripts and results.
                             <div class="row">
                                 <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <label class="control-label" for="user">Username
-                        <input name="user" ng-model="experiment.user" class="form-control "
-                               type="text" tabindex="7" required>
-                    </label>
-                </div>
-                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <label class="control-label" for="group">Group
-                        <input name="group" ng-model="experiment.group" class="form-control "
-                               type="text" tabindex="8" required>
-                    </label>
-                </div>
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <label class="control-label" for="user">Username
+                                        <input name="user" ng-model="experiment.user" class="form-control "
+                                               type="text" tabindex="7" required>
+                                    </label>
+                                </div>
+                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
+                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                                    <label class="control-label" for="group">Group
+                                        <input name="group" ng-model="experiment.group" class="form-control "
+                                               type="text" tabindex="8" required>
+                                    </label>
+                                </div>
 
                             </div>
 
@@ -183,7 +183,39 @@
                                 </div>        
                             </div>        
                         </accordion-group>
-                    </accordion>
+
+                        <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
+                        <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
+                            <accordion-heading>
+                                Experiment Setup - Chef Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
+                            </accordion-heading>
+                            <div class="row form-group">
+                                <span class="col-md-1 col-lg-1"></span>
+                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                    <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
+                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="9"  class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </accordion-group>
+
+                        <accordion close-others="false">
+                            <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
+                            <accordion-group is-open="status.configOpen" ng-show="status.advanced">
+                                <accordion-heading>
+                                    Configuration <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.configOpen, 'glyphicon-resize-full': !status.configOpen}"></i>
+                                </accordion-heading>
+
+                                <div class="row form-group">
+                                    <span class="col-md-1 col-lg-1"></span>
+                                    <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                        <!--<div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">-->
+                                        <!--<label for="configFile" class="text">Config File</label>-->
+                                        <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                                    </div>
+                                </div>
+                            </accordion-group>
+
+                        </accordion>
                 </div>
             </div>
             <br/>
@@ -194,74 +226,75 @@
             <div class="row form-group col-lg-12">
                 <div class="row form-group col-lg-10" style="margin-left:10px">
 
-                    <accordion close-others="false">
-                        <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
-                        <accordion-group is-open="status.configOpen" ng-show="status.advanced">
-                            <accordion-heading>
-                                Configuration <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.configOpen, 'glyphicon-resize-full': !status.configOpen}"></i>
-                            </accordion-heading>
 
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <!--<div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">-->
-                                    <!--<label for="configFile" class="text">Config File</label>-->
-                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.code.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
-                                </div>
+                    <!--                        <span class="col-md-1 col-lg-1"></span>
+                                            <accordion-group is-open="status.experimentOpen">
+                                                <accordion-heading>
+                                                    Experiment Code<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.experimentOpen, 'glyphicon-resize-full': !status.experimentOpen}"></i>
+                                                </accordion-heading>
+                    
+                                                <div class="row form-group">
+                                                    <span class="col-md-1 col-lg-1"></span>
+                                                    <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                                        <select name="scriptTypes" ng-model="scriptTypes"
+                                                                ng-options="obj.value as obj.label for obj in scriptTypes">
+                                                            <option value="">Script type for your experiment.</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="row form-group">
+                                                    <span class="col-md-1 col-lg-1"></span>
+                                                    <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
+                                                        <label for="experimentScript">Experiment Code</label>
+                                                        <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.code.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
+                                                    </div>
+                                                </div>
+                                                <br/>
+                    
+                                                <div class="row form-group">
+                                                    <span class="col-md-1 col-lg-1"></span>
+                                                    <div class="col-xs-3 col-sm-8 col-md-10 col-lg-10">
+                                                        <label for="results" class="control-label">Full path to the Results Directory on the Experiment Server. </label>
+                                                        <input name="results" ng-model="experiment.resultsDir" class="form-control "
+                                                               type="text" tabindex="15" required>
+                                                        <span>The contents of this directory will be downloaded using scp to this machine running Karamel and stored in: $HOME_DIR/.karamel/results.</span>
+                                                    </div>
+                                                </div>
+                                            </accordion-group>-->
+
+                    <span class="col-md-1 col-lg-1"></span>
+                    <accordion-group is-open="status.experimentOpen" ng-repeat="exp in experiment.code">
+                        <accordion-heading>
+                            {{exp.name}}: Code<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.experimentOpen, 'glyphicon-resize-full': !status.experimentOpen}"></i>
+                        </accordion-heading>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                                <select name="scriptTypes" ng-model="scriptTypes"
+                                        ng-options="obj.value as obj.label for obj in scriptTypes">
+                                    <option value="">Script type for your experiment.</option>
+                                </select>
                             </div>
-
-                        </accordion-group>
-
-                        <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
-                        <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
-                            <accordion-heading>
-                                Pre-Experiment Chef Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
-                            </accordion-heading>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
-                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.code.preScriptChefCode" placeholder="Chef code run before the recipe"  tabindex="9"  class="form-control"></textarea>
-                                </div>
+                        </div>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
+                                <!--<label for="experimentScript">Experiment Code</label>-->
+                                <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
                             </div>
-                        </accordion-group>
+                        </div>
+                        <br/>
 
-                        <span class="col-md-1 col-lg-1"></span>
-                        <accordion-group is-open="status.experimentOpen">
-                            <accordion-heading>
-                                Experiment Code<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.experimentOpen, 'glyphicon-resize-full': !status.experimentOpen}"></i>
-                            </accordion-heading>
-
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="form-group col-xs-4 col-sm-4 col-md-4 col-lg-4">
-                                    <select name="scriptTypes" ng-model="scriptTypes"
-                                            ng-options="obj.value as obj.label for obj in scriptTypes">
-                                        <option value="">Script type for your experiment.</option>
-                                    </select>
-                                </div>
+                        <div class="row form-group">
+                            <span class="col-md-1 col-lg-1"></span>
+                            <div class="col-xs-3 col-sm-8 col-md-10 col-lg-10">
+                                <label for="results" class="control-label">Full path to the Results Directory on the Experiment Server. </label>
+                                <input name="results" ng-model="exp.resultsDir" class="form-control "
+                                       type="text" tabindex="15" required>
+                                <span>The contents of this directory will be downloaded using scp to this machine running Karamel and stored in: $HOME_DIR/.karamel/results.</span>
                             </div>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-                                    <!--<label for="experimentScript">Experiment Code</label>-->
-                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.code.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
-                                </div>
-                            </div>
-                            <br/>
-
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-8 col-md-10 col-lg-10">
-                                    <label for="results" class="control-label">Full path to the Results Directory on the Experiment Server. </label>
-                                    <input name="results" ng-model="experiment.resultsDir" class="form-control "
-                                           type="text" tabindex="15" required>
-                                    <span>The contents of this directory will be downloaded using scp to this machine running Karamel and stored in: $HOME_DIR/.karamel/results.</span>
-                                </div>
-                            </div>
-
-
-                        </accordion-group>
+                        </div>
+                    </accordion-group>
 
                     </accordion>            
                 </div>
