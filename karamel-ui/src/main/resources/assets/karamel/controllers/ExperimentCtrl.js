@@ -17,7 +17,7 @@ angular.module('karamel.main')
                     expanded: false
                 };
                 
-                self.expandAll = function() {
+                $scope.toggle = function() {
                     $scope.status.experimentOpen = !$scope.status.experimentOpen;
                     $scope.status.sourceOpen = !$scope.status.sourceOpen;
                     $scope.status.binaryOpen = !$scope.status.binaryOpen;

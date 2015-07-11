@@ -91,7 +91,7 @@
                     <label class="control-label">URL:</label>
                     <span>{{gs.repo.sshUrl| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
                 </div>
-                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-click="experimentCtrl.expandAll()">
+                <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center" ng-click="toggle">
                     View <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
                 </div>
             </div>
@@ -186,9 +186,6 @@
                 <div class="row form-group col-lg-10">
 
                     <accordion close-others="false">
-
-                        <span class="col-md-1 col-lg-1"></span>
-
                         <span class="col-md-1 col-lg-1"></span>
                         <accordion-group is-open="status.configOpen" ng-show="status.advanced">
                             <accordion-heading>
@@ -219,6 +216,8 @@
                                 </div>
                             </div>
                         </accordion-group>
+
+                        <span class="col-md-1 col-lg-1"></span>
                         <accordion-group is-open="status.experimentOpen">
                             <accordion-heading>
                                 Experiment Code<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.experimentOpen, 'glyphicon-resize-full': !status.experimentOpen}"></i>
@@ -253,6 +252,7 @@
 
 
                         </accordion-group>
+
                     </accordion>            
                 </div>
             </div>
