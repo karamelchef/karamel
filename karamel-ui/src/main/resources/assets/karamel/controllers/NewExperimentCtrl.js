@@ -11,6 +11,14 @@ angular.module('karamel.main')
                 $scope.submittedOngoing = false;
                 $scope.submittedMsg = "";
 
+                self.githubDetails = {
+                    user: '',
+                    group: '',
+                    githubRepo: '',
+                    githubOwner: '',
+                    description: ''
+                };
+
                 self.selectOrg = function (name) {
                     GithubService.setOrg(name);
                 };
@@ -47,6 +55,7 @@ angular.module('karamel.main')
                                 self.githubDetails.group = $scope.github.repo.name;
                                 self.githubDetails.githubRepo = $scope.github.repo.name;
                                 self.githubDetails.githubOwner = $scope.github.org.name;
+                                self.githubDetails.description = $scope.github.repo.description;
                                 $scope.submittedMsg = "Repo doesn't exist yet.";
                                 $scope.submittedOngoing = false;
                                 self.close(self.githubDetails);
@@ -57,13 +66,6 @@ angular.module('karamel.main')
                 self.getOrgs = function () {
                     GithubService.getOrgs();
                 }
-
-                self.githubDetails = {
-                    user: '',
-                    group: '',
-                    githubRepo: '',
-                    githubOwner: '',
-                };
 
                 self.getOrgs();
             }]);

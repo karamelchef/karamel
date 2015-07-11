@@ -27,6 +27,7 @@ angular.module('karamel.main')
                     user: '',
                     group: '',
                     githubRepo: '',
+                    description: '',
                     githubOwner: '',
                     dependencies: '',
                     urlBinary: '',
@@ -103,6 +104,7 @@ angular.module('karamel.main')
                                     $scope.experiment.group = result.group;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
+                                    $scope.experiment.description = result.description;
                                     $scope.landing = false;
                                 }
                             });
@@ -153,26 +155,26 @@ angular.module('karamel.main')
 
                 $scope.pushExperiment = function pushExperiment() {
 
-                    $scope.experimentNameInvalid = false;
-                    $scope.githubOwnerInvalid = false;
-                    $scope.userInvalid = false;
-                    $scope.groupInvalid = false;
-
-                    if (!$scope.uploadExperiment.experimentName.$valid) {
-                        $scope.experimentNameInvalid = true;
-                    }
-
-                    if (!$scope.uploadExperiment.experimentName.$valid) {
-                        $scope.experimentNameInvalid = true;
-                    }
-
-                    if (!$scope.uploadExperiment.user.$valid) {
-                        $scope.userInvalid = true;
-                    }
-
-                    if (!$scope.uploadExperiment.group.$valid) {
-                        $scope.groupInvalid = true;
-                    }
+//                    $scope.experimentNameInvalid = false;
+//                    $scope.githubOwnerInvalid = false;
+//                    $scope.userInvalid = false;
+//                    $scope.groupInvalid = false;
+//
+//                    if (!$scope.uploadExperiment.experimentName.$valid) {
+//                        $scope.experimentNameInvalid = true;
+//                    }
+//
+//                    if (!$scope.uploadExperiment.experimentName.$valid) {
+//                        $scope.experimentNameInvalid = true;
+//                    }
+//
+//                    if (!$scope.uploadExperiment.user.$valid) {
+//                        $scope.userInvalid = true;
+//                    }
+//
+//                    if (!$scope.uploadExperiment.group.$valid) {
+//                        $scope.groupInvalid = true;
+//                    }
 
 
 

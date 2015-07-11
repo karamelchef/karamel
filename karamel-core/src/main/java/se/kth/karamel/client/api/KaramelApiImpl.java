@@ -251,21 +251,20 @@ public class KaramelApiImpl implements KaramelApi {
   public void commitAndPushExperiment(String owner, String repoName, Experiment experiment)
       throws KaramelException {
 
-    // 1. Create the repo if it doesn't exist and clone it to a local directory
+    // Create the repo if it doesn't exist and clone it to a local directory
     File f = Github.getRepoDirectory(repoName);
     if (f.exists() == false) {
       initGithubRepo(owner, repoName, experiment.getDescription());
+      // Scaffold a new experiment project with Karamel/Chef
+      Github.scaffoldRepo(repoName);
     }
 
-    // 2. Scaffold a new experiment project with Karamel/Chef
-    Github.scaffoldRepo(repoName);
-
-    // 3. For all config and script files, compile them and generate Karamel/Chef files
+    // For all config and script files, compile them and generate Karamel/Chef files
     ChefExperimentExtractor.parseAttributesAddToGit(owner, repoName, experiment);
 
     ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
 
-    // 4. Commit and push all changes to github
+    // Commit and push all changes to github
     Github.commitPush(owner, repoName);
 
   }
