@@ -157,6 +157,12 @@
           var url = _defaultHost.concat("/pushExperiment");
           return _getPromiseObject(method, url, _defaultContentType, experiment);
         },
+        removeExperimentScript: function(org, repo, experimentName) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/removeExperimentScript");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "org" : org, "repo" : repo, "experimentName" : experimentName }));
+        },
         processCommand: function(commandName) {
           var method = 'PUT';
           var url = _defaultHost.concat("/processCommand");

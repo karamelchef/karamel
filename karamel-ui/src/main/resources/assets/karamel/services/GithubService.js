@@ -31,7 +31,6 @@ angular.module('karamel.terminal')
 
 
                 self.setCredentials = function (user, password) {
-                    $log.info("Github Credentials set: " + user + " - " + email + " - " + password);
 
                     KaramelCoreRestServices.setGibhubCredentials(user, password)
                             .success(function (data, status, headers, config) {
@@ -45,7 +44,7 @@ angular.module('karamel.terminal')
                             .error(function (data, status, headers, config) {
                                 self.errorMsg = error.data.errorMsg;
 //                            growl.error("Could not login to github.", {title: 'Error', ttl: 5000});
-                                $log.info("Github Credentials can't be Registered .");
+                                $log.error("Github Credentials can't be Registered .");
                             });
 
                     return self.githubCredentials;
@@ -59,21 +58,16 @@ angular.module('karamel.terminal')
                                 self.githubCredentials.email = data.email;
                                 self.emailHash = md5.createHash(self.githubCredentials.email || '');
                                 self.org.name = data.user;
-                                $log.info("GitHub Credentials found: " + data.user + " - " + data.password + " - " + data.email);
                             })
                             .error(function (data, status, headers, config) {
-                                $log.info("GitHub Credentials not found.");
+                                $log.warn("GitHub Credentials not found.");
                             });
                     return self.githubCredentials;
                 };
                 self.getOrgs = function () {
                     KaramelCoreRestServices.getGithubOrgs()
                             .success(function (data, status, headers, config) {
-                                $log.info("GitHub Orgs found: " + data.length);
                                 for (var i = 0, len = data.length; i < len; i++) {
-                                    $log.info("GitHub Org: " + data[i]);
-                                    $log.info("GitHub Org name: " + data[i].name);
-                                    $log.info("GitHub Org name: " + data[i].gravitar);
                                     self.orgs[i] = {
                                         name: data[i].name,
                                         gravitar: data[i].gravitar
@@ -81,7 +75,7 @@ angular.module('karamel.terminal')
                                 }
                             })
                             .error(function (data, status, headers, config) {
-                                $log.info("GitHub Orgs not found.");
+                                $log.warn("GitHub Orgs not found.");
                             });
                     return self.orgs;
                 };

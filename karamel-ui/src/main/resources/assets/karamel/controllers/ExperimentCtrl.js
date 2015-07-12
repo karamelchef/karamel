@@ -9,7 +9,7 @@ angular.module('karamel.main')
                 $scope.gs = GithubService;
 
                 $scope.status = {
-                    experimentOpen: false,
+                    experimentOpen: true,
                     userGroup: false,
                     sourceOpen: false,
                     binaryOpen: false,
@@ -17,8 +17,54 @@ angular.module('karamel.main')
                     depdenciesOpen: false,
                     chefOpen: false,
                     advanced: false,
-                    expanded: false
+                    expanded: false,
+                    experiment: [
+                        {
+                            name: '',
+                            status: false
+                        }
+                    ]
                 };
+
+                $scope.toggle = function () {
+                    $scope.status.advanced = true;
+                    $scope.status.userGroup = !$scope.status.userGroup;
+                    $scope.status.experimentOpen = !$scope.status.experimentOpen;
+                    $scope.status.sourceOpen = !$scope.status.sourceOpen;
+                    $scope.status.binaryOpen = !$scope.status.binaryOpen;
+                    $scope.status.configOpen = !$scope.status.configOpen;
+                    $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
+                    $scope.status.chefOpen = !$scope.status.chefOpen;
+                    $scope.status.expanded = !$scope.status.expanded;
+                    for (var i = 0; i < $scope.status.experiment.length; i++) {
+                        $scope.status.experiment[i].status = !$scope.status.experiment[i].status;
+                    }
+                }
+
+
+                $scope.isExperimentOpen = function (name) {
+                    for (var i = 0; i < $scope.status.experiment.length; i++) {
+                        if ($scope.status.experiment[i].name === name) {
+                            return $scope.status.experiment[i].status;
+                        }
+                    }
+                    return false;
+                }
+
+                $scope.setExperimentOpenTrue = function (name) {
+                    for (var i = 0; i < $scope.status.experiment.length; i++) {
+                        if ($scope.status.experiment[i].name === name) {
+                            $scope.status.experiment[i].status = true;
+                        }
+                    }
+                }
+                $scope.setExperimentOpenFalse = function (name) {
+                    for (var i = 0; i < $scope.status.experiment.length; i++) {
+                        if ($scope.status.experiment[i].name === name) {
+                            $scope.status.experiment[i].status = false;
+                        }
+                    }
+                }
 
 
                 $scope.loading = false;
@@ -33,14 +79,15 @@ angular.module('karamel.main')
                     urlBinary: '',
                     urlGitClone: '',
                     mavenCommand: 'mvn install -DskipTests',
-                    resultsDir: '/tmp/results',
+//                    resultsDir: '/tmp/results',
                     experimentSetupCode: '',
                     defaultAttributes: '',
                     code: [
                         {
                             name: 'experiment',
                             scriptContents: '',
-                            preScriptChefCode: '',
+                            configFileName: '',
+                            configFileContents: '',
                             scriptType: ''
                         }
                     ]
@@ -77,6 +124,7 @@ angular.module('karamel.main')
                 ];
 
 
+                $scope.configFileName = "";
                 $scope.newExperimentName = "";
                 $scope.newExperimentErr = false;
                 $scope.newExperimentErMsg = "";
@@ -90,23 +138,75 @@ angular.module('karamel.main')
                             return;
                         }
                     }
-                    $scope.experiment.code[$scope.experiment.code.length].name = $scope.newExperimentName;
-                    $scope.experiment.code[$scope.experiment.code.length].scriptContents = "";
-                    $scope.experiment.code[$scope.experiment.code.length].preScriptChefCode = "";
-                    $scope.experiment.code[$scope.experiment.code.length].scriptType = "";
+                    
+                    var newEntry = {
+                            name: $scope.newExperimentName,
+                            scriptContents: '',
+                            configFileName: '',
+                            configFileContents: '',
+                            scriptType: 'bash'
+                    };
+                    
+                    $scope.experiment.code.push(newEntry);
+                    $scope.newExperimentName = "";
+                    $scope.newExperimentErrMsg = "";
                 }
 
+                $scope.newConfigFile = function (experimentName) {
+                    for (var i = 0; i < $scope.experiment.code.length; i++) {
+                        if ($scope.experiment.code[i].name === experimentName) {
+                            $scope.experiment.code[i].configFileName = $scope.configFileName;
+                            return;
+                        }
+                    }
+                }
 
-                $scope.toggle = function () {
-                    $scope.status.advanced = true;
-                    $scope.status.userGroup = !$scope.status.userGroup;
-                    $scope.status.experimentOpen = !$scope.status.experimentOpen;
-                    $scope.status.sourceOpen = !$scope.status.sourceOpen;
-                    $scope.status.binaryOpen = !$scope.status.binaryOpen;
-                    $scope.status.configOpen = !$scope.status.configOpen;
-                    $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
-                    $scope.status.chefOpen = !$scope.status.chefOpen;
-                    $scope.status.expanded = !$scope.status.expanded;
+                $scope.removeConfigFile = function (experimentName) {
+                    for (var i = 0; i < $scope.experiment.code.length; i++) {
+                        if ($scope.experiment.code[i].name === experimentName) {
+                            $scope.experiment.code[i].configFileName = "";
+                            $scope.experiment.code[i].configFileContents = "";
+                            return;
+                        }
+                    }
+                }
+
+                $scope.removeExperiment = function (experimentName) {
+
+                    SweetAlert.swal({
+                        title: "Remove the experiment?",
+                        text: "This will remove the Chef experiment recipe from the local GitHub repository.",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, remove it.",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: false,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+
+                        if (isConfirm) {
+
+                            for (var i = 0; i < $scope.experiment.code.length; i++) {
+                                if ($scope.experiment.code[i].name === experimentName) {
+                                    KaramelCoreRestServices.removeExperimentScript($scope.gs.org.name, $scope.gs.repo.name, experimentName)
+                                            .success(function (data, status, headers, config) {
+                                                $scope.experiment.code.splice(i, 1);
+                                                SweetAlert.swal("Deleted", "Experiment has been deleted.", "success");
+                                            })
+                                            .error(function (data, status, headers, config) {
+                                                $log.info("Experiment can't be Pushed.");
+                                            });
+                                    return;
+                                }
+                            }
+
+                        } else {
+                            SweetAlert.swal("Cancelled", "Experiment hasn't been deleted.", "error");
+                        }
+                    });
+
+
+
                 }
 
                 $scope.toggleDropdown = function ($event) {
@@ -162,10 +262,11 @@ angular.module('karamel.main')
                                     $scope.experiment.githubRepo = data.githubRepo;
                                     $scope.experiment.githubOwner = data.githubOwner;
                                     $scope.experiment.experimentSetupCode = data.experimentSetupCode;
-                                    $scope.experiment.context.resultsDir = data.context.resultsDir;
+                                    $scope.experiment.defaultAttributes = data.defaultAttributes;
+//                                    $scope.experiment.context.resultsDir = data.context.resultsDir;
                                     $scope.experiment.context.scriptContents = data.context.scriptContents;
-                                    $scope.experiment.context.preScriptChefCode = data.context.preScriptChefCode;
-                                    $scope.experiment.context.defaultAttributes = data.context.defaultAttributes;
+                                    $scope.experiment.context.configFileName = data.context.configFileName;
+                                    $scope.experiment.context.configFileContents = data.context.configFileContents;
                                     $scope.experiment.context.scriptType = data.context.scriptType;
                                     $scope.landing = false;
                                 }

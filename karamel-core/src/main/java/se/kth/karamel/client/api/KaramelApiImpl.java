@@ -321,4 +321,13 @@ public class KaramelApiImpl implements KaramelApi {
     return Github.createRepoForOrg(org, repo, description);
   }
 
+  @Override
+  public void removeExperimentScript(String owner, String repo, String experimentName) {
+    try {
+      Github.removeFile(owner, repo, experimentName);
+    } catch (KaramelException ex) {
+      // Do nothing - Repository hasn't been created yet. That's ok.");
+    }
+  }
+
 }

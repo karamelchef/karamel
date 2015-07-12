@@ -300,6 +300,30 @@ public class Github {
     }
   }
 
+  
+  public synchronized static void removeFile(String owner, String repoName, String fileName)
+      throws KaramelException {
+    File repoDir = getRepoDirectory(repoName);
+    Git git = null;
+    try {
+      git = Git.open(repoDir);
+
+      new File(repoDir + File.separator + fileName).delete();
+      git.add().addFilepattern(fileName).call();
+      git.commit().setAuthor(user, email).setMessage("File removed by Karamel.")
+          .setAll(true).call();
+      git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, password)).call();
+    } catch (IOException | GitAPIException ex) {
+      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException(ex.getMessage());
+    } finally {
+      if (git != null) {
+        git.close();
+      }
+    }
+  }
+  
+  
   /**
    * Scaffolds a Karamel/chef project for an experiment and adds it to the github repo. You still need to commit and
    * push the changes to github.

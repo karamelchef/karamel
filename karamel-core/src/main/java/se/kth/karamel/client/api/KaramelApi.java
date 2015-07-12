@@ -276,4 +276,12 @@ public interface KaramelApi {
    */
   public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
 
+  /**
+   * 
+   * @param owner
+   * @param repo
+   * @param experimentName
+   */
+  public void removeExperimentScript(String owner, String repo, String experimentName);
+
 }

@@ -314,6 +314,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Github.GetGithubRepos());
     environment.jersey().register(new Github.CreateGithubRepo());
     environment.jersey().register(new Github.PushExperiment());
+    environment.jersey().register(new Github.RemoveExperimentScript());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -920,6 +921,22 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         }
 
         return response;
+      }
+    }
+
+    @Path("/removeExperimentScript")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public static class RemoveExperimentScript {
+
+      @POST
+      public Response removeExperimentScript(@FormParam("org") String org, @FormParam("repo") String repo,
+          @FormParam("experimentName") String experimentName) {
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        karamelApiHandler.removeExperimentScript(org, repo, experimentName);
+        return Response.status(Response.Status.OK).entity(
+            new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
       }
     }
 
