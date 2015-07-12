@@ -297,10 +297,22 @@
                     </accordion-group>
 
                     </accordion>            
-                </div>
+                </div>    <button ng-click="profileModal()" ng-show="gs.githubCredentials.email === ''" class="btn btn-primary"> Login to GitHub</button>
             </div>
 
     </div>
-
 </form>
+        
+<div class ="row">
+                        <span class="col-md-1 col-lg-1"></span>
+    <input name="newExperiment" ng-model="newExperimentName" class="form-control col-xs-2 col-sm-2 col-md-2 col-lg-2" type="text" tabindex="16">
+                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1" ng-click="newExperiment()">
+                        <i class="glyphicon glyphicon-plus"></i>
+                    </span>
+</div>        
+<div class ="row" ng-show="newExperimentErr">
+    <span class="col-md-1 col-lg-1 text-warning"></span>
+    {{newExperimentErMsg}}
+</div>        
+        
 </div>

@@ -45,6 +45,7 @@ import se.kth.karamel.common.SshKeyService;
 import se.kth.karamel.cookbook.metadata.Berksfile;
 import se.kth.karamel.cookbook.metadata.DefaultRb;
 import se.kth.karamel.cookbook.metadata.ExperimentRecipe;
+import se.kth.karamel.cookbook.metadata.InstallRecipe;
 import se.kth.karamel.cookbook.metadata.KaramelFile;
 import se.kth.karamel.cookbook.metadata.MetadataRb;
 
@@ -300,18 +301,18 @@ public class KaramelApiImpl implements KaramelApi {
 //    String configFile = kc.getConfigFile();
     Berksfile bf = kc.getBerksFile();
     DefaultRb attributes = kc.getDefaultRb();
-    ExperimentRecipe er = kc.getExperimentRecipe();
-    
+    List<ExperimentRecipe> er = kc.getExperimentRecipes();
+    InstallRecipe ir = kc.getInstallRecipe();
+
     ec.setUser(attributes.getValue(repoName + "/user"));
     ec.setGroup(attributes.getValue(repoName + "/group"));
     ec.setUrlBinary(attributes.getValue(repoName + "/url"));
-    
-    Experiment.Code exp = new Experiment.Code();
-    ec.addExperiment("experiment", exp);
-    exp.setDefaultAttributes(attributes.getExperimentContextFormat());
-    exp.setPreScriptChefCode(er.getPreScriptContents());
-    exp.setScriptContents(er.getScriptContents());
-    exp.setScriptType(er.getScriptType());
+    ec.setExperimentSetupCode(ir.getSetupCode());
+    for (ExperimentRecipe r : er) {
+      Experiment.Code exp = new Experiment.Code(r.getRecipeName(), r.getScriptContents(), r.getConfigFileName(),
+          r.getConfigFileContents(), r.getScriptType());
+      ec.addExperiment(exp);
+    }
     return ec;
   }
 

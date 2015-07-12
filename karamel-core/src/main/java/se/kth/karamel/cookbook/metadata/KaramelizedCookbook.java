@@ -7,6 +7,7 @@ package se.kth.karamel.cookbook.metadata;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,9 +31,9 @@ public class KaramelizedCookbook {
   private final KaramelFile karamelFile;
   private final Berksfile berksFile;
   private String configFile;
-  private ExperimentRecipe experimentRecipe;
+//  private ExperimentRecipe experimentRecipe;
   private List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
-  private ExperimentRecipe installRecipe;
+  private InstallRecipe installRecipe;
   private String json;
 
   public KaramelizedCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
@@ -58,21 +59,60 @@ public class KaramelizedCookbook {
       Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
           + urls.configFile, ex);
     }
-    try {
-      List<Recipe> recipes = this.metadataRb.getRecipes();
-      String experimentContents = IoUtils.readContent(urls.experimentRecipe);
-      this.experimentRecipe = ExperimentRecipeParser.parse(experimentContents);
-      String recipeContents = IoUtils.readContent(urls.experimentRecipe);
-      this.installRecipe = ExperimentRecipeParser.parse(recipeContents);
-    } catch (IOException ex) {
-      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-          + urls.experimentRecipe, ex);
-    } catch (RecipeParseException ex) {
-      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
-          "Experiment recipe not a valid format in this cookbook: "
-          + urls.experimentRecipe, ex);
+    List<Recipe> recipes = this.metadataRb.getRecipes();
+    for (Recipe r : recipes) {
+      String experimentName = r.getName() + ".rb";
+      String description = r.getDescription();
+      String[] configData = description.split(",configFile=");
+      String configFileName = "";
+      String configFileContents = "";
+      String experimentContent;
+      if (configData.length > 1) {
+        String desc = configData[1];
+        int pos = desc.indexOf(";");
+        if (pos != -1) {
+          configFileName = desc.substring(0, pos - 1);
+        }
+      }
+      String configFileUrl = urls.rawHome + File.separator + "templates" + File.separator
+          + "default" + File.separator + configFileName + ".erb";
+      try {
+        configFileContents = IoUtils.readContent(configFileUrl);
+      } catch (IOException ex) {
+        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
+            + urls.recipesHome + experimentName, ex);
+      }
+
+      ExperimentRecipe er = null;
+      try {
+        experimentContent = IoUtils.readContent(urls.recipesHome + experimentName);
+        er = ExperimentRecipeParser.parse(r.getName(), experimentContent, configFileName, configFileContents);
+      } catch (IOException ex) {
+        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
+            + urls.recipesHome + experimentName, ex);
+      } catch (RecipeParseException ex) {
+        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
+            "Experiment recipe not a valid format in this cookbook: "
+            + urls.recipesHome + experimentName, ex);
+      }
+
+      if (er != null) {
+        experimentRecipes.add(er);
+      }
+
     }
 
+    try {
+      String installContent = IoUtils.readContent(urls.recipesHome + "install.rb");
+      this.installRecipe = InstallRecipeParser.parse(installContent);
+    } catch (IOException ex) {
+      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
+          + urls.recipesHome + "install.rb", ex);
+    } catch (RecipeParseException ex) {
+      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
+          "Install recipe not a valid format in this cookbook: "
+          + urls.recipesHome + "install.rb", ex);
+    }
   }
 
   public String getConfigFile() {
@@ -99,8 +139,12 @@ public class KaramelizedCookbook {
     return karamelFile;
   }
 
-  public ExperimentRecipe getExperimentRecipe() {
-    return experimentRecipe;
+  public List<ExperimentRecipe> getExperimentRecipes() {
+    return experimentRecipes;
+  }
+
+  public InstallRecipe getInstallRecipe() {
+    return installRecipe;
   }
 
   public DefaultRb getDefaultRb() {

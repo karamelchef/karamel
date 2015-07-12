@@ -190,10 +190,10 @@ public class GithubUserTest {
   public void testCreateRepo() {
     try {
       Experiment ec = new Experiment();
-      Experiment.Code exp = new Experiment.Code("echo \"jim\"\n"
-          + "java -jar -D%%maxHeapSize%% prog.jar", "%%maxHeapSize%%=128m\n%%log%%=true\n",
-          "", Experiment.ScriptType.bash);
-      ec.addExperiment("experiment", exp);
+      Experiment.Code exp = new Experiment.Code("experiment", "echo \"jim\"\n"
+          + "java -jar -D%%maxHeapSize%% prog.jar", "config.props", "%%maxHeapSize%%=128m\n%%log%%=true\n",
+          Experiment.ScriptType.bash);
+      ec.addExperiment(exp);
       ec.setUser("blah");
       ec.setGroup("blah");
       ec.setResultsDir("results");

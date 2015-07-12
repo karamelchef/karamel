@@ -1,6 +1,7 @@
 package se.kth.karamel.backend;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -56,7 +57,7 @@ public class Experiment {
    */
   private String description = "Karamel experiment repository description placeholder";
 
-  private Map<String, Code> mapExperiments = new HashMap<>();
+  private List<Code> experiments = new ArrayList<>();
 
   private String githubRepo = "";
 
@@ -64,40 +65,60 @@ public class Experiment {
 
   private String experimentSetupCode = "";
 
-//  private String attributes = "";
+  private String defaultAttributes = "";
+
   @XmlRootElement
   public static class Code {
 
+    private String experimentName;
     private String scriptContents;
-    private String defaultAttributes;
-    private String preScriptChefCode;
+    private String configFileName;
+    private String configFile;
     private ScriptType scriptType;
 
     /**
      * Create an experiment as a Chef recipe.
      *
+     * @param experimentName
      * @param scriptContents
-     * @param defaultAttributes
-     * @param preScriptChefCode
+     * @param configFileName
+     * @param configFile
      * @param scriptType
      */
-    public Code(String scriptContents, String defaultAttributes,
-        String preScriptChefCode, ScriptType scriptType) {
+    public Code(String experimentName, String scriptContents, String configFileName, String configFile,
+        ScriptType scriptType) {
+      this.experimentName = experimentName;
       this.scriptContents = scriptContents;
-      this.defaultAttributes = defaultAttributes;
-      this.preScriptChefCode = preScriptChefCode == null ? "" : preScriptChefCode;
+      this.configFileName = configFileName == null ? "" : configFileName;
+      this.configFile = configFile == null ? "" : configFile;
       this.scriptType = scriptType;
     }
 
     public Code() {
     }
 
-    public String getPreScriptChefCode() {
-      return preScriptChefCode;
+    public String getExperimentName() {
+      return experimentName;
     }
 
-    public void setPreScriptChefCode(String preScriptChefCode) {
-      this.preScriptChefCode = preScriptChefCode;
+    public void setExperimentName(String experimentName) {
+      this.experimentName = experimentName;
+    }
+
+    public String getConfigFile() {
+      return configFile;
+    }
+
+    public void setConfigFile(String configFile) {
+      this.configFile = configFile;
+    }
+
+    public String getConfigFileName() {
+      return configFileName;
+    }
+
+    public void setConfigFileName(String configFileName) {
+      this.configFileName = configFileName;
     }
 
     public void setScriptContents(String script) {
@@ -109,7 +130,7 @@ public class Experiment {
     }
 
     public String getDefaultAttributes() {
-      return defaultAttributes;
+      return configFile;
     }
 
     public ScriptType getScriptType() {
@@ -121,7 +142,7 @@ public class Experiment {
     }
 
     public void setDefaultAttributes(String defaultAttributes) {
-      this.defaultAttributes = defaultAttributes;
+      this.configFile = defaultAttributes;
     }
 
     public void setScriptType(ScriptType scriptType) {
@@ -181,14 +202,31 @@ public class Experiment {
     this.urlGitClone = urlGitClone;
   }
 
-  public void addExperiment(String recipeName, Code exp) {
-    mapExperiments.put(recipeName, exp);
+  private boolean existsExperiment(Code exp) {
+    for (Code c : experiments) {
+      if (exp.getExperimentName().compareToIgnoreCase(c.getExperimentName()) == 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  public void addExperiment(String recipeName, String scriptContents, String defaultAttrContents,
-      String preScriptChefCode, ScriptType scriptType) {
-    Code exp = new Code(scriptContents, defaultAttrContents, preScriptChefCode, scriptType);
-    mapExperiments.put(recipeName, exp);
+  public boolean addExperiment(Code exp) {
+    if (existsExperiment(exp)) {
+      return false;
+    }
+    experiments.add(exp);
+    return true;
+  }
+
+  public boolean addExperiment(String recipeName, String scriptContents, String configFileName,
+      String configFileContents, ScriptType scriptType) {
+    Code exp = new Code(recipeName, scriptContents, configFileName, configFileContents, scriptType);
+    if (existsExperiment(exp)) {
+      return false;
+    }
+    experiments.add(exp);
+    return true;
   }
 
   public void setDependencies(String dependencies) {
@@ -207,10 +245,6 @@ public class Experiment {
     return mavenCommand;
   }
 
-  public Map<String, Code> getExperiments() {
-    return mapExperiments;
-  }
-
   public String getGroup() {
     return group;
   }
@@ -223,12 +257,12 @@ public class Experiment {
     this.clusterDefinition = clusterDefinition;
   }
 
-  public Map<String, Code> getMapExperiments() {
-    return mapExperiments;
+  public List<Code> getExperiments() {
+    return experiments;
   }
 
-  public void setMapExperiments(Map<String, Code> mapExperiments) {
-    this.mapExperiments = mapExperiments;
+  public void setExperiments(List<Code> experiments) {
+    this.experiments = experiments;
   }
 
   public String getUser() {
@@ -249,6 +283,14 @@ public class Experiment {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getDefaultAttributes() {
+    return defaultAttributes;
+  }
+
+  public void setDefaultAttributes(String defaultAttributes) {
+    this.defaultAttributes = defaultAttributes;
   }
 
 }

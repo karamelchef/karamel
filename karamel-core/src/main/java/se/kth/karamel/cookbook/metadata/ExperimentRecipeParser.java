@@ -13,11 +13,15 @@ public class ExperimentRecipeParser {
 
   /**
    *
+   * @param name
    * @param recipeContent
+   * @param configFileName
+   * @param configFileContents
    * @return an experiment recipe
    * @throws se.kth.karamel.common.exception.RecipeParseException
    */
-  public static ExperimentRecipe parse(String recipeContent, String installContent) throws RecipeParseException {
+  public static ExperimentRecipe parse(String name, String recipeContent, String configFileName,
+      String configFileContents) throws RecipeParseException {
 
     Matcher mp = EXPERIMENT_SCRIPT.matcher(recipeContent);
     boolean foundPreScript = mp.find();
@@ -54,7 +58,7 @@ public class ExperimentRecipeParser {
     String interpreter = mi.group(1);
     
     
-    return new ExperimentRecipe("experiment", ScriptType.valueOf(interpreter), script, preScript);
+    return new ExperimentRecipe(name, ScriptType.valueOf(interpreter), script, configFileName, configFileContents);
   }
 
 }

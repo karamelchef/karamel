@@ -13,20 +13,18 @@ import se.kth.karamel.backend.Experiment;
 public class ExperimentRecipe {
 
   private final String recipeName;
-  private final String preScriptContents;
   private final String scriptContents;
   private final Experiment.ScriptType scriptType;
+  private final String configFileName;
+  private final String configFileContents;
 
-  public ExperimentRecipe(String recipeName, Experiment.ScriptType scriptType, String preScriptContents,
-      String scriptContents) {
+  public ExperimentRecipe(String recipeName, Experiment.ScriptType scriptType, 
+      String scriptContents, String configFileName, String configFileContents) {
     this.recipeName = recipeName;
     this.scriptContents = scriptContents;
-    this.preScriptContents = preScriptContents;
     this.scriptType = scriptType;
-  }
-
-  public String getPreScriptContents() {
-    return preScriptContents;
+    this.configFileName = configFileName;
+    this.configFileContents = configFileContents;
   }
 
   public String getScriptContents() {
@@ -39,6 +37,14 @@ public class ExperimentRecipe {
 
   public Experiment.ScriptType getScriptType() {
     return scriptType;
+  }
+
+  public String getConfigFileContents() {
+    return configFileContents;
+  }
+
+  public String getConfigFileName() {
+    return configFileName;
   }
 
 }

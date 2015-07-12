@@ -218,7 +218,9 @@ public class Settings {
   public static final String COOKBOOK_CONFIGFILE = "config.props";
   public static final String COOKBOOK_CONFIGFILE_REL_URL = File.separator + "templates" + File.separator
       + "default" + File.separator + COOKBOOK_CONFIGFILE;
-  public static final String COOKBOOK_EXP_RECIPE_REL_URL = File.separator + "recipes" + File.separator 
+  public static final String COOKBOOK_CONFIGFILE_BASE_URL = File.separator + "templates" + File.separator
+      + "default" + File.separator;
+  public static final String COOKBOOK_EXP_RECIPE_REL_URL = File.separator + "recipes" + File.separator
       + "experiment.rb";
 
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
@@ -248,9 +250,12 @@ public class Settings {
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
   public static final String COOKBOOK_README_PATH = File.separator + "README.md";
-  public static final String COOKBOOK_EXPERIMENT_CLUSTER_PATH = File.separator + "experiments" + File.separator + "experiment.yml";
-  public static final String COOKBOOK_PROVIDERS_EXP_PATH = File.separator + "providers" + File.separator + "experiment.rb";
-  public static final String COOKBOOK_RESOURCES_EXP_PATH = File.separator + "resources" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_EXPERIMENT_CLUSTER_PATH
+      = File.separator + "experiments" + File.separator + "experiment.yml";
+  public static final String COOKBOOK_PROVIDERS_EXP_PATH
+      = File.separator + "providers" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RESOURCES_EXP_PATH
+      = File.separator + "resources" + File.separator + "experiment.rb";
   public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";

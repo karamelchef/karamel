@@ -76,8 +76,28 @@ angular.module('karamel.main')
                     {value: "ruby", label: "Ruby-Gems"}
                 ];
 
-                
-                $scope.toggle = function() {
+
+                $scope.newExperimentName = "";
+                $scope.newExperimentErr = false;
+                $scope.newExperimentErMsg = "";
+
+                $scope.newExperiment = function () {
+                    $scope.newExperimentErr = false;
+                    for (var i = 0; i < $scope.experiment.code.length; i++) {
+                        if ($scope.experiment.code[i].name === $scope.newExperimentName) {
+                            $scope.newExperimentErr = true;
+                            $scope.newExperimentErrMsg = "Experiment name already exists";
+                            return;
+                        }
+                    }
+                    $scope.experiment.code[$scope.experiment.code.length].name = $scope.newExperimentName;
+                    $scope.experiment.code[$scope.experiment.code.length].scriptContents = "";
+                    $scope.experiment.code[$scope.experiment.code.length].preScriptChefCode = "";
+                    $scope.experiment.code[$scope.experiment.code.length].scriptType = "";
+                }
+
+
+                $scope.toggle = function () {
                     $scope.status.advanced = true;
                     $scope.status.userGroup = !$scope.status.userGroup;
                     $scope.status.experimentOpen = !$scope.status.experimentOpen;

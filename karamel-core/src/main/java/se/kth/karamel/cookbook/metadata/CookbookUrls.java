@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import java.io.File;
 import se.kth.karamel.common.Settings;
 import static se.kth.karamel.common.Settings.GITHUB_BASE_URL;
 import static se.kth.karamel.common.Settings.GITHUB_DEFAULT_BRANCH;
@@ -32,10 +33,10 @@ public class CookbookUrls {
   public String karamelFile;
   public String berksFile;
   public String configFile;
-  public String experimentRecipe;
+  public String recipesHome;
 
   public CookbookUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile,
-      String metadataFile, String karamelFile, String berksFile, String configFile, String experimentRecipe) {
+      String metadataFile, String karamelFile, String berksFile, String configFile, String recipesHome) {
     this.repoName = repoName;
     this.branch = branch;
     this.id = id;
@@ -46,7 +47,7 @@ public class CookbookUrls {
     this.karamelFile = karamelFile;
     this.berksFile = berksFile;
     this.configFile = configFile;
-    this.experimentRecipe = experimentRecipe;
+    this.recipesHome = recipesHome;
   }
 
   public static class Builder {
@@ -102,9 +103,9 @@ public class CookbookUrls {
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
       String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
-      String experimentRecipe = rawHome + Settings.COOKBOOK_EXP_RECIPE_REL_URL;
+      String recipesHome = rawHome + File.separator + "recipes" + File.separator;
       CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
-          berksFile, configFile, experimentRecipe);
+          berksFile, configFile, recipesHome);
       return urls;
     }
 

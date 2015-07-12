@@ -63,14 +63,15 @@ public class TestKaramelizedCookbook {
   }
 
   @Test
-  public void testParseRecipe() throws CookbookUrlException, IOException {
+  public void testParseRecipes() throws CookbookUrlException, IOException {
     try {
       Settings.CB_CLASSPATH_MODE = true;
       String recipe = Resources.toString(Resources.getResource(
           "cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
-      ExperimentRecipe er = ExperimentRecipeParser.parse(recipe);
+      ExperimentRecipe er = ExperimentRecipeParser.parse("experiment", recipe, "config.props", "x=y");
       assertEquals("experiment", er.getRecipeName());
-      assertEquals(er.getPreScriptContents().isEmpty(), false);
+      assertEquals(er.getConfigFileName().isEmpty(), false);
+      assertEquals(er.getConfigFileContents().isEmpty(), false);
       assertEquals(er.getScriptContents().isEmpty(), false);
       assertEquals(er.getScriptType(), Experiment.ScriptType.bash);
     } catch (RecipeParseException ex) {
