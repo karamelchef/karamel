@@ -8,8 +8,7 @@ cookbooks:
     github: "%%org%%/%%name%%"
     branch: "master"
     
-groups: 
-  nodes:
-    size: 1 
-    recipes: 
-        - %%recipe%%
+groups:
+
+%%groups%%
+

@@ -265,7 +265,6 @@ public class ChefExperimentExtractor {
         Github.addFile(owner, repoName,
             "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
 
-//        karamelFile.setDependency(repoName + Settings.COOOKBOOK_DELIMITER + recipe, yd);
         karamelFile.getDependencies().add(yd);
       }
 

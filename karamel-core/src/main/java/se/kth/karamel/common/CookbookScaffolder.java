@@ -63,8 +63,6 @@ public class CookbookScaffolder {
     // Create all the directories for the coookbook 
     mkdirs(cbName + "recipes");
     mkdirs(cbName + "attributes");
-    mkdirs(cbName + "resources");
-    mkdirs(cbName + "providers");
     mkdirs(cbName + "experiments");
     mkdirs(cbName + "templates" + File.separator + "default");
 
@@ -74,7 +72,6 @@ public class CookbookScaffolder {
     createFile(cbName + Settings.COOKBOOK_METADATARB_REL_PATH, Settings.CB_TEMPLATE_METADATA, name);
     createFile(cbName + Settings.COOKBOOK_RECIPE_INSTALL_PATH, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
     createFile(cbName + Settings.COOKBOOK_RECIPE_DEFAULT_PATH, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);
-//    createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, Settings.CB_TEMPLATE_CONFIG_PROPS, name);
     createFile(cbName + Settings.COOKBOOK_README_PATH, Settings.CB_TEMPLATE_README, name);
     System.out.println("Cookbook scaffolding created. Cookbook now in folder: ./cookbooks/" + name);
 
