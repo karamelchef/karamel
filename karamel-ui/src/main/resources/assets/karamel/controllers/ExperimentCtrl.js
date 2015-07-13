@@ -255,7 +255,7 @@ angular.module('karamel.main')
                             type: "info",
                             showCancelButton: true,
                             confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, recover it.",
-                            cancelButtonText: "Cancel",
+                            cancelButtonText: "Delete",
                             closeOnConfirm: true,
                             closeOnCancel: false},
                         function (isConfirm) {
@@ -265,7 +265,7 @@ angular.module('karamel.main')
                                 $scope.landing = false;
                                 SweetAlert.swal("Recovered", "The Experiment is now available for editing", "error");
                             } else {
-                                SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
+                                SweetAlert.swal("Deleted", "The previous Experiment you were working on has been deleted", "error");
                                 ExperimentsService.store(null);
                             }
                         });
@@ -309,7 +309,7 @@ angular.module('karamel.main')
                     $scope.experiment.code = [];
                     for (var i = 0; i < data.code.length; i++) {
                         var newEntry = {
-                            name: data.code[i].scriptContents,
+                            name: data.code[i].name,
                             scriptContents: data.code[i].scriptContents,
                             configFileName: data.code[i].configFileName,
                             configFileContents: data.code[i].configFileContents,
