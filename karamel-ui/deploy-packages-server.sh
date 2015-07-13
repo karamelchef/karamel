@@ -8,7 +8,7 @@ version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/
 echo "version is: $version"
 
 dist=karamel-$version
-certs_dir=/home/jdowling/Dropbox/karamel/certs
+certs_dir=/home/$USER/Dropbox/karamel/certs
 
 mvn clean package
 cd target

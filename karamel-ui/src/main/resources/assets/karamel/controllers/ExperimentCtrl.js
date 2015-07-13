@@ -1,8 +1,9 @@
 'use strict';
 
 angular.module('karamel.main')
-        .controller('ExperimentCtrl', ['$log', '$scope', 'SweetAlert', 'KaramelCoreRestServices', 'GithubService', 'ModalService',
-            function ($log, $scope, SweetAlert, KaramelCoreRestServices, GithubService, ModalService) {
+        .controller('ExperimentCtrl', ['$log', '$scope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
+            'GithubService', 'ModalService', 'ExperimentsService',
+            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService, ExperimentsService) {
 
                 var self = this;
 
@@ -25,6 +26,7 @@ angular.module('karamel.main')
                         }
                     ]
                 };
+                self.currentTimeout = null;
 
                 $scope.toggle = function () {
                     $scope.status.advanced = true;
@@ -69,7 +71,7 @@ angular.module('karamel.main')
 
                 $scope.loading = false;
 
-                $scope.experiment = {
+                $scope.experiment =  {
                     user: '',
                     group: '',
                     githubRepo: '',
@@ -138,15 +140,15 @@ angular.module('karamel.main')
                             return;
                         }
                     }
-                    
+
                     var newEntry = {
-                            name: $scope.newExperimentName,
-                            scriptContents: '',
-                            configFileName: '',
-                            configFileContents: '',
-                            scriptType: 'bash'
+                        name: $scope.newExperimentName,
+                        scriptContents: '',
+                        configFileName: '',
+                        configFileContents: '',
+                        scriptType: 'bash'
                     };
-                    
+
                     $scope.experiment.code.push(newEntry);
                     $scope.newExperimentName = "";
                     $scope.newExperimentErrMsg = "";
@@ -180,7 +182,7 @@ angular.module('karamel.main')
                         showCancelButton: true,
                         confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, remove it.",
                         cancelButtonText: "Cancel",
-                        closeOnConfirm: false,
+                        closeOnConfirm: true,
                         closeOnCancel: false},
                     function (isConfirm) {
 
@@ -222,8 +224,8 @@ angular.module('karamel.main')
                                 if (angular.isDefined(result)) {
                                     $scope.isExpLoaded = true;
                                     $log.info("new experiment modal experiment results ...");
-                                    $scope.experiment.user = result.user;
-                                    $scope.experiment.group = result.group;
+                                    $scope.experiment.user = result.githubRepo;
+                                    $scope.experiment.group = result.githubRepo;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
                                     $scope.experiment.description = result.description;
@@ -244,7 +246,80 @@ angular.module('karamel.main')
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
                     GithubService.getCredentials();
+
+                    var exp = ExperimentsService.recover();
+                    if (exp !== false && exp !== null && typeof exp !== 'undefined') {
+                        SweetAlert.swal({
+                            title: "Restore the previous local Experiment?",
+                            text: "This loads the most recent experiment you had been editing from your local harddisk - not github.",
+                            type: "info",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, recover it.",
+                            cancelButtonText: "Cancel",
+                            closeOnConfirm: true,
+                            closeOnCancel: false},
+                        function (isConfirm) {
+
+                            if (isConfirm) {
+                                self.deepCopyExperiment(exp);
+                                $scope.landing = false;
+                                SweetAlert.swal("Recovered", "The Experiment is now available for editing", "error");
+                            } else {
+                                SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
+                                ExperimentsService.store(null);
+                            }
+                        });
+                    }
+                    restartTimer();
+
                 }
+
+
+                function restartTimer() {
+                    self.currentTimeout = $timeout(saveExperimentTimer, 500);
+                }
+
+                function cancelTimer() {
+                    if (self.currentTimeout) {
+                        $timeout.cancel(self.currentTimeout);
+                        self.currentTimeout = null;
+                    }
+                }
+
+                function saveExperimentTimer() {
+                    if (!$scope.landing && $scope.experiment !== null && $scope.experiment.githubRepo !== "") {
+                        ExperimentsService.store($scope.experiment);
+                    }
+                    restartTimer();
+                }
+
+
+                self.deepCopyExperiment = function (data) {
+
+                    $scope.experiment.urlBinary = data.urlBinary;
+                    $scope.experiment.urlGitClone = data.urlGitClone;
+                    $scope.experiment.mavenCommand = data.mavenCommand;
+                    $scope.experiment.dependencies = data.dependencies;
+                    $scope.experiment.user = data.user;
+                    $scope.experiment.group = data.group;
+                    $scope.experiment.githubRepo = data.githubRepo;
+                    $scope.experiment.githubOwner = data.githubOwner;
+                    $scope.experiment.experimentSetupCode = data.experimentSetupCode;
+                    $scope.experiment.defaultAttributes = data.defaultAttributes;
+                    $scope.experiment.code = [];
+                    for (var i = 0; i < data.code.length; i++) {
+                        var newEntry = {
+                            name: data.code[i].scriptContents,
+                            scriptContents: data.code[i].scriptContents,
+                            configFileName: data.code[i].configFileName,
+                            configFileContents: data.code[i].configFileContents,
+                            scriptType: data.code[i].scriptType
+                        };
+                        $scope.experiment.code.push(newEntry);
+                    }
+
+                }
+
 
                 $scope.loadExperiment = function loadExperiment() {
                     KaramelCoreRestServices.loadExperiment(experiment.url)
@@ -253,21 +328,7 @@ angular.module('karamel.main')
                                 if (angular.isDefined(data)) {
                                     $log.info("Experiment Loaded Successfully.");
                                     $scope.isExpLoaded = true;
-                                    $scope.experiment.urlBinary = data.urlBinary;
-                                    $scope.experiment.urlGitClone = data.urlGitClone;
-                                    $scope.experiment.mavenCommand = data.mavenCommand;
-                                    $scope.experiment.dependencies = data.dependencies;
-                                    $scope.experiment.user = data.user;
-                                    $scope.experiment.group = data.group;
-                                    $scope.experiment.githubRepo = data.githubRepo;
-                                    $scope.experiment.githubOwner = data.githubOwner;
-                                    $scope.experiment.experimentSetupCode = data.experimentSetupCode;
-                                    $scope.experiment.defaultAttributes = data.defaultAttributes;
-//                                    $scope.experiment.context.resultsDir = data.context.resultsDir;
-                                    $scope.experiment.context.scriptContents = data.context.scriptContents;
-                                    $scope.experiment.context.configFileName = data.context.configFileName;
-                                    $scope.experiment.context.configFileContents = data.context.configFileContents;
-                                    $scope.experiment.context.scriptType = data.context.scriptType;
+                                    self.deepCopyExperiment(data);
                                     $scope.landing = false;
                                 }
                             })
@@ -309,21 +370,22 @@ angular.module('karamel.main')
                         showCancelButton: true,
                         confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, push it!",
                         cancelButtonText: "Cancel",
-                        closeOnConfirm: false,
+                        closeOnConfirm: true,
                         closeOnCancel: false},
                     function (isConfirm) {
 
                         if (isConfirm) {
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
-//                                $scope.experimentContext = data;
                                         SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
                                         $log.info("Experiment Pushed Successfully.");
                                     })
                                     .error(function (data, status, headers, config) {
                                         $log.info("Experiment can't be Pushed.");
                                     });
-
+//                            ExperimentsService.store($scope.experiment);
+                            SweetAlert.swal("Pushed", "The Experiment has been pushed to GitHub and can be loaded using its github URL", "error");
+                            return;
                         } else {
                             SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
                         }

@@ -100,7 +100,7 @@
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
                     <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-left" ng-click="toggle()">
-                        <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
+                        <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
                     </span>
                 </div>
             </div>
@@ -113,7 +113,7 @@
 
                         <accordion-group is-open="status.userGroup">
                             <accordion-heading>
-                                Run experiment as user/group<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.userGroup, 'glyphicon-resize-full': !status.userGroup}"></i>
+                                Run experiment as Unix user/group<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.userGroup, 'glyphicon-resize-full': !status.userGroup}"></i>
                             </accordion-heading>
                             Username/group that owns the binaries/source-code installed and the experiment scripts and results.
                             <div class="row">
@@ -137,7 +137,7 @@
                         </accordion-group>
                         <accordion-group is-open="status.binaryOpen">
                             <accordion-heading>
-                                Download Binary using Http<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.binaryOpen, 'glyphicon-resize-full': !status.binaryOpen}"></i>
+                                Download Experiment as Binary<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.binaryOpen, 'glyphicon-resize-full': !status.binaryOpen}"></i>
                             </accordion-heading>
                             <div class="row">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -150,12 +150,11 @@
                         </accordion-group>
                         <accordion-group is-open="status.sourceOpen">
                             <accordion-heading>
-                                Clones source code from GitHub URL, then builds it using the Maven command below. <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
+                                Build Experiment from Source. <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-6 col-md-6 col-lg-6">    
-                                    <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
+                                <div class="row experimentSourceUrl" class="control-label">GitHub URL </label>
                                     <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="13" required>
                                 </div>        
                             </div>
@@ -169,19 +168,19 @@
                         </accordion-group>
                         <accordion-group is-open="status.dependenciesOpen">
                             <accordion-heading>
-                                Dependencies: Services that should be running for my Experiment <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.dependenciesOpen, 'glyphicon-resize-full': !status.dependenciesOpen}"></i>
+                                Dependencies <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.dependenciesOpen, 'glyphicon-resize-full': !status.dependenciesOpen}"></i>
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
-                                    <label for="dependencies" class="control-label">Comma-separated list of cookbook::recipe entries. Generates the Karamelfile to orchestrate the experiment.</label>
+                                    <label for="dependencies" class="control-label">Comma-separated list of cookbook::recipe that should be executed before this experiment. Generates the Karamelfile.</label>
                                     <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
                                 </div>        
                             </div>        
                         </accordion-group>
                         <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
                             <accordion-heading>
-                                Experiment Setup - Chef Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
+                                Experiment Setup with Chef  <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -214,7 +213,7 @@
             <br/>
 
 
-            <div class="row form-group col-lg-12">
+            <div class="row form-group col-lg-12" ng-show="!landing">
                 <span class="col-md-1 col-lg-1"></span>
                 <div class="row form-group col-md-9 col-lg-9">
                     <accordion close-others="false">
@@ -261,44 +260,45 @@
                             <div class="row form-group" ng-show="status.advanced">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
-                                    <label for="configFileName" class="control-label col-md-3 col-lg-3">New config file: 
-                                    <!--                                        <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="newConfigFile(exp.name)">
-                                                                                <i class="glyphicon glyphicon-plus"></i>
-                                                                            </span>-->
-                                    <input name="configFileName" ng-model="configFileName" placeholder="config.props" class="col-md-6 col-lg-6" type="text" tabindex="16">
-                                     </label>
-                                    <button ng-click="newConfigFile(exp.name)" class="btn btn-default">Add</button>                                    </div>                        
-
-                                <div class="row form-group" ng-show="exp.configFileName !== ''">
-                                    <span class="col-md-1 col-lg-1"></span>
-                                    <label for="configFile" class="col-md-3 col-lg-3">Configuration File for Experiment</label>
-                                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="removeConfigFile(exp.name)">
-                                        <i class="glyphicon glyphicon-minus"></i>
-                                    </span>
-                                    <span class="col-md-1 col-lg-1"></span>
-                                    <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                        <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                                    <div class="form-group">
+                                        <label>Relative path to config file</label>
+                                        <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control">
+                                    </div>
+                                    <div class="row form-group" ng-show="exp.configFileName.length > 0">
+                                        <span class="col-md-1 col-lg-1"></span>
+                                        <label>Configuration File for Experiment</label>
+                                        <!--                                        <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="removeConfigFile(exp.name)">
+                                                                                    <i class="glyphicon glyphicon-minus"></i>
+                                                                                </span>-->
+                                        <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                            <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                         </accordion-group>
                     </accordion>            
                 </div>    
             </div>
-
     </div>
+</div>
 </form>
 
 <div class ="row" ng-show="!landing">
     <span class="col-md-1 col-lg-1"></span>
 
     <div class ="row col-xs-2 col-sm-6 col-md-6 col-lg-6">
-        <label for="newExperiment" class="control-label">Name of new Experiment Script
-            <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="newExperiment()">        
-                <i class="glyphicon glyphicon-plus"></i>
-            </span>
-            <input name="newExperiment" ng-model="newExperimentName" class="form-control" type="text" tabindex="16">
-        </label>
+
+        <div class="form-group">
+            <label  style="margin-left: 10px">Name of new Experiment Script</label>
+            <input ng-model="newExperimentName" class="form-control" type="text" tabindex="16">
+            <button ng-click="newExperiment()" class="btn btn-default">Add</button>
+        </div>        
+        <!--        <label for="newExperiment" class="control-label" style="margin-left: 10px">Name of new Experiment Script
+                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="newExperiment()">        
+                        <i class="glyphicon glyphicon-plus"></i>
+                    </span>
+                    <input name="newExperiment" ng-model="newExperimentName" class="form-control" type="text" tabindex="16">
+                </label>-->
     </div>        
     <div class ="row" ng-show="newExperimentErr">
         <span class="col-md-1 col-lg-1 text-warning"></span>
