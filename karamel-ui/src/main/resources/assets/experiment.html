@@ -83,13 +83,18 @@
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                     <input type="submit" class="btn btn-primary" value="Push Experiment to Github" tabindex="2">
                 </div>
-                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                    <label class="control-label">Name: </label>
-                    <span>{{gs.repo.name| limitTo: 32}}{{ gs.repo.name > 32 ? '...' : ''}}</span>     
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 pull-right">
+                    <button class="btn btn-primary" tabindex="3" ng-click="deleteAll($event)">Delete</button>
                 </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                    <label class="control-label">URL:</label>
-                    <span>{{gs.repo.sshUrl| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
+                <div class="row">    
+                    <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                        <label class="control-label">Name: </label>
+                        <span>{{gs.repo.name| limitTo: 32}}{{ gs.repo.name > 32 ? '...' : ''}}</span>     
+                    </div>
+                    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                        <label class="control-label">URL:</label>
+                        <span>{{gs.repo.sshUrl| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
+                    </div>
                 </div>
             </div>
 
@@ -289,16 +294,10 @@
     <div class ="row col-xs-2 col-sm-6 col-md-6 col-lg-6">
 
         <div class="form-group">
-            <label  style="margin-left: 10px">Name of new Experiment Script</label>
-            <input ng-model="newExperimentName" class="form-control" type="text" tabindex="16">
-            <button ng-click="newExperiment()" class="btn btn-default">Add</button>
+            <label  style="margin-left: 10px">Add Experiment Script</label>
+            <input ng-model="newExperimentName" class="form-control" type="text" tabindex="16" placeholder="Name of new experiment script">
+            <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment()" class="btn btn-default">Add</button>
         </div>        
-        <!--        <label for="newExperiment" class="control-label" style="margin-left: 10px">Name of new Experiment Script
-                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right" ng-click="newExperiment()">        
-                        <i class="glyphicon glyphicon-plus"></i>
-                    </span>
-                    <input name="newExperiment" ng-model="newExperimentName" class="form-control" type="text" tabindex="16">
-                </label>-->
     </div>        
     <div class ="row" ng-show="newExperimentErr">
         <span class="col-md-1 col-lg-1 text-warning"></span>

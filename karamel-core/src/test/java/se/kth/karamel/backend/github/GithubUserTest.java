@@ -196,7 +196,7 @@ public class GithubUserTest {
       ec.addExperiment(exp);
       ec.setUser("blah");
       ec.setGroup("blah");
-      ec.setResultsDir("results");
+//      ec.setResultsDir("results");
       ec.setUrlBinary("http://snurran.sics.se/hops/prog.jar");
       ec.setDescription("Test experiment");
       ec.setClusterDefinition("name: MySqlCluster\n"

@@ -33,10 +33,10 @@ public class Experiment {
    */
   private String dependencies;
 
-  /**
-   * Full path to the directory containing the experiment results.
-   */
-  private String resultsDir;
+//  /**
+//   * Full path to the directory containing the experiment results.
+//   */
+//  private String resultsDir;
   /**
    * YAML for the Cluster context
    */
@@ -162,13 +162,13 @@ public class Experiment {
     this.experimentSetupCode = experimentSetupCode;
   }
 
-  public String getResultsDir() {
-    return resultsDir;
-  }
-
-  public void setResultsDir(String resultsDir) {
-    this.resultsDir = resultsDir;
-  }
+//  public String getResultsDir() {
+//    return resultsDir;
+//  }
+//
+//  public void setResultsDir(String resultsDir) {
+//    this.resultsDir = resultsDir;
+//  }
 
   public void setGithubOwner(String githubOwner) {
     this.githubOwner = githubOwner;

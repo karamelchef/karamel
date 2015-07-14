@@ -6,7 +6,11 @@ angular.module('karamel.terminal')
       store: function( value ){
         try{
           if( $window.Storage ){
-            $window.localStorage.setItem( 'experiment', $window.JSON.stringify( value ) );
+              if (value === null) {
+                  $window.localStorage.removeItem('expeiment');                  
+              } else {            
+                  $window.localStorage.setItem( 'experiment', $window.JSON.stringify( value ) );
+              }
             return true;
           } else {
             return false;

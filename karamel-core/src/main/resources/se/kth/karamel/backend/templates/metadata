@@ -6,13 +6,11 @@ description      'Installs/Configures/Runs %%name%%'
 version          "0.1"
 
 recipe            "%%name%%::install", "Experiment setup for %%name%%"
-recipe            "%%name%%::experiment", "Runs %%name%% experiment"
 %%more_recipes%%
 
 depends 'kagent'
 depends 'ark'
 
-results_dir       "%%results_dir%%"
 build_command     "%%build_command%%"
 url_binary        "%%url_binary%%"
 url_gitclone      "%%url_gitclone%%"

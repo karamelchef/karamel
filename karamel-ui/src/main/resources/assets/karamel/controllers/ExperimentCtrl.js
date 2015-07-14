@@ -71,7 +71,7 @@ angular.module('karamel.main')
 
                 $scope.loading = false;
 
-                $scope.experiment =  {
+                $scope.experiment = {
                     user: '',
                     group: '',
                     githubRepo: '',
@@ -176,8 +176,8 @@ angular.module('karamel.main')
                 $scope.removeExperiment = function (experimentName) {
 
                     SweetAlert.swal({
-                        title: "Remove the experiment?",
-                        text: "This will remove the Chef experiment recipe from the local GitHub repository.",
+                        title: "Remove " + experimentName + "?",
+                        text: "This will remove the Chef experiment recipe " + experimentName + ".rb from the local GitHub repository.",
                         type: "info",
                         showCancelButton: true,
                         confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, remove it.",
@@ -193,10 +193,10 @@ angular.module('karamel.main')
                                     KaramelCoreRestServices.removeExperimentScript($scope.gs.org.name, $scope.gs.repo.name, experimentName)
                                             .success(function (data, status, headers, config) {
                                                 $scope.experiment.code.splice(i, 1);
-                                                SweetAlert.swal("Deleted", "Experiment has been deleted.", "success");
+                                                SweetAlert.swal("Deleted", experimentName + " has been deleted.", "success");
                                             })
                                             .error(function (data, status, headers, config) {
-                                                $log.info("Experiment can't be Pushed.");
+                                                $log.info(experimentName + " could not be deleted.");
                                             });
                                     return;
                                 }
@@ -239,9 +239,6 @@ angular.module('karamel.main')
                     ModalService.profile('lg');
                 };
 
-                self.getEmailHash = function () {
-                    return GithubService.getEmailhash();
-                }
 
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
@@ -249,28 +246,57 @@ angular.module('karamel.main')
 
                     var exp = ExperimentsService.recover();
                     if (exp !== false && exp !== null && typeof exp !== 'undefined') {
-                        SweetAlert.swal({
-                            title: "Restore the previous local Experiment?",
-                            text: "This loads the most recent experiment you had been editing from your local harddisk - not github.",
-                            type: "info",
-                            showCancelButton: true,
-                            confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, recover it.",
-                            cancelButtonText: "Delete",
-                            closeOnConfirm: true,
-                            closeOnCancel: false},
-                        function (isConfirm) {
-
-                            if (isConfirm) {
-                                self.deepCopyExperiment(exp);
-                                $scope.landing = false;
-                                SweetAlert.swal("Recovered", "The Experiment is now available for editing", "error");
-                            } else {
-                                SweetAlert.swal("Deleted", "The previous Experiment you were working on has been deleted", "error");
-                                ExperimentsService.store(null);
-                            }
-                        });
+                        self.deepCopyExperiment(exp);
+                        $scope.landing = false;
                     }
                     restartTimer();
+                }
+
+                $scope.deleteAll = function deleteAll($event) {
+                    $event.preventDefault();
+
+                    SweetAlert.swal({
+                        title: "Delete the Experiment from local storage?",
+                        text: "This deletes the experiment you had been editing, but not from your local harddisk and not from github.",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete it.",
+                        cancelButtonText: "Do not delete",
+                        closeOnConfirm: true,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            // Set landing true first to prevent a race-condition with the timer
+                            $scope.landing = true;
+                            ExperimentsService.store(null);
+                            $scope.experiment = {
+                                user: '',
+                                group: '',
+                                githubRepo: '',
+                                description: '',
+                                githubOwner: '',
+                                dependencies: '',
+                                urlBinary: '',
+                                urlGitClone: '',
+                                mavenCommand: 'mvn install -DskipTests',
+                                experimentSetupCode: '',
+                                defaultAttributes: '',
+                                code: [
+                                    {
+                                        name: 'experiment',
+                                        scriptContents: '',
+                                        configFileName: '',
+                                        configFileContents: '',
+                                        scriptType: ''
+                                    }
+                                ]
+                            };
+                            SweetAlert.swal("Deleted", "The Experiment is now deleted", "info");
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
+                        }
+                    });
 
                 }
 
@@ -287,7 +313,7 @@ angular.module('karamel.main')
                 }
 
                 function saveExperimentTimer() {
-                    if (!$scope.landing && $scope.experiment !== null && $scope.experiment.githubRepo !== "") {
+                    if (!$scope.landing && $scope.experiment !== {} && $scope.experiment.githubRepo !== "") {
                         ExperimentsService.store($scope.experiment);
                     }
                     restartTimer();

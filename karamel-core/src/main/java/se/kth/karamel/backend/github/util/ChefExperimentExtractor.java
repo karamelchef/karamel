@@ -128,7 +128,7 @@ public class ChefExperimentExtractor {
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_METADATA,
           "resolve_ips", "",
-          "results_dir", experiment.getResultsDir(),
+//          "results_dir", experiment.getResultsDir(),
           "build_command", experiment.getMavenCommand(),
           "ip_params", "",
           "%%more_recipes%%", recipeDescriptions.toString()

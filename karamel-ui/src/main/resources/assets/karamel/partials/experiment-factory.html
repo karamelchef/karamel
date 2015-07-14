@@ -52,9 +52,9 @@
                 </div>
                 <div class="row" >
                     <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repository" 
-                           ng-model="repoName" class="form-control" type="text" tabindex="4">
-                           <!--ng-model="repoName" class="form-control" type="text" tabindex="4" ng-pattern="[a-zA-Z]{3,}">-->
-                           <!--ng-model="repoName" class="form-control" type="text" tabindex="4" ng-pattern="^\S+$">-->
+                           ng-model="repoName" class="form-control" type="text" tabindex="1">
+                           <!--ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="[a-zA-Z]{3,}">-->
+                           <!--ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="^\S+$">-->
                 </div>
             </div>
         </div> 
@@ -64,13 +64,13 @@
                     <label for="repoDesc" class="control-label">Repository Description</label>
                 </div>
                 <div class="row col-md-12" >
-                    <textarea id="repoDesc" style="width:100%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment repository"  tabindex="5"  class="form-control "></textarea>
+                    <textarea id="repoDesc" style="width:100%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment repository"  tabindex="2"  class="form-control "></textarea>
                 </div>
             </div> 
         </div> 
         <div class="row">
             <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
-                <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="6">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
+                <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="3">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
             </div>                
         </div>                
     </div>
