@@ -314,7 +314,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Github.GetGithubRepos());
     environment.jersey().register(new Github.CreateGithubRepo());
     environment.jersey().register(new Github.PushExperiment());
-    environment.jersey().register(new Github.RemoveExperimentScript());
+    environment.jersey().register(new Github.RemoveFileFromExperiment());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -924,17 +924,32 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
 
-    @Path("/removeExperimentScript")
+    @Path("/removeFileFromExperiment")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class RemoveExperimentScript {
+    public static class RemoveFileFromExperiment {
 
       @POST
-      public Response removeExperimentScript(@FormParam("org") String org, @FormParam("repo") String repo,
-          @FormParam("experimentName") String experimentName) {
+      public Response removeFileFromExperiment(@FormParam("org") String org, @FormParam("repo") String repo,
+          @FormParam("filename") String filename) {
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
-        karamelApiHandler.removeExperimentScript(org, repo, experimentName);
+        karamelApiHandler.removeFileFromExperiment(org, repo, filename);
+        return Response.status(Response.Status.OK).entity(
+            new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+      }
+    }
+    
+    @Path("/removeRepository")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public static class RemoveRepository {
+
+      @POST
+      public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo) {
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to set github credentials.... ");
+        karamelApiHandler.removeRepo(org, repo);
         return Response.status(Response.Status.OK).entity(
             new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
       }

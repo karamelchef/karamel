@@ -8,10 +8,13 @@ package se.kth.karamel.backend.github;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.User;
@@ -148,9 +151,9 @@ public class Github {
       if (Github.getUser().equalsIgnoreCase(orgName)) {
         repos = rs.getRepositories(orgName);
       } else {       // If we are looking for the repositories for a given organization
-        repos = rs.getOrgRepositories(orgName);        
+        repos = rs.getOrgRepositories(orgName);
       }
-      
+
       List<RepoItem> repoItems = new ArrayList<>();
       for (Repository r : repos) {
         repoItems.add(new RepoItem(r.getName(), r.getDescription(), r.getSshUrl()));
@@ -267,6 +270,37 @@ public class Github {
 
   }
 
+  public synchronized static void removeRepo(String owner, String repoName) throws KaramelException {
+    
+     RepositoryService rs = new RepositoryService(client);
+      String uri = rs.getUrl();
+      URL url = new URL(uri);
+      HttpURLConnection request = (HttpURLConnection) url.openConnection();
+      request.setRequestMethod("DELETE");
+               request.setFixedLengthStreamingMode(0);
+                        request.setRequestProperty("Content-Length", "0");
+      request.setDoOutput(true);
+      int code = request.getResponseCode();    
+    File repoDir = getRepoDirectory(repoName);
+    Git git = null;
+    try {
+      git = Git.open(repoDir);
+      org.eclipse.jgit.lib.Repository repo = git.getRepository();
+      RemoveCommand rc = new Remove
+//		 RepositoryUtil repositoryUtil = Activator.getDefault().getRepositoryUtil();
+//		RepositoryCache repositoryCache = org.eclipse.egit.core.Activator.getDefault()
+//				.getRepositoryCache();      
+
+    } catch (IOException ex) {
+      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+    }
+  }
+  
+  public synchronized static void removeLocalRepo(String owner, String repoName) throws KaramelException {
+    File path = getRepoDirectory(repoName);
+    FileUtils.deleteDirectory();
+  }
+
   /**
    * Adds a file to the Github repo's index. You then need to commit the change and push the commit to github.
    *
@@ -300,7 +334,6 @@ public class Github {
     }
   }
 
-  
   public synchronized static void removeFile(String owner, String repoName, String fileName)
       throws KaramelException {
     File repoDir = getRepoDirectory(repoName);
@@ -322,8 +355,7 @@ public class Github {
       }
     }
   }
-  
-  
+
   /**
    * Scaffolds a Karamel/chef project for an experiment and adds it to the github repo. You still need to commit and
    * push the changes to github.

@@ -282,6 +282,14 @@ public interface KaramelApi {
    * @param repo
    * @param experimentName
    */
-  public void removeExperimentScript(String owner, String repo, String experimentName);
+  public void removeFileFromExperiment(String owner, String repo, String experimentName);
 
+  
+  /**
+   * 
+   * @param owner
+   * @param repo 
+   */
+  public void removeRepo(String owner, String repo);
+  
 }

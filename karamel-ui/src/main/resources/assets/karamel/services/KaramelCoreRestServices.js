@@ -157,11 +157,17 @@
           var url = _defaultHost.concat("/pushExperiment");
           return _getPromiseObject(method, url, _defaultContentType, experiment);
         },
-        removeExperimentScript: function(org, repo, experimentName) {
+        removeFileFromExperiment: function(org, repo, fileName) {
           var method = 'POST';
-          var url = _defaultHost.concat("/removeExperimentScript");
+          var url = _defaultHost.concat("/removeFileFromExperiment");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "org" : org, "repo" : repo, "experimentName" : experimentName }));
+          $.param({ "org" : org, "repo" : repo, "filename" : fileName }));
+        },
+        removeRepo: function(org, repo) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/removeRepository");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+          $.param({ "org" : org, "repo" : repo}));
         },
         processCommand: function(commandName) {
           var method = 'PUT';

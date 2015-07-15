@@ -190,7 +190,7 @@ angular.module('karamel.main')
 
                             for (var i = 0; i < $scope.experiment.code.length; i++) {
                                 if ($scope.experiment.code[i].name === experimentName) {
-                                    KaramelCoreRestServices.removeExperimentScript($scope.gs.org.name, $scope.gs.repo.name, experimentName)
+                                    KaramelCoreRestServices.removeFileFromExperiment($scope.gs.org.name, $scope.gs.repo.name, experimentName)
                                             .success(function (data, status, headers, config) {
                                                 $scope.experiment.code.splice(i, 1);
                                                 SweetAlert.swal("Deleted", experimentName + " has been deleted.", "success");
@@ -252,21 +252,84 @@ angular.module('karamel.main')
                     restartTimer();
                 }
 
-                $scope.deleteAll = function deleteAll($event) {
+                $scope.deleteRepository = function deleteRepository($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
-                        title: "Delete the Experiment from local storage?",
-                        text: "This deletes the experiment you had been editing, but not from your local harddisk and not from github.",
+                        title: "Delete the Experiment completely (not recoverable)?",
+                        text: "This removes the experiment from both GitHub and local storage. You will not be able to recover it.",
                         type: "info",
                         showCancelButton: true,
-                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete it.",
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, wipe it.",
                         cancelButtonText: "Do not delete",
                         closeOnConfirm: true,
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
                             // Set landing true first to prevent a race-condition with the timer
+                            clearExperiment();
+                            // Core Rest Services
+                            SweetAlert.swal("Deleted", "The Experiment is now gone completely.", "info");
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
+                        }
+                    });
+
+                }
+                $scope.deleteBrowser = function deleteLocal($event) {
+                    $event.preventDefault();
+
+                    SweetAlert.swal({
+                        title: "Delete the local clone of the Experiment and from HTML local storage?",
+                        text: "This deletes the experiment clone on your local harddisk, but not the copy on GitHub.",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete the local copy only.",
+                        cancelButtonText: "Do not delete",
+                        closeOnConfirm: true,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            // Set landing true first to prevent a race-condition with the timer
+                            clearExperiment();
+                            // Core Rest Services
+                            SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
+                        }
+                    });
+
+                }
+                $scope.deleteBrowser = function clearBrowser($event) {
+                    $event.preventDefault();
+
+                    SweetAlert.swal({
+                        title: "Clear the Experiment from your browser's local storage?",
+                        text: "This clear the experiment you had been editing from your browser (not GitHub).",
+                        type: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, clear it.",
+                        cancelButtonText: "Do not clear",
+                        closeOnConfirm: true,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+                        if (isConfirm) {
+                            // Set landing true first to prevent a race-condition with the timer
+                            clearExperiment();
+                            // Core Rest Services
+                            SweetAlert.swal("Deleted", "The Browser is now cleared", "info");
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
+                        }
+                    });
+
+                }
+                
+                
+                function clearExperiment() {
                             $scope.landing = true;
                             ExperimentsService.store(null);
                             $scope.experiment = {
@@ -291,13 +354,7 @@ angular.module('karamel.main')
                                     }
                                 ]
                             };
-                            SweetAlert.swal("Deleted", "The Experiment is now deleted", "info");
-                        } else {
-                            cancelTimer();
-                            SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
-                        }
-                    });
-
+                    
                 }
 
 
