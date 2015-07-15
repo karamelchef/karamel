@@ -26,7 +26,7 @@ import se.kth.karamel.common.SshKeyPair;
 public class KaramelApiTest {
 
   KaramelApi api = new KaramelApiImpl();
-  
+
   @Test
   public void dummyTest() {
     //just that we dont need to ignore this class all the time
@@ -162,7 +162,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-  
+
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hiway";
@@ -184,7 +184,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-
+  
 //  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
@@ -206,7 +206,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-  
+
 //  @Test
   public void testBaremetal() throws KaramelException, IOException, InterruptedException {
 //    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_baremetal.yml"), Charsets.UTF_8);

@@ -141,7 +141,9 @@ public class DagBuilder {
     RunRecipeTask runRecipeTask = allRecipeTasks.get(recId);
     if (!allRecipeTasks.containsKey(recId)) {
       ChefJsonGenerator.addRunListForRecipe(chefJson, recipeName);
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      GsonBuilder builder = new GsonBuilder();
+      builder.disableHtmlEscaping();
+      Gson gson = builder.setPrettyPrinting().create();
       String jsonString = gson.toJson(chefJson);
       runRecipeTask = new RunRecipeTask(machine, recipeName, jsonString, submitter, cookbookId, cookbookName);
       dag.addTask(runRecipeTask);

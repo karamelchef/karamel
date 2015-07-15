@@ -95,7 +95,9 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
-    Gson gson = new GsonBuilder().
+    GsonBuilder builder = new GsonBuilder();
+    builder.disableHtmlEscaping();
+    Gson gson = builder.
         registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
         registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
         registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
@@ -123,7 +125,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void purgeCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); 
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -133,7 +135,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getInstallationDag(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet."); 
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   @Override
@@ -176,18 +178,18 @@ public class KaramelApiImpl implements KaramelApi {
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
 //    keypair = SshKeyService.loadSshKeys(confs);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(), 
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);
     return keypair;
   }
-  
+
   private void saveSshConfs(SshKeyPair keypair, Confs confs) {
     confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
     if (keypair.getPassphrase() != null && keypair.getPassphrase().isEmpty() == false) {
       confs.put(Settings.SSH_PRIVKEY_PASSPHRASE, keypair.getPassphrase());
-    }    
+    }
   }
 
   @Override
@@ -195,26 +197,23 @@ public class KaramelApiImpl implements KaramelApi {
     Confs confs = Confs.loadJustClusterConfs(clusterName);
     saveSshConfs(keypair, confs);
     confs.writeClusterConfs(clusterName);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(),
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(clusterName, keypair);
     return keypair;
   }
-
 
   @Override
   public void registerSudoPassword(String password) {
     ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
   }
 
-
   @Override
-  public void registerGithubAccount(String email, String password) 
-  {
+  public void registerGithubAccount(String email, String password) {
     // TODO - test github credentials
     ClusterService.getInstance().getCommonContext().setGithubEmail(email);
     ClusterService.getInstance().getCommonContext().setGithubPassword(password);
-    
+
   }
-  
+
 }

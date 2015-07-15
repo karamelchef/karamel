@@ -33,7 +33,8 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.FilesystemUtil;
 
 /**
- * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions. 
+ * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
+ *
  * @author kamal
  */
 public class ClusterDefinitionService {
@@ -138,7 +139,6 @@ public class ClusterDefinitionService {
     return new JsonCluster(cluster);
   }
 
-  
   public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {
     try {
       Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
@@ -148,14 +148,16 @@ public class ClusterDefinitionService {
       throw new KaramelException("Syntax error in the yaml!!", ex);
     }
   }
-  
+
   public static String yamlToJson(String yaml) throws KaramelException {
     JsonCluster jsonObj = yamlToJsonObject(yaml);
     return serializeJson(jsonObj);
   }
 
   public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
-    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    GsonBuilder builder = new GsonBuilder();
+    builder.disableHtmlEscaping();
+    Gson gson = builder.setPrettyPrinting().create();
     String json = gson.toJson(jsonCluster);
     return json;
   }
