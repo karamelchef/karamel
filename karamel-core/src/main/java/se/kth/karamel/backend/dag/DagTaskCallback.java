@@ -6,7 +6,8 @@
 package se.kth.karamel.backend.dag;
 
 /**
- *
+ * A callback that is set by DagNode into Task at the time of submit to receive status update. 
+ * 
  * @author kamal
  */
 public interface DagTaskCallback {

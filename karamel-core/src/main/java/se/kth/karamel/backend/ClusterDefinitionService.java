@@ -33,7 +33,7 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.FilesystemUtil;
 
 /**
- *
+ * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions. 
  * @author kamal
  */
 public class ClusterDefinitionService {

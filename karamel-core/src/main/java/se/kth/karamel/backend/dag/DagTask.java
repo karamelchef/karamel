@@ -8,7 +8,8 @@ package se.kth.karamel.backend.dag;
 import java.util.Set;
 
 /**
- *
+ * An interface of Task to DagNode. 
+ * 
  * @author kamal
  */
 public interface DagTask {

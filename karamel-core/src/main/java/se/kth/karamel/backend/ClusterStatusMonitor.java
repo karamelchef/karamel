@@ -12,7 +12,8 @@ import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.Settings;
 
 /**
- *
+ * While cluster is running, it observes its status, should failure happen it pauses MachinesMonitor. 
+ * 
  * @author kamal
  */
 public class ClusterStatusMonitor implements Runnable {

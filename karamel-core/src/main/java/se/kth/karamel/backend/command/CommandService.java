@@ -41,7 +41,8 @@ import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * Terminal backend, a replacement for API with more flexibilities. It processes user commands and generates mere 
+ * hyper-link aware textual pages. Each hyper-link is another command and results of each command is another page.  
  * @author kamal
  */
 public class CommandService {
