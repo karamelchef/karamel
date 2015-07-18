@@ -292,6 +292,6 @@ public interface KaramelApi {
    * @param removeGitHub 
    * @param removeLocal 
    */
-  public void removeRepo(String owner, String repo, boolean removeGitHub, boolean removeLocal) throws KaramelException;
+  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
   
 }

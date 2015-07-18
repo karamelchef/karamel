@@ -56,7 +56,6 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.Experiment;
-import se.kth.karamel.backend.ExperimentT;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
@@ -67,9 +66,7 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
-/**
- * Created by babbarshaer on 2014-11-20.
- */
+
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
   private static KaramelApi karamelApiHandler;

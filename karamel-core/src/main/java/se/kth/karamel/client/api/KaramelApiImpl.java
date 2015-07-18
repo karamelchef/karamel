@@ -335,17 +335,24 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void removeRepo(String owner, String repo, boolean removeGitHub, boolean removeLocal) throws KaramelException {
-    try {
-      if (removeLocal) {
+  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException {
+    boolean failedLocal = false;
+    String failedMsg = "";
+
+    // if failure while removing locally, still try and remove remote repo (if requested)
+    if (removeLocal) {
+      try {
         Github.removeLocalRepo(owner, repo);
+      } catch (KaramelException ex) {
+        failedLocal = true;
+        failedMsg = ex.toString();
       }
-      if (removeGitHub) {
-        Github.removeRepo(owner, repo);
-      }
-    } catch (KaramelException ex) {
-      // Swallow it
-      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    if (removeGitHub) {
+      Github.removeRepo(owner, repo);
+    }
+    if (failedLocal) {
+      throw new KaramelException(failedMsg);
     }
   }
 

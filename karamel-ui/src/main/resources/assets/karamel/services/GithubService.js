@@ -21,7 +21,7 @@ angular.module('karamel.terminal')
                     name: '',
                     gravitar: ''
                 };
-
+                
                 self.repo = {
                     name: '',
                     description: '',

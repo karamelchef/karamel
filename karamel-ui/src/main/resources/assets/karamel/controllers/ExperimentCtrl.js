@@ -99,9 +99,9 @@ angular.module('karamel.main')
                     code: [
                         {
                             name: 'experiment',
-//                            scriptContents: '',
-//                            configFileName: '',
-//                            configFileContents: '',
+                            scriptContents: '',
+                            configFileName: '',
+                            configFileContents: '',
                             scriptType: ''
                         }
                     ]
@@ -109,7 +109,6 @@ angular.module('karamel.main')
 
 
                 $scope.landing = true;
-                $scope.load = true;
 
                 $scope.experimentNameInvalid = false;
                 $scope.githubOwnerInvalid = false;
@@ -122,12 +121,6 @@ angular.module('karamel.main')
                 $scope.scriptInvalid = false;
 
 
-//                $scope.scriptTypes = [
-//                    {value: "bash", label: "Bash"},
-//                    {value: "python", label: "Python"},
-//                    {value: "ruby", label: "Ruby"},
-//                    {value: "perl", label: "Perl"}
-//                ];
                 $scope.scriptType = "bash";
                 $scope.sourceType = {};
 
@@ -235,7 +228,6 @@ angular.module('karamel.main')
                     ModalService.experimentFactory('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
-                                    $scope.isExpLoaded = true;
                                     $log.info("new experiment modal experiment results ...");
                                     $scope.experiment.user = result.githubRepo;
                                     $scope.experiment.group = result.githubRepo;
@@ -330,11 +322,8 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowserButton = function clearBrowserButton($event) {
+                $scope.deleteBrowser= function clearBrowser($event) {
                     $event.preventDefault();
-                    $scope.deleteBrowser();
-                }
-                $scope.deleteBrowser = function clearBrowser() {
 
                     SweetAlert.swal({
                         title: "Clear the Experiment from your browser's local storage?",
@@ -361,8 +350,9 @@ angular.module('karamel.main')
 
 
                 function clearExperiment() {
+                    cancelTimer();
                     $scope.landing = true;
-                    ExperimentsService.store(null);
+                    ExperimentsService.clear();
                     $scope.experiment = {
                         user: '',
                         group: '',
@@ -386,12 +376,13 @@ angular.module('karamel.main')
                             }
                         ]
                     };
+                    restartTimer();
 
                 }
 
 
                 function restartTimer() {
-                    self.currentTimeout = $timeout(saveExperimentTimer, 500);
+                    self.currentTimeout = $timeout(saveExperimentTimer, 2000);
                 }
 
                 function cancelTimer() {
@@ -402,7 +393,8 @@ angular.module('karamel.main')
                 }
 
                 function saveExperimentTimer() {
-                    if (!$scope.landing && $scope.experiment !== {} && $scope.experiment.githubRepo !== "") {
+                    if (!$scope.landing && $scope.experiment !== {} && $scope.experiment.githubRepo !== ""
+                            && $scope.experiment.name !== "") {
                         ExperimentsService.store($scope.experiment);
                     }
                     restartTimer();
@@ -437,12 +429,11 @@ angular.module('karamel.main')
 
 
                 $scope.loadExperiment = function loadExperiment() {
-                    KaramelCoreRestServices.loadExperiment(experiment.url)
+                    KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
                             .then(function (data, status, headers, config) {
 
                                 if (angular.isDefined(data)) {
                                     $log.info("Experiment Loaded Successfully.");
-                                    $scope.isExpLoaded = true;
                                     self.deepCopyExperiment(data);
                                     $scope.landing = false;
                                 }
