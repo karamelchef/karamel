@@ -2,7 +2,6 @@ package se.kth.karamel.cookbook.metadata;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import se.kth.karamel.backend.Experiment.ScriptType;
 import se.kth.karamel.common.exception.RecipeParseException;
 
 public class ExperimentRecipeParser {
@@ -58,7 +57,7 @@ public class ExperimentRecipeParser {
     String interpreter = mi.group(1);
     
     
-    return new ExperimentRecipe(name, ScriptType.valueOf(interpreter), script, configFileName, configFileContents);
+    return new ExperimentRecipe(name, interpreter, script, configFileName, configFileContents);
   }
 
 }

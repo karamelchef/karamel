@@ -8,8 +8,6 @@ package se.kth.karamel.backend.github;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +23,10 @@ import org.eclipse.egit.github.core.service.UserService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.kohsuke.github.GHOrganization;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Settings;
@@ -223,7 +225,7 @@ public class Github {
       r.setOwner(us.getUser());
       r.setDescription(description);
       rs.createRepository(r);
-      cloneRepo(us.getUser().getName(), repoName);
+      cloneRepo(getUser(), repoName);
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
@@ -271,34 +273,60 @@ public class Github {
   }
 
   public synchronized static void removeRepo(String owner, String repoName) throws KaramelException {
-    
-     RepositoryService rs = new RepositoryService(client);
-      String uri = rs.getUrl();
-      URL url = new URL(uri);
-      HttpURLConnection request = (HttpURLConnection) url.openConnection();
-      request.setRequestMethod("DELETE");
-               request.setFixedLengthStreamingMode(0);
-                        request.setRequestProperty("Content-Length", "0");
-      request.setDoOutput(true);
-      int code = request.getResponseCode();    
-    File repoDir = getRepoDirectory(repoName);
-    Git git = null;
+
     try {
-      git = Git.open(repoDir);
-      org.eclipse.jgit.lib.Repository repo = git.getRepository();
-      RemoveCommand rc = new Remove
+      GitHub gitHub = GitHub.connectUsingPassword(Github.getUser(), Github.getPassword());
+      if (!gitHub.isCredentialValid()) {
+        throw new KaramelException("Invalid GitHub credentials");
+      }
+      GHRepository repo = null;
+      if (owner.compareToIgnoreCase(Github.getUser()) != 0) {
+        GHOrganization org = gitHub.getOrganization(owner);
+        repo = org.getRepository(repoName);
+      } else {
+        repo = gitHub.getRepository(owner + "/"  + repoName);
+      }
+      repo.delete();
+
+//      gitHub.getRepository(repoName);
+//    UserService us = new UserService(client);
+//      RepositoryService rs = new RepositoryService(client);
+//    String uri = rs.getUrl();
+//    URL url = new URL(uri);
+//    HttpURLConnection request = (HttpURLConnection) url.openConnection();
+//    request.setRequestMethod("DELETE");
+//    request.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+//
+////    request.setFixedLengthStreamingMode(0);
+////    request.setRequestProperty("Content-Length", "0");
+//    request.setDoOutput(true);
+//    int code = request.getResponseCode();
+//    File repoDir = getRepoDirectory(repoName);
+//    Git git = null;
+//    try {
+//      git = Git.open(repoDir);
+//      org.eclipse.jgit.lib.Repository repo = git.getRepository();
+//      RemoveCommand rc = new RemoveCommand();
+//      RemoveOrDeleteRepositoryCommand rdrc = new RemoveOrDe
 //		 RepositoryUtil repositoryUtil = Activator.getDefault().getRepositoryUtil();
 //		RepositoryCache repositoryCache = org.eclipse.egit.core.Activator.getDefault()
-//				.getRepositoryCache();      
-
+//				.getRepositoryCache();
+//    } catch (IOException ex) {
+//      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+//    }
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+      throw new KaramelException("Problem authenticating with gihub-api");
     }
   }
-  
+
   public synchronized static void removeLocalRepo(String owner, String repoName) throws KaramelException {
     File path = getRepoDirectory(repoName);
-    FileUtils.deleteDirectory();
+    try {
+      FileUtils.deleteDirectory(path);
+    } catch (IOException ex) {
+      throw new KaramelException("Couldn't find the path to delete for Repo: " + repoName + " with owner: " + owner);
+    }
   }
 
   /**

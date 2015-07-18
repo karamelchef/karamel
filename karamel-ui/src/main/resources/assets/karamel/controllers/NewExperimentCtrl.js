@@ -16,7 +16,8 @@ angular.module('karamel.main')
                     group: '',
                     githubRepo: '',
                     githubOwner: '',
-                    description: ''
+                    description: '',
+                    urlGitClone: ''
                 };
 
                 self.selectOrg = function (name) {
@@ -56,6 +57,7 @@ angular.module('karamel.main')
                                 self.githubDetails.githubRepo = $scope.github.repo.name;
                                 self.githubDetails.githubOwner = $scope.github.org.name;
                                 self.githubDetails.description = $scope.github.repo.description;
+                                self.githubDetails.urlGitClone = $scope.github.repo.url;
                                 $scope.submittedMsg = "Repo doesn't exist yet.";
                                 $scope.submittedOngoing = false;
                                 self.close(self.githubDetails);

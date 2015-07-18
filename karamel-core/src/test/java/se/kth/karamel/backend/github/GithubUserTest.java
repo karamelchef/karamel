@@ -192,8 +192,9 @@ public class GithubUserTest {
       Experiment ec = new Experiment();
       Experiment.Code exp = new Experiment.Code("experiment", "echo \"jim\"\n"
           + "java -jar -D%%maxHeapSize%% prog.jar", "config.props", "%%maxHeapSize%%=128m\n%%log%%=true\n",
-          Experiment.ScriptType.bash);
-      ec.addExperiment(exp);
+          "bash");
+      List<Experiment.Code> exps = ec.getCode();
+      exps.add(exp);      
       ec.setUser("blah");
       ec.setGroup("blah");
 //      ec.setResultsDir("results");
@@ -219,7 +220,7 @@ public class GithubUserTest {
           + "        - ndb::memcached"
       );
       
-      api.commitAndPushExperiment("karamelchef", "test", ec);
+      api.commitAndPushExperiment(ec);
 
     } catch (KaramelException ex) {
       fail(ex.getMessage());

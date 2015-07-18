@@ -54,12 +54,12 @@
     <script type="text/javascript" src="karamel/controllers/editor.provider.js"></script>
     <script type="text/javascript" src="karamel/controllers/launch.js"></script>
     <script type="text/javascript" src="karamel/controllers/sshkeys.js"></script>
-    <script type="text/javascript" src="karamel/controllers/scaffold.js"></script>
     <script type="text/javascript" src="karamel/controllers/board.js"></script>
     <script type="text/javascript" src="karamel/controllers/new.recipe.js"></script>
     <script type="text/javascript" src="karamel/controllers/ExperimentCtrl.js"></script>
     <script type="text/javascript" src="karamel/controllers/NewExperimentCtrl.js"></script>
     <script type="text/javascript" src="karamel/controllers/ProfileCtrl.js"></script>
+    <script type="text/javascript" src="karamel/controllers/HeaderCtrl.js"></script>
 
 
 <!-- services -->
@@ -73,7 +73,7 @@
       <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
     </div>
 
-    <div ng-include='"header.html"'></div>
+    <div ng-include='"header.html"' ng-controller="HeaderCtrl as headerCtrl"></div>
 
     <div ng-view></div>
   </body>

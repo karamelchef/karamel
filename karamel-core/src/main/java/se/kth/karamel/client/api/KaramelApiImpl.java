@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -240,8 +242,8 @@ public class KaramelApiImpl implements KaramelApi {
     return Github.loadGithubCredentials();
   }
 
-  private void initGithubRepo(String owner, String repo, String description) throws KaramelException {
-    if (owner == null || owner.isEmpty()) {
+  private void initGithubRepo(String user, String owner, String repo, String description) throws KaramelException {
+    if (owner == null || owner.isEmpty() || owner.compareToIgnoreCase(user) == 0) {
       Github.createRepoForUser(repo, description);
     } else {
       Github.createRepoForOrg(owner, repo, description);
@@ -249,13 +251,14 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void commitAndPushExperiment(String owner, String repoName, Experiment experiment)
+  public void commitAndPushExperiment(Experiment experiment)
       throws KaramelException {
-
+    String owner = experiment.getGithubOwner();
+    String repoName = experiment.getGithubRepo();
     // Create the repo if it doesn't exist and clone it to a local directory
     File f = Github.getRepoDirectory(repoName);
     if (f.exists() == false) {
-      initGithubRepo(owner, repoName, experiment.getDescription());
+      initGithubRepo(Github.getUser(), owner, repoName, experiment.getDescription());
       // Scaffold a new experiment project with Karamel/Chef
       Github.scaffoldRepo(repoName);
     }
@@ -311,7 +314,8 @@ public class KaramelApiImpl implements KaramelApi {
     for (ExperimentRecipe r : er) {
       Experiment.Code exp = new Experiment.Code(r.getRecipeName(), r.getScriptContents(), r.getConfigFileName(),
           r.getConfigFileContents(), r.getScriptType());
-      ec.addExperiment(exp);
+      List<Experiment.Code> exps = ec.getCode();
+      exps.add(exp);
     }
     return ec;
   }
@@ -331,8 +335,18 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void removeRepo(String owner, String repo) {
-    
+  public void removeRepo(String owner, String repo, boolean removeGitHub, boolean removeLocal) throws KaramelException {
+    try {
+      if (removeLocal) {
+        Github.removeLocalRepo(owner, repo);
+      }
+      if (removeGitHub) {
+        Github.removeRepo(owner, repo);
+      }
+    } catch (KaramelException ex) {
+      // Swallow it
+      Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 
 }

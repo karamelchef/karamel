@@ -2,14 +2,16 @@
 
 angular.module('karamel.main')
         .controller('ExperimentCtrl', ['$log', '$scope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
-            'GithubService', 'ModalService', 'ExperimentsService',
-            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService, ExperimentsService) {
+            'GithubService', 'ModalService', 'ExperimentsService', 'BoardService',
+            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService, 
+            ExperimentsService, BoardService) {
 
                 var self = this;
 
                 $scope.gs = GithubService;
 
                 $scope.status = {
+                    isOpen: true,
                     experimentOpen: true,
                     userGroup: false,
                     sourceOpen: false,
@@ -26,6 +28,16 @@ angular.module('karamel.main')
                         }
                     ]
                 };
+                $scope.items = ['push', 'clear', 'delete local', 'delete local and remote'];
+                $scope.selected = $scope.items[0];
+
+                $scope.select = function (i, $event) {
+                    $event.preventDefault();
+                    if (angular.isDefined(i))
+                        $scope.selected = $scope.items[i];
+                }; // end select
+
+
                 self.currentTimeout = null;
 
                 $scope.toggle = function () {
@@ -81,15 +93,15 @@ angular.module('karamel.main')
                     urlBinary: '',
                     urlGitClone: '',
                     mavenCommand: 'mvn install -DskipTests',
-//                    resultsDir: '/tmp/results',
                     experimentSetupCode: '',
                     defaultAttributes: '',
+                    clusterDefinition: '',
                     code: [
                         {
                             name: 'experiment',
-                            scriptContents: '',
-                            configFileName: '',
-                            configFileContents: '',
+//                            scriptContents: '',
+//                            configFileName: '',
+//                            configFileContents: '',
                             scriptType: ''
                         }
                     ]
@@ -110,13 +122,13 @@ angular.module('karamel.main')
                 $scope.scriptInvalid = false;
 
 
-                $scope.scriptTypes = [
-                    {value: "bash", label: "Bash"},
-                    {value: "python", label: "Python"},
-                    {value: "ruby", label: "Ruby"},
-                    {value: "perl", label: "Perl"}
-                ];
-                $scope.scriptType = {};
+//                $scope.scriptTypes = [
+//                    {value: "bash", label: "Bash"},
+//                    {value: "python", label: "Python"},
+//                    {value: "ruby", label: "Ruby"},
+//                    {value: "perl", label: "Perl"}
+//                ];
+                $scope.scriptType = "bash";
                 $scope.sourceType = {};
 
                 $scope.sourceTypes = [
@@ -131,7 +143,8 @@ angular.module('karamel.main')
                 $scope.newExperimentErr = false;
                 $scope.newExperimentErMsg = "";
 
-                $scope.newExperiment = function () {
+                $scope.newExperiment = function ($event) {
+                    $event.preventDefault();
                     $scope.newExperimentErr = false;
                     for (var i = 0; i < $scope.experiment.code.length; i++) {
                         if ($scope.experiment.code[i].name === $scope.newExperimentName) {
@@ -228,6 +241,8 @@ angular.module('karamel.main')
                                     $scope.experiment.group = result.githubRepo;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
+                                    $scope.experiment.urlGitClone = "git@github.com:" + result.githubOwner 
+                                            + "/" + result.githubRepo + ".git";
                                     $scope.experiment.description = result.description;
                                     $scope.landing = false;
                                 }
@@ -252,7 +267,7 @@ angular.module('karamel.main')
                     restartTimer();
                 }
 
-                $scope.deleteRepository = function deleteRepository($event) {
+                $scope.deleteRepo = function clearRepo($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
@@ -266,9 +281,15 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
-                            // Set landing true first to prevent a race-condition with the timer
-                            clearExperiment();
-                            // Core Rest Services
+                            KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
+                            .then(function (data, status, headers, config) {
+                                clearExperiment();
+                                // Core Rest Services
+                                SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
+                            })
+                            .error(function (data, status, headers, config) {
+                                $log.info("Experiment can't be Loaded.");
+                            });                            
                             SweetAlert.swal("Deleted", "The Experiment is now gone completely.", "info");
                         } else {
                             cancelTimer();
@@ -277,7 +298,7 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowser = function deleteLocal($event) {
+                $scope.deleteLocal = function clearLocal($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
@@ -291,10 +312,17 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
-                            // Set landing true first to prevent a race-condition with the timer
-                            clearExperiment();
-                            // Core Rest Services
-                            SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
+
+                            KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
+                            .then(function (data, status, headers, config) {
+                                clearExperiment();
+                                // Core Rest Services
+                                SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
+                            })
+                            .error(function (data, status, headers, config) {
+                                $log.info("Experiment can't be Loaded.");
+                            });
+
                         } else {
                             cancelTimer();
                             SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
@@ -302,8 +330,11 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowser = function clearBrowser($event) {
+                $scope.deleteBrowserButton = function clearBrowserButton($event) {
                     $event.preventDefault();
+                    $scope.deleteBrowser();
+                }
+                $scope.deleteBrowser = function clearBrowser() {
 
                     SweetAlert.swal({
                         title: "Clear the Experiment from your browser's local storage?",
@@ -327,34 +358,35 @@ angular.module('karamel.main')
                     });
 
                 }
-                
-                
+
+
                 function clearExperiment() {
-                            $scope.landing = true;
-                            ExperimentsService.store(null);
-                            $scope.experiment = {
-                                user: '',
-                                group: '',
-                                githubRepo: '',
-                                description: '',
-                                githubOwner: '',
-                                dependencies: '',
-                                urlBinary: '',
-                                urlGitClone: '',
-                                mavenCommand: 'mvn install -DskipTests',
-                                experimentSetupCode: '',
-                                defaultAttributes: '',
-                                code: [
-                                    {
-                                        name: 'experiment',
-                                        scriptContents: '',
-                                        configFileName: '',
-                                        configFileContents: '',
-                                        scriptType: ''
-                                    }
-                                ]
-                            };
-                    
+                    $scope.landing = true;
+                    ExperimentsService.store(null);
+                    $scope.experiment = {
+                        user: '',
+                        group: '',
+                        githubRepo: '',
+                        description: '',
+                        githubOwner: '',
+                        dependencies: '',
+                        urlBinary: '',
+                        urlGitClone: '',
+                        mavenCommand: 'mvn install -DskipTests',
+                        experimentSetupCode: '',
+                        defaultAttributes: '',
+                        clusterDefinition: '',
+                        code: [
+                            {
+                                name: 'experiment',
+                                scriptContents: '',
+                                configFileName: '',
+                                configFileContents: '',
+                                scriptType: ''
+                            }
+                        ]
+                    };
+
                 }
 
 
@@ -465,9 +497,8 @@ angular.module('karamel.main')
                                     })
                                     .error(function (data, status, headers, config) {
                                         $log.info("Experiment can't be Pushed.");
+                                        SweetAlert.swal("Problem pushing", "The Experiment could not pushed to GitHub. Is your Internet connection working?", "error");
                                     });
-//                            ExperimentsService.store($scope.experiment);
-                            SweetAlert.swal("Pushed", "The Experiment has been pushed to GitHub and can be loaded using its github URL", "error");
                             return;
                         } else {
                             SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");

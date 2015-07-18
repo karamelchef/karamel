@@ -140,12 +140,12 @@
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
           $.param({"org" : org}), true);
         },
-        createGithubRepo: function(org, repo, description) {
-          var method = 'POST';
-          var url = _defaultHost.concat("/createGithubRepo");
-          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "org" : org, "repo" : repo, "description" : description}));
-        },
+//        createGithubRepo: function(org, repo, description) {
+//          var method = 'POST';
+//          var url = _defaultHost.concat("/createGithubRepo");
+//          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
+//          $.param({ "org" : org, "repo" : repo, "description" : description}));
+//        },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
           var url = _defaultHost.concat("/loadExperiment");
@@ -163,11 +163,11 @@
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
           $.param({ "org" : org, "repo" : repo, "filename" : fileName }));
         },
-        removeRepo: function(org, repo) {
+        removeRepo: function(org, repo, removeLocal, removeRemote) {
           var method = 'POST';
           var url = _defaultHost.concat("/removeRepository");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-          $.param({ "org" : org, "repo" : repo}));
+          $.param({ "org" : org, "repo" : repo, "local" : removeLocal, "remote" : removeRemote}));
         },
         processCommand: function(commandName) {
           var method = 'PUT';

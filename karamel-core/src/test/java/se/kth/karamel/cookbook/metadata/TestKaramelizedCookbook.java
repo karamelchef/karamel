@@ -73,7 +73,7 @@ public class TestKaramelizedCookbook {
       assertEquals(er.getConfigFileName().isEmpty(), false);
       assertEquals(er.getConfigFileContents().isEmpty(), false);
       assertEquals(er.getScriptContents().isEmpty(), false);
-      assertEquals(er.getScriptType(), Experiment.ScriptType.bash);
+      assertEquals(er.getScriptType(), "bash");
     } catch (RecipeParseException ex) {
       Assert.fail(ex.toString());
     }

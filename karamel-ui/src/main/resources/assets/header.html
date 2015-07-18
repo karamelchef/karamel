@@ -8,28 +8,28 @@
         <span class="icon-bar"></span>
       </button>
       <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
-      <a class="navbar-brand logoFont" href="#/">Karamel</a>
+      <a class="navbar-brand logoFont" href="#/" ng-click="BoardController.setExperimentInActive()">Karamel</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse navbar-ex1-collapse">
       <ul class="nav navbar-nav navbar-left header-karamel">
-        <li class="dropdown">
-          <a class="dropdown-toggle headerFont" data-toggle="dropdown"> File <b class="caret"></b></a>
-          <ul class="dropdown-menu">
+        <li class="dropdown" dropdown>
+          <a class="dropdown-toggle headerFont" data-toggle="dropdown" dropdown-toggle> File <b class="caret"></b></a>
+          <ul class="dropdown-menu" dropdown-menu>
             <li class="custom-font"><a href="#/yaml/open" click-directive>Load Definition</a></li>
             <li class="custom-font"><input type="file" id="fileUploader" style="display: none"
                                            file-uploader></li>
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
             <li class="divider"></li>
-            <li class="custom-font"><a ng-click="switchToExperiment()">Experiment</a> </li>
+            <li class="custom-font"><a ng-click="switchToExperiment()" ng-click="BoardController.setExperimentActive()">Experiment</a> </li>
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
           </ul>
         </li>
       </ul>
-      <ul class="nav navbar-nav navbar-left">
+      <ul class="nav navbar-nav navbar-left" ng-show="hasProvider() && ! bs.experimentActive">
         <li><span/></li>
         <li><span/></li>
         <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
@@ -52,6 +52,29 @@
         <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
       </ul>
 
+      <ul class="nav navbar-nav navbar-left" ng-show="bs.experimentActive">
+        <li><span/></li>
+        <li><span/></li>
+        <li>
+          <i class="glyphicon glyphicon-cloud"></i> 
+        </li>
+        <li class="custom-font"><a title="Push" class="headerFont" 
+                                   ng-click="configureGlobalProvider()">Push</a></li>
+        <li><span/></li>
+	<li class="glyphicon glyphicon-tasks"></li> 
+        <li class="custom-font"><a title="Delete" class="headerFont" 
+                                   ng-click="configureGlobalAttributes()">Delete</a></li>
+        <li><span/></li>
+        <li class="glyphicon glyphicon-play specializeProvider">
+        </li>
+        <li><a title="Cluster" class="headerFont" ng-click="launchCluster()">Cluster</a></li>
+      </ul>
+        
+        
+        
+        
+        
+        
       <ul class="nav navbar-nav navbar-right" style="padding-right: 30px">
         <li>
           <a title="Cluster Name" class="headerFont"><span ng-bind="$root.activeCluster.name"></span> </a>

@@ -56,6 +56,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.Experiment;
+import se.kth.karamel.backend.ExperimentT;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
@@ -312,9 +313,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Github.LoadExperiment());
     environment.jersey().register(new Github.GetGithubOrgs());
     environment.jersey().register(new Github.GetGithubRepos());
-    environment.jersey().register(new Github.CreateGithubRepo());
+//    environment.jersey().register(new Github.CreateGithubRepo());
     environment.jersey().register(new Github.PushExperiment());
     environment.jersey().register(new Github.RemoveFileFromExperiment());
+    environment.jersey().register(new Github.RemoveRepository());
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -851,31 +853,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
 
-    @Path("/createGithubRepo")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class CreateGithubRepo {
-
-      @POST
-      public Response createGithubRepo(@FormParam("org") String org, @FormParam("repo") String repo,
-          @FormParam("description") String description) {
-        Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
-        try {
-          RepoItem r = karamelApiHandler.createGithubRepo(org, repo, description);
-          response = Response.status(Response.Status.OK).
-              entity(r).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
+//    @Path("/createGithubRepo")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+//    public static class CreateGithubRepo {
+//
+//      @POST
+//      public Response createGithubRepo(@FormParam("org") String org, @FormParam("repo") String repo,
+//          @FormParam("description") String description) {
+//        Response response = null;
+//        Logger.getLogger(KaramelServiceApplication.class.getName()).
+//            log(Level.INFO, " Received request to set github credentials.... ");
+//        try {
+//          RepoItem r = karamelApiHandler.createGithubRepo(org, repo, description);
+//          response = Response.status(Response.Status.OK).
+//              entity(r).build();
+//        } catch (KaramelException e) {
+//          e.printStackTrace();
+//          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+//              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+//        }
+//
+//        return response;
+//      }
+//    }
     @Path("/pushExperiment")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -887,8 +888,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
         try {
-          karamelApiHandler.commitAndPushExperiment(experiment.getGithubOwner(), experiment.getGithubRepo(),
-              experiment);
+          karamelApiHandler.commitAndPushExperiment(experiment);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {
@@ -939,22 +939,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
       }
     }
-    
+
     @Path("/removeRepository")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public static class RemoveRepository {
 
       @POST
-      public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo) {
+      public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo,
+          @FormParam("local") boolean local, @FormParam("remote") boolean remote) {
+        Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
             log(Level.INFO, " Received request to set github credentials.... ");
-        karamelApiHandler.removeRepo(org, repo);
-        return Response.status(Response.Status.OK).entity(
-            new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+        try {
+          karamelApiHandler.removeRepo(org, repo, local, remote);
+          response = Response.status(Response.Status.OK).
+              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
       }
     }
-
   }
 
   static class KaramelCleanupBeforeShutdownThread extends Thread {

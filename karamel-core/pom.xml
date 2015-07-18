@@ -27,6 +27,13 @@
     </repositories>
     <dependencies>
         <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.68</version>
+        </dependency>
+        
+        
+        <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
             <version>3.7.0.201502260915-r</version>

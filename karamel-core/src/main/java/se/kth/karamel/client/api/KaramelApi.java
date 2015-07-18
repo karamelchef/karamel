@@ -255,7 +255,7 @@ public interface KaramelApi {
    * @param experiment bash scripts and config files to add, commit, and push.
    * @throws KaramelException
    */
-  public void commitAndPushExperiment(String owner, String repoName, Experiment experiment)
+  public void commitAndPushExperiment(Experiment experiment)
       throws KaramelException;
 
   /**
@@ -282,14 +282,16 @@ public interface KaramelApi {
    * @param repo
    * @param experimentName
    */
-  public void removeFileFromExperiment(String owner, String repo, String experimentName);
+  public void removeFileFromExperiment(String owner, String repo, String experimentName) ;
 
   
   /**
    * 
    * @param owner
    * @param repo 
+   * @param removeGitHub 
+   * @param removeLocal 
    */
-  public void removeRepo(String owner, String repo);
+  public void removeRepo(String owner, String repo, boolean removeGitHub, boolean removeLocal) throws KaramelException;
   
 }
