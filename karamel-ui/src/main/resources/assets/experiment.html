@@ -44,7 +44,7 @@
                 <h2>New Experiment</h2> 
                 <div class="row">
                     <div class="form-group">    
-                        <button type="button" class="btn btn-primary vcenter" ng-click="experimentFactoryModal()">New Repository in GitHub</button>
+                        <button type="button" class="btn btn-primary vcenter" ng-click="experimentFactoryModal()"  tabindex="1">New Repository in GitHub</button>
                     </div>        
                 </div>        
             </div>
@@ -57,13 +57,13 @@
                     <div class="col-xs-10 col-sm-10 col-md-10">
                         <div class="form-group">
                             <input id="expName" name="user" placeholder="For example, https://github.com/username/experiment" 
-                                   ng-model="gs.repo.sshUrl" class="form-control vcenter"
-                                   type="text" tabindex="3">
+                                   ng-model="experiment.urlGitClone" class="form-control vcenter"
+                                   type="text" tabindex="2">
                         </div>
                     </div>
                     <div class="col-xs-2 col-sm-2 col-md-2">
                         <div class="form-group">    
-                            <button for="expName" type="button" class="btn btn-primary" ng-click="loadExperiment()" tabindex="1">Load</button>
+                            <button for="expName" type="button" class="btn btn-primary" ng-click="loadExperiment()" tabindex="3">Load</button>
                         </div>
                     </div>
                 </div>
@@ -189,14 +189,14 @@
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                             <label class="control-label" for="user">Username
                                 <input name="user" ng-model="experiment.user" class="form-control "
-                                       type="text" tabindex="7" required>
+                                       type="text" tabindex="5" required>
                             </label>
                         </div>
                         <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
                         <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                             <label class="control-label" for="group">Group
                                 <input name="group" ng-model="experiment.group" class="form-control "
-                                       type="text" tabindex="8" required>
+                                       type="text" tabindex="6" required>
                             </label>
                         </div>
 
@@ -211,7 +211,7 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-4 col-sm-8 col-md-8 col-lg-8">
                             <label for="experimentBinaryUrl" class="control-label">URL for binary that is downloaded and extracted to /usr/local/<experimentName>. Uses Chef's 'ark' resource. </label>
-                            <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="12" required tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
+                            <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="7" required tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
                         </div>
                     </div>
 
@@ -224,14 +224,14 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">
                             <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
-                            <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="13" required tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
+                            <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="8" required tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
                         </div>        
                     </div>
                     <div class="row form-group">
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">    
                             <label for="mavenCommand" class="control-label">Maven command</label>
-                            <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="13" required >
+                            <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="9" required >
                         </div>        
                     </div>
                 </accordion-group>
@@ -243,7 +243,7 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
                             <label for="dependencies" class="control-label">Comma-separated list of cookentry::recipe that should be executed before this experiment. Generates the Karamelfile.</label>
-                            <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="13" required>
+                            <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="10" required>
                         </div>        
                     </div>        
                 </accordion-group>
@@ -255,7 +255,7 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                             <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
-                            <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="9"  class="form-control"></textarea>
+                            <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11"  class="form-control"></textarea>
                         </div>
                     </div>
                 </accordion-group>
@@ -290,7 +290,7 @@
 
             <div class="form-group">
                 <label  style="margin-left: 10px">Add Experiment Script</label>
-                <input ng-model="newExperimentName" class="form-control" type="text" tabindex="16" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
+                <input ng-model="newExperimentName" class="form-control" type="text" tabindex="12" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
                 <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default">Add</button>
             </div>        
         </div>        
@@ -331,7 +331,7 @@
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
                             <!--<label for="experimentScript">Experiment Code</label>-->
-                            <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="14"  class="form-control"></textarea>
+                            <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13"  class="form-control"></textarea>
                         </div>
                     </div>
                     <br/>
@@ -360,7 +360,7 @@
                                                                             <i class="glyphicon glyphicon-minus"></i>
                                                                         </span>-->
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
+                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14"  class="form-control"></textarea>
                                 </div>
                             </div>
                         </div>

@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.egit.github.core.Reference;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.egit.github.core.service.UserService;
@@ -26,7 +29,6 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Settings;
@@ -233,6 +235,31 @@ public class Github {
   }
 
   /**
+   * Implements 'git pull master'
+   *
+   * @param owner
+   * @param repoName
+   * @throws KaramelException
+   */
+//  public synchronized static void updateRepo(String owner, String repoName) throws KaramelException {
+//    Git result = null;
+//    RepositoryService rs = new RepositoryService(client);
+//    Repository r;
+//    RepositoryId repo;
+//    try {
+//      r = rs.getRepository(owner, repoName);
+//      repo = new RepositoryId(owner, repoName);
+//      DataService service = new DataService(client);
+//      Reference ref = service.getReference(repo, "refs/heads/master");
+//      ref.
+//    } catch (IOException ex) {
+//      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+//      throw new KaramelException(ex.getMessage());
+//    }
+//
+//  }
+
+  /**
    * Clone an existing github repo.
    *
    * @param owner
@@ -284,7 +311,7 @@ public class Github {
         GHOrganization org = gitHub.getOrganization(owner);
         repo = org.getRepository(repoName);
       } else {
-        repo = gitHub.getRepository(owner + "/"  + repoName);
+        repo = gitHub.getRepository(owner + "/" + repoName);
       }
       repo.delete();
 

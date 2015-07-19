@@ -8,9 +8,11 @@ package se.kth.karamel.client.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -21,6 +23,7 @@ import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.backend.github.util.ChefExperimentExtractor;
+import se.kth.karamel.backend.github.util.GithubUrl;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -277,27 +280,30 @@ public class KaramelApiImpl implements KaramelApi {
   public Experiment loadExperiment(String githubRepoUrl) throws KaramelException {
     Experiment ec = new Experiment();
 
-    int e = githubRepoUrl.lastIndexOf(".git");
-    int s = githubRepoUrl.lastIndexOf("/");
-    if (s == -1 || e == -1) {
-      throw new KaramelException("Misformed url: " + githubRepoUrl);
-    }
-    int s1 = githubRepoUrl.lastIndexOf("/", s - 1);
-    if (s1 == -1) {
-      throw new KaramelException("Misformed url: " + githubRepoUrl);
-    }
-
-    String repoName = githubRepoUrl.substring(s, e);
+    String repoName = GithubUrl.extractRepoName(githubRepoUrl);
     ec.setGithubRepo(repoName);
-    String owner = githubRepoUrl.substring(s1, s);
+    String owner = GithubUrl.extractUserName(githubRepoUrl);
     ec.setGithubOwner(owner);
     if (repoName == null || owner == null || repoName.isEmpty() || owner.isEmpty()) {
       throw new KaramelException("Misformed url repo/owner: " + githubRepoUrl);
     }
 
+    File localPath = new File(Settings.COOKBOOK_DESIGNER_PATH + File.separator + repoName);
+    if (localPath.isDirectory() == true) {
+      try {
+        FileUtils.deleteDirectory(localPath);
+      } catch (IOException ex) {
+        Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+        if (localPath.isDirectory() == true) {
+          throw new KaramelException("Couldn't remove local copy of the repo at directory: " + localPath.getPath());
+        }
+      }
+    }
     Github.cloneRepo(owner, repoName);
 
-    KaramelizedCookbook kc = new KaramelizedCookbook(githubRepoUrl);
+    String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
+
+    KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl);
     MetadataRb metadata = kc.getMetadataRb();
     KaramelFile kf = kc.getKaramelFile();
     String metadataJson = kc.getMetadataJson();

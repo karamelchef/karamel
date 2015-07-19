@@ -3,8 +3,8 @@
 angular.module('karamel.main')
         .controller('ExperimentCtrl', ['$log', '$scope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
             'GithubService', 'ModalService', 'ExperimentsService', 'BoardService',
-            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService, 
-            ExperimentsService, BoardService) {
+            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService,
+                    ExperimentsService, BoardService) {
 
                 var self = this;
 
@@ -233,7 +233,7 @@ angular.module('karamel.main')
                                     $scope.experiment.group = result.githubRepo;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
-                                    $scope.experiment.urlGitClone = "git@github.com:" + result.githubOwner 
+                                    $scope.experiment.urlGitClone = "git@github.com:" + result.githubOwner
                                             + "/" + result.githubRepo + ".git";
                                     $scope.experiment.description = result.description;
                                     $scope.landing = false;
@@ -274,14 +274,14 @@ angular.module('karamel.main')
                     function (isConfirm) {
                         if (isConfirm) {
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
-                            .then(function (data, status, headers, config) {
-                                clearExperiment();
-                                // Core Rest Services
-                                SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
-                            })
-                            .error(function (data, status, headers, config) {
-                                $log.info("Experiment can't be Loaded.");
-                            });                            
+                                    .then(function (data, status, headers, config) {
+                                        clearExperiment();
+                                        // Core Rest Services
+                                        SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
+                                    })
+                                    .error(function (data, status, headers, config) {
+                                        $log.info("Experiment can't be Loaded.");
+                                    });
                             SweetAlert.swal("Deleted", "The Experiment is now gone completely.", "info");
                         } else {
                             cancelTimer();
@@ -306,14 +306,14 @@ angular.module('karamel.main')
                         if (isConfirm) {
 
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
-                            .then(function (data, status, headers, config) {
-                                clearExperiment();
-                                // Core Rest Services
-                                SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
-                            })
-                            .error(function (data, status, headers, config) {
-                                $log.info("Experiment can't be Loaded.");
-                            });
+                                    .then(function (data, status, headers, config) {
+                                        clearExperiment();
+                                        // Core Rest Services
+                                        SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
+                                    })
+                                    .error(function (data, status, headers, config) {
+                                        $log.info("Experiment can't be Loaded.");
+                                    });
 
                         } else {
                             cancelTimer();
@@ -322,7 +322,7 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowser= function clearBrowser($event) {
+                $scope.deleteBrowser = function clearBrowser($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
@@ -429,19 +429,37 @@ angular.module('karamel.main')
 
 
                 $scope.loadExperiment = function loadExperiment() {
-                    KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
-                            .then(function (data, status, headers, config) {
 
-                                if (angular.isDefined(data)) {
-                                    $log.info("Experiment Loaded Successfully.");
-                                    self.deepCopyExperiment(data);
-                                    $scope.landing = false;
-                                }
-                            })
-                            .error(function (data, status, headers, config) {
-                                $log.info("Experiment can't be Loaded.");
-                            });
+                    SweetAlert.swal({
+                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
+                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: true,
+                        closeOnCancel: false},
+                    function (isConfirm) {
 
+                        if (isConfirm) {
+
+                            KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
+                                    .success(function (data, status, headers, config) {
+
+                                        if (angular.isDefined(data)) {
+                                            $log.info("Experiment Loaded Successfully.");
+                                            self.deepCopyExperiment(data);
+                                            $scope.landing = false;
+                                        }
+                                    })
+                                    .error(function (data, status, headers, config) {
+                                        $log.info("Experiment can't be Loaded.");
+                                    });
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
+                        }
+                    });
                 }
 
                 $scope.pushExperiment = function pushExperiment() {
