@@ -452,4 +452,8 @@ textarea[name="pubkey"]{
     display: block;     
 }
 
+#experimentPanel {  
+    background-color:purple;
+    color: #ffffff;
+ }
  

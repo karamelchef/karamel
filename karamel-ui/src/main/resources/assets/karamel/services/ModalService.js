@@ -44,6 +44,21 @@ angular.module('karamel.main')
                             }
                         });
                         return modalInstance.result;
+                    },
+                    loadExperiment: function (size, githubDetails) {
+                        var modalInstance = $modal.open({
+                            templateUrl: 'karamel/partials/load-experiment.html',
+                            controller: 'LoadExperimentCtrl as loadExperimentCtrl',
+                            size: size,
+                            windowClass: 'app-modal-window',
+                            resolve: {
+                                githubDetails: function () {
+                                    return githubDetails;
+                                }
+
+                            }
+                        });
+                        return modalInstance.result;
                     }
                 }
 

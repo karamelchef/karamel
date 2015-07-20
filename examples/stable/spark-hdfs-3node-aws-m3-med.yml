@@ -10,6 +10,9 @@ cookbooks:
   spark: 
     github: "hopshadoop/spark-chef"
     branch: "master"
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
     
 groups: 
   namenodes:

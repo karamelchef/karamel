@@ -259,13 +259,16 @@ public class KaramelApiImpl implements KaramelApi {
     String owner = experiment.getGithubOwner();
     String repoName = experiment.getGithubRepo();
     File f = Github.getRepoDirectory(repoName);
-    if (Github.repoExists(owner, repoName) && f.exists() == false) {
+    boolean repoExists = Github.repoExists(owner, repoName);
+    if (repoExists) {
       // local copy must exist, already pushed to GitHub
-      throw new KaramelException("Trying to push a new experiment to an existing repository. "
+      if (!f.exists()) {
+        throw new KaramelException("Trying to push a new experiment to an existing repository. "
           + "Remote repo exists, local clone doesn't exist. Load the experiment if it already exists.");
+      }
     } else {
       // no repo on GitHub. Should not exist a local directory with same repo name.
-      if (f.exists() == true) {
+      if (f.exists()) {
         throw new KaramelException("Trying to pushd an experiment to a new repository. "
             + "Remote repo does not exist, however a local directory found (should be removed first).");
       } else {

@@ -140,12 +140,6 @@
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
           $.param({"org" : org}), true);
         },
-//        createGithubRepo: function(org, repo, description) {
-//          var method = 'POST';
-//          var url = _defaultHost.concat("/createGithubRepo");
-//          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',  
-//          $.param({ "org" : org, "repo" : repo, "description" : description}));
-//        },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
           var url = _defaultHost.concat("/loadExperiment");
