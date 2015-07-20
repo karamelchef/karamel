@@ -169,6 +169,18 @@ public class Github {
     }
   }
 
+  public synchronized static boolean repoExists(String owner, String repoName) throws KaramelException {
+    List<RepoItem> repos = Github.getRepos(owner);
+    boolean found = false;
+    for (RepoItem r : repos) {
+      if (r.getName().compareToIgnoreCase(repoName) == 0) {
+        found = true;
+        break;
+      }
+    }
+    return found;
+  }
+
   /**
    * Gets local directory for a given repository name.
    *
@@ -258,7 +270,6 @@ public class Github {
 //    }
 //
 //  }
-
   /**
    * Clone an existing github repo.
    *

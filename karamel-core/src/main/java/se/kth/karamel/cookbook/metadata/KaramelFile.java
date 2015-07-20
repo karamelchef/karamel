@@ -20,9 +20,7 @@ public final class KaramelFile {
 
   private List<YamlDependency> dependencies;
   
-  public static class Recipe {
-    
-  }
+
   public KaramelFile(String fileContent) {
     Yaml yaml = new Yaml(new Constructor(YamlKaramelFile.class));
     YamlKaramelFile file = (YamlKaramelFile) yaml.load(fileContent);

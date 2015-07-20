@@ -31,6 +31,15 @@ angular.module('karamel.main')
                 $scope.items = ['push', 'clear', 'delete local', 'delete local and remote'];
                 $scope.selected = $scope.items[0];
 
+                $scope.options = [{
+                        name: 'Bash',
+                        value: 'bash'
+                    }, {
+                        name: 'Python',
+                        value: 'python'
+                    }];
+
+
                 $scope.select = function (i, $event) {
                     $event.preventDefault();
                     if (angular.isDefined(i))
@@ -92,7 +101,7 @@ angular.module('karamel.main')
                     dependencies: '',
                     urlBinary: '',
                     urlGitClone: '',
-                    mavenCommand: 'mvn install -DskipTests',
+                    mavenCommand: '',
                     experimentSetupCode: '',
                     defaultAttributes: '',
                     clusterDefinition: '',
@@ -102,7 +111,7 @@ angular.module('karamel.main')
                             scriptContents: '',
                             configFileName: '',
                             configFileContents: '',
-                            scriptType: ''
+                            scriptType: 'bash'
                         }
                     ]
                 };
@@ -121,7 +130,6 @@ angular.module('karamel.main')
                 $scope.scriptInvalid = false;
 
 
-                $scope.scriptType = "bash";
                 $scope.sourceType = {};
 
                 $scope.sourceTypes = [
@@ -273,9 +281,9 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
+                            clearExperiment(false);
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
-                                    .then(function (data, status, headers, config) {
-                                        clearExperiment();
+                                    .success(function (data, status, headers, config) {
                                         // Core Rest Services
                                         SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
                                     })
@@ -304,10 +312,9 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
-
+                            clearExperiment();
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
                                     .then(function (data, status, headers, config) {
-                                        clearExperiment();
                                         // Core Rest Services
                                         SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
                                     })
@@ -362,7 +369,7 @@ angular.module('karamel.main')
                         dependencies: '',
                         urlBinary: '',
                         urlGitClone: '',
-                        mavenCommand: 'mvn install -DskipTests',
+                        mavenCommand: '',
                         experimentSetupCode: '',
                         defaultAttributes: '',
                         clusterDefinition: '',
@@ -402,7 +409,6 @@ angular.module('karamel.main')
 
 
                 self.deepCopyExperiment = function (data) {
-
                     $scope.experiment.urlBinary = data.urlBinary;
                     $scope.experiment.urlGitClone = data.urlGitClone;
                     $scope.experiment.mavenCommand = data.mavenCommand;

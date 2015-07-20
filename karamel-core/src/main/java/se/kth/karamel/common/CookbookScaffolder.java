@@ -71,7 +71,6 @@ public class CookbookScaffolder {
     createFile(cbName + Settings.COOKBOOK_BERKSFILE_REL_PATH, Settings.CB_TEMPLATE_BERKSFILE, name);
     createFile(cbName + Settings.COOKBOOK_METADATARB_REL_PATH, Settings.CB_TEMPLATE_METADATA, name);
     createFile(cbName + Settings.COOKBOOK_RECIPE_INSTALL_PATH, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
-    createFile(cbName + Settings.COOKBOOK_RECIPE_DEFAULT_PATH, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);
     createFile(cbName + Settings.COOKBOOK_README_PATH, Settings.CB_TEMPLATE_README, name);
     System.out.println("Cookbook scaffolding created. Cookbook now in folder: ./cookbooks/" + name);
 

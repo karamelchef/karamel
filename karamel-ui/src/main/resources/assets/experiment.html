@@ -321,31 +321,20 @@
                     <div class="row form-group">
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="form-group col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                            <select ng-model="scriptType" >
-                                <option value="bash">Bash</option>
-                                <option value="python">Python</option>
+                            <select ng-model="exp.scriptType" 
+                                    ng-init="exp.scriptType = exp.scriptType || options[0].value"
+                                    ng-options="option.value as option.name for option in options"
+                                    >
                             </select>
                         </div>
                     </div>
                     <div class="row form-group">
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-                            <!--<label for="experimentScript">Experiment Code</label>-->
                             <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13"  class="form-control"></textarea>
                         </div>
                     </div>
                     <br/>
-
-                    <!--                            <div class="row form-group">
-                                                    <span class="col-md-1 col-lg-1"></span>
-                                                                                <div class="col-xs-3 col-sm-8 col-md-10 col-lg-10">
-                                                                                    <label for="results" class="control-label">Full path to the Results Directory on the Experiment Server. </label>
-                                                                                    <input name="results" ng-model="exp.resultsDir" class="form-control "
-                                                                                           type="text" tabindex="15" required>
-                                                    <span>The remote folder /usr/local/{{gs.repo.name}}/results/{{exp.name}} will be downloaded to your local folder $HOME_DIR/.karamel/results</span>
-                                                </div>-->
-
-
                     <div class="row form-group" ng-show="status.advanced">
                         <span class="col-md-1 col-lg-1"></span>
                         <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
@@ -360,7 +349,7 @@
                                                                             <i class="glyphicon glyphicon-minus"></i>
                                                                         </span>-->
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14"  class="form-control"></textarea>
+                                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14"  class="form-control"></textarea>
                                 </div>
                             </div>
                         </div>

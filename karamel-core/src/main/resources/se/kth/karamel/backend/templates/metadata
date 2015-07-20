@@ -34,3 +34,4 @@ attribute "%%name%%/user",
 :description => "Run %%name%% as this user",
 :type => 'string',
 :default => "%%name%%"
+

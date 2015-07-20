@@ -7,7 +7,7 @@ end
 
 group node[:%%name%%][:group] do
   action :modify
-  members ["#{node[:%%name%%][:user]}"
+  members ["#{node[:%%name%%][:user]}"]
   append true
 end
 
