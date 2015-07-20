@@ -22,7 +22,7 @@ import se.kth.karamel.common.exception.MetadataParseException;
  *
  * @author kamal
  */
-public class TestKaramelizedCookbook {
+public class KaramelizedCookbookTest {
 
   @Test
   public void testLoadingClasspathCookbook() {
