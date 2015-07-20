@@ -91,9 +91,10 @@ We have organized our code into two main projects, _karamel-core_ and _karamel-u
 
 The core and REST-API are programmed in Java 7, and the UI is programmed in <a href="https://angularjs.org/">Angular JS<a>.  
 
-Our programming approach is test driven, we have a good test coverage and we use Mocking whenever it is required. Jenkins is our nightly build server, it runs all the tests per commit and reports possible failures to our mailing list. 
-
-We use <a href="https://code.google.com/p/guava-libraries/wiki/GuavaExplained">Google Guava</a> and its best practices, specially the basic ones such as nullity checks and preconditions. 
+####Code quality 
+1. Testability and mockability: Write your code in a way that you test each unit separately. Split concerns into different modules that you can mock one when testing the other. We use JUnit-4 for unit testing and <a href="http://mockito.org/">mockito</a> for mocking. 
+2. Code styles: Write a DRY (Don't repeat yourself) code, use spaces instead of tab and line width limit is 120. 
+3. We use <a href="https://code.google.com/p/guava-libraries/wiki/GuavaExplained">Google Guava</a> and its best practices, specially the basic ones such as nullity checks and preconditions. 
 
 ####Build and run from Source
 Ubuntu Requirements:
