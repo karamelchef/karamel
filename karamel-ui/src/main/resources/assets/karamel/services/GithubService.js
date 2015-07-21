@@ -79,7 +79,7 @@ angular.module('karamel.terminal')
                             });
                     return self.orgs;
                 };
-                self.getRepos = function (org) {
+                self.getRepos = function () {
                     return KaramelCoreRestServices.getGithubRepos(self.org.name)
                             .success(function (data, status, headers, config) {
                                 $log.info("GitHub Repos found: " + data.length);
@@ -104,17 +104,33 @@ angular.module('karamel.terminal')
                             if (self.orgs[i].name === org) {
                                 self.org.name = self.orgs[i].name;
                                 self.org.gravitar = self.orgs[i].gravitar;
+                                self.repos = [];
+                                self.getRepos();
                                 break;
                             }
                         }
                     }
                     self.org.name = org;
                     self.org.gravitar = "";
+                    
                 };
+                
+                self.setRepo = function (repo) {
+                    if (self.repos !== null) {
+                        for (var i = 0, len = self.repos.length; i < len; i++) {
+                            if (self.repos[i].name === repo) {
+                                self.repo.name = self.repos[i].name;
+                                break;
+                            }
+                        }
+                    }
+                    self.repo.name = repo;
+                };                
+                
                 self.newRepo = function (repoName, description) {
                     self.repo.name = repoName;
                     self.repo.description = description;
-                    self.repo.sshUrl = "git@github.com:" + self.org.name + "/" + repoName + ".git";
+                    self.repo.sshUrl = "https://github.com:" + self.org.name + "/" + repoName + ".git";
                 };
                 self.getOrg = function () {
                     return self.org;

@@ -6,7 +6,7 @@
 
     <div class="container" style="width: 100%">
 
-        <div class="row text-left">
+<!--        <div class="row text-left">
             <div class = "col-xs-3 col-sm-3 col-md-3" >
                 <label class="control-label">User: </label> {{github.githubCredentials.user| limitTo: 12}}{{github.githubCredentials.user > 12 ? '...' : ''}}
             </div>
@@ -14,10 +14,10 @@
                 <label class="control-label">Email: </label> {{github.githubCredentials.email| limitTo: 12}}{{github.githubCredentials.email > 12 ? '...' : ''}}
             </div>
         </div>
-        <hr>
+        <hr>-->
         <div class = "row" >
             <div class = "col-xs-6 col-sm-6 col-md-12" >
-                <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected2" class="text-primary"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
+                <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
             </div>
         </div>
         <br/>

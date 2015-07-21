@@ -241,7 +241,7 @@ angular.module('karamel.main')
                                     $scope.experiment.group = result.githubRepo;
                                     $scope.experiment.githubRepo = result.githubRepo;
                                     $scope.experiment.githubOwner = result.githubOwner;
-                                    $scope.experiment.urlGitClone = "git@github.com:" + result.githubOwner
+                                    $scope.experiment.urlGitClone = "https://github.com:" + result.githubOwner
                                             + "/" + result.githubRepo + ".git";
                                     $scope.experiment.description = result.description;
                                     $scope.landing = false;
@@ -249,19 +249,14 @@ angular.module('karamel.main')
                             });
                 };
 
-                $scope.loadExperiment = function () {
+                $scope.loadExperimentProfile = function () {
                     $log.info("Load experiment...");
                     ModalService.loadExperiment('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
                                     $log.info("load experiment modal experiment results ...");
-                                    $scope.experiment.user = result.githubRepo;
-                                    $scope.experiment.group = result.githubRepo;
-                                    $scope.experiment.githubRepo = result.githubRepo;
-                                    $scope.experiment.githubOwner = result.githubOwner;
-                                    $scope.experiment.urlGitClone = "git@github.com:" + result.githubOwner
-                                            + "/" + result.githubRepo + ".git";
-                                    $scope.experiment.description = result.description;
+                                    $scope.experiment.urlGitClone = result.githubUrl;
+                                    loadExperiment(result.githubUrl);
                                     $scope.landing = false;
                                 }
                             });
@@ -285,16 +280,16 @@ angular.module('karamel.main')
                     restartTimer();
                 }
 
-                $scope.deleteRepo = function clearRepo($event) {
+                $scope.deleteRepo = function($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
-                        title: "Delete the Experiment completely (not recoverable)?",
+                        title: "Delete the experiment completely (not recoverable)?",
                         text: "This removes the experiment from both GitHub and local storage. You will not be able to recover it.",
                         type: "info",
                         showCancelButton: true,
-                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, wipe it.",
-                        cancelButtonText: "Do not delete",
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete it completely.",
+                        cancelButtonText: "Do not delete.",
                         closeOnConfirm: true,
                         closeOnCancel: false},
                     function (isConfirm) {
@@ -305,21 +300,21 @@ angular.module('karamel.main')
                                         SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
                                     })
                                     .error(function (data, status, headers, config) {
-                                        $log.info("Experiment can't be deleted from GitHub.");
+                                        $log.info("There was an error when trying to delete the experiment.");
                                     });
                             clearExperiment(false);
                         } else {
                             cancelTimer();
-                            SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
+                            SweetAlert.swal("Not Deleted", "The Experiment has not been deleted", "error");
                         }
                     });
 
                 }
-                $scope.deleteLocal = function clearLocal($event) {
+                $scope.deleteLocal = function($event) {
                     $event.preventDefault();
                     SweetAlert.swal({
-                        title: "Delete the local clone of the Experiment and from HTML local storage?",
-                        text: "This deletes the experiment clone on your local harddisk, but not the copy on GitHub.",
+                        title: "Close the experiment and delete the local clone from ${HOME}/.karamel/cookbook_designer?",
+                        text: "This deletes the copy of the Experiment on your local harddisk, but not the copy on GitHub.",
                         type: "info",
                         showCancelButton: true,
                         confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, delete the local copy only.",
@@ -332,10 +327,10 @@ angular.module('karamel.main')
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
                                     .then(function (data, status, headers, config) {
                                         // Core Rest Services
-                                        SweetAlert.swal("Deleted", "The Experiment is now deleted locally", "info");
+                                        SweetAlert.swal("Deleted", "The experiment is now deleted locally", "info");
                                     })
                                     .error(function (data, status, headers, config) {
-                                        $log.info("Experiment can't be Loaded.");
+                                        $log.info("An error occured when trying to delete the experiment locally.");
                                     });
 
                         } else {
@@ -345,16 +340,16 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowser = function clearBrowser($event) {
+                $scope.deleteBrowser = function($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
-                        title: "Clear the Experiment from your browser's local storage?",
-                        text: "This clear the experiment you had been editing from your browser (not GitHub).",
+                        title: "Close the Experiment?",
+                        text: "If you have already saved it to GitHub, you will be able load the experiment again.",
                         type: "info",
                         showCancelButton: true,
-                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, clear it.",
-                        cancelButtonText: "Do not clear",
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, close it.",
+                        cancelButtonText: "Do not close",
                         closeOnConfirm: true,
                         closeOnCancel: false},
                     function (isConfirm) {
@@ -362,10 +357,10 @@ angular.module('karamel.main')
                             // Set landing true first to prevent a race-condition with the timer
                             clearExperiment();
                             // Core Rest Services
-                            SweetAlert.swal("Deleted", "The Browser is now cleared", "info");
+                            SweetAlert.swal("Closed", "The experiment is closed.", "info");
                         } else {
                             cancelTimer();
-                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
+                            SweetAlert.swal("Cancelled", "The experiment has not been closed", "error");
                         }
                     });
 
@@ -450,41 +445,41 @@ angular.module('karamel.main')
                 }
 
 
-//                $scope.loadExperiment = function loadExperiment() {
-//
-//                    SweetAlert.swal({
-//                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
-//                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
-//                        type: "warning",
-//                        showCancelButton: true,
-//                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
-//                        cancelButtonText: "Cancel",
-//                        closeOnConfirm: true,
-//                        closeOnCancel: false},
-//                    function (isConfirm) {
-//
-//                        if (isConfirm) {
-//
-//                            KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
-//                                    .success(function (data, status, headers, config) {
-//
-//                                        if (angular.isDefined(data)) {
-//                                            $log.info("Experiment Loaded Successfully.");
-//                                            self.deepCopyExperiment(data);
-//                                            $scope.landing = false;
-//                                        }
-//                                    })
-//                                    .error(function (data, status, headers, config) {
-//                                        $log.info("Experiment can't be Loaded.");
-//                                    });
-//                        } else {
-//                            cancelTimer();
-//                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
-//                        }
-//                    });
-//                }
+                $scope.loadExperiment = function() {
 
-                $scope.pushExperiment = function pushExperiment($event) {
+                    SweetAlert.swal({
+                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
+                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: true,
+                        closeOnCancel: false},
+                    function (isConfirm) {
+
+                        if (isConfirm) {
+
+                            KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
+                                    .success(function (data, status, headers, config) {
+
+                                        if (angular.isDefined(data)) {
+                                            $log.info("Experiment Loaded Successfully.");
+                                            self.deepCopyExperiment(data);
+                                            $scope.landing = false;
+                                        }
+                                    })
+                                    .error(function (data, status, headers, config) {
+                                        $log.info("Experiment can't be Loaded.");
+                                    });
+                        } else {
+                            cancelTimer();
+                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
+                        }
+                    });
+                }
+
+                $scope.pushExperiment = function($event) {
                     $event.preventDefault();
                 
 //                    $scope.experimentNameInvalid = false;

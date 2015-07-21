@@ -40,7 +40,7 @@ angular.module('karamel.main')
                     $scope.submittedOngoing = true;
                     $scope.submitted = true;
                     $scope.submittedMsg = "";
-                    GithubService.getRepos($scope.github.org.name).then(
+                    GithubService.getRepos().then(
                             function () {
                                 // Check if the repository already exists for this user or organization
                                 for (var i = 0; i < $scope.github.repos.length; i++) {

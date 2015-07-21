@@ -428,8 +428,18 @@ textarea[name="pubkey"]{
     margin-bottom: 15px;
 }
 
-#orgSelected1,#orgSelected2 {
+#orgSelected1{
     display:inline;
+}
+.text-bold {
+    padding: 5px 5px 5px 5px;
+/*    border-style:solid;
+    border-width:3px;
+    border-color: #cacaca;*/
+    font-weight: bold;    
+    font-size: 16px;
+    border-bottom: 3px solid #dddddd;
+
 }
 
 #experimentLoader {  
@@ -452,8 +462,8 @@ textarea[name="pubkey"]{
     display: block;     
 }
 
-#experimentPanel {  
+.selectedOrg {  
     background-color:purple;
-    color: #ffffff;
+    border: 3px double #CCCCCC;
  }
  
