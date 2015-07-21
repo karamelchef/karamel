@@ -4,10 +4,6 @@
  */
 package icons;
 
-/**
- *
- * @author jdowling
- */
 import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;

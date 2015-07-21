@@ -32,7 +32,7 @@ angular.module('karamel.main')
                     },
                     experimentFactory: function (size, githubDetails) {
                         var modalInstance = $modal.open({
-                            templateUrl: 'karamel/partials/experiment-factory.html',
+                            templateUrl: 'karamel/partials/new-experiment.html',
                             controller: 'NewExperimentCtrl as newExperimentCtrl',
                             size: size,
                             windowClass: 'app-modal-window',

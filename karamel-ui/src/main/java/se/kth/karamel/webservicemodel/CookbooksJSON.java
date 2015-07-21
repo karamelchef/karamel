@@ -2,10 +2,6 @@ package se.kth.karamel.webservicemodel;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author jdowling
- */
 public class CookbooksJSON {
 
   private String cookbookName;

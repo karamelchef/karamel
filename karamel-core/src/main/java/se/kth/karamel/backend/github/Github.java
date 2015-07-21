@@ -38,7 +38,6 @@ import se.kth.karamel.common.exception.KaramelException;
  * 1. Call registerCredentials() to store your github credentials in memory. 2. Then call methods like addFile(),
  * commitPush(repo,..)
  *
- * @author jdowling
  */
 public class Github {
 

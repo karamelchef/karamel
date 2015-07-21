@@ -40,10 +40,6 @@ import se.kth.karamel.cookbook.metadata.KaramelFile;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
-/**
- *
- * @author jdowling
- */
 public class GithubUserTest {
 
   String user = "";

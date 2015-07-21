@@ -8,10 +8,6 @@ package se.kth.karamel.webservicemodel;
 import se.kth.karamel.backend.github.OrgItem;
 import java.util.List;
 
-/**
- *
- * @author jdowling
- */
 public class GithubOrgsJSON {
 
   

@@ -7,10 +7,6 @@ package se.kth.karamel.webservicemodel;
 
 import java.util.List;
 
-/**
- *
- * @author jdowling
- */
 public class GithubReposJSON {
 
   private String org;

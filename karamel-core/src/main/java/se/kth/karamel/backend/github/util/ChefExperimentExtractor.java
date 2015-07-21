@@ -38,7 +38,6 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
  * How to use. Invoke methods in this order: (1) @see ChefExperimentExtractor#parseAttributesAddToGit() (2) @see
  * ChefExperimentExtractor#parseRecipesAddToGit()
  *
- * @author jdowling
  */
 public class ChefExperimentExtractor {
 

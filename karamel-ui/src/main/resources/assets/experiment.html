@@ -95,9 +95,13 @@
                     <span>{{experiment.urlGitClone| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
-                    <button type="button" class="btn btn-primary" ng-click="pushExperiment($event)">
-                        Save to GitHub
+                    <button type="button" class="btn" 
+                            ng-class="{'btn-warning': status.isModified, 'btn-primary': !status.isModified}"
+                            ng-click="pushExperiment($event)">
+                        Save to GitHub <span class="glyphicon" 
+                        ng-class="{'glyphicon-resize-small': status.isModified, 'glyphicon-resize-full': !status.isModified}"/>
                     </button>
+
                 </div>
                 <div class="btn-group-sm col-xs-3 col-sm-3 col-md-3 col-lg-1" dropdown is-open="status.isopen">
                     <button type="button" class="btn btn-danger dropdown-toggle"  ng-disabled="disabled" dropdown-toggle >
@@ -139,14 +143,14 @@
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                     <label class="control-label" for="user">Username
                                         <input name="user" ng-model="experiment.user" class="form-control "
-                                               type="text" tabindex="5" required>
+                                               type="text" tabindex="5" required ng-change="status.isModified=true">
                                     </label>
                                 </div>
                                 <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                     <label class="control-label" for="group">Group
                                         <input name="group" ng-model="experiment.group" class="form-control "
-                                               type="text" tabindex="6" required>
+                                               type="text" tabindex="6" required ng-change="status.isModified=true">
                                     </label>
                                 </div>
 
@@ -161,7 +165,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-8 col-md-8 col-lg-8">
                                     <label for="experimentBinaryUrl" class="control-label">URL for binary that is downloaded and extracted to /usr/local/{{experiment.githubRepo}}. Uses Chef's 'ark' resource. </label>
-                                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="7" required tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
+                                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="7" required ng-change="status.isModified=true" tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
                                 </div>
                             </div>
 
@@ -174,14 +178,14 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">
                                     <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
-                                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="8" required tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
+                                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="8" required ng-change="status.isModified=true" tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
                                 </div>        
                             </div>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">    
                                     <label for="mavenCommand" class="control-label">Maven command</label>
-                                    <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="9" required >
+                                    <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="9" required ng-change="status.isModified=true">
                                 </div>        
                             </div>
                         </accordion-group>
@@ -193,7 +197,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
                                     <label for="dependencies" class="control-label">Comma-separated list of cookentry::recipe that should be executed before this experiment. Generates the Karamelfile.</label>
-                                    <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="10" required>
+                                    <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="10" required ng-change="status.isModified=true">
                                 </div>        
                             </div>        
                         </accordion-group>
@@ -205,7 +209,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="chefCode">This Chef code is executed before the Experiment Code is run.</label>
-                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11"  class="form-control"></textarea>
+                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified=true" class="form-control"></textarea>
                                 </div>
                             </div>
                         </accordion-group>
@@ -255,6 +259,7 @@
                                     <select ng-model="exp.scriptType" 
                                             ng-init="exp.scriptType = exp.scriptType || options[0].value"
                                             ng-options="option.value as option.name for option in options"
+                                            ng-change="status.isModified=true"
                                             >
                                     </select>
                                 </div>
@@ -262,7 +267,7 @@
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13"  class="form-control"></textarea>
+                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified=true" class="form-control"></textarea>
                                 </div>
                             </div>
                             <br/>
@@ -271,7 +276,7 @@
                                 <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
                                     <div class="form-group">
                                         <label>Relative path to config file</label>
-                                        <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control">
+                                        <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control" ng-change="status.isModified=true">
                                     </div>
                                     <div class="row form-group" ng-show="exp.configFileName.length > 0">
                                         <span class="col-md-1 col-lg-1"></span>
@@ -280,7 +285,7 @@
                                                                                     <i class="glyphicon glyphicon-minus"></i>
                                                                                 </span>-->
                                         <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                            <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14"  class="form-control"></textarea>
+                                            <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14" ng-change="status.isModified=true" class="form-control"></textarea>
                                         </div>
                                     </div>
                                 </div>

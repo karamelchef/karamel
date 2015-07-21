@@ -294,7 +294,6 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public Experiment loadExperiment(String githubRepoUrl) throws KaramelException {
     Experiment ec = new Experiment();
-
     String repoName = GithubUrl.extractRepoName(githubRepoUrl);
     ec.setGithubRepo(repoName);
     String owner = GithubUrl.extractUserName(githubRepoUrl);

@@ -7,20 +7,15 @@ package se.kth.karamel.backend.github.util;
 
 import se.kth.karamel.common.exception.KaramelException;
 
-/**
- *
- * @author jdowling
- */
 public class GithubUrl {
 
   public static String getProtocol(String githubUrl) throws KaramelException {
+    if (githubUrl == null || githubUrl.isEmpty()) {
+      throw new KaramelException("Misformed empty url: " + githubUrl);      
+    }
     String protocol = githubUrl.substring(0, 4);
 
-    if (protocol.compareToIgnoreCase("http") == 0) {
-
-    } else if (protocol.compareToIgnoreCase("git@") == 0) {
-
-    } else {
+    if (protocol.compareToIgnoreCase("http") != 0 || protocol.compareToIgnoreCase("git@") != 0) {
       throw new KaramelException("Misformed url - only 'http' and 'git@' supported: " + githubUrl);
     }
 

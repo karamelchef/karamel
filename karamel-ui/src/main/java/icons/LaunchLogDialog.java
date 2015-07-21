@@ -21,10 +21,6 @@ import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
 import se.kth.karamel.webservice.KaramelServiceApplication;
 
-/**
- *
- * @author jdowling
- */
 public class LaunchLogDialog extends javax.swing.JDialog {
 
   private final int port;

@@ -12,6 +12,7 @@ angular.module('karamel.main')
 
                 $scope.status = {
                     isOpen: true,
+                    isModified: true,
                     experimentOpen: true,
                     userGroup: false,
                     sourceOpen: false,
@@ -154,6 +155,7 @@ angular.module('karamel.main')
                             return;
                         }
                     }
+                    $scope.status.isModified=true;
 
                     var newEntry = {
                         name: $scope.newExperimentName,
@@ -256,8 +258,10 @@ angular.module('karamel.main')
                                 if (angular.isDefined(result)) {
                                     $log.info("load experiment modal experiment results ...");
                                     $scope.experiment.urlGitClone = result.githubUrl;
-                                    loadExperiment(result.githubUrl);
-                                    $scope.landing = false;
+                                    if (result.githubUrl !== null && result.githubUrl !== "") {
+                                        loadExperiment();
+                                        $scope.landing = false;
+                                    }
                                 }
                             });
                 };
@@ -519,6 +523,7 @@ angular.module('karamel.main')
                         if (isConfirm) {
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
+                                        $scope.status.isModified=false;
                                         SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
                                         $log.info("Experiment Pushed Successfully.");
                                     })

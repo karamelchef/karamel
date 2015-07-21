@@ -7,24 +7,8 @@ angular.module('karamel.main')
 
                 $scope.github = GithubService;
 
-                $scope.submitted = true;
-                $scope.submittedOngoing = false;
-                $scope.submittedMsg = "";
-
-                $scope.repoName = "";
-
                 $scope.githubUrl = ""
-                
-                $scope.githubDetails = {
-                    user: '',
-                    group: '',
-                    githubRepo: '',
-                    githubOwner: '',
-                    description: '',
-                    urlGitClone: ''
-                };
-                
-                
+
                 self.selectUserOrg = function () {
                     $scope.github.org.name = $scope.github.githubCredentials.user;
                     $scope.github.repos = [];
@@ -32,19 +16,11 @@ angular.module('karamel.main')
                 }
                 self.selectOrg = function (name) {
                     GithubService.setOrg(name);
-                    $scope.repoName = "";
-                    $scope.githubDetails.githubRepo = "";
-                    $scope.githubDetails.urlGitClone = "";
-                    $scope.githubDetails.githubOwner = GithubService.org.name;
                 };
                 
                 self.selectRepo = function (name) {
                     GithubService.setRepo(name);
-                    $scope.repoName = name;
-                    $scope.githubDetails.githubRepo = name;
-                    $scope.githubDetails.urlGitClone = "";
-                    $scope.githubDetails.githubOwner = GithubService.org.name;
-                    
+                    $scope.github.repo.sshUrl = "https://github.com/" + $scope.github.org.name + "/" + name + ".git";
                     $scope.githubUrl = "https://github.com/" + $scope.github.org.name + "/" + name + ".git";
                 };
 
@@ -60,18 +36,11 @@ angular.module('karamel.main')
                     return null;
                 };
 
-
-                self.getOrgs = function () {
-                    GithubService.getOrgs();
-                }
-
                 function _initScope() {
-                    self.getOrgs();
+                    GithubService.getOrgs();
                     $scope.github.org.name = $scope.github.githubCredentials.user;
                     self.selectUserOrg();
                 }
-
-                
                 
                 _initScope();
                 
