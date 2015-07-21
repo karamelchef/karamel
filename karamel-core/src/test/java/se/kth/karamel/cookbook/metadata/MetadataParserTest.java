@@ -5,8 +5,11 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import static org.junit.Assert.*;
@@ -36,7 +39,7 @@ public class MetadataParserTest {
   }
 
   @Test
-  public void testRecognizedLines() throws IOException, MetadataParseException {
+  public void testNdbRecognizedLines() throws IOException, MetadataParseException {
     String content = IoUtils.readContentFromClasspath("cookbooks/hopshadoop/ndb-chef/master/metadata.rb");
     MetadataRb metadatarb = MetadataParser.parse(content);
     assertEquals("ndb", metadatarb.getName());
@@ -64,5 +67,23 @@ public class MetadataParserTest {
     assertEquals("string", attributes.get(43).getType());
     assertEquals("optional", attributes.get(43).getRequired());
     assertEquals("false", attributes.get(43).getDefault());
+  }
+  
+    @Test
+  public void testLinks() throws MetadataParseException, IOException {
+    String content = IoUtils.readContentFromClasspath("se/kth/karamel/cookbook/metadata/metadata.rb");
+    MetadataRb metadatarb = MetadataParser.parse(content);
+    List<Recipe> recipes = metadatarb.getRecipes();
+    assertEquals(recipes.size(), 2);
+    Recipe r1 = recipes.get(0);
+    Recipe r2 = recipes.get(1);
+    assertEquals(r1.getName(), "hopshub::install");
+    Set<String> l1 = r1.getLinks();
+    assertEquals(l1.size(), 0);
+    assertEquals(r2.getName(), "hopshub::default");
+    Set<String> l2 = r2.getLinks();
+    assertEquals(l2.size(), 2);
+    assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopshub in your browser");
+    assertEquals(l2.toArray()[1], "Visit Karamel {here,www.karamel.io}");
   }
 }

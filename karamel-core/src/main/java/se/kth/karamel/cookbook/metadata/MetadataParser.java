@@ -53,8 +53,8 @@ public class MetadataParser {
       line = line.trim();
       if (!line.isEmpty()) {
         if (line.startsWith("#")) {
-        //It assumes that each comment block belongs to the next definition, it records comments until it finds out the 
-          //next item
+          //It assumes that each comment block belongs to the next definition, it records comments until it finds out 
+          //the next item
           comments.add(line);
           found = true;
         }
@@ -96,6 +96,7 @@ public class MetadataParser {
             r.parseComments(comments);
             metadata.getRecipes().add(r);
             found = true;
+            comments.clear();
           }
         }
 
@@ -160,7 +161,7 @@ public class MetadataParser {
         if (!found) {
           logger.warn(String.format("Urecognized line in the metadata.rb '%s'", line));
         }
-
+      } else {
         comments.clear();
       }
     }
