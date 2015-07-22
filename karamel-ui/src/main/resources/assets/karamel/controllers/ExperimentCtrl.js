@@ -18,6 +18,7 @@ angular.module('karamel.main')
                     sourceOpen: false,
                     binaryOpen: false,
                     configOpen: false,
+                    orchestrationOpen: false,
                     depdenciesOpen: false,
                     chefOpen: false,
                     advanced: false,
@@ -58,6 +59,7 @@ angular.module('karamel.main')
                     $scope.status.binaryOpen = !$scope.status.binaryOpen;
                     $scope.status.configOpen = !$scope.status.configOpen;
                     $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
+                    $scope.status.orchestrationOpen= !$scope.status.orchestrationOpen;
                     $scope.status.chefOpen = !$scope.status.chefOpen;
                     $scope.status.expanded = !$scope.status.expanded;
                     for (var i = 0; i < $scope.status.experiment.length; i++) {

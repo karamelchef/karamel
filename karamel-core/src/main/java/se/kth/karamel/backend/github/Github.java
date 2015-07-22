@@ -217,7 +217,6 @@ public class Github {
    */
   public synchronized static RepoItem createRepoForOrg(String org, String repoName, String description) throws
       KaramelException {
-
     try {
       OrganizationService os = new OrganizationService(client);
       RepositoryService rs = new RepositoryService(client);
@@ -226,7 +225,8 @@ public class Github {
       r.setOwner(os.getOrganization(org));
       r.setDescription(description);
       rs.createRepository(org, r);
-      cloneRepo(org, repoName);
+      cloneRepo(org, repoName);      
+      cachedRepos.remove(org);      
       return new RepoItem(repoName, description, r.getSshUrl());
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
@@ -251,6 +251,7 @@ public class Github {
       r.setDescription(description);
       rs.createRepository(r);
       cloneRepo(getUser(), repoName);
+      cachedRepos.remove(Github.getUser());      
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());

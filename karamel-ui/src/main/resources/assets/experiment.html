@@ -122,7 +122,7 @@
                     <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
-                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-left" ng-click="toggle()" ng-show="status.advanced">
+                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-right" ng-click="toggle()" ng-show="status.advanced">
                         <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
                     </span>
                 </div>
@@ -194,11 +194,12 @@
                                     </div>        
                                 </div>
                             </accordion-group>-->
-                        <accordion-group is-open="status.dependenciesOpen">
+                        <accordion-group is-open="status.orchestrationOpen">
                             <accordion-heading>
                                 <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
-                                Dependencies 
+                                Orchestration 
                             </accordion-heading>
+                            Runtime Dependencies for this experiment.
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
@@ -223,7 +224,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="berksCode">Berksfile dependencies included in the Cookbook.</label>
-                                    <textarea id="berksCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="\"ark\", \"java\", \"mysql\", \"cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master'\""  tabindex="11" ng-change="status.isModified=true" class="form-control"></textarea>
+                                    <textarea id="berksCode" style="width:100%; height:100px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="ark, java, mysql"  tooltip-trigger="focus" tooltip-placement="right" tooltip="ark, java, mysql, \"'ark', github: 'burtlo/ark', version: '~> 0.9.0'\", \"cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master'\""  tabindex="11" ng-change="status.isModified=true" class="form-control"></textarea>
                                 </div>
                             </div>                            
                         </accordion-group>

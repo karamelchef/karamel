@@ -2,7 +2,4 @@ source "https://api.berkshelf.com"
 
 metadata
 
-cookbook 'ark', github: 'burtlo/ark', version: "~> 0.9.0"
-cookbook 'java'
-
 %%berks_dependencies%%
