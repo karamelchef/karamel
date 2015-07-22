@@ -123,7 +123,7 @@
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
                     <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-left" ng-click="toggle()" ng-show="status.advanced">
-                        <i class="glyphicon" ng-class="{'glyphicon-chevron-right': status.expanded, 'glyphicon-chevron-down': !status.expanded}"></i>
+                        <i class="glyphicon" ng-class="{'glyphicon-chevron-down': status.expanded, 'glyphicon-chevron-right': !status.expanded}"></i>
                     </span>
                 </div>
             </div>
@@ -135,7 +135,9 @@
                     <accordion close-others="false">
                         <accordion-group is-open="status.userGroup">
                             <accordion-heading> 
-                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.userGroup, 'glyphicon-chevron-down': !status.userGroup}"></i>Run experiment as Unix user/group
+                                                                <span class="col-md-1 col-lg-1">
+<i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.userGroup, 'glyphicon-chevron-right': !status.userGroup}"></i></span>
+                                Run experiment as Unix user/group
                             </accordion-heading>
                             Username/group that owns the binaries/source-code installed and the experiment scripts and results.
                             <div class="row">
@@ -159,7 +161,8 @@
                         </accordion-group>
                         <accordion-group is-open="status.binaryOpen">
                             <accordion-heading>
-                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.binaryOpen, 'glyphicon-chevron-down': !status.binaryOpen}"></i>Download Binaries
+                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.binaryOpen, 'glyphicon-chevron-right': !status.binaryOpen}"></i></span>
+                                    Download Binaries
                             </accordion-heading>
                             <div class="row">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -172,7 +175,8 @@
                         </accordion-group>
                         <accordion-group is-open="status.sourceOpen">
                             <accordion-heading>
-                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.sourceOpen, 'glyphicon-chevron-down': !status.sourceOpen}"></i>Clone and Build Source Code 
+                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.sourceOpen, 'glyphicon-chevron-right': !status.sourceOpen}"></i></span>
+                                Clone and Build Source Code 
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -191,7 +195,8 @@
                         </accordion-group>
                         <accordion-group is-open="status.dependenciesOpen">
                             <accordion-heading>
-                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.dependenciesOpen, 'glyphicon-chevron-down': !status.dependenciesOpen}"></i>Dependencies 
+                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
+                                Dependencies 
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -203,7 +208,8 @@
                         </accordion-group>
                         <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
                             <accordion-heading>
-                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.chefOpen, 'glyphicon-chevron-down': !status.chefOpen}"></i>Experiment Setup with Chef  
+                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.chefOpen, 'glyphicon-chevron-right': !status.chefOpen}"></i></span>
+                                Experiment Setup with Chef  
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -217,7 +223,7 @@
                                                     <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
                                                     <accordion-group is-open="status.configOpen" ng-show="status.advanced">
                                                         <accordion-heading>
-                                                            Configuration <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.configOpen, 'glyphicon-chevron-down': !status.configOpen}"></i>
+                                                            Configuration <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.configOpen, 'glyphicon-chevron-right': !status.configOpen}"></i>
                                                         </accordion-heading>
                         
                                                         <div class="row form-group">
@@ -244,7 +250,7 @@
                         <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code">
                             <accordion-heading>
                                 <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
-                                    <i class="glyphicon" ng-class="{'glyphicon-chevron-right': $scope.status.experiment[$index].status, 'glyphicon-chevron-down': !$scope.status.experiment[$index].status}"></i>
+                                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': $scope.status.experiment[$index].status, 'glyphicon-chevron-right': !$scope.status.experiment[$index].status}"></i>
                                 </span>
                                 <span class="col-md-4 col-lg-4">Experiment {{$index+1}}: {{exp.name}}</span>
                                 <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" 
