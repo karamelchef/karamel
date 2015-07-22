@@ -100,6 +100,7 @@ angular.module('karamel.main')
                     description: '',
                     githubOwner: '',
                     dependencies: '',
+                    berksfile: '',
                     urlBinary: '',
                     urlGitClone: '',
                     mavenCommand: '',
@@ -303,15 +304,23 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
+                            // delete Browser LocalStorage
+                            clearExperiment();
+                            // delete local clone of Repo
+                            KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
+                                    .error(function (data, status, headers, config) {
+                                        SweetAlert.swal("Problem deleting local clone", "An error occured when trying to delete the experiment locally", "error");
+                                        return;
+                                    });                            
+                            // delete Repo on GitHub
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
                                     .success(function (data, status, headers, config) {
                                         // Core Rest Services
                                         SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
                                     })
                                     .error(function (data, status, headers, config) {
-                                        $log.info("There was an error when trying to delete the experiment.");
+                                        SweetAlert.swal("Problem deleting Repo on GitHub", "You will need to remove the repository from GitHub's website.", "error");
                                     });
-                            clearExperiment(false);
                         } else {
                             cancelTimer();
                             SweetAlert.swal("Not Deleted", "The Experiment has not been deleted", "error");
@@ -436,6 +445,7 @@ angular.module('karamel.main')
                     $scope.experiment.urlGitClone = data.urlGitClone;
                     $scope.experiment.mavenCommand = data.mavenCommand;
                     $scope.experiment.dependencies = data.dependencies;
+                    $scope.experiment.berksfile = data.berksfile;
                     $scope.experiment.user = data.user;
                     $scope.experiment.group = data.group;
                     $scope.experiment.githubRepo = data.githubRepo;

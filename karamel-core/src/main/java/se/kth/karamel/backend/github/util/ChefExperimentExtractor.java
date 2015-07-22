@@ -207,6 +207,38 @@ public class ChefExperimentExtractor {
           }
         }
       }
+
+      String berksfile = experimentContext.getBerksfile();
+      StringBuilder berksDependencies = new StringBuilder();
+      if (!berksfile.isEmpty()) {
+        int curPos = 0;
+        int pos = 0; 
+        while (pos != -1) {
+          pos = berksfile.indexOf("\"", curPos);
+          curPos = pos+1;
+          pos = berksfile.indexOf("\"", curPos);
+          if (pos != -1) {
+            berksDependencies.append(berksfile.substring(curPos, pos-1)).append(System.lineSeparator());
+          }
+          curPos = pos+1;
+        }        
+      }
+      
+      
+      String[] tokens = berksfile.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+      for (String s : tokens) {
+        String quotesStripped = s.replaceAll("\"", "");
+        berksDependencies.append(quotesStripped).append(System.lineSeparator());
+      }
+      
+      StringBuilder berksContents = CookbookGenerator.instantiateFromTemplate(
+          Settings.CB_TEMPLATE_BERKSFILE,
+          "berks_dependencies", berksDependencies.toString()
+      );
+      
+      Github.addFile(owner, repoName, "Berksfile", berksContents.toString());
+     
+      
       Map<String, String> expConfigFileNames = new HashMap<>();
 
       // 2. write them to recipes/default.rb and metadata.rb

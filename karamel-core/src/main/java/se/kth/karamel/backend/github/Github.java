@@ -379,7 +379,9 @@ public class Github {
   }
 
   /**
-   * Adds a file to the Github repo's index. You then need to commit the change and push the commit to github.
+   * Adds a file to the Github repo's index. 
+   * If the file already exists, it will delete it and replace its contents with the new contents.
+   * You wil subsequenty need to commit the change and push the commit to github.
    *
    * @param owner
    * @param repoName

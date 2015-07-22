@@ -96,15 +96,15 @@
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
                     <button type="button" class="btn" 
-                            ng-class="{'btn-warning': status.isModified, 'btn-primary': !status.isModified}"
+                            ng-class="{'btn-danger': status.isModified, 'btn-success': !status.isModified}"
                             ng-click="pushExperiment($event)">
-                        Save<span ng-show="!status.isModified">d</span> <span class="glyphicon" 
-                        ng-class="{'glyphicon-thumbs-up': status.isModified, 'glyphicon-thumbs-down': !status.isModified}"/>
+                        <span ng-show="status.isModified">Not </span>Saved <span class="glyphicon" 
+                        ng-class="{'glyphicon-thumbs-down': status.isModified, 'glyphicon-thumbs-up': !status.isModified}"/>
                     </button>
 
                 </div>
                 <div class="btn-group-sm col-xs-3 col-sm-3 col-md-3 col-lg-1" dropdown is-open="status.isopen">
-                    <button type="button" class="btn btn-danger dropdown-toggle"  ng-disabled="disabled" dropdown-toggle >
+                    <button type="button" class="btn btn-primary dropdown-toggle"  ng-disabled="disabled" dropdown-toggle >
                         Close or Delete<span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="cmenu">
@@ -123,7 +123,7 @@
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
                     <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-left" ng-click="toggle()" ng-show="status.advanced">
-                        <i class="glyphicon" ng-class="{'glyphicon-chevron-down': status.expanded, 'glyphicon-chevron-right': !status.expanded}"></i>
+                        <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
                     </span>
                 </div>
             </div>
@@ -159,40 +159,41 @@
                             </div>
 
                         </accordion-group>
-                        <accordion-group is-open="status.binaryOpen">
-                            <accordion-heading>
-                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.binaryOpen, 'glyphicon-chevron-right': !status.binaryOpen}"></i></span>
-                                    Download Binaries
-                            </accordion-heading>
-                            <div class="row">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-8 col-md-8 col-lg-8">
-                                    <label for="experimentBinaryUrl" class="control-label">URL for binary that is downloaded and extracted to /usr/local/{{experiment.githubRepo}}. Uses Chef's 'ark' resource. </label>
-                                    <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="7" required ng-change="status.isModified=true" tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
+                        
+    <!--                        <accordion-group is-open="status.binaryOpen">
+                                <accordion-heading>
+                                    <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.binaryOpen, 'glyphicon-chevron-right': !status.binaryOpen}"></i></span>
+                                        Download Binaries
+                                </accordion-heading>
+                                <div class="row">
+                                    <span class="col-md-1 col-lg-1"></span>
+                                    <div class="col-xs-4 col-sm-8 col-md-8 col-lg-8">
+                                        <label for="experimentBinaryUrl" class="control-label">URL for binary that is downloaded and extracted to /usr/local/{{experiment.githubRepo}}. Uses Chef's 'ark' resource. </label>
+                                        <input name="experimentBinaryUrl" placeholder="https://dl.dropboxusercontent.com/u/4555798/myExperiment.jar"  class="form-control" ng-model="experiment.urlBinary" type="text" tabindex="7" required ng-change="status.isModified=true" tooltip="Copy the jar or .targ.gz of your program to a location where it can be downloaded from. During development, you can copy your experiment to you local Dropbox public folder. After copying, right-click on the binary and select 'copy public link'. Then paste that link in this text box."  tooltip-trigger="focus" tooltip-placement="right">
+                                    </div>
                                 </div>
-                            </div>
 
-                        </accordion-group>
-                        <accordion-group is-open="status.sourceOpen">
-                            <accordion-heading>
-                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.sourceOpen, 'glyphicon-chevron-right': !status.sourceOpen}"></i></span>
-                                Clone and Build Source Code 
-                            </accordion-heading>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">
-                                    <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
-                                    <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="8" required ng-change="status.isModified=true" tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
-                                </div>        
-                            </div>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">    
-                                    <label for="mavenCommand" class="control-label">Maven command</label>
-                                    <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="9" required ng-change="status.isModified=true">
-                                </div>        
-                            </div>
-                        </accordion-group>
+                            </accordion-group>
+                            <accordion-group is-open="status.sourceOpen">
+                                <accordion-heading>
+                                    <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.sourceOpen, 'glyphicon-chevron-right': !status.sourceOpen}"></i></span>
+                                    Clone and Build Source Code 
+                                </accordion-heading>
+                                <div class="row form-group">
+                                    <span class="col-md-1 col-lg-1"></span>
+                                    <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">
+                                        <label for="experimentSourceUrl" class="control-label">GitHub URL </label>
+                                        <input name="experimentSourceUrl" placeholder="https://github.com/username/experiment.git"  class="form-control" ng-model="experiment.urlGitClone" type="text" tabindex="8" required ng-change="status.isModified=true" tooltip="You can select a branch by extending the URL to include the branch."  tooltip-trigger="focus" tooltip-placement="right">
+                                    </div>        
+                                </div>
+                                <div class="row form-group">
+                                    <span class="col-md-1 col-lg-1"></span>
+                                    <div class="col-xs-3 col-sm-9 col-md-9 col-lg-9">    
+                                        <label for="mavenCommand" class="control-label">Maven command</label>
+                                        <input name="mavenCommand" placeholder="mvn install -DskipTests"  class="form-control" ng-model="experiment.mavenCommand" type="text" tabindex="9" required ng-change="status.isModified=true">
+                                    </div>        
+                                </div>
+                            </accordion-group>-->
                         <accordion-group is-open="status.dependenciesOpen">
                             <accordion-heading>
                                 <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
@@ -218,6 +219,13 @@
                                     <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified=true" class="form-control"></textarea>
                                 </div>
                             </div>
+                            <div class="row form-group">
+                                <span class="col-md-1 col-lg-1"></span>
+                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                                    <label class="text" for="berksCode">Berksfile dependencies included in the Cookbook.</label>
+                                    <textarea id="berksCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="\"ark\", \"java\", \"mysql\", \"cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master'\""  tabindex="11" ng-change="status.isModified=true" class="form-control"></textarea>
+                                </div>
+                            </div>                            
                         </accordion-group>
                         <!--                        <accordion close-others="false">
                                                     <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
@@ -310,7 +318,7 @@
 
         <div class="form-group">
             <label  style="margin-left: 10px">Add Experiment Script</label>
-            <input ng-model="newExperimentName" class="form-control" type="text" tabindex="12" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
+            <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="12" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
             <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default">Add</button>
         </div>        
     </div>        

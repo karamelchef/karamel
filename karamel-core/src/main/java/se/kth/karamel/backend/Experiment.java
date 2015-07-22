@@ -27,10 +27,16 @@ public class Experiment {
   private String description = "Karamel experiment repository description placeholder";
 
   private String githubOwner = "";
+
   /**
    * Comma-separated String of Cookbook::recipe dependencies used to generate the KaramelFile
    */
   private String dependencies;
+  
+  /**
+   * Comma-separated list of Berksfile dependencies. Each entry is enclosed in double-quotation marks.
+   */
+  private String berksfile;
 
   /**
    * Url for the experiment binary. Typically, a .tar.gz extention.
@@ -195,33 +201,6 @@ public class Experiment {
     this.urlGitClone = urlGitClone;
   }
 
-//  private boolean existsExperiment(Code exp) {
-//    for (Code c : code) {
-//      if (exp.getName().compareToIgnoreCase(c.getName()) == 0) {
-//        return false;
-//      }
-//    }
-//    return true;
-//  }
-//
-//  public boolean addExperiment(Code exp) {
-//    if (existsExperiment(exp)) {
-//      return false;
-//    }
-//    code.add(exp);
-//    return true;
-//  }
-//
-//  public boolean addExperiment(String recipeName, String scriptContents, String configFileName,
-//      String configFileContents, String scriptType) {
-//    Code exp = new Code(recipeName, scriptContents, configFileName, configFileContents, scriptType);
-//    if (existsExperiment(exp)) {
-//      return false;
-//    }
-//    code.add(exp);
-//    return true;
-//  }
-
   public void setDependencies(String dependencies) {
     this.dependencies = dependencies;
   }
@@ -279,4 +258,12 @@ public class Experiment {
     this.defaultAttributes = defaultAttributes;
   }
 
+  public String getBerksfile() {
+    return berksfile;
+  }
+
+  public void setBerksfile(String berksfile) {
+    this.berksfile = berksfile;
+  }
+  
 }

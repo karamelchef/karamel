@@ -330,6 +330,7 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setUser(attributes.getValue(repoName + "/user"));
     ec.setGroup(attributes.getValue(repoName + "/group"));
     ec.setUrlBinary(attributes.getValue(repoName + "/url"));
+    ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
     for (ExperimentRecipe r : er) {
       Experiment.Code exp = new Experiment.Code(r.getRecipeName(), r.getScriptContents(), r.getConfigFileName(),

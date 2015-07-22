@@ -122,4 +122,14 @@ public class Berksfile {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for (String s : fileLines) {
+      sb.append(s).append(System.lineSeparator());
+    }
+    return sb.toString();
+  }
+
+  
 }
