@@ -9,17 +9,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.egit.github.core.Reference;
 import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.RepositoryId;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
-import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.egit.github.core.service.UserService;
@@ -46,6 +45,9 @@ public class Github {
   private static volatile String password;
 
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
+
+  private static Map<String, List<OrgItem>> cachedOrgs = new HashMap<>();
+  private static Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
 
   // Singleton
   private Github() {
@@ -124,6 +126,9 @@ public class Github {
    * @throws KaramelException
    */
   public synchronized static List<OrgItem> getOrganizations() throws KaramelException {
+    if (cachedOrgs.get(Github.getUser()) != null) {
+      return cachedOrgs.get(Github.getUser());
+    }
     try {
       List<String> orgs = new ArrayList<>();
       OrganizationService os = new OrganizationService(client);
@@ -132,6 +137,8 @@ public class Github {
       for (User u : longOrgsList) {
         orgsList.add(new OrgItem(u.getLogin(), u.getAvatarUrl()));
       }
+      cachedOrgs.put(Github.getUser(), orgsList);
+
       return orgsList;
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
@@ -147,6 +154,10 @@ public class Github {
    * @throws KaramelException
    */
   public synchronized static List<RepoItem> getRepos(String orgName) throws KaramelException {
+    if (cachedRepos.get(orgName) != null) {
+      return cachedRepos.get(orgName);
+    }
+
     try {
       RepositoryService rs = new RepositoryService(client);
       List<Repository> repos;
@@ -161,6 +172,7 @@ public class Github {
       for (Repository r : repos) {
         repoItems.add(new RepoItem(r.getName(), r.getDescription(), r.getSshUrl()));
       }
+      cachedRepos.put(orgName, repoItems);
       return repoItems;
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);

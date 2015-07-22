@@ -155,7 +155,7 @@ angular.module('karamel.main')
                             return;
                         }
                     }
-                    $scope.status.isModified=true;
+                    $scope.status.isModified = true;
 
                     var newEntry = {
                         name: $scope.newExperimentName,
@@ -168,6 +168,12 @@ angular.module('karamel.main')
                     $scope.experiment.code.push(newEntry);
                     $scope.newExperimentName = "";
                     $scope.newExperimentErrMsg = "";
+                      
+                    var statusEntry = {
+                        name: $scope.newExperimentName,
+                        status: true
+                    };
+                    $scope.status.experiment.push(statusEntry);
                 }
 
                 $scope.newConfigFile = function (experimentName) {
@@ -256,11 +262,10 @@ angular.module('karamel.main')
                     ModalService.loadExperiment('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
-                                    $log.info("load experiment modal experiment results ...");
-                                    $scope.experiment.urlGitClone = result.githubUrl;
-                                    if (result.githubUrl !== null && result.githubUrl !== "") {
-                                        loadExperiment();
-                                        $scope.landing = false;
+                                    $log.info("load experiment modal experiment at " + result);
+                                    $scope.experiment.urlGitClone = result;
+                                    if (result !== null && result !== "") {
+                                        $scope.loadExperiment();
                                     }
                                 }
                             });
@@ -284,7 +289,7 @@ angular.module('karamel.main')
                     restartTimer();
                 }
 
-                $scope.deleteRepo = function($event) {
+                $scope.deleteRepo = function ($event) {
                     $event.preventDefault();
 
                     SweetAlert.swal({
@@ -314,7 +319,7 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteLocal = function($event) {
+                $scope.deleteLocal = function ($event) {
                     $event.preventDefault();
                     SweetAlert.swal({
                         title: "Close the experiment and delete the local clone from ${HOME}/.karamel/cookbook_designer?",
@@ -344,29 +349,32 @@ angular.module('karamel.main')
                     });
 
                 }
-                $scope.deleteBrowser = function($event) {
+                $scope.closeBrowser = function ($event) {
                     $event.preventDefault();
 
-                    SweetAlert.swal({
-                        title: "Close the Experiment?",
-                        text: "If you have already saved it to GitHub, you will be able load the experiment again.",
-                        type: "info",
-                        showCancelButton: true,
-                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, close it.",
-                        cancelButtonText: "Do not close",
-                        closeOnConfirm: true,
-                        closeOnCancel: false},
-                    function (isConfirm) {
-                        if (isConfirm) {
-                            // Set landing true first to prevent a race-condition with the timer
-                            clearExperiment();
-                            // Core Rest Services
-                            SweetAlert.swal("Closed", "The experiment is closed.", "info");
-                        } else {
-                            cancelTimer();
-                            SweetAlert.swal("Cancelled", "The experiment has not been closed", "error");
-                        }
-                    });
+                    if ($scope.status.isModified) {
+                        SweetAlert.swal({
+                            title: "Close the Experiment and lose unsaved changes?",
+                            text: "You have unsaved changes that will be lost!",
+                            type: "info",
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, close it.",
+                            cancelButtonText: "Do not close",
+                            closeOnConfirm: true,
+                            closeOnCancel: false},
+                        function (isConfirm) {
+                            if (isConfirm) {
+                                clearExperiment();
+                                SweetAlert.swal("Closed", "The experiment is closed.", "info");
+                            } else {
+                                cancelTimer();
+                                SweetAlert.swal("Canceled", "The experiment has not been closed", "error");
+                            }
+                        });
+                    } else {
+                        clearExperiment();
+                        SweetAlert.swal("Closed", "The experiment is closed.", "info");
+                    }
 
                 }
 
@@ -444,48 +452,56 @@ angular.module('karamel.main')
                             scriptType: data.code[i].scriptType
                         };
                         $scope.experiment.code.push(newEntry);
+
+                    $scope.status.experiment = [];
+                    var statusEntry = {
+                        name: data.code[i].name,
+                        status: true
+                    };
+                    $scope.status.experiment.push(statusEntry);
+                    
                     }
 
                 }
 
 
-                $scope.loadExperiment = function() {
+                $scope.loadExperiment = function () {
 
-                    SweetAlert.swal({
-                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
-                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
-                        cancelButtonText: "Cancel",
-                        closeOnConfirm: true,
-                        closeOnCancel: false},
-                    function (isConfirm) {
+//                    SweetAlert.swal({
+//                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
+//                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
+//                        type: "warning",
+//                        showCancelButton: true,
+//                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
+//                        cancelButtonText: "Cancel",
+//                        closeOnConfirm: true,
+//                        closeOnCancel: false},
+//                    function (isConfirm) {
+//
+//                        if (isConfirm) {
 
-                        if (isConfirm) {
+                    KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
+                            .success(function (data, status, headers, config) {
 
-                            KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
-                                    .success(function (data, status, headers, config) {
-
-                                        if (angular.isDefined(data)) {
-                                            $log.info("Experiment Loaded Successfully.");
-                                            self.deepCopyExperiment(data);
-                                            $scope.landing = false;
-                                        }
-                                    })
-                                    .error(function (data, status, headers, config) {
-                                        $log.info("Experiment can't be Loaded.");
-                                    });
-                        } else {
-                            cancelTimer();
-                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
-                        }
-                    });
+                                if (angular.isDefined(data)) {
+                                    $log.info("Experiment Loaded Successfully.");
+                                    self.deepCopyExperiment(data);
+                                    $scope.landing = false;
+                                }
+                            })
+                            .error(function (data, status, headers, config) {
+                                $log.info("Experiment can't be Loaded.");
+                            });
+//                        } else {
+//                            cancelTimer();
+//                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
+//                        }
+//                    });
                 }
 
-                $scope.pushExperiment = function($event) {
+                $scope.pushExperiment = function ($event) {
                     $event.preventDefault();
-                
+
 //                    $scope.experimentNameInvalid = false;
 //                    $scope.githubOwnerInvalid = false;
 //                    $scope.userInvalid = false;
@@ -523,7 +539,7 @@ angular.module('karamel.main')
                         if (isConfirm) {
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
-                                        $scope.status.isModified=false;
+                                        $scope.status.isModified = false;
                                         SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
                                         $log.info("Experiment Pushed Successfully.");
                                     })

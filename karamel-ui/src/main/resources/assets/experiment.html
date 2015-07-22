@@ -98,8 +98,8 @@
                     <button type="button" class="btn" 
                             ng-class="{'btn-warning': status.isModified, 'btn-primary': !status.isModified}"
                             ng-click="pushExperiment($event)">
-                        Save to GitHub <span class="glyphicon" 
-                        ng-class="{'glyphicon-resize-small': status.isModified, 'glyphicon-resize-full': !status.isModified}"/>
+                        Save<span ng-show="!status.isModified">d</span> <span class="glyphicon" 
+                        ng-class="{'glyphicon-thumbs-up': status.isModified, 'glyphicon-thumbs-down': !status.isModified}"/>
                     </button>
 
                 </div>
@@ -108,7 +108,7 @@
                         Close or Delete<span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu" role="cmenu">
-                        <li><a href="#experiment" ng-click="deleteBrowser($event)">Close</a></li>
+                        <li><a href="#experiment" ng-click="closeBrowser($event)">Close</a></li>
                         <li><a href="#experiment" ng-click="deleteLocal($event)">Delete from your Computer</a></li>
                         <li><a href="#experiment" ng-click="deleteRepo($event)">Delete from your Computer and GitHub</a></li>
                     </ul>
@@ -123,7 +123,7 @@
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
                     <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-left" ng-click="toggle()" ng-show="status.advanced">
-                        <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
+                        <i class="glyphicon" ng-class="{'glyphicon-chevron-right': status.expanded, 'glyphicon-chevron-down': !status.expanded}"></i>
                     </span>
                 </div>
             </div>
@@ -134,8 +134,8 @@
 
                     <accordion close-others="false">
                         <accordion-group is-open="status.userGroup">
-                            <accordion-heading>
-                                Run experiment as Unix user/group<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.userGroup, 'glyphicon-resize-full': !status.userGroup}"></i>
+                            <accordion-heading> 
+                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.userGroup, 'glyphicon-chevron-down': !status.userGroup}"></i>Run experiment as Unix user/group
                             </accordion-heading>
                             Username/group that owns the binaries/source-code installed and the experiment scripts and results.
                             <div class="row">
@@ -159,7 +159,7 @@
                         </accordion-group>
                         <accordion-group is-open="status.binaryOpen">
                             <accordion-heading>
-                                Download Binaries<i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.binaryOpen, 'glyphicon-resize-full': !status.binaryOpen}"></i>
+                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.binaryOpen, 'glyphicon-chevron-down': !status.binaryOpen}"></i>Download Binaries
                             </accordion-heading>
                             <div class="row">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -172,7 +172,7 @@
                         </accordion-group>
                         <accordion-group is-open="status.sourceOpen">
                             <accordion-heading>
-                                Clone and Build Source Code <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.sourceOpen, 'glyphicon-resize-full': !status.sourceOpen}"></i>
+                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.sourceOpen, 'glyphicon-chevron-down': !status.sourceOpen}"></i>Clone and Build Source Code 
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -191,7 +191,7 @@
                         </accordion-group>
                         <accordion-group is-open="status.dependenciesOpen">
                             <accordion-heading>
-                                Dependencies <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.dependenciesOpen, 'glyphicon-resize-full': !status.dependenciesOpen}"></i>
+                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.dependenciesOpen, 'glyphicon-chevron-down': !status.dependenciesOpen}"></i>Dependencies 
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -203,7 +203,7 @@
                         </accordion-group>
                         <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
                             <accordion-heading>
-                                Experiment Setup with Chef  <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.chefOpen, 'glyphicon-resize-full': !status.chefOpen}"></i>
+                                <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.chefOpen, 'glyphicon-chevron-down': !status.chefOpen}"></i>Experiment Setup with Chef  
                             </accordion-heading>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
@@ -217,7 +217,7 @@
                                                     <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
                                                     <accordion-group is-open="status.configOpen" ng-show="status.advanced">
                                                         <accordion-heading>
-                                                            Configuration <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': status.configOpen, 'glyphicon-resize-full': !status.configOpen}"></i>
+                                                            Configuration <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-right': status.configOpen, 'glyphicon-chevron-down': !status.configOpen}"></i>
                                                         </accordion-heading>
                         
                                                         <div class="row form-group">
@@ -241,12 +241,12 @@
                 <span class="col-md-1 col-lg-1"></span>
                 <div class="row form-group col-md-9 col-lg-9">
                     <accordion close-others="false">
-                        <accordion-group is-open="status.experimentOpen" ng-repeat="exp in experiment.code">
+                        <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code">
                             <accordion-heading>
-                                <span class="col-md-4 col-lg-4">Experiment {{$index}}: {{exp.name}}</span>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-right text-right">
-                                    <i class="pull-right glyphicon" ng-class="{'glyphicon-resize-small': isExperimentOpen(exp.name), 'glyphicon-resize-full': !isExperimentOpen(exp.name)}"></i>
+                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
+                                    <i class="glyphicon" ng-class="{'glyphicon-chevron-right': $scope.status.experiment[$index].status, 'glyphicon-chevron-down': !$scope.status.experiment[$index].status}"></i>
                                 </span>
+                                <span class="col-md-4 col-lg-4">Experiment {{$index+1}}: {{exp.name}}</span>
                                 <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" 
                                       ng-click="removeExperiment(exp.name)">
                                     <i class="glyphicon glyphicon-minus"></i>
