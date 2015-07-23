@@ -16,7 +16,9 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is 
+ * stored here in memory. It is valid just until the system is running otherwise it will disappear.  
+ 
  * @author kamal
  */
 public class ClusterContext {

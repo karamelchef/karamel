@@ -81,8 +81,8 @@ public class Settings {
   //Providers 
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
-  //  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
-  public static final String PROVIDER_EC2_DEFAULT_IMAGE = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
+  //  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
+  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
 

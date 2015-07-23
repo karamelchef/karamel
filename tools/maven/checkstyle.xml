@@ -19,5 +19,9 @@
       <property name="message" value="Line has leading tab characters; indentation should be performed with space only."/>
       <property name="ignoreComments" value="true"/>
     </module>
+    <module name="AvoidStarImport"/>
+    <module name="IllegalImport"/>
+    <module name="RedundantImport"/>
+    <module name="UnusedImports"/>
   </module>
 </module>

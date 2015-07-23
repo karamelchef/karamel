@@ -8,7 +8,6 @@ package se.kth.karamel.client.model.yaml;
 import java.util.ArrayList;
 import java.util.List;
 import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;

@@ -149,6 +149,11 @@
             <artifactId>dropwizard-jetty</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
+<dependency>
+	<groupId>com.akathist.maven.plugins.launch4j</groupId>
+	<artifactId>launch4j-maven-plugin</artifactId>
+	<version>1.7.7</version>
+</dependency>
 
     </dependencies>
 
@@ -379,11 +384,6 @@
 
 
     <repositories>
-    <repository>
-        <id>dsol-xml</id>
-        <name>Simulation @ TU Delft</name>
-        <url>http://simulation.tudelft.nl/maven/</url>
-    </repository>
         <repository>
             <id>sics-release</id>
             <name>SICS Release Repository</name>

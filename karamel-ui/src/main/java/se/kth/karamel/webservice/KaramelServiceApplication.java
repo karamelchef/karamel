@@ -26,7 +26,6 @@ import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.webservicemodel.*;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -65,6 +64,16 @@ import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+import se.kth.karamel.webservicemodel.CommandJSON;
+import se.kth.karamel.webservicemodel.CookbookJSON;
+import se.kth.karamel.webservicemodel.GithubCredentialsJSON;
+import se.kth.karamel.webservicemodel.KaramelBoardJSON;
+import se.kth.karamel.webservicemodel.KaramelBoardYaml;
+import se.kth.karamel.webservicemodel.ProviderJSON;
+import se.kth.karamel.webservicemodel.ScaffoldJSON;
+import se.kth.karamel.webservicemodel.SshKeyJSON;
+import se.kth.karamel.webservicemodel.StatusResponseJSON;
+import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {

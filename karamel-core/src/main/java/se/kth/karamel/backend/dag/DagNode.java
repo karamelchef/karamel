@@ -6,7 +6,6 @@
 package se.kth.karamel.backend.dag;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +14,8 @@ import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * Unit of execution in the DAG that knows about its predecessors and successors. 
+ * 
  * @author kamal
  */
 public class DagNode implements DagTaskCallback {
@@ -48,6 +48,10 @@ public class DagNode implements DagTaskCallback {
     return id;
   }
 
+  public Status getStatus() {
+    return status;
+  }
+  
   public void setTask(DagTask task) throws DagConstructionException {
     if (this.task == null) {
       this.task = task;

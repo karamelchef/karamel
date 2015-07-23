@@ -1,10 +1,9 @@
 name: hiway
 ec2:
-    type: m3.large
-    image: ami-234ecc54
-    region: eu-west-1
-    username: hiway
-    price: 0.1
+    type: c3.2xlarge
+    region: us-east-1
+    ami: ami-d05e75b8
+    price: 1
 
 cookbooks:
   hadoop:
@@ -18,23 +17,23 @@ attrs:
   hadoop:
     yarn:
       nm:
-        memory_mbs: '6656'
-      vcores: '7'
-    mr:
-      tmp_dir: '/mnt/tmp/hadoop'
+        memory_mbs: '12288'
+      vcores: '8'
+      max_vcores: '8'
+    tmp_dir: '/mnt/tmp/hadoop'
     data_dir: '/mnt/data/hadoop'
-    num_replicas: '1'
+    #num_replicas: '1'
     container_cleanup_delay_sec: '86400'
   hiway:
     data: '/mnt/data'
     release: 'false'
     hiway:
       am:
-        memory_mb: '512'
+        memory_mb: '1024'
         vcores: '1'
       worker:
-        memory_mb: '6144'
-        vcores: '6'
+        memory_mb: '8096'
+        vcores: '7'
     
 groups:
   clientmaster:
@@ -42,12 +41,17 @@ groups:
     recipes:
         - hadoop::nn
         - hadoop::rm
+        - hadoop::dn
+        - hadoop::nm
         - hadoop::jhs
+        - hiway::hiway_worker
+        - hiway::galaxy_worker
+        - hiway::RNAseq_worker
         - hiway::hiway_client
         - hiway::RNAseq_client
 
   workers:
-    size: 3
+    size: 1
     recipes:
         - hadoop::dn
         - hadoop::nm

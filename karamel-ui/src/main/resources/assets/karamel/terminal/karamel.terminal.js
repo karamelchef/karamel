@@ -237,17 +237,6 @@ angular.module('karamel.terminal', [])
           });
           svg.call(zoom);
 
-          var render = new dagreD3.render();
-
-          // Left-to-right layout
-          var g = new dagreD3.graphlib.Graph();
-          g.setGraph({
-            nodesep: 70,
-            ranksep: 50,
-            rankdir: "LR",
-            marginx: 20,
-            marginy: 20
-          });
           scope.$watch('dagData', function(data) {
             if (data !== undefined) {
               updateDag(data);
@@ -255,7 +244,17 @@ angular.module('karamel.terminal', [])
           });
 
           var updateDag = function(data) {
+            var render = new dagreD3.render();
 
+            // Left-to-right layout
+            var g = new dagreD3.graphlib.Graph();
+            g.setGraph({
+              nodesep: 70,
+              ranksep: 50,
+              rankdir: "LR",
+              marginx: 20,
+              marginy: 20
+            });
             var tasks = JSON.parse(data);
             for (var id in tasks) {
               var task = tasks[id];

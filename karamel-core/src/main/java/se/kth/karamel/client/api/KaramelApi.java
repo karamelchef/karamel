@@ -72,7 +72,6 @@ public interface KaramelApi {
   /**
    * Loads Karamel common keys
    *
-   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -82,7 +81,6 @@ public interface KaramelApi {
    * Loads cluster specific keys
    *
    * @param clusterName
-   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -250,8 +248,6 @@ public interface KaramelApi {
   /**
    * Add a file to an existing repo, commit it, and push it to github.
    *
-   * @param owner organization or user
-   * @param repoName name of repo
    * @param experiment bash scripts and config files to add, commit, and push.
    * @throws KaramelException
    */

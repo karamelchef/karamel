@@ -585,14 +585,14 @@ function toCoreApiFormat(uiCluster) {
 
   function _Ec2() {
     this.type = null;
-    this.image = null;
+    this.ami = null;
     this.region = null;
     this.price = null;
     this.vpc = null;
     this.subnet = null;
     this.load = function(other) {
       this.type = other.type || null;
-      this.image = other.image || null;
+      this.ami = other.ami || null;
       this.region = other.region || null;
       this.price = other.price || null;
       this.vpc = other.vpc || null;

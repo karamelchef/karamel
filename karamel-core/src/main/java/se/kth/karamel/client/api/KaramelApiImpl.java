@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
@@ -114,7 +109,9 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
-    Gson gson = new GsonBuilder().
+    GsonBuilder builder = new GsonBuilder();
+    builder.disableHtmlEscaping();
+    Gson gson = builder.
         registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
         registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
         registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
@@ -195,8 +192,8 @@ public class KaramelApiImpl implements KaramelApi {
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
 //    keypair = SshKeyService.loadSshKeys(confs);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(),
-        keypair.getPrivateKeyPath(), keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(), 
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);
     return keypair;
   }
