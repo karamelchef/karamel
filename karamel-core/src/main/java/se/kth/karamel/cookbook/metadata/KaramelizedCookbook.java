@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.CookbookUrlException;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
 

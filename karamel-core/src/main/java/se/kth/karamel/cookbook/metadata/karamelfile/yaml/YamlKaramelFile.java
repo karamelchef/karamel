@@ -6,9 +6,7 @@
 package se.kth.karamel.cookbook.metadata.karamelfile.yaml;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
