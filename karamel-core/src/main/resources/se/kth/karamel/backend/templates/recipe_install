@@ -45,9 +45,10 @@ end
 my_private_ip= my_private_ip()
 my_public_ip= my_public_ip()
 
-%%resolve_ipsT
+%%resolve_ips%%
 
 # Pre-Experiment Code
 %%setup_code%%
 
+# Configuration Files
 %%config_files%%

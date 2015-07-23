@@ -88,11 +88,11 @@
                 <span class="col-md-1 col-lg-1"></span>
                 <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
                     <label class="control-label">Name: </label>
-                    <span>{{experiment.githubRepo| limitTo: 32}}{{ gs.repo.name > 32 ? '...' : ''}}</span>     
+                    <span>{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}</span>     
                 </div>
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-4">
                     <label class="control-label">URL:</label>
-                    <span>{{experiment.urlGitClone| limitTo: 64}}{{ gs.repo.sshUrl > 64 ? '...' : ''}}</span>
+                    <a ng-href="{{getUrl()}}">{{experiment.urlGitClone| limitTo: 48}}{{ experiment.urlGitClone > 48 ? '...' : ''}}</a>
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
                     <button type="button" class="btn" 

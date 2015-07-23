@@ -120,6 +120,13 @@ angular.module('karamel.main')
                     ]
                 };
 
+                $scope.getUrl = function() {
+                    if ($scope.status.isModified) {
+                        return "";
+                    }
+                    var len = $scope.experiment.urlGitClone.length;
+                    return $scope.experiment.urlGitClone.substring(0, len-4).replace(":", "/");
+                }
 
                 $scope.landing = true;
 
@@ -499,10 +506,11 @@ angular.module('karamel.main')
                                     $log.info("Experiment Loaded Successfully.");
                                     self.deepCopyExperiment(data);
                                     $scope.landing = false;
+                                    $scope.status.isModified = false;
                                 }
                             })
                             .error(function (data, status, headers, config) {
-                                $log.info("Experiment can't be Loaded.");
+                                SweetAlert.swal("Problem loading from GitHub", data.reason, "error");
                             });
 //                        } else {
 //                            cancelTimer();
@@ -552,12 +560,10 @@ angular.module('karamel.main')
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
                                         $scope.status.isModified = false;
-                                        SweetAlert.swal("Pushed!", "Experiment Pushed to GitHub. \\\m/", "success");
-                                        $log.info("Experiment Pushed Successfully.");
+                                        SweetAlert.swal("Saved.", "Experiment saved/pushed to GitHub. \\\m/", "success");
                                     })
                                     .error(function (data, status, headers, config) {
-                                        $log.info("Experiment can't be Pushed.");
-                                        SweetAlert.swal("Problem pushing", "The Experiment could not pushed to GitHub. Is your Internet connection working?", "error");
+                                        SweetAlert.swal("Problem saving to GitHub", data.reason, "error");
                                     });
                             return;
                         } else {

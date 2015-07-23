@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.karamel.common.IoUtils;
+import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
@@ -61,17 +62,18 @@ public class KaramelizedCookbook {
       if (recipeData.length < 2) {
         throw new MetadataParseException("Invalid recipe name in metadata.rb. Name should be- cookbook::recipe");
       }
-      String experimentName = recipeData[1] + ".rb";
+      String experimentFilename = recipeData[1] + ".rb";
       String description = r.getDescription();
-      String[] configData = description.split(",configFile=");
+      String searchStr = "configFile=";
+      int confPos = description.indexOf(searchStr);
       String configFileName = "";
       String configFileContents = "";
       String experimentContent;
-      if (configData.length > 1) {
-        String desc = configData[1];
+      if (confPos != -1 && confPos < description.length()+searchStr.length()) {
+        String desc = description.substring(confPos+searchStr.length());
         int pos = desc.indexOf(";");
         if (pos != -1) {
-          configFileName = desc.substring(0, pos - 1);
+          configFileName = desc.substring(0, pos);
           int pathPos = configFileName.lastIndexOf("/");
           if (pathPos != -1) {
             configFileName = configFileName.substring(pathPos + 1);
@@ -80,26 +82,29 @@ public class KaramelizedCookbook {
       }
       if (!configFileName.isEmpty()) {
         String configFileUrl = urls.rawHome + File.separator + "templates" + File.separator
-            + "default" + File.separator + configFileName + ".erb";
+            + "defaults" + File.separator + configFileName + ".erb";
         try {
           configFileContents = IoUtils.readContent(configFileUrl);
         } catch (IOException ex) {
           Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-              + urls.recipesHome + experimentName, ex);
+              + urls.recipesHome + experimentFilename, ex);
         }
       }
 
       ExperimentRecipe er = null;
       try {
-        experimentContent = IoUtils.readContent(urls.recipesHome + experimentName);
-        er = ExperimentRecipeParser.parse(r.getName(), experimentContent, configFileName, configFileContents);
+        // Only parse experiment recipes here, parse the install.rb recipe later.
+        if (experimentFilename.compareTo(Settings.INSTALL_RECIPE + ".rb") != 0) {
+          experimentContent = IoUtils.readContent(urls.recipesHome + experimentFilename);
+          er = ExperimentRecipeParser.parse(r.getName(), experimentContent, configFileName, configFileContents);
+        }
       } catch (IOException ex) {
         Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-            + urls.recipesHome + experimentName, ex);
+            + urls.recipesHome + experimentFilename, ex);
       } catch (RecipeParseException ex) {
         Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
             "Experiment recipe not a valid format in this cookbook: "
-            + urls.recipesHome + experimentName, ex);
+            + urls.recipesHome + experimentFilename, ex);
       }
 
       if (er != null) {

@@ -127,7 +127,7 @@ public class ChefExperimentExtractor {
           "name", repoName,
           "user", experiment.getUser(),
           "email", email,
-          // TODO
+          "depends", "", 
           "resolve_ips", "",
           "build_command", experiment.getMavenCommand(),
           "url_binary", experiment.getUrlBinary(),
@@ -167,7 +167,8 @@ public class ChefExperimentExtractor {
    * @param owner
    * @param repoName
    * @param experimentContext
-   * @throws KaramelException
+   * @throws KaramelExceptionntents.toString());
+      // Update Karamel
    */
   public static void parseRecipesAddToGit(String owner, String repoName, Experiment experimentContext)
       throws KaramelException {
@@ -315,7 +316,6 @@ public class ChefExperimentExtractor {
           "name", repoName, 
           "checksum", "", 
           "resolve_ips", "", 
-          "depends", "", 
           "setup_code", experimentContext.getExperimentSetupCode(), 
           "config_files", configFilesTemplateDefns.toString()
       );

@@ -256,7 +256,8 @@ public class Settings {
       = File.separator + "providers" + File.separator + "experiment.rb";
   public static final String COOKBOOK_RESOURCES_EXP_PATH
       = File.separator + "resources" + File.separator + "experiment.rb";
-  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
+  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator 
+                                                          + INSTALL_RECIPE + ".rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";
   public static final String COOKBOOK_RECIPE_SLAVE_PATH = File.separator + "recipes" + File.separator + "slave.rb";

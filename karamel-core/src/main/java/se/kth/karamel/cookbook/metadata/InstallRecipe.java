@@ -11,14 +11,20 @@ package se.kth.karamel.cookbook.metadata;
 public class InstallRecipe {
 
   private final String setupCode;
+  private final String configCode;
 
-  public InstallRecipe(String setupCode) {
+  public InstallRecipe(String setupCode, String configCode) {
     this.setupCode = setupCode;
+    this.configCode = configCode;
   }
 
   public String getSetupCode() {
     return setupCode;
   }
 
+  public String getConfigCode() {
+    return configCode;
+  }
+  
 
 }
