@@ -19,8 +19,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.api.CookbookCache;
-import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -201,13 +199,6 @@ public class DagBuilder {
     String vendorPath = UserClusterDataExtractor.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-
-        Provider p = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
-        if (p instanceof Baremetal) {
-          Baremetal baremetal = (Baremetal) p;
-          SudoPasswordCheckTask t0 = new SudoPasswordCheckTask(me, submitter);
-          dag.addTask(t0);
-        }
         AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, submitter);
         InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, submitter);
         MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, submitter);
