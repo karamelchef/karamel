@@ -212,40 +212,45 @@ public class ChefExperimentExtractor {
       StringBuilder berksDependencies = new StringBuilder();
       if (!berksfile.isEmpty()) {
         int curPos = 0;
-        int pos = 0; 
+        int pos = 0;
         while (pos != -1) {
           pos = berksfile.indexOf("\"", curPos);
-          curPos = pos+1;
+          curPos = pos + 1;
           pos = berksfile.indexOf("\"", curPos);
           if (pos != -1) {
-            berksDependencies.append(berksfile.substring(curPos, pos-1)).append(System.lineSeparator());
+            berksDependencies.append(berksfile.substring(curPos, pos - 1)).append(System.lineSeparator());
           }
-          curPos = pos+1;
-        }        
+          curPos = pos + 1;
+        }
       }
-      
-      
+
       String[] tokens = berksfile.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
       for (String s : tokens) {
         String quotesStripped = s.replaceAll("\"", "");
         berksDependencies.append(quotesStripped).append(System.lineSeparator());
       }
-      
+
       StringBuilder berksContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_BERKSFILE,
           "berks_dependencies", berksDependencies.toString()
       );
-      
+
       Github.addFile(owner, repoName, "Berksfile", berksContents.toString());
-     
-      
+
       Map<String, String> expConfigFileNames = new HashMap<>();
+      Map<String, String> expConfigFilePaths = new HashMap<>();
 
       // 2. write them to recipes/default.rb and metadata.rb
       for (Code experiment : experiments) {
         String experimentName = experiment.getName();
-        String configFileName = experiment.getConfigFileName();
+        String configFilePath = experiment.getConfigFileName();
         String configFileContents = experiment.getConfigFileContents();
+
+        String configFileName = configFilePath;
+        int filePos = configFileName.lastIndexOf("/");
+        if (filePos != -1) {
+          configFileName = configFileName.substring(filePos + 1);
+        }
 
         YamlDependency yd = new YamlDependency();
         if (!ymlString.isEmpty()) {
@@ -276,14 +281,11 @@ public class ChefExperimentExtractor {
               "<%= node[:" + repoName + "][:" + attr + "] =>");
         }
 
-        if (!configFileName.isEmpty()) {
+        if (!configFilePath.isEmpty()) {
           expConfigFileNames.put(experimentName, configFileName);
+          expConfigFilePaths.put(experimentName, configFilePath);
         }
 
-        int lastPos = configFileName.lastIndexOf("/");
-        if (lastPos != -1) {
-          configFileName = configFileName.substring(lastPos + 1);
-        }
         // 3. write them to files and push to github
         Github.addFile(owner, repoName, "recipes" + File.separator + experimentName + ".rb", recipeContents);
         Github.addFile(owner, repoName,
@@ -294,24 +296,28 @@ public class ChefExperimentExtractor {
         }
       }
 
-      StringBuilder configFilesContents = new StringBuilder();
+      StringBuilder configFilesTemplateDefns = new StringBuilder();
       for (String expName : expConfigFileNames.keySet()) {
         String configFilePath = expConfigFileNames.get(expName);
+        String configFileName = expConfigFileNames.get(expName);
         StringBuilder configProps = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_CONFIG_PROPS,
             "name", expName,
-            "configFileName", configFilePath.substring(configFilePath.lastIndexOf("/") + 1),
+            "configFileName", configFileName,
             "configFilePath", configFilePath,
             "ip_params", ""
         );
-        configFilesContents.append(configProps).append(System.lineSeparator());
-
+        configFilesTemplateDefns.append(configProps).append(System.lineSeparator());
       }
 
       StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
-          Settings.CB_TEMPLATE_RECIPE_INSTALL, "name", repoName, "checksum", "", "resolve_ips", "", "setup_code",
-          experimentContext.getExperimentSetupCode()
-      //          ,"config_files", configFilesContents.toString()
+          Settings.CB_TEMPLATE_RECIPE_INSTALL, 
+          "name", repoName, 
+          "checksum", "", 
+          "resolve_ips", "", 
+          "depends", "", 
+          "setup_code", experimentContext.getExperimentSetupCode(), 
+          "config_files", configFilesTemplateDefns.toString()
       );
 
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());

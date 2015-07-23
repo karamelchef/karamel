@@ -15,6 +15,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.CookbookUrlException;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
 
@@ -30,8 +31,6 @@ public class KaramelizedCookbook {
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
   private final Berksfile berksFile;
-  private String configFile;
-//  private ExperimentRecipe experimentRecipe;
   private List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
   private InstallRecipe installRecipe;
   private String json;
@@ -52,16 +51,18 @@ public class KaramelizedCookbook {
     } catch (IOException e) {
       throw new CookbookUrlException("", e);
     }
-    // Subsequent files may not be found in the cookbook, and that's ok. No need to throw an exception.
-    try {
-      this.configFile = IoUtils.readContent(urls.configFile);
-    } catch (IOException ex) {
-      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-          + urls.configFile, ex);
-    }
+
     List<Recipe> recipes = this.metadataRb.getRecipes();
     for (Recipe r : recipes) {
-      String experimentName = r.getName() + ".rb";
+      String name = r.getName();
+      if (name == null || name.isEmpty()) {
+        throw new MetadataParseException("Invalid recipe name in metadata.rb");
+      }
+      String[] recipeData = r.getName().split("::");
+      if (recipeData.length < 2) {
+        throw new MetadataParseException("Invalid recipe name in metadata.rb. Name should be- cookbook::recipe");
+      }
+      String experimentName = recipeData[1] + ".rb";
       String description = r.getDescription();
       String[] configData = description.split(",configFile=");
       String configFileName = "";
@@ -72,15 +73,21 @@ public class KaramelizedCookbook {
         int pos = desc.indexOf(";");
         if (pos != -1) {
           configFileName = desc.substring(0, pos - 1);
+          int pathPos = configFileName.lastIndexOf("/");
+          if (pathPos != -1) {
+            configFileName = configFileName.substring(pathPos + 1);
+          }
         }
       }
-      String configFileUrl = urls.rawHome + File.separator + "templates" + File.separator
-          + "default" + File.separator + configFileName + ".erb";
-      try {
-        configFileContents = IoUtils.readContent(configFileUrl);
-      } catch (IOException ex) {
-        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-            + urls.recipesHome + experimentName, ex);
+      if (!configFileName.isEmpty()) {
+        String configFileUrl = urls.rawHome + File.separator + "templates" + File.separator
+            + "default" + File.separator + configFileName + ".erb";
+        try {
+          configFileContents = IoUtils.readContent(configFileUrl);
+        } catch (IOException ex) {
+          Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
+              + urls.recipesHome + experimentName, ex);
+        }
       }
 
       ExperimentRecipe er = null;
@@ -113,10 +120,6 @@ public class KaramelizedCookbook {
           "Install recipe not a valid format in this cookbook: "
           + urls.recipesHome + "install.rb", ex);
     }
-  }
-
-  public String getConfigFile() {
-    return configFile;
   }
 
   public Berksfile getBerksFile() {
