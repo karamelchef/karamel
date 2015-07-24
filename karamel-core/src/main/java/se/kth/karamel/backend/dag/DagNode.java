@@ -14,7 +14,8 @@ import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * Unit of execution in the DAG that knows about its predecessors and successors. 
+ * 
  * @author kamal
  */
 public class DagNode implements DagTaskCallback {

@@ -47,7 +47,9 @@ public class KaramelizedCookbook {
 
   public String getMetadataJson() {
     if (json == null) {
-      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      GsonBuilder builder = new GsonBuilder();
+      builder.disableHtmlEscaping();
+      Gson gson = builder.setPrettyPrinting().create();
       json = gson.toJson(metadataRb);
     }
     return json;

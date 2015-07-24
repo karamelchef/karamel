@@ -146,8 +146,8 @@ public class KaramelApiTest {
 
 //  @Test
   public void testDag() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "spark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
+    String clusterName = "hopsonenode";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hops-1node-aws-m3-med.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -161,7 +161,7 @@ public class KaramelApiTest {
     int mins = 0;
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
-      System.out.println(api.processCommand("dag spark").getResult());
+      System.out.println(api.processCommand("tdag hopsonenode").getResult());
       Thread.currentThread().sleep(60000);
     }
   }
@@ -187,7 +187,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-
+  
 //  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";

@@ -41,6 +41,8 @@ import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
+ * Terminal backend, a replacement for API with more flexibilities. It processes user commands and generates mere
+ * hyper-link aware textual pages. Each hyper-link is another command and results of each command is another page.
  *
  * @author kamal
  */
@@ -507,7 +509,7 @@ public class CommandService {
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();
           if (sshKeyPair != null) {
-            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), 
+            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(),
                 sshKeyPair.getPrivateKeyPath());
           } else {
             throw new KaramelException("no ssh keys has been chosen yet!!");
@@ -571,10 +573,10 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + 
-          name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + 
-          name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + 
-          name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag "
+          + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines "
+          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge "
+          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -588,9 +590,9 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + 
-          yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + 
-          yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag "
+          + yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove "
+          + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -620,7 +622,11 @@ public class CommandService {
       data[i][1] = task.getStatus();
       data[i][2] = task.getMachineId();
       String uuid = task.getUuid();
-      data[i][3] = "<a kref='log " + uuid + "'>log</a>";
+      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
+        data[i][3] = "<a kref='log " + uuid + "'>log</a>";
+      } else {
+        data[i][3] = "";
+      }
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
@@ -678,7 +684,7 @@ public class CommandService {
 
   }
 
-  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) 
+  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd)
       throws KaramelException {
     Pattern p = Pattern.compile(cmd + "(\\s+(\\w+))?");
     Matcher matcher = p.matcher(userinput);

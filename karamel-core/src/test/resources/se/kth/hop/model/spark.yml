@@ -9,7 +9,7 @@ cookbooks:
   spark: 
     github: "hopshadoop/spark-chef"
     branch: "master"
-    
+
 groups: 
   namenodes:
     size: 1
