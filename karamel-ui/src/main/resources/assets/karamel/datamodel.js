@@ -4,6 +4,7 @@ function Cluster() {
   this.cookbooks = [];
   this.groups = [];
   this.ec2 = null;
+  this.gce = null;
   this.baremetal = null;
   this.sshKeyPair = null;
 
@@ -52,6 +53,7 @@ function Cluster() {
   this.load = function(other) {
     this.name = other.name;
     this.loadEc2(this, other["ec2"]);
+    this.loadGce(this, other["gce"]);
     this.loadBaremetal(this, other["baremetal"]);
     this.loadSshKeyPair(this, null);
     this.loadGroups(this, other["groups"]);
@@ -65,6 +67,12 @@ function Cluster() {
       this.ec2.copy(other.ec2);
     } else
       this.ec2 = null;
+  
+    if (other.gce !== null) {
+      this.gce = new Gce();
+      this.gce.copy(other.gce);
+    } else
+      this.gce = null;
 
     if (other.baremetal !== null) {
       this.baremetal = new Baremetal();
@@ -110,6 +118,15 @@ function Cluster() {
       container.ec2 = ec2;
     } else
       container.ec2 = null;
+  };
+  
+  this.loadGce = function(container, provider) {
+    if (!(_.isUndefined(provider) || _.isNull(provider))) {
+      var gce = new Gce();
+      gce.load(provider);
+      container.gce = gce;
+    } else
+      container.gce = null;
   };
 
   this.loadBaremetal = function(container, provider) {
@@ -170,6 +187,18 @@ function Cluster() {
     }
     return false;
   };
+  
+  this.hasGce = function() {
+    if (this.gce)
+      return true;
+    else {
+      for (var i = 0; i < this.cookbooks; i++) {
+        if (cookbooks[i].gce)
+          return true;
+      }
+    }
+    return false;
+  };
 
   this.hasBaremetal = function() {
     if (this.baremetal)
@@ -187,6 +216,9 @@ function Cluster() {
     var result = true;
     if (this.hasEc2()) {
       result = result && this.ec2.getIsValid();
+    }
+    if (this.hasGce()) {
+      result = result && this.gce.getIsValid();
     }
     result = result && this.sshKeyPair.getIsValid();
     return result;
@@ -280,6 +312,33 @@ function Ec2() {
 
 // Inherit from the Provider.
 Ec2.prototype = Object.create(Provider.prototype);
+
+function Gce() {
+  this.mapKey = "gce";
+  this.type = null;
+  this.zone = null;
+  this.image = null;
+  this.jsonKeyPath = null;
+
+  this.load = function(other) {
+    this.type = other.type || null;
+    this.zone = other.zone || null;
+    this.image = other.image || null;
+  };
+
+  this.copy = function(other) {
+    this.type = other.type || null;
+    this.zone = other.zone || null;
+    this.image = other.image || null;
+  };
+
+  this.addAccountDetails = function(other) {
+    this.jsonKeyPath = null;
+  };
+}
+
+// Inherit from the Provider.
+Gce.prototype = Object.create(Provider.prototype);
 
 function Baremetal() {
   this.mapKey = "baremetal";
@@ -398,6 +457,7 @@ function Group() {
   this.attrs = [];
   this.size = 0;
   this.ec2 = {};
+  this.gce = {};
   this.baremetal = {};
   this.cookbooks = [];
 
@@ -410,6 +470,7 @@ function Group() {
     this.name = group.name;
     this.size = group.size;
     this.ec2 = group.ec2;
+    this.gce = group.gce;
     this.baremetal = group.baremetal;
   };
 
@@ -421,6 +482,7 @@ function Group() {
     this.attrs = other.attrs;
     this.size = other.size;
     this.ec2 = other.ec2;
+    this.gce = other.gce;
     this.baremetal = other.baremetal;
 
     // Load cookbooks instead of copying.
@@ -474,6 +536,14 @@ function toCoreApiFormat(uiCluster) {
     container.ec2 = ec2;
     }
   }
+  
+  function _addGce(container, provider) {
+    if (provider) {
+    var gce = new _Gce();
+    gce.load(provider);
+    container.gce = gce;
+    }
+  }
 
   function _addCookbooks(container, cookbooks) {
     for (var i = 0; i < cookbooks.length; i++) {
@@ -505,6 +575,7 @@ function toCoreApiFormat(uiCluster) {
     this.cookbooks = null;
     this.groups = null;
     this.ec2 = null;
+    this.gce = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -524,6 +595,7 @@ function toCoreApiFormat(uiCluster) {
     this.load = function(other) {
       this.name = other.name;
       _addEc2(this, other.ec2);
+      _addGce(this, other.gce);
       _addBaremetal(this, other.baremetal);
       _addCookbooks(this, other.cookbooks);
       _addGroups(this, other.groups);
@@ -537,6 +609,7 @@ function toCoreApiFormat(uiCluster) {
     this.cookbooks = null;
     this.size = null;
     this.ec2 = null;
+    this.gce = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -551,6 +624,7 @@ function toCoreApiFormat(uiCluster) {
       this.size = other.size;
       _addCookbooks(this, other.cookbooks);
       _addEc2(this, other.ec2);
+      _addGce(this, other.gce);
       _addBaremetal(this, other.baremetal);
     }
   }
@@ -597,6 +671,17 @@ function toCoreApiFormat(uiCluster) {
       this.price = other.price || null;
       this.vpc = other.vpc || null;
       this.subnet = other.subnet || null;
+    }
+  }
+  
+  function _Gce() {
+    this.type = null;
+    this.zone = null;
+    this.image = null;
+    this.load = function(other) {
+      this.type = other.type || null;
+      this.zone = other.zone || null;
+      this.image = other.image || null;
     }
   }
   

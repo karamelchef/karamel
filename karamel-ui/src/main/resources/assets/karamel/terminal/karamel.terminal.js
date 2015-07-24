@@ -382,14 +382,24 @@ angular.module('karamel.terminal', [])
           var url = _defaultHost.concat("/generateSshKeys");
           return _getPromiseObject(method, url, _defaultContentType);
         },
-        loadCredentials: function() {
+        loadEc2Credentials: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/loadCredentials");
+          var url = _defaultHost.concat("/ec2/loadCredentials");
           return _getPromiseObject(method, url, _defaultContentType);
         },
-        validateCredentials: function(providerInfo) {
+        validateEc2Credentials: function(providerInfo) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/validateCredentials");
+          var url = _defaultHost.concat("/ec2/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+        },
+        loadGceCredentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/gce/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateGceCredentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/gce/validateCredentials");
           return _getPromiseObject(method, url, _defaultContentType, providerInfo);
         },
         startCluster: function(clusterJson) {

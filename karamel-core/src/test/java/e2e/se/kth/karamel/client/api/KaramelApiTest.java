@@ -9,14 +9,12 @@ import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import org.jclouds.domain.Credentials;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
@@ -187,7 +185,7 @@ public class KaramelApiTest {
       Thread.currentThread().sleep(60000);
     }
   }
-  
+
 //  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
@@ -233,7 +231,7 @@ public class KaramelApiTest {
     }
   }
 
-  @Test
+//  @Test
   public void testGce() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flinkgce";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_gce.yml"), Charsets.UTF_8);
@@ -245,7 +243,7 @@ public class KaramelApiTest {
     }
     api.registerSshKeys(sshKeys);
 //    String keyPath = api.loadGceCredentialsIfExist();
-    api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH+"/gce-key.json");
+    api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH + "/gce-key.json");
     api.startCluster(json);
     long ms1 = System.currentTimeMillis();
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
