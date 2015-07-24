@@ -6,3 +6,4 @@ dependencies:
 %%local_dependencies%%
     global:
 %%global_dependencies%%
+%%next_recipes%%

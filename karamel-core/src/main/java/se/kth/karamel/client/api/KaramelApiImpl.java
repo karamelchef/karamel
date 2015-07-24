@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,6 +49,7 @@ import se.kth.karamel.cookbook.metadata.ExperimentRecipe;
 import se.kth.karamel.cookbook.metadata.InstallRecipe;
 import se.kth.karamel.cookbook.metadata.KaramelFile;
 import se.kth.karamel.cookbook.metadata.MetadataRb;
+import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -328,6 +330,31 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setUrlBinary(attributes.getValue(repoName + "/url"));
     ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
+    ArrayList<YamlDependency> deps = kf.getDependencies();
+    StringBuilder local = new StringBuilder();
+    StringBuilder global = new StringBuilder();
+    for (YamlDependency yd : deps) {
+      if (yd.getRecipe().compareToIgnoreCase("install")==0) {
+        List<String> locals = yd.getLocal();
+        for (int i=0; i < locals.size(); i++) {
+          if (i == 0) {
+            local.append(locals.get(i));
+          } else {
+            local.append(", ").append(locals.get(i));
+          }
+        }
+        List<String> globals = yd.getGlobal();
+        for (int i=0; i < globals.size(); i++) {
+          if (i == 0) {
+            global.append(globals.get(i));
+          } else {
+            global.append(", ").append(globals.get(i));
+          }
+        }
+      }
+    }
+    ec.setLocalDependencies(local.toString());
+    ec.setGlobalDependencies(global.toString());
     for (ExperimentRecipe r : er) {
       Experiment.Code exp = new Experiment.Code(r.getRecipeName(), r.getScriptContents(), r.getConfigFileName(),
           r.getConfigFileContents(), r.getScriptType());

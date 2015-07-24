@@ -42,6 +42,7 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 public class ChefExperimentExtractor {
 
   private static final String YAML_DEPENDENCY_PREFIX = "      - ";
+  private static final String YAML_RECIPE_PREFIX = "  - recipe: ";
 
   // <AttrName, AttrValue> pair added to attributes/default.rb 
   private static final Map<String, String> attrs = new HashMap<>();
@@ -185,6 +186,20 @@ public class ChefExperimentExtractor {
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
+      StringBuilder recipeNames = new StringBuilder();
+      for (Code experiment : experiments) {
+        String recipeName = experiment.getName();
+        if (recipeName.compareToIgnoreCase("experiment") != 0) {
+          recipeNames.append(repoName).append("::").append(recipeName).append(",");
+        }
+      }
+      String namesOfRecipes = recipeNames.toString();
+      if (namesOfRecipes.length() > 0 && namesOfRecipes.charAt(namesOfRecipes.length() - 1) == ',') {
+        namesOfRecipes = namesOfRecipes.substring(0, namesOfRecipes.length() - 1);
+        namesOfRecipes = namesOfRecipes.replaceAll(",", System.lineSeparator() + YAML_RECIPE_PREFIX);
+        namesOfRecipes = YAML_RECIPE_PREFIX + namesOfRecipes;
+      }
+
       String localDependencies = experimentContext.getLocalDependencies();
       if (!localDependencies.isEmpty()) {
         localDependencies = localDependencies.replaceAll(" ", "");
@@ -201,7 +216,8 @@ public class ChefExperimentExtractor {
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
           "local_dependencies", localDependencies,
-          "global_dependencies", globalDependencies
+          "global_dependencies", globalDependencies,
+          "next_recipes", namesOfRecipes
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition

@@ -41,20 +41,9 @@ public final class KaramelFile {
         return yd;
       }
     }
-//    return dependencies.get(recipeName);
     return null;
   }
 
-//  public void setDependency(String recipeName, YamlDependency yd) {
-//    dependencies.put(recipeName, yd);
-//  }
-//  public Map<String, YamlDependency> getDependencies() {
-//    return dependencies;
-//  }
-//
-//  public void setDependencies(Map<String, YamlDependency> dependencies) {
-//    this.dependencies = dependencies;
-//  }
   public ArrayList<YamlDependency> getDependencies() {
     return dependencies;
   }
