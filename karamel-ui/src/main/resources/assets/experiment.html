@@ -199,12 +199,20 @@
                                 <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
                                 Orchestration 
                             </accordion-heading>
-                            Runtime Dependencies for this experiment.
+                            Runtime Dependencies for this experiment. Local Dependencies are local to this machine.
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
-                                    <label for="dependencies" class="control-label">Comma-separated list of cookentry::recipe that should be executed before this experiment. Generates the Karamelfile.</label>
-                                    <input placeholder="hadoop::dn, spark::slave" name="dependencies"  class="form-control" ng-model="experiment.dependencies" type="text" tabindex="10" required ng-change="status.isModified = true">
+                                    <label for="localDependencies" class="control-label">Comma-separated list of cookbook::recipe entries that must have completed locally on the machine before this experiment is started. Helps generate the Karamelfile.</label>
+                                    <input placeholder="hadoop::install, spark::install" name="localDependencies"  class="form-control" ng-model="experiment.localDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">
+                                </div>        
+                            </div>        
+                            Global Dependencies are cluster-wide.
+                            <div class="row form-group">
+                                <span class="col-md-1 col-lg-1"></span>
+                                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
+                                    <label for="globalDependencies" class="control-label">Comma-separated list of cookbook::recipe entries that must have completed at all nodes in the cluster before this experiment is started. Helps generate the Karamelfile.</label>
+                                    <input placeholder="hadoop::dn, spark::slave" name="globalDependencies"  class="form-control" ng-model="experiment.globalDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">
                                 </div>        
                             </div>        
                         </accordion-group>

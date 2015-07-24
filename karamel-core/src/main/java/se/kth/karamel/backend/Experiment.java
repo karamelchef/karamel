@@ -29,29 +29,34 @@ public class Experiment {
   private String githubOwner = "";
 
   /**
-   * Comma-separated String of Cookbook::recipe dependencies used to generate the KaramelFile
+   * Comma-separated String of Cookbook::recipe global dependencies used to generate the KaramelFile
    */
-  private String dependencies;
+  private String localDependencies="";
+
+  /**
+   * Comma-separated String of Cookbook::recipe local dependencies used to generate the KaramelFile
+   */
+  private String globalDependencies="";
   
   /**
    * Comma-separated list of Berksfile dependencies. Each entry is enclosed in double-quotation marks.
    */
-  private String berksfile;
+  private String berksfile = "";
 
   /**
    * Url for the experiment binary. Typically, a .tar.gz extention.
    */
-  private String urlBinary;
+  private String urlBinary = "";
 
   /**
    * Url for the experiment source code. Typically, a github URL.
    */
-  private String urlGitClone;
+  private String urlGitClone = "";
 
   /**
    * Maven command to build experiment source code.
    */
-  private String mavenCommand;
+  private String mavenCommand = "";
 
   /**
    * Chef code to be executed before the experiment in the Install phase
@@ -67,7 +72,7 @@ public class Experiment {
   /**
    * YAML for the Cluster context
    */
-  private String clusterDefinition;
+  private String clusterDefinition = "";
 
 
   private ArrayList<Code> code = new ArrayList<>();
@@ -201,12 +206,20 @@ public class Experiment {
     this.urlGitClone = urlGitClone;
   }
 
-  public void setDependencies(String dependencies) {
-    this.dependencies = dependencies;
+  public String getGlobalDependencies() {
+    return globalDependencies;
   }
 
-  public String getDependencies() {
-    return dependencies;
+  public void setGlobalDependencies(String globalDependencies) {
+    this.globalDependencies = globalDependencies;
+  }
+
+  public String getLocalDependencies() {
+    return localDependencies;
+  }
+
+  public void setLocalDependencies(String localDependencies) {
+    this.localDependencies = localDependencies;
   }
 
   public void setMavenCommand(String mavenCommand) {

@@ -3,5 +3,6 @@ dependencies:
   - recipe: %%name%%::experiment
     local:
       - %%name%%::install
+%%local_dependencies%%
     global:
-      %%dependencies%%
+%%global_dependencies%%

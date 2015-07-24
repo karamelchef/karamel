@@ -101,7 +101,8 @@ angular.module('karamel.main')
                     githubRepo: '',
                     description: '',
                     githubOwner: '',
-                    dependencies: '',
+                    localDependencies: '',
+                    globalDependencies: '',
                     berksfile: '',
                     urlBinary: '',
                     urlGitClone: '',
@@ -407,7 +408,8 @@ angular.module('karamel.main')
                         githubRepo: '',
                         description: '',
                         githubOwner: '',
-                        dependencies: '',
+                        localDependencies: '',
+                        globalDependencies: '',
                         urlBinary: '',
                         urlGitClone: '',
                         mavenCommand: '',
@@ -453,7 +455,8 @@ angular.module('karamel.main')
                     $scope.experiment.urlBinary = data.urlBinary;
                     $scope.experiment.urlGitClone = data.urlGitClone;
                     $scope.experiment.mavenCommand = data.mavenCommand;
-                    $scope.experiment.dependencies = data.dependencies;
+                    $scope.experiment.localDependencies = data.localDependencies;
+                    $scope.experiment.globalDependencies = data.globalDependencies;
                     $scope.experiment.berksfile = data.berksfile;
                     $scope.experiment.user = data.user;
                     $scope.experiment.group = data.group;

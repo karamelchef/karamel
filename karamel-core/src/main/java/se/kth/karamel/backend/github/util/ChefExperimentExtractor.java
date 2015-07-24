@@ -41,6 +41,8 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
  */
 public class ChefExperimentExtractor {
 
+  private static final String YAML_DEPENDENCY_PREFIX = "      - ";
+
   // <AttrName, AttrValue> pair added to attributes/default.rb 
   private static final Map<String, String> attrs = new HashMap<>();
   private static final Map<String, Map<String, String>> configFiles = new HashMap<>();
@@ -127,7 +129,7 @@ public class ChefExperimentExtractor {
           "name", repoName,
           "user", experiment.getUser(),
           "email", email,
-          "depends", "", 
+          "depends", "",
           "resolve_ips", "",
           "build_command", experiment.getMavenCommand(),
           "url_binary", experiment.getUrlBinary(),
@@ -167,8 +169,8 @@ public class ChefExperimentExtractor {
    * @param owner
    * @param repoName
    * @param experimentContext
-   * @throws KaramelExceptionntents.toString());
-      // Update Karamel
+   * @throws se.kth.karamel.common.exception.KaramelException
+   * @throws KaramelExceptionntents.toString()); // Update Karamel
    */
   public static void parseRecipesAddToGit(String owner, String repoName, Experiment experimentContext)
       throws KaramelException {
@@ -183,16 +185,23 @@ public class ChefExperimentExtractor {
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
-      String dependencies = experimentContext.getDependencies();
-      if (!dependencies.isEmpty()) {
-        String yamlEntryPrefix = "   - ";
-        dependencies = dependencies.replaceAll(",", System.lineSeparator() + yamlEntryPrefix);
-        dependencies = yamlEntryPrefix + dependencies;
+      String localDependencies = experimentContext.getLocalDependencies();
+      if (!localDependencies.isEmpty()) {
+        localDependencies = localDependencies.replaceAll(" ", "");
+        localDependencies = localDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
+        localDependencies = YAML_DEPENDENCY_PREFIX + localDependencies;
+      }
+      String globalDependencies = experimentContext.getGlobalDependencies();
+      if (!globalDependencies.isEmpty()) {
+        globalDependencies = globalDependencies.replaceAll(" ", "");
+        globalDependencies = globalDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
+        globalDependencies = YAML_DEPENDENCY_PREFIX + globalDependencies;
       }
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
-          "dependencies", dependencies
+          "local_dependencies", localDependencies,
+          "global_dependencies", globalDependencies
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition
@@ -312,11 +321,11 @@ public class ChefExperimentExtractor {
       }
 
       StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
-          Settings.CB_TEMPLATE_RECIPE_INSTALL, 
-          "name", repoName, 
-          "checksum", "", 
-          "resolve_ips", "", 
-          "setup_code", experimentContext.getExperimentSetupCode(), 
+          Settings.CB_TEMPLATE_RECIPE_INSTALL,
+          "name", repoName,
+          "checksum", "",
+          "resolve_ips", "",
+          "setup_code", experimentContext.getExperimentSetupCode(),
           "config_files", configFilesTemplateDefns.toString()
       );
 
