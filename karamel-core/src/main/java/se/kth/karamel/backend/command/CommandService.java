@@ -73,7 +73,7 @@ public class CommandService {
 //  private static final KaramelApi api = new KaramelApiImpl();
 
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
-    String cmd = command.toLowerCase().trim();
+    String cmd = command.toLowerCase();
     String nextCmd = null;
     CommandResponse.Renderer renderer = CommandResponse.Renderer.INFO;
     CommandResponse response = new CommandResponse();
@@ -305,7 +305,7 @@ public class CommandService {
         }
       }
 
-      p = Pattern.compile("shellexec(.+)");
+      p = Pattern.compile("shellexec((.|\n|\t|\r|\033)+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -315,7 +315,7 @@ public class CommandService {
             if (!shell.isConnected()) {
               throw new KaramelException("shell is not connected.");
             } else {
-              shell.exec(cmdStr + "\r");
+              shell.exec(cmdStr);
               try {
                 Thread.sleep(100);
 
