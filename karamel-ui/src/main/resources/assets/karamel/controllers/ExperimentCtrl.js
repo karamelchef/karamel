@@ -59,7 +59,7 @@ angular.module('karamel.main')
                     $scope.status.binaryOpen = !$scope.status.binaryOpen;
                     $scope.status.configOpen = !$scope.status.configOpen;
                     $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
-                    $scope.status.orchestrationOpen= !$scope.status.orchestrationOpen;
+                    $scope.status.orchestrationOpen = !$scope.status.orchestrationOpen;
                     $scope.status.chefOpen = !$scope.status.chefOpen;
                     $scope.status.expanded = !$scope.status.expanded;
                     for (var i = 0; i < $scope.status.experiment.length; i++) {
@@ -121,12 +121,12 @@ angular.module('karamel.main')
                     ]
                 };
 
-                $scope.getUrl = function() {
+                $scope.getUrl = function () {
                     if ($scope.status.isModified) {
                         return "";
                     }
                     var len = $scope.experiment.urlGitClone.length;
-                    return $scope.experiment.urlGitClone.substring(0, len-4).replace(":", "/");
+                    return $scope.experiment.urlGitClone.substring(0, len - 4).replace(":", "/");
                 }
 
                 $scope.landing = true;
@@ -179,7 +179,7 @@ angular.module('karamel.main')
                     $scope.experiment.code.push(newEntry);
                     $scope.newExperimentName = "";
                     $scope.newExperimentErrMsg = "";
-                      
+
                     var statusEntry = {
                         name: $scope.newExperimentName,
                         status: true
@@ -314,22 +314,23 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
-                            // delete Browser LocalStorage
-                            clearExperiment();
                             // delete local clone of Repo
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
-                                    .error(function (data, status, headers, config) {
-                                        SweetAlert.swal("Problem deleting local clone", "An error occured when trying to delete the experiment locally", "error");
-                                        return;
-                                    });                            
-                            // delete Repo on GitHub
-                            KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
                                     .success(function (data, status, headers, config) {
-                                        // Core Rest Services
-                                        SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
+                                        // delete Repo on GitHub
+                                        KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
+                                                .success(function (data, status, headers, config) {
+                                                    // Core Rest Services
+                                                    // delete Browser LocalStorage
+                                                    clearExperiment();
+                                                    SweetAlert.swal("Deleted", "The Experiment is now removed and cannot be recovered.", "info");
+                                                })
+                                                .error(function (data, status, headers, config) {
+                                                    SweetAlert.swal("Problem deleting Repo on GitHub", "You will need to remove the repository from GitHub's website.", "error");
+                                                });
                                     })
                                     .error(function (data, status, headers, config) {
-                                        SweetAlert.swal("Problem deleting Repo on GitHub", "You will need to remove the repository from GitHub's website.", "error");
+                                        SweetAlert.swal("Problem deleting local clone", "An error occured when trying to delete the experiment locally", "error");
                                     });
                         } else {
                             cancelTimer();
@@ -351,16 +352,15 @@ angular.module('karamel.main')
                         closeOnCancel: false},
                     function (isConfirm) {
                         if (isConfirm) {
-                            clearExperiment();
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
                                     .then(function (data, status, headers, config) {
                                         // Core Rest Services
+                                        clearExperiment();
                                         SweetAlert.swal("Deleted", "The experiment is now deleted locally", "info");
                                     })
                                     .error(function (data, status, headers, config) {
                                         $log.info("An error occured when trying to delete the experiment locally.");
                                     });
-
                         } else {
                             cancelTimer();
                             SweetAlert.swal("Deleted", "The Experiment has not been deleted", "error");
@@ -475,13 +475,13 @@ angular.module('karamel.main')
                         };
                         $scope.experiment.code.push(newEntry);
 
-                    $scope.status.experiment = [];
-                    var statusEntry = {
-                        name: data.code[i].name,
-                        status: true
-                    };
-                    $scope.status.experiment.push(statusEntry);
-                    
+                        $scope.status.experiment = [];
+                        var statusEntry = {
+                            name: data.code[i].name,
+                            status: true
+                        };
+                        $scope.status.experiment.push(statusEntry);
+
                     }
 
                 }

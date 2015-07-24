@@ -28,8 +28,8 @@ public class ExperimentRecipeParser {
       throw new RecipeParseException(
           "Could not find in the recipe any chef code before a script resource like \"script 'run_experiment' do\" ");
     }
-    String preScript = recipeContent.substring(0, mp.start());
-    String postScript = recipeContent.substring(mp.start());
+    // +1 to skip the newline char
+    String postScript = recipeContent.substring(mp.start()+1);
     
     Matcher ms = EXPERIMENT_DELIMITER.matcher(postScript);
     boolean foundStart = ms.find();

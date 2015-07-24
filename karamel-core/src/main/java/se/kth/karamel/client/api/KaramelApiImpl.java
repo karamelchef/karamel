@@ -312,8 +312,9 @@ public class KaramelApiImpl implements KaramelApi {
       }
     }
     Github.cloneRepo(owner, repoName);
-
     String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
+    ec.setUrlGitClone(githubRepoUrl);
+
 
     KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl);
     MetadataRb metadata = kc.getMetadataRb();
