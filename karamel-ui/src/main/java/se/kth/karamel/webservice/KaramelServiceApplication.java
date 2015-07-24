@@ -68,7 +68,10 @@ import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardYaml;
-import se.kth.karamel.webservicemodel.ProviderJSON;
+
+
+import se.kth.karamel.webservicemodel.Ec2JSON;
+import se.kth.karamel.webservicemodel.GceJson;
 import se.kth.karamel.webservicemodel.SshKeyJSON;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
 import se.kth.karamel.webservicemodel.SudoPasswordJSON;
@@ -308,6 +311,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ssh.Generate());
     environment.jersey().register(new Ec2.Load());
     environment.jersey().register(new Ec2.Validate());
+    environment.jersey().register(new Gce.Load());
+    environment.jersey().register(new Gce.Validate());
     environment.jersey().register(new Cluster.StartCluster());
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
@@ -611,7 +616,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
   public static class Ec2 {
 
-    @Path("/loadCredentials")
+    @Path("/ec2/loadCredentials")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public static class Load {
@@ -623,7 +628,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             log(Level.INFO, " Received request to load the ec2 credentials.");
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
-          ProviderJSON provider = new ProviderJSON();
+          Ec2JSON provider = new Ec2JSON();
           provider.setAccountId((credentials == null) ? "" : credentials.getAccessKey());
           provider.setAccountKey((credentials == null) ? "" : credentials.getSecretKey());
           response = Response.status(Response.Status.OK).entity(provider).build();
@@ -636,7 +641,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
 
-    @Path("/validateCredentials")
+    @Path("/ec2/validateCredentials")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public static class Validate {
@@ -648,7 +653,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
        * @return
        */
       @PUT
-      public Response validateCredentials(ProviderJSON providerJSON) {
+      public Response validateCredentials(Ec2JSON providerJSON) {
 
         Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
@@ -659,6 +664,70 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           credentials.setAccessKey(providerJSON.getAccountId());
           credentials.setSecretKey(providerJSON.getAccountKey());
           if (karamelApiHandler.updateEc2CredentialsIfValid(credentials)) {
+            response = Response.status(Response.Status.OK).
+                entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+          } else {
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
+          }
+
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+  }
+  
+  public static class Gce {
+
+    @Path("/gce/loadCredentials")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Load {
+
+      @PUT
+      public Response loadCredentials() {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to load the gce credentials.");
+        try {
+          String jsonKeyPath = karamelApiHandler.loadGceCredentialsIfExist();
+          GceJson provider = new GceJson();
+          provider.setJsonKeyPath((jsonKeyPath == null) ? "" : jsonKeyPath);
+          response = Response.status(Response.Status.OK).entity(provider).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+
+    @Path("/gce/validateCredentials")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Validate {
+
+      /**
+       * Validating the Provider based on the supplied credentials..
+       *
+       * @param providerJSON
+       * @return
+       */
+      @PUT
+      public Response validateCredentials(GceJson providerJSON) {
+
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+            log(Level.INFO, " Received request to validate the gce credentials.");
+
+        try {
+          String jsonKeyPath = providerJSON.getJsonKeyPath();
+          if (karamelApiHandler.updateGceCredentialsIfValid(jsonKeyPath)) {
             response = Response.status(Response.Status.OK).
                 entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
           } else {

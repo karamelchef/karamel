@@ -118,6 +118,11 @@
           var url = _defaultHost.concat("/sudoPassword");
           return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
+        githubCredentials: function(githubCredentials) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/githubCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, githubCredentials);
+        },
         setGithubCredentials: function(username, password) {
           var method = 'POST';
           var url = _defaultHost.concat("/setGithubCredentials");
@@ -167,7 +172,18 @@
           var method = 'PUT';
           var url = _defaultHost.concat("/processCommand");
           return _getPromiseObject(method, url, _defaultContentType, commandName);
+        },
+        loadGceCredentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/gce/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateGceCredentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/gce/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
         }
+	  
 
       }
 

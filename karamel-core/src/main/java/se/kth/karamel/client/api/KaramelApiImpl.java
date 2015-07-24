@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.jclouds.domain.Credentials;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -22,6 +23,8 @@ import se.kth.karamel.backend.github.util.ChefExperimentExtractor;
 import se.kth.karamel.backend.github.util.GithubUrl;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
+import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -105,6 +108,31 @@ public class KaramelApiImpl implements KaramelApi {
     confs.put(Settings.AWS_SECRET_KEY, credentials.getSecretKey());
     confs.writeKaramelConfs();
     clusterService.registerEc2Context(context);
+    return true;
+  }
+
+  @Override
+  public String loadGceCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    String path = confs.getProperty(Settings.GCE_JSON_KEY_FILE_PATH);
+    if (path != null) {
+      Credentials credentials = GceLauncher.readCredentials(path);
+      if (credentials != null) {
+        return path;
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException {
+    Credentials credentials = GceLauncher.readCredentials(jsonFilePath);
+    GceContext context = GceLauncher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
+    confs.writeKaramelConfs();
+    clusterService.registerGceContext(context);
     return true;
   }
 
@@ -194,7 +222,7 @@ public class KaramelApiImpl implements KaramelApi {
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
 //    keypair = SshKeyService.loadSshKeys(confs);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(), 
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(),
         keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);
     return keypair;
@@ -315,7 +343,6 @@ public class KaramelApiImpl implements KaramelApi {
     String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
     ec.setUrlGitClone(githubRepoUrl);
 
-
     KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl);
     MetadataRb metadata = kc.getMetadataRb();
     KaramelFile kf = kc.getKaramelFile();
@@ -335,9 +362,9 @@ public class KaramelApiImpl implements KaramelApi {
     StringBuilder local = new StringBuilder();
     StringBuilder global = new StringBuilder();
     for (YamlDependency yd : deps) {
-      if (yd.getRecipe().compareToIgnoreCase("install")==0) {
+      if (yd.getRecipe().compareToIgnoreCase("install") == 0) {
         List<String> locals = yd.getLocal();
-        for (int i=0; i < locals.size(); i++) {
+        for (int i = 0; i < locals.size(); i++) {
           if (i == 0) {
             local.append(locals.get(i));
           } else {
@@ -345,7 +372,7 @@ public class KaramelApiImpl implements KaramelApi {
           }
         }
         List<String> globals = yd.getGlobal();
-        for (int i=0; i < globals.size(); i++) {
+        for (int i = 0; i < globals.size(); i++) {
           if (i == 0) {
             global.append(globals.get(i));
           } else {
@@ -399,6 +426,6 @@ public class KaramelApiImpl implements KaramelApi {
     if (failedLocal) {
       throw new KaramelException(failedMsg);
     }
-  }
 
+  }
 }

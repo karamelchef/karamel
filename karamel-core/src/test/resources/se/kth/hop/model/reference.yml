@@ -97,6 +97,12 @@ groups:
     - hopagent
     - hop::dn
     - hop::nm
+  gcevms:
+    size: 3
+    gce: 
+        type: n1-standard-1
+        zone: europe-west1-b
+        image: ubuntu-1404-trusty-v20150316
 
 
 

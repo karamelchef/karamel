@@ -290,4 +290,7 @@ public interface KaramelApi {
    */
   public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
   
+  public String loadGceCredentialsIfExist() throws KaramelException;
+
+  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
 }

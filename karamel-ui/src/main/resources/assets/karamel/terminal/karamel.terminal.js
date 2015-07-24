@@ -312,8 +312,6 @@ angular.module('karamel.terminal', [])
       };
     }])
 
-
-
   .service('sshIps', ['$log', function() {
       var _ipAddress = '192.168.33.10';
 

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
+import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.json.JsonCluster;
@@ -75,6 +76,10 @@ public class ClusterService {
     }
     clusterContext.setEc2Context(ec2Context);
     clusterContexts.put(name, clusterContext);
+  }
+  
+  public synchronized void registerGceContext(GceContext gceContext) throws KaramelException {
+    commonContext.setGceContext(gceContext);
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {

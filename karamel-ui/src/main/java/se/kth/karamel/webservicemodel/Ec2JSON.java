@@ -1,7 +1,7 @@
 package se.kth.karamel.webservicemodel;
 
-public class ProviderJSON {
 
+public class Ec2JSON {
   public String accessKey;
   public String secretKey;
 
