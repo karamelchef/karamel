@@ -7,8 +7,9 @@ import se.kth.karamel.common.exception.RecipeParseException;
 public class InstallRecipeParser {
 
   public static final String SETUP_MARKER="Pre-Experiment Code";
-  public static final String CONFIG_MARKER="Configuration Files";
-  public static Pattern EXPERIMENT_SETUP = Pattern.compile( SETUP_MARKER + "(.*)" + CONFIG_MARKER);
+  public static final String CONFIG_MARKER="# Configuration Files";
+  public static Pattern EXPERIMENT_SETUP_START = Pattern.compile( SETUP_MARKER + "(.*)");
+  public static Pattern EXPERIMENT_SETUP_END = Pattern.compile( "(.*)" + CONFIG_MARKER);
   public static Pattern CONFIG_FILES = Pattern.compile( CONFIG_MARKER + "(.*)");
 
   /**
@@ -19,16 +20,27 @@ public class InstallRecipeParser {
    */
   public static InstallRecipe parse(String recipeContent) throws RecipeParseException {
 
-    Matcher mp = EXPERIMENT_SETUP.matcher(recipeContent);
-    boolean isSetupCode = mp.find();
-    if (!isSetupCode) {
+    Matcher mStart = EXPERIMENT_SETUP_START.matcher(recipeContent);
+    boolean foundMarker = mStart.find();
+    if (!foundMarker) {
       throw new RecipeParseException("Could not find in the install recipe any experiment setup chef code. "
-          + "Missing one or both of these markers in the file: '" +  SETUP_MARKER + "' or '" + CONFIG_MARKER + "'");
+          + "Missing this marker in the file: '" +  SETUP_MARKER);
     }
-    String setupCode = recipeContent.substring(mp.start(), mp.end());
-
+    Matcher mEnd = EXPERIMENT_SETUP_END.matcher(recipeContent);
+    foundMarker = mEnd.find();
+    if (!foundMarker) {
+      throw new RecipeParseException("Could not find in the install recipe any experiment setup chef code. "
+          + "Missing this marker in the file: '" +  CONFIG_MARKER);
+    }    
+    String setupCode = recipeContent.substring(mStart.start()+SETUP_MARKER.length(), mEnd.end()-CONFIG_MARKER.length());
+    
     Matcher mConfig = CONFIG_FILES.matcher(recipeContent);
-    String configCode = recipeContent.substring(mConfig.start());
+    foundMarker = mConfig.find();
+    if (!foundMarker) {
+      throw new RecipeParseException("Could not find in the install recipe any config file code. "
+          + "Missing this marker in the file: '" +  CONFIG_MARKER);
+    }    
+    String configCode = recipeContent.substring(mConfig.start()+CONFIG_MARKER.length());
 
     return new InstallRecipe(setupCode, configCode);
   }

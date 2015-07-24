@@ -95,7 +95,7 @@
                     <a ng-href="{{getUrl()}}">{{experiment.urlGitClone| limitTo: 48}}{{ experiment.urlGitClone > 48 ? '...' : ''}}</a>
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
-                    <button type="button" class="btn" 
+                    <button type="button" class="btn"  ng-disabled="!status.isModified"
                             ng-class="{'btn-danger': status.isModified, 'btn-success': !status.isModified}"
                             ng-click="pushExperiment($event)">
                         <span ng-show="status.isModified">Not </span>Saved <span class="glyphicon" 

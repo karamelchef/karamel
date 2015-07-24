@@ -69,8 +69,8 @@ public class KaramelizedCookbook {
       String configFileName = "";
       String configFileContents = "";
       String experimentContent;
-      if (confPos != -1 && confPos < description.length()+searchStr.length()) {
-        String desc = description.substring(confPos+searchStr.length());
+      if (confPos != -1 && confPos < description.length() + searchStr.length()) {
+        String desc = description.substring(confPos + searchStr.length());
         int pos = desc.indexOf(";");
         if (pos != -1) {
           configFileName = desc.substring(0, pos);
@@ -119,10 +119,14 @@ public class KaramelizedCookbook {
     } catch (IOException ex) {
       Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
           + urls.recipesHome + "install.rb", ex);
+      throw new CookbookUrlException(
+          "Could not download recipes/install.rb. Does the file exist? Is the Internet working? " + ex.getMessage());
     } catch (RecipeParseException ex) {
       Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
           "Install recipe not a valid format in this cookbook: "
           + urls.recipesHome + "install.rb", ex);
+      throw new MetadataParseException("Install recipe not a valid format in this cookbook: "
+          + urls.recipesHome + "install.rb . " + ex.getMessage());
     }
   }
 

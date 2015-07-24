@@ -185,7 +185,7 @@ public class ChefExperimentExtractor {
 
       String dependencies = experimentContext.getDependencies();
       if (!dependencies.isEmpty()) {
-        String yamlEntryPrefix = "      -";
+        String yamlEntryPrefix = "   - ";
         dependencies = dependencies.replaceAll(",", System.lineSeparator() + yamlEntryPrefix);
         dependencies = yamlEntryPrefix + dependencies;
       }
