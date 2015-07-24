@@ -24,6 +24,7 @@ import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
+import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
@@ -33,6 +34,7 @@ import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -146,6 +148,8 @@ public class ClusterManager implements Runnable {
           launcher = new Ec2Launcher(clusterContext.getEc2Context(), clusterContext.getSshKeyPair());
         } else if (provider instanceof Baremetal) {
           launcher = new BaremetalLauncher(clusterContext.getSshKeyPair());
+        } else if (provider instanceof Gce) {
+          launcher = new GceLauncher(clusterContext.getGceContext(), clusterContext.getSshKeyPair());
         }
         launchers.put(provider.getClass(), launcher);
       }

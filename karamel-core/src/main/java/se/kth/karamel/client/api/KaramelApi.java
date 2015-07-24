@@ -19,11 +19,12 @@ public interface KaramelApi {
 
   /**
    * Demonstrates available commands and their usage
+   *
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public String commandCheatSheet() throws KaramelException;
-  
+
   /**
    * Parses the command, if valid fetches the result in string, result could have different 
    * formatting depends on the command.
@@ -31,10 +32,10 @@ public interface KaramelApi {
    * @param command
    * @param args
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public CommandResponse processCommand(String command, String... args) throws KaramelException;
-  
+
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
    *
@@ -62,17 +63,19 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String yamlToJson(String yaml) throws KaramelException;
-  
+
   /**
    * Loads Karamel common keys
+   *
    * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
   public SshKeyPair loadSshKeysIfExist() throws KaramelException;
-  
+
   /**
    * Loads cluster specific keys
+   *
    * @param clusterName
    * @param passphrase user-supplied password for ssh private key
    * @return
@@ -198,6 +201,8 @@ public interface KaramelApi {
    * @throws KaramelException 
    */
   public void registerGithubAccount(String email, String password) throws KaramelException;
-  
-  
+
+  public String loadGceCredentialsIfExist() throws KaramelException;
+
+  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
 }
