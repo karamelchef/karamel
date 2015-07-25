@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import org.junit.Assert;
 import org.junit.Ignore;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -52,7 +53,7 @@ public class SshShellTest {
 
     String publicKey = "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key";
     SshShell shell = new SshShell(privateKey, publicKey, "192.168.33.11", "vagrant", 22);
-    FileOutputStream fos = new FileOutputStream(new File("/home/kamal/output1"));
+    FileOutputStream fos = new FileOutputStream(new File("/Users/kamal/output1"));
 
     shell.connect();
 
@@ -65,7 +66,6 @@ public class SshShellTest {
 
     shell.exec("pwd\r");
     waitNPrint(shell, fos);
-
     shell.exec("cd / \r");
     waitNPrint(shell, fos);
 
@@ -83,25 +83,23 @@ public class SshShellTest {
 
     shell.exec("\r");
     waitNPrint(shell, fos);
-    
-    shell.exec("ls\r");
-    waitNPrint(shell, fos);
-    
-    shell.exec("m\t\t");
-    waitNPrint(shell, fos);
 
-    shell.exec("v\t\t");
+    shell.exec("ls\r");
     waitNPrint(shell, fos);
 
     shell.exec("ls s\t\t");
     waitNPrint(shell, fos);
 
-//    waitNPrint();
-//
-//    SshService.shellExec("bbb\r");
-//    waitNPrint();
-    Thread.sleep(1000);
-    shell.disconnect();
+    shell.exec("\t\t");
+    waitNPrint(shell, fos);
+
+    shell.exec("y\r");
+    waitNPrint(shell, fos);
+
+    shell.exec("\033[\003");
+    waitNPrint(shell, fos);
+
+    Assert.assertTrue(shell.isConnected());
     fos.close();
   }
 

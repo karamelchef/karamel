@@ -58,6 +58,10 @@ public class SshShell {
     this.sshPort = sshPort;
   }
 
+  public String getIpAddress() {
+    return ipAddress;
+  }
+  
   private PasswordFinder getPasswordFinder() {
     return new PasswordFinder() {
 

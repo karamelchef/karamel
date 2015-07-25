@@ -83,6 +83,7 @@ public class CommandService {
     selectCluster();
     String result = null;
     String successMessage = null;
+    String context = chosenCluster();
     if (cmd.equals("help")) {
       result = HELP_PAGE_TEMPLATE;
     } else if (cmd.equals("running")) {
@@ -263,24 +264,22 @@ public class CommandService {
           SshMachine machine = mm.getMachine(ip);
           if (machine != null) {
             shell = machine.getShell();
-            if (shell.isConnected()) {
-              throw new KaramelException("shell is already connected!!");
-            } else {
+            if (!shell.isConnected()) {
               shell.connect();
               if (!shell.isConnected()) {
-                throw new KaramelException("shell is not connected!!");
+                throw new KaramelException("attempt to connect shell was not successful!!");
               } else {
                 try {
                   Thread.sleep(200);
-
                 } catch (InterruptedException ex) {
                   logger.error("", ex);
                 }
-                result = shell.readStreams();
-                renderer = CommandResponse.Renderer.SSH;
-                response.addMenuItem("Disconnect Shell", "shelldisconnect");
               }
             }
+            context = chosenCluster() + "/" + shell.getIpAddress();
+            result = shell.readStreams();
+            renderer = CommandResponse.Renderer.SSH;
+            addActiveMachineMenus(response);
           } else {
             throw new KaramelException("Opps, machine was not found, make sure cluster is chosen first");
           }
@@ -305,7 +304,7 @@ public class CommandService {
         }
       }
 
-      p = Pattern.compile("shellexec((.|\n|\t|\r|\033)+)");
+      p = Pattern.compile("shellexec((.|\n|\t|\r|\033|\003|\004)+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
@@ -322,9 +321,10 @@ public class CommandService {
               } catch (InterruptedException ex) {
                 logger.error("", ex);
               }
+              context = chosenCluster() + "/" + shell.getIpAddress();
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
-              response.addMenuItem("Disconnect Shell", "shelldisconnect");
+              addActiveMachineMenus(response);
             }
           } else {
             throw new KaramelException("Opps, there is not connected shell..");
@@ -343,9 +343,10 @@ public class CommandService {
             if (!shell.isConnected()) {
               throw new KaramelException("shell is not connected.");
             } else {
+              context = chosenCluster() + "/" + shell.getIpAddress();
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
-              response.addMenuItem("Disconnect Shell", "shelldisconnect");
+              addActiveMachineMenus(response);
             }
           } else {
             throw new KaramelException("Opps, there is not connected shell..");
@@ -520,6 +521,7 @@ public class CommandService {
     if (result == null && successMessage == null) {
       throw new KaramelException(String.format("Command '%s' not found", cmd));
     }
+    response.setContext(context);
     response.setSuccessMessage(successMessage);
     response.addMenuItem("Help", "help");
     response.setNextCmd(nextCmd);
@@ -660,6 +662,12 @@ public class CommandService {
       }
     }
     return builder.toString();
+  }
+
+  private static void addActiveMachineMenus(CommandResponse response) {
+    response.addMenuItem("Status", "status");
+    response.addMenuItem("Machines", "machines");
+    response.addMenuItem("Close Shell", "shelldisconnect");
   }
 
   private static void addActiveClusterMenus(CommandResponse response) {
