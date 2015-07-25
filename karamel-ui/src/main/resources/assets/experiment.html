@@ -96,10 +96,10 @@
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
                     <button type="button" class="btn"  ng-disabled="!status.isModified"
-                            ng-class="{'btn-danger': status.isModified, 'btn-success': !status.isModified}"
+                            ng-class="{'btn-primary': status.isModified, 'btn-success': !status.isModified}"
                             ng-click="pushExperiment($event)">
                         <span ng-show="status.isModified">Press to </span>Save<span ng-show="!status.isModified">d</span> <span class="glyphicon" 
-                                                                                                                                ng-class="{'glyphicon-thumbs-down': status.isModified, 'glyphicon-thumbs-up': !status.isModified}"/>
+                                                                                                                                ng-class="{'icon-upload': status.isModified, 'glyphicon-thumbs-up': !status.isModified}"/>
                     </button>
 
                 </div>
@@ -136,7 +136,7 @@
                         <accordion-group is-open="status.userGroup">
                             <accordion-heading> 
                                 <span class="col-md-1 col-lg-1">
-                                    <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.userGroup, 'glyphicon-chevron-right': !status.userGroup}" ng-click="status.userGroup = !status.userGroup"></i></span>
+                                    <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.userGroup, 'glyphicon-chevron-right': !status.userGroup}"></i></span>
                                 Run experiment as Unix user/group
                             </accordion-heading>                            
                             <div class="row">
@@ -154,7 +154,7 @@
                                                type="text" tabindex="6" required ng-change="status.isModified = true">
                                     </label>
                                 </div>
-                                <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="Username/group that is created and then used to run the experiment program and results. For Hadoop programs, use 'hadoop' as the groupname."></span>
+                                <span class="col-md-1 col-lg-1 glyphicon glyphicon-question-sign pull-right text-right" tooltip-placement="left" tooltip="Username/group that is created and then used to run the experiment program and results. For Hadoop programs, use 'hadoop' as the groupname."></span>
 
                             </div>
 
@@ -199,13 +199,13 @@
                                 <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
                                 Orchestration 
                             </accordion-heading>
-                            
+
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
                                     <label for="localDependencies" class="control-label">Local Dependencies</label>
-                                    
-                                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that are executed locally on this machine. These recipes must have been executed successfully locally on this machine before the experiment is started. This list is used when generating the Karamelfile."></span>
+
+                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that are executed locally on this machine. These recipes must have been executed successfully locally on this machine before the experiment is started. This list is used when generating the Karamelfile."></span>
                                     <input placeholder="hadoop::install, spark::install" name="localDependencies"  class="form-control" ng-model="experiment.localDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">
                                 </div>        
                             </div>        
@@ -213,7 +213,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
                                     <label for="globalDependencies" class="control-label">Global Dependencies</label>
-                                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that could be executed on potentially any machine in the cluster (global). These recipes must have been executed successfully on all machines in the cluster that they are run on, before this experiment is started. This list is used when generating the Karamelfile."></span>
+                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that could be executed on potentially any machine in the cluster (global). These recipes must have been executed successfully on all machines in the cluster that they are run on, before this experiment is started. This list is used when generating the Karamelfile."></span>
                                     <input placeholder="hadoop::dn, spark::slave" name="globalDependencies"  class="form-control" ng-model="experiment.globalDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">
                                 </div>        
                             </div>        
@@ -227,7 +227,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="chefCode">Chef code executed before the Experiment program is run.</label>
-                                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below."></span>
+                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below."></span>
                                     <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified = true" class="form-control"></textarea>
                                 </div>
                             </div>
@@ -235,7 +235,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="berksCode">Berksfile dependencies</label>
-                                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook entries for cookbooks that will be install on the experiment machine.  For example: ark, java, mysql, ('ark', github: 'burtlo/ark', version: '~> 0.9.0'), (cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master')"></span>
+                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook entries for cookbooks that will be install on the experiment machine.  For example: ark, java, mysql, ('ark', github: 'burtlo/ark', version: '~> 0.9.0'), (cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master')"></span>
                                     <textarea id="berksCode" style="width:100%; height:100px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="ark, java, mysql" tabindex="11" ng-change="status.isModified = true" class="form-control"></textarea>
                                 </div>
                             </div>                            
@@ -289,13 +289,12 @@
                                             ng-change="status.isModified = true"
                                             >
                                     </select>
-                                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="Select the type of script for the Experiment and then write the experiment code in the box below. For bash, you should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment are taken from any config file and written as follows: #{node[repoName][:configParamKey]}"></span>
                                 </div>
+                                <span class="glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip="Select the type of script for the Experiment and then write the experiment code in the box below. For bash, you should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment are taken from any config file and written as follows: #{node[repoName][:configParamKey]}"></span>
                             </div>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-
                                     <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified = true" class="form-control"></textarea>
                                 </div>
                             </div>
@@ -305,7 +304,7 @@
                                 <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
                                     <div class="form-group">
                                         <label>Relative path to config file</label>
-                                        <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" tooltip="An experiment can include a configuration file that store experiment parameters. These parameters can then be set in the Karamel UI and are implemented as attributes in the attributes/default.rb file in Chef."></span>
+                                        <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="An experiment can include a configuration file that store experiment parameters. These parameters can then be set in the Karamel UI and are implemented as attributes in the attributes/default.rb file in Chef."></span>
                                         <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control" ng-change="status.isModified = true">
                                     </div>
                                 </div>
@@ -315,7 +314,7 @@
                                 <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
                                     <div class="form-group" ng-show="exp.configFileName.length > 0">
                                         <label>Configuration File for Experiment</label>
-                                        <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" 
+                                        <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
                                               tooltip="Enter key-value pairs here. A parameter can be referenced inside a script using the Chef attribute syntax: node[:repoName][:attrName]"></span>
                                         <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14" ng-change="status.isModified = true" class="form-control"></textarea>
                                     </div>
@@ -335,7 +334,7 @@
 
                 <div class="form-group">
                     <label  style="margin-left: 10px">Add Experiment Script</label>
-                    <span class="glyphicon glyphicon-info-sign pull-right" tooltip-placement="left" 
+                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
                           tooltip="You can have multiple experiment recipes. Write the name of the new experiment recipe and click 'add'."></span>
                     <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="12" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
                     <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default">Add</button>
