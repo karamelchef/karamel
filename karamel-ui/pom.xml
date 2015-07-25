@@ -25,9 +25,79 @@
         <profile>
             <id>win</id>
             <activation>
-              <property><name>win</name></property>
+                <property>
+                    <name>win</name>
+                </property>
             </activation>
 
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                        <artifactId>launch4j-maven-plugin</artifactId>
+                        <version>1.7.7</version>
+                        <executions>
+                            <execution>
+                                <id>l4j-clui</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>launch4j</goal>
+                                </goals>
+                                <configuration>
+                                    <cmdLine>-server conf/dropwizard.yml</cmdLine>
+                                    <headerType>gui</headerType>
+                                    <outfile>${project.build.directory}/karamel.exe</outfile>
+                                    <dontWrapJar>false</dontWrapJar>
+                                    <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
+                                    <classPath>
+                                        <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
+                                        <preCp>lib\*.jar</preCp>
+                                    </classPath>
+                                    <icon>icons/karamel.ico</icon>
+                                    <errTitle>Karamel Error</errTitle>
+                                    <singleInstance>
+                                        <mutexName>Karamel</mutexName>
+                                        <windowTitle>Another Instance of Karamel is already Running.</windowTitle>
+                                    </singleInstance>
+                                    <jre>
+                                        <minVersion>1.7.0</minVersion>
+                                        <maxVersion>1.9.0</maxVersion>
+                                        <initialHeapSize>128</initialHeapSize>
+                                        <maxHeapSize>1024</maxHeapSize>
+                                        <runtimeBits>64/32</runtimeBits>
+                                    </jre>
+                                    <!--
+                                        <splash>
+                                        <file>icons/karamel-logo.bmp</file>
+                                        <waitForWindow>false</waitForWindow>
+                                        <timeout>2</timeout>
+                                        <timeoutErr>false</timeoutErr>
+                                        </splash>
+                                    -->
+                                    <versionInfo>
+                                        <fileVersion>0.0.0.1</fileVersion>
+                                        <txtFileVersion>Karamel</txtFileVersion>
+                                        <fileDescription>Karamel - orchestration for Chef Solo</fileDescription>
+                                        <copyright>Karamel</copyright>
+                                        <productVersion>0.0.0.1</productVersion>
+                                        <txtProductVersion>Karamel</txtProductVersion>
+                                        <productName>Karamel</productName>
+                                        <companyName>karamel.io</companyName>
+                                        <internalName>karamel</internalName>
+                                        <originalFilename>karamel.exe</originalFilename>
+                                    </versionInfo>
+                                    <messages>
+                                        <startupErr>Karamel startup error</startupErr>
+                                        <jreVersionErr>Karamel requires 64-bit java version 7 or higher.</jreVersionErr>
+                                        <launcherErr>Karamel launcher error. Karamel requires 64-bit java, version 7 or higher.</launcherErr>
+                                    </messages>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+                
+            </build>
             <dependencies>        
                 <dependency>
                     <groupId>se.kth</groupId>
@@ -55,10 +125,12 @@
                 </dependency> 
             </dependencies>
         </profile>
-         <profile>
+        <profile>
             <id>linux</id>
             <activation>
-              <property><name>!win</name></property>
+                <property>
+                    <name>!win</name>
+                </property>
             </activation>
 
             <dependencies>        
@@ -149,17 +221,6 @@
             <artifactId>dropwizard-jetty</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
-<dependency>
-	<groupId>com.akathist.maven.plugins.launch4j</groupId>
-	<artifactId>launch4j-maven-plugin</artifactId>
-	<version>1.7.7</version>
-</dependency>
-<dependency>
-	<groupId>net.sf.launch4j</groupId>
-	<artifactId>launch4j</artifactId>
-	<version>3.8.0</version>
-</dependency>
-
     </dependencies>
 
     <build>
@@ -230,61 +291,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-              <groupId>com.akathist.maven.plugins.launch4j</groupId>
-              <artifactId>launch4j-maven-plugin</artifactId>
-              <executions>
-                <execution>
-                  <id>l4j-clui</id>
-                  <phase>package</phase>
-                  <goals>
-                    <goal>launch4j</goal>
-                  </goals>
-                  <configuration>
-                    <cmdLine>-server conf/dropwizard.yml</cmdLine>
-                    <headerType>gui</headerType>
-                    <outfile>${project.build.directory}/karamel.exe</outfile>
-                    <dontWrapJar>false</dontWrapJar>
-                    <jar>target/${project.artifactId}-${project.version}-shaded.jar</jar>
-                    <classPath>
-                      <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
-                      <preCp>lib\*.jar</preCp>
-                    </classPath>
-                    <icon>icons/karamel.ico</icon>
-                    <errTitle>Karamel Error</errTitle>
-                    <singleInstance>
-                      <mutexName>Karamel</mutexName>
-                      <windowTitle>Another Instance of Karamel is already Running.</windowTitle>
-                    </singleInstance>
-                    <jre>
-                      <minVersion>1.7.0</minVersion>
-                      <maxVersion>1.9.0</maxVersion>
-                      <initialHeapSize>128</initialHeapSize>
-                      <maxHeapSize>1024</maxHeapSize>
-                      <runtimeBits>64/32</runtimeBits>
-                    </jre>
-		    <versionInfo>
-		      <fileVersion>0.0.0.1</fileVersion>
-		      <txtFileVersion>Karamel</txtFileVersion>
-		      <fileDescription>Karamel - orchestration for Chef Solo</fileDescription>
-		      <copyright>Karamel</copyright>
-		      <productVersion>0.0.0.1</productVersion>
-		      <txtProductVersion>Karamel</txtProductVersion>
-		      <productName>Karamel</productName>
-		      <companyName>karamel.io</companyName>
-		      <internalName>karamel</internalName>
-		      <originalFilename>karamel.exe</originalFilename>
-		    </versionInfo>
-		    <messages>
-		      <startupErr>Karamel startup error</startupErr>
-		      <jreVersionErr>Karamel requires 64-bit java version 7 or higher.</jreVersionErr>
-		      <launcherErr>Karamel launcher error. Karamel requires 64-bit java, version 7 or higher.</launcherErr>
-		    </messages>
-                  </configuration>
-                </execution>
-              </executions>
             </plugin>
 
             <plugin>
