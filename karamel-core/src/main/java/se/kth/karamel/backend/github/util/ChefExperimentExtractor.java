@@ -7,7 +7,6 @@ package se.kth.karamel.backend.github.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,18 +19,12 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.representer.Representer;
-import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.Experiment.Code;
 import se.kth.karamel.backend.github.Github;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.client.model.json.JsonRecipe;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.cookbook.metadata.KaramelFile;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
 /**
@@ -63,10 +56,7 @@ public class ChefExperimentExtractor {
     attrs.clear();
     configFiles.clear();
 
-    // Add recipeNames to metadata.rb
     StringBuilder recipeDescriptions = new StringBuilder();
-//    Set<String> recipeNames = experiment.getExperiments().keySet();
-    // Parse all the config variables and put them into attributes/default.rb
     List<Code> experiments = experiment.getCode();
 
     Pattern pD = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
@@ -77,6 +67,9 @@ public class ChefExperimentExtractor {
       attrs.put(name, value);
     }
 
+    // Extract all the configFileNames: write them to metadata.rb later
+    // Extract all the from the configFile contents: write them to attributes/default.rb later
+    // No conflict detection for duplicate key-value pairs yet. Should be done in Javascript in Browser.
     for (Code code : experiments) {
       String configFileName = code.getConfigFileName();
       Map<String, String> cfs = configFiles.get(configFileName);
@@ -84,9 +77,9 @@ public class ChefExperimentExtractor {
         cfs = new HashMap<>();
         configFiles.put(configFileName, cfs);
       }
-      recipeDescriptions.append("recipe            \"").append(repoName).append("::").append(code.getName())
-          .append("\",  \"configFile=").append(configFileName).append("; This experiment's name is ")
-          .append(code.getName()).append("\"").append(System.lineSeparator());
+      recipeDescriptions.append("recipe            \"").append(repoName).append(Settings.COOOKBOOK_DELIMITER).
+          append(code.getName()).append("\",  \"configFile=").append(configFileName)
+          .append("; This experiment's name is ").append(code.getName()).append("\"").append(System.lineSeparator());
       String str = code.getConfigFileContents();
       Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
@@ -97,7 +90,6 @@ public class ChefExperimentExtractor {
       }
     }
 
-    // 2. write them to attributes/default.rb and metadata.rb
     String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
     try {
       StringBuilder defaults_rb = CookbookGenerator.instantiateFromTemplate(
@@ -108,21 +100,10 @@ public class ChefExperimentExtractor {
           "http_binaries", experiment.getUrlBinary()
       );
 
+      // Add all key-value pairs from the config files to the default attributes
       for (String key : attrs.keySet()) {
         String entry = "default[:" + repoName + "][:" + key + "] = \"" + attrs.get(key) + "\"";
         defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
-      }
-
-      StringBuilder config_props = CookbookGenerator.instantiateFromTemplate(
-          Settings.CB_TEMPLATE_CONFIG_PROPS,
-          "name", repoName,
-          "user", experiment.getUser(),
-          "group", experiment.getGroup(),
-          "http_binaries", experiment.getUrlBinary()
-      );
-      for (String key : attrs.keySet()) {
-        String entry = key + " = <%= node[:" + repoName + "][:" + key + "] %>";
-        config_props.append(entry).append(System.lineSeparator());
       }
 
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
@@ -139,14 +120,7 @@ public class ChefExperimentExtractor {
           "ip_params", "",
           "more_recipes", recipeDescriptions.toString()
       );
-//      for (Code code : experiment.getCode()) {
-//
-//        String entry = "recipe            \"" + repoName + "::" + code.getName() + "\", \"configFile="
-//            + code.getConfigFileName() + "; Executes experiment as "
-//            + code.getScriptType() + " script.\"";
-//        metadata_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
-//
-//      }
+
       for (String key : attrs.keySet()) {
         String entry = "attribute \"" + repoName + "/" + key + "\"," + System.lineSeparator()
             + ":description => \"" + key + " parameter value\"," + System.lineSeparator()
@@ -178,19 +152,20 @@ public class ChefExperimentExtractor {
 
     try {
 
-      List<Code> experiments = experimentContext.getCode();
-
       StringBuilder kitchenContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KITCHEN_YML,
           "name", repoName
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
+
+      List<Code> experiments = experimentContext.getCode();
+
       StringBuilder recipeNames = new StringBuilder();
       for (Code experiment : experiments) {
         String recipeName = experiment.getName();
         if (recipeName.compareToIgnoreCase("experiment") != 0) {
-          recipeNames.append(repoName).append("::").append(recipeName).append(",");
+          recipeNames.append(repoName).append(Settings.COOOKBOOK_DELIMITER).append(recipeName).append(",");
         }
       }
       String namesOfRecipes = recipeNames.toString();
@@ -222,17 +197,17 @@ public class ChefExperimentExtractor {
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition
       String ymlString = experimentContext.getClusterDefinition();
-      List<String> clusterDependencies = new ArrayList<>();
-      if (!ymlString.isEmpty()) {
-        JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
-        for (JsonGroup g : jsonCluster.getGroups()) {
-          for (JsonCookbook cb : g.getCookbooks()) {
-            for (JsonRecipe r : cb.getRecipes()) {
-              clusterDependencies.add(r.getCanonicalName());
-            }
-          }
-        }
-      }
+//      List<String> clusterDependencies = new ArrayList<>();
+//      if (!ymlString.isEmpty()) {
+//        JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
+//        for (JsonGroup g : jsonCluster.getGroups()) {
+//          for (JsonCookbook cb : g.getCookbooks()) {
+//            for (JsonRecipe r : cb.getRecipes()) {
+//              clusterDependencies.add(r.getCanonicalName());
+//            }
+//          }
+//        }
+//      }
 
       String berksfile = experimentContext.getBerksfile();
       StringBuilder berksDependencies = new StringBuilder();
@@ -278,11 +253,11 @@ public class ChefExperimentExtractor {
           configFileName = configFileName.substring(filePos + 1);
         }
 
-        YamlDependency yd = new YamlDependency();
-        if (!ymlString.isEmpty()) {
-          yd.setGlobal(clusterDependencies);
-          yd.setRecipe(repoName + Settings.COOOKBOOK_DELIMITER + experimentName);
-        }
+//        YamlDependency yd = new YamlDependency();
+//        if (!ymlString.isEmpty()) {
+//          yd.setGlobal(clusterDependencies);
+//          yd.setRecipe(repoName + Settings.COOOKBOOK_DELIMITER + experimentName);
+//        }
         String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
 
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
@@ -317,9 +292,9 @@ public class ChefExperimentExtractor {
         Github.addFile(owner, repoName,
             "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
 
-        if (!ymlString.isEmpty()) {
-          karamelFile.getDependencies().add(yd);
-        }
+//        if (!ymlString.isEmpty()) {
+//          karamelFile.getDependencies().add(yd);
+//        }
       }
 
       StringBuilder configFilesTemplateDefns = new StringBuilder();
