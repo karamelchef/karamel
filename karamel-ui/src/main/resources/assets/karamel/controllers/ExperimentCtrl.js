@@ -563,7 +563,7 @@ angular.module('karamel.main')
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
                                         $scope.status.isModified = false;
-                                        SweetAlert.swal("Saved.", "Experiment saved/pushed to GitHub. \\\m/", "success");
+//                                        SweetAlert.swal("Saved.", "Experiment saved/pushed to GitHub. \\\m/", "success");
                                     })
                                     .error(function (data, status, headers, config) {
                                         SweetAlert.swal("Problem saving to GitHub", data.reason, "error");
