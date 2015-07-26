@@ -11,17 +11,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Test;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
  * @author kamal
  */
-@Ignore
+//@Ignore
 public class SshShellTest {
 
-//  @Test
+  @Test
   public void testSshService() throws InterruptedException, KaramelException, FileNotFoundException, IOException {
     String privateKey = "-----BEGIN RSA PRIVATE KEY-----\n"
         + "MIIEogIBAAKCAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzI\n"
@@ -78,7 +78,7 @@ public class SshShellTest {
     shell.exec("\033[A");
     waitNPrint(shell, fos);
 
-    shell.exec("\033[A");
+    shell.exec("\033[B");
     waitNPrint(shell, fos);
 
     shell.exec("\r");

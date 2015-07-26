@@ -309,6 +309,8 @@ public class CommandService {
       if (!found && matcher.matches()) {
         found = true;
         String cmdStr = matcher.group(1);
+        cmdStr = cmdStr.replace("arrup", "\033[A");
+        cmdStr = cmdStr.replace("arrdown", "\033[B");
         if (chosenCluster() != null) {
           if (shell != null) {
             if (!shell.isConnected()) {
@@ -317,7 +319,6 @@ public class CommandService {
               shell.exec(cmdStr);
               try {
                 Thread.sleep(100);
-
               } catch (InterruptedException ex) {
                 logger.error("", ex);
               }
