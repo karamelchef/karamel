@@ -205,8 +205,8 @@ public final class NovaLauncher extends Launcher{
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Nova) {
         for (MachineRuntime machine : group.getMachines()) {
-          if (machine.getEc2Id() != null) {
-            allNovaVmsIds.add(machine.getEc2Id());
+          if (machine.getVmId() != null) {
+            allNovaVmsIds.add(machine.getVmId());
           }
         }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
@@ -266,7 +266,7 @@ public final class NovaLauncher extends Launcher{
     Provider provider = UserClusterDataExtractor.getGroupProvider(definition,name);
     Nova nova = (Nova) provider;
     Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.DEFAULT_PORTS);
+    ports.addAll(Settings.EC2_DEFAULT_PORTS);
     String groupId = createSecurityGroup(definition.getName(), jg.getName(), nova, ports);
     return groupId;
   }
@@ -373,7 +373,7 @@ public final class NovaLauncher extends Launcher{
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
             publicIps.addAll(node.getPublicAddresses());
-            machine.setEc2Id(node.getId());
+            machine.setVmId(node.getId());
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));
             machine.setPublicIp(publicIps.get(0));

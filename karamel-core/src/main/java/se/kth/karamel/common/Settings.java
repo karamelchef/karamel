@@ -222,7 +222,7 @@ public class Settings {
 
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
-  public static final List<String> DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
+  public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
 
   public static final int MACHINES_TASKQUEUE_SIZE = 100;

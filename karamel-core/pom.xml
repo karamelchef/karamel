@@ -35,7 +35,7 @@
             <groupId>org.eclipse.mylyn.github</groupId>
             <artifactId>org.eclipse.egit.github.core</artifactId>
             <version>2.1.5</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>dnl.utils</groupId>
             <artifactId>j-text-utils</artifactId>
@@ -52,10 +52,15 @@
             <version>1.11</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.jclouds.api</groupId>
+            <artifactId>openstack-nova</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>
             <version>${jclouds.version}</version>
-        </dependency>            
+        </dependency>
         <dependency>
             <groupId>org.apache.jclouds.driver</groupId>
             <artifactId>jclouds-bouncycastle</artifactId>
@@ -96,7 +101,7 @@
                         <version>2.18.1</version>
                     </dependency>
                 </dependencies>
-            </plugin>        
+            </plugin>
         </plugins>
         <extensions>
             <extension>
@@ -105,6 +110,6 @@
                 <version>1.0</version>
             </extension>
         </extensions>
-    </build>    
+    </build>
 
 </project>
