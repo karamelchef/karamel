@@ -1,7 +1,8 @@
-name: spark
-ec2:
-    type: m3.medium
-    region: eu-west-1
+name: sparkongce
+gce:
+  type: n1-standard-1
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
 
 cookbooks:                                                                      
   hadoop: 
@@ -9,7 +10,7 @@ cookbooks:
   spark: 
     github: "hopshadoop/spark-chef"
     branch: "master"
-
+    
 groups: 
   namenodes:
     size: 1

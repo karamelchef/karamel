@@ -19,7 +19,6 @@ cp ../README.linux $dist/README.txt
 tar zcf ${dist}.tgz $dist
 mv $dist ${dist}-linux
 
-
 #create jar archive
 mkdir ${dist}-jar
 cp karamel-ui-${version}-shaded.jar ${dist}-jar/karamel-ui-${version}.jar

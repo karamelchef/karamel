@@ -11,13 +11,17 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
+import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.SshKeyPair;
 
 /**
- *
+ * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is 
+ * stored inside a context. There is a common context with shared values between clusters and each cluster has its own 
+ * context inside which values can be overwritten. 
+ * 
  * @author kamal
  */
 public class ClusterService {
@@ -78,6 +82,10 @@ public class ClusterService {
     }
     clusterContext.setEc2Context(ec2Context);
     clusterContexts.put(name, clusterContext);
+  }
+  
+  public synchronized void registerGceContext(GceContext gceContext) throws KaramelException {
+    commonContext.setGceContext(gceContext);
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {

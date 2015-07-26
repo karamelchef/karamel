@@ -7,12 +7,15 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jclouds.domain.Credentials;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
+import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -93,9 +96,36 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
+  public String loadGceCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    String path = confs.getProperty(Settings.GCE_JSON_KEY_FILE_PATH);
+    if (path != null) {
+      Credentials credentials = GceLauncher.readCredentials(path);
+      if (credentials != null) {
+        return path;
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException {
+    Credentials credentials = GceLauncher.readCredentials(jsonFilePath);
+    GceContext context = GceLauncher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
+    confs.writeKaramelConfs();
+    clusterService.registerGceContext(context);
+    return true;
+  }
+
+  @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
-    Gson gson = new GsonBuilder().
+    GsonBuilder builder = new GsonBuilder();
+    builder.disableHtmlEscaping();
+    Gson gson = builder.
         registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
         registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
         registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
@@ -176,8 +206,8 @@ public class KaramelApiImpl implements KaramelApi {
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
 //    keypair = SshKeyService.loadSshKeys(confs);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(), 
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);
     return keypair;
   }
@@ -195,8 +225,8 @@ public class KaramelApiImpl implements KaramelApi {
     Confs confs = Confs.loadJustClusterConfs(clusterName);
     saveSshConfs(keypair, confs);
     confs.writeClusterConfs(clusterName);
-    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath()
-        , keypair.getPassphrase());
+    keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(),
+        keypair.getPassphrase());
     clusterService.registerSshKeyPair(clusterName, keypair);
     return keypair;
   }
@@ -209,8 +239,7 @@ public class KaramelApiImpl implements KaramelApi {
 
 
   @Override
-  public void registerGithubAccount(String email, String password) 
-  {
+  public void registerGithubAccount(String email, String password) {
     // TODO - test github credentials
     ClusterService.getInstance().getCommonContext().setGithubEmail(email);
     ClusterService.getInstance().getCommonContext().setGithubPassword(password);

@@ -46,9 +46,36 @@ public class ChefJsonGeneratorTest {
     }
     ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
-    System.out.println(chefJsons.keySet());
     JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));
+  }
+
+  @Test
+  public void testEncodingInAttributes() throws KaramelException {
+    //Related to https://github.com/karamelchef/karamel/issues/72
+    String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
+        + "\"1C==\"},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],\"groups\":[{\"name\":\"datanodes\","
+        + "\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\","
+        + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
+        + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
+        + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
+        + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
+        + "null,\"vpc\":null,\"subnet\":null}}";
+    
+    String yaml = ClusterDefinitionService.jsonToYaml(jsonString);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(yaml);
+    List<JsonCookbook> cookbooks = definition.getCookbooks();
+    JsonCookbook ndb = null;
+    for (JsonCookbook jc : cookbooks) {
+      if (jc.getName().equals("flink")) {
+        ndb = jc;
+      }
+    }
+    ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
+    JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
+    String st = jsonObject.toString();
+    Assert.assertTrue(st.contains("\"DataMemory\":\"1C==\""));
   }
 }

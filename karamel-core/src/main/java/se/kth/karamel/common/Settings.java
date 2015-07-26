@@ -103,6 +103,7 @@ public class Settings {
   public static final String AWS_SECRET_KEY = "aws.secret.key";
   public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
+  public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
     return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_Address).toLowerCase();
@@ -112,10 +113,33 @@ public class Settings {
     return (USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
   }
 
+  public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {
+    return (provider + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
+  }
+
   public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int size) {
     List<String> names = new ArrayList<>();
     for (int i = 1; i <= size; i++) {
       names.add(EC2_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
+    }
+    return names;
+  }
+
+  /**
+   * GCE firewall name.
+   * @param networkName
+   * @param port
+   * @param protocol
+   * @return 
+   */
+  public static final String UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
+    return (networkName + "-" + protocol + port).toLowerCase();
+  }
+
+  public static final List<String> UNIQUE_VM_NAMES(String provider, String clusterName, String groupName, int size) {
+    List<String> names = new ArrayList<>();
+    for (int i = 1; i <= size; i++) {
+      names.add(UNIQUE_GROUP_NAME(provider, clusterName, groupName) + "-" + i);
     }
     return names;
   }
@@ -267,5 +291,7 @@ public class Settings {
   }
 
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
+  
+  public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
 }

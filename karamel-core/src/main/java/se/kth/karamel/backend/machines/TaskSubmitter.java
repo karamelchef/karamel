@@ -9,7 +9,8 @@ import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- *
+ * Submitter of tasks to machines that being called by DagTask.  
+ * 
  * @author kamal
  */
 public interface TaskSubmitter {
