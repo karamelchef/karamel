@@ -446,13 +446,6 @@ angular.module('karamel.terminal', [])
 
         }
 
-      }])
-
-    .service('sshIps', ['$log', function() {
-        var _ipAddress = 'test-ip';
-
-        this.ipAddress = _ipAddress;
-
       }]);
 
 

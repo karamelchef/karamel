@@ -127,9 +127,8 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
         return prompt;
       }])
 
-    .controller('sshTerminalController', ['$scope', '$log', '$interval', 'terminalConfiguration', 'promptCreator',
-      'sshIps', 'KaramelCoreRestServices', '$compile',
-      function($scope, $log, $interval, terminalConfiguration, promptCreator, sshIps, KaramelCoreRestServices) {
+    .controller('shellEmulatorContoller', ['$scope', '$log', 'terminalConfiguration', 'promptCreator',
+      function($scope, $log, terminalConfiguration, promptCreator) {
 
         $scope.commandLine = '';
         $scope.machineSwitched = false;
@@ -140,19 +139,25 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
         $scope.typeSound = function() {
         };
         $scope.configName = $scope.configName || 'default';
-        $scope.ipAddress = sshIps.ipAddress;
-        $log.info("ip: " + $scope.ipAddress);
+        
+        $scope.init = function(configName) {
+          var config = terminalConfiguration(configName);
+          $scope.prompt = promptCreator(config);
+          $scope.prompt.text = "";
+          $scope.allowTypingWriteDisplaying = config.allowTypingWriteDisplaying;
+          if (config.getTypeEffect) {
+            config.getTypeEffect.then(function(effect) {
+              $scope.typeSound = effect;
+            });
+          }
 
-        $scope.$on('$destroy', function() {
-          _destroyFetcher();
-        });
-
-        function _destroyFetcher() {
-          if (angular.isDefined($scope.shellOuputFetcher)) {
-            $interval.cancel($scope.shellOuputFetcher);
+          if (config.getStartEffect) {
+            config.getStartEffect.then(function(effect) {
+              effect();
+            });
           }
         }
-
+        
         $scope.$on('core-result-ssh', function(e, response) {
           if ($scope.machine && $scope.machine != response.context)
             $scope.machineSwitched = true;
@@ -192,26 +197,7 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
           $scope.$emit('ask-core', {index: 0, cmdName: 'shellexec ' + cmd.command, cmdArg: ''});
         });
 
-        $scope.init = function(configName) {
-          var config = terminalConfiguration(configName);
-          $scope.prompt = promptCreator(config);
-          $scope.prompt.text = "";
-          $scope.allowTypingWriteDisplaying = config.allowTypingWriteDisplaying;
-          if (config.getTypeEffect) {
-            config.getTypeEffect.then(function(effect) {
-              $scope.typeSound = effect;
-            });
-          }
-
-          if (config.getStartEffect) {
-            config.getStartEffect.then(function(effect) {
-              effect();
-            });
-          }
-        }
         $scope.init('default');
-
-        var lastCtrlKey = '';
 
         $scope.handlePaste = function(e) {
           $scope.commandLine += e.clipboardData.getData('text/plain');
@@ -338,7 +324,7 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
     .directive('terminal', function($document) {
       return {
         restrict: 'E',
-        controller: 'sshTerminalController',
+        controller: 'shellEmulatorContoller',
         transclude: true,
         replace: true,
         template: "<section class='terminal' ng-paste='handlePaste($event)'>\n\
