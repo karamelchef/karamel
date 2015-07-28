@@ -73,7 +73,7 @@ public class CommandService {
 //  private static final KaramelApi api = new KaramelApiImpl();
 
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
-    String cmd = command.toLowerCase();
+    String cmd = command;
     String nextCmd = null;
     CommandResponse.Renderer renderer = CommandResponse.Renderer.INFO;
     CommandResponse response = new CommandResponse();

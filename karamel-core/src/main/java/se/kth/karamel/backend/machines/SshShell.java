@@ -97,7 +97,7 @@ public class SshShell {
       session = client.startSession();
 
       Map<PTYMode, Integer> modes = new HashMap<>();
-      session.allocatePTY("vt220", 80, 24, 0, 0, modes);
+      session.allocatePTY("vt220", 160, 80, 0, 0, modes);
 
       shell = (SessionChannel) session.startShell();
       sequenceInputStream = new SequenceInputStream(shell.getInputStream(), shell.getErrorStream());
@@ -118,9 +118,9 @@ public class SshShell {
             logger.error("", ex);
           }
         }
-
       };
       streamReader.start();
+      exec("PS1=\""+sshUser+"@"+ipAddress+":~$\"\r");
     } catch (UserAuthException ex) {
       logger.error("", ex);
       throw new KaramelException("Issue for using ssh keys, make sure you keypair is not password protected..", ex);

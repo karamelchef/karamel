@@ -139,7 +139,7 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
       $scope.typeSound = function() {
       };
       $scope.configName = $scope.configName || 'default';
-      $scope.style = $scope.defaultStyle();
+
 
       $scope.init = function(configName) {
         var config = terminalConfiguration(configName);
@@ -157,13 +157,15 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
             effect();
           });
         }
-      }
+        $scope.style = defaultStyle();
+      };
 
-      $scope.defaultSyle = function() {
+      var defaultStyle = function() {
         return {fontWeight: "normal", textDecoration: "none",
           color: "white", bgColor: "black"};
-      }
-      $scope.styleText = function(style) {
+      };
+
+      var styleText = function(style) {
         var styleStr = "";
         if (style.fontWeight !== "normal")
           styleStr += "font-weight:" + style.fontWeight + ";"
@@ -175,7 +177,8 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
           styleStr += "background-color:" + style.bgColor + ";"
 
         return styleStr;
-      }
+      };
+
       $scope.$on('core-result-ssh', function(e, response) {
         if ($scope.machine && $scope.machine != response.context)
           $scope.machineSwitched = true;
@@ -185,30 +188,37 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
         if (!$scope.machinesLines[$scope.machine])
           $scope.machinesLines[$scope.machine] = [];
 
-        var result = $scope.prompt.text + response.result;
-        if (result !== null && result !== '') {
-          var index = result.lastIndexOf("\r");
-          if (index > 0 && index < result.length - 1) {
-            var text = result.substring(0, index);
-            var newPrompt = result.substring(index + 1, result.length);
-            newPrompt = newPrompt.replace(/(\r\n|\n|\r)/gm, "").trim();
-            $scope.prompt.text = newPrompt;
-
-            $scope.processCsiCmdsInResult(text, $scope.machinesLines[$scope.machine], $scope.style);
-            var re = /\r\n|\n\r|\n|\r/g;
-            var lines = text.replace(re, "\n").split("\n");
-            for (var i in lines) {
-              var lineItems = bashColorsToHtml(lines[i]);
-              $scope.machinesLines[$scope.machine].push({
-                items: lineItems
-              });
+        if (response.result) {
+          var index = response.result.lastIndexOf('\r');
+          //multi-line: must attache the current prompt to the start of the result, last line is the new prompt
+          if (index > 0) {
+//            var text = $scope.prompt.text + response.result.substring(0, index);
+//             var promptLine = response.result.substring(index + 1, response.result.length);
+            var text = $scope.prompt.text + response.result;
+            var newLines = text.replace(NLR, "\n").split("\n");
+            for (var i in newLines) {
+              var processResult = processCsiCmdsInResult(newLines[i], $scope.machinesLines[$scope.machine], $scope.style);
+              var line = processResult.line;
+              $scope.style = processResult.style;
+              if (i != newLines.length - 1)
+                $scope.machinesLines[$scope.machine].push(line);
+              else
+                $scope.prompt.text = (line.items && line.items.length > 0) ? line.items[0].data : '';
             }
           } else {
-            $scope.commandLine = response.result;
+            //single line: keep the current prompt, process CSI commands in the line, printable chars are the new commandline
+            var processResult = processCsiCmdsInResult(response.result, $scope.machinesLines[$scope.machine], $scope.style);
+            var line = processResult.line;
+            $scope.style = processResult.style;
+            $scope.commandLine = (line.items && line.items.length > 0) ? line.items[0].data : '';
             $scope.$$phase || $scope.$apply();
           }
         }
       });
+
+      //New line regular expression
+      var NLR = /\r\n|\n\r|\n|\r/g;
+
       //Set Graphics Rendition (affects character attributes)
       var SGR = new RegExp(/^\[((?:\d+;)*(?:\d+))m(.*)/);
 
@@ -224,71 +234,66 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
       //Delete Character, from current position to end of field
       var DCH = new RegExp(/^\[(\d*)P(.*)/);
 
-      $scope.processCsiCmdsInResult = function(text, lines, style) {
-        var re = /\r\n|\n\r|\n|\r/g;
-        var newLines = text.replace(re, "\n").split("\n");
-        for (var i in newLines) {
+      var processCsiCmdsInResult = function(newLine, lines, style) {
+        var newStyle = style;
+        var pieces = newLine.split("\033");
+        var rowNum = -1;
+        var colNum = -1;
+        var line = {items: []};
+        for (var j in pieces) {
+          var piece = pieces[j];
+          if (piece) {
+            var match;
 
-          var pieces = newLines[i].split("\033");
-          var rowNum = -1;
-          var colNum = -1;
-          var line = [];
-          for (var j in pieces) {
-            var piece = pieces[j];
-            if (piece) {
-              var match;
-
-              if (match = DCH.exec(piece)) {
-                var numChars = 1;
-                if (match[1]) {
-                  numChars = parseInt(match[1]);
-                }
-              } else if (match = ED.exec(piece)) {
-                var mode = 0;
-                if (match[1]) {
-                  mode = parseInt(match[1]);
-                }
-                eraseDisplay(rowNum, colNum, mode, lines);
-              } else if (match = EL.exec(piece)) {
-                var mode = 0;
-                if (match[1]) {
-                  mode = parseInt(match[1]);
-                }
-                if (mode === 0) {
-                  //EL to end
-                } else if (mode === 1) {
-                  //EL from start
-                } else if (mode === 2) {
-                  //EL totaly
-                }
-                line.splice(0, line.length);
-              } else if (match = CUP.exec(piece)) {
-                if (match[1]) {
-                  var dims = match[1].split(";");
-                  rowNum = parseInt(dims[0]);
-                  colNum = parseInt(dims[1]);
-                } else {
-                  rowNum = 0;
-                  colNum = 0;
-                }
-                // console.log("home(row:" + rowNum + " col:" + colNum + ")");
-              } else if (match = SGR.exec(piece)) {
-                csiColorToStyle(match[1], style);
-                if (match[2]) {
-                  line.push({data: match[2], style: styleText(style)})
-                  //var newStr = "<span style=\""+styleText()+"\">" + match[2] + "</span>";
-                  // console.log(newStr);
-                }
-              } else {
-                line.push({data: piece, style: styleText(style)});
+            if (match = DCH.exec(piece)) {
+              var numChars = 1;
+              if (match[1]) {
+                numChars = parseInt(match[1]);
               }
+            } else if (match = ED.exec(piece)) {
+              var mode = 0;
+              if (match[1]) {
+                mode = parseInt(match[1]);
+              }
+              eraseDisplay(rowNum, colNum, mode, lines);
+            } else if (match = EL.exec(piece)) {
+              var mode = 0;
+              if (match[1]) {
+                mode = parseInt(match[1]);
+              }
+              if (mode === 0) {
+                //EL to end
+              } else if (mode === 1) {
+                //EL from start
+              } else if (mode === 2) {
+                //EL totaly
+              }
+              line.items.splice(0, line.length);
+            } else if (match = CUP.exec(piece)) {
+              if (match[1]) {
+                var dims = match[1].split(";");
+                rowNum = parseInt(dims[0]);
+                colNum = parseInt(dims[1]);
+              } else {
+                rowNum = 0;
+                colNum = 0;
+              }
+              // console.log("home(row:" + rowNum + " col:" + colNum + ")");
+            } else if (match = SGR.exec(piece)) {
+              newStyle = csiColorToStyle(match[1], newStyle);
+            } else {
+              line.items.push({data: piece, style: styleText(newStyle)});
+            }
+
+            if (match && match[2]) {
+              line.items.push({data: match[2], style: styleText(newStyle)})
             }
           }
-          lines.push(line);
         }
+        return {line: line, style: newStyle};
       };
-      
-      function eraseDisplay(row, col, mode, lines) {
+
+      var eraseDisplay = function(row, col, mode, lines) {
         if (mode == 0) {
           //ED to end
         } else if (mode == 1) {
@@ -297,81 +302,85 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
           //ED totaly
         }
         lines.splice(0, lines.length)
-      };
+      }
+      ;
 
-      function csiColorToStyle(csiStr, style) {
+      var csiColorToStyle = function(csiStr, style) {
+        var newStyle = style;
         var styles = csiStr.split(";");
         for (var i in styles) {
           var x = parseInt(styles[i]);
           switch (true) {
             case (x === 0):
-              style = defaultStyle();
+              newStyle = defaultStyle();
               break;
             case (x === 1):
-              style.fontWeight = "bold";
+              newStyle.fontWeight = "bold";
               break;
             case (x === 4):
-              style.textDecoration = "underline";
+              newStyle.textDecoration = "underline";
               break;
             case (x === 30):
-              style.color = "black";
+              newStyle.color = "black";
               break;
             case (x === 31):
-              style.color = "red";
+              newStyle.color = "red";
               break;
             case (x === 32):
-              style.color = "green";
+              newStyle.color = "green";
               break;
             case (x === 33):
-              style.color = "yellow";
+              newStyle.color = "yellow";
               break;
             case (x === 34):
-              style.color = "blue";
+              newStyle.color = "blue";
               break;
             case (x === 35):
-              style.color = "purple";
+              newStyle.color = "purple";
               break;
             case (x === 36):
-              style.color = "cyan";
+              newStyle.color = "cyan";
               break;
             case (x === 37):
-              style.color = "white";
+              newStyle.color = "white";
               break;
             case (x === 39):
-              style.color = "white";
+              newStyle.color = "white";
               break;
             case (x === 40):
-              style.bgColor = "black";
+              newStyle.bgColor = "black";
               break;
             case (x === 41):
-              style.bgColor = "red";
+              newStyle.bgColor = "red";
               break;
             case (x === 42):
-              style.bgColor = "green";
+              newStyle.bgColor = "green";
               break;
             case (x === 43):
-              style.bgColor = "yellow";
+              newStyle.bgColor = "yellow";
               break;
             case (x === 44):
-              style.bgColor = "blue";
+              newStyle.bgColor = "blue";
               break;
             case (x === 45):
-              style.bgColor = "purple";
+              newStyle.bgColor = "purple";
               break;
             case (x === 46):
-              style.bgColor = "cyan";
+              newStyle.bgColor = "cyan";
               break;
             case (x === 47):
-              style.bgColor = "white";
+              newStyle.bgColor = "white";
               break;
             case (x === 49):
-              style.bgColor = "black";
+              newStyle.bgColor = "black";
               break;
             default:
               break;
           }
         }
-      }
+        return newStyle;
+      };
+
       $scope.$on('terminal-input', function(e, consoleInput) {
         var cmd = consoleInput[0];
         $log.info("terminal-input:" + cmd);
@@ -585,10 +594,10 @@ angular.module('karamel.shell.emulator', ['karamel.terminal'])
                   line.className = 'terminal-line';
                   for (var i = 0; i < newLine.items.length; i++) {
                     var item = newLine.items[i];
-                    var dateSpan = document.createElement('span');
-                    dateSpan.innerHTML = item.text;
-                    dateSpan.setAttribute("style", item.style);
-                    line.appendChild(dateSpan);
+                    var span = document.createElement('span');
+                    span.innerHTML = item.data;
+                    span.setAttribute("style", item.style);
+                    line.appendChild(span);
                   }
 
                   results[0].appendChild(line)
