@@ -7,12 +7,15 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jclouds.domain.Credentials;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
+import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -93,6 +96,31 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
+  public String loadGceCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    String path = confs.getProperty(Settings.GCE_JSON_KEY_FILE_PATH);
+    if (path != null) {
+      Credentials credentials = GceLauncher.readCredentials(path);
+      if (credentials != null) {
+        return path;
+      }
+    }
+
+    return null;
+  }
+
+  @Override
+  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException {
+    Credentials credentials = GceLauncher.readCredentials(jsonFilePath);
+    GceContext context = GceLauncher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
+    confs.writeKaramelConfs();
+    clusterService.registerGceContext(context);
+    return true;
+  }
+
+  @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
     GsonBuilder builder = new GsonBuilder();
@@ -125,7 +153,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void purgeCluster(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   @Override
@@ -135,7 +163,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getInstallationDag(String clusterName) throws KaramelException {
-    throw new UnsupportedOperationException("Not supported yet.");
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   @Override
@@ -183,13 +211,13 @@ public class KaramelApiImpl implements KaramelApi {
     clusterService.registerSshKeyPair(keypair);
     return keypair;
   }
-
+  
   private void saveSshConfs(SshKeyPair keypair, Confs confs) {
     confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
     if (keypair.getPassphrase() != null && keypair.getPassphrase().isEmpty() == false) {
       confs.put(Settings.SSH_PRIVKEY_PASSPHRASE, keypair.getPassphrase());
-    }
+    }    
   }
 
   @Override
@@ -203,17 +231,19 @@ public class KaramelApiImpl implements KaramelApi {
     return keypair;
   }
 
+
   @Override
   public void registerSudoPassword(String password) {
     ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
   }
+
 
   @Override
   public void registerGithubAccount(String email, String password) {
     // TODO - test github credentials
     ClusterService.getInstance().getCommonContext().setGithubEmail(email);
     ClusterService.getInstance().getCommonContext().setGithubPassword(password);
-
+    
   }
-
+  
 }

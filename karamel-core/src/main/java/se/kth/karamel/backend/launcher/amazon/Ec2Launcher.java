@@ -74,9 +74,7 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
-  public static Ec2Credentials readCredentials(Confs confs) {
-    
-    
+  public static Ec2Credentials readCredentials(Confs confs) {  
     String accessKey =  System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
     String secretKey = System.getenv(Settings.AWS_SECRET_KEY_ENV_VAR);
 
@@ -303,7 +301,7 @@ public final class Ec2Launcher extends Launcher {
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
             publicIps.addAll(node.getPublicAddresses());
-            machine.setEc2Id(node.getId());
+            machine.setVmId(node.getId());
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));
             machine.setPublicIp(publicIps.get(0));
@@ -383,8 +381,8 @@ public final class Ec2Launcher extends Launcher {
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2) {
         for (MachineRuntime machine : group.getMachines()) {
-          if (machine.getEc2Id() != null) {
-            allEc2VmsIds.add(machine.getEc2Id());
+          if (machine.getVmId() != null) {
+            allEc2VmsIds.add(machine.getVmId());
           }
         }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());

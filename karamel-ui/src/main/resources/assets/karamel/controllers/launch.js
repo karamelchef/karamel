@@ -11,6 +11,9 @@ angular.module('karamel.main')
         if (info.cluster.hasEc2()) {
           map[info.cluster.ec2.getMapKey()] = info.cluster.ec2;
         }
+        if (info.cluster.hasGce()) {
+          map[info.cluster.gce.getMapKey()] = info.cluster.gce;
+        }
         map[info.cluster.sshKeyPair.getMapKey()] = info.cluster.sshKeyPair;
       }
 
@@ -141,12 +144,12 @@ angular.module('karamel.main')
               $log.info('provider pane selected.');
 
               if (scope.bootUp) {
-                KaramelCoreRestServices.loadCredentials()
+                KaramelCoreRestServices.loadEc2Credentials()
                   .success(function(data) {
                     scope.account.accessKey = data.accessKey;
                     scope.account.secretKey = data.secretKey;
                     _updateState('specialWarn', scope.ec2);
-                    scope.validateCredentials();
+                    scope.validateEc2Credentials();
                   })
                   .error(function(data) {
                     $log.warn("No Ec2 credentials is available");
@@ -160,10 +163,10 @@ angular.module('karamel.main')
             }
           });
 
-          scope.validateCredentials = function() {
+          scope.validateEc2Credentials = function() {
 
             if (scope.account.accessKey != null && scope.account.secretKey != null) {
-              KaramelCoreRestServices.validateCredentials(scope.account)
+              KaramelCoreRestServices.validateEc2Credentials(scope.account)
                 .success(function(data) {
                   _updateState('success', scope.ec2);
                 })
@@ -182,6 +185,120 @@ angular.module('karamel.main')
         },
         templateUrl: 'karamel/partials/launch-ec2-pane.html'
       }
+    }])
+
+.directive('launchGcePane', ['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices) {
+      return{
+        restrict: 'E',
+        require: "^launchTabs",
+        scope: {
+          title: '@',
+          mapKey: '@',
+          credentialsHolderMap: '='
+        },
+        link: function(scope, elem, attrs, tabsCtrl) {
+          function _initScope(scp) {
+            tabsCtrl.addPane(scp);
+            scp.mapKey = 'gce';
+            scp.bootUp = true;
+            scp.account = {
+              jsonKeyPath: null
+            };
+            scp.availableStates = {
+              success: 'success',
+              failure: 'failure',
+              initialWarn: 'initialWarn',
+              userWarn: 'userWarn',
+              specialWarn: 'specialWarn'
+            };
+            scp.stateMessage = {
+              success: 'Valid Provider Details',
+              failure: 'Provider Details Invalid.',
+              initialWarn: 'No Provider Details Found.',
+              userWarn: 'Please Re-Validate',
+              specialWarn: 'Credentials must be validated. Click on the \'Validate\' button.'
+            };
+            scp.currentState = scp.availableStates.initialWarn;
+            scp.gce = scp.credentialsHolderMap[scp.mapKey];
+          }
+
+          function _updateState(result, credentialObj) {
+
+            if (result === 'success') {
+              credentialObj.setIsValid(true);
+              scope.currentState = scope.availableStates.success;
+            }
+
+            else if (result === 'failure') {
+              credentialObj.setIsValid(false);
+              scope.currentState = scope.availableStates.failure;
+            }
+
+            else if (result === 'initialWarn') {
+              credentialObj.setIsValid(false);
+              scope.currentState = scope.availableStates.initialWarn;
+            }
+
+            else if (result === 'userWarn') {
+              credentialObj.setIsValid(false);
+              scope.currentState = scope.availableStates.userWarn;
+            }
+            else if (result === 'specialWarn') {
+              credentialObj.setIsValid(false);
+              scope.currentState = scope.availableStates.specialWarn;
+            }
+          }
+
+          scope.warnUser = function() {
+            _updateState('userWarn', scope.gce);
+          };
+
+          scope.$watch('selected', function() {
+
+            if (scope.selected) {
+              $log.info('provider pane selected.');
+
+              if (scope.bootUp) {
+                KaramelCoreRestServices.loadGceCredentials()
+                  .success(function(data) {
+                    scope.account.jsonKeyPath = data.jsonKeyPath;
+                    _updateState('specialWarn', scope.gce);
+                    scope.validateGceCredentials();
+                  })
+                  .error(function(data) {
+                    $log.warn("No GCE credentials is available");
+                    _updateState('initialWarn', scope.gce);
+                  });
+                scope.bootUp = false;
+              }
+              else {
+                $log.info('Won\'t try now');
+              }
+            }
+          });
+
+          scope.validateGceCredentials = function() {
+
+            if (scope.account.jsonKeyPath !== null) {
+              KaramelCoreRestServices.validateGceCredentials(scope.account)
+                .success(function(data) {
+                  _updateState('success', scope.gce);
+                })
+                .error(function(data) {
+                  _updateState('failure', scope.gce);
+                });
+            }
+            else {
+              _updateState('failure', scope.gce);
+            }
+          };
+
+          if (scope.credentialsHolderMap['gce'])
+            _initScope(scope);
+
+        },
+        templateUrl: 'karamel/partials/launch-gce-pane.html'
+      };
     }])
 
   // Directive for the ssh key pane.
