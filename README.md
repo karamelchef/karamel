@@ -79,6 +79,37 @@ We support <a href="http://aws.amazon.com/vpc/">AWS VPC</a> on EC2 for better pe
 3. Make a routing table for your VPC and add a row for your gateway into it, on this row open all ips '0.0.0.0/0'.
 4. Add your vpc-id and subnet-id into the ec2 section of your yaml like the following example. Also make sure you are using the right image and type of instance for your vpc. 
 
+####Google Compute Engine
+To deploy the cluster on Google’s infrastructure, we use the keyword _gce_ in the cluster definition YAML file. Following code snippet shows the current supported attributes:
+ ```yaml
+gce:
+  type: n1-standard-1
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
+```
+<a href="https://cloud.google.com/compute/docs/machine-types">Machine type</a>, <a href="https://cloud.google.com/compute/docs/zones">zone of the VMs</a>, and the <a href="https://cloud.google.com/compute/docs/images">VM image</a> can be specified by the user.
+
+Karamel uses Compute Engine’s OAuth 2.0 authentication method. Therefore, an OAuth 2.0 client ID needs to be created through the Google’s Developer Console. The description on how to generate a client ID is available <a href="https://developers.google.com/console/help/new/?hl=en_US#generatingoauth2">here</a>. You need to select _Service account_ as the application type. After generating a service account, click on _Generate new JSON key_ button to download a generated JSON file that contains both private and public keys. You need to register the fullpath of the generated JSON file with Karamel API.
+
+####Bare-metal
+In case of bare-metal muchies must be ready before hand and their ip-address are specified in the cluster definition. If you have many ip-addresses in a range, it is possible to give range of addresses instead of specifying them one by one (second following exmaple). Machines' credentials with super-user previlledges are required for establishing ssh connection. The username goes into the cluster definition while the sudo-password must be registered through our API.   
+ ```yaml
+baremetal:
+  username: ubuntu
+  ips: 
+   - 192.168.33.12
+   - 192.168.33.13
+   - 192.168.33.14
+   - 192.168.44.15
+```
+IP-Range:  
+ ```yaml
+baremetal:
+  username: ubuntu
+  ips: 
+   - 192.168.33.12-192.168.33.14
+   - 192.168.44.15
+```
 
 ###Web UI
 ---
@@ -116,7 +147,7 @@ cd karamel-ui/target/appassembler
 ```
 
 
-###Building Window Executables
+####Building Window Executables
 You need to have 32-bit libraries to build the windows exe from Linux, as the launch4j plugin requires them.
 
 ```{r, engine='sh'}
