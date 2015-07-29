@@ -22,6 +22,7 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.scanner.ScannerException;
 import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.json.JsonCluster;
@@ -136,7 +137,9 @@ public class ClusterDefinitionService {
 
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = yamlToYamlObject(yaml);
-    return new JsonCluster(cluster);
+    JsonCluster jsonCluster = new JsonCluster(cluster);
+    ClusterDefinitionValidator.validate(jsonCluster);
+    return jsonCluster;
   }
 
   public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {

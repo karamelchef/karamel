@@ -1,0 +1,34 @@
+dependencies: 
+  - recipe: hops::install
+  - recipe: hops::ndb
+    local:  
+      - hops::install
+    global:  
+      - ndb::mysqld
+  - recipe: hops::nn
+    local:  
+      - hops::install
+    global:  
+      - hops::ndb
+  - recipe: hops::rm
+    local:  
+      - hops::install
+    global:  
+      - ndb::dn
+      - hops::nn
+  - recipe: hops::dn
+    local: 
+      - hops::install
+    global:  
+      - hops::nn
+  - recipe: hops::nm
+    local:   
+      - hops::install
+    global:  
+      - hops::rm
+  - recipe: hops::jhs
+    local:
+      - hops::install
+    global:  
+      - hops::nn
+      - hops::dn
