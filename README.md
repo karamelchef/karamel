@@ -95,7 +95,7 @@ Karamel uses Compute Engine’s OAuth 2.0 authentication method. Therefore, an O
 In case of bare-metal muchies must be ready before hand and their ip-address are specified in the cluster definition. If you have many ip-addresses in a range, it is possible to give range of addresses instead of specifying them one by one (second following exmaple). Machines' credentials with super-user previlledges are required for establishing ssh connection. The username goes into the cluster definition while the sudo-password must be registered through our API.   
  ```yaml
 baremetal:
-  username: vagrant:
+  username: ubuntu
   ips: 
    - 192.168.33.12
    - 192.168.33.13
@@ -105,7 +105,7 @@ baremetal:
 IP-Range:  
  ```yaml
 baremetal:
-  username: vagrant:
+  username: ubuntu
   ips: 
    - 192.168.33.12-192.168.33.14
    - 192.168.44.15
