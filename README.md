@@ -91,6 +91,26 @@ gce:
 
 Karamel uses Compute Engine’s OAuth 2.0 authentication method. Therefore, an OAuth 2.0 client ID needs to be created through the Google’s Developer Console. The description on how to generate a client ID is available <a href="https://developers.google.com/console/help/new/?hl=en_US#generatingoauth2">here</a>. You need to select _Service account_ as the application type. After generating a service account, click on _Generate new JSON key_ button to download a generated JSON file that contains both private and public keys. You need to give the direction of the generated JSON  file to Karamel.
 
+####Bare-metal
+In case of bare-metal muchies must be ready before hand and their ip-address are specified in the cluster definition. If you have many ip-addresses in a range, it is possible to give range of addresses instead of specifying them one by one (second following exmaple). Machines' credentials with super-user previlledges are required for establishing ssh connection. The username goes into the cluster definition while the sudo-password must be registered through our API.   
+ ```yaml
+baremetal:
+  username: vagrant:
+  ips: 
+   - 192.168.33.12
+   - 192.168.33.13
+   - 192.168.33.14
+   - 192.168.44.15
+```
+IP-Range:  
+ ```yaml
+baremetal:
+  username: vagrant:
+  ips: 
+   - 192.168.33.12-192.168.33.14
+   - 192.168.44.15
+```
+
 ###Web UI
 ---
 Karamel provides a web-ui, built on AngularJS.
