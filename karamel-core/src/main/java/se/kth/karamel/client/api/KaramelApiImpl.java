@@ -280,8 +280,7 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void commitAndPushExperiment(Experiment experiment)
-      throws KaramelException {
+  public void commitAndPushExperiment(Experiment experiment) throws KaramelException {
     String owner = experiment.getGithubOwner();
     String repoName = experiment.getGithubRepo();
     File f = Github.getRepoDirectory(repoName);

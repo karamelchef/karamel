@@ -36,11 +36,11 @@ public class KaramelizedCookbook {
   private String json;
 
   /**
-   * 
+   *
    * @param homeUrl url or canonical path to the cookbook
    * @param local true if it is a canonical path (to a cloned cookbook) and not a URL.
    * @throws CookbookUrlException
-   * @throws MetadataParseException 
+   * @throws MetadataParseException
    */
   public KaramelizedCookbook(String homeUrl, boolean local) throws CookbookUrlException, MetadataParseException {
     if (local) {
@@ -59,10 +59,8 @@ public class KaramelizedCookbook {
       List<String> berksfileLines = IoUtils.readLines(urls.berksFile);
       this.berksFile = new Berksfile(berksfileLines);
     } catch (IOException e) {
-      throw new CookbookUrlException("", e);
-    } finally {
-//       reset using local filesystem path
       Settings.USE_CLONED_REPO_FILES = false;
+      throw new CookbookUrlException("", e);
     }
 
     List<Recipe> recipes = this.metadataRb.getRecipes();
@@ -140,6 +138,8 @@ public class KaramelizedCookbook {
           + urls.recipesHome + "install.rb", ex);
       throw new MetadataParseException("Install recipe not a valid format in this cookbook: "
           + urls.recipesHome + "install.rb . " + ex.getMessage());
+    } finally {
+      Settings.USE_CLONED_REPO_FILES = false;
     }
   }
 

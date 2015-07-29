@@ -176,7 +176,7 @@ public class DagBuilder {
               urls.repoName, urls.home, urls.branch);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
-          String recipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+          String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
           JsonObject json = chefJsons.get(me.getId() + recipeName);
           RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, json, submitter, urls.id, jc.getName(), 
               allRecipeTasks, dag);

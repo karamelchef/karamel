@@ -108,7 +108,7 @@ public class CookbookUrls {
       String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
 
       if (Settings.USE_CLONED_REPO_FILES) {
-        rawHome = Settings.COOKBOOKS_PATH;
+        rawHome = Settings.COOKBOOKS_PATH + SLASH + repo;
       }
       
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;

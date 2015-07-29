@@ -59,14 +59,13 @@ public class ChefExperimentExtractor {
     StringBuilder recipeDescriptions = new StringBuilder();
     List<Code> experiments = experiment.getCode();
 
-    Pattern pD = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
-    Matcher mD = pD.matcher(experiment.getDefaultAttributes());
-    while (mD.find()) {
-      String name = mD.group(1);
-      String value = mD.group(2);
-      attrs.put(name, value);
-    }
-
+//    Pattern pD = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
+//    Matcher mD = pD.matcher(experiment.getDefaultAttributes());
+//    while (mD.find()) {
+//      String name = mD.group(1);
+//      String value = mD.group(2);
+//      attrs.put(name, value);
+//    }
     // Extract all the configFileNames: write them to metadata.rb later
     // Extract all the from the configFile contents: write them to attributes/default.rb later
     // No conflict detection for duplicate key-value pairs yet. Should be done in Javascript in Browser.
@@ -77,16 +76,19 @@ public class ChefExperimentExtractor {
         cfs = new HashMap<>();
         configFiles.put(configFileName, cfs);
       }
-      recipeDescriptions.append("recipe            \"").append(repoName).append(Settings.COOOKBOOK_DELIMITER).
+      recipeDescriptions.append("recipe            \"").append(repoName).append(Settings.COOKBOOK_DELIMITER).
           append(code.getName()).append("\",  \"configFile=").append(configFileName)
-          .append("; This experiment's name is ").append(code.getName()).append("\"").append(System.lineSeparator());
+          .append("; Experiment name: ").append(code.getName()).append("\"").append(System.lineSeparator());
       String str = code.getConfigFileContents();
-      Pattern p = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
+      Pattern p = Pattern.compile("\\s*(.*)\\s*=\\s*(.*)\\s*");
       Matcher m = p.matcher(str);
       while (m.find()) {
         String name = m.group(1);
         String value = m.group(2);
-        cfs.put(name, value);
+        if (!name.isEmpty()) {
+          cfs.put(name, value);
+          attrs.put(name, value);
+        }
       }
     }
 
@@ -103,7 +105,7 @@ public class ChefExperimentExtractor {
       // Add all key-value pairs from the config files to the default attributes
       for (String key : attrs.keySet()) {
         String entry = "default[:" + repoName + "][:" + key + "] = \"" + attrs.get(key) + "\"";
-        defaults_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
+        defaults_rb.append(entry).append(System.lineSeparator());
       }
 
       StringBuilder metadata_rb = CookbookGenerator.instantiateFromTemplate(
@@ -125,7 +127,7 @@ public class ChefExperimentExtractor {
         String entry = "attribute \"" + repoName + "/" + key + "\"," + System.lineSeparator()
             + ":description => \"" + key + " parameter value\"," + System.lineSeparator()
             + ":type => \"string\"";
-        metadata_rb.append(System.lineSeparator()).append(entry).append(System.lineSeparator());
+        metadata_rb.append(entry).append(System.lineSeparator());
       }
 
       // 3. write them to files and push to github
@@ -158,41 +160,61 @@ public class ChefExperimentExtractor {
       );
       Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
-
       List<Code> experiments = experimentContext.getCode();
 
-      StringBuilder recipeNames = new StringBuilder();
-      for (Code experiment : experiments) {
-        String recipeName = experiment.getName();
-        if (recipeName.compareToIgnoreCase("experiment") != 0) {
-          recipeNames.append(repoName).append(Settings.COOOKBOOK_DELIMITER).append(recipeName).append(",");
+      String localDependencies = repoName + Settings.COOKBOOK_DELIMITER + "install" + System.lineSeparator()
+          + experimentContext.getLocalDependencies();
+      String[] lDeps = localDependencies.split(System.lineSeparator());
+      StringBuilder lDepsFinal = new StringBuilder();
+      for (String s : lDeps) {
+        s = s.trim();
+        if (!s.isEmpty()) {
+          lDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
         }
       }
-      String namesOfRecipes = recipeNames.toString();
-      if (namesOfRecipes.length() > 0 && namesOfRecipes.charAt(namesOfRecipes.length() - 1) == ',') {
-        namesOfRecipes = namesOfRecipes.substring(0, namesOfRecipes.length() - 1);
-        namesOfRecipes = namesOfRecipes.replaceAll(",", System.lineSeparator() + YAML_RECIPE_PREFIX);
-        namesOfRecipes = YAML_RECIPE_PREFIX + namesOfRecipes;
+//      if (!localDependencies.isEmpty()) {
+//        localDependencies = localDependencies.replaceAll(" ", "");
+//        localDependencies = localDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
+//        localDependencies = YAML_DEPENDENCY_PREFIX + localDependencies;
+//      }
+      String globalDependencies = experimentContext.getGlobalDependencies();
+      String[] gDeps = globalDependencies.split(System.lineSeparator());
+      StringBuilder gDepsFinal = new StringBuilder();
+      for (String s : gDeps) {
+        s = s.trim();
+        if (!s.isEmpty()) {
+          gDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
+        }
+      }
+//      if (!globalDependencies.isEmpty()) {
+//        globalDependencies = globalDependencies.replaceAll(" ", "");
+//        globalDependencies = globalDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
+//        globalDependencies = YAML_DEPENDENCY_PREFIX + globalDependencies;
+//      }
+
+//      String recipeEntries = recipeNames.toString();
+//      if (recipeEntries.length() > 0 && recipeEntries.charAt(recipeEntries.length() - 1) == ',') {
+//        recipeEntries = recipeEntries.substring(0, recipeEntries.length() - 1);
+//        recipeEntries = recipeEntries.replaceAll(",", System.lineSeparator() + YAML_RECIPE_PREFIX);
+//        recipeEntries = YAML_RECIPE_PREFIX + recipeEntries;
+//      }
+      StringBuilder recipeDeps = new StringBuilder();
+      for (Code experiment : experiments) {
+        String recipeName = experiment.getName();
+        recipeDeps.append(YAML_RECIPE_PREFIX).append(repoName).append(Settings.COOKBOOK_DELIMITER).append(recipeName)
+            .append(System.lineSeparator());
+        recipeDeps.append("    local:").append(System.lineSeparator());
+        recipeDeps.append(lDepsFinal.toString());
+        recipeDeps.append("    global:").append(System.lineSeparator());
+        recipeDeps.append(gDepsFinal.toString());
       }
 
-      String localDependencies = experimentContext.getLocalDependencies();
-      if (!localDependencies.isEmpty()) {
-        localDependencies = localDependencies.replaceAll(" ", "");
-        localDependencies = localDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
-        localDependencies = YAML_DEPENDENCY_PREFIX + localDependencies;
-      }
-      String globalDependencies = experimentContext.getGlobalDependencies();
-      if (!globalDependencies.isEmpty()) {
-        globalDependencies = globalDependencies.replaceAll(" ", "");
-        globalDependencies = globalDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
-        globalDependencies = YAML_DEPENDENCY_PREFIX + globalDependencies;
-      }
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
-          "local_dependencies", localDependencies,
-          "global_dependencies", globalDependencies,
-          "next_recipes", namesOfRecipes
+          //          "local_dependencies", lDepsFinal.toString(),
+          //          "global_dependencies", gDepsFinal.toString(),
+          "next_recipes", recipeDeps.toString()
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
       // Update Karamelfile with dependencies from the cluster definition

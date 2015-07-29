@@ -109,7 +109,7 @@ public class RunRecipeTask extends Task {
     }
 
     if (commands == null) {
-      String jsonFileName = recipeCanonicalName.replaceAll(Settings.COOOKBOOK_DELIMITER, "__");
+      String jsonFileName = recipeCanonicalName.replaceAll(Settings.COOKBOOK_DELIMITER, "__");
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE,
           "chef_json", json,
           "json_file_name", jsonFileName,
@@ -128,7 +128,7 @@ public class RunRecipeTask extends Task {
   }
 
   public String getRecipeName() {
-    return recipeCanonicalName.split(Settings.COOOKBOOK_DELIMITER)[1];
+    return recipeCanonicalName.split(Settings.COOKBOOK_DELIMITER)[1];
   }
 
   public String getCookbookName() {
@@ -136,13 +136,13 @@ public class RunRecipeTask extends Task {
   }
 
   public static String installRecipeIdFromCookbookName(String machineId, String cookbook) {
-    String installName = cookbook + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+    String installName = cookbook + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
     return makeUniqueId(machineId, installName);
   }
 
   public static String installRecipeIdFromAnotherRecipeName(String machineId, String recipe) {
-    String[] cmp = recipe.split(Settings.COOOKBOOK_DELIMITER);
-    String installName = cmp[0] + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+    String[] cmp = recipe.split(Settings.COOKBOOK_DELIMITER);
+    String installName = cmp[0] + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
     return makeUniqueId(machineId, installName);
   }
 

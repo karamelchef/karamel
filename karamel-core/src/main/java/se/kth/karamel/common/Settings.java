@@ -27,7 +27,7 @@ public class Settings {
 
   //read
   public static final String ATTR_DELIMITER = "/";
-  public static final String COOOKBOOK_DELIMITER = "::";
+  public static final String COOKBOOK_DELIMITER = "::";
   public static final String COOOKBOOK_FS_PATH_DELIMITER = "__";
   public static final String INSTALL_RECIPE = "install";
   public final static String CHEF_PRIVATE_IPS = "private_ips";
@@ -187,8 +187,8 @@ public class Settings {
   }
 
   public static String RECIPE_CANONICAL_NAME(String recipeName) {
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      return recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      return recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       return recipeName;
     }
@@ -196,14 +196,14 @@ public class Settings {
 
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {
@@ -216,13 +216,13 @@ public class Settings {
 
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;

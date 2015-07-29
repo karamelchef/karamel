@@ -1,9 +1,3 @@
 dependencies:
   - recipe: %%name%%::install
-  - recipe: %%name%%::experiment
-    local:
-      - %%name%%::install
-%%local_dependencies%%
-    global:
-%%global_dependencies%%
 %%next_recipes%%

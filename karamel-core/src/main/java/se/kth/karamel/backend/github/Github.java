@@ -40,9 +40,9 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class Github {
 
-  private static volatile String user;
-  private static volatile String email;
-  private static volatile String password;
+  private static volatile String user="";
+  private static volatile String email="";
+  private static volatile String password="";
 
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
 
@@ -182,6 +182,9 @@ public class Github {
 
   public synchronized static boolean repoExists(String owner, String repoName) throws KaramelException {
     List<RepoItem> repos = Github.getRepos(owner);
+    if (repos == null) {
+      return false;
+    }
     boolean found = false;
     for (RepoItem r : repos) {
       if (r.getName().compareToIgnoreCase(repoName) == 0) {
