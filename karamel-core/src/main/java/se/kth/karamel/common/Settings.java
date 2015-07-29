@@ -22,7 +22,8 @@ public class Settings {
 
   //test
   public static boolean CB_CLASSPATH_MODE = false;
-  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+  // files
+  public static boolean USE_CLONED_REPO_FILES = false;
 
   //read
   public static final String ATTR_DELIMITER = "/";
@@ -145,8 +146,10 @@ public class Settings {
     return names;
   }
 
+
+  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
-  public static final String COOKBOOK_DESIGNER_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbook_designer";
+  public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";

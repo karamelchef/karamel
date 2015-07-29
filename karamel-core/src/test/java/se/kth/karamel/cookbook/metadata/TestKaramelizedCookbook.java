@@ -13,7 +13,6 @@ import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
@@ -30,7 +29,7 @@ public class TestKaramelizedCookbook {
   public void testLoadingClasspathCookbook() {
     try {
       Settings.CB_CLASSPATH_MODE = true;
-      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopshub-chef");
+      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopshub-chef", false);
     } catch (CookbookUrlException | MetadataParseException e) {
       Assert.fail();
     }

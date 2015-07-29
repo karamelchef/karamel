@@ -22,6 +22,7 @@ angular.module('karamel.main')
                                 var cluster = new Cluster();
                                 cluster.copy(clusterObj);
                                 $rootScope.activeCluster = cluster;
+                                $rootScope.context = cluster.name;
                                 AlertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
                             }
                             catch (err) {
@@ -535,6 +536,7 @@ angular.module('karamel.main')
                                                 var cluster = new Cluster();
                                                 cluster.load(data);
                                                 $rootScope.activeCluster = cluster;
+                                                $rootScope.context = cluster.name;
                                                 AlertService.addAlert({type: 'success', msg: 'Model Created Successfully.'});
                                             }
                                             catch (err) {

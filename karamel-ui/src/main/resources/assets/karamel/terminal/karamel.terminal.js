@@ -140,6 +140,7 @@ angular.module('karamel.terminal', [])
             $scope.commandObj[index].errormsg = data.errormsg;
 
             if (data.errormsg === null) {
+              $rootScope.context = data.context;
               $scope.commandObj[index].successmsg = data.successmsg;
               var timeinterval = 5000;
 
@@ -156,7 +157,7 @@ angular.module('karamel.terminal', [])
                   $scope.dagData = data.result;
                 } else if (data.renderer === 'ssh') {
                   _destroyIntervalInstance(index);
-                  $scope.$emit('core-result-ssh', [data.result]);
+                  $scope.$emit('core-result-ssh', {result: data.result, context: data.context});
                 }
               } else {
                 timeinterval = 5000;
@@ -310,13 +311,5 @@ angular.module('karamel.terminal', [])
           };
         }
       };
-    }])
-
-  .service('sshIps', ['$log', function() {
-      var _ipAddress = '192.168.33.10';
-
-      this.ipAddress = _ipAddress;
-
     }]);
-
 

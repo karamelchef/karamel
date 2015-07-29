@@ -42,8 +42,9 @@ public class CommandResponse {
   private String result;
   private String nextCmd;
   private Renderer renderer = Renderer.INFO;
-  private List<MenuItem> menuItems = new ArrayList();
+  private final List<MenuItem> menuItems = new ArrayList();
   private String successMessage;
+  private String context;
 
   public String getNextCmd() {
     return nextCmd;
@@ -86,4 +87,12 @@ public class CommandResponse {
     this.successMessage = successMessage;
   }
 
+  public String getContext() {
+    return context;
+  }
+
+  public void setContext(String context) {
+    this.context = context;
+  }
+  
 }

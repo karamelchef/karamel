@@ -51,7 +51,6 @@ import se.kth.karamel.cookbook.metadata.DefaultRb;
 import se.kth.karamel.cookbook.metadata.ExperimentRecipe;
 import se.kth.karamel.cookbook.metadata.InstallRecipe;
 import se.kth.karamel.cookbook.metadata.KaramelFile;
-import se.kth.karamel.cookbook.metadata.MetadataRb;
 import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
 
 /**
@@ -328,7 +327,7 @@ public class KaramelApiImpl implements KaramelApi {
       throw new KaramelException("Misformed url repo/owner: " + githubRepoUrl);
     }
 
-    File localPath = new File(Settings.COOKBOOK_DESIGNER_PATH + File.separator + repoName);
+    File localPath = new File(Settings.COOKBOOKS_PATH + File.separator + repoName);
     if (localPath.isDirectory() == true) {
       try {
         FileUtils.deleteDirectory(localPath);
@@ -343,11 +342,10 @@ public class KaramelApiImpl implements KaramelApi {
     String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
     ec.setUrlGitClone(githubRepoUrl);
 
-    KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl);
-    MetadataRb metadata = kc.getMetadataRb();
+    KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl, true);
+//    MetadataRb metadata = kc.getMetadataRb();
     KaramelFile kf = kc.getKaramelFile();
-    String metadataJson = kc.getMetadataJson();
-//    String configFile = kc.getConfigFile();
+//    String metadataJson = kc.getMetadataJson();
     Berksfile bf = kc.getBerksFile();
     DefaultRb attributes = kc.getDefaultRb();
     List<ExperimentRecipe> er = kc.getExperimentRecipes();

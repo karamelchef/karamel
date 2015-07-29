@@ -58,7 +58,7 @@ public class CookbookScaffolder {
    * @throws IOException 
    */
   public static String create(String name) throws IOException {
-    String cbName = Settings.COOKBOOK_DESIGNER_PATH + File.separator + name + File.separator;
+    String cbName = Settings.COOKBOOKS_PATH + File.separator + name + File.separator;
 
     // Create all the directories for the coookbook 
     mkdirs(cbName + "recipes");

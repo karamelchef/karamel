@@ -49,7 +49,7 @@ public class IoUtils {
     URL fileUrl = new URL(url);
     return Resources.readLines(fileUrl, Charsets.UTF_8);
   }
-
+  
   public static String readContentFromWeb(String url) throws IOException {
     URL fileUrl = new URL(url);
     return Resources.toString(fileUrl, Charsets.UTF_8);

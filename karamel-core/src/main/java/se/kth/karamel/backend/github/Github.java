@@ -199,11 +199,11 @@ public class Github {
    * @return File representing the local directory
    */
   public static File getRepoDirectory(String repoName) {
-    File targetDir = new File(Settings.COOKBOOK_DESIGNER_PATH);
+    File targetDir = new File(Settings.COOKBOOKS_PATH);
     if (targetDir.exists() == false) {
       targetDir.mkdirs();
     }
-    return new File(Settings.COOKBOOK_DESIGNER_PATH + File.separator + repoName);
+    return new File(Settings.COOKBOOKS_PATH + File.separator + repoName);
   }
 
   /**
@@ -297,7 +297,7 @@ public class Github {
 
       String cloneURL = r.getSshUrl();
       // prepare a new folder for the cloned repository
-      File localPath = new File(Settings.COOKBOOK_DESIGNER_PATH + File.separator + repoName);
+      File localPath = new File(Settings.COOKBOOKS_PATH + File.separator + repoName);
       if (localPath.isDirectory() == false) {
         localPath.mkdirs();
       } else {

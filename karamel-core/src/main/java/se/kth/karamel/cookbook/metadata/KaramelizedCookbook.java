@@ -35,12 +35,22 @@ public class KaramelizedCookbook {
   private InstallRecipe installRecipe;
   private String json;
 
-  public KaramelizedCookbook(String homeUrl) throws CookbookUrlException, MetadataParseException {
+  /**
+   * 
+   * @param homeUrl url or canonical path to the cookbook
+   * @param local true if it is a canonical path (to a cloned cookbook) and not a URL.
+   * @throws CookbookUrlException
+   * @throws MetadataParseException 
+   */
+  public KaramelizedCookbook(String homeUrl, boolean local) throws CookbookUrlException, MetadataParseException {
+    if (local) {
+      Settings.USE_CLONED_REPO_FILES = true;
+    }
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
     this.urls = builder.url(homeUrl).build();
     try {
-      List<String> lines1 = IoUtils.readLines(urls.attrFile);
-      this.defaultRb = new DefaultRb(lines1);
+      List<String> defaultsLines = IoUtils.readLines(urls.attrFile);
+      this.defaultRb = new DefaultRb(defaultsLines);
       String metadataContent = IoUtils.readContent(urls.metadataFile);
       this.metadataRb = MetadataParser.parse(metadataContent);
       this.metadataRb.setDefaults(defaultRb);
@@ -50,6 +60,9 @@ public class KaramelizedCookbook {
       this.berksFile = new Berksfile(berksfileLines);
     } catch (IOException e) {
       throw new CookbookUrlException("", e);
+    } finally {
+//       reset using local filesystem path
+      Settings.USE_CLONED_REPO_FILES = false;
     }
 
     List<Recipe> recipes = this.metadataRb.getRecipes();

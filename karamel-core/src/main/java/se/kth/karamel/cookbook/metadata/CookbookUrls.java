@@ -57,11 +57,19 @@ public class CookbookUrls {
     String user;
     String branch;
 
+    /**
+     * 
+     * @param url url to reposiory name if files == false. Otherwise the name of the reo
+     * @param files if true, reading from a repoo stored locally
+     * @return
+     * @throws CookbookUrlException 
+     */
     public Builder url(String url) throws CookbookUrlException {
       if (url.isEmpty()) {
         throw new CookbookUrlException("Cookbook url is empty.");
       }
       this.url = url.trim();
+      
       return this;
     }
 
@@ -94,10 +102,15 @@ public class CookbookUrls {
       String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL; 
       String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL; 
       
+      
       String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
       String home = base + SLASH + user + SLASH + repo;
       String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
 
+      if (Settings.USE_CLONED_REPO_FILES) {
+        rawHome = Settings.COOKBOOKS_PATH;
+      }
+      
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;

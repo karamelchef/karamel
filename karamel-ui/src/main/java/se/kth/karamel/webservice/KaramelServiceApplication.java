@@ -602,6 +602,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
           command.getMenuItems().addAll(cmdRes.getMenuItems());
           command.setSuccessmsg(cmdRes.getSuccessMessage());
+          command.setContext(cmdRes.getContext());
         } catch (KaramelException e) {
           command.setErrormsg(e.getMessage());
         } catch (Exception e) {
