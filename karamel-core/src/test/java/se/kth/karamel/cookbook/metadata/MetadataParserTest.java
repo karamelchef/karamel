@@ -5,8 +5,6 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -54,19 +52,25 @@ public class MetadataParserTest {
         recipes.get(10).getDescription());
     
     List<Attribute> attributes = metadatarb.getAttributes();
-    assertEquals(44, attributes.size());
+    assertEquals(45, attributes.size());
     
-    assertEquals("ndb/DataMemory", attributes.get(0).getName());
-    assertEquals("Data memory for each MySQL Cluster Data Node", attributes.get(0).getDescription());
-    assertEquals("string", attributes.get(0).getType());
+    assertEquals("ndb/ports", attributes.get(0).getName());
+    assertEquals("Dummy ports", attributes.get(0).getDescription());
+    assertEquals("array", attributes.get(0).getType());
     assertEquals("required", attributes.get(0).getRequired());
-    assertEquals("80", attributes.get(0).getDefault());
+    assertEquals("['123', '134', '145']", attributes.get(0).getDefault());
 
-    assertEquals("kagent/enabled", attributes.get(43).getName());
-    assertEquals("Install kagent", attributes.get(43).getDescription());
-    assertEquals("string", attributes.get(43).getType());
-    assertEquals("optional", attributes.get(43).getRequired());
-    assertEquals("false", attributes.get(43).getDefault());
+    assertEquals("ndb/DataMemory", attributes.get(1).getName());
+    assertEquals("Data memory for each MySQL Cluster Data Node", attributes.get(1).getDescription());
+    assertEquals("string", attributes.get(1).getType());
+    assertEquals("required", attributes.get(1).getRequired());
+    assertEquals("80", attributes.get(1).getDefault());
+
+    assertEquals("kagent/enabled", attributes.get(44).getName());
+    assertEquals("Install kagent", attributes.get(44).getDescription());
+    assertEquals("string", attributes.get(44).getType());
+    assertEquals("optional", attributes.get(44).getRequired());
+    assertEquals("false", attributes.get(44).getDefault());
   }
   
     @Test
