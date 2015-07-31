@@ -38,6 +38,13 @@ supports 'debian'
 # Required Attributes
 #
 
+
+attribute "ndb/ports",
+          :description => "Dummy ports",
+          :type => 'array',
+          :required => "required",
+          :default => ['123', '134', '145']
+
 attribute "ndb/DataMemory",
           :description => "Data memory for each MySQL Cluster Data Node",
           :type => 'string',

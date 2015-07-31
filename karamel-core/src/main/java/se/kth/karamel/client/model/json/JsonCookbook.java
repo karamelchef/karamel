@@ -18,13 +18,14 @@ import se.kth.karamel.client.model.Cookbook;
 public class JsonCookbook extends Cookbook {
 
   String name;
-  Map<String, String> attrs = new HashMap<>();
+  //values of attrs could be string or array of string 
+  Map<String, Object> attrs = new HashMap<>();
   Set<JsonRecipe> recipes = new HashSet<>();
   
   public JsonCookbook() {
   }
 
-  public JsonCookbook(Cookbook cb, String name, Map<String, String> attrs) {
+  public JsonCookbook(Cookbook cb, String name, Map<String, Object> attrs) {
     super(cb);
     this.name = name;
     this.attrs = attrs;
@@ -38,11 +39,11 @@ public class JsonCookbook extends Cookbook {
     this.name = name;
   }
 
-  public Map<String, String> getAttrs() {
+  public Map<String, Object> getAttrs() {
     return attrs;
   }
 
-  public void setAttrs(Map<String, String> attrs) {
+  public void setAttrs(Map<String, Object> attrs) {
     this.attrs = attrs;
   }
 

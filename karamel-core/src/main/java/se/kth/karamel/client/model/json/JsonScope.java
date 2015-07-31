@@ -33,7 +33,7 @@ public class JsonScope extends Scope {
 
   public JsonScope(YamlCluster cluster, YamlScope scope) throws KaramelException {
     super(scope);
-    Map<String, String> attrs = cluster.flattenAttrs();
+    Map<String, Object> attrs = cluster.flattenAttrs();
     Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
     for (Map.Entry<String, Cookbook> entry : cks) {
       String key = entry.getKey();
@@ -41,7 +41,7 @@ public class JsonScope extends Scope {
 
       KaramelizedCookbook metadata = CookbookCache.get(cb.getUrls().id);
       List<Attribute> allAttrs = metadata.getMetadataRb().getAttributes();
-      Map<String, String> filteredAttrs = new HashMap<>();
+      Map<String, Object> filteredAttrs = new HashMap<>();
       for (Attribute att : allAttrs) {
         if (attrs.containsKey(att.getName())) {
           filteredAttrs.put(att.getName(), attrs.get(att.getName()));
@@ -51,11 +51,11 @@ public class JsonScope extends Scope {
       cookbooks.add(jck);
     }
 
-    Map<String, String> tempattrs = new HashMap<>();
+    Map<String, Object> tempattrs = new HashMap<>();
     tempattrs.putAll(attrs);
     for (JsonCookbook jc : cookbooks) {
-      Map<String, String> attrs1 = jc.getAttrs();
-      for (Map.Entry<String, String> entry : attrs1.entrySet()) {
+      Map<String, Object> attrs1 = jc.getAttrs();
+      for (Map.Entry<String, Object> entry : attrs1.entrySet()) {
         String key = entry.getKey();
         if (tempattrs.containsKey(key)) {
           tempattrs.remove(key);
@@ -64,7 +64,7 @@ public class JsonScope extends Scope {
     }
 
     if (!tempattrs.isEmpty()) {
-      throw new KaramelException(String.format("Undefined attributes: %s", attrs.keySet().toString()));
+      throw new KaramelException(String.format("Undefined attributes: %s", tempattrs.keySet().toString()));
     }
 
   }

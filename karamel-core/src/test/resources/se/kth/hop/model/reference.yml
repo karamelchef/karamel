@@ -41,6 +41,7 @@ attrs:
     ndbd:
         port: 10000 
   hop:
+    ports: ['123', '134', '145']
     dn:
       http_port: 50075
     yarn:
