@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import com.google.common.collect.Lists;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -58,7 +59,7 @@ public class MetadataParserTest {
     assertEquals("Dummy ports", attributes.get(0).getDescription());
     assertEquals("array", attributes.get(0).getType());
     assertEquals("required", attributes.get(0).getRequired());
-    assertEquals("['123', '134', '145']", attributes.get(0).getDefault());
+    assertEquals(Lists.newArrayList("123", "134", "145"), attributes.get(0).getDefault());
 
     assertEquals("ndb/DataMemory", attributes.get(1).getName());
     assertEquals("Data memory for each MySQL Cluster Data Node", attributes.get(1).getDescription());

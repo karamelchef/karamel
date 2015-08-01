@@ -32,9 +32,10 @@ public class MetadataParser {
       = Pattern.compile("\\s*:display_name\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_DESC = Pattern.compile("\\s*:description\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_TYPE = Pattern.compile("\\s*:type\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
-  public static Pattern ATTR_DEFAULT_SIMPLE = 
-      Pattern.compile("\\s*:default\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
+  public static Pattern ATTR_DEFAULT_SIMPLE
+      = Pattern.compile("\\s*:default\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_DEFAULT_ARRAY = Pattern.compile("\\s*:default\\s*=>\\s*\\[(.*)\\]s*(,)?\\s*");
+  public static Pattern ATTR_DEFAULT_ARRAY_ITEMS = Pattern.compile("[\\'|\\\"]([^\\'|\\\"]*)[\\'|\\\"]");
   public static Pattern ATTR_REQUIRED = Pattern.compile("\\s*:required\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static String COMMA_CLOSING_LINE = ".*,\\s*$";
 
@@ -142,17 +143,22 @@ public class MetadataParser {
                   found2 = true;
                 }
               }
-              
+
               if (!found2) {
                 Matcher m92 = ATTR_DEFAULT_ARRAY.matcher(line);
                 if (m92.matches()) {
                   String sarr = m92.group(1);
-                  sarr.split(",");
-                  attr.setDefault(m92.group(1));
+                  Matcher m921 = ATTR_DEFAULT_ARRAY_ITEMS.matcher(sarr);
+                  List<String> deflist = new ArrayList<>();
+                  while (m921.find()) {
+                    String item = m921.group(1);
+                    deflist.add(item);
+                  }
+                  attr.setDefault(deflist);
                   found2 = true;
                 }
               }
-              
+
               if (!found2) {
                 Matcher m10 = ATTR_REQUIRED.matcher(line);
                 if (m10.matches()) {
