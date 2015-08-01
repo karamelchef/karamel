@@ -326,6 +326,7 @@ public class KaramelApiImpl implements KaramelApi {
       throw new KaramelException("Misformed url repo/owner: " + githubRepoUrl);
     }
 
+    // Loading a repo involves wiping any existing local copy and replacing it with GitHub's copy.
     File localPath = new File(Settings.COOKBOOKS_PATH + File.separator + repoName);
     if (localPath.isDirectory() == true) {
       try {
@@ -337,6 +338,7 @@ public class KaramelApiImpl implements KaramelApi {
         }
       }
     }
+    // Download the latest copy from GitHub
     Github.cloneRepo(owner, repoName);
     String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
     ec.setUrlGitClone(githubRepoUrl);
@@ -359,13 +361,14 @@ public class KaramelApiImpl implements KaramelApi {
     StringBuilder local = new StringBuilder();
     StringBuilder global = new StringBuilder();
     for (YamlDependency yd : deps) {
-      if (yd.getRecipe().compareToIgnoreCase("install") == 0) {
+      
+      if (!yd.getRecipe().contains(Settings.COOKBOOK_DELIMITER + "install")) {
         List<String> locals = yd.getLocal();
         for (int i = 0; i < locals.size(); i++) {
           if (i == 0) {
             local.append(locals.get(i));
           } else {
-            local.append(", ").append(locals.get(i));
+            local.append(System.lineSeparator()).append(locals.get(i));
           }
         }
         List<String> globals = yd.getGlobal();
@@ -373,9 +376,12 @@ public class KaramelApiImpl implements KaramelApi {
           if (i == 0) {
             global.append(globals.get(i));
           } else {
-            global.append(", ").append(globals.get(i));
+            global.append(System.lineSeparator()).append(globals.get(i));
           }
         }
+        // All recipes have the same copies of dependencies, so break here.
+        // TODO: In future, we could have recipe-specific dependencies
+        break;
       }
     }
     ec.setLocalDependencies(local.toString());

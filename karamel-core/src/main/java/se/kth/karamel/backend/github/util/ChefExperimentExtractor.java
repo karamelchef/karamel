@@ -14,18 +14,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.Experiment.Code;
 import se.kth.karamel.backend.github.Github;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelFile;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
 
 /**
  * How to use. Invoke methods in this order: (1) @see ChefExperimentExtractor#parseAttributesAddToGit() (2) @see
@@ -127,7 +120,7 @@ public class ChefExperimentExtractor {
         String entry = "attribute \"" + repoName + "/" + key + "\"," + System.lineSeparator()
             + ":description => \"" + key + " parameter value\"," + System.lineSeparator()
             + ":type => \"string\"";
-        metadata_rb.append(entry).append(System.lineSeparator());
+        metadata_rb.append(entry).append(System.lineSeparator()).append(System.lineSeparator());
       }
 
       // 3. write them to files and push to github
@@ -216,46 +209,35 @@ public class ChefExperimentExtractor {
           //          "global_dependencies", gDepsFinal.toString(),
           "next_recipes", recipeDeps.toString()
       );
-      KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
-      // Update Karamelfile with dependencies from the cluster definition
       String ymlString = experimentContext.getClusterDefinition();
-//      List<String> clusterDependencies = new ArrayList<>();
-//      if (!ymlString.isEmpty()) {
-//        JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
-//        for (JsonGroup g : jsonCluster.getGroups()) {
-//          for (JsonCookbook cb : g.getCookbooks()) {
-//            for (JsonRecipe r : cb.getRecipes()) {
-//              clusterDependencies.add(r.getCanonicalName());
-//            }
-//          }
-//        }
-//      }
+
 
       String berksfile = experimentContext.getBerksfile();
-      StringBuilder berksDependencies = new StringBuilder();
-      if (!berksfile.isEmpty()) {
-        int curPos = 0;
-        int pos = 0;
-        while (pos != -1) {
-          pos = berksfile.indexOf("\"", curPos);
-          curPos = pos + 1;
-          pos = berksfile.indexOf("\"", curPos);
-          if (pos != -1) {
-            berksDependencies.append(berksfile.substring(curPos, pos - 1)).append(System.lineSeparator());
-          }
-          curPos = pos + 1;
-        }
-      }
-
-      String[] tokens = berksfile.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-      for (String s : tokens) {
-        String quotesStripped = s.replaceAll("\"", "");
-        berksDependencies.append(quotesStripped).append(System.lineSeparator());
-      }
+//      StringBuilder berksDependencies = new StringBuilder();
+//      if (!berksfile.isEmpty()) {
+//        int curPos = 0;
+//        int pos = 0;
+//        while (pos != -1) {
+//          pos = berksfile.indexOf("\"", curPos);
+//          curPos = pos + 1;
+//          pos = berksfile.indexOf("\"", curPos);
+//          if (pos != -1) {
+//            berksDependencies.append(berksfile.substring(curPos, pos - 1)).append(System.lineSeparator());
+//          }
+//          curPos = pos + 1;
+//        }
+//      }
+//
+//      String[] tokens = berksfile.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+//      for (String s : tokens) {
+//        String quotesStripped = s.replaceAll("\"", "");
+//        berksDependencies.append(quotesStripped).append(System.lineSeparator());
+//      }
 
       StringBuilder berksContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_BERKSFILE,
-          "berks_dependencies", berksDependencies.toString()
+//          "berks_dependencies", berksDependencies.toString()
+          "berks_dependencies", berksfile
       );
 
       Github.addFile(owner, repoName, "Berksfile", berksContents.toString());
@@ -344,13 +326,14 @@ public class ChefExperimentExtractor {
 
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
 
-      DumperOptions options = new DumperOptions();
-      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-      Representer r = new Representer();
-      r.addClassTag(KaramelFile.class, Tag.MAP);
-      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
-      String karamelFileContents = karamelYml.dump(karamelFile);
-      Github.addFile(owner, repoName, "Karamelfile", karamelFileContents);
+//      DumperOptions options = new DumperOptions();
+//      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+//      Representer r = new Representer();
+//      r.addClassTag(KaramelFile.class, Tag.MAP);
+//      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
+//      String karamelFileContents = karamelYml.dump(karamelFile);
+//      Github.addFile(owner, repoName, "Karamelfile", karamelFileContents);
+      Github.addFile(owner, repoName, "Karamelfile", karamelContents.toString());
 
     } catch (IOException ex) {
       Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);

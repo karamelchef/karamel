@@ -46,8 +46,8 @@ public class Github {
 
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
 
-  private static Map<String, List<OrgItem>> cachedOrgs = new HashMap<>();
-  private static Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
+  private static final Map<String, List<OrgItem>> cachedOrgs = new HashMap<>();
+  private static final Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
 
   // Singleton
   private Github() {
@@ -423,12 +423,21 @@ public class Github {
     Git git = null;
     try {
       git = Git.open(repoDir);
-
       new File(repoDir + File.separator + fileName).delete();
       git.add().addFilepattern(fileName).call();
       git.commit().setAuthor(user, email).setMessage("File removed by Karamel.")
           .setAll(true).call();
       git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, password)).call();
+      RepoItem toRemove = null;
+      List<RepoItem> repos = cachedRepos.get(owner);
+      for (RepoItem r : repos) {
+        if (r.getName().compareToIgnoreCase(repoName)==0) {
+          toRemove = r;
+        }
+      }
+      if (toRemove != null) {
+        repos.remove(toRemove);
+      }
     } catch (IOException | GitAPIException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());

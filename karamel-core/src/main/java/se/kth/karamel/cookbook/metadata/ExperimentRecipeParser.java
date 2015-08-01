@@ -37,7 +37,7 @@ public class ExperimentRecipeParser {
       throw new RecipeParseException(
           "Could not find in the recipe a script resource like \"script 'run_experiment' do\" ");
     }
-    int startPos = ms.end();
+    int startPos = ms.end()+1;
     
     boolean foundEnd = ms.find();
     if (!foundEnd) {

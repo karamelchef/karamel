@@ -7,6 +7,6 @@ script 'run_experiment' do
   group node['%%name%%']['group']
   interpreter "%%interpreter%%"
   code <<-EOM
-    %%script_contents%%
+%%script_contents%%
   EOM
 end

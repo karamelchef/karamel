@@ -91,7 +91,7 @@
                     <span>{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}</span>     
                 </div>
                 <div class="col-xs-3 col-sm-3 col-md-3 col-lg-4">
-                    <label class="control-label">URL:</label>
+                    <label class="control-label">Clone URL:</label>
                     <a ng-href="{{getUrl()}}">{{experiment.urlGitClone| limitTo: 48}}{{ experiment.urlGitClone > 48 ? '...' : ''}}</a>
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
@@ -109,7 +109,7 @@
                     </button>
                     <ul class="dropdown-menu" role="cmenu">
                         <li><a href="#experiment" ng-click="closeBrowser($event)">Close</a></li>
-                        <li><a href="#experiment" ng-click="deleteLocal($event)">Delete from your Computer</a></li>
+<!--                        <li><a href="#experiment" ng-click="deleteLocal($event)">Delete from your Computer</a></li>-->
                         <li><a href="#experiment" ng-click="deleteRepo($event)">Delete from your Computer and GitHub</a></li>
                     </ul>
                 </div>
