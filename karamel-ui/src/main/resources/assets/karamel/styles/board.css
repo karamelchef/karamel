@@ -466,4 +466,5 @@ textarea[name="pubkey"]{
     background-color:purple;
     border: 3px double #CCCCCC;
  }
- 
+
+accordion * {outline: 0 !important;}
