@@ -229,7 +229,7 @@
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
                                     <label class="text" for="chefCode">Chef code executed before the Experiment program is run.</label>
-                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below."></span>
+                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below. For example: package do 'openjdk-7-jdk' end"></span>
                                     <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified = true" class="form-control"></textarea>
                                 </div>
                             </div>

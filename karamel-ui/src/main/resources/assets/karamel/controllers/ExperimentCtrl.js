@@ -384,15 +384,12 @@ angular.module('karamel.main')
                         function (isConfirm) {
                             if (isConfirm) {
                                 clearExperiment();
-//                                SweetAlert.swal("Closed", "The experiment is closed.", "info");
                             } else {
                                 cancelTimer();
-//                                SweetAlert.swal("Canceled", "The experiment has not been closed", "error");
                             }
                         });
                     } else {
                         clearExperiment();
-//                        SweetAlert.swal("Closed", "The experiment is closed.", "info");
                     }
 
                 }
@@ -489,18 +486,6 @@ angular.module('karamel.main')
 
                 $scope.loadExperiment = function () {
 
-//                    SweetAlert.swal({
-//                        title: "Load experiment: " + $scope.experiment.urlGitClone.substring(19) + "?",
-//                        text: "This will load the experiment from the master branch in the GitHub repository and overwrite any local copy of the experiment.",
-//                        type: "warning",
-//                        showCancelButton: true,
-//                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, load it.",
-//                        cancelButtonText: "Cancel",
-//                        closeOnConfirm: true,
-//                        closeOnCancel: false},
-//                    function (isConfirm) {
-//
-//                        if (isConfirm) {
 
                     KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
                             .success(function (data, status, headers, config) {
@@ -515,11 +500,6 @@ angular.module('karamel.main')
                             .error(function (data, status, headers, config) {
                                 SweetAlert.swal("Problem loading from GitHub", data.reason, "error");
                             });
-//                        } else {
-//                            cancelTimer();
-//                            SweetAlert.swal("Deleted", "The Browser has not been cleared", "error");
-//                        }
-//                    });
                 }
 
                 $scope.pushExperiment = function ($event) {
@@ -548,18 +528,6 @@ angular.module('karamel.main')
 
 
 
-//                    SweetAlert.swal({
-//                        title: "Commit and Push Experiment to GitHub?",
-//                        text: "This requires a functioning Internet connection. The Experiment will generate a commit and push to the master branch of your GitHub repository.",
-//                        type: "info",
-//                        showCancelButton: true,
-//                        confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, push it!",
-//                        cancelButtonText: "Cancel",
-//                        closeOnConfirm: true,
-//                        closeOnCancel: false},
-//                    function (isConfirm) {
-//
-//                        if (isConfirm) {
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
                                         $scope.status.isModified = false;
@@ -568,12 +536,6 @@ angular.module('karamel.main')
                                     .error(function (data, status, headers, config) {
                                         SweetAlert.swal("Problem saving to GitHub", data.reason, "error");
                                     });
-//                        } else {
-//                            SweetAlert.swal("Cancelled", "Experiment hasn't been pushed to GitHub", "error");
-//                        }
-//                    });
-
-
 
 
                 }

@@ -45,17 +45,15 @@ public class KaramelApiTest {
 
     exp.setDescription("some repo");
     exp.setExperimentSetupCode("chef code");
-    exp.setGithubOwner("jimdowling");
+    exp.setGithubOwner("karamelchef");
     exp.setGithubRepo("test");
     exp.setGlobalDependencies("hops::nn\nhops::dn");
     exp.setGroup("testG");
     exp.setLocalDependencies("hops::install");
     exp.setUser("testU");
-//    api.commitAndPushExperiment(exp);
-    ChefExperimentExtractor.parseAttributesAddToGit("jimdowling", "test", exp);
-    ChefExperimentExtractor.parseRecipesAddToGit("jimdowling", "test", exp);
-
-    KaramelizedCookbook kc = new KaramelizedCookbook("https://github.com/jimdowling/test", true);
+//    ChefExperimentExtractor.parseAttributesAddToGit("karamelchef", "test", exp);
+//    ChefExperimentExtractor.parseRecipesAddToGit("karamelchef", "test", exp);
+//    KaramelizedCookbook kc = new KaramelizedCookbook("https://github.com/karamelchef/test", true);
   }
 
 //  @Test

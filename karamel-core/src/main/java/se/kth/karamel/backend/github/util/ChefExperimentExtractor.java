@@ -165,11 +165,6 @@ public class ChefExperimentExtractor {
           lDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
         }
       }
-//      if (!localDependencies.isEmpty()) {
-//        localDependencies = localDependencies.replaceAll(" ", "");
-//        localDependencies = localDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
-//        localDependencies = YAML_DEPENDENCY_PREFIX + localDependencies;
-//      }
       String globalDependencies = experimentContext.getGlobalDependencies();
       String[] gDeps = globalDependencies.split(System.lineSeparator());
       StringBuilder gDepsFinal = new StringBuilder();
@@ -179,18 +174,7 @@ public class ChefExperimentExtractor {
           gDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
         }
       }
-//      if (!globalDependencies.isEmpty()) {
-//        globalDependencies = globalDependencies.replaceAll(" ", "");
-//        globalDependencies = globalDependencies.replaceAll(",", System.lineSeparator() + YAML_DEPENDENCY_PREFIX);
-//        globalDependencies = YAML_DEPENDENCY_PREFIX + globalDependencies;
-//      }
 
-//      String recipeEntries = recipeNames.toString();
-//      if (recipeEntries.length() > 0 && recipeEntries.charAt(recipeEntries.length() - 1) == ',') {
-//        recipeEntries = recipeEntries.substring(0, recipeEntries.length() - 1);
-//        recipeEntries = recipeEntries.replaceAll(",", System.lineSeparator() + YAML_RECIPE_PREFIX);
-//        recipeEntries = YAML_RECIPE_PREFIX + recipeEntries;
-//      }
       StringBuilder recipeDeps = new StringBuilder();
       for (Code experiment : experiments) {
         String recipeName = experiment.getName();
@@ -205,38 +189,15 @@ public class ChefExperimentExtractor {
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
-          //          "local_dependencies", lDepsFinal.toString(),
-          //          "global_dependencies", gDepsFinal.toString(),
           "next_recipes", recipeDeps.toString()
       );
       String ymlString = experimentContext.getClusterDefinition();
 
 
       String berksfile = experimentContext.getBerksfile();
-//      StringBuilder berksDependencies = new StringBuilder();
-//      if (!berksfile.isEmpty()) {
-//        int curPos = 0;
-//        int pos = 0;
-//        while (pos != -1) {
-//          pos = berksfile.indexOf("\"", curPos);
-//          curPos = pos + 1;
-//          pos = berksfile.indexOf("\"", curPos);
-//          if (pos != -1) {
-//            berksDependencies.append(berksfile.substring(curPos, pos - 1)).append(System.lineSeparator());
-//          }
-//          curPos = pos + 1;
-//        }
-//      }
-//
-//      String[] tokens = berksfile.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-//      for (String s : tokens) {
-//        String quotesStripped = s.replaceAll("\"", "");
-//        berksDependencies.append(quotesStripped).append(System.lineSeparator());
-//      }
 
       StringBuilder berksContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_BERKSFILE,
-//          "berks_dependencies", berksDependencies.toString()
           "berks_dependencies", berksfile
       );
 
@@ -257,17 +218,11 @@ public class ChefExperimentExtractor {
           configFileName = configFileName.substring(filePos + 1);
         }
 
-//        YamlDependency yd = new YamlDependency();
-//        if (!ymlString.isEmpty()) {
-//          yd.setGlobal(clusterDependencies);
-//          yd.setRecipe(repoName + Settings.COOOKBOOK_DELIMITER + experimentName);
-//        }
         String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
 
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
             "name", experimentName,
-            //            "pre_chef_commands", experiment.getPreScriptChefCode(),
             "interpreter", experiment.getScriptType(),
             "user", experimentContext.getUser(),
             "group", experimentContext.getGroup(),
@@ -296,9 +251,6 @@ public class ChefExperimentExtractor {
         Github.addFile(owner, repoName,
             "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
 
-//        if (!ymlString.isEmpty()) {
-//          karamelFile.getDependencies().add(yd);
-//        }
       }
 
       StringBuilder configFilesTemplateDefns = new StringBuilder();
@@ -325,14 +277,6 @@ public class ChefExperimentExtractor {
       );
 
       Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
-
-//      DumperOptions options = new DumperOptions();
-//      options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-//      Representer r = new Representer();
-//      r.addClassTag(KaramelFile.class, Tag.MAP);
-//      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
-//      String karamelFileContents = karamelYml.dump(karamelFile);
-//      Github.addFile(owner, repoName, "Karamelfile", karamelFileContents);
       Github.addFile(owner, repoName, "Karamelfile", karamelContents.toString());
 
     } catch (IOException ex) {
