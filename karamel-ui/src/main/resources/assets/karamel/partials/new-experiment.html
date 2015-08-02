@@ -6,33 +6,50 @@
 
     <div class="container" style="width: 100%">
 
-<!--        <div class="row text-left">
-            <div class = "col-xs-3 col-sm-3 col-md-3" >
-                <label class="control-label">User: </label> {{github.githubCredentials.user| limitTo: 12}}{{github.githubCredentials.user > 12 ? '...' : ''}}
-            </div>
-            <div class = "col-xs-3 col-sm-3 col-md-3" >
-                <label class="control-label">Email: </label> {{github.githubCredentials.email| limitTo: 12}}{{github.githubCredentials.email > 12 ? '...' : ''}}
-            </div>
-        </div>
-        <hr>-->
         <div class = "row" >
-            <div class = "col-xs-6 col-sm-6 col-md-12" >
-                <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
+            <div class = "col-xs-5 col-sm-5 col-md-5 col-lg-5" >
+                <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
+                </div>
+                <br/>
+                <div class="row col-sm-12 col-md-12 col-lg-12">
+                    <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class = "  row" >
+                            <label for="newRepo" class="control-label">Repository Name</label>
+                        </div>
+                        <div class="row" >
+                            <input id="newRepo" name="repoName" placeholder="Name of your new experiment repository" 
+                                   ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="[a-zA-Z]{3,}">
+                        </div>
+                    </div>
+                </div> 
+                <div class="row">
+                    <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12" >    
+                        <div class = "row col-md-9" >
+                            <label for="repoDesc" class="control-label">Repository Description</label>
+                        </div>
+                        <div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12" >
+                            <textarea id="repoDesc" style="width:100%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment repository"  tabindex="2"  class="form-control "></textarea>
+                        </div>
+                    </div> 
+                </div> 
+                <div class="row">
+                    <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
+                        <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="3">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
+                    </div>                
+                </div>                
             </div>
-        </div>
-        <br/>
-        <div class = "row" >
-            <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
+
+            <div class="form-group col-xs-7 col-sm-7 col-md-7 col-lg-7 vcenter text-left">
                 <ul style="list-style-type: none;">
                     <li >
-                        <div class="col-md-3 repoIcon">
+                        <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
                             <button type="button" style="margin: 5px;" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(github.githubCredentials.user)">
                                 {{github.githubCredentials.user}} 
                             </button></div>
                     </li>
                     <li ng-repeat="org in github.orgs">
-                        <div class="col-md-3 repoIcon">
-
+                        <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
                             <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)"> <img class="img-thumbnail" style="height: 30px;"
                                                                                                                                  ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 20}}{{org.name.length > 20 ? '...' : ''}}</button>
 
@@ -43,37 +60,12 @@
                     </li>
                 </ul>                    
             </div>
-        </div>
 
-        <div class="row col-md-12">
-            <div class="form-group col-xs-6 col-sm-6 col-md-6">
-                <div class = "  row" >
-                    <label for="newRepo" class="control-label">Repository Name</label>
-                </div>
-                <div class="row" >
-                    <input id="newRepo" name="repoName" placeholder="Enter the name of the new experiment repository" 
-                           ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="[a-zA-Z]{3,}">
-                           <!--ng-model="repoName" class="form-control" type="text" tabindex="1">-->
-                           <!--ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="^\S+$">-->
-                </div>
-            </div>
-        </div> 
-        <div class="row">
-            <div class="form-group col-xs-9 col-sm-9 col-md-10" >    
-                <div class = "row col-md-6" >
-                    <label for="repoDesc" class="control-label">Repository Description</label>
-                </div>
-                <div class="row col-md-12" >
-                    <textarea id="repoDesc" style="width:100%; float:left;" ng-model="repoDesc" placeholder="Enter a description for the new experiment repository"  tabindex="2"  class="form-control "></textarea>
-                </div>
-            </div> 
-        </div> 
-        <div class="row">
-            <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
-                <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="3">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
-            </div>                
-        </div>                
+
+        </div>
     </div>
+
+
     <div class="row" ng-show="submitted">
         <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >   
             <div class="text-warning" > {{submittedMsg}} </div>                
