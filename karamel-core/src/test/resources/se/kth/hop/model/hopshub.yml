@@ -1,4 +1,4 @@
-name: HopsHub
+name: HopsWorks
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -23,7 +23,7 @@ groups:
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs                                                            
-        - hopshub
+        - hopsworks
   ndb:
     size: 2 
     recipes: 

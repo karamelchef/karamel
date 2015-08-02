@@ -20,7 +20,7 @@ import se.kth.karamel.common.exception.KaramelException;
 public class JsonCluster extends JsonScope {
 
   private String name;
-  
+
   private List<JsonGroup> groups = new ArrayList<>();
 
   public JsonCluster() {

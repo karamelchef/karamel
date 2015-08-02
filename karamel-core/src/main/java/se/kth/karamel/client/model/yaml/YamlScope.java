@@ -14,6 +14,7 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonScope;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -94,12 +95,14 @@ public abstract class YamlScope extends Scope {
     this.attrs = attrs;
   }
 
-  public Map<String, String> flattenAttrs() {
+  public Map<String, String> flattenAttrs() throws ValidationException {
     return flattenAttrs(attrs, "");
   }
 
-  public Map<String, String> flattenAttrs(Map<String, Object> map, String partialName) {
+  public Map<String, String> flattenAttrs(Map<String, Object> map, String partialName) throws ValidationException {
     Map<String, String> flatten = new HashMap<>();
+    if (map == null)
+      throw new ValidationException("attributes block cannot be empty");
     Set<Map.Entry<String, Object>> entrySet = map.entrySet();
 
     for (Map.Entry<String, Object> entry : entrySet) {
@@ -108,6 +111,8 @@ public abstract class YamlScope extends Scope {
       if (value instanceof Map) {
         flatten.putAll(flattenAttrs((Map<String, Object>) value, key));
       } else {
+        if (value == null)
+          throw new ValidationException(String.format("attribute '%s' doesn't have any value", key));
         flatten.put(key, value.toString());
       }
     }

@@ -5,8 +5,6 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;

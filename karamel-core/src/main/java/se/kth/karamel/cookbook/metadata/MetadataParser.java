@@ -64,14 +64,17 @@ public class MetadataParser {
         Matcher mName = NAME.matcher(line);
         if (mName.matches()) {
           metadata.setName(mName.group(1));
+          comments.clear();
         } else {
           Matcher mDesc = DESC.matcher(line);
           if (mDesc.matches()) {
             metadata.setDescription(mDesc.group(1));
+            comments.clear();
           } else {
             Matcher mVer = VERSION.matcher(line);
             if (mVer.matches()) {
               metadata.setVersion(mVer.group(1));
+              comments.clear();
             } else {
               Matcher mRecipe = RECIPE.matcher(line);
               if (mRecipe.matches()) {
@@ -80,6 +83,7 @@ public class MetadataParser {
                 r.setDescription(mRecipe.group(3));
                 r.parseComments(comments);
                 metadata.getRecipes().add(r);
+                comments.clear();
 //              } else {
 //                Matcher mRes = RESULTS_DIR.matcher(line);
 //                if (mRes.matches()) {
@@ -101,6 +105,7 @@ public class MetadataParser {
                 if (mAttr.matches()) {
                   Attribute attr = new Attribute();
                   attr.setName(mAttr.group(1));
+                  comments.clear();
                   while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
                     line = scanner.nextLine();
                     Matcher mGroup = ATTR_DISP_NAME.matcher(line);

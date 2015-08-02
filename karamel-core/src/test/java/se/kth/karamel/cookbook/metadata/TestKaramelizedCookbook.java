@@ -29,7 +29,7 @@ public class TestKaramelizedCookbook {
   public void testLoadingClasspathCookbook() {
     try {
       Settings.CB_CLASSPATH_MODE = true;
-      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopshub-chef", false);
+      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopsworks-chef", false);
     } catch (CookbookUrlException | MetadataParseException e) {
       Assert.fail();
     }
@@ -44,20 +44,20 @@ public class TestKaramelizedCookbook {
     assertEquals(recipes.size(), 2);
     Recipe r1 = recipes.get(0);
     Recipe r2 = recipes.get(1);
-    assertEquals(r1.getName(), "hopshub::install");
+    assertEquals(r1.getName(), "hopsworks::install");
     Set<String> l1 = r1.getLinks();
     assertEquals(l1.size(), 0);
-    assertEquals(r2.getName(), "hopshub::default");
+    assertEquals(r2.getName(), "hopsworks::default");
     Set<String> l2 = r2.getLinks();
     assertEquals(l2.size(), 2);
-    assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopshub in your browser");
+    assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopsworks in your browser");
     assertEquals(l2.toArray()[1], "Visit Karamel {here,www.karamel.io}");
   }
 
   @Test
   public void testLoadDependencies() throws CookbookUrlException, IOException {
     Settings.CB_CLASSPATH_MODE = true;
-    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopshub-chef/master/Berksfile");
+    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopsworks-chef/master/Berksfile");
     Berksfile berksfile = new Berksfile(list);
   }
 
@@ -66,7 +66,7 @@ public class TestKaramelizedCookbook {
     try {
       Settings.CB_CLASSPATH_MODE = true;
       String recipe = Resources.toString(Resources.getResource(
-          "cookbooks/hopshadoop/hopshub-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
+          "cookbooks/hopshadoop/hopsworks-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
       ExperimentRecipe er = ExperimentRecipeParser.parse("experiment", recipe, "config.props", "x=y");
       assertEquals("experiment", er.getRecipeName());
       assertEquals(er.getConfigFileName().isEmpty(), false);

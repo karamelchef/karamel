@@ -10,7 +10,6 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.common.exception.MetadataParseException;
-import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
