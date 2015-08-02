@@ -188,18 +188,18 @@ public class CookbookUrlsTest {
 
   @Test
   public void testValidUrlsWithVersionInClasspath() throws CookbookUrlException {
-    String id = "https://github.com/hopshadoop/hopshub-chef/tree/master";
-    String home = "cookbooks/hopshadoop/hopshub-chef";
-    String rawHome = "cookbooks/hopshadoop/hopshub-chef/master";
-    String metadataFile = "cookbooks/hopshadoop/hopshub-chef/master/metadata.rb";
-    String attFile = "cookbooks/hopshadoop/hopshub-chef/master/attributes/default.rb";
-    String karamelFile = "cookbooks/hopshadoop/hopshub-chef/master/Karamelfile";
-    String berksFile = "cookbooks/hopshadoop/hopshub-chef/master/Berksfile";
-    String repo = "hopshub-chef";
+    String id = "https://github.com/hopshadoop/hopsworks-chef/tree/master";
+    String home = "cookbooks/hopshadoop/hopsworks-chef";
+    String rawHome = "cookbooks/hopshadoop/hopsworks-chef/master";
+    String metadataFile = "cookbooks/hopshadoop/hopsworks-chef/master/metadata.rb";
+    String attFile = "cookbooks/hopshadoop/hopsworks-chef/master/attributes/default.rb";
+    String karamelFile = "cookbooks/hopshadoop/hopsworks-chef/master/Karamelfile";
+    String berksFile = "cookbooks/hopshadoop/hopsworks-chef/master/Berksfile";
+    String repo = "hopsworks-chef";
     String branch = "master";
     Settings.CB_CLASSPATH_MODE = true;
     CookbookUrls.Builder builder1 = new CookbookUrls.Builder();
-    CookbookUrls urls1 = builder1.url("hopshadoop/hopshub-chef").branchOrVersion("master").build();
+    CookbookUrls urls1 = builder1.url("hopshadoop/hopsworks-chef").branchOrVersion("master").build();
     assertEquals(id, urls1.id);
     assertEquals(home, urls1.home);
     assertEquals(rawHome, urls1.rawHome);

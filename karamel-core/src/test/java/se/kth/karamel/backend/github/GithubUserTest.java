@@ -126,7 +126,8 @@ public class GithubUserTest {
     try {
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
-          "name", "jim"
+          "name", "jim",
+          "next_recipes", ""
       );
       KaramelFile karamelFile = new KaramelFile(karamelContents.toString());
 
@@ -183,8 +184,9 @@ public class GithubUserTest {
   }
 
   @Test
-  public void testCreateRepo() {
+  public void testCreateAndDeleteRepo() {
     try {
+      String owner = "karamelchef";
       Experiment ec = new Experiment();
       Experiment.Code exp = new Experiment.Code("experiment", "echo \"jim\"\n"
           + "java -jar -D%%maxHeapSize%% prog.jar", "config.props", "%%maxHeapSize%%=128m\n%%log%%=true\n",
@@ -193,8 +195,8 @@ public class GithubUserTest {
       exps.add(exp);      
       ec.setUser("blah");
       ec.setGroup("blah");
-//      ec.setResultsDir("results");
-      ec.setUrlBinary("http://snurran.sics.se/hops/prog.jar");
+      ec.setGithubOwner(owner);
+      ec.setGithubRepo("test");
       ec.setDescription("Test experiment");
       ec.setClusterDefinition("name: MySqlCluster\n"
           + "ec2:\n"
@@ -217,6 +219,8 @@ public class GithubUserTest {
       );
       
       api.commitAndPushExperiment(ec);
+
+      api.removeRepo(owner, "test", true, true);
 
     } catch (KaramelException ex) {
       fail(ex.getMessage());

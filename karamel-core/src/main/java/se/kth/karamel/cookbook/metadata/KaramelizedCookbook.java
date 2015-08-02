@@ -69,11 +69,12 @@ public class KaramelizedCookbook {
       if (name == null || name.isEmpty()) {
         throw new MetadataParseException("Invalid recipe name in metadata.rb");
       }
-      String[] recipeData = r.getName().split("::");
-      if (recipeData.length < 2) {
-        throw new MetadataParseException("Invalid recipe name in metadata.rb. Name should be- cookbook::recipe");
+      String[] recipeData = r.getName().split(Settings.COOKBOOK_DELIMITER);
+      // assume recipe name is 'default'
+      String experimentFilename = "default.rb";
+      if (recipeData.length > 1) {
+        experimentFilename = recipeData[1] + ".rb";
       }
-      String experimentFilename = recipeData[1] + ".rb";
       String description = r.getDescription();
       String searchStr = "configFile=";
       int confPos = description.indexOf(searchStr);
@@ -134,10 +135,9 @@ public class KaramelizedCookbook {
           "Could not download recipes/install.rb. Does the file exist? Is the Internet working? " + ex.getMessage());
     } catch (RecipeParseException ex) {
       Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
-          "Install recipe not a valid format in this cookbook: "
+          "Install recipe not in a format that can be used by Karamel Experiments: "
           + urls.recipesHome + "install.rb", ex);
-      throw new MetadataParseException("Install recipe not a valid format in this cookbook: "
-          + urls.recipesHome + "install.rb . " + ex.getMessage());
+
     } finally {
       Settings.USE_CLONED_REPO_FILES = false;
     }

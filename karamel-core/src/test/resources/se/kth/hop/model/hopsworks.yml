@@ -7,15 +7,15 @@ cookbooks:
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"   
-  hopshub:                                                                     
-    github: "hopshadoop/hopshub-chef"
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
     branch: "master"  
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
 
 groups: 
-  hopshub:
+  hopsworks:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       

@@ -75,13 +75,13 @@ public class MetadataParserTest {
     assertEquals(recipes.size(), 2);
     Recipe r1 = recipes.get(0);
     Recipe r2 = recipes.get(1);
-    assertEquals(r1.getName(), "hopshub::install");
+    assertEquals(r1.getName(), "hopsworks::install");
     Set<String> l1 = r1.getLinks();
     assertEquals(l1.size(), 0);
-    assertEquals(r2.getName(), "hopshub::default");
+    assertEquals(r2.getName(), "hopsworks::default");
     Set<String> l2 = r2.getLinks();
     assertEquals(l2.size(), 2);
-    assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopshub in your browser");
+    assertEquals(l2.toArray()[0], "Click {here,https://%host%:8181/hop-dashboard} to launch hopsworks in your browser");
     assertEquals(l2.toArray()[1], "Visit Karamel {here,www.karamel.io}");
   }
 }
