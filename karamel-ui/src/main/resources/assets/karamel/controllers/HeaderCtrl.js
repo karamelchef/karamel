@@ -23,7 +23,7 @@ angular.module('karamel.main')
 
 
                 function restartTimer() {
-                    self.currentTimeout = $timeout(pingServer, 500);
+                    self.currentTimeout = $timeout(pingServer, 2000);
                 }
 
                 function pingServer() {

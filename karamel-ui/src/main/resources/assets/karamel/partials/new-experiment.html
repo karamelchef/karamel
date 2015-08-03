@@ -12,6 +12,7 @@
                     <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
                 </div>
                 <br/>
+                <br/>
                 <div class="row col-sm-12 col-md-12 col-lg-12">
                     <div class="form-group col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <div class = "  row" >
@@ -19,7 +20,8 @@
                         </div>
                         <div class="row" >
                             <input id="newRepo" name="repoName" placeholder="Name of your new experiment repository" 
-                                   ng-model="repoName" class="form-control" type="text" tabindex="1" ng-pattern="[a-zA-Z]{3,}">
+                                   ng-model="repoName" class="form-control" type="text" tabindex="1">
+                            <!--ng-pattern="[a-zA-Z]{3,}"-->
                         </div>
                     </div>
                 </div> 
@@ -44,14 +46,18 @@
                 <ul style="list-style-type: none;">
                     <li >
                         <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
-                            <button type="button" style="margin: 5px;" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(github.githubCredentials.user)">
+                            <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(github.githubCredentials.user)" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
                                 {{github.githubCredentials.user}} 
                             </button></div>
                     </li>
+
+
+
                     <li ng-repeat="org in github.orgs">
                         <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
-                            <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)"> <img class="img-thumbnail" style="height: 30px;"
-                                                                                                                                 ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 20}}{{org.name.length > 20 ? '...' : ''}}</button>
+                            <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)" ng-class="{'border-button':github.org.name === org.name}"> 
+                                <img class="img-thumbnail" style="height: 30px;"
+                                     ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '...' : ''}}</button>
 
                         </div>
                     </li>

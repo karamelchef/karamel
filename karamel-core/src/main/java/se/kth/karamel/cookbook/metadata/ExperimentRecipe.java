@@ -5,6 +5,8 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import se.kth.karamel.common.Settings;
+
 public class ExperimentRecipe {
 
   private final String recipeName;
@@ -15,6 +17,9 @@ public class ExperimentRecipe {
 
   public ExperimentRecipe(String recipeName, String scriptType, 
       String scriptContents, String configFileName, String configFileContents) {
+    if (recipeName.contains(Settings.COOKBOOK_DELIMITER)) {
+      recipeName = recipeName.split(Settings.COOKBOOK_DELIMITER)[1];
+    }
     this.recipeName = recipeName;
     this.scriptContents = scriptContents;
     this.scriptType = scriptType;

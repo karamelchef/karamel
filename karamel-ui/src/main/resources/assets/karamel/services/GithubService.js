@@ -77,7 +77,6 @@ angular.module('karamel.terminal')
                             .error(function (data, status, headers, config) {
                                 $log.warn("GitHub Orgs not found.");
                             });
-                    return self.orgs;
                 };
                 self.getRepos = function () {
                     return KaramelCoreRestServices.getGithubRepos(self.org.name)

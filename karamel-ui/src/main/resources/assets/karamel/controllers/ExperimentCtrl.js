@@ -291,7 +291,6 @@ angular.module('karamel.main')
                 function _initScope() {
                     $log.log("Looking for cached GitHub Credentials...");
                     GithubService.getCredentials();
-
                     var exp = ExperimentsService.recover();
                     if (exp !== false && exp !== null && typeof exp !== 'undefined') {
                         self.deepCopyExperiment(exp);

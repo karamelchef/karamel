@@ -5,7 +5,9 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
@@ -344,9 +346,7 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setUrlGitClone(githubRepoUrl);
 
     KaramelizedCookbook kc = new KaramelizedCookbook(strippedUrl, true);
-//    MetadataRb metadata = kc.getMetadataRb();
     KaramelFile kf = kc.getKaramelFile();
-//    String metadataJson = kc.getMetadataJson();
     Berksfile bf = kc.getBerksFile();
     DefaultRb attributes = kc.getDefaultRb();
     List<ExperimentRecipe> er = kc.getExperimentRecipes();
@@ -361,22 +361,29 @@ public class KaramelApiImpl implements KaramelApi {
     StringBuilder local = new StringBuilder();
     StringBuilder global = new StringBuilder();
     for (YamlDependency yd : deps) {
-      
+
       if (!yd.getRecipe().contains(Settings.COOKBOOK_DELIMITER + "install")) {
         List<String> locals = yd.getLocal();
-        for (int i = 0; i < locals.size(); i++) {
+        // remove duplicates from locals
+        Set<String> localSet = new HashSet<>();
+        localSet.addAll(locals);
+        int i = 0;
+        for (String s : localSet) {
           if (i == 0) {
-            local.append(locals.get(i));
+            local.append(s);
           } else {
-            local.append(System.lineSeparator()).append(locals.get(i));
+            local.append(System.lineSeparator()).append(s);
+            i++;
           }
         }
         List<String> globals = yd.getGlobal();
-        for (int i = 0; i < globals.size(); i++) {
+        Set<String> globalSet = new HashSet<>();
+        i=0;
+        for (String s : globalSet) {
           if (i == 0) {
-            global.append(globals.get(i));
+            global.append(s);
           } else {
-            global.append(System.lineSeparator()).append(globals.get(i));
+            global.append(System.lineSeparator()).append(s);
           }
         }
         // All recipes have the same copies of dependencies, so break here.
