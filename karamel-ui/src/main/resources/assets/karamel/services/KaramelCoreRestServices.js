@@ -73,16 +73,6 @@
           var url = _defaultHost.concat("/generateSshKeys");
           return _getPromiseObject(method, url, _defaultContentType);
         },
-        loadCredentials: function() {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/loadCredentials");
-          return _getPromiseObject(method, url, _defaultContentType);
-        },
-        validateCredentials: function(providerInfo) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/validateCredentials");
-          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
-        },
         startCluster: function(clusterJson) {
           var method = 'PUT';
           var url = _defaultHost.concat("/startCluster");
@@ -178,6 +168,16 @@
           var url = _defaultHost.concat("/processCommand");
           return _getPromiseObject(method, url, _defaultContentType, commandName);
         },
+        loadEc2Credentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/ec2/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateEc2Credentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/ec2/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+        },
         loadGceCredentials: function() {
           var method = 'PUT';
           var url = _defaultHost.concat("/gce/loadCredentials");
@@ -187,8 +187,7 @@
           var method = 'PUT';
           var url = _defaultHost.concat("/gce/validateCredentials");
           return _getPromiseObject(method, url, _defaultContentType, providerInfo);
-        }
-	  
+        } 
 
       }
 

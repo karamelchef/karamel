@@ -52,7 +52,7 @@ public class ClusterContext {
   }
 
   public String getGithubUsername() {
-    return Github.getUser().substring(0, Github.getUser().lastIndexOf("@"));
+    return Github.getEmail().isEmpty() ? "karamel" : Github.getEmail().substring(0, Github.getEmail().lastIndexOf("@"));
   }
 
   public String getGithubPassword() {

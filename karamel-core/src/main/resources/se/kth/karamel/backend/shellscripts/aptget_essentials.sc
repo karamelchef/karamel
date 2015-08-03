@@ -1,5 +1,4 @@
 %sudo_command% apt-get update -y
-%sudo_command% apt-get update -y
 %sudo_command% apt-get install -f -y --force-yes git 
 %sudo_command% apt-get install -f -y --force-yes curl 
 %sudo_command% apt-get install -f -y --force-yes make 

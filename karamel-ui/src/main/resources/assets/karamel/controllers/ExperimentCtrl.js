@@ -252,8 +252,6 @@ angular.module('karamel.main')
 
                 $scope.experimentFactoryModal = function () {
                     $log.info("New experiment...");
-                    $scope.gs.org.name = "";
-                    $scope.gs.repo.name = "";
                     ModalService.experimentFactory('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
