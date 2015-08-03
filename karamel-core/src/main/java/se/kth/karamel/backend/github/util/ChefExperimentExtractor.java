@@ -222,6 +222,7 @@ public class ChefExperimentExtractor {
 
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
+            "cookbook", repoName,
             "name", experimentName,
             "interpreter", experiment.getScriptType(),
             "user", experimentContext.getUser(),

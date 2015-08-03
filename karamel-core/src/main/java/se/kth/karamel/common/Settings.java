@@ -234,7 +234,7 @@ public class Settings {
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + "results" + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) ;
+        + "results" + File.separator + recName.replace(COOKBOOK_DELIMITER, "_") ;
   }  
   
   

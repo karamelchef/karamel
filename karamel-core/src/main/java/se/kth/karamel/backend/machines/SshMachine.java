@@ -183,6 +183,7 @@ public class SshMachine implements MachineInterface, Runnable {
           } else {
             try {
               task.collectResults(this);
+              // If this task is an experiment, try and download the experiment results
               if (task.getName().contains("experiment")) {
                 task.downloadExperimentResults(this);
               }

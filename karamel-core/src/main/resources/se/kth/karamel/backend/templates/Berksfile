@@ -1,3 +1,4 @@
 source "https://api.berkshelf.com"
+cookbook 'kagent', github: 'karamelchef/kagent-chef', branch: 'master'
 metadata
 %%berks_dependencies%%

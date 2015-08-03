@@ -1,10 +1,10 @@
-private_ip = my_private_ip()
-public_ip = my_public_ip()
+#private_ip = my_private_ip()
+#public_ip = my_public_ip()
 
 script 'run_experiment' do
-  cwd "/usr/local/%%name%%"
-  user node['%%name%%']['user']
-  group node['%%name%%']['group']
+  cwd "/usr/local/%%cookbook%%"
+  user node['%%cookbook%%']['user']
+  group node['%%cookbook%%']['group']
   interpreter "%%interpreter%%"
   code <<-EOM
 %%script_contents%%
