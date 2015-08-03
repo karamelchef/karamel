@@ -53,7 +53,7 @@
 
 
 
-                    <li ng-repeat="org in github.orgs">
+                    <li ng-repeat="org in github.orgs | orderBy: '+name'">
                         <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
                             <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)" ng-class="{'border-button':github.org.name === org.name}"> 
                                 <img class="img-thumbnail" style="height: 30px;"

@@ -23,7 +23,7 @@
                                 {{github.githubCredentials.user}} 
                             </button></div>
                     </li>
-                    <li ng-repeat="org in github.orgs">
+                    <li ng-repeat="org in github.orgs | orderBy: '+name'">
                         <div class="col-md-3 col-lg-3 repoIcon">
                             <button type="button" class="btn btn-default" ng-class="{'border-button':github.org.name === org.name}" ng-click="loadExperimentCtrl.selectOrg(org.name)"> 
                                 <img class="img-thumbnail" style="height: 30px;" ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '..' : ''}}
@@ -44,9 +44,9 @@
         <div class = "row" >
             <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
                 <ul style="list-style-type: none;">
-                    <li ng-repeat="repo in github.repos">
+                    <li ng-repeat="repo in github.repos | orderBy: '+name'">
                         <div class="col-md-3 repoIcon">
-                            <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="loadExperimentCtrl.selectRepo(repo.name)">  &nbsp; {{repo.name| limitTo: 20}}{{repo.name.length > 20 ? '...' : ''}}</button>
+                            <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="loadExperimentCtrl.selectRepo(repo.name)">  &nbsp; {{repo.name | limitTo: 20 }}{{repo.name.length > 20 ? '...' : ''}}</button>
 
                         </div>
                     </li>
