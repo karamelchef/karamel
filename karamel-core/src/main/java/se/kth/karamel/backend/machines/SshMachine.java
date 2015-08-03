@@ -183,6 +183,9 @@ public class SshMachine implements MachineInterface, Runnable {
           } else {
             try {
               task.collectResults(this);
+              if (task.getName().contains("experiment")) {
+                task.downloadExperimentResults(this);
+              }
             } catch (KaramelException ex) {
               logger.error("Error in the resutls", ex);
               task.failed(ex.getMessage());

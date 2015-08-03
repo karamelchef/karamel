@@ -100,7 +100,9 @@
                     <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
-                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-right" ng-click="toggle()" ng-show="status.advanced">
+                </div>
+                <div class="col-sm-10 col-md-10 col-lg-10">    
+                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" style="margin-right: 5px" ng-click="toggle()" ng-show="status.advanced">
                         <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
                     </span>
                 </div>
@@ -270,7 +272,7 @@
                                             >
                                     </select>
                                 </div>
-                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-center glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip="Select the type of script for the Experiment and then write the experiment code in the box below. For bash, you should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment are taken from any config file and written as follows: #{node[repoName][:configParamKey]}"></span>
+                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-center glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip="Select the type of script for the Experiment and then write the experiment code in the box below. For bash, you should not include the shebang line (#!/bin/bash) at the top of the scripe. Pipe the output of the program to '/tmp/{repoName}_{experimentName}.out' and this file will be automatically downloaded to a file in the local directory (~/.karamel/results/}. Parameters for the experiment can be written in the form: #{node[repoName][:configParamKey]}, where configParamKey is a key taken from any of the configuration files defined."></span>
                             </div>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>

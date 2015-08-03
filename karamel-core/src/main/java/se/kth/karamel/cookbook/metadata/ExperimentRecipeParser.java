@@ -44,7 +44,7 @@ public class ExperimentRecipeParser {
       throw new RecipeParseException(
           "Could not find in the recipe a script resource like \"script 'run_experiment' do\" ");
     }
-    int endPos = ms.start();
+    int endPos = ms.start()-1;
     
     String script = postScript.substring(startPos, endPos);
 

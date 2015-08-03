@@ -203,7 +203,7 @@ public class Settings {
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + ".out";
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {
@@ -225,6 +225,33 @@ public class Settings {
         + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
+  public static String EXPERIMENT_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
+        + "results" + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) ;
+  }  
+  
+  
+  public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+    return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
+        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + File.separator
+       + System.currentTimeMillis();
+  }  
+  
+  
+  
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
