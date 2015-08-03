@@ -296,6 +296,7 @@ angular.module('karamel.main')
                             if (isConfirm) {
                                 KaramelCoreRestServices.exitKaramel()
                                         .success(function (data, status, headers, config) {
+                                            SweetAlert.swal("Shutdown", "Karamel engine has shutdown. Close your browser window.", "info");
                                         })
                                         .error(function (data, status, headers, config) {
                                             SweetAlert.swal("Error", "There was a problem shutting down the Karamel Engine. Maybe it was already shutdown?", "error");

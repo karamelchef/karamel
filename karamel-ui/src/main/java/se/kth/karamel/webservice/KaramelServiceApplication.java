@@ -68,13 +68,11 @@ import se.kth.karamel.webservicemodel.CookbookJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardYaml;
 
-
 import se.kth.karamel.webservicemodel.Ec2JSON;
 import se.kth.karamel.webservicemodel.GceJson;
 import se.kth.karamel.webservicemodel.SshKeyJSON;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
 import se.kth.karamel.webservicemodel.SudoPasswordJSON;
-
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
@@ -681,7 +679,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
   }
-  
+
   public static class Gce {
 
     @Path("/gce/loadCredentials")
@@ -791,10 +789,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         @Override
         public void run() {
           try {
-            Thread.sleep(1000);
-            System.exit(0);
+            Thread.sleep(2000);
           } catch (InterruptedException ex) {
             Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
+          } finally {
+            System.exit(0);
           }
         }
       }.start();

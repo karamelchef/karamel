@@ -6,7 +6,7 @@ angular.module('karamel.main')
 
                 var self = this;
 
-                $scope.connected = false;
+                $scope.connected = true;
 
                 $scope.hasEc2 = function () {
                     return BoardService.hasEc2();
@@ -23,7 +23,7 @@ angular.module('karamel.main')
 
 
                 function restartTimer() {
-                    self.currentTimeout = $timeout(pingServer, 2000);
+                    self.currentTimeout = $timeout(pingServer, 500);
                 }
 
                 function pingServer() {
