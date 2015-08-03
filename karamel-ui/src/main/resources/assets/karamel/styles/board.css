@@ -468,3 +468,49 @@ textarea[name="pubkey"]{
  }
 
 accordion * {outline: 0 !important;}
+
+.server-status {
+  color: #ffffff;
+  font-family: 'Quicksand', sans-serif;
+  /*font-family: 'Yanone Kaffeesatz', sans-serif;*/
+  font-weight: 400;
+  font-size: 12px;
+  margin-top: 15px;
+}
+
+
+.glyphicon-stack {
+position: relative;
+display: inline-block;
+width: 2em;
+height: 2em;
+line-height: 2em;
+vertical-align: middle;
+}
+  
+.glyphicon-circle{
+position: relative;
+border-radius: 50%;
+width: 100%;
+height: auto;
+padding-top: 100%;
+background: black;
+}
+    
+.glyphicon-stack-1x {
+line-height: inherit;
+}
+.glyphicon-stack-1x, .glyphicon-stack-2x {
+position: absolute;
+left: 0;
+width: 100%;
+text-align: center;
+}
+    
+.green{
+  background: green;
+}
+    
+.red{
+  background: red;
+}

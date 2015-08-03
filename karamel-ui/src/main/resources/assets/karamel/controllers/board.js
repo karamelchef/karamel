@@ -5,9 +5,9 @@
 
 angular.module('karamel.main')
         .controller('BoardController', ['$rootScope', '$log', '$scope', 'BoardService', '$window', 'AlertService',
-            '$location', function ($rootScope, $log, $scope, BoardService, $window, AlertService, $location) {
+            '$location', 
+            function ($rootScope, $log, $scope, BoardService, $window, AlertService, $location) {
                 var self = this;
-                
                 
                 $scope.bs = BoardService;
 
@@ -38,6 +38,8 @@ angular.module('karamel.main')
                         $log.error("No Support for session storage.");
                     }
                 }
+
+
 
                 $scope.configureGlobalProvider = function () {
                     BoardService.configureGlobalProvider();
@@ -283,7 +285,7 @@ angular.module('karamel.main')
                     exitKaramel: function () {
                         SweetAlert.swal({
                             title: "Are you sure?",
-                            text: "Karamel will exit and ongoing deployments will be lost.",
+                            text: "The Karamel Engine will shutdown and ongoing deployments will be lost.",
                             type: "warning",
                             showCancelButton: true,
                             confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, exit Karamel!",
@@ -294,10 +296,9 @@ angular.module('karamel.main')
                             if (isConfirm) {
                                 KaramelCoreRestServices.exitKaramel()
                                         .success(function (data, status, headers, config) {
-                                            $window.close();
                                         })
                                         .error(function (data, status, headers, config) {
-                                            $log.info("Error Received.");
+                                            SweetAlert.swal("Error", "There was a problem shutting down the Karamel Engine. Maybe it was already shutdown?", "error");
                                         });
 
                             } else {

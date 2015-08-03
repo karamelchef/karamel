@@ -1,88 +1,96 @@
 <nav class="navbar navbar-fixed-top headerbackground" role="navigation">
-  <div class="container-fluid" ng-controller="BoardController">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
-      <a class="navbar-brand logoFont" href="#/" ng-click="BoardController.setExperimentInActive()">Karamel</a>
+    <div class="container-fluid" ng-controller="BoardController">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
+            <a class="navbar-brand logoFont" href="#/" ng-click="BoardController.setExperimentInActive()">Karamel</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav navbar-left header-karamel">
+                <li class="dropdown" dropdown>
+                    <a class="dropdown-toggle headerFont" data-toggle="dropdown" dropdown-toggle> Menu <b class="caret"></b></a>
+                    <ul class="dropdown-menu" dropdown-menu>
+                        <li class="custom-font"><a href="#/yaml/open" click-directive>Load Definition</a></li>
+                        <li class="custom-font"><input type="file" id="fileUploader" style="display: none"
+                                                       file-uploader></li>
+                        <li class="divider"></li>
+                        <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
+                        <li class="divider"></li>
+                        <li class="custom-font"><a ng-click="switchToExperiment()" ng-click="BoardController.setExperimentActive()">Experiment</a> </li>
+                        <li class="divider"></li>
+                        <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-left" ng-show="hasProvider() && !bs.experimentActive">
+                <li><span/></li>
+                <li><span/></li>
+                <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
+                    <!--<li  ng-show="activeCluster.activeProvider === 'ec2'">-->
+                    <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
+                </li>
+                <li ng-show="activeCluster.activeProvider.name === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
+                                                                                                 ng-click="configureGlobalProvider()">Provider</a></li>
+                <li><span/></li>
+                <li class="glyphicon glyphicon-tasks specializeProvider"></li> 
+                <li class="custom-font"><a title="Set Cookbook Attributes" class="headerFont" 
+                                           ng-click="configureGlobalAttributes()">Configure</a></li>
+                <li><span/></li>
+                <!-- Launch a cluster. 
+                It should present a model dialog that asks you to paste in your public openssh key
+                if you want to (optional). The same dialog should ask for your AWS key/secret
+                -->
+                <li class="glyphicon glyphicon-play specializeProvider">
+                </li>
+                <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
+            </ul>
+
+            <ul class="nav navbar-nav navbar-left" ng-show="bs.experimentActive">
+                <li><span/></li>
+                <li><span/></li>
+                <li>
+                    <i class="glyphicon glyphicon-cloud"></i> 
+                </li>
+                <li class="custom-font"><a title="Push" class="headerFont" 
+                                           ng-click="configureGlobalProvider()">Push</a></li>
+                <li><span/></li>
+                <li class="glyphicon glyphicon-tasks"></li> 
+                <li class="custom-font"><a title="Delete" class="headerFont" 
+                                           ng-click="configureGlobalAttributes()">Delete</a></li>
+                <li><span/></li>
+                <li class="glyphicon glyphicon-play specializeProvider">
+                </li>
+                <li><a title="Cluster" class="headerFont" ng-click="launchCluster()">Cluster</a></li>
+            </ul>
+
+
+
+            <ul class="nav navbar-nav navbar-right" style="padding-right: 30px">
+                <li>
+                    <a title="Cluster Name" class="headerFont"><span ng-bind="$root.context"></span> </a>
+                </li>
+                
+                
+                <li class="server-status"> 
+
+                    <span class="glyphicon-stack">
+<i class="glyphicon glyphicon-circle glyphicon-stack-2x" ng-class="{'green':connected, 'red':!connected }"></i>
+</span>
+
+                    <!--                    <i class="fa fa-circle server-connected" ng-class="{'server-connected':connected, 'server-disconnected':!connected }"></i> -->
+                    
+                    <span ng-show="connected" class="">Connected</span> <span ng-show="!connected" class="ng-hide">Disconnected</span> </li>
+            </ul>
+
+        </div>
+        <!-- /.navbar-collapse -->
     </div>
-
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse navbar-ex1-collapse">
-      <ul class="nav navbar-nav navbar-left header-karamel">
-        <li class="dropdown" dropdown>
-          <a class="dropdown-toggle headerFont" data-toggle="dropdown" dropdown-toggle> Menu <b class="caret"></b></a>
-          <ul class="dropdown-menu" dropdown-menu>
-            <li class="custom-font"><a href="#/yaml/open" click-directive>Load Definition</a></li>
-            <li class="custom-font"><input type="file" id="fileUploader" style="display: none"
-                                           file-uploader></li>
-            <li class="divider"></li>
-            <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
-            <li class="divider"></li>
-            <li class="custom-font"><a ng-click="switchToExperiment()" ng-click="BoardController.setExperimentActive()">Experiment</a> </li>
-            <li class="divider"></li>
-            <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
-          </ul>
-        </li>
-      </ul>
-      <ul class="nav navbar-nav navbar-left" ng-show="hasProvider() && ! bs.experimentActive">
-        <li><span/></li>
-        <li><span/></li>
-        <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
-        <!--<li  ng-show="activeCluster.activeProvider === 'ec2'">-->
-          <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
-        </li>
-        <li ng-show="activeCluster.activeProvider.name === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
-                                   ng-click="configureGlobalProvider()">Provider</a></li>
-        <li><span/></li>
-	<li class="glyphicon glyphicon-tasks specializeProvider"></li> 
-        <li class="custom-font"><a title="Set Cookbook Attributes" class="headerFont" 
-                                   ng-click="configureGlobalAttributes()">Configure</a></li>
-        <li><span/></li>
-        <!-- Launch a cluster. 
-        It should present a model dialog that asks you to paste in your public openssh key
-        if you want to (optional). The same dialog should ask for your AWS key/secret
-        -->
-        <li class="glyphicon glyphicon-play specializeProvider">
-        </li>
-        <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
-      </ul>
-
-      <ul class="nav navbar-nav navbar-left" ng-show="bs.experimentActive">
-        <li><span/></li>
-        <li><span/></li>
-        <li>
-          <i class="glyphicon glyphicon-cloud"></i> 
-        </li>
-        <li class="custom-font"><a title="Push" class="headerFont" 
-                                   ng-click="configureGlobalProvider()">Push</a></li>
-        <li><span/></li>
-	<li class="glyphicon glyphicon-tasks"></li> 
-        <li class="custom-font"><a title="Delete" class="headerFont" 
-                                   ng-click="configureGlobalAttributes()">Delete</a></li>
-        <li><span/></li>
-        <li class="glyphicon glyphicon-play specializeProvider">
-        </li>
-        <li><a title="Cluster" class="headerFont" ng-click="launchCluster()">Cluster</a></li>
-      </ul>
-        
-        
-        
-        
-        
-        
-      <ul class="nav navbar-nav navbar-right" style="padding-right: 30px">
-        <li>
-          <a title="Cluster Name" class="headerFont"><span ng-bind="$root.context"></span> </a>
-        </li>
-      </ul>
-
-    </div>
-    <!-- /.navbar-collapse -->
-  </div>
-  <!-- /.container -->
+    <!-- /.container -->
 </nav>

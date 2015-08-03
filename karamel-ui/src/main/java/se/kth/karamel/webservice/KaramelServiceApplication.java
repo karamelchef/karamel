@@ -316,6 +316,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
     environment.jersey().register(new ExitKaramel());
+    environment.jersey().register(new PingKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
     environment.jersey().register(new Github.LoadGithubCredentials());
     environment.jersey().register(new Github.LoadExperiment());
@@ -798,6 +799,16 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         }
       }.start();
 
+      return response;
+    }
+  }
+
+  @Path("/ping")
+  public static class PingKaramel {
+
+    @GET
+    public Response pingKaramel() {
+      Response response = Response.status(Response.Status.OK).build();
       return response;
     }
   }

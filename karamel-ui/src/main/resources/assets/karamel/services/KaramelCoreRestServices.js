@@ -113,6 +113,11 @@
           var url = _defaultHost.concat("/exitKaramel");
           return _getPromiseObject(method, url, _defaultContentType);
         },
+        ping: function() {
+          var method = 'GET';
+          var url = _defaultHost.concat("/ping");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
         sudoPassword: function(sudoAccount) {
           var method = 'PUT';
           var url = _defaultHost.concat("/sudoPassword");
