@@ -358,39 +358,39 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
     ArrayList<YamlDependency> deps = kf.getDependencies();
-    StringBuilder local = new StringBuilder();
-    StringBuilder global = new StringBuilder();
+    Set<String> localSet = new HashSet<>();
+    Set<String> globalSet = new HashSet<>();
     for (YamlDependency yd : deps) {
-
       if (!yd.getRecipe().contains(Settings.COOKBOOK_DELIMITER + "install")) {
         List<String> locals = yd.getLocal();
         // remove duplicates from locals
-        Set<String> localSet = new HashSet<>();
         localSet.addAll(locals);
-        int i = 0;
-        for (String s : localSet) {
-          if (i == 0) {
-            local.append(s);
-          } else {
-            local.append(System.lineSeparator()).append(s);
-            i++;
-          }
-        }
         List<String> globals = yd.getGlobal();
-        Set<String> globalSet = new HashSet<>();
-        i=0;
-        for (String s : globalSet) {
-          if (i == 0) {
-            global.append(s);
-          } else {
-            global.append(System.lineSeparator()).append(s);
-          }
-        }
-        // All recipes have the same copies of dependencies, so break here.
-        // TODO: In future, we could have recipe-specific dependencies
-        break;
+        globalSet.addAll(globals);
+
       }
     }
+    StringBuilder local = new StringBuilder();
+    StringBuilder global = new StringBuilder();
+    int i = 0;
+    for (String s : localSet) {
+      if (i == 0) {
+        local.append(s);
+      } else {
+        local.append(System.lineSeparator()).append(s);
+      }
+      i++;
+    }
+    i = 0;
+    for (String s : globalSet) {
+      if (i == 0) {
+        global.append(s);
+      } else {
+        global.append(System.lineSeparator()).append(s);
+      }
+      i++;
+    }
+
     ec.setLocalDependencies(local.toString());
     ec.setGlobalDependencies(global.toString());
     for (ExperimentRecipe r : er) {

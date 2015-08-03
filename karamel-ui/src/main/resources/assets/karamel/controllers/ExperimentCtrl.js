@@ -252,6 +252,8 @@ angular.module('karamel.main')
 
                 $scope.experimentFactoryModal = function () {
                     $log.info("New experiment...");
+                    $scope.gs.org.name = "";
+                    $scope.gs.repo.name = "";
                     ModalService.experimentFactory('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
@@ -270,6 +272,9 @@ angular.module('karamel.main')
 
                 $scope.loadExperimentProfile = function () {
                     $log.info("Load experiment...");
+                    $scope.gs.org.name = "";
+                    $scope.gs.repo.name = "";
+                    
                     ModalService.loadExperiment('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
