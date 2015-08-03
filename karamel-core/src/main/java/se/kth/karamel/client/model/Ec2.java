@@ -20,6 +20,7 @@ public class Ec2 extends Provider {
   private Float price;
   private String vpc;
   private String subnet;
+  private String image;
 
   public String getType() {
     return type;
@@ -49,6 +50,13 @@ public class Ec2 extends Provider {
     return price;
   }
 
+  public String getImage() {
+    return image;
+  }
+
+  public void setImage(String image) {
+    this.image = image;
+  }
   public void setPrice(Float price) {
     this.price = price;
   }
@@ -102,6 +110,7 @@ public class Ec2 extends Provider {
     ec2.setPrice(price);
     ec2.setSubnet(subnet);
     ec2.setVpc(vpc);
+    ec2.setImage(image);
     return ec2;
   }
 
@@ -131,6 +140,9 @@ public class Ec2 extends Provider {
       if (clone.getVpc() == null) {
         clone.setVpc(parentEc2.getVpc());
       }
+      if (clone.getImage() == null) {
+        clone.setImage(parentEc2.getImage());
+      }
     }
     return clone;
   }
@@ -140,5 +152,7 @@ public class Ec2 extends Provider {
     if ((subnet != null && vpc == null) || (subnet == null && vpc != null))
       throw new ValidationException("Both subnet and vpc ids are required for vpc settings on ec2");
   }
+
+
 
 }
