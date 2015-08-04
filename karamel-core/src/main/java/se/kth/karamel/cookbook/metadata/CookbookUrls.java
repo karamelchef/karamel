@@ -24,6 +24,7 @@ public class CookbookUrls {
 
   public String repoName;
   public String branch;
+  public String subCookbook;
   public String id;
   public String home;
   public String rawHome;
@@ -32,10 +33,11 @@ public class CookbookUrls {
   public String karamelFile;
   public String berksfile;
 
-  public CookbookUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile,
-      String metadataFile, String karamelFile, String berksfile) {
+  public CookbookUrls(String repoName, String branch, String subCookbook, String id, String home, String rawHome, 
+      String attrFile,String metadataFile, String karamelFile, String berksfile) {
     this.repoName = repoName;
     this.branch = branch;
+    this.subCookbook = subCookbook;
     this.id = id;
     this.home = home;
     this.rawHome = rawHome;
@@ -51,6 +53,7 @@ public class CookbookUrls {
     String repo;
     String user;
     String branch;
+    String subCookbook;
 
     public Builder url(String url) throws CookbookUrlException {
       if (url.isEmpty()) {
@@ -64,7 +67,12 @@ public class CookbookUrls {
       this.branch = branch;
       return this;
     }
-    
+
+    public Builder relativeCookbook(String subCookbook) {
+      this.subCookbook = subCookbook;
+      return this;
+    }
+
     public CookbookUrls build() throws CookbookUrlException {
       if (url.matches(REPO_WITH_BRANCH_PATTERN) || url.matches(GITHUB_REPO_WITH_BRANCH_PATTERN)) {
         String[] comp = url.split(SLASH);
@@ -86,19 +94,28 @@ public class CookbookUrls {
             + "<branch>', \n'<user_name>/<repo>', or \n'<user_name>/<repo>/tree/<branch>'", url));
       }
 
-      String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL; 
-      String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL; 
-      
+      String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL;
+      String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL;
+
       String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
       String home = base + SLASH + user + SLASH + repo;
       String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
+      
+      if (subCookbook != null && !subCookbook.isEmpty()) {
+        if(subCookbook.contains(SLASH))
+          throw new CookbookUrlException("relative cookbook cannot be multi-level");
+        String subPath = SLASH + "cookbooks" + SLASH + subCookbook;
+        id += subPath;
+        home += subPath;
+        rawHome += subPath;
+      }
 
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
-      CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
-          berksFile);
+      CookbookUrls urls = new CookbookUrls(repo, branch, subCookbook, id, home, 
+          rawHome, attrFile, metadataFile, karamelFile, berksFile);
       return urls;
     }
 
