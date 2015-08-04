@@ -4,7 +4,8 @@
 
 user node[:%%cookbook%%][:user] do
   action :create
-  system true
+  supports :manage_home => true
+  home "/home/#{node[:%%cookbook%%][:user]}"
   shell "/bin/bash"
   not_if "getent passwd #{node[:%%cookbook%%]['user']}"
 end

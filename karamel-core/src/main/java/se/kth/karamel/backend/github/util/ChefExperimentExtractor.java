@@ -193,7 +193,6 @@ public class ChefExperimentExtractor {
       );
       String ymlString = experimentContext.getClusterDefinition();
 
-
       String berksfile = experimentContext.getBerksfile();
 
       StringBuilder berksContents = CookbookGenerator.instantiateFromTemplate(
@@ -271,6 +270,7 @@ public class ChefExperimentExtractor {
       StringBuilder install_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_RECIPE_INSTALL,
           "name", repoName,
+          "cookbook", repoName,
           "checksum", "",
           "resolve_ips", "",
           "setup_code", experimentContext.getExperimentSetupCode(),
