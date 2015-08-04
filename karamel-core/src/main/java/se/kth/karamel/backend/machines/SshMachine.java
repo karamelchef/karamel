@@ -184,11 +184,11 @@ public class SshMachine implements MachineInterface, Runnable {
             try {
               task.collectResults(this);
               // If this task is an experiment, try and download the experiment results
-              if (task.getName().contains("experiment")) {
+              if (cmd.getCmdStr().contains("experiment") && cmd.getCmdStr().contains("json")) {
                 task.downloadExperimentResults(this);
               }
             } catch (KaramelException ex) {
-              logger.error("Error in the resutls", ex);
+              logger.error("Error in collecting/downloading the results", ex);
               task.failed(ex.getMessage());
             }
           }

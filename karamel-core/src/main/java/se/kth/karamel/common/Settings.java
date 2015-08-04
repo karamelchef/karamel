@@ -8,7 +8,7 @@ package se.kth.karamel.common;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -131,10 +131,11 @@ public class Settings {
 
   /**
    * GCE firewall name.
+   *
    * @param networkName
    * @param port
    * @param protocol
-   * @return 
+   * @return
    */
   public static final String UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
@@ -147,7 +148,6 @@ public class Settings {
     }
     return names;
   }
-
 
   public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
@@ -235,10 +235,9 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_") ;
-  }  
-  
-  
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_");
+  }
+
   public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
     if (!recipeName.contains(COOKBOOK_DELIMITER)) {
@@ -246,15 +245,15 @@ public class Settings {
     } else {
       recName = recipeName;
     }
-    
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
+
     return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
-        + File.separator + DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis())) 
-        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + ".out";
-  }  
-  
-  
-  
-  
+        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + File.separator
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + "-"
+        + sdf.format(new Date(System.currentTimeMillis())) + ".out";
+  }
+
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
   public static final int EC2_RETRY_MAX = 100;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
@@ -313,8 +312,8 @@ public class Settings {
       = File.separator + "providers" + File.separator + "experiment.rb";
   public static final String COOKBOOK_RESOURCES_EXP_PATH
       = File.separator + "resources" + File.separator + "experiment.rb";
-  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator 
-                                                          + INSTALL_RECIPE + ".rb";
+  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator
+      + INSTALL_RECIPE + ".rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";
   public static final String COOKBOOK_RECIPE_SLAVE_PATH = File.separator + "recipes" + File.separator + "slave.rb";
@@ -346,7 +345,7 @@ public class Settings {
   }
 
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
-  
+
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
 }
