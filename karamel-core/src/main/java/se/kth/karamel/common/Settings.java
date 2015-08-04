@@ -8,8 +8,10 @@ package se.kth.karamel.common;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
@@ -233,8 +235,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + "results" + File.separator + recName.replace(COOKBOOK_DELIMITER, "_") ;
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_") ;
   }  
   
   
@@ -245,10 +246,12 @@ public class Settings {
     } else {
       recName = recipeName;
     }
+    
     return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
-        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + File.separator
-       + System.currentTimeMillis();
+        + File.separator + DateFormat.getDateTimeInstance().format(new Date(System.currentTimeMillis())) 
+        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + ".out";
   }  
+  
   
   
   
