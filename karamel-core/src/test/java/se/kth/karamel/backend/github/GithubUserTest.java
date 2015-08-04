@@ -219,6 +219,12 @@ public class GithubUserTest {
       );
       
       api.commitAndPushExperiment(ec);
+      
+      try {
+        Thread.sleep(4000);
+      } catch (InterruptedException ex) {
+        Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       api.removeRepo(owner, "test", true, true);
 

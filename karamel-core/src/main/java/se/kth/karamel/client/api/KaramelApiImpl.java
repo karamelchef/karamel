@@ -352,9 +352,9 @@ public class KaramelApiImpl implements KaramelApi {
     List<ExperimentRecipe> er = kc.getExperimentRecipes();
     InstallRecipe ir = kc.getInstallRecipe();
 
-    ec.setUser(attributes.getValue(repoName + "/user"));
-    ec.setGroup(attributes.getValue(repoName + "/group"));
-    ec.setUrlBinary(attributes.getValue(repoName + "/url"));
+    ec.setUser((String) attributes.getValue(repoName + "/user"));
+    ec.setGroup((String) attributes.getValue(repoName + "/group"));
+    ec.setUrlBinary((String) attributes.getValue(repoName + "/url"));
     ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
     ArrayList<YamlDependency> deps = kf.getDependencies();
