@@ -16,6 +16,7 @@ import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
+import se.kth.karamel.common.Settings;
 
 /**
  *
@@ -25,6 +26,7 @@ public class ChefJsonGeneratorTest {
 
   @Test
   public void testGenerateClusterChefJsons() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true; 
     String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
         + "\"111\"},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],\"groups\":[{\"name\":\"datanodes\","
         + "\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\","
@@ -53,6 +55,7 @@ public class ChefJsonGeneratorTest {
 
   @Test
   public void testEncodingInAttributes() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true; 
     //Related to https://github.com/karamelchef/karamel/issues/72
     String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
         + "\"1C==\"},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],\"groups\":[{\"name\":\"datanodes\","
@@ -62,7 +65,7 @@ public class ChefJsonGeneratorTest {
         + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
         + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
         + "null,\"vpc\":null,\"subnet\":null}}";
-    
+
     String yaml = ClusterDefinitionService.jsonToYaml(jsonString);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(yaml);
     List<JsonCookbook> cookbooks = definition.getCookbooks();
@@ -77,5 +80,27 @@ public class ChefJsonGeneratorTest {
     JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"1C==\""));
+  }
+
+  @Test
+  public void testArrayAttribtuesInChefJsons() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true; 
+    String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
+        + "\"111\", \"ndb/ports\":[\"123\", \"134\", \"145\"]},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],"
+        + "\"groups\":[{\"name\":\"datanodes\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\","
+        + "\"github\":\"hopshadoop/ndb-chef\","
+        + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
+        + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
+        + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
+        + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
+        + "null,\"vpc\":null,\"subnet\":null}}";
+    String yaml = ClusterDefinitionService.jsonToYaml(jsonString);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
+    JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
+    String st = jsonObject.toString();
+    Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));
+    Assert.assertTrue(st.contains("\"ports\":[\"123\",\"134\",\"145\"]"));
   }
 }

@@ -25,6 +25,7 @@ import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
@@ -53,6 +54,7 @@ public class ClusterDefinitionService {
     yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);

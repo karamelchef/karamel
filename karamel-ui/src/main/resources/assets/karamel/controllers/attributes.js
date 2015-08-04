@@ -86,7 +86,19 @@ angular.module('karamel.main')
               angular.forEach(attributes, function(attribute) {
 
                 // If variable is set and not empty string or full of spaces, then append the property value.
-                if (attribute["value"] != null && !!(attribute["value"].replace(/\s/g, '').length) && attribute["default"] !== attribute["value"]) {
+                if (attribute["type"] === 'array' && attribute["value"] != null && attribute["value"].length > 0) {
+                  var diff = (attribute["value"].length !== attribute["default"].length);
+                  
+                  if (attribute["value"].length === attribute["default"].length) {
+                    for (i in attribute["value"]) {
+                      if (attribute["value"][i] !== attribute["default"][i])
+                        diff = true;
+                    }
+                  }
+                  
+                  if (diff)
+                    requiredCookbook.addPropertyToAttributes(attribute["name"], attribute["value"]);
+                } else if (attribute["value"] != null && !!(attribute["value"].replace(/\s/g, '').length) && attribute["default"] !== attribute["value"]) {
                   requiredCookbook.addPropertyToAttributes(attribute["name"], attribute["value"]);
                 }
               });

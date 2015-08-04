@@ -33,38 +33,40 @@ public class JsonScope extends Scope {
 
   public JsonScope(YamlCluster cluster, YamlScope scope) throws KaramelException {
     super(scope);
-    Map<String, String> attrs = cluster.flattenAttrs();
+    Map<String, Object> usedAttrs = cluster.flattenAttrs();
     Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
+    //filtering invalid(not defined in metadata.rb) attributes from yaml model
     for (Map.Entry<String, Cookbook> entry : cks) {
       String key = entry.getKey();
       Cookbook cb = entry.getValue();
 
       KaramelizedCookbook metadata = CookbookCache.get(cb.getUrls().id);
-      List<Attribute> allAttrs = metadata.getMetadataRb().getAttributes();
-      Map<String, String> filteredAttrs = new HashMap<>();
-      for (Attribute att : allAttrs) {
-        if (attrs.containsKey(att.getName())) {
-          filteredAttrs.put(att.getName(), attrs.get(att.getName()));
+      List<Attribute> allValidAttrs = metadata.getMetadataRb().getAttributes();
+      Map<String, Object> validUsedAttrs = new HashMap<>();
+      for (Attribute att : allValidAttrs) {
+        if (usedAttrs.containsKey(att.getName())) {
+          validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
         }
       }
-      JsonCookbook jck = new JsonCookbook(cb, key, filteredAttrs);
+      JsonCookbook jck = new JsonCookbook(cb, key, validUsedAttrs);
       cookbooks.add(jck);
     }
 
-    Map<String, String> tempattrs = new HashMap<>();
-    tempattrs.putAll(attrs);
+    Map<String, Object> invalidAttrs = new HashMap<>();
+    invalidAttrs.putAll(usedAttrs);
     for (JsonCookbook jc : cookbooks) {
-      Map<String, String> attrs1 = jc.getAttrs();
-      for (Map.Entry<String, String> entry : attrs1.entrySet()) {
+      Map<String, Object> attrs1 = jc.getAttrs();
+      for (Map.Entry<String, Object> entry : attrs1.entrySet()) {
         String key = entry.getKey();
-        if (tempattrs.containsKey(key)) {
-          tempattrs.remove(key);
+        if (invalidAttrs.containsKey(key)) {
+          invalidAttrs.remove(key);
         }
       }
     }
 
-    if (!tempattrs.isEmpty()) {
-      throw new KaramelException(String.format("Undefined attributes: %s", attrs.keySet().toString()));
+    if (!invalidAttrs.isEmpty()) {
+      throw new KaramelException(String.format("Invalid attributes, all used attributes must be defined in metadata.rb "
+          + "files: %s", invalidAttrs.keySet().toString()));
     }
 
   }

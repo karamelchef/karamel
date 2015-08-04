@@ -105,7 +105,7 @@ attribute "hiway/variantcall/reads/run_ids",
 :display_name => "1000 Genomes Run Ids",
 :description => "The Run Ids of sequence data from the 1000 Genomes project that is to be aligned",
 :type => 'array',
-:default => ["SRR359188", "SRR359195"]
+:default => ['SRR359188', 'SRR359195']
 
 attribute "hiway/variantcall/reference/chromosomes",
 :display_name => "HG38 chromosomes",
