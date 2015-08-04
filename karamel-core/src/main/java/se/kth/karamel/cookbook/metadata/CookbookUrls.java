@@ -68,7 +68,7 @@ public class CookbookUrls {
       return this;
     }
 
-    public Builder relativeCookbook(String subCookbook) {
+    public Builder subCookbook(String subCookbook) {
       this.subCookbook = subCookbook;
       return this;
     }
