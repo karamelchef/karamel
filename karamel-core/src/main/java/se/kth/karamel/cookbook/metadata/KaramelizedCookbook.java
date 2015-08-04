@@ -63,4 +63,8 @@ public class KaramelizedCookbook {
     return karamelFile;
   }
 
+  public DefaultRb getDefaultRb() {
+    return defaultRb;
+  }
+
 }

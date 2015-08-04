@@ -137,14 +137,6 @@ public class MetadataParser {
               }
 
               if (!found2) {
-                Matcher m91 = ATTR_DEFAULT_SIMPLE.matcher(line);
-                if (m91.matches()) {
-                  attr.setDefault(m91.group(1));
-                  found2 = true;
-                }
-              }
-
-              if (!found2) {
                 Matcher m92 = ATTR_DEFAULT_ARRAY.matcher(line);
                 if (m92.matches()) {
                   String sarr = m92.group(1);
@@ -158,7 +150,15 @@ public class MetadataParser {
                   found2 = true;
                 }
               }
-
+              
+              if (!found2) {
+                Matcher m91 = ATTR_DEFAULT_SIMPLE.matcher(line);
+                if (m91.matches()) {
+                  attr.setDefault(m91.group(1));
+                  found2 = true;
+                }
+              }
+              
               if (!found2) {
                 Matcher m10 = ATTR_REQUIRED.matcher(line);
                 if (m10.matches()) {

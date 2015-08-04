@@ -9,7 +9,7 @@
 
     <common-tabs>
       <common-tabs-pane cookbook="cookbook" cookbooks-filtered-data="cookbooksFilteredData"
-               ng-repeat="cookbook in cookbooks" title="{{cookbook.name}}" url-info="info.url">
+                        ng-repeat="cookbook in cookbooks" title="{{cookbook.name}}" url-info="info.url">
 
         <div style="overflow: scroll; height: 400px">
 
@@ -24,9 +24,11 @@
 
           <div ng-repeat="attr in cookbooksFilteredData[info.url].attributes| requiredFilter: true" class="form-group">
 
-            <label class="control-label">{{attr.name}}</label>
-            <input class="form-control" ng-model="attr.value"/>
-
+            <label class="control-label">{{attr.name}}</label><label class="control-label" ng-show="attr.type === 'array'"> []</label>
+            <div ng-switch="attr.type">
+              <input ng-switch-when="array" class="form-control" ng-model="attr.value" ng-list/>
+              <input ng-switch-default class="form-control" ng-model="attr.value"/>
+            </div>
           </div>
 
 
@@ -39,8 +41,11 @@
 
             <div ng-repeat="attr in cookbooksFilteredData[info.url].attributes| requiredFilter: false" class="form-group">
 
-              <label class="control-label">{{attr.name}}</label>
-              <input class="form-control" ng-model="attr.value"/>
+              <label class="control-label">{{attr.name}}</label><label class="control-label" ng-show="attr.type === 'array'"> []</label>
+              <div ng-switch="attr.type">
+                <input ng-switch-when="array" class="form-control" ng-model="attr.value" ng-list/>
+                <input ng-switch-default class="form-control" ng-model="attr.value"/>
+              </div>
 
             </div>
           </div>
