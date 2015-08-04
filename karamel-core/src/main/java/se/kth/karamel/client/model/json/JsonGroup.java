@@ -58,11 +58,11 @@ public class JsonGroup extends JsonScope {
         getCookbooks().remove(cb);
       }
     }
-    Map<String, String> attrs = new HashMap<>();
+    Map<String, Object> attrs = new HashMap<>();
     attrs.putAll(group.flattenAttrs());
     for (JsonCookbook jc : cookbooks) {
-      Map<String, String> attrs1 = jc.getAttrs();
-      for (Map.Entry<String, String> entry : attrs1.entrySet()) {
+      Map<String, Object> attrs1 = jc.getAttrs();
+      for (Map.Entry<String, Object> entry : attrs1.entrySet()) {
         String key = entry.getKey();
         if (attrs.containsKey(key)) {
           attrs.remove(key);

@@ -18,14 +18,14 @@ public class Attribute {
   String type;
   String description;
   @SerializedName("default")
-  String defaultVal;
+  Object defaultVal;
   String required;
 
-  public void setDefault(String defaultVal) {
+  public void setDefault(Object defaultVal) {
     this.defaultVal = defaultVal;
   }
 
-  public String getDefault() {
+  public Object getDefault() {
     return defaultVal;
   }
 

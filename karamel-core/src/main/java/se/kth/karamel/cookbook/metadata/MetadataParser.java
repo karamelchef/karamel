@@ -22,13 +22,9 @@ public class MetadataParser {
 
   private static final Logger logger = Logger.getLogger(MetadataParser.class);
 
-  public static Pattern NAME = singleValueEntry("name");
-  public static Pattern DESC = singleValueEntry("description");
-  public static Pattern VERSION = singleValueEntry("version");
-//  public static Pattern RESULTS_DIR = singleValueEntry("results_dir");
-//  public static Pattern URL_BINARY = singleValueEntry("url_binary");
-//  public static Pattern URL_GITCLONE = singleValueEntry("url_gitclone");
-//  public static Pattern BUILD_COMMAND = singleValueEntry("build_command");
+  public static Pattern NAME = Pattern.compile("name\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
+  public static Pattern DESC = Pattern.compile("description\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
+  public static Pattern VERSION = Pattern.compile("version\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
   public static Pattern RECIPE = Pattern.compile(
       "recipe\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(\\,\\s*[\\\"|\\'](.+)[\\\"|\\'])+");
   public static Pattern ATTR = Pattern.compile("attribute\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(,)?\\s*");
@@ -36,13 +32,12 @@ public class MetadataParser {
       = Pattern.compile("\\s*:display_name\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_DESC = Pattern.compile("\\s*:description\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static Pattern ATTR_TYPE = Pattern.compile("\\s*:type\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
-  public static Pattern ATTR_DEFAULT = Pattern.compile("\\s*:default\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
+  public static Pattern ATTR_DEFAULT_SIMPLE
+      = Pattern.compile("\\s*:default\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
+  public static Pattern ATTR_DEFAULT_ARRAY = Pattern.compile("\\s*:default\\s*=>\\s*\\[(.*)\\]s*(,)?\\s*");
+  public static Pattern ATTR_DEFAULT_ARRAY_ITEMS = Pattern.compile("[\\'|\\\"]([^\\'|\\\"]*)[\\'|\\\"]");
   public static Pattern ATTR_REQUIRED = Pattern.compile("\\s*:required\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");
   public static String COMMA_CLOSING_LINE = ".*,\\s*$";
-
-  private static Pattern singleValueEntry(String name) {
-    return Pattern.compile(name + "\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
-  }
 
   /**
    *
@@ -58,92 +53,132 @@ public class MetadataParser {
     while (scanner.hasNextLine()) {
       boolean found = false;
       String line = scanner.nextLine();
-      if (line.startsWith("#")) {
-        comments.add(line);
-      } else {
-        Matcher mName = NAME.matcher(line);
-        if (mName.matches()) {
-          metadata.setName(mName.group(1));
-          comments.clear();
-        } else {
-          Matcher mDesc = DESC.matcher(line);
-          if (mDesc.matches()) {
-            metadata.setDescription(mDesc.group(1));
-            comments.clear();
-          } else {
-            Matcher mVer = VERSION.matcher(line);
-            if (mVer.matches()) {
-              metadata.setVersion(mVer.group(1));
-              comments.clear();
-            } else {
-              Matcher mRecipe = RECIPE.matcher(line);
-              if (mRecipe.matches()) {
-                Recipe r = new Recipe();
-                r.setName(mRecipe.group(1));
-                r.setDescription(mRecipe.group(3));
-                r.parseComments(comments);
-                metadata.getRecipes().add(r);
-                comments.clear();
-//              } else {
-//                Matcher mRes = RESULTS_DIR.matcher(line);
-//                if (mRes.matches()) {
-//                  metadata.setResultsDir(mRes.group(1));
-//                } else {
-//                  Matcher mBuild = BUILD_COMMAND.matcher(line);
-//                  if (mBuild.matches()) {
-//                    metadata.setBuildCommand(mBuild.group(1));
-//                  } else {
-//                    Matcher mUrlBinary = URL_BINARY.matcher(line);
-//                    if (mUrlBinary.matches()) {
-//                      metadata.setUrlBinary(mUrlBinary.group(1));
-//                    } else {
-//                      Matcher mUrlGitclone = URL_GITCLONE.matcher(line);
-//                      if (mUrlGitclone.matches()) {
-//                        metadata.setBuildCommand(mUrlGitclone.group(1));
-              } else {
-                Matcher mAttr = ATTR.matcher(line);
-                if (mAttr.matches()) {
-                  Attribute attr = new Attribute();
-                  attr.setName(mAttr.group(1));
-                  comments.clear();
-                  while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
-                    line = scanner.nextLine();
-                    Matcher mGroup = ATTR_DISP_NAME.matcher(line);
-                    if (mGroup.matches()) {
-                      attr.setDisplayName(mGroup.group(1));
-                    } else {
-                      Matcher mAttrType = ATTR_TYPE.matcher(line);
-                      if (mAttrType.matches()) {
-                        attr.setType(mAttrType.group(1));
-                      } else {
-                        Matcher mAttrDesc = ATTR_DESC.matcher(line);
-                        if (mAttrDesc.matches()) {
-                          attr.setDescription(mAttrDesc.group(1));
-                        } else {
-                          Matcher mAttrDef = ATTR_DEFAULT.matcher(line);
-                          if (mAttrDef.matches()) {
-                            attr.setDefault(mAttrDef.group(1));
-                          } else {
-                            Matcher mAreqd = ATTR_REQUIRED.matcher(line);
-                            if (mAreqd.matches()) {
-                              attr.setRequired(mAreqd.group(1));
-                            }
-                          }
-                        }
-                      }
+      line = line.trim();
+      if (!line.isEmpty()) {
+        if (line.startsWith("#")) {
+          //It assumes that each comment block belongs to the next definition, it records comments until it finds out 
+          //the next item
+          comments.add(line);
+          found = true;
+        }
 
-                    }
-                  }
-                  metadata.getAttributes().add(attr);
-                }
-              }
-            }
+        //name of the cookbook
+        if (!found) {
+          Matcher m1 = NAME.matcher(line);
+          if (m1.matches()) {
+            metadata.setName(m1.group(1));
+            found = true;
           }
         }
-      }
 
-      if (!found) {
-        logger.warn(String.format("Urecognized line in the metadata.rb '%s'", line));
+        //description of the cookbook
+        if (!found) {
+          Matcher m2 = DESC.matcher(line);
+          if (m2.matches()) {
+            metadata.setDescription(m2.group(1));
+            found = true;
+          }
+        }
+
+        //version of the cookbook
+        if (!found) {
+          Matcher m3 = VERSION.matcher(line);
+          if (m3.matches()) {
+            metadata.setVersion(m3.group(1));
+            found = true;
+          }
+        }
+
+        //recipe is a single line definition
+        if (!found) {
+          Matcher m4 = RECIPE.matcher(line);
+          if (m4.matches()) {
+            Recipe r = new Recipe();
+            r.setName(m4.group(1));
+            r.setDescription(m4.group(3));
+            r.parseComments(comments);
+            metadata.getRecipes().add(r);
+            found = true;
+            comments.clear();
+          }
+        }
+
+        //attribute is multiple line definition
+        if (!found) {
+          Matcher m5 = ATTR.matcher(line);
+          if (m5.matches()) {
+            Attribute attr = new Attribute();
+            attr.setName(m5.group(1));
+            while (line.matches(COMMA_CLOSING_LINE) && scanner.hasNext()) {
+              boolean found2 = false;
+              line = scanner.nextLine();
+
+              Matcher m6 = ATTR_DISP_NAME.matcher(line);
+              if (m6.matches()) {
+                attr.setDisplayName(m6.group(1));
+                found2 = true;
+              }
+
+              if (!found2) {
+                Matcher m7 = ATTR_TYPE.matcher(line);
+                if (m7.matches()) {
+                  attr.setType(m7.group(1));
+                  found2 = true;
+                }
+              }
+
+              if (!found2) {
+                Matcher m8 = ATTR_DESC.matcher(line);
+                if (m8.matches()) {
+                  attr.setDescription(m8.group(1));
+                  found2 = true;
+                }
+
+              }
+
+              if (!found2) {
+                Matcher m92 = ATTR_DEFAULT_ARRAY.matcher(line);
+                if (m92.matches()) {
+                  String sarr = m92.group(1);
+                  Matcher m921 = ATTR_DEFAULT_ARRAY_ITEMS.matcher(sarr);
+                  List<String> deflist = new ArrayList<>();
+                  while (m921.find()) {
+                    String item = m921.group(1);
+                    deflist.add(item);
+                  }
+                  attr.setDefault(deflist);
+                  found2 = true;
+                }
+              }
+              
+              if (!found2) {
+                Matcher m91 = ATTR_DEFAULT_SIMPLE.matcher(line);
+                if (m91.matches()) {
+                  attr.setDefault(m91.group(1));
+                  found2 = true;
+                }
+              }
+              
+              if (!found2) {
+                Matcher m10 = ATTR_REQUIRED.matcher(line);
+                if (m10.matches()) {
+                  attr.setRequired(m10.group(1));
+                  found2 = true;
+                }
+              }
+
+              if (!found2) {
+                logger.warn(String.format("Urecognized line for attribtue in the metadata.rb '%s'", line));
+              }
+            }
+            metadata.getAttributes().add(attr);
+            found = true;
+          }
+        }
+
+        if (!found) {
+          logger.warn(String.format("Urecognized line in the metadata.rb '%s'", line));
+        }
       } else {
         comments.clear();
       }
