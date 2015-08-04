@@ -23,6 +23,7 @@ import se.kth.karamel.common.exception.CookbookUrlException;
 public class CookbookUrls {
 
   public String repoName;
+  public String repoHome;
   public String branch;
   public String subCookbook;
   public String id;
@@ -33,9 +34,10 @@ public class CookbookUrls {
   public String karamelFile;
   public String berksfile;
 
-  public CookbookUrls(String repoName, String branch, String subCookbook, String id, String home, String rawHome, 
-      String attrFile,String metadataFile, String karamelFile, String berksfile) {
+  public CookbookUrls(String repoName, String repoHome, String branch, String subCookbook, String id, String home, 
+      String rawHome, String attrFile, String metadataFile, String karamelFile, String berksfile) {
     this.repoName = repoName;
+    this.repoHome = repoHome;
     this.branch = branch;
     this.subCookbook = subCookbook;
     this.id = id;
@@ -99,11 +101,13 @@ public class CookbookUrls {
 
       String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
       String home = base + SLASH + user + SLASH + repo;
+      String repoHome = base + SLASH + user + SLASH + repo;
       String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
-      
+
       if (subCookbook != null && !subCookbook.isEmpty()) {
-        if(subCookbook.contains(SLASH))
+        if (subCookbook.contains(SLASH)) {
           throw new CookbookUrlException("relative cookbook cannot be multi-level");
+        }
         String subPath = SLASH + "cookbooks" + SLASH + subCookbook;
         id += subPath;
         home += subPath;
@@ -114,7 +118,7 @@ public class CookbookUrls {
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
-      CookbookUrls urls = new CookbookUrls(repo, branch, subCookbook, id, home, 
+      CookbookUrls urls = new CookbookUrls(repo, repoHome, branch, subCookbook, id, home,
           rawHome, attrFile, metadataFile, karamelFile, berksFile);
       return urls;
     }

@@ -17,6 +17,7 @@ public class Cookbook {
   private String github;
   private String version;
   private String branch;
+  private String cookbook;
 
   public Cookbook() {
   }
@@ -51,6 +52,14 @@ public class Cookbook {
     this.version = version;
   }
 
+  public String getCookbook() {
+    return cookbook;
+  }
+
+  public void setCookbook(String cookbook) {
+    this.cookbook = cookbook;
+  }
+  
   public CookbookUrls getUrls() throws KaramelException {
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
     builder.url(github);
@@ -58,6 +67,8 @@ public class Cookbook {
       builder.branchOrVersion(branch);
     else if (version != null)
       builder.branchOrVersion(version);
+    else if (cookbook != null)
+      builder.subCookbook(cookbook);
     CookbookUrls urls = builder.build();
     return urls;
   }
