@@ -11,22 +11,17 @@ cookbooks:
     github: "hopshadoop/flink-chef"
     branch: "master"
 
-attrs:
-  hadoop:
-    version: 2.7.1
-
 groups: 
   namenodes:
     size: 1
     recipes: 
         - hadoop::nn
         - hadoop::rm
-        - hadoop::jhs
         - flink::jobmanager
         - flink::wordcount
   datanodes:
     size: 2
     recipes: 
         - hadoop::dn
-        - hadoop::rm
+        - hadoop::nm
         - flink::taskmanager
