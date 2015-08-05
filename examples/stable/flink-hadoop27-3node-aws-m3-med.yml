@@ -1,0 +1,32 @@
+name: FlinkWithHadoop27
+ec2:
+    type: m3.medium
+    region: eu-west-1
+    
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink: 
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+
+attrs:
+  hadoop:
+    version: 2.7.1
+
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs
+        - flink::jobmanager
+        - flink::wordcount
+  datanodes:
+    size: 2
+    recipes: 
+        - hadoop::dn
+        - hadoop::rm
+        - flink::taskmanager
