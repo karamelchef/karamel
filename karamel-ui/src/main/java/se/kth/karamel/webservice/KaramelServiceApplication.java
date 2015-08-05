@@ -76,6 +76,9 @@ import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
+
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(KaramelServiceApplication.class);
+
   private static KaramelApi karamelApiHandler;
 
   public static TrayUI trayUi;
@@ -96,7 +99,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       // shouldn't happen for localhost
     } catch (IOException e) {
       // port taken, so app is already running
-      System.out.println("An instance of Karamel is already running. Exiting...");
+      logger.info("An instance of Karamel is already running. Exiting...");
       System.exit(10);
     }
 
@@ -125,7 +128,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           System.out.print("Do you wan  t to over-write the existing cookbook " + name + "? (y/n) ");
           String overwrite = br.readLine();
           if (overwrite.compareToIgnoreCase("n") == 0 || overwrite.compareToIgnoreCase("no") == 0) {
-            System.out.println("Not over-writing. Exiting.");
+            logger.info("Not over-writing. Exiting.");
             System.exit(0);
           }
           if (overwrite.compareToIgnoreCase("y") == 0 || overwrite.compareToIgnoreCase("yes") == 0) {
@@ -135,8 +138,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         }
       }
       String pathToCb = CookbookScaffolder.create(name);
-      System.out.println("New Cookbook is now located at: " + pathToCb);
-      System.out.println();
+      logger.info("New Cookbook is now located at: " + pathToCb);
       System.exit(0);
     } catch (IOException ex) {
       Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
@@ -229,7 +231,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           long ms1 = System.currentTimeMillis();
           while (ms1 + 6000000 > System.currentTimeMillis()) {
             String clusterStatus = karamelApiHandler.getClusterStatus(cluster.getName());
-            System.out.println(clusterStatus);
+            logger.debug(clusterStatus);
             Thread.currentThread().sleep(30000);
           }
         } catch (KaramelException e) {
@@ -261,7 +263,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   @Override
   public void initialize(Bootstrap<KaramelServiceConfiguration> bootstrap) {
 
-    System.out.println("Executing any initialization tasks.");
+    logger.debug("Executing any initialization tasks.");
 //        bootstrap.addBundle(new ConfiguredAssetsBundle("/assets/", "/dashboard/"));
     // https://groups.google.com/forum/#!topic/dropwizard-user/UaVcAYm0VlQ
     bootstrap.addBundle(new AssetsBundle("/assets/", "/"));

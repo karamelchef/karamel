@@ -28,6 +28,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import se.kth.karamel.backend.machines.SshMachine;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Settings;
@@ -44,8 +45,12 @@ public class Github {
   private static volatile String email="";
   private static volatile String password="";
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Github.class);
+
+  
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
 
+  
   private static final Map<String, List<OrgItem>> cachedOrgs = new HashMap<>();
   private static final Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
 
@@ -262,30 +267,6 @@ public class Github {
   }
 
   /**
-   * Implements 'git pull master'
-   *
-   * @param owner
-   * @param repoName
-   * @throws KaramelException
-   */
-//  public synchronized static void updateRepo(String owner, String repoName) throws KaramelException {
-//    Git result = null;
-//    RepositoryService rs = new RepositoryService(client);
-//    Repository r;
-//    RepositoryId repo;
-//    try {
-//      r = rs.getRepository(owner, repoName);
-//      repo = new RepositoryId(owner, repoName);
-//      DataService service = new DataService(client);
-//      Reference ref = service.getReference(repo, "refs/heads/master");
-//      ref.
-//    } catch (IOException ex) {
-//      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-//      throw new KaramelException(ex.getMessage());
-//    }
-//
-//  }
-  /**
    * Clone an existing github repo.
    *
    * @param owner
@@ -307,13 +288,13 @@ public class Github {
         throw new KaramelException("Local directory already exists. Delete it first: " + localPath);
       }
 
-      System.out.println("Cloning from " + cloneURL + " to " + localPath);
+      logger.debug("Cloning from " + cloneURL + " to " + localPath);
       result = Git.cloneRepository()
           .setURI(cloneURL)
           .setDirectory(localPath)
           .call();
       // Note: the call() returns an opened repository already which needs to be closed to avoid file handle leaks!
-      System.out.println("Cloned repository: " + result.getRepository().getDirectory());
+      logger.debug("Cloned repository: " + result.getRepository().getDirectory());
     } catch (IOException | GitAPIException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
@@ -341,32 +322,6 @@ public class Github {
       }
       repo.delete();
 
-//      gitHub.getRepository(repoName);
-//    UserService us = new UserService(client);
-//      RepositoryService rs = new RepositoryService(client);
-//    String uri = rs.getUrl();
-//    URL url = new URL(uri);
-//    HttpURLConnection request = (HttpURLConnection) url.openConnection();
-//    request.setRequestMethod("DELETE");
-//    request.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-//
-////    request.setFixedLengthStreamingMode(0);
-////    request.setRequestProperty("Content-Length", "0");
-//    request.setDoOutput(true);
-//    int code = request.getResponseCode();
-//    File repoDir = getRepoDirectory(repoName);
-//    Git git = null;
-//    try {
-//      git = Git.open(repoDir);
-//      org.eclipse.jgit.lib.Repository repo = git.getRepository();
-//      RemoveCommand rc = new RemoveCommand();
-//      RemoveOrDeleteRepositoryCommand rdrc = new RemoveOrDe
-//		 RepositoryUtil repositoryUtil = Activator.getDefault().getRepositoryUtil();
-//		RepositoryCache repositoryCache = org.eclipse.egit.core.Activator.getDefault()
-//				.getRepositoryCache();
-//    } catch (IOException ex) {
-//      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-//    }
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException("Problem authenticating with gihub-api");

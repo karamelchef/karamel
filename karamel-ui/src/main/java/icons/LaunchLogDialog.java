@@ -23,6 +23,8 @@ import se.kth.karamel.webservice.KaramelServiceApplication;
 
 public class LaunchLogDialog extends javax.swing.JDialog {
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(LaunchLogDialog.class);
+  
   private final int port;
   private final Image image;
   private PrintStream printStream;
@@ -224,8 +226,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
 
-      System.out.println("User Clicked on 'Exit Karamel' Button");
-      System.out.println("Exiting Karamel....");
+      logger.info("User requested to exit Karamel from the TrayIcon.");
       System.exit(0);
     }//GEN-LAST:event_jButton1ActionPerformed
 

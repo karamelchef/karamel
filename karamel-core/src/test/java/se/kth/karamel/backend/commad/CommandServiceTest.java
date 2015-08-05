@@ -21,6 +21,8 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class CommandServiceTest {
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommandServiceTest.class);
+  
   @Test
   public void testCommands() throws KaramelException {
     CommandResponse commandResponse = CommandService.processCommand("home");
@@ -46,6 +48,6 @@ public class CommandServiceTest {
     CommandResponse commandResponse = CommandService.processCommand("tdag hopsworks");
     assertEquals(CommandResponse.Renderer.INFO, commandResponse.getRenderer());
     assertNotNull(commandResponse.getResult());
-    System.out.println(commandResponse.getResult());
+    logger.info(commandResponse.getResult());
   }
 }

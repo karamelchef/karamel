@@ -17,6 +17,9 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class Driver {
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Driver.class);
+  
+  
   public static void main(String[] args) throws IOException, KaramelException, InterruptedException {
     
     //Karamel will read your ssh-key pair from the default location (~/.ssh/id_rsa and ~/.ssh/id_rsa/id_rsa.pub) in 
@@ -43,7 +46,7 @@ public class Driver {
     while (ms1 + 6000000 > System.currentTimeMillis()) {
       //the name of the cluster should be equal to the one you specified in your yaml file
       String clusterStatus = api.getClusterStatus("hiway");
-      System.out.println(clusterStatus);
+      logger.debug(clusterStatus);
       Thread.currentThread().sleep(60000);
     }
   }

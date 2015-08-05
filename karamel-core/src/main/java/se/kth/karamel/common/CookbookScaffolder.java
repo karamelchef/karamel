@@ -9,6 +9,8 @@ import java.nio.file.Paths;
 
 public class CookbookScaffolder {
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CookbookScaffolder.class);
+
   static boolean mkdirs(String path) {
     File cbDir = new File(path);
     return cbDir.mkdirs();
@@ -53,9 +55,10 @@ public class CookbookScaffolder {
 
   /**
    * Scaffold a new cookbook with 'name' in the /user/home/.karamel/cookbook_designer/name folder.
+   *
    * @param name
    * @return path to newly scaffolded cookbook
-   * @throws IOException 
+   * @throws IOException
    */
   public static String create(String name) throws IOException {
     String cbName = Settings.COOKBOOKS_PATH + File.separator + name + File.separator;
@@ -72,7 +75,7 @@ public class CookbookScaffolder {
     createFile(cbName + Settings.COOKBOOK_METADATARB_REL_PATH, Settings.CB_TEMPLATE_METADATA, name);
     createFile(cbName + Settings.COOKBOOK_RECIPE_INSTALL_PATH, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
     createFile(cbName + Settings.COOKBOOK_README_PATH, Settings.CB_TEMPLATE_README, name);
-    System.out.println("Cookbook scaffolding created. Cookbook now in folder: ./cookbooks/" + name);
+    logger.debug("Cookbook scaffolding created. Cookbook now in folder: ~/.karamel/cookbooks/" + name);
 
     File f = new File(cbName);
     return f.getAbsolutePath();

@@ -52,13 +52,6 @@ public class ChefExperimentExtractor {
     StringBuilder recipeDescriptions = new StringBuilder();
     List<Code> experiments = experiment.getCode();
 
-//    Pattern pD = Pattern.compile("%%(.*)%%\\s*=\\s*(.*)\\s*");
-//    Matcher mD = pD.matcher(experiment.getDefaultAttributes());
-//    while (mD.find()) {
-//      String name = mD.group(1);
-//      String value = mD.group(2);
-//      attrs.put(name, value);
-//    }
     // Extract all the configFileNames: write them to metadata.rb later
     // Extract all the from the configFile contents: write them to attributes/default.rb later
     // No conflict detection for duplicate key-value pairs yet. Should be done in Javascript in Browser.
