@@ -128,12 +128,19 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException {
-    Credentials credentials = GceLauncher.readCredentials(jsonFilePath);
-    GceContext context = GceLauncher.validateCredentials(credentials);
-    Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
-    confs.writeKaramelConfs();
-    clusterService.registerGceContext(context);
+    if (jsonFilePath.isEmpty() || jsonFilePath == null) {
+      return false;
+    }
+    try {
+      Credentials credentials = GceLauncher.readCredentials(jsonFilePath);
+      GceContext context = GceLauncher.validateCredentials(credentials);
+      Confs confs = Confs.loadKaramelConfs();
+      confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
+      confs.writeKaramelConfs();
+      clusterService.registerGceContext(context);
+    } catch (Throwable ex) {
+      throw new KaramelException(ex.getMessage());    
+    }
     return true;
   }
 

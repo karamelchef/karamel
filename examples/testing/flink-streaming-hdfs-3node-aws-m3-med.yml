@@ -1,4 +1,4 @@
-name: StandaloneFlinkWithHDFS
+name: FlinkStreamingZkKafka
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -16,7 +16,11 @@ cookbooks:
   kafka: 
     github: "biobankcloud/kafka-cookbook"
     branch: "master"
-    
+
+attrs:
+  hadoop:
+    version: 2.7.1
+
 groups: 
   namenodes:
     size: 1

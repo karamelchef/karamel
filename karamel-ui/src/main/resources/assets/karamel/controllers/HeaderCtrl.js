@@ -17,9 +17,17 @@ angular.module('karamel.main')
                 };
 
                 $scope.hasProvider = function () {
-                    return $scope.hasEc2() || $scope.hasBaremetal();
+                    return $scope.hasEc2() || $scope.hasBaremetal() || 
+                            $scope.hasGce() || $scope.hasOpenStack();
                 };
 
+                $scope.hasGce= function () {
+                    return BoardService.hasGce();
+                };
+
+                $scope.hasOpenStack = function () {
+                    return BoardService.hasOpenStack();
+                };
 
 
                 function restartTimer() {

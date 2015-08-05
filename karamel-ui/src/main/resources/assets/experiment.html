@@ -272,12 +272,13 @@
                                             >
                                     </select>
                                 </div>
-                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-center glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip="Select the type of script for the Experiment and then write the experiment code in the box below. For bash, you should not include the shebang line (#!/bin/bash) at the top of the scripe. Pipe the output of the program to '/tmp/{repoName}_{experimentName}.out' and this file will be automatically downloaded to a file in the local directory (~/.karamel/results/}. Parameters for the experiment can be written in the form: #{node[repoName][:configParamKey]}, where configParamKey is a key taken from any of the configuration files defined."></span>
+                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-left glyphicon glyphicon-info-sign text-left pull-right" tooltip-placement="left" tooltip-html-unsafe="<h5>Howto download Experiment Results</h5>Redirect stdout to <h4>> /tmp/{{experiment.githubRepo}}_{{exp.name}}.out </h4> Results will be downloaded to: <h5> ~/.karamel/results/</h5> For example: <br/> java -jar myProg.jar > /tmp/{{experiment.githubRepo}}_{{exp.name}}.out"></span>
+                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip-html-unsafe="<h4>Instructions</h4>(1) Select the type of script for the Experiment. <br/> (2) Write the experiment code in the box below. <br/><h5>Bash</h5>You should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment can be written in the form: #{node{{experiment.githubRepo}}.configParamKey}, where configParamKey is a key taken from any of the configuration files defined.<br/><h5>Python</h5>Write python code in the box below."></span>
                             </div>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>
                                 <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-                                    <textarea id="experimentScript" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified = true" class="form-control"></textarea>
+                                    <textarea id="experimentScript" style="width:100%b; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified = true" class="form-control"></textarea>
                                 </div>
                             </div>
                             <br/>
@@ -306,19 +307,18 @@
                     </accordion>              
                 </div>
             </div>
-
         </form>
 
         <div class ="row" ng-show="!landing && status.advanced">
             <span class="col-md-1 col-lg-1"></span>
 
-            <div class ="row col-xs-2 col-sm-6 col-md-6 col-lg-6">
+            <div class ="row col-xs-8 col-sm-8 col-md-8 col-lg-8">
 
                 <div class="form-group">
                     <label  style="margin-left: 10px">Add Experiment Script</label>
                     <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
                           tooltip="You can have multiple experiment recipes. Write the name of the new experiment recipe and click 'add'."></span>
-                    <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="20" placeholder="Name of new experiment script" tooltip="Don't forget to select the type of experiment as either bash or python."  tooltip-trigger="focus" tooltip-placement="right" >
+                    <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="20" placeholder="Name of new experiment script. Prefix the name with 'experiment' to be able to automatically download its results" tooltip="Prefix the name with 'experiment' to be able to automatically download its results. For example, 'experimentFlinkJob'."  tooltip-trigger="focus" tooltip-placement="right" >
                     <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default" tabindex="21">Add</button>
                 </div>        
             </div>        

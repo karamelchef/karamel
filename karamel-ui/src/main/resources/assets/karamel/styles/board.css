@@ -518,3 +518,11 @@ text-align: center;
 .border-button {
   background-color: yellow;
 }
+
+
+.tooltip-inner {
+    max-width: 450px;
+    /* If max-width does not work, try using width instead */
+    width: 450px;
+    background-color: #4d394b;
+}

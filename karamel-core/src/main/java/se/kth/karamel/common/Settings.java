@@ -205,7 +205,7 @@ public class Settings {
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + ".out";
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {

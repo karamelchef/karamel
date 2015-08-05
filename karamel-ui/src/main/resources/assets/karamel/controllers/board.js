@@ -471,6 +471,18 @@ angular.module('karamel.main')
                         }
                         return $rootScope.activeCluster.hasBaremetal();
                     },
+                    hasGce: function () {
+                        if (_isNullCluster()) {
+                            return false;
+                        }
+                        return $rootScope.activeCluster.hasGce();
+                    },
+                    hasOpenStack: function () {
+                        if (_isNullCluster()) {
+                            return false;
+                        }
+                        return $rootScope.activeCluster.hasOpenStack();
+                    },
                     launchCluster: function () {
                         var cluster = $rootScope.activeCluster;
                         if (cluster === null) {
