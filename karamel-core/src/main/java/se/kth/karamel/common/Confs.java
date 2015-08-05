@@ -56,10 +56,13 @@ public class Confs<K extends String, V extends String> extends Properties {
       File file = new File(folder, Settings.KARAMEL_CONF_NAME);
       out = new FileOutputStream(file);
       store(out, "Karamel configurations");
-      Set<PosixFilePermission> perms = new HashSet<>();
-      perms.add(PosixFilePermission.OWNER_READ);
-      perms.add(PosixFilePermission.OWNER_WRITE);
-      Files.setPosixFilePermissions(file.toPath(), perms);
+
+      if ( System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+        Set<PosixFilePermission> perms = new HashSet<>();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        Files.setPosixFilePermissions(file.toPath(), perms);
+      }
     } catch (IOException ex) {
       logger.error("", ex);
     } finally {

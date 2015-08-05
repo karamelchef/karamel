@@ -46,14 +46,17 @@ public class SshKeyService {
     }
     File pubFile = new File(folder, Settings.SSH_PUBKEY_FILENAME);
     File priFile = new File(folder, Settings.SSH_PRIVKEY_FILENAME);
-    Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
-    perms.add(PosixFilePermission.OWNER_READ);
-    perms.add(PosixFilePermission.OWNER_WRITE);
-    try {
-      Files.setPosixFilePermissions(priFile.toPath(), perms);
-    } catch (IOException ex) {
-      logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on "
+    
+    if ( System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+      Set<PosixFilePermission> perms = new HashSet<PosixFilePermission>();
+      perms.add(PosixFilePermission.OWNER_READ);
+      perms.add(PosixFilePermission.OWNER_WRITE);
+      try {
+        Files.setPosixFilePermissions(priFile.toPath(), perms);
+      } catch (IOException ex) {
+        logger.error("If you are running Windows, this is not an error. Failed to set posix permissions on "
           + "generated private ssh-key. ", ex);
+      }
     }
     Map<String, String> keys = SshKeys.generate();
     String pub = keys.get("public");

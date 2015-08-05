@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
-import java.io.File;
 import se.kth.karamel.common.Settings;
 import static se.kth.karamel.common.Settings.GITHUB_BASE_URL;
 import static se.kth.karamel.common.Settings.GITHUB_DEFAULT_BRANCH;
@@ -116,7 +115,7 @@ public class CookbookUrls {
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
       String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
-      String recipesHome = rawHome + File.separator + "recipes" + File.separator;
+      String recipesHome = rawHome + "/recipes/";
       CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
           berksFile, configFile, recipesHome);
       return urls;
