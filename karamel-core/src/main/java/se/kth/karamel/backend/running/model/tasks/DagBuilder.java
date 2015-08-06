@@ -173,7 +173,7 @@ public class DagBuilder {
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, submitter, urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH,
-              urls.repoHome, urls.repoName, urls.subCookbook, urls.branch);
+              urls.repoHome, urls.repoName, urls.subCookbookName, urls.branch);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
           String recipeName = jc.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
