@@ -150,6 +150,19 @@ public class CookbookUrlsTest {
     assertEquals(repo, urls2.repoName);
     assertEquals(branch, urls2.branch);
 
+    CookbookUrls.Builder builder21 = new CookbookUrls.Builder();
+    CookbookUrls urls21 = builder21.url("hopstart/hadoop-chef/tree/master/cookbooks/testcb").build();
+    assertEquals(id, urls21.id);
+    assertEquals(home, urls21.home);
+    assertEquals(repoHome, urls21.repoHome);
+    assertEquals(rawHome, urls21.rawHome);
+    assertEquals(metadataFile, urls21.metadataFile);
+    assertEquals(attFile, urls21.attrFile);
+    assertEquals(karamelFile, urls21.karamelFile);
+    assertEquals(berksFile, urls21.berksfile);
+    assertEquals(repo, urls21.repoName);
+    assertEquals(branch, urls21.branch);
+
     CookbookUrls.Builder builder3 = new CookbookUrls.Builder();
     CookbookUrls urls3 = builder3.url("https://github.com/hopstart/hadoop-chef").subCookbookName("testcb").build();
     assertEquals(id, urls1.id);
@@ -201,6 +214,19 @@ public class CookbookUrlsTest {
     assertEquals(berksFile, urls6.berksfile);
     assertEquals(repo, urls6.repoName);
     assertEquals(branch, urls6.branch);
+
+    CookbookUrls.Builder builder7 = new CookbookUrls.Builder();
+    CookbookUrls urls7 = builder7.url("http://github.com/hopstart/hadoop-chef/tree/master/cookbooks/testcb").build();
+    assertEquals(id, urls7.id);
+    assertEquals(home, urls7.home);
+    assertEquals(repoHome, urls7.repoHome);
+    assertEquals(rawHome, urls7.rawHome);
+    assertEquals(metadataFile, urls7.metadataFile);
+    assertEquals(attFile, urls7.attrFile);
+    assertEquals(karamelFile, urls7.karamelFile);
+    assertEquals(berksFile, urls7.berksfile);
+    assertEquals(repo, urls7.repoName);
+    assertEquals(branch, urls7.branch);
   }
 
   @Test

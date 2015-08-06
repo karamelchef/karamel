@@ -77,7 +77,16 @@ public class CookbookUrls {
     }
 
     public CookbookUrls build() throws CookbookUrlException {
-      if (url.matches(REPO_WITH_BRANCH_PATTERN) || url.matches(GITHUB_REPO_WITH_BRANCH_PATTERN)) {
+      if (url.matches(Settings.REPO_WITH_SUBCOOKBOOK_PATTERN) 
+          || url.matches(Settings.GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN)) {
+        String[] comp = url.split(SLASH);
+        user = comp[comp.length - 6];
+        repo = comp[comp.length - 5];
+        if (branch == null) {
+          branch = comp[comp.length - 3];
+        }
+        subCookbookName = comp[comp.length - 1];
+      } else if (url.matches(REPO_WITH_BRANCH_PATTERN) || url.matches(GITHUB_REPO_WITH_BRANCH_PATTERN)) {
         String[] comp = url.split(SLASH);
         user = comp[comp.length - 4];
         repo = comp[comp.length - 3];
@@ -93,8 +102,11 @@ public class CookbookUrls {
         }
       } else {
         throw new CookbookUrlException(String.format("'%s' is not a valid Github url, it must be one the following "
-            + "formats: \n'http(s)://github.com/<user_name>/<repo>', \n'http(s)://github.com/<user_name>/<repo>/tree/"
-            + "<branch>', \n'<user_name>/<repo>', or \n'<user_name>/<repo>/tree/<branch>'", url));
+            + "formats: \n'http(s)://github.com/<user_name>/<repo>', "
+            + "\n'http(s)://github.com/<user_name>/<repo>/tree/<branch>', "
+            + "\n'http(s)://github.com/<user_name>/<repo>/tree/<branch>/cookbooks/<sub-cookbook>', "
+            + "\n'<user_name>/<repo>', \n'<user_name>/<repo>/tree/<branch>',"
+            + " or \n'<user_name>/<repo>/tree/<branch>/cookbooks/<sub-cookbook>'", url));
       }
 
       String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL;
