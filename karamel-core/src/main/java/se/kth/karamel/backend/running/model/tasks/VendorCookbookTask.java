@@ -30,7 +30,7 @@ public class VendorCookbookTask extends Task {
 
   public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, 
       String githubRepoUrl, String githubRepoName, String subCookbookName, String branch) {
-    super("clone and vendor " + subCookbookName, machine, submitter);
+    super("clone and vendor " + ((subCookbookName == null) ? githubRepoName: subCookbookName), machine, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;
     this.githubRepoName = githubRepoName;
