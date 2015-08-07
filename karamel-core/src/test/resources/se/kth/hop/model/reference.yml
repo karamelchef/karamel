@@ -8,10 +8,12 @@ ec2:                                                                            
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
   hopagent:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/hopagent-chef"
+    github: "hopstart/test-repo"
+    cookbook: "hopagent-chef"
     branch: "master"    
   hopdashboard:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/hopdashboard-chef"
+    github: "hopstart/test-repo"
+    cookbook: "hopdashboard-chef"
     branch: "master"  
   hop: 
     github: "hopstart/hop-chef"

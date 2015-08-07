@@ -26,6 +26,7 @@ public class Cookbook {
     this.github = cookbook.getGithub();
     this.version = cookbook.getVersion();
     this.branch = cookbook.getBranch();
+    this.cookbook = cookbook.cookbook;
   }
 
   public String getBranch() {

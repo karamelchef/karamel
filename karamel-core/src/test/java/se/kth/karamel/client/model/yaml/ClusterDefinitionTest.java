@@ -6,6 +6,8 @@
 package se.kth.karamel.client.model.yaml;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import se.kth.karamel.client.model.Ec2;
@@ -17,17 +19,22 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.common.IoUtils;
+import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
  * @author kamal
  */
-public class YamlTest {
+public class ClusterDefinitionTest {
 
   @Test
-  public void testReferenceYaml() throws Exception {
+  public void testYamlToYamlObject() throws Exception {
     YamlCluster cluster;
     String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
     cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
@@ -57,10 +64,12 @@ public class YamlTest {
 
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
     assertTrue(cookbooks.containsKey("hopagent"));
-    assertEquals("hopstart/hopagent-chef", cookbooks.get("hopagent").getGithub());
+    assertEquals("hopstart/test-repo", cookbooks.get("hopagent").getGithub());
+    assertEquals("hopagent-chef", cookbooks.get("hopagent").getCookbook());
     assertEquals("master", cookbooks.get("hopagent").getBranch());
     assertTrue(cookbooks.containsKey("hop"));
     assertEquals("hopstart/hop-chef", cookbooks.get("hop").getGithub());
+    assertNull(cookbooks.get("hop").getCookbook());
     assertEquals("master", cookbooks.get("hop").getBranch());
     assertTrue(cookbooks.containsKey("cuneiform"));
     assertEquals("biobankcloud/cuneiform-chef", cookbooks.get("cuneiform").getGithub());
@@ -111,6 +120,19 @@ public class YamlTest {
   }
 
   @Test
+  public void testJsonCookbook() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
+    YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
+    Map<String, Cookbook> cookbooks = cluster.getCookbooks();
+    assertTrue(cookbooks.containsKey("hopagent"));
+    Cookbook cookbook = cookbooks.get("hopagent");
+    JsonCookbook jc = new JsonCookbook(cookbook, "hopagent", new HashMap<String, Object>());
+    assertEquals("hopstart/test-repo", jc.getGithub());
+    assertEquals("hopagent-chef", jc.getCookbook());
+  }
+
+  @Test
   public void foldOutAttrTest() throws MetadataParseException {
     YamlScope yamlScope = new YamlScope() {
     };
@@ -147,8 +169,22 @@ public class YamlTest {
 
     Yaml yaml = new Yaml();
     String output = yaml.dump(cluster);
+    String expected = "attrs:\n"
+        + "  ndb:\n"
+        + "    nn: {jmxport: '8077', http_port: '50070'}\n"
+        + "    mysql:\n"
+        + "      server:\n"
+        + "        username: root\n"
+        + "        ports: ['5003', '5004', '5005']\n"
+        + "";
+    assertEquals(expected, output);
+  }
 
-    System.out.println(output);
+  @Test(expected = ValidationException.class)
+  public void testInvalidGroupSizeForBaremetal() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/validations.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
   }
 
 }
