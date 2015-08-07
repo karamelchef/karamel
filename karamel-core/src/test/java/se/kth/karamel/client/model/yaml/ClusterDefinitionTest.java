@@ -36,7 +36,7 @@ public class ClusterDefinitionTest {
   @Test
   public void testYamlToYamlObject() throws Exception {
     YamlCluster cluster;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/reference.yml");
     cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
     assertNotNull(cluster);
     assertEquals("ReferenceYaml", cluster.getName());
@@ -122,7 +122,7 @@ public class ClusterDefinitionTest {
   @Test
   public void testJsonCookbook() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/reference.yml");
     YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
     assertTrue(cookbooks.containsKey("hopagent"));
@@ -183,7 +183,7 @@ public class ClusterDefinitionTest {
   @Test(expected = ValidationException.class)
   public void testInvalidGroupSizeForBaremetal() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/validations.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations.yml");
     ClusterDefinitionService.yamlToJson(yaml);
   }
 

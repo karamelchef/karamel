@@ -41,7 +41,7 @@ public class CommandServiceTest {
   @Test
   public void testOfflineDag() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/hopshub.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/hopshub.yml");
     ClusterDefinitionService.saveYaml(yaml);
     CommandResponse commandResponse = CommandService.processCommand("tdag hopshub");
     assertEquals(CommandResponse.Renderer.INFO, commandResponse.getRenderer());
