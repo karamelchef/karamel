@@ -76,8 +76,8 @@ import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
-
-  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(KaramelServiceApplication.class);
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
+      KaramelServiceApplication.class);
 
   private static KaramelApi karamelApiHandler;
 

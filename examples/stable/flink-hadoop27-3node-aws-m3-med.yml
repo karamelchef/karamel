@@ -11,6 +11,10 @@ cookbooks:
     github: "hopshadoop/flink-chef"
     branch: "master"
 
+attrs:
+  hadoop:
+    version: 2.7.1
+
 groups: 
   namenodes:
     size: 1

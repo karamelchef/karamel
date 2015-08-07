@@ -111,11 +111,11 @@ public class KaramelizedCookbook {
           er = ExperimentRecipeParser.parse(r.getName(), experimentContent, configFileName, configFileContents);
         }
       } catch (IOException ex) {
-        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-            + urls.recipesHome + experimentFilename, ex);
+        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.FINE, "This cookbook does not have a "
+            + "karamelized experiment: " + urls.recipesHome + experimentFilename, ex);
       } catch (RecipeParseException ex) {
-        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
-            "Experiment recipe not a valid format in this cookbook: "
+        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.WARNING,
+            "The recipe is not in a karamelized format: "
             + urls.recipesHome + experimentFilename, ex);
       }
 

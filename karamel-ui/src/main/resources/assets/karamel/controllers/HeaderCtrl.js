@@ -1,12 +1,12 @@
 'use strict';
 
 angular.module('karamel.main')
-        .controller('HeaderCtrl', ['$timeout', '$scope', 'BoardService', 'KaramelCoreRestServices',
-            function ($timeout, $scope, BoardService, KaramelCoreRestServices) {
+        .controller('HeaderCtrl', ['$timeout', '$scope', '$rootScope', 'BoardService', 'KaramelCoreRestServices',
+            function ($timeout, $scope, $rootScope, BoardService, KaramelCoreRestServices) {
 
                 var self = this;
 
-                $scope.connected = true;
+                $rootScope.connected = true;
 
                 $scope.hasEc2 = function () {
                     return BoardService.hasEc2();
@@ -17,11 +17,11 @@ angular.module('karamel.main')
                 };
 
                 $scope.hasProvider = function () {
-                    return $scope.hasEc2() || $scope.hasBaremetal() || 
+                    return $scope.hasEc2() || $scope.hasBaremetal() ||
                             $scope.hasGce() || $scope.hasOpenStack();
                 };
 
-                $scope.hasGce= function () {
+                $scope.hasGce = function () {
                     return BoardService.hasGce();
                 };
 
@@ -37,18 +37,19 @@ angular.module('karamel.main')
                 function pingServer() {
                     KaramelCoreRestServices.ping()
                             .success(function (data, status, headers, config) {
-                                $scope.connected = true;
+                                $rootScope.connected = true;
+                                restartTimer();
                             })
                             .error(function (data, status, headers, config) {
-                                $scope.connected = false;
+                                $rootScope.connected = false;
                             });
-                    restartTimer();
                 }
 
 
                 function _initScope() {
                     restartTimer();
-                };
+                }
+                ;
 
                 _initScope();
             }])

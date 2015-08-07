@@ -65,13 +65,9 @@
             <div class="row">    
 
                 <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <label class="control-label">Name: </label>
                     <span>{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}</span>     
-                </div>
-                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-4">
-                    <label class="control-label">Clone URL:</label>
-                    <a ng-href="{{getUrl()}}">{{experiment.urlGitClone| limitTo: 48}}{{ experiment.urlGitClone > 48 ? '...' : ''}}</a>
                 </div>
                 <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
                     <button type="button" class="btn"  ng-disabled="!status.isModified"
@@ -93,19 +89,30 @@
                 </div>
 
             </div>
+            <div class="row">    
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+                    <label class="control-label">Dependency:</label>
+                    cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', branch: master
+                    <!--<a ng-href="{{getUrl()}}">{{experiment.urlGitClone| limitTo: 48}}{{ experiment.urlGitClone > 48 ? '...' : ''}}</a>-->
+                </div>
+            </div>
 
             <div class="row form-group" ng-show="!landing">    
-                <div class="col-sm-10 col-md-10 col-lg-10">    
+                <!--<div class="col-sm-10 col-md-10 col-lg-10">-->    
                     <span class="col-md-1 col-lg-1"></span>
-                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced 
+                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced &nbsp;
                         <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
                     </label>
+                    
+<!--                    <span class="col-md-9 col-lg-9"></span>
+                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Dependency: </label>cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}'
                 </div>
                 <div class="col-sm-10 col-md-10 col-lg-10">    
                     <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" style="margin-right: 5px" ng-click="toggle()" ng-show="status.advanced">
                         <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
-                    </span>
-                </div>
+                    </span>-->
+                <!--</div>-->
             </div>
 
             <div class="row form-group col-lg-12" ng-show="status.advanced && !landing">
@@ -222,23 +229,6 @@
                                 </div>
                             </div>                            
                         </accordion-group>
-                        <!--                        <accordion close-others="false">
-                                                    <span class="col-md-1 col-lg-1" ng-show="status.advanced"></span>
-                                                    <accordion-group is-open="status.configOpen" ng-show="status.advanced">
-                                                        <accordion-heading>
-                                                            Configuration <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.configOpen, 'glyphicon-chevron-right': !status.configOpen}"></i>
-                                                        </accordion-heading>
-                        
-                                                        <div class="row form-group">
-                                                            <span class="col-md-1 col-lg-1"></span>
-                                                            <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                                                <div class="col-xs-4 col-sm-4 col-md-8 col-lg-8">
-                                                                <label for="configFile" class="text">Config File</label>
-                                                                <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="10"  class="form-control"></textarea>
-                                                            </div>
-                                                        </div>
-                                                    </accordion-group>-->
-
                     </accordion>
                 </div>
             </div>
@@ -250,7 +240,7 @@
                 <span class="col-md-1 col-lg-1"></span>
                 <div class="row form-group col-md-9 col-lg-9">
                     <accordion close-others="false">
-                        <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code">
+                        <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code track by $index">
                             <accordion-heading>
                                 <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
                                     <i class="glyphicon" ng-class="{'glyphicon-chevron-down': $scope.status.experiment[$index].status, 'glyphicon-chevron-right': !$scope.status.experiment[$index].status}"></i>
@@ -272,8 +262,8 @@
                                             >
                                     </select>
                                 </div>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-left glyphicon glyphicon-info-sign text-left pull-right" tooltip-placement="left" tooltip-html-unsafe="<h5>Howto download Experiment Results</h5>Redirect stdout to <h4>> /tmp/{{experiment.githubRepo}}_{{exp.name}}.out </h4> Results will be downloaded to: <h5> ~/.karamel/results/</h5> For example: <br/> java -jar myProg.jar > /tmp/{{experiment.githubRepo}}_{{exp.name}}.out"></span>
-                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip-html-unsafe="<h4>Instructions</h4>(1) Select the type of script for the Experiment. <br/> (2) Write the experiment code in the box below. <br/><h5>Bash</h5>You should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment can be written in the form: #{node{{experiment.githubRepo}}.configParamKey}, where configParamKey is a key taken from any of the configuration files defined.<br/><h5>Python</h5>Write python code in the box below."></span>
+                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-left glyphicon glyphicon-info-sign text-left pull-right" tooltip-placement="left" tooltip-html="<h5>Howto download Experiment Results</h5>Redirect stdout to <h4>> /tmp/{{experiment.githubRepo}}_{{exp.name}}.out </h4> Results will be downloaded to: <h5> ~/.karamel/results/</h5> For example: <br/> java -jar myProg.jar > /tmp/{{experiment.githubRepo}}_{{exp.name}}.out"></span>
+                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip-html="<h4>Instructions</h4>(1) Select the type of script for the Experiment. <br/> (2) Write the experiment code in the box below. <br/><h5>Bash</h5>You should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment can be written in the form: #{node{{experiment.githubRepo}}.configParamKey}, where configParamKey is a key taken from any of the configuration files defined.<br/><h5>Python</h5>Write python code in the box below."></span>
                             </div>
                             <div class="row form-group">
                                 <span class="col-md-1 col-lg-1"></span>

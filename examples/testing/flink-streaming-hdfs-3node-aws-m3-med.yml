@@ -10,11 +10,11 @@ cookbooks:
   flink: 
     github: "hopshadoop/flink-chef"
     branch: "master"
-  zookeeper: 
-    github: "biobankcloud/chef-zookeeper"
+  kzookeeper: 
+    github: "hopshadoop/kzookeeper"
     branch: "master"
-  kafka: 
-    github: "biobankcloud/kafka-cookbook"
+  kkafka: 
+    github: "hopshadoop/kkafka"
     branch: "master"
 
 attrs:
@@ -28,8 +28,8 @@ groups:
         - hadoop::nn
         - flink::jobmanager
         - flink::wordcount
-        - zookeeper
-        - kafka
+        - kzookeeper
+        - kkafka
   datanodes:
     size: 2
     recipes: 

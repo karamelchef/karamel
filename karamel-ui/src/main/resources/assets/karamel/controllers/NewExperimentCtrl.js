@@ -10,6 +10,16 @@ angular.module('karamel.main')
                 $scope.submitted = true;
                 $scope.submittedOngoing = false;
                 $scope.submittedMsg = "";
+                $scope.repoName = "";
+                $scope.repoDesc = "";
+
+                $scope.doFocus = function () {
+                    console.log('focus');
+                }
+
+                $scope.doBlur = function () {
+                    console.log('blur');
+                }
 
                 self.githubDetails = {
                     user: '',

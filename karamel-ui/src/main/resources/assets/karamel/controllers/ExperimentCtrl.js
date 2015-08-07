@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('karamel.main')
-        .controller('ExperimentCtrl', ['$log', '$scope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
+        .controller('ExperimentCtrl', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
             'GithubService', 'ModalService', 'ExperimentsService', 'BoardService',
-            function ($log, $scope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService,
+            function ($log, $scope, $rootScope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService,
                     ExperimentsService, BoardService) {
 
                 var self = this;
@@ -426,7 +426,6 @@ angular.module('karamel.main')
                         ]
                     };
                     restartTimer();
-
                 }
 
 
@@ -446,7 +445,9 @@ angular.module('karamel.main')
                             && $scope.experiment.name !== "") {
                         ExperimentsService.store($scope.experiment);
                     }
-                    restartTimer();
+                    if ($rootScope.connected) {
+                        restartTimer();
+                    }
                 }
 
 
@@ -482,12 +483,10 @@ angular.module('karamel.main')
                         $scope.status.experiment.push(statusEntry);
 
                     }
-
                 }
 
 
                 $scope.loadExperiment = function () {
-
 
                     KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
                             .success(function (data, status, headers, config) {
@@ -507,33 +506,9 @@ angular.module('karamel.main')
                 $scope.pushExperiment = function ($event) {
                     $event.preventDefault();
 
-//                    $scope.experimentNameInvalid = false;
-//                    $scope.githubOwnerInvalid = false;
-//                    $scope.userInvalid = false;
-//                    $scope.groupInvalid = false;
-//
-//                    if (!$scope.uploadExperiment.experimentName.$valid) {
-//                        $scope.experimentNameInvalid = true;
-//                    }
-//
-//                    if (!$scope.uploadExperiment.experimentName.$valid) {
-//                        $scope.experimentNameInvalid = true;
-//                    }
-//
-//                    if (!$scope.uploadExperiment.user.$valid) {
-//                        $scope.userInvalid = true;
-//                    }
-//
-//                    if (!$scope.uploadExperiment.group.$valid) {
-//                        $scope.groupInvalid = true;
-//                    }
-
-
-
                             KaramelCoreRestServices.pushExperiment($scope.experiment)
                                     .success(function (data, status, headers, config) {
                                         $scope.status.isModified = false;
-//                                        SweetAlert.swal("Saved.", "Experiment saved/pushed to GitHub. \\\m/", "success");
                                     })
                                     .error(function (data, status, headers, config) {
                                         SweetAlert.swal("Problem saving to GitHub", data.reason, "error");

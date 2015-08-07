@@ -20,7 +20,9 @@
                         </div>
                         <div class="row" >
                             <input id="newRepo" name="repoName" placeholder="Name of your new experiment repository" 
-                                   ng-model="repoName" class="form-control" type="text" tabindex="1">
+                                   ng-model="repoName" class="form-control" type="text" tabindex="1"
+                                   ng-focus="doFocus()" ng-blur="doBlur()"
+                                   >
                             <!--ng-pattern="[a-zA-Z]{3,}"-->
                         </div>
                     </div>

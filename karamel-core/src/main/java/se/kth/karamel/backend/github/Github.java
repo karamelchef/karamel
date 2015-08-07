@@ -28,7 +28,6 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import se.kth.karamel.backend.machines.SshMachine;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Settings;
@@ -41,16 +40,14 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class Github {
 
-  private static volatile String user="";
-  private static volatile String email="";
-  private static volatile String password="";
+  private static volatile String user = "";
+  private static volatile String email = "";
+  private static volatile String password = "";
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Github.class);
 
-  
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
 
-  
   private static final Map<String, List<OrgItem>> cachedOrgs = new HashMap<>();
   private static final Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
 
@@ -233,8 +230,8 @@ public class Github {
       r.setOwner(os.getOrganization(org));
       r.setDescription(description);
       rs.createRepository(org, r);
-      cloneRepo(org, repoName);      
-      cachedRepos.remove(org);      
+      cloneRepo(org, repoName);
+      cachedRepos.remove(org);
       return new RepoItem(repoName, description, r.getSshUrl());
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
@@ -259,7 +256,7 @@ public class Github {
       r.setDescription(description);
       rs.createRepository(r);
       cloneRepo(getUser(), repoName);
-      cachedRepos.remove(Github.getUser());      
+      cachedRepos.remove(Github.getUser());
     } catch (IOException ex) {
       Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
@@ -338,9 +335,8 @@ public class Github {
   }
 
   /**
-   * Adds a file to the Github repo's index. 
-   * If the file already exists, it will delete it and replace its contents with the new contents.
-   * You wil subsequenty need to commit the change and push the commit to github.
+   * Adds a file to the Github repo's index. If the file already exists, it will delete it and replace its contents with
+   * the new contents. You wil subsequenty need to commit the change and push the commit to github.
    *
    * @param owner
    * @param repoName
@@ -386,7 +382,7 @@ public class Github {
       RepoItem toRemove = null;
       List<RepoItem> repos = cachedRepos.get(owner);
       for (RepoItem r : repos) {
-        if (r.getName().compareToIgnoreCase(repoName)==0) {
+        if (r.getName().compareToIgnoreCase(repoName) == 0) {
           toRemove = r;
         }
       }

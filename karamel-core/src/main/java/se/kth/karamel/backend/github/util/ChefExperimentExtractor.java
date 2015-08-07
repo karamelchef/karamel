@@ -8,8 +8,10 @@ package se.kth.karamel.backend.github.util;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -151,40 +153,52 @@ public class ChefExperimentExtractor {
       String localDependencies = repoName + Settings.COOKBOOK_DELIMITER + "install" + System.lineSeparator()
           + experimentContext.getLocalDependencies();
       String[] lDeps = localDependencies.split(System.lineSeparator());
+
+      Set<String> lDepsRemoveDuplicates = new HashSet<>();
       StringBuilder lDepsFinal = new StringBuilder();
       for (String s : lDeps) {
         s = s.trim();
         if (!s.isEmpty()) {
-          lDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
+          lDepsRemoveDuplicates.add(s);
         }
       }
+      for (String s : lDepsRemoveDuplicates) {
+        lDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
+      }
+
       String globalDependencies = experimentContext.getGlobalDependencies();
       String[] gDeps = globalDependencies.split(System.lineSeparator());
+      Set<String> gDepsRemoveDuplicates = new HashSet<>();
       StringBuilder gDepsFinal = new StringBuilder();
       for (String s : gDeps) {
         s = s.trim();
         if (!s.isEmpty()) {
-          gDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
+          gDepsRemoveDuplicates.add(s);
         }
       }
+      for (String s : gDepsRemoveDuplicates) {
+        gDepsFinal.append(YAML_DEPENDENCY_PREFIX).append(s).append(System.lineSeparator());
+      }
 
-      StringBuilder recipeDeps = new StringBuilder();
+      StringBuilder recipeDepsKaramelfile = new StringBuilder();
       for (Code experiment : experiments) {
         String recipeName = experiment.getName();
-        recipeDeps.append(YAML_RECIPE_PREFIX).append(repoName).append(Settings.COOKBOOK_DELIMITER).append(recipeName)
+        recipeDepsKaramelfile.append(YAML_RECIPE_PREFIX).append(repoName).append(Settings.COOKBOOK_DELIMITER).append(
+            recipeName)
             .append(System.lineSeparator());
-        recipeDeps.append("    local:").append(System.lineSeparator());
-        recipeDeps.append(lDepsFinal.toString());
-        recipeDeps.append("    global:").append(System.lineSeparator());
-        recipeDeps.append(gDepsFinal.toString());
+        recipeDepsKaramelfile.append("    local:").append(System.lineSeparator());
+        recipeDepsKaramelfile.append(lDepsFinal.toString());
+        recipeDepsKaramelfile.append("    global:").append(System.lineSeparator());
+        recipeDepsKaramelfile.append(gDepsFinal.toString());
       }
 
       StringBuilder karamelContents = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_KARAMELFILE,
           "name", repoName,
-          "next_recipes", recipeDeps.toString()
+          "next_recipes", recipeDepsKaramelfile.toString()
       );
-      String ymlString = experimentContext.getClusterDefinition();
+      // TODO - integration with cluster defn file
+//      String ymlString = experimentContext.getClusterDefinition();
 
       String berksfile = experimentContext.getBerksfile();
 

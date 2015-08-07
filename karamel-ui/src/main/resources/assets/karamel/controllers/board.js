@@ -217,7 +217,7 @@ angular.module('karamel.main')
                     },
                     removeRecipe: function (group, cookbook, recipe) {
                         SweetAlert.swal({
-                            title: "Are you sure?",
+                            title: "Remove this recipe?",
                             text: "The Recipe will be deleted from the Node Group.",
                             type: "warning",
                             showCancelButton: true,
@@ -250,7 +250,7 @@ angular.module('karamel.main')
                     },
                     removeGroup: function (group) {
                         SweetAlert.swal({
-                            title: "Are you sure?",
+                            title: "Remove this group?",
                             text: "The Node Group will be permanently deleted.",
                             type: "warning",
                             showCancelButton: true,
@@ -284,7 +284,7 @@ angular.module('karamel.main')
                     },
                     exitKaramel: function () {
                         SweetAlert.swal({
-                            title: "Are you sure?",
+                            title: "Shutdown Karamel engine?",
                             text: "The Karamel Engine will shutdown and ongoing deployments will be lost.",
                             type: "warning",
                             showCancelButton: true,
