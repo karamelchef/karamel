@@ -22,8 +22,10 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.scanner.ScannerException;
 import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.client.model.yaml.YamlGroup;
@@ -52,6 +54,7 @@ public class ClusterDefinitionService {
     yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
@@ -136,7 +139,9 @@ public class ClusterDefinitionService {
 
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = yamlToYamlObject(yaml);
-    return new JsonCluster(cluster);
+    JsonCluster jsonCluster = new JsonCluster(cluster);
+    ClusterDefinitionValidator.validate(jsonCluster);
+    return jsonCluster;
   }
 
   public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {

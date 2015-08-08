@@ -93,11 +93,11 @@ public class ChefJsonGenerator {
   }
 
   public static void addCookbookAttributes(JsonCookbook jc, JsonObject root) {
-    Set<Map.Entry<String, String>> entrySet = jc.getAttrs().entrySet();
-    for (Map.Entry<String, String> entry : entrySet) {
+    Set<Map.Entry<String, Object>> entrySet = jc.getAttrs().entrySet();
+    for (Map.Entry<String, Object> entry : entrySet) {
       String[] keyComps = entry.getKey().split(Settings.ATTR_DELIMITER);
-      String valStr = entry.getValue();
-      Object value = valStr;
+      Object value = entry.getValue();
+//      Object value = valStr;
 //      if (valStr.startsWith("$")) {
 //        if (valStr.contains(".")) {
 //          value = cluster.getVariable(valStr.substring(1));

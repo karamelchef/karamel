@@ -13,7 +13,9 @@ import se.kth.karamel.client.model.Scope;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonScope;
+import se.kth.karamel.common.CollectionsUtil;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -30,21 +32,21 @@ public abstract class YamlScope extends Scope {
     super(scope);
     List<JsonCookbook> cookbooks = scope.getCookbooks();
     for (JsonCookbook cb : cookbooks) {
-      Set<Map.Entry<String, String>> entries = cb.getAttrs().entrySet();
-      for (Map.Entry<String, String> entry : entries) {
+      Set<Map.Entry<String, Object>> entries = cb.getAttrs().entrySet();
+      for (Map.Entry<String, Object> entry : entries) {
         foldOutAttr(entry.getKey(), entry.getValue(), attrs);
       }
     }
   }
 
-  protected void foldOutAttr(String key, String value, Map<String, Object> map) throws MetadataParseException {
+  protected void foldOutAttr(String key, Object value, Map<String, Object> map) throws MetadataParseException {
     String[] comps = key.split(Settings.ATTR_DELIMITER);
     Map<String, Object> parent = map;
     for (int i = 0; i < comps.length; i++) {
       String comp = comps[i];
       if (i == comps.length - 1) {
         if (parent.containsKey(comp) && !parent.get(comp).equals(value)) {
-          throw new MetadataParseException(String.format("Ambiguous value for attribute '%s' 1st '%s' 2nd '%s' ", key, 
+          throw new MetadataParseException(String.format("Ambiguous value for attribute '%s' 1st '%s' 2nd '%s' ", key,
               parent.get(comp), value));
         } else {
           parent.put(comp, value);
@@ -64,7 +66,7 @@ public abstract class YamlScope extends Scope {
   }
 
   @Override
-  public String getAttr(String key) {
+  public Object getAttr(String key) {
     String[] comps = key.split(Settings.ATTR_DELIMITER);
     Map<String, Object> parent = attrs;
     for (int i = 0; i < comps.length; i++) {
@@ -76,7 +78,12 @@ public abstract class YamlScope extends Scope {
         parent = (Map<String, Object>) child;
       } else {
         if (i == comps.length - 1) {
-          return child.toString();
+          if (child instanceof List) {
+            List<Object> list = (List<Object>) child;
+            return CollectionsUtil.asStringList(list);
+          } else {
+            return child.toString();
+          }
         } else {
           return null;
         }
@@ -94,12 +101,15 @@ public abstract class YamlScope extends Scope {
     this.attrs = attrs;
   }
 
-  public Map<String, String> flattenAttrs() {
+  public Map<String, Object> flattenAttrs() throws ValidationException {
     return flattenAttrs(attrs, "");
   }
 
-  public Map<String, String> flattenAttrs(Map<String, Object> map, String partialName) {
-    Map<String, String> flatten = new HashMap<>();
+  public Map<String, Object> flattenAttrs(Map<String, Object> map, String partialName) throws ValidationException {
+    Map<String, Object> flatten = new HashMap<>();
+    if (map == null) {
+      throw new ValidationException("attributes block cannot be empty");
+    }
     Set<Map.Entry<String, Object>> entrySet = map.entrySet();
 
     for (Map.Entry<String, Object> entry : entrySet) {
@@ -108,7 +118,14 @@ public abstract class YamlScope extends Scope {
       if (value instanceof Map) {
         flatten.putAll(flattenAttrs((Map<String, Object>) value, key));
       } else {
-        flatten.put(key, value.toString());
+        if (value == null) {
+          throw new ValidationException(String.format("attribute '%s' doesn't have any value", key));
+        } else if (value instanceof List) {
+          List<Object> list = (List<Object>) value;
+          flatten.put(key, CollectionsUtil.asStringList(list));
+        } else {
+          flatten.put(key, value.toString());
+        }
       }
     }
     return flatten;

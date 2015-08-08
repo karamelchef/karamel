@@ -7,53 +7,23 @@ ec2:                                                                            
     price: 0.1
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
-  hopagent:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/hopagent-chef"
+  kagent:                                                                     #'name' is an alias used in the yaml
+    github: "karamelchef/kagent-chef"
     branch: "master"    
-  hopdashboard:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/hopdashboard-chef"
+  hopshub:                                                                     #'name' is an alias used in the yaml
+    github: "hopshadoop/hopshub-chef"
     branch: "master"  
-  hop: 
-    github: "hopstart/hop-chef"
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
-  ndb:
-    github: "hopstart/ndb-chef"
-    branch: "master"
-  cuneiform: 
-    github: "biobankcloud/cuneiform-chef"
+  hiway: 
+    github: "biobankcloud/hiway-chef"
+  ndb: 
+    github: "hopshadoop/ndb-chef"
     
 attrs:
-#  hadoop:
-#    version: 2.2.0 #used in cuneiform-chef
-#  hop:
-#    version: 2.2.0 #used in hop-chef
-  mysql:
-    user: admin  #used in hop-chef
-  ndb:
-    ndbapi:
-        private_ips: $ndb.private_ips
-        public_ips: $ndb.public_ips
-    nn: 
-        jmxport: 8077
-        http_port: 50070
-    mgmd:
-        port: 1186        
-    ndbd:
-        port: 10000 
-  hop:
-    ports: ['123', '134', '145']
-    dn:
-      http_port: 50075
-    yarn:
-      ps_port: 20888
-    rm:
-      http_port: 8088
-      jmxport: 8042
-    nm:
-      jmxport: 8083
-      http_port: 8042
-    jhs:
-      http_port: 19888
+  hadoop: 
+    version: 2.2.2
 
 groups: 
   dashboard:
@@ -61,24 +31,21 @@ groups:
     ec2:                                                                        #this group inherits 'ec2' from global settings while it overwrites type of machines to large                                                  
         type: m3.large
     recipes:                                                                    #List of the recipes to be installed on this group, the convention is <cookbook_name>::<recipe_name>, if recipe_name is not specified it will assuem the 'default' recipe of the cookbook
-        - hopagent
-        - hopdashboard
+        - kagent
+        - hopshub::hopshub
         - ndb::mysqld
-    attrs:                                                                      #Group-scoped attributes could be defined, it will override global-scoped attributes
-        ndb:
-            mysqld: 3306                                                            
   namenodes:
     size: 2
     ec2: 
         type: m3.medium
     recipes: 
-        - hopagent
+        - kagent
         - ndb::memcached
         - ndb::mysqld
         - ndb::mgmd
-        - hop::nn
-        - hop::rm
-        - hop::jhs                                                              #Single recipe is acceptable, all will be added to the list of recipes for this group
+        - hops::nn
+        - hops::rm
+        - hops::jhs                                                              #Single recipe is acceptable, all will be added to the list of recipes for this group
   ndb:
     size: 2 
     baremetal: 
@@ -88,16 +55,16 @@ groups:
           - 192.168.33.14
         ip: 192.168.33.15
     recipes: 
-        - hopagent
+        - kagent
         - ndb::ndbd
   datanodes:
     size: 4
     ec2: 
         type: m3.medium
     recipes: 
-    - hopagent
-    - hop::dn
-    - hop::nm
+    - kagent
+    - hops::dn
+    - hops::nm
   gcevms:
     size: 3
     gce: 

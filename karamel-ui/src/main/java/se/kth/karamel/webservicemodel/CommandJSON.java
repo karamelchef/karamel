@@ -35,6 +35,7 @@ public class CommandJSON {
   String renderer;
   String errormsg;
   String successmsg;
+  String context;
   List<CommandResponse.MenuItem> menuItems = new ArrayList();
 
   public String getCommand() {
@@ -93,4 +94,12 @@ public class CommandJSON {
     this.menuItems = menuItems;
   }
 
+  public String getContext() {
+    return context;
+  }
+
+  public void setContext(String context) {
+    this.context = context;
+  }
+  
 }
