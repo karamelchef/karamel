@@ -5,11 +5,8 @@
  */
 package e2e.se.kth.karamel.client.api;
 
-import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -18,6 +15,12 @@ import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.exception.KaramelException;
+
+import java.io.IOException;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -250,6 +253,15 @@ public class KaramelApiTest {
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
     }
+  }
+
+  @Test
+  public void testNovaJSONconversion() throws KaramelException, IOException, InterruptedException {
+    //CARE WITH NEW LINE CHARACTERS FROM WINDOWS AND UNIX on the file!
+    String expectedString = Resources.toString(Resources.getResource("se/kth/hop/json/flink_nova.json"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    assertTrue(expectedString.equals(json));
   }
 
 }

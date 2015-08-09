@@ -1,0 +1,27 @@
+name: flinknova
+nova:
+  flavor: 1
+  region: regionSICS
+  image: ubuntu-1404
+  endpoint: 10.20.40.30
+
+cookbooks:
+  hadoop:
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink:
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+
+groups:
+  namenodes:
+    size: 1
+    recipes:
+        - hadoop::nn
+        - flink::jobmanager
+        - flink::wordcount
+  datanodes:
+    size: 50
+    recipes:
+        - hadoop::dn
+        - flink::taskmanager
