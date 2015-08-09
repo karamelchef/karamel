@@ -27,7 +27,7 @@ public class TextTableTest {
   @Test
   public void testMakeTable() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hopshub.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     List<MachineRuntime> machines = dummyRuntime.getGroups().get(1).getMachines();
@@ -61,14 +61,17 @@ public class TextTableTest {
     data = " ";
     len = TextTable.realDataLen(data);
     Assert.assertEquals(1, len);
-    data = "<a kref='shellconnect hopshub1'>hopshub1</a>";
+    String name = "hopsworks1";
+    String website = "Karamel Website";
+    data = "<a kref='shellconnect hopsworks1'>" + name + "</a>";
     len = TextTable.realDataLen(data);
-    Assert.assertEquals(8, len);
-    data = "baba <a kref='shellconnect hopshub1'>hopshub1</a> mkmk<<>>";
+    Assert.assertEquals(name.length(), len);
+    data = "baba <a kref='shellconnect hopsworks1'>" + name + "</a> mkmk<<>>";
     len = TextTable.realDataLen(data);
-    Assert.assertEquals(22, len);
-    data = "baba <a kref='shellconnect hopshub1'>hopshub1</a> mkmk<<>> <a href='http://www.karamel.io/'>Karamel Website</a> !!'''";
+    Assert.assertEquals(("baba ".length() + name.length() + " mkmk<<>>".length()), len);
+    data = "baba <a kref='shellconnect hopsworks1'>" + name + "</a> mkmk<<>> <a href='http://www.karamel.io/'>" +
+        website + "</a>";
     len = TextTable.realDataLen(data);
-    Assert.assertEquals(44, len);
+    Assert.assertEquals("baba ".length() + name.length() +  " mkmk<<>> ".length() + website.length(), len);
   }
 }

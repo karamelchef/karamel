@@ -6,6 +6,7 @@
 package se.kth.karamel.backend;
 
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.client.model.Ec2;
@@ -17,9 +18,8 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is 
- * stored here in memory. It is valid just until the system is running otherwise it will disappear.  
- 
+ * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is
+ * stored here in memory. It is valid just until the system is running otherwise it will disappear.  *
  * @author kamal
  */
 public class ClusterContext {
@@ -40,28 +40,21 @@ public class ClusterContext {
     return sudoAccountPasswordRequired;
   }
 
-  public void setGithubEmail(String githubEmail) {
-    this.githubEmail = githubEmail;
-  }
-
-  public void setGithubPassword(String githubPassword) {
-    this.githubPassword = githubPassword;
-  }
-
   public void setSudoAccountPassword(String sudoAccountPassword) {
     this.sudoAccountPassword = sudoAccountPassword;
   }
 
   public String getGithubEmail() {
-    return githubEmail;
+    return GithubApi.getUser();
   }
 
   public String getGithubUsername() {
-    return githubEmail.substring(0, githubEmail.lastIndexOf("@"));
+    return GithubApi.getEmail().isEmpty() ? "karamel" : GithubApi.getEmail().substring(0,
+        GithubApi.getEmail().lastIndexOf("@"));
   }
 
   public String getGithubPassword() {
-    return githubPassword;
+    return GithubApi.getPassword();
   }
 
   public String getSudoAccountPassword() {

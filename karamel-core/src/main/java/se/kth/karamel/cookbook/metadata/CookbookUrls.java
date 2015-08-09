@@ -30,10 +30,12 @@ public class CookbookUrls {
   public String attrFile;
   public String metadataFile;
   public String karamelFile;
-  public String berksfile;
+  public String berksFile;
+  public String configFile;
+  public String recipesHome;
 
   public CookbookUrls(String repoName, String branch, String id, String home, String rawHome, String attrFile,
-      String metadataFile, String karamelFile, String berksfile) {
+      String metadataFile, String karamelFile, String berksFile, String configFile, String recipesHome) {
     this.repoName = repoName;
     this.branch = branch;
     this.id = id;
@@ -42,7 +44,9 @@ public class CookbookUrls {
     this.attrFile = attrFile;
     this.metadataFile = metadataFile;
     this.karamelFile = karamelFile;
-    this.berksfile = berksfile;
+    this.berksFile = berksFile;
+    this.configFile = configFile;
+    this.recipesHome = recipesHome;
   }
 
   public static class Builder {
@@ -52,11 +56,19 @@ public class CookbookUrls {
     String user;
     String branch;
 
+    /**
+     * 
+     * @param url url to reposiory name if files == false. Otherwise the name of the reo
+     * @param files if true, reading from a repoo stored locally
+     * @return
+     * @throws CookbookUrlException 
+     */
     public Builder url(String url) throws CookbookUrlException {
       if (url.isEmpty()) {
         throw new CookbookUrlException("Cookbook url is empty.");
       }
       this.url = url.trim();
+      
       return this;
     }
 
@@ -89,16 +101,23 @@ public class CookbookUrls {
       String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL; 
       String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL; 
       
+      
       String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
       String home = base + SLASH + user + SLASH + repo;
       String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
 
+      if (Settings.USE_CLONED_REPO_FILES) {
+        rawHome = Settings.COOKBOOKS_PATH + SLASH + repo;
+      }
+      
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
+      String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
+      String recipesHome = rawHome + "/recipes/";
       CookbookUrls urls = new CookbookUrls(repo, branch, id, home, rawHome, attrFile, metadataFile, karamelFile, 
-          berksFile);
+          berksFile, configFile, recipesHome);
       return urls;
     }
 

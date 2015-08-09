@@ -18,6 +18,10 @@ public class MetadataRb {
   String name;
   String description;
   String version;
+  String resultsDir;
+  String buildCommand;
+  String urlBinary;
+  String urlGitclone;
   List<Recipe> recipes = new ArrayList<>();
   List<Attribute> attributes = new ArrayList<>();
 
@@ -27,6 +31,22 @@ public class MetadataRb {
 
   public List<Attribute> getAttributes() {
     return attributes;
+  }
+
+  public String getUrlBinary() {
+    return urlBinary;
+  }
+
+  public void setUrlBinary(String urlBinary) {
+    this.urlBinary = urlBinary;
+  }
+
+  public String getUrlGitclone() {
+    return urlGitclone;
+  }
+
+  public void setUrlGitclone(String urlGitclone) {
+    this.urlGitclone = urlGitclone;
   }
 
   public void setDescription(String description) {
@@ -61,6 +81,14 @@ public class MetadataRb {
     return version;
   }
 
+  public String getBuildCommand() {
+    return buildCommand;
+  }
+
+  public void setBuildCommand(String buildCommand) {
+    this.buildCommand = buildCommand;
+  }
+  
   public void setDefaults(DefaultRb defaultRb) {
     for (Attribute attr : attributes) {
       if (defaultRb.getValue(attr.getName()) != null) {
@@ -69,4 +97,12 @@ public class MetadataRb {
     }
   }
 
+  public String getResultsDir() {
+    return resultsDir;
+  }
+
+  public void setResultsDir(String resultsDir) {
+    this.resultsDir = resultsDir;
+  }
+  
 }

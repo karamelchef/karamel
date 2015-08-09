@@ -37,7 +37,7 @@ public class JsonGroup extends JsonScope {
     this.size = group.getSize();
     List<String> recipes = group.getRecipes();
     for (String rec : recipes) {
-      String[] comp = rec.split(Settings.COOOKBOOK_DELIMITER);
+      String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
       JsonCookbook cookbook = null;
       for (JsonCookbook cb : getCookbooks()) {
         if (cb.getName().equals(comp[0])) {

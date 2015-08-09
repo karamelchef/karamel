@@ -1,0 +1,6 @@
+  %%group_name%%:
+    size: %%num_nodes%% 
+    recipes: 
+        %%list_recipe%%
+    attrs: 
+        %%attrs_recipe%%

@@ -9,12 +9,14 @@ import java.nio.file.Paths;
 
 public class CookbookScaffolder {
 
-  public static boolean mkdirs(String path) {
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CookbookScaffolder.class);
+
+  static boolean mkdirs(String path) {
     File cbDir = new File(path);
     return cbDir.mkdirs();
   }
 
-  public static boolean mkFile(String path, StringBuffer contents) throws IOException {
+  static boolean mkFile(String path, StringBuffer contents) throws IOException {
     File f = new File(path);
     return f.createNewFile();
   }
@@ -51,31 +53,31 @@ public class CookbookScaffolder {
     out.close();
   }
 
+  /**
+   * Scaffold a new cookbook with 'name' in the /user/home/.karamel/cookbook_designer/name folder.
+   *
+   * @param name
+   * @return path to newly scaffolded cookbook
+   * @throws IOException
+   */
   public static String create(String name) throws IOException {
-    String cbName = "cookbooks" + File.separator + name + File.separator;
+    String cbName = Settings.COOKBOOKS_PATH + File.separator + name + File.separator;
 
     // Create all the directories for the coookbook 
     mkdirs(cbName + "recipes");
     mkdirs(cbName + "attributes");
+    mkdirs(cbName + "experiments");
     mkdirs(cbName + "templates" + File.separator + "default");
 
     // Create all the files for the coookbook using the file-templates in the resources
     createFile(cbName + Settings.COOKBOOK_DEFAULTRB_REL_PATH, Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT, name);
     createFile(cbName + Settings.COOKBOOK_BERKSFILE_REL_PATH, Settings.CB_TEMPLATE_BERKSFILE, name);
     createFile(cbName + Settings.COOKBOOK_METADATARB_REL_PATH, Settings.CB_TEMPLATE_METADATA, name);
-    createFile(cbName + Settings.COOKBOOK_KARAMELFILE_REL_PATH, Settings.CB_TEMPLATE_KARAMELFILE, name);
     createFile(cbName + Settings.COOKBOOK_RECIPE_INSTALL_PATH, Settings.CB_TEMPLATE_RECIPE_INSTALL, name);
-    createFile(cbName + Settings.COOKBOOK_RECIPE_DEFAULT_PATH, Settings.CB_TEMPLATE_RECIPE_DEFAULT, name);
-    createFile(cbName + Settings.COOKBOOK_RECIPE_MASTER_PATH, Settings.CB_TEMPLATE_RECIPE_MASTER, name);
-    createFile(cbName + Settings.COOKBOOK_RECIPE_SLAVE_PATH, Settings.CB_TEMPLATE_RECIPE_SLAVE, name);
-    createFile(cbName + Settings.COOKBOOK_KITCHEN_YML_PATH, Settings.CB_TEMPLATE_KITCHEN_YML, name);
-    createFile(cbName + Settings.COOKBOOK_CONFIG_FILE_PATH, Settings.CB_TEMPLATE_CONFIG_PROPS, name);
-    createFile(cbName + Settings.COOKBOOK_MASTER_SH_PATH, Settings.CB_TEMPLATE_MASTER_SH, name);
-    createFile(cbName + Settings.COOKBOOK_SLAVE_SH_PATH, Settings.CB_TEMPLATE_SLAVE_SH, name);
-    System.out.println("Cookbook scaffolding created.");
-    System.out.println("Cookbook now in folder: ./cookbooks/" + name);
+    createFile(cbName + Settings.COOKBOOK_README_PATH, Settings.CB_TEMPLATE_README, name);
+    logger.debug("Cookbook scaffolding created. Cookbook now in folder: ~/.karamel/cookbooks/" + name);
 
-    File f = new File("cookbooks" + File.separator + name);
+    File f = new File(cbName);
     return f.getAbsolutePath();
   }
 

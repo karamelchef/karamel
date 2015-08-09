@@ -122,4 +122,22 @@ public class Berksfile {
     }
   }
 
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    boolean skipLines = true;
+    
+    // append all lines that appear after 'metadata' in the Berksfile template
+    for (String s : fileLines) {
+      if (!skipLines) {
+        sb.append(s).append(System.lineSeparator());
+      }
+      if (s.compareToIgnoreCase("metadata") == 0) {
+        skipLines = false;
+      }
+    }
+    return sb.toString();
+  }
+
+  
 }

@@ -140,4 +140,8 @@ public abstract class Task implements DagTask, TaskCallback {
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
   }
+  
+  public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
+    //override it in the subclasses if needed
+  }
 }

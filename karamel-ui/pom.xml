@@ -245,6 +245,7 @@
                                 </transformer>
                             </transformers>
                             <filters>
+                                <!-- Required by Windows signing certificate -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -291,7 +292,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -360,7 +360,7 @@
                                 </resource>
                             </resources>              
                         </configuration>            
-                    </execution>                    
+                    </execution>
                 </executions>
             </plugin>
 
