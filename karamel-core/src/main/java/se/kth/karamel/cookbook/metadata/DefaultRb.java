@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.common.exception.CookbookUrlException;
-import static se.kth.karamel.cookbook.metadata.MetadataParser.ATTR_DEFAULT_ARRAY_ITEMS;
 
 /**
  * Represents attributes/default.rb file in cookbook

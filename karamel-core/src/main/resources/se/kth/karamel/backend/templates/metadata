@@ -8,6 +8,8 @@ version          "0.1"
 recipe            "%%name%%::install", "Experiment setup for %%name%%"
 %%more_recipes%%
 
+depends "kagent"
+
 %%depends%%
 
 %w{ ubuntu debian rhel centos }.each do |os|

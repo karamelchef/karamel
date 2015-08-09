@@ -11,8 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
@@ -25,6 +23,8 @@ import se.kth.karamel.common.exception.RecipeParseException;
  * @author kamal
  */
 public class KaramelizedCookbook {
+
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(KaramelizedCookbook.class);
 
   private final CookbookUrls urls;
   private final DefaultRb defaultRb;
@@ -98,8 +98,7 @@ public class KaramelizedCookbook {
         try {
           configFileContents = IoUtils.readContent(configFileUrl);
         } catch (IOException ex) {
-          Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-              + urls.recipesHome + experimentFilename, ex);
+          logger.info("Not found in this cookbook: " + urls.recipesHome + experimentFilename, ex);
         }
       }
 
@@ -111,12 +110,11 @@ public class KaramelizedCookbook {
           er = ExperimentRecipeParser.parse(r.getName(), experimentContent, configFileName, configFileContents);
         }
       } catch (IOException ex) {
-        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.FINE, "This cookbook does not have a "
-            + "karamelized experiment: " + urls.recipesHome + experimentFilename, ex);
+        logger.debug("This cookbook does not have a karamelized experiment: " + urls.recipesHome + experimentFilename
+            + " - " + ex.getMessage());
       } catch (RecipeParseException ex) {
-        Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.WARNING,
-            "The recipe is not in a karamelized format: "
-            + urls.recipesHome + experimentFilename, ex);
+        logger.warn("The recipe is not in a karamelized format: " + urls.recipesHome + experimentFilename
+            + " - " + ex.getMessage());
       }
 
       if (er != null) {
@@ -129,14 +127,11 @@ public class KaramelizedCookbook {
       String installContent = IoUtils.readContent(urls.recipesHome + "install.rb");
       this.installRecipe = InstallRecipeParser.parse(installContent);
     } catch (IOException ex) {
-      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO, "Not found in this cookbook: "
-          + urls.recipesHome + "install.rb", ex);
       throw new CookbookUrlException(
-          "Could not download recipes/install.rb. Does the file exist? Is the Internet working? " + ex.getMessage());
+          "Could not find the file 'recipes/install.rb'. Does the file exist? Is the Internet working?");
     } catch (RecipeParseException ex) {
-      Logger.getLogger(KaramelizedCookbook.class.getName()).log(Level.INFO,
-          "Install recipe not in a format that can be used by Karamel Experiments: "
-          + urls.recipesHome + "install.rb", ex);
+      logger.warn("Install recipe not in a format that can be used by Karamel Experiments: "
+          + urls.recipesHome + "install.rb" + " - " + ex.getMessage());
 
     } finally {
       Settings.USE_CLONED_REPO_FILES = false;

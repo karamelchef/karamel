@@ -33,7 +33,7 @@ public class InstallRecipeParser {
           + "Missing this marker in the file: '" + CONFIG_MARKER);
     }
     // skip over the SETUP_MARKER and +1 for the newline
-    String setupCode = recipeContent.substring(mStart.start() + SETUP_MARKER.length() + 1,
+    String setupCode = recipeContent.substring(mStart.start()+1 + SETUP_MARKER.length() + 1,
         mEnd.end() - CONFIG_MARKER.length());
 
     Matcher mConfig = CONFIG_FILES.matcher(recipeContent);

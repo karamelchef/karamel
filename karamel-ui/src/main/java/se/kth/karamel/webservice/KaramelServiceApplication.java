@@ -220,8 +220,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             credentials.setSecretKey(ec2AccessKey);
             valid = karamelApiHandler.updateEc2CredentialsIfValid(credentials);
             if (!valid) {
-              Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.WARNING,
-                  "Invalid Ec2 Credentials. Try again.");
+              logger.info("Invalid Ec2 Credentials. Try again.");
               ec2AccountId = null;
               ec2AccessKey = null;
             }
@@ -322,7 +321,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Github.LoadExperiment());
     environment.jersey().register(new Github.GetGithubOrgs());
     environment.jersey().register(new Github.GetGithubRepos());
-//    environment.jersey().register(new Github.CreateGithubRepo());
     environment.jersey().register(new Github.PushExperiment());
     environment.jersey().register(new Github.RemoveFileFromExperiment());
     environment.jersey().register(new Github.RemoveRepository());
@@ -436,7 +434,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     @PUT
     public Response getYamlForJSON(KaramelBoardJSON karamelBoardJSON) {
       Response response = null;
-      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Fetch Yaml Called ... ");
+      logger.debug("Fetch Yaml Called ... ");
 
       try {
         String yml = karamelApiHandler.jsonToYaml(karamelBoardJSON.getJson());
@@ -460,9 +458,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     @PUT
     public Response getCookbook(CookbookJSON cookbookJSON) {
       Response response = null;
-
-      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Received Call For the cookbook.");
-      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, cookbookJSON.getUrl());
       try {
         String cookbookDetails = karamelApiHandler.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
         response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
@@ -487,8 +482,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadSshKeys() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to load ssh keys.");
+        logger.debug(" Received request to load ssh keys.");
         try {
           SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();
           if (sshKeypair == null) {
@@ -515,8 +509,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response registerSshKeys(SshKeyJSON sshKeysJSON) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to register ssh keys.");
+        logger.debug("Received request to register ssh keys.");
         SshKeyPair sshKeypair = new SshKeyPair();
         sshKeypair.setPublicKeyPath(sshKeysJSON.getPubKeyPath());
         sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
@@ -543,8 +536,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response generateSshKeys() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to generate ssh keys.");
+        logger.debug("Received request to generate ssh keys.");
         try {
           SshKeyPair sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
           karamelApiHandler.registerSshKeys(sshKeypair);
@@ -570,8 +562,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response getCommandCheetSheet() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to load the command cheatsheet.");
+        logger.debug("Received request to load the command cheatsheet.");
         try {
           String cheatSheet = karamelApiHandler.commandCheatSheet();
           response = Response.status(Response.Status.OK).entity(cheatSheet).build();
@@ -593,8 +584,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response processCommand(CommandJSON command) {
         Response response = null;
 
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.FINEST,
-            " Received request to process a command with info: {0}", command.getCommand());
+        logger.debug("Received request to process a command with info: " + command.getCommand());
         try {
           CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
           command.setResult(cmdRes.getResult());
@@ -625,8 +615,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadCredentials() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to load the ec2 credentials.");
+        logger.debug("Received request to load the ec2 credentials.");
         try {
           Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
           Ec2JSON provider = new Ec2JSON();
@@ -657,8 +646,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response validateCredentials(Ec2JSON providerJSON) {
 
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to validate the ec2 credentials.");
+        logger.debug("Received request to validate the ec2 credentials.");
 
         try {
           Ec2Credentials credentials = new Ec2Credentials();
@@ -692,8 +680,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response loadCredentials() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to load the gce credentials.");
+        logger.debug("Received request to load the gce credentials.");
         try {
           String jsonKeyPath = karamelApiHandler.loadGceCredentialsIfExist();
           GceJson provider = new GceJson();
@@ -723,8 +710,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response validateCredentials(GceJson providerJSON) {
 
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to validate the gce credentials.");
+        logger.debug("Received request to validate the gce credentials.");
 
         try {
           String jsonKeyPath = providerJSON.getJsonKeyPath();
@@ -760,8 +746,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response startCluster(KaramelBoardJSON boardJSON) {
 
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO,
-            "Start cluster: \n" + boardJSON.getJson());
+        logger.debug("Start cluster: " + System.lineSeparator() + boardJSON.getJson());
 
         try {
           karamelApiHandler.startCluster(boardJSON.getJson());
@@ -793,8 +778,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           try {
             Thread.sleep(2000);
           } catch (InterruptedException ex) {
-            Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
+            logger.warn(ex.getMessage());
           } finally {
+            logger.info("Karamel Shutdown finished.");
             System.exit(0);
           }
         }
@@ -938,30 +924,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
 
-//    @Path("/createGithubRepo")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-//    public static class CreateGithubRepo {
-//
-//      @POST
-//      public Response createGithubRepo(@FormParam("org") String org, @FormParam("repo") String repo,
-//          @FormParam("description") String description) {
-//        Response response = null;
-//        Logger.getLogger(KaramelServiceApplication.class.getName()).
-//            log(Level.INFO, " Received request to set github credentials.... ");
-//        try {
-//          RepoItem r = karamelApiHandler.createGithubRepo(org, repo, description);
-//          response = Response.status(Response.Status.OK).
-//              entity(r).build();
-//        } catch (KaramelException e) {
-//          e.printStackTrace();
-//          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-//              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-//        }
-//
-//        return response;
-//      }
-//    }
+
     @Path("/pushExperiment")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

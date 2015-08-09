@@ -38,13 +38,13 @@ import se.kth.karamel.common.exception.KaramelException;
  * commitPush(repo,..)
  *
  */
-public class Github {
+public class GithubApi {
 
   private static volatile String user = "";
   private static volatile String email = "";
   private static volatile String password = "";
 
-  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Github.class);
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(GithubApi.class);
 
   private static final GitHubClient client = GitHubClient.createClient("http://github.com");
 
@@ -52,7 +52,7 @@ public class Github {
   private static final Map<String, List<RepoItem>> cachedRepos = new HashMap<>();
 
   // Singleton
-  private Github() {
+  private GithubApi() {
   }
 
   /**
@@ -65,8 +65,8 @@ public class Github {
    */
   public synchronized static GithubUser registerCredentials(String user, String password) throws KaramelException {
     try {
-      Github.user = user;
-      Github.password = password;
+      GithubApi.user = user;
+      GithubApi.password = password;
       client.setCredentials(user, password);
       client.getUser();
       Confs confs = Confs.loadKaramelConfs();
@@ -81,11 +81,11 @@ public class Github {
       if (u == null) {
         throw new KaramelException("Could not find user or password incorret: " + user);
       }
-      Github.email = u.getEmail();
+      GithubApi.email = u.getEmail();
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+      logger.warn("Problem connecting to GitHub: " + ex.getMessage());
     }
-    return new GithubUser(Github.user, Github.password, Github.email);
+    return new GithubUser(GithubApi.user, GithubApi.password, GithubApi.email);
   }
 
   /**
@@ -93,25 +93,25 @@ public class Github {
    * @return email or null if not set yet.
    */
   public static String getEmail() {
-    return Github.email;
+    return GithubApi.email;
   }
 
   public static GithubUser loadGithubCredentials() throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
-    Github.user = confs.getProperty(Settings.GITHUB_USER);
-    Github.password = confs.getProperty(Settings.GITHUB_PASSWORD);
-    if (Github.user != null && Github.password != null) {
-      registerCredentials(Github.user, Github.password);
+    GithubApi.user = confs.getProperty(Settings.GITHUB_USER);
+    GithubApi.password = confs.getProperty(Settings.GITHUB_PASSWORD);
+    if (GithubApi.user != null && GithubApi.password != null) {
+      registerCredentials(GithubApi.user, GithubApi.password);
     }
-    return new GithubUser(Github.user, Github.password, Github.email);
+    return new GithubUser(GithubApi.user, GithubApi.password, GithubApi.email);
   }
 
   public synchronized static String getUser() {
-    return Github.user;
+    return GithubApi.user;
   }
 
   public synchronized static String getPassword() {
-    return Github.password;
+    return GithubApi.password;
   }
 
   public synchronized static int getRemainingRequests() {
@@ -128,8 +128,8 @@ public class Github {
    * @throws KaramelException
    */
   public synchronized static List<OrgItem> getOrganizations() throws KaramelException {
-    if (cachedOrgs.get(Github.getUser()) != null) {
-      return cachedOrgs.get(Github.getUser());
+    if (cachedOrgs.get(GithubApi.getUser()) != null) {
+      return cachedOrgs.get(GithubApi.getUser());
     }
     try {
       List<String> orgs = new ArrayList<>();
@@ -139,12 +139,11 @@ public class Github {
       for (User u : longOrgsList) {
         orgsList.add(new OrgItem(u.getLogin(), u.getAvatarUrl()));
       }
-      cachedOrgs.put(Github.getUser(), orgsList);
+      cachedOrgs.put(GithubApi.getUser(), orgsList);
 
       return orgsList;
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem listing GitHub organizations: " + ex.getMessage());
     }
   }
 
@@ -164,7 +163,7 @@ public class Github {
       RepositoryService rs = new RepositoryService(client);
       List<Repository> repos;
       // If we are looking for the repositories for the current user
-      if (Github.getUser().equalsIgnoreCase(orgName)) {
+      if (GithubApi.getUser().equalsIgnoreCase(orgName)) {
         repos = rs.getRepositories(orgName);
       } else {       // If we are looking for the repositories for a given organization
         repos = rs.getOrgRepositories(orgName);
@@ -177,13 +176,12 @@ public class Github {
       cachedRepos.put(orgName, repoItems);
       return repoItems;
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem listing GitHub repositories: " + ex.getMessage());
     }
   }
 
   public synchronized static boolean repoExists(String owner, String repoName) throws KaramelException {
-    List<RepoItem> repos = Github.getRepos(owner);
+    List<RepoItem> repos = GithubApi.getRepos(owner);
     if (repos == null) {
       return false;
     }
@@ -234,8 +232,8 @@ public class Github {
       cachedRepos.remove(org);
       return new RepoItem(repoName, description, r.getSshUrl());
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem creating the repository " + repoName + " for organization " + org
+          + " : " + ex.getMessage());
     }
   }
 
@@ -256,13 +254,12 @@ public class Github {
       r.setDescription(description);
       rs.createRepository(r);
       cloneRepo(getUser(), repoName);
-      cachedRepos.remove(Github.getUser());
+      cachedRepos.remove(GithubApi.getUser());
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem creating " + repoName + " for user " + ex.getMessage());
     }
   }
-
+ 
   /**
    * Clone an existing github repo.
    *
@@ -293,8 +290,7 @@ public class Github {
       // Note: the call() returns an opened repository already which needs to be closed to avoid file handle leaks!
       logger.debug("Cloned repository: " + result.getRepository().getDirectory());
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem cloning repo: " + ex.getMessage());
     } finally {
       if (result != null) {
         result.close();
@@ -306,12 +302,12 @@ public class Github {
   public synchronized static void removeRepo(String owner, String repoName) throws KaramelException {
 
     try {
-      GitHub gitHub = GitHub.connectUsingPassword(Github.getUser(), Github.getPassword());
+      GitHub gitHub = GitHub.connectUsingPassword(GithubApi.getUser(), GithubApi.getPassword());
       if (!gitHub.isCredentialValid()) {
         throw new KaramelException("Invalid GitHub credentials");
       }
       GHRepository repo = null;
-      if (owner.compareToIgnoreCase(Github.getUser()) != 0) {
+      if (owner.compareToIgnoreCase(GithubApi.getUser()) != 0) {
         GHOrganization org = gitHub.getOrganization(owner);
         repo = org.getRepository(repoName);
       } else {
@@ -320,8 +316,7 @@ public class Github {
       repo.delete();
 
     } catch (IOException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException("Problem authenticating with gihub-api");
+      throw new KaramelException("Problem authenticating with gihub-api when trying to remove a repository");
     }
   }
 
@@ -358,7 +353,6 @@ public class Github {
       }
       git.add().addFilepattern(fileName).call();
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     } finally {
       if (git != null) {
@@ -390,7 +384,6 @@ public class Github {
         repos.remove(toRemove);
       }
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     } finally {
       if (git != null) {
@@ -421,8 +414,7 @@ public class Github {
           .addFilepattern("templates").addFilepattern("README.md").call();
 
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem scaffolding a new Repository: " + ex.getMessage());
     } finally {
       if (git != null) {
         git.close();
@@ -451,7 +443,7 @@ public class Github {
           .setAll(true).call();
       git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, password)).call();
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(Github.class.getName()).log(Level.SEVERE, null, ex);
+      Logger.getLogger(GithubApi.class.getName()).log(Level.SEVERE, null, ex);
       throw new KaramelException(ex.getMessage());
     } finally {
       if (git != null) {

@@ -29,7 +29,6 @@ public final class KaramelFile {
     } catch (YAMLException ex) {
       throw new MetadataParseException(ex.getMessage());
     }
-//    dependencies = file.getDependencyMap();
     dependencies = new ArrayList<>();
     dependencies.addAll(file.getDependencies());
   }

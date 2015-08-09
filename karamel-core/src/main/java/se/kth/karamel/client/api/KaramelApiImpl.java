@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.jclouds.domain.Credentials;
 import se.kth.karamel.backend.ClusterDefinitionService;
@@ -17,7 +15,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
-import se.kth.karamel.backend.github.Github;
+import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
@@ -61,6 +59,8 @@ import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
  * @author kamal
  */
 public class KaramelApiImpl implements KaramelApi {
+
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(KaramelApiImpl.class);
 
   private static final ClusterService clusterService = ClusterService.getInstance();
 
@@ -139,7 +139,7 @@ public class KaramelApiImpl implements KaramelApi {
       confs.writeKaramelConfs();
       clusterService.registerGceContext(context);
     } catch (Throwable ex) {
-      throw new KaramelException(ex.getMessage());    
+      throw new KaramelException(ex.getMessage());
     }
     return true;
   }
@@ -262,29 +262,29 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public List<OrgItem> listGithubOrganizations() throws KaramelException {
-    return Github.getOrganizations();
+    return GithubApi.getOrganizations();
   }
 
   @Override
   public List<RepoItem> listGithubRepos(String organization) throws KaramelException {
-    return Github.getRepos(organization);
+    return GithubApi.getRepos(organization);
   }
 
   @Override
   public GithubUser registerGithubAccount(String user, String password) throws KaramelException {
-    return Github.registerCredentials(user, password);
+    return GithubApi.registerCredentials(user, password);
   }
 
   @Override
   public GithubUser loadGithubCredentials() throws KaramelException {
-    return Github.loadGithubCredentials();
+    return GithubApi.loadGithubCredentials();
   }
 
   private void initGithubRepo(String user, String owner, String repo, String description) throws KaramelException {
     if (owner == null || owner.isEmpty() || owner.compareToIgnoreCase(user) == 0) {
-      Github.createRepoForUser(repo, description);
+      GithubApi.createRepoForUser(repo, description);
     } else {
-      Github.createRepoForOrg(owner, repo, description);
+      GithubApi.createRepoForOrg(owner, repo, description);
     }
   }
 
@@ -292,8 +292,8 @@ public class KaramelApiImpl implements KaramelApi {
   public void commitAndPushExperiment(Experiment experiment) throws KaramelException {
     String owner = experiment.getGithubOwner();
     String repoName = experiment.getGithubRepo();
-    File f = Github.getRepoDirectory(repoName);
-    boolean repoExists = Github.repoExists(owner, repoName);
+    File f = GithubApi.getRepoDirectory(repoName);
+    boolean repoExists = GithubApi.repoExists(owner, repoName);
     if (repoExists) {
       // local copy must exist, already pushed to GitHub
       if (!f.exists()) {
@@ -308,9 +308,9 @@ public class KaramelApiImpl implements KaramelApi {
         // Create the repo if it doesn't exist and clone it to a local directory
         // That way, the local directory will only ever exist if it the repo has been created first.
         // Users should subsequently load a directory from GitHub.
-        initGithubRepo(Github.getUser(), owner, repoName, experiment.getDescription());
+        initGithubRepo(GithubApi.getUser(), owner, repoName, experiment.getDescription());
         // Scaffold a new experiment project with Karamel/Chef
-        Github.scaffoldRepo(repoName);
+        GithubApi.scaffoldRepo(repoName);
       }
     }
 
@@ -320,7 +320,7 @@ public class KaramelApiImpl implements KaramelApi {
     ChefExperimentExtractor.parseRecipesAddToGit(owner, repoName, experiment);
 
     // Commit and push all changes to github
-    Github.commitPush(owner, repoName);
+    GithubApi.commitPush(owner, repoName);
 
   }
 
@@ -341,14 +341,14 @@ public class KaramelApiImpl implements KaramelApi {
       try {
         FileUtils.deleteDirectory(localPath);
       } catch (IOException ex) {
-        Logger.getLogger(KaramelApiImpl.class.getName()).log(Level.SEVERE, null, ex);
+        logger.warn(ex.getMessage());
         if (localPath.isDirectory() == true) {
           throw new KaramelException("Couldn't remove local copy of the repo at directory: " + localPath.getPath());
         }
       }
     }
     // Download the latest copy from GitHub
-    Github.cloneRepo(owner, repoName);
+    GithubApi.cloneRepo(owner, repoName);
     String strippedUrl = githubRepoUrl.replaceAll("\\.git", "");
     ec.setUrlGitClone(githubRepoUrl);
 
@@ -411,13 +411,13 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException {
-    return Github.createRepoForOrg(org, repo, description);
+    return GithubApi.createRepoForOrg(org, repo, description);
   }
 
   @Override
   public void removeFileFromExperiment(String owner, String repo, String experimentName) {
     try {
-      Github.removeFile(owner, repo, experimentName);
+      GithubApi.removeFile(owner, repo, experimentName);
     } catch (KaramelException ex) {
       // Do nothing - Repository hasn't been created yet. That's ok.");
     }
@@ -431,14 +431,14 @@ public class KaramelApiImpl implements KaramelApi {
     // if failure while removing locally, still try and remove remote repo (if requested)
     if (removeLocal) {
       try {
-        Github.removeLocalRepo(owner, repo);
+        GithubApi.removeLocalRepo(owner, repo);
       } catch (KaramelException ex) {
         failedLocal = true;
         failedMsg = ex.toString();
       }
     }
     if (removeGitHub) {
-      Github.removeRepo(owner, repo);
+      GithubApi.removeRepo(owner, repo);
     }
     if (failedLocal) {
       throw new KaramelException(failedMsg);

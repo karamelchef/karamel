@@ -6,7 +6,7 @@
 package se.kth.karamel.backend;
 
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import se.kth.karamel.backend.github.Github;
+import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.client.model.Ec2;
@@ -18,9 +18,8 @@ import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is 
- * stored here in memory. It is valid just until the system is running otherwise it will disappear.  
- 
+ * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is
+ * stored here in memory. It is valid just until the system is running otherwise it will disappear.  *
  * @author kamal
  */
 public class ClusterContext {
@@ -33,7 +32,6 @@ public class ClusterContext {
   private String githubEmail = "anonymous@anonymous.org";
   private String githubPassword;
 
-
   public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
     this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
   }
@@ -42,21 +40,21 @@ public class ClusterContext {
     return sudoAccountPasswordRequired;
   }
 
-
   public void setSudoAccountPassword(String sudoAccountPassword) {
     this.sudoAccountPassword = sudoAccountPassword;
   }
 
   public String getGithubEmail() {
-    return Github.getUser();
+    return GithubApi.getUser();
   }
 
   public String getGithubUsername() {
-    return Github.getEmail().isEmpty() ? "karamel" : Github.getEmail().substring(0, Github.getEmail().lastIndexOf("@"));
+    return GithubApi.getEmail().isEmpty() ? "karamel" : GithubApi.getEmail().substring(0,
+        GithubApi.getEmail().lastIndexOf("@"));
   }
 
   public String getGithubPassword() {
-    return Github.getPassword();
+    return GithubApi.getPassword();
   }
 
   public String getSudoAccountPassword() {

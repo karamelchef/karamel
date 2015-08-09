@@ -12,13 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.Experiment.Code;
-import se.kth.karamel.backend.github.Github;
+import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -80,7 +78,7 @@ public class ChefExperimentExtractor {
       }
     }
 
-    String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
+    String email = (GithubApi.getEmail() == null) ? "karamel@karamel.io" : GithubApi.getEmail();
     try {
       StringBuilder defaults_rb = CookbookGenerator.instantiateFromTemplate(
           Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT,
@@ -119,12 +117,11 @@ public class ChefExperimentExtractor {
       }
 
       // 3. write them to files and push to github
-      Github.addFile(owner, repoName, "attributes/default.rb", defaults_rb.toString());
-      Github.addFile(owner, repoName, "metadata.rb", metadata_rb.toString());
+      GithubApi.addFile(owner, repoName, "attributes/default.rb", defaults_rb.toString());
+      GithubApi.addFile(owner, repoName, "metadata.rb", metadata_rb.toString());
 
     } catch (IOException ex) {
-      Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem parsing attributes from GitHub: " + ex.getMessage());
     }
   }
 
@@ -146,7 +143,7 @@ public class ChefExperimentExtractor {
           Settings.CB_TEMPLATE_KITCHEN_YML,
           "name", repoName
       );
-      Github.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
+      GithubApi.addFile(owner, repoName, ".kitchen.yml", kitchenContents.toString());
 
       List<Code> experiments = experimentContext.getCode();
 
@@ -207,7 +204,7 @@ public class ChefExperimentExtractor {
           "berks_dependencies", berksfile
       );
 
-      Github.addFile(owner, repoName, "Berksfile", berksContents.toString());
+      GithubApi.addFile(owner, repoName, "Berksfile", berksContents.toString());
 
       Map<String, String> expConfigFileNames = new HashMap<>();
       Map<String, String> expConfigFilePaths = new HashMap<>();
@@ -224,7 +221,7 @@ public class ChefExperimentExtractor {
           configFileName = configFileName.substring(filePos + 1);
         }
 
-        String email = (Github.getEmail() == null) ? "karamel@karamel.io" : Github.getEmail();
+        String email = (GithubApi.getEmail() == null) ? "karamel@karamel.io" : GithubApi.getEmail();
 
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
@@ -254,8 +251,8 @@ public class ChefExperimentExtractor {
         }
 
         // 3. write them to files and push to github
-        Github.addFile(owner, repoName, "recipes" + File.separator + experimentName + ".rb", recipeContents);
-        Github.addFile(owner, repoName,
+        GithubApi.addFile(owner, repoName, "recipes" + File.separator + experimentName + ".rb", recipeContents);
+        GithubApi.addFile(owner, repoName,
             "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
 
       }
@@ -284,12 +281,11 @@ public class ChefExperimentExtractor {
           "config_files", configFilesTemplateDefns.toString()
       );
 
-      Github.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
-      Github.addFile(owner, repoName, "Karamelfile", karamelContents.toString());
+      GithubApi.addFile(owner, repoName, "recipes/install.rb", install_rb.toString());
+      GithubApi.addFile(owner, repoName, "Karamelfile", karamelContents.toString());
 
     } catch (IOException ex) {
-      Logger.getLogger(ChefExperimentExtractor.class.getName()).log(Level.SEVERE, null, ex);
-      throw new KaramelException(ex.getMessage());
+      throw new KaramelException("Problem parsing recipes from GitHub: " + ex.getMessage());
     }
 
   }
