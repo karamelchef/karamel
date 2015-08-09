@@ -1,8 +1,10 @@
 node.default['java']['jdk_version'] = 7
 node.default['java']['install_flavor'] = "openjdk"
 
+
+# Pre-Experiment Code
+
 include_recipe 'java'
-#include_recipe "openssh"
 
 bash 'fix_java_path_for_glassfish_cookbook' do
 user "root"
@@ -129,3 +131,5 @@ if platform_family?("debian")
     not_if { ::File.exists?( "#{node['glassfish']['base_dir']}/.limits_increased" ) }
   end
 end
+
+# Configuration Files
