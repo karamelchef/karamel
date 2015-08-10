@@ -25,5 +25,9 @@
     </module>
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
+    <module name="Regexp">
+      <property name="format" value="System\.out\.print(?:ln)?|System\.err\.print(?:ln)?"/>
+      <property name="illegalPattern" value="true"/>
+    </module>
   </module>
 </module>
