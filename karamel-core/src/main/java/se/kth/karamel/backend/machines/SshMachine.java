@@ -27,7 +27,6 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
-import java.util.logging.Level;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;

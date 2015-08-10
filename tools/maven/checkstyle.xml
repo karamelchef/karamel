@@ -20,7 +20,9 @@
       <property name="ignoreComments" value="true"/>
     </module>
     <module name="AvoidStarImport"/>
-    <module name="IllegalImport"/>
+    <module name="IllegalImport">
+      <property name="illegalPkgs" value="java.util.logging"/>
+    </module>
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
   </module>
