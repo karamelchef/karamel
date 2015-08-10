@@ -1,0 +1,3 @@
+actions :start
+
+default_action :start

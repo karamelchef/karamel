@@ -60,6 +60,7 @@ public class CommandService {
   private static String RUNNING_PAGE_TEMPLATE = "";
   private static String YAMLS_TABLE_PLH = "%YAMLS_TABLE%";
   private static String CLUSTERS_TABLE_PLH = "%CLUSTERS_TABLE%";
+  private static String HYPERLINKS_PLH = "%HYPERLINKS%";
 
   static {
     try {
@@ -70,7 +71,6 @@ public class CommandService {
 
     }
   }
-//  private static final KaramelApi api = new KaramelApiImpl();
 
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
     String cmd = command;
@@ -88,6 +88,16 @@ public class CommandService {
       result = HELP_PAGE_TEMPLATE;
     } else if (cmd.equals("running")) {
       result = RUNNING_PAGE_TEMPLATE.replace(CLUSTERS_TABLE_PLH, clustersTable());
+      ClusterManager cluster = cluster(context);
+      String hyperLinks;
+      if (cluster != null) {
+        hyperLinks = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+      } else {
+        String yml = ClusterDefinitionService.loadYaml(context);
+        JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+        hyperLinks = UserClusterDataExtractor.clusterLinks(json, null);
+      }
+      result = result.replace(HYPERLINKS_PLH, hyperLinks);
       nextCmd = "running";
     } else if (cmd.equals("home")) {
       result = HOME_PAGE_TEMPLATE.replace(YAMLS_TABLE_PLH, yamlsTable());

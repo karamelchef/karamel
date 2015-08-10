@@ -23,7 +23,7 @@ public class CookbookCache {
   public static Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
   
   public static KaramelizedCookbook load(String cookbookUrl) throws KaramelException {
-    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl);
+    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl, false);
     cookbooks.put(cookbookUrl, cookbook);
     return cookbook;
   }

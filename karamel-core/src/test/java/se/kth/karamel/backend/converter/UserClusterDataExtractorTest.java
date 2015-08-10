@@ -26,7 +26,7 @@ public class UserClusterDataExtractorTest {
   @Test
   public void clusterLinksTest() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopshub.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     String links = UserClusterDataExtractor.clusterLinks(definition, null);
     String expected = "Visit <a target='_blank' href='http://www.hops.io/'>Hop's Website</a> or <a target='_blank' "
@@ -34,7 +34,7 @@ public class UserClusterDataExtractorTest {
     Assert.assertEquals(expected, links.trim());
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     links = UserClusterDataExtractor.clusterLinks(definition, dummyRuntime);
-    expected = "Click <a target='_blank' href='https://hopshub1:8181/hop-dashboard'>here</a> to launch hopshub in your browser\n"
+    expected = "Click <a target='_blank' href='https://hopsworks1:8181/hop-dashboard'>here</a> to launch hopsworks in your browser\n"
         + "Visit <a target='_blank' href='http://www.hops.io/'>Hop's Website</a> or <a target='_blank' href='http://www.karamel.io/'>Karamel's Website</a>\n"
         + "";
     Assert.assertEquals(expected, links);

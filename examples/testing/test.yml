@@ -1,0 +1,17 @@
+name: TestExp
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  test:
+    github: "jimdowling/test"
+    branch: "master"
+    
+groups: 
+  exptest:
+    size: 1 
+    recipes: 
+        - test::experiment
+
+

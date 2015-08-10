@@ -8,8 +8,10 @@ package se.kth.karamel.common;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
@@ -22,11 +24,12 @@ public class Settings {
 
   //test
   public static boolean CB_CLASSPATH_MODE = false;
-  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+  // files
+  public static boolean USE_CLONED_REPO_FILES = false;
 
   //read
   public static final String ATTR_DELIMITER = "/";
-  public static final String COOOKBOOK_DELIMITER = "::";
+  public static final String COOKBOOK_DELIMITER = "::";
   public static final String COOOKBOOK_FS_PATH_DELIMITER = "__";
   public static final String INSTALL_RECIPE = "install";
   public final static String CHEF_PRIVATE_IPS = "private_ips";
@@ -105,6 +108,8 @@ public class Settings {
   public static final String AWS_SECRET_KEY = "aws.secret.key";
   public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
+  public static final String GITHUB_USER = "github.email";
+  public static final String GITHUB_PASSWORD = "github.password";
   public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
@@ -129,10 +134,11 @@ public class Settings {
 
   /**
    * GCE firewall name.
+   *
    * @param networkName
    * @param port
    * @param protocol
-   * @return 
+   * @return
    */
   public static final String UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
@@ -146,7 +152,9 @@ public class Settings {
     return names;
   }
 
+  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
+  public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
@@ -184,8 +192,8 @@ public class Settings {
   }
 
   public static String RECIPE_CANONICAL_NAME(String recipeName) {
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      return recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      return recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       return recipeName;
     }
@@ -193,14 +201,14 @@ public class Settings {
 
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {
@@ -213,13 +221,40 @@ public class Settings {
 
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+  }
+
+  public static String EXPERIMENT_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_");
+  }
+
+  public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
+
+    return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
+        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + File.separator
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + "-"
+        + sdf.format(new Date(System.currentTimeMillis())) + ".out";
   }
 
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
@@ -240,20 +275,29 @@ public class Settings {
   public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
   public static final String COOKBOOK_SUB_FOLDER = "/cookbooks/";
-  
+  public static final String COOKBOOK_CONFIGFILE = "config.props";
+  public static final String COOKBOOK_CONFIGFILE_REL_URL =  "/templates/default/" + COOKBOOK_CONFIGFILE;
+  public static final String COOKBOOK_CONFIGFILE_BASE_URL = "/templates/default/";
+  public static final String COOKBOOK_EXP_RECIPE_REL_URL =  "/recipes/experiment.rb";
+
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
-  public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
+  public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"
+      + File.separator + "backend" + File.separator + "templates" + File.separator;
+  public static final String CB_TEMPLATE_EXPERIMENT_CLUSTER = CB_TEMPLATE_PATH_ROOT + "experiment_cluster";
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
-  public static final String CB_TEMPLATE_RECIPE_MASTER = CB_TEMPLATE_PATH_ROOT + "recipe_master";
+  public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
   public static final String CB_TEMPLATE_RECIPE_SLAVE = CB_TEMPLATE_PATH_ROOT + "recipe_slave";
-  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + "config.props";
+  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + COOKBOOK_CONFIGFILE;
   public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";
   public static final String CB_TEMPLATE_MASTER_SH = CB_TEMPLATE_PATH_ROOT + "master_sh";
   public static final String CB_TEMPLATE_SLAVE_SH = CB_TEMPLATE_PATH_ROOT + "slave_sh";
   public static final String CB_TEMPLATE_METADATA = CB_TEMPLATE_PATH_ROOT + "metadata";
   public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
+  public static final String CB_TEMPLATE_README = CB_TEMPLATE_PATH_ROOT + "README.md";
+  public static final String CB_TEMPLATE_PROVIDERS_START = CB_TEMPLATE_PATH_ROOT + "providers_start";
+  public static final String CB_TEMPLATE_RESOURCES_START = CB_TEMPLATE_PATH_ROOT + "resources_start";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
 
   // Relative file locations of files in cookbook scaffolding
@@ -262,7 +306,15 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_PATH = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
-  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
+  public static final String COOKBOOK_README_PATH = File.separator + "README.md";
+  public static final String COOKBOOK_EXPERIMENT_CLUSTER_PATH
+      = File.separator + "experiments" + File.separator + "experiment.yml";
+  public static final String COOKBOOK_PROVIDERS_EXP_PATH
+      = File.separator + "providers" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RESOURCES_EXP_PATH
+      = File.separator + "resources" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator
+      + INSTALL_RECIPE + ".rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";
   public static final String COOKBOOK_RECIPE_SLAVE_PATH = File.separator + "recipes" + File.separator + "slave.rb";
@@ -294,7 +346,7 @@ public class Settings {
   }
 
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
-  
+
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
 }

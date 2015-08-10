@@ -33,10 +33,13 @@ public class CookbookUrls {
   public String attrFile;
   public String metadataFile;
   public String karamelFile;
-  public String berksfile;
+  public String berksFile;
+  public String configFile;
+  public String recipesHome;
 
-  public CookbookUrls(String repoName, String repoHome, String branch, String subCookbookName, String id, String home, 
-      String rawHome, String attrFile, String metadataFile, String karamelFile, String berksfile) {
+  public CookbookUrls(String repoName, String repoHome, String branch, String subCookbookName, String id, String home,
+      String rawHome, String attrFile, String metadataFile, String karamelFile, String berksFile, String configFile,
+      String recipesHome) {
     this.repoName = repoName;
     this.repoHome = repoHome;
     this.branch = branch;
@@ -47,7 +50,9 @@ public class CookbookUrls {
     this.attrFile = attrFile;
     this.metadataFile = metadataFile;
     this.karamelFile = karamelFile;
-    this.berksfile = berksfile;
+    this.berksFile = berksFile;
+    this.configFile = configFile;
+    this.recipesHome = recipesHome;
   }
 
   public static class Builder {
@@ -58,11 +63,19 @@ public class CookbookUrls {
     String branch;
     String subCookbookName;
 
+    /**
+     *
+     * @param url url to reposiory name if files == false. Otherwise the name of the reo
+     * @param files if true, reading from a repoo stored locally
+     * @return
+     * @throws CookbookUrlException
+     */
     public Builder url(String url) throws CookbookUrlException {
       if (url.isEmpty()) {
         throw new CookbookUrlException("Cookbook url is empty.");
       }
       this.url = url.trim();
+
       return this;
     }
 
@@ -77,7 +90,7 @@ public class CookbookUrls {
     }
 
     public CookbookUrls build() throws CookbookUrlException {
-      if (url.matches(Settings.REPO_WITH_SUBCOOKBOOK_PATTERN) 
+      if (url.matches(Settings.REPO_WITH_SUBCOOKBOOK_PATTERN)
           || url.matches(Settings.GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN)) {
         String[] comp = url.split(SLASH);
         user = comp[comp.length - 6];
@@ -127,12 +140,18 @@ public class CookbookUrls {
         rawHome += subPath;
       }
 
+      if (Settings.USE_CLONED_REPO_FILES) {
+        rawHome = Settings.COOKBOOKS_PATH + SLASH + repo;
+      }
+
       String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
       String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
       String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
+      String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
+      String recipesHome = rawHome + "/recipes/";
       CookbookUrls urls = new CookbookUrls(repo, repoHome, branch, subCookbookName, id, home,
-          rawHome, attrFile, metadataFile, karamelFile, berksFile);
+          rawHome, attrFile, metadataFile, karamelFile, berksFile, configFile, recipesHome);
       return urls;
     }
 

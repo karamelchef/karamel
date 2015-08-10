@@ -1,9 +1,12 @@
 package se.kth.karamel.webservicemodel;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * JSON representing the password for a sudo account 
  *
  */
+@XmlRootElement
 public class SudoPasswordJSON {
 
   private String password;

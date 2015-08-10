@@ -20,12 +20,12 @@ public class YamlDependency {
   private List<String> local = Collections.EMPTY_LIST;
   private List<String> global = Collections.EMPTY_LIST;
 
-  public String getRecipe() {
-    return recipe;
-  }
-
   public String getRecipeCanonicalName() {
     return Settings.RECIPE_CANONICAL_NAME(recipe);
+  }
+
+  public String getRecipe() {
+    return recipe;
   }
 
   public void setRecipe(String recipe) {
@@ -38,8 +38,12 @@ public class YamlDependency {
 
   public void setGlobal(List<String> global) {
     this.global = new ArrayList<>();
-    for (String gl : global) {
-      this.global.add(Settings.RECIPE_CANONICAL_NAME(gl));
+    if (global != null) {
+      for (String gl : global) {
+        this.global.add(Settings.RECIPE_CANONICAL_NAME(gl));
+      }
+    } else {
+      this.global = Collections.EMPTY_LIST;
     }
   }
 
@@ -49,8 +53,12 @@ public class YamlDependency {
 
   public void setLocal(List<String> local) {
     this.local = new ArrayList<>();
-    for (String loc : local) {
-      this.local.add(Settings.RECIPE_CANONICAL_NAME(loc));
+    if (local != null) {
+      for (String loc : local) {
+        this.local.add(Settings.RECIPE_CANONICAL_NAME(loc));
+      }
+    }else {
+      this.local = Collections.EMPTY_LIST;
     }
   }
 

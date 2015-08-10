@@ -10,8 +10,8 @@ cookbooks:                                                                      
   kagent:                                                                     #'name' is an alias used in the yaml
     github: "karamelchef/kagent-chef"
     branch: "master"    
-  hopshub:                                                                     #'name' is an alias used in the yaml
-    github: "hopshadoop/hopshub-chef"
+  hopsworks:                                                                     #'name' is an alias used in the yaml
+    github: "hopshadoop/hopsworks-chef"
     branch: "master"  
   hops: 
     github: "hopshadoop/hops-hadoop-chef"
@@ -32,7 +32,7 @@ groups:
         type: m3.large
     recipes:                                                                    #List of the recipes to be installed on this group, the convention is <cookbook_name>::<recipe_name>, if recipe_name is not specified it will assuem the 'default' recipe of the cookbook
         - kagent
-        - hopshub::hopshub
+        - hopsworks
         - ndb::mysqld
   namenodes:
     size: 2

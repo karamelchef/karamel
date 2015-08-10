@@ -46,7 +46,7 @@ public class DagBuilderTest {
     };
 
     Settings.CB_CLASSPATH_MODE = true;
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopshub.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);

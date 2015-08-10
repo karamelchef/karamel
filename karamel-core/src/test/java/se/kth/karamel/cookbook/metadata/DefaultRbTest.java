@@ -21,7 +21,7 @@ public class DefaultRbTest {
   @Test
   public void testLoadAttributes() throws CookbookUrlException, MetadataParseException {
     Settings.CB_CLASSPATH_MODE = true;
-    KaramelizedCookbook cb = new KaramelizedCookbook("biobankcloud/hiway-chef");
+    KaramelizedCookbook cb = new KaramelizedCookbook("biobankcloud/hiway-chef", false);
     DefaultRb defaultRb = cb.getDefaultRb();
     
     Object value = defaultRb.getValue("hiway/variantcall/reads/run_ids");

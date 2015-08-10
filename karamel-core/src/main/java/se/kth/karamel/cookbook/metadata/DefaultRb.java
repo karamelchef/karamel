@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.common.exception.CookbookUrlException;
-import static se.kth.karamel.cookbook.metadata.MetadataParser.ATTR_DEFAULT_ARRAY_ITEMS;
 
 /**
  * Represents attributes/default.rb file in cookbook
@@ -69,6 +68,17 @@ public final class DefaultRb {
 
   public Object getValue(String key) {
     return kv.get(key);
+  }
+
+  public String getExperimentContextFormat() {
+    StringBuilder sb = new StringBuilder();
+
+    for (String key : kv.keySet()) {
+      String k = key.substring(key.lastIndexOf("/") + 1);
+      sb.append(k).append("=").append(kv.get(key)).append(System.lineSeparator());
+    }
+
+    return sb.toString();
   }
 
 }
