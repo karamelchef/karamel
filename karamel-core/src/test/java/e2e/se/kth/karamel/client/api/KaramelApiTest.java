@@ -13,6 +13,7 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -263,5 +264,25 @@ public class KaramelApiTest {
     String json = api.yamlToJson(ymlString);
     assertTrue(expectedString.equals(json));
   }
+  //@Test
+  public void testNova() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "flinknova";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    System.out.println(json);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+    NovaCredentials credentials = api.loadNovaCredentialsIfExist();
+    api.updateNovaCredentialsIfValid(credentials);
 
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      System.out.println(api.processCommand("status").getResult());
+      Thread.currentThread().sleep(60000);
+    }
+  }
 }

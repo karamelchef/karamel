@@ -7,7 +7,9 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.jclouds.ContextBuilder;
 import org.jclouds.domain.Credentials;
+import org.jclouds.openstack.nova.v2_0.NovaApiMetadata;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
@@ -16,27 +18,18 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
+import se.kth.karamel.backend.launcher.nova.NovaLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
-import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
-import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
-import se.kth.karamel.backend.running.model.serializers.ShellCommandSerializer;
-import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
-import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
-import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
-import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
-import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
-import se.kth.karamel.backend.running.model.tasks.ShellCommand;
-import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
+import se.kth.karamel.backend.running.model.serializers.*;
+import se.kth.karamel.backend.running.model.tasks.*;
+import se.kth.karamel.common.*;
+import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.settings.NovaSetting;
 import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
-import se.kth.karamel.common.Confs;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.common.SshKeyService;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -117,6 +110,25 @@ public class KaramelApiImpl implements KaramelApi {
     confs.put(Settings.GCE_JSON_KEY_FILE_PATH, jsonFilePath);
     confs.writeKaramelConfs();
     clusterService.registerGceContext(context);
+    return true;
+  }
+
+  @Override
+  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    return NovaLauncher.readCredentials(confs);
+  }
+
+  @Override
+  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
+    NovaContext context = NovaLauncher.validateCredentials(credentials, ContextBuilder.newBuilder(new NovaApiMetadata()));
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY, credentials.getAccountName());
+    confs.put(NovaSetting.NOVA_ACCESSKEY_KEY, credentials.getAccountPass());
+    confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT, credentials.getEndpoint());
+    confs.put(NovaSetting.NOVA_REGION, credentials.getRegion());
+    confs.writeKaramelConfs();
+    clusterService.registerNovaContext(context);
     return true;
   }
 

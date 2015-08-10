@@ -8,6 +8,7 @@ package se.kth.karamel.backend;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.Provider;
@@ -31,6 +32,11 @@ public class ClusterContext {
   private boolean sudoAccountPasswordRequired = false;
   private String githubEmail = "anonymous@anonymous.org";
   private String githubPassword;
+  private NovaContext novaContext;
+
+  public NovaContext getNovaContext() {
+    return novaContext;
+  }
 
   public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
     this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
@@ -98,6 +104,9 @@ public class ClusterContext {
     if (sshKeyPair == null) {
       sshKeyPair = commonContext.getSshKeyPair();
     }
+    if (novaContext == null){
+      novaContext = commonContext.getNovaContext();
+    }
   }
 
   public static ClusterContext validateContext(JsonCluster definition,
@@ -137,5 +146,9 @@ public class ClusterContext {
    */
   public void setGceContext(GceContext gceContext) {
     this.gceContext = gceContext;
+  }
+
+  public void setNovaContext(NovaContext novaContext) {
+    this.novaContext = novaContext;
   }
 }

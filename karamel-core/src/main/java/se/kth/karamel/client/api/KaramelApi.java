@@ -7,6 +7,7 @@ package se.kth.karamel.client.api;
 
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -205,4 +206,8 @@ public interface KaramelApi {
   public String loadGceCredentialsIfExist() throws KaramelException;
 
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
+
+  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
+
+  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
 }
