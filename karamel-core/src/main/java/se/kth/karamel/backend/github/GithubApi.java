@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.SearchRepository;
 import org.eclipse.egit.github.core.User;
@@ -28,6 +28,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
+import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.common.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Settings;
@@ -39,7 +40,7 @@ import se.kth.karamel.common.exception.KaramelException;
  *
  */
 public class GithubApi {
-
+  
   private static volatile String user = "";
   private static volatile String email = "";
   private static volatile String password = "";
@@ -443,7 +444,7 @@ public class GithubApi {
           .setAll(true).call();
       git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, password)).call();
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(GithubApi.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error during github push", ex);
       throw new KaramelException(ex.getMessage());
     } finally {
       if (git != null) {

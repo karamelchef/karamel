@@ -325,7 +325,7 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            java.util.logging.Logger.getLogger(SshMachine.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("", ex);
           }
           timeBetweenRetries *= scaleRetryTimeout;
         }
