@@ -34,13 +34,13 @@ import se.kth.karamel.common.exception.CookbookUrlException;
 public class CookbookUrls {
 
   public String repoName;
-  public String repoHome;
+  public String repoUrl;
   public String branch;
   public String cookbookRelPath;
   public String cookbookRelativePath;
   public String id;
-  public String home;
-  public String rawHome;
+  public String cookbookUrl;
+  public String cookbookRawUrl;
   public String attrFile;
   public String metadataFile;
   public String karamelFile;
@@ -52,12 +52,12 @@ public class CookbookUrls {
       String rawHome, String attrFile, String metadataFile, String karamelFile, String berksFile, String configFile,
       String recipesHome) {
     this.repoName = repoName;
-    this.repoHome = repoHome;
+    this.repoUrl = repoHome;
     this.branch = branch;
     this.cookbookRelPath = cookbookRelPath;
     this.id = id;
-    this.home = home;
-    this.rawHome = rawHome;
+    this.cookbookUrl = home;
+    this.cookbookRawUrl = rawHome;
     this.attrFile = attrFile;
     this.metadataFile = metadataFile;
     this.karamelFile = karamelFile;

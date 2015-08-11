@@ -18,6 +18,7 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -26,7 +27,7 @@ import se.kth.karamel.common.exception.RecipeParseException;
 public class TestKaramelizedCookbook {
 
   @Test
-  public void testLoadingClasspathCookbook() {
+  public void testLoadingClasspathCookbook() throws ValidationException {
     try {
       Settings.CB_CLASSPATH_MODE = true;
       KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopsworks-chef", false);
