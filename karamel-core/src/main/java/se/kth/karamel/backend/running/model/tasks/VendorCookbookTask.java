@@ -43,7 +43,7 @@ public class VendorCookbookTask extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     String cookbookPath = githubRepoName;
     if (subCookbookName != null && !subCookbookName.isEmpty())
-      cookbookPath += Settings.COOKBOOK_SUB_FOLDER + subCookbookName;
+      cookbookPath += Settings.SLASH + subCookbookName;
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
               "cookbooks_home", cookbooksHome,

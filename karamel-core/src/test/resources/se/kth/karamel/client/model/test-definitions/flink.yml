@@ -10,7 +10,7 @@ cookbooks:
     branch: "master"
   flink: 
     github: "testorg/testrepo"
-    cookbook: "flink-chef"
+    cookbook: "cookbooks/flink-chef"
     branch: "master"
     
 groups: 

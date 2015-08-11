@@ -69,7 +69,7 @@ public class Cookbook {
     else if (version != null)
       builder.branchOrVersion(version);
     if (cookbook != null)
-      builder.subCookbookName(cookbook);
+      builder.cookbookRelPath(cookbook);
     CookbookUrls urls = builder.build();
     return urls;
   }

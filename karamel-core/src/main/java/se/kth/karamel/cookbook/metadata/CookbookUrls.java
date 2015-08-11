@@ -5,15 +5,26 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import java.util.regex.Matcher;
 import se.kth.karamel.common.Settings;
+import static se.kth.karamel.common.Settings.CB_CLASSPATH_MODE;
+import static se.kth.karamel.common.Settings.COOKBOOKS_PATH;
+import static se.kth.karamel.common.Settings.COOKBOOK_BERKSFILE_REL_URL;
+import static se.kth.karamel.common.Settings.COOKBOOK_CONFIGFILE_REL_URL;
+import static se.kth.karamel.common.Settings.COOKBOOK_DEFAULTRB_REL_URL;
+import static se.kth.karamel.common.Settings.COOKBOOK_KARAMELFILE_REL_URL;
+import static se.kth.karamel.common.Settings.COOKBOOK_METADATARB_REL_URL;
 import static se.kth.karamel.common.Settings.GITHUB_BASE_URL;
-import static se.kth.karamel.common.Settings.GITHUB_DEFAULT_BRANCH;
 import static se.kth.karamel.common.Settings.GITHUB_RAW_URL;
 import static se.kth.karamel.common.Settings.GITHUB_REPO_NO_BRANCH_PATTERN;
 import static se.kth.karamel.common.Settings.GITHUB_REPO_WITH_BRANCH_PATTERN;
+import static se.kth.karamel.common.Settings.GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN;
 import static se.kth.karamel.common.Settings.REPO_NO_BRANCH_PATTERN;
 import static se.kth.karamel.common.Settings.REPO_WITH_BRANCH_PATTERN;
+import static se.kth.karamel.common.Settings.REPO_WITH_SUBCOOKBOOK_PATTERN;
 import static se.kth.karamel.common.Settings.SLASH;
+import static se.kth.karamel.common.Settings.TEST_CB_ROOT_FOLDER;
+import static se.kth.karamel.common.Settings.USE_CLONED_REPO_FILES;
 import se.kth.karamel.common.exception.CookbookUrlException;
 
 /**
@@ -25,7 +36,7 @@ public class CookbookUrls {
   public String repoName;
   public String repoHome;
   public String branch;
-  public String subCookbookName;
+  public String cookbookRelPath;
   public String cookbookRelativePath;
   public String id;
   public String home;
@@ -37,13 +48,13 @@ public class CookbookUrls {
   public String configFile;
   public String recipesHome;
 
-  public CookbookUrls(String repoName, String repoHome, String branch, String subCookbookName, String id, String home,
+  public CookbookUrls(String repoName, String repoHome, String branch, String cookbookRelPath, String id, String home,
       String rawHome, String attrFile, String metadataFile, String karamelFile, String berksFile, String configFile,
       String recipesHome) {
     this.repoName = repoName;
     this.repoHome = repoHome;
     this.branch = branch;
-    this.subCookbookName = subCookbookName;
+    this.cookbookRelPath = cookbookRelPath;
     this.id = id;
     this.home = home;
     this.rawHome = rawHome;
@@ -59,14 +70,13 @@ public class CookbookUrls {
 
     String url;
     String repo;
-    String user;
+    String org;
     String branch;
-    String subCookbookName;
+    String cookbookRelPath;
 
     /**
      *
      * @param url url to reposiory name if files == false. Otherwise the name of the reo
-     * @param files if true, reading from a repoo stored locally
      * @return
      * @throws CookbookUrlException
      */
@@ -84,73 +94,102 @@ public class CookbookUrls {
       return this;
     }
 
-    public Builder subCookbookName(String subCookbook) {
-      this.subCookbookName = subCookbook;
+    public Builder cookbookRelPath(String subCookbook) {
+      this.cookbookRelPath = subCookbook;
       return this;
     }
 
     public CookbookUrls build() throws CookbookUrlException {
-      if (url.matches(Settings.REPO_WITH_SUBCOOKBOOK_PATTERN)
-          || url.matches(Settings.GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN)) {
-        String[] comp = url.split(SLASH);
-        user = comp[comp.length - 6];
-        repo = comp[comp.length - 5];
-        if (branch == null) {
-          branch = comp[comp.length - 3];
+      boolean found = false;
+      Matcher matcher = REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(url);
+      if (matcher.matches()) {
+        found = true;
+      }
+
+      if (!found) {
+        matcher = GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(url);
+        if (matcher.matches()) {
+          found = true;
         }
-        subCookbookName = comp[comp.length - 1];
-      } else if (url.matches(REPO_WITH_BRANCH_PATTERN) || url.matches(GITHUB_REPO_WITH_BRANCH_PATTERN)) {
-        String[] comp = url.split(SLASH);
-        user = comp[comp.length - 4];
-        repo = comp[comp.length - 3];
-        if (branch == null) {
-          branch = comp[comp.length - 1];
+      }
+      
+      if (found) {
+        cookbookRelPath = matcher.group(4);
+      }
+
+      if (!found) {
+        matcher = REPO_WITH_BRANCH_PATTERN.matcher(url);
+        if (matcher.matches()) {
+          found = true;
         }
-      } else if (url.matches(REPO_NO_BRANCH_PATTERN) || url.matches(GITHUB_REPO_NO_BRANCH_PATTERN)) {
-        String[] comp = url.split(SLASH);
-        user = comp[comp.length - 2];
-        repo = comp[comp.length - 1];
+      }
+
+      if (!found) {
+        matcher = GITHUB_REPO_WITH_BRANCH_PATTERN.matcher(url);
+        if (matcher.matches()) {
+          found = true;
+        }
+      }
+
+      if (found && branch == null) {
+        branch = matcher.group(3);
+      }
+
+      if (!found) {
+        matcher = REPO_NO_BRANCH_PATTERN.matcher(url);
+        if (matcher.matches()) {
+          found = true;
+        }
+      }
+
+      if (!found) {
+        matcher = GITHUB_REPO_NO_BRANCH_PATTERN.matcher(url);
+        if (matcher.matches()) {
+          found = true;
+        }
+      }
+
+      if (found) {
+        org = matcher.group(1);
+        repo = matcher.group(2);
         if (branch == null) {
-          branch = GITHUB_DEFAULT_BRANCH;
+          branch = Settings.GITHUB_DEFAULT_BRANCH;
         }
       } else {
         throw new CookbookUrlException(String.format("'%s' is not a valid Github url, it must be one the following "
-            + "formats: \n'http(s)://github.com/<user_name>/<repo>', "
-            + "\n'http(s)://github.com/<user_name>/<repo>/tree/<branch>', "
-            + "\n'http(s)://github.com/<user_name>/<repo>/tree/<branch>/cookbooks/<sub-cookbook>', "
-            + "\n'<user_name>/<repo>', \n'<user_name>/<repo>/tree/<branch>',"
-            + " or \n'<user_name>/<repo>/tree/<branch>/cookbooks/<sub-cookbook>'", url));
+            + "formats: \n'http(s)://github.com/<org>/<repo>', "
+            + "\n'http(s)://github.com/<org>/<repo>/tree/<branch>', "
+            + "\n'http(s)://github.com/<org>/<repo>/tree/<branch>/<cookbook-relative-path>', "
+            + "\n'<org>/<repo>', \n'<org>/<repo>/tree/<branch>',"
+            + " or \n'<org>/<repo>/tree/<branch>/<cookbook-relative-path>'", url));
       }
 
-      String base = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL;
-      String raw = Settings.CB_CLASSPATH_MODE ? Settings.TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL;
+      String base = CB_CLASSPATH_MODE ? TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL;
+      String raw = CB_CLASSPATH_MODE ? TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL;
 
-      String id = GITHUB_BASE_URL + SLASH + user + SLASH + repo + SLASH + "tree" + SLASH + branch;
-      String home = base + SLASH + user + SLASH + repo;
-      String repoHome = base + SLASH + user + SLASH + repo;
-      String rawHome = raw + SLASH + user + SLASH + repo + SLASH + branch;
+      String id = GITHUB_BASE_URL + SLASH + org + SLASH + repo + SLASH + "tree" + SLASH + branch;
+      String home = base + SLASH + org + SLASH + repo;
+      String repoHome = base + SLASH + org + SLASH + repo;
+      String rawHome = raw + SLASH + org + SLASH + repo + SLASH + branch;
 
-      if (subCookbookName != null && !subCookbookName.isEmpty()) {
-        if (subCookbookName.contains(SLASH)) {
-          throw new CookbookUrlException("relative cookbook cannot be multi-level");
-        }
-        String subPath = Settings.COOKBOOK_SUB_FOLDER + subCookbookName;
+      if (cookbookRelPath != null && !cookbookRelPath.isEmpty()) {
+        String subPath = SLASH + cookbookRelPath;
         id += subPath;
         home += subPath;
         rawHome += subPath;
       }
 
-      if (Settings.USE_CLONED_REPO_FILES) {
-        rawHome = Settings.COOKBOOKS_PATH + SLASH + repo;
+      if (USE_CLONED_REPO_FILES) {
+        rawHome = COOKBOOKS_PATH + SLASH + repo;
       }
 
-      String attrFile = rawHome + Settings.COOKBOOK_DEFAULTRB_REL_URL;
-      String metadataFile = rawHome + Settings.COOKBOOK_METADATARB_REL_URL;
-      String karamelFile = rawHome + Settings.COOKBOOK_KARAMELFILE_REL_URL;
-      String berksFile = rawHome + Settings.COOKBOOK_BERKSFILE_REL_URL;
-      String configFile = rawHome + Settings.COOKBOOK_CONFIGFILE_REL_URL;
+      String attrFile = rawHome + COOKBOOK_DEFAULTRB_REL_URL;
+      String metadataFile = rawHome + COOKBOOK_METADATARB_REL_URL;
+      String karamelFile = rawHome + COOKBOOK_KARAMELFILE_REL_URL;
+      String berksFile = rawHome + COOKBOOK_BERKSFILE_REL_URL;
+      String configFile = rawHome + COOKBOOK_CONFIGFILE_REL_URL;
       String recipesHome = rawHome + "/recipes/";
-      CookbookUrls urls = new CookbookUrls(repo, repoHome, branch, subCookbookName, id, home,
+      CookbookUrls urls = new CookbookUrls(repo, repoHome, branch, cookbookRelPath, id, home,
           rawHome, attrFile, metadataFile, karamelFile, berksFile, configFile, recipesHome);
       return urls;
     }

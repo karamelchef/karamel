@@ -123,8 +123,8 @@ public class UserClusterDataExtractor {
       for (JsonCookbook cb : gr.getCookbooks()) {
         CookbookUrls urls = cb.getUrls();
         String cookbookPath = urls.repoName;
-        if (urls.subCookbookName != null && !urls.subCookbookName.isEmpty()) {
-          cookbookPath += Settings.COOKBOOK_SUB_FOLDER + urls.subCookbookName;
+        if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
+          cookbookPath += Settings.SLASH + urls.cookbookRelPath;
         }
         paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
             + Settings.COOKBOOKS_VENDOR_SUBFOLDER);
