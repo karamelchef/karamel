@@ -210,7 +210,7 @@ angular.module('karamel.main')
                                 }
 
                                 $log.info(cluster);
-                                localCookbook.addRecipe(new Recipe(info.recipe.name));
+                                localCookbook.addRecipe(new Recipe(localCookbook.name + "::" + info.recipe.name));
                                 BrowserCacheService.updateCache();
                             }
                         });

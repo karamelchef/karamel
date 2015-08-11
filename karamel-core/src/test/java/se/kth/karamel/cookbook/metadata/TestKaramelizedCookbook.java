@@ -57,7 +57,7 @@ public class TestKaramelizedCookbook {
   @Test
   public void testLoadDependencies() throws CookbookUrlException, IOException {
     Settings.CB_CLASSPATH_MODE = true;
-    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopsworks-chef/master/Berksfile");
+    List<String> list = IoUtils.readLinesFromClasspath("testgithub/hopshadoop/hopsworks-chef/master/Berksfile");
     Berksfile berksfile = new Berksfile(list);
   }
 
@@ -66,7 +66,7 @@ public class TestKaramelizedCookbook {
     try {
       Settings.CB_CLASSPATH_MODE = true;
       String recipe = Resources.toString(Resources.getResource(
-          "cookbooks/hopshadoop/hopsworks-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
+          "testgithub/hopshadoop/hopsworks-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
       ExperimentRecipe er = ExperimentRecipeParser.parse("experiment", recipe, "config.props", "x=y");
       assertEquals("experiment", er.getRecipeName());
       assertEquals(er.getConfigFileName().isEmpty(), false);

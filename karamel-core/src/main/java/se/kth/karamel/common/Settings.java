@@ -152,7 +152,7 @@ public class Settings {
     return names;
   }
 
-  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+  public static final String TEST_CB_ROOT_FOLDER = "testgithub";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
   public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";

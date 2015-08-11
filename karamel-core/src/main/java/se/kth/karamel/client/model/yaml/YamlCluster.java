@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.client.model.yaml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +33,14 @@ public class YamlCluster extends YamlScope {
     super(jsonCluster);
     this.name = jsonCluster.getName();
     List<JsonGroup> jsonGroups = jsonCluster.getGroups();
+    List<JsonCookbook> allCbs = new ArrayList<>();
     for (JsonGroup jsonGroup : jsonGroups) {
       YamlGroup yamlGroup = new YamlGroup(jsonGroup);
+      allCbs.addAll(jsonGroup.getCookbooks());
       groups.put(jsonGroup.getName(), yamlGroup);
     }
-    List<JsonCookbook> jsonCookbooks = jsonCluster.getCookbooks();
-    for (JsonCookbook jck : jsonCookbooks) {
+    allCbs.addAll(jsonCluster.getCookbooks());
+    for (JsonCookbook jck : allCbs) {
       Cookbook ck = new Cookbook(jck);
       cookbooks.put(jck.getName(), ck);
     }

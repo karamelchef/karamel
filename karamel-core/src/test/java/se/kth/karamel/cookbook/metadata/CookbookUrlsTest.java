@@ -423,13 +423,13 @@ public class CookbookUrlsTest {
   @Test
   public void testValidUrlsWithVersionInClasspath() throws CookbookUrlException {
     String id = "https://github.com/hopshadoop/hopsworks-chef/tree/master";
-    String home = "cookbooks/hopshadoop/hopsworks-chef";
-    String rawHome = "cookbooks/hopshadoop/hopsworks-chef/master";
-    String repoHome = "cookbooks/hopshadoop/hopsworks-chef";
-    String metadataFile = "cookbooks/hopshadoop/hopsworks-chef/master/metadata.rb";
-    String attFile = "cookbooks/hopshadoop/hopsworks-chef/master/attributes/default.rb";
-    String karamelFile = "cookbooks/hopshadoop/hopsworks-chef/master/Karamelfile";
-    String berksFile = "cookbooks/hopshadoop/hopsworks-chef/master/Berksfile";
+    String home = "testgithub/hopshadoop/hopsworks-chef";
+    String rawHome = "testgithub/hopshadoop/hopsworks-chef/master";
+    String repoHome = "testgithub/hopshadoop/hopsworks-chef";
+    String metadataFile = "testgithub/hopshadoop/hopsworks-chef/master/metadata.rb";
+    String attFile = "testgithub/hopshadoop/hopsworks-chef/master/attributes/default.rb";
+    String karamelFile = "testgithub/hopshadoop/hopsworks-chef/master/Karamelfile";
+    String berksFile = "testgithub/hopshadoop/hopsworks-chef/master/Berksfile";
     String repo = "hopsworks-chef";
     String branch = "master";
     Settings.CB_CLASSPATH_MODE = true;
@@ -450,13 +450,13 @@ public class CookbookUrlsTest {
   @Test
   public void testValidUrlsWithVersionAndRekativeCookbookInClasspath() throws CookbookUrlException {
     String id = "https://github.com/hopshadoop/hopshub-chef/tree/master/cookbooks/testcb";
-    String home = "cookbooks/hopshadoop/hopshub-chef/cookbooks/testcb";
-    String repoHome = "cookbooks/hopshadoop/hopshub-chef";
-    String rawHome = "cookbooks/hopshadoop/hopshub-chef/master/cookbooks/testcb";
-    String metadataFile = "cookbooks/hopshadoop/hopshub-chef/master/cookbooks/testcb/metadata.rb";
-    String attFile = "cookbooks/hopshadoop/hopshub-chef/master/cookbooks/testcb/attributes/default.rb";
-    String karamelFile = "cookbooks/hopshadoop/hopshub-chef/master/cookbooks/testcb/Karamelfile";
-    String berksFile = "cookbooks/hopshadoop/hopshub-chef/master/cookbooks/testcb/Berksfile";
+    String home = "testgithub/hopshadoop/hopshub-chef/cookbooks/testcb";
+    String repoHome = "testgithub/hopshadoop/hopshub-chef";
+    String rawHome = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb";
+    String metadataFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/metadata.rb";
+    String attFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/attributes/default.rb";
+    String karamelFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/Karamelfile";
+    String berksFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/Berksfile";
     String repo = "hopshub-chef";
     String branch = "master";
     Settings.CB_CLASSPATH_MODE = true;

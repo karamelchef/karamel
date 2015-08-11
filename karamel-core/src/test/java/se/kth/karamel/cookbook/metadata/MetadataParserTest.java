@@ -61,7 +61,7 @@ public class MetadataParserTest {
 
   @Test
   public void testNdbRecognizedLines() throws IOException, MetadataParseException {
-    String content = IoUtils.readContentFromClasspath("cookbooks/hopshadoop/ndb-chef/master/metadata.rb");
+    String content = IoUtils.readContentFromClasspath("testgithub/hopshadoop/ndb-chef/master/metadata.rb");
     MetadataRb metadatarb = MetadataParser.parse(content);
     assertEquals("ndb", metadatarb.getName());
     assertEquals("Installs/Configures NDB (MySQL Cluster)", metadatarb.getDescription());

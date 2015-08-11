@@ -91,7 +91,7 @@ public class GithubUserTest {
   /**
    * List Organizations in github
    */
-  @Test
+//  @Test
   public void testListOrgs() {
     try {
       api.registerGithubAccount(user, password);
@@ -104,7 +104,7 @@ public class GithubUserTest {
     }
   }
 
-  @Test
+//  @Test
   public void testListRepos() {
     try {
       List<RepoItem> orgs = api.listGithubRepos("hopshadoop");

@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Gce;
 import se.kth.karamel.client.model.json.JsonCluster;
@@ -187,4 +188,16 @@ public class ClusterDefinitionTest {
     ClusterDefinitionService.yamlToJson(yaml);
   }
 
+  @Test
+  public void testGroupLevelRecipesInJson() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String json = "  {\"name\":\"flink\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\"}],\"groups\":[{\"name\":\"namenodes\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"recipes\":[{\"name\":\"hadoop::nn\"}]},{\"name\":\"flink\",\"github\":\"testorg/testrepo/tree/master/cookbooks/flink-chef\",\"recipes\":[{\"name\":\"flink::jobmanager\"}]}],\"size\":1,\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.11\"]}},{\"name\":\"datanodes\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"recipes\":[{\"name\":\"hadoop::dn\"}]}],\"size\":1,\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.12\"]}}],\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":\"vagrant\",\"ips\":[]}}";
+    JsonCluster jsonCluster = ClusterDefinitionService.jsonToJsonObject(json);
+    ClusterDefinitionValidator.validate(jsonCluster);
+    String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
+    jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
+    List<JsonCookbook> cookbooks = jsonCluster.getCookbooks();
+    assertEquals(2, cookbooks.size());
+    assertEquals("flink", cookbooks.get(1).getName());
+  }
 }
