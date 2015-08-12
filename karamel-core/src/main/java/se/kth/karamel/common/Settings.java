@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
 
@@ -40,19 +41,22 @@ public class Settings {
   public static final String GITHUB_DOMAIN = "github.com";
   public static final String GITHUB_DEFAULT_BRANCH = "master";
   public static final String SLASH = "/";
+  public static final String DOLLAR = "$";
+  public static final String CARET = "^";
   public static final String GITHUB_RAW_DOMAIN = "raw.githubusercontent.com";
   public static final String GITHUB_BASE_URL = HTTPS_PREFIX + GITHUB_DOMAIN;
   public static final String GITHUB_RAW_URL = HTTPS_PREFIX + GITHUB_RAW_DOMAIN;
-  public static final String GITHUB_BASE_URL_PATTERN = "http(s)?://github.com";
-  public static final String GITHUB_DEFAULT_REPO_URL1 = GITHUB_BASE_URL + "/hopshadoop";
-  public static final String GITHUB_DEFAULT_REPO_URL2 = GITHUB_BASE_URL + "/karamelize";
-  public static final String GITHUB_DEFAULT_REPO_URL3 = GITHUB_BASE_URL + "/hopstart";
-  public static final String REPO_WITH_BRANCH_PATTERN = "[^\\/]*/[^\\/]*/tree/[^\\/]*";
-  public static final String REPO_NO_BRANCH_PATTERN = "[^\\/]*/[^\\/]*";
-  public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^"
-      + GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
-  public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^"
-      + GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
+  public static final String GITHUB_BASE_URL_PATTERN = "http(?:s)?:\\/\\/github.com";
+  public static final Pattern REPO_WITH_SUBCOOKBOOK_PATTERN = 
+      Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)\\/(.*)");
+  public static final Pattern REPO_WITH_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)");
+  public static final Pattern REPO_NO_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)");
+  public static final Pattern GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_SUBCOOKBOOK_PATTERN.pattern() + DOLLAR);
+  public static final Pattern GITHUB_REPO_WITH_BRANCH_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_BRANCH_PATTERN.pattern() + DOLLAR);
+  public static final Pattern GITHUB_REPO_NO_BRANCH_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_NO_BRANCH_PATTERN.pattern() + DOLLAR);
   public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
@@ -149,7 +153,7 @@ public class Settings {
     return names;
   }
 
-  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+  public static final String TEST_CB_ROOT_FOLDER = "testgithub";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
   public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";
@@ -268,9 +272,9 @@ public class Settings {
 
   //Git cookbook metadata 
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
-  public static final String COOKBOOK_METADATARB_REL_URL =  "/metadata.rb";
-  public static final String COOKBOOK_KARAMELFILE_REL_URL =  "/Karamelfile";
-  public static final String COOKBOOK_BERKSFILE_REL_URL =  "/Berksfile";
+  public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
+  public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
+  public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
   public static final String COOKBOOK_CONFIGFILE = "config.props";
   public static final String COOKBOOK_CONFIGFILE_REL_URL =  "/templates/default/" + COOKBOOK_CONFIGFILE;
   public static final String COOKBOOK_CONFIGFILE_BASE_URL = "/templates/default/";

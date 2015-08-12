@@ -64,7 +64,7 @@ public class KaramelApiTest {
 
 //  @Test
   public void testYamlToJson() throws IOException, KaramelException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     assertFalse(json.isEmpty());
     System.out.println(json);
@@ -72,7 +72,7 @@ public class KaramelApiTest {
 
 //  @Test
   public void testJsonToYaml() throws KaramelException, IOException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     String convertedYaml = api.jsonToYaml(json);
     assertFalse(convertedYaml.isEmpty());
@@ -82,7 +82,7 @@ public class KaramelApiTest {
 //  @Test
   public void testPauseResumePurge() throws KaramelException, IOException, InterruptedException {
     String clusterName = "spark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -116,7 +116,7 @@ public class KaramelApiTest {
 //  @Test
   public void testForkMachineScale() throws KaramelException, IOException, InterruptedException {
     String clusterName = "bigspark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/bigspark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/bigspark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -142,7 +142,7 @@ public class KaramelApiTest {
 //  @Test
   public void testVcpMachines() throws KaramelException, IOException, InterruptedException {
     String clusterName = "sparkonvpc";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/sparkonvpc.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/sparkonvpc.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -168,8 +168,7 @@ public class KaramelApiTest {
 //  @Test
   public void testDag() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hopsonenode";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hops-1node-aws-m3-med.yml"),
-        Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hops-1node-aws-m3-med.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -191,7 +190,7 @@ public class KaramelApiTest {
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hiway";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hiway.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -213,7 +212,7 @@ public class KaramelApiTest {
 //  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/ndb.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/ndb.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -234,7 +233,7 @@ public class KaramelApiTest {
 
 //  @Test
   public void testBaremetal() throws KaramelException, IOException, InterruptedException {
-//    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_baremetal.yml"), Charsets.UTF_8);
+//    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_baremetal.yml"), Charsets.UTF_8);
 //    String json = api.yamlToJson(ymlString);
     String json
         = "{\"name\":\"flink\",\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[]}],\"groups\":[{\"name\":\"namenodes\",\"provider\":\"\",\"attrs\":[],\"instances\":1,\"baremetal\":{\"ips\":[\"192.168.33.11\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::nn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::wordcount\"},{\"title\":\"flink::jobmanager\"}]}]},{\"name\":\"datanodes\",\"provider\":\"\",\"attrs\":[],\"instances\":2,\"baremetal\":{\"ips\":[\"192.168.33.12\",\"192.168.33.13\"]},\"cookbooks\":[{\"name\":\"hadoop\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"hadoop::dn\"}]},{\"name\":\"flink\",\"github\":\"hopshadoop/flink-chef\",\"branch\":\"master\",\"attributes\":{},\"recipes\":[{\"title\":\"flink::taskmanager\"}]}]}],\"ec2\":null,\"baremetal\":{\"mapKey\":\"baremetal\",\"username\":\"vagrant\",\"ips\":[]},\"sshKeyPair\":{\"mapKey\":\"ssh\",\"pubKey\":null,\"priKey\":null,\"pubKeyPath\":null,\"privKeyPath\":null,\"passphrase\":null,\"isValid\":true}}\n"
@@ -259,7 +258,7 @@ public class KaramelApiTest {
 //  @Test
   public void testGce() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flinkgce";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_gce.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_gce.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");

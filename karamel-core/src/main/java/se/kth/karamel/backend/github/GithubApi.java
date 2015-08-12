@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.SearchRepository;
@@ -39,7 +37,7 @@ import se.kth.karamel.common.exception.KaramelException;
  *
  */
 public class GithubApi {
-
+  
   private static volatile String user = "";
   private static volatile String email = "";
   private static volatile String password = "";
@@ -443,7 +441,7 @@ public class GithubApi {
           .setAll(true).call();
       git.push().setCredentialsProvider(new UsernamePasswordCredentialsProvider(user, password)).call();
     } catch (IOException | GitAPIException ex) {
-      Logger.getLogger(GithubApi.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("error during github push", ex);
       throw new KaramelException(ex.getMessage());
     } finally {
       if (git != null) {

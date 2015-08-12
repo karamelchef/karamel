@@ -16,6 +16,7 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  * Represents a coobook located in github
@@ -31,7 +32,7 @@ public class KaramelizedCookbook {
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
   private final Berksfile berksFile;
-  private List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
+  private final List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
   private InstallRecipe installRecipe;
   private String json;
 
@@ -41,8 +42,10 @@ public class KaramelizedCookbook {
    * @param local true if it is a canonical path (to a cloned cookbook) and not a URL.
    * @throws CookbookUrlException
    * @throws MetadataParseException
+   * @throws se.kth.karamel.common.exception.ValidationException
    */
-  public KaramelizedCookbook(String homeUrl, boolean local) throws CookbookUrlException, MetadataParseException {
+  public KaramelizedCookbook(String homeUrl, boolean local) throws CookbookUrlException, MetadataParseException, 
+      ValidationException {
     if (local) {
       Settings.USE_CLONED_REPO_FILES = true;
     }
@@ -53,6 +56,7 @@ public class KaramelizedCookbook {
       this.defaultRb = new DefaultRb(defaultsLines);
       String metadataContent = IoUtils.readContent(urls.metadataFile);
       this.metadataRb = MetadataParser.parse(metadataContent);
+      this.metadataRb.normalizeRecipeNames();
       this.metadataRb.setDefaults(defaultRb);
       String karamelFileContent = IoUtils.readContent(urls.karamelFile);
       this.karamelFile = new KaramelFile(karamelFileContent);
@@ -93,7 +97,7 @@ public class KaramelizedCookbook {
         }
       }
       if (!configFileName.isEmpty()) {
-        String configFileUrl = urls.rawHome + File.separator + "templates" + File.separator
+        String configFileUrl = urls.cookbookRawUrl + File.separator + "templates" + File.separator
             + "defaults" + File.separator + configFileName + ".erb";
         try {
           configFileContents = IoUtils.readContent(configFileUrl);
@@ -142,12 +146,13 @@ public class KaramelizedCookbook {
     return berksFile;
   }
 
-  public String getMetadataJson() {
+  public String getInfoJson() {
     if (json == null) {
+      CookbookInfoJson cookbookInfoJson = new CookbookInfoJson(urls.id, metadataRb);
       GsonBuilder builder = new GsonBuilder();
       builder.disableHtmlEscaping();
       Gson gson = builder.setPrettyPrinting().create();
-      json = gson.toJson(metadataRb);
+      json = gson.toJson(cookbookInfoJson);
     }
     return json;
   }
@@ -172,4 +177,8 @@ public class KaramelizedCookbook {
     return defaultRb;
   }
 
+  public CookbookUrls getUrls() {
+    return urls;
+  }
+  
 }

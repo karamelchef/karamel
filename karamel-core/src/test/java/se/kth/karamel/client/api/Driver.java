@@ -28,7 +28,7 @@ public class Driver {
     
     KaramelApi api = new KaramelApiImpl();
     //give your own yaml file
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hiway.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hiway.yml"), Charsets.UTF_8);
     //since api works with json you will need to convert your yaml to json
     String json = api.yamlToJson(ymlString);
 

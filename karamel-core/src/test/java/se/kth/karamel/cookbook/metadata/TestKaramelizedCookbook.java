@@ -18,6 +18,7 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -26,10 +27,10 @@ import se.kth.karamel.common.exception.RecipeParseException;
 public class TestKaramelizedCookbook {
 
   @Test
-  public void testLoadingClasspathCookbook() {
+  public void testLoadingClasspathCookbook() throws ValidationException {
     try {
       Settings.CB_CLASSPATH_MODE = true;
-      KaramelizedCookbook cb = new KaramelizedCookbook("hopshadoop/hopsworks-chef", false);
+      KaramelizedCookbook cb = new KaramelizedCookbook("testorg/testrepo/tree/master/cookbooks/hopshadoop/hopsworks-chef", false);
     } catch (CookbookUrlException | MetadataParseException e) {
       Assert.fail();
     }
@@ -57,7 +58,7 @@ public class TestKaramelizedCookbook {
   @Test
   public void testLoadDependencies() throws CookbookUrlException, IOException {
     Settings.CB_CLASSPATH_MODE = true;
-    List<String> list = IoUtils.readLinesFromClasspath("cookbooks/hopshadoop/hopsworks-chef/master/Berksfile");
+    List<String> list = IoUtils.readLinesFromClasspath("testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Berksfile");
     Berksfile berksfile = new Berksfile(list);
   }
 
@@ -66,7 +67,7 @@ public class TestKaramelizedCookbook {
     try {
       Settings.CB_CLASSPATH_MODE = true;
       String recipe = Resources.toString(Resources.getResource(
-          "cookbooks/hopshadoop/hopsworks-chef/master/recipes/experiment.rb"), Charsets.UTF_8);
+          "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/recipes/experiment.rb"), Charsets.UTF_8);
       ExperimentRecipe er = ExperimentRecipeParser.parse("experiment", recipe, "config.props", "x=y");
       assertEquals("experiment", er.getRecipeName());
       assertEquals(er.getConfigFileName().isEmpty(), false);

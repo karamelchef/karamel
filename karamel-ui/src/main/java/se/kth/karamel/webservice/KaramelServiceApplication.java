@@ -36,8 +36,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -141,7 +139,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       logger.info("New Cookbook is now located at: " + pathToCb);
       System.exit(0);
     } catch (IOException ex) {
-      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.SEVERE, null, ex);
+      logger.error("", ex);
       System.exit(-1);
     }
   }
@@ -811,8 +809,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response sudoPassword(SudoPasswordJSON sudoPwd) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set sudo password.... ");
+        logger.info(" Received request to set sudo password....");
         try {
           karamelApiHandler.registerSudoPassword(sudoPwd.getPassword());
           response = Response.status(Response.Status.OK).
@@ -836,8 +833,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @GET
       public Response getGithubCredentials() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           GithubUser credentials = karamelApiHandler.loadGithubCredentials();
           response = Response.status(Response.Status.OK).
@@ -861,8 +857,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @POST
       public Response setGithubCredentials(@FormParam("user") String user, @FormParam("password") String password) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           GithubUser githubUser = karamelApiHandler.registerGithubAccount(user, password);
 
@@ -885,8 +880,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @POST
       public Response getGithubOrgs() {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           List<OrgItem> orgs = karamelApiHandler.listGithubOrganizations();
           response = Response.status(Response.Status.OK).
@@ -909,8 +903,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @POST
       public Response getGithubRepos(@FormParam("org") String org) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           List<RepoItem> repos = karamelApiHandler.listGithubRepos(org);
           response = Response.status(Response.Status.OK).
@@ -934,8 +927,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @PUT
       public Response pushExperiment(Experiment experiment) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           karamelApiHandler.commitAndPushExperiment(experiment);
           response = Response.status(Response.Status.OK).
@@ -958,8 +950,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @POST
       public Response loadExperiment(@FormParam("experimentUrl") String experimentUrl) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           Experiment ec = karamelApiHandler.loadExperiment(experimentUrl);
           response = Response.status(Response.Status.OK).entity(ec).build();
@@ -981,8 +972,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       @POST
       public Response removeFileFromExperiment(@FormParam("org") String org, @FormParam("repo") String repo,
           @FormParam("filename") String filename) {
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         karamelApiHandler.removeFileFromExperiment(org, repo, filename);
         return Response.status(Response.Status.OK).entity(
             new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
@@ -998,8 +988,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo,
           @FormParam("local") boolean local, @FormParam("remote") boolean remote) {
         Response response = null;
-        Logger.getLogger(KaramelServiceApplication.class.getName()).
-            log(Level.INFO, " Received request to set github credentials.... ");
+        logger.info(" Received request to set github credentials.... ");
         try {
           karamelApiHandler.removeRepo(org, repo, local, remote);
           response = Response.status(Response.Status.OK).
@@ -1018,7 +1007,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     @Override
     public void run() {
-      Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.INFO, "Bye! Cleaning up first....");
+      logger.info("Bye! Cleaning up first....");
       // TODO - interrupt all threads
       // Should we cleanup AMIs?
     }

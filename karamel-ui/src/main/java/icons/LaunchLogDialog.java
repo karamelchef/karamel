@@ -11,8 +11,6 @@ import java.awt.event.KeyEvent;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -199,7 +197,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
       try {
         KaramelServiceApplication.openWebpage(new URL("http://localhost:" + this.port + "/index.html"));
       } catch (MalformedURLException ex) {
-        Logger.getLogger(LaunchLogDialog.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("", ex);
       }
 
     }//GEN-LAST:event_launchButtonActionPerformed
@@ -220,7 +218,7 @@ public class LaunchLogDialog extends javax.swing.JDialog {
       try {
         jTextAreaKaramelStdOut.getDocument().remove(0, jTextAreaKaramelStdOut.getDocument().getLength());
       } catch (BadLocationException ex) {
-        Logger.getLogger(LaunchLogDialog.class.getName()).log(Level.SEVERE, null, ex);
+        logger.error("", ex);
       }
     }//GEN-LAST:event_clearButtonActionPerformed
 
