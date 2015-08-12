@@ -146,12 +146,13 @@ public class KaramelizedCookbook {
     return berksFile;
   }
 
-  public String getMetadataJson() {
+  public String getInfoJson() {
     if (json == null) {
+      CookbookInfoJson cookbookInfoJson = new CookbookInfoJson(urls.id, metadataRb);
       GsonBuilder builder = new GsonBuilder();
       builder.disableHtmlEscaping();
       Gson gson = builder.setPrettyPrinting().create();
-      json = gson.toJson(metadataRb);
+      json = gson.toJson(cookbookInfoJson);
     }
     return json;
   }

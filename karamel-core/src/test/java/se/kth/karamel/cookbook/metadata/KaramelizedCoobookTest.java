@@ -20,26 +20,15 @@ import se.kth.karamel.common.exception.ValidationException;
 public class KaramelizedCoobookTest {
   
   @Test
-  public void testGetMetadataJson() throws CookbookUrlException, MetadataParseException, ValidationException {
+  public void testGetInfoJson() throws CookbookUrlException, MetadataParseException, ValidationException {
     Settings.CB_CLASSPATH_MODE = true;
     KaramelizedCookbook cb = new KaramelizedCookbook("testorg/testrepo/tree/master/cookbooks/biobankcloud/hiway-chef", false);
-    String json = cb.getMetadataJson();
+    String json = cb.getInfoJson();
     String expecetdJson = "{\n" +
+"  \"id\": \"https://github.com/testorg/testrepo/tree/master/cookbooks/biobankcloud/hiway-chef\",\n" +
 "  \"name\": \"hiway\",\n" +
 "  \"description\": \"Chef recipes for installing Hi-WAY, its dependencies, and several workflows.\",\n" +
 "  \"version\": \"1.0.0\",\n" +
-"  \"recipes\": [\n" +
-"    {\n" +
-"      \"name\": \"hiway::install\",\n" +
-"      \"description\": \"Installs and sets up Hi-WAY\",\n" +
-"      \"links\": []\n" +
-"    },\n" +
-"    {\n" +
-"      \"name\": \"hiway::hiway_client\",\n" +
-"      \"description\": \"Configures Hadoop to support Hi-WAY on the Client\",\n" +
-"      \"links\": []\n" +
-"    }\n" +
-"  ],\n" +
 "  \"attributes\": [\n" +
 "    {\n" +
 "      \"name\": \"hiway/user\",\n" +
@@ -123,6 +112,18 @@ public class KaramelizedCoobookTest {
 "        \"chr22\",\n" +
 "        \"chrY\"\n" +
 "      ]\n" +
+"    }\n" +
+"  ],\n" +
+"  \"recipes\": [\n" +
+"    {\n" +
+"      \"name\": \"hiway::install\",\n" +
+"      \"description\": \"Installs and sets up Hi-WAY\",\n" +
+"      \"links\": []\n" +
+"    },\n" +
+"    {\n" +
+"      \"name\": \"hiway::hiway_client\",\n" +
+"      \"description\": \"Configures Hadoop to support Hi-WAY on the Client\",\n" +
+"      \"links\": []\n" +
 "    }\n" +
 "  ]\n" +
 "}";

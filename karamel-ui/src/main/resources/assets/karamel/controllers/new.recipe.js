@@ -35,7 +35,7 @@ angular.module('karamel.main')
         if (this.addRecipeForm.$valid) {
           $log.info(" Add new recipe invoked.");
           $log.info($scope.recipe.name);
-          $modalInstance.close({url: $scope.url, cookbook: $scope.cookbook, group: group, recipe: $scope.recipe});
+          $modalInstance.close({cookbook: $scope.cookbook, group: group, recipe: $scope.recipe});
         }
       };
       $scope.close = function() {

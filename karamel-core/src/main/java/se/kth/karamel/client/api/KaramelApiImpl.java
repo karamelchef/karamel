@@ -78,10 +78,10 @@ public class KaramelApiImpl implements KaramelApi {
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
     if (refresh) {
       KaramelizedCookbook cb = CookbookCache.load(cookbookUrl);
-      return cb.getMetadataJson();
+      return cb.getInfoJson();
     } else {
       KaramelizedCookbook cb = CookbookCache.get(cookbookUrl);
-      return cb.getMetadataJson();
+      return cb.getInfoJson();
     }
   }
 

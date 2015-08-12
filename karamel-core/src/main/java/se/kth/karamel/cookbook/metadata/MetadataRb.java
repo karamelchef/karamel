@@ -16,7 +16,7 @@ import se.kth.karamel.common.exception.ValidationException;
  * @author kamal
  */
 public class MetadataRb {
-  
+
   String name;
   String description;
   String version;

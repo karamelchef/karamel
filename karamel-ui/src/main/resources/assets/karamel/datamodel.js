@@ -33,8 +33,7 @@ function Cluster() {
 
     this.containsCookbook = function (cookbook) {
         for (var i = 0; i < this.cookbooks.length; i++) {
-            if (cookbook.name === this.cookbooks[i].name 
-                && cookbook.github === this.cookbooks[i].github && cookbook.cookbook === this.cookbooks[i].cookbook) {
+            if (cookbook.id === this.cookbooks[i].name) {
                 return this.cookbooks[i];
             }
         }
@@ -97,8 +96,7 @@ function Cluster() {
         }
 
         for (var i = 0; i < cookbookArray.length; i++) {
-            if (cookbook.name === cookbookArray[i].name && cookbook.github == cookbookArray[i].github
-                && cookbook.cookbook == cookbookArray[i].cookbook) {
+            if (cookbook.id === cookbookArray[i].id) {
                 return true;
             }
         }
@@ -413,13 +411,8 @@ Baremetal.prototype = Object.create(Provider.prototype);
 
 // ===========================================  COOKBOOKS ============================================== //
 function Cookbook() {
-    this.name = null;
-    this.github = null;
-    this.cookbook = null;
-    this.branch = null;
-    this.version = null;
+    this.id = null;
     this.attributes = {};
-    this.cookbookHomeUrl = null;
     this.recipes = [];
 
     this.addPropertyToAttributes = function (key, value) {
@@ -432,8 +425,7 @@ function Cookbook() {
 
     this.equals = function (other) {
         if (other != null) {
-            if (this.github === other.github && this.cookbook === other.cookbook 
-                && this.cookbookHomeUrl === other.cookbookHomeUrl) {
+            if (this.id === other.id) {
                 return true;
             }
         }
@@ -442,22 +434,14 @@ function Cookbook() {
 
     // Load data into the cookbook.
     this.load = function (other) {
-        this.name = other.name;
-        this.github = other.github;
-        this.cookbook = other.cookbook;
-        this.branch = other.branch;
-        this.version = other.version;
+        this.id = other.id;
         this.attributes = other.attrs;          // FIX ME: Name discrepancy should not be there.
         this.cookbookHomeUrl = other.cookbookHomeUrl;
     };
 
 
     this.copy = function (other) {
-        this.name = other.name;
-        this.github = other.github;
-        this.cookbook = other.cookbook;
-        this.branch = other.branch;
-        this.version = other.version;
+        this.id = other.id;
         this.attributes = other.attributes;
         this.cookbookHomeUrl = other.cookbookHomeUrl;
 
@@ -550,8 +534,7 @@ function Group() {
     // ==== Is Similar Cookbook Present ?
     this.containsCookbook = function (cookbook) {
         for (var i = 0; i < this.cookbooks.length; i++) {
-            if (cookbook.name === this.cookbooks[i].name && cookbook.github === this.cookbooks[i].github 
-                && cookbook.cookbook === this.cookbooks[i].cookbook) {
+            if (cookbook.id === this.cookbooks[i].id) {
                 return this.cookbooks[i];
             }
         }
@@ -701,13 +684,8 @@ function toCoreApiFormat(uiCluster) {
     }
 
     function _Cookbook() {
-        this.name = null;
+        this.id = null;
         this.attrs = null;
-        this.branch = null;
-        this.version = null;
-        this.cookbookHomeUrl = null;
-        this.github = null;
-        this.cookbook = null;
 
         this.addRecipe = function (recipe) {
             if (this.recipes == null) {
@@ -718,13 +696,8 @@ function toCoreApiFormat(uiCluster) {
 
 
         this.load = function (other) {
-            this.name = other.name;
+            this.id = other.id;
             this.attrs = other.attributes;
-            this.branch = other.branch;
-            this.version = other.version;
-            this.cookbookHomeUrl = other.cookbookHomeUrl;
-            this.github = other.github;
-            this.cookbook = other.cookbook;
             _addRecipes(this, other.recipes);
         }
 
