@@ -422,19 +422,19 @@ public class CookbookUrlsTest {
 
   @Test
   public void testValidUrlsWithVersionInClasspath() throws CookbookUrlException {
-    String id = "https://github.com/hopshadoop/hopsworks-chef/tree/master";
-    String cookbookUrl = "testgithub/hopshadoop/hopsworks-chef";
-    String cookbookRawUrl = "testgithub/hopshadoop/hopsworks-chef/master";
-    String repoUrl = "testgithub/hopshadoop/hopsworks-chef";
-    String metadataFile = "testgithub/hopshadoop/hopsworks-chef/master/metadata.rb";
-    String attFile = "testgithub/hopshadoop/hopsworks-chef/master/attributes/default.rb";
-    String karamelFile = "testgithub/hopshadoop/hopsworks-chef/master/Karamelfile";
-    String berksFile = "testgithub/hopshadoop/hopsworks-chef/master/Berksfile";
-    String repo = "hopsworks-chef";
+    String id = "https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/hopsworks-chef";
+    String cookbookUrl = "testgithub/testorg/testrepo/cookbooks/hopshadoop/hopsworks-chef";
+    String cookbookRawUrl = "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef";
+    String repoUrl = "testgithub/testorg/testrepo";
+    String metadataFile = "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/metadata.rb";
+    String attFile = "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/attributes/default.rb";
+    String karamelFile = "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Karamelfile";
+    String berksFile = "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Berksfile";
+    String repo = "testrepo";
     String branch = "master";
     Settings.CB_CLASSPATH_MODE = true;
     CookbookUrls.Builder builder1 = new CookbookUrls.Builder();
-    CookbookUrls urls1 = builder1.url("hopshadoop/hopsworks-chef").branchOrVersion("master").build();
+    CookbookUrls urls1 = builder1.url("testorg/testrepo/tree/master/cookbooks/hopshadoop/hopsworks-chef").branchOrVersion("master").build();
     assertEquals(id, urls1.id);
     assertEquals(cookbookUrl, urls1.cookbookUrl);
     assertEquals(repoUrl, urls1.repoUrl);
@@ -449,19 +449,20 @@ public class CookbookUrlsTest {
 
   @Test
   public void testValidUrlsWithVersionAndRekativeCookbookInClasspath() throws CookbookUrlException {
-    String id = "https://github.com/hopshadoop/hopshub-chef/tree/master/cookbooks/testcb";
-    String cookbookUrl = "testgithub/hopshadoop/hopshub-chef/cookbooks/testcb";
-    String repoUrl = "testgithub/hopshadoop/hopshub-chef";
-    String cookbookRawUrl = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb";
-    String metadataFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/metadata.rb";
-    String attFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/attributes/default.rb";
-    String karamelFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/Karamelfile";
-    String berksFile = "testgithub/hopshadoop/hopshub-chef/master/cookbooks/testcb/Berksfile";
-    String repo = "hopshub-chef";
+    String id = "https://github.com/testorg/testrepo/tree/master/cookbooks/testcb";
+    String cookbookUrl = "testgithub/testorg/testrepo/cookbooks/testcb";
+    String repoUrl = "testgithub/testorg/testrepo";
+    String cookbookRawUrl = "testgithub/testorg/testrepo/master/cookbooks/testcb";
+    String metadataFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/metadata.rb";
+    String attFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/attributes/default.rb";
+    String karamelFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/Karamelfile";
+    String berksFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/Berksfile";
+    String orgRepo = "testorg/testrepo";
+    String repo = "testrepo";
     String branch = "master";
     Settings.CB_CLASSPATH_MODE = true;
     CookbookUrls.Builder builder1 = new CookbookUrls.Builder();
-    CookbookUrls urls1 = builder1.url("hopshadoop/hopshub-chef").
+    CookbookUrls urls1 = builder1.url("testorg/testrepo").
         branchOrVersion("master").cookbookRelPath("cookbooks/testcb").build();
     assertEquals(id, urls1.id);
     assertEquals(cookbookUrl, urls1.cookbookUrl);
@@ -471,6 +472,7 @@ public class CookbookUrlsTest {
     assertEquals(attFile, urls1.attrFile);
     assertEquals(karamelFile, urls1.karamelFile);
     assertEquals(berksFile, urls1.berksFile);
+    assertEquals(orgRepo, urls1.orgRepo);
     assertEquals(repo, urls1.repoName);
     assertEquals(branch, urls1.branch);
   }

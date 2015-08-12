@@ -6,7 +6,8 @@ ec2:
     
 cookbooks:                                                                      
   hadoop: 
-    github: "hopshadoop/apache-hadoop-chef"
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/apache-hadoop-chef"
     branch: "master"
   flink: 
     github: "testorg/testrepo"

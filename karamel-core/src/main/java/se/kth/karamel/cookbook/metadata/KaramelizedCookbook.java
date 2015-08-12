@@ -176,4 +176,8 @@ public class KaramelizedCookbook {
     return defaultRb;
   }
 
+  public CookbookUrls getUrls() {
+    return urls;
+  }
+  
 }

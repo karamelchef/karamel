@@ -8,18 +8,25 @@ ec2:                                                                            
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
   kagent:                                                                     #'name' is an alias used in the yaml
-    github: "karamelchef/kagent-chef"
-    branch: "master"    
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/kagent-chef"
+    branch: "master"     
   hopsworks:                                                                     #'name' is an alias used in the yaml
-    github: "hopshadoop/hopsworks-chef"
-    branch: "master"  
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hopsworks-chef"
+    branch: "master"   
   hops: 
-    github: "hopshadoop/hops-hadoop-chef"
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  ndb:
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/ndb-chef"
     branch: "master"
   hiway: 
-    github: "biobankcloud/hiway-chef"
-  ndb: 
-    github: "hopshadoop/ndb-chef"
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/biobankcloud/hiway-chef"
+    branch: "master"
     
 attrs:
   hadoop: 

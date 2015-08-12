@@ -64,38 +64,38 @@ public class ClusterDefinitionTest {
     assertEquals(cluster.getAttr("ndb/ndbd/port"), "10000");
 
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
-    assertTrue(cookbooks.containsKey("hopagent"));
-    assertEquals("hopstart/test-repo", cookbooks.get("hopagent").getGithub());
-    assertEquals("hopagent-chef", cookbooks.get("hopagent").getCookbook());
-    assertEquals("master", cookbooks.get("hopagent").getBranch());
-    assertTrue(cookbooks.containsKey("hop"));
-    assertEquals("hopstart/hop-chef", cookbooks.get("hop").getGithub());
-    assertNull(cookbooks.get("hop").getCookbook());
-    assertEquals("master", cookbooks.get("hop").getBranch());
-    assertTrue(cookbooks.containsKey("cuneiform"));
-    assertEquals("biobankcloud/cuneiform-chef", cookbooks.get("cuneiform").getGithub());
+    assertTrue(cookbooks.containsKey("kagent"));
+    assertEquals("testorg/testrepo", cookbooks.get("kagent").getGithub());
+    assertEquals("cookbooks/kagent-chef", cookbooks.get("kagent").getCookbook());
+    assertEquals("master", cookbooks.get("kagent").getBranch());
+    assertTrue(cookbooks.containsKey("hops"));
+    assertEquals("testorg/testrepo", cookbooks.get("hops").getGithub());
+    assertEquals("cookbooks/hopshadoop/hops-hadoop-chef", cookbooks.get("hops").getCookbook());
+    assertEquals("master", cookbooks.get("hops").getBranch());
+    assertTrue(cookbooks.containsKey("hiway"));
+    assertEquals("cookbooks/biobankcloud/hiway-chef", cookbooks.get("hiway").getCookbook());
     Map<String, YamlGroup> groups = cluster.getGroups();
     assertTrue(groups.containsKey("dashboard"));
     assertEquals(1, groups.get("dashboard").getSize());
     assertEquals("3306", groups.get("dashboard").getAttr("ndb/mysqld"));
-    assertTrue(groups.get("dashboard").getRecipes().contains("hopagent"));
-    assertTrue(groups.get("dashboard").getRecipes().contains("hopdashboard"));
+    assertTrue(groups.get("dashboard").getRecipes().contains("kagent"));
+    assertTrue(groups.get("dashboard").getRecipes().contains("hopsworks"));
     assertTrue(groups.get("dashboard").getRecipes().contains("ndb::mysqld"));
     assertTrue(groups.containsKey("namenodes"));
     assertEquals(2, groups.get("namenodes").getSize());
-    assertTrue(groups.get("namenodes").getRecipes().contains("hopagent"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("kagent"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::memcached"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::mysqld"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::mgmd"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::nn"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::rm"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::jhs"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::nn"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::rm"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::jhs"));
     assertTrue(groups.get("namenodes").getProvider() instanceof Ec2);
     Ec2 provider2 = (Ec2) groups.get("namenodes").getProvider();
     assertEquals("m3.medium", provider2.getType());
     assertTrue(groups.containsKey("ndb"));
     assertEquals(2, groups.get("ndb").getSize());
-    assertTrue(groups.get("ndb").getRecipes().contains("hopagent"));
+    assertTrue(groups.get("ndb").getRecipes().contains("kagent"));
     assertTrue(groups.get("ndb").getRecipes().contains("ndb::ndbd"));
     assertTrue(groups.get("ndb").getProvider() instanceof Baremetal);
     Baremetal provider3 = (Baremetal) groups.get("ndb").getProvider();
@@ -107,9 +107,9 @@ public class ClusterDefinitionTest {
     assertTrue(provider3.getIps().contains("192.168.33.15"));
     assertTrue(groups.containsKey("datanodes"));
     assertEquals(4, groups.get("datanodes").getSize());
-    assertTrue(groups.get("datanodes").getRecipes().contains("hopagent"));
-    assertTrue(groups.get("datanodes").getRecipes().contains("hop::dn"));
-    assertTrue(groups.get("datanodes").getRecipes().contains("hop::nm"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("kagent"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("hops::dn"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("hops::nm"));
     assertTrue(groups.get("datanodes").getProvider() instanceof Ec2);
     Ec2 provider4 = (Ec2) groups.get("datanodes").getProvider();
     assertEquals("m3.medium", provider4.getType());
@@ -126,11 +126,11 @@ public class ClusterDefinitionTest {
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/reference.yml");
     YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
-    assertTrue(cookbooks.containsKey("hopagent"));
-    Cookbook cookbook = cookbooks.get("hopagent");
-    JsonCookbook jc = new JsonCookbook(cookbook, "hopagent", new HashMap<String, Object>());
-    assertEquals("hopstart/test-repo", jc.getGithub());
-    assertEquals("hopagent-chef", jc.getCookbook());
+    assertTrue(cookbooks.containsKey("kagent"));
+    Cookbook cookbook = cookbooks.get("kagent");
+    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, new HashMap<String, Object>());
+    assertEquals("testorg/testrepo", jc.getKaramelizedCookbook().getUrls().orgRepo);
+    assertEquals("cookbooks/kagent-chef", jc.getKaramelizedCookbook().getUrls().cookbookRelPath);
   }
 
   @Test
@@ -191,7 +191,39 @@ public class ClusterDefinitionTest {
   @Test
   public void testGroupLevelRecipesInJson() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String json = "  {\"name\":\"flink\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\"}],\"groups\":[{\"name\":\"namenodes\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"recipes\":[{\"name\":\"hadoop::nn\"}]},{\"name\":\"flink\",\"github\":\"testorg/testrepo/tree/master/cookbooks/flink-chef\",\"recipes\":[{\"name\":\"flink\"}]}],\"size\":1,\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.11\"]}},{\"name\":\"datanodes\",\"cookbooks\":[{\"name\":\"hadoop\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/apache-hadoop-chef\",\"recipes\":[{\"name\":\"hadoop::dn\"}]}],\"size\":1,\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.12\"]}}],\"ec2\":null,\"gce\":null,\"openstack\":null,\"baremetal\":{\"username\":\"vagrant\",\"ips\":[]}}";
+    String json = "  {\"name\":\"flink\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{}}],"
+        + "\"groups\":["
+        + "{\"name\":\"namenodes\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{},"
+        + "\"recipes\":["
+        + "{\"name\":\"hadoop::nn\"}]},"
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef\","
+        + "\"recipes\":["
+        + "{\"name\":\"flink\"}]}],"
+        + "\"size\":1,"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.11\"]}},"
+        + "{\"name\":\"datanodes\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{},"
+        + "\"recipes\":[{\"name\":\"hadoop::dn\"}]}],"
+        + "\"size\":1,"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.12\"]}}],"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":\"vagrant\",\"ips\":[]}}";
     JsonCluster jsonCluster = ClusterDefinitionService.jsonToJsonObject(json);
     ClusterDefinitionValidator.validate(jsonCluster);
     String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);

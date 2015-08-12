@@ -48,7 +48,7 @@ public class JsonScope extends Scope {
           validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
         }
       }
-      JsonCookbook jck = new JsonCookbook(cb, key, validUsedAttrs);
+      JsonCookbook jck = new JsonCookbook(cb.getUrls().id, validUsedAttrs);
       cookbooks.add(jck);
     }
 

@@ -99,7 +99,7 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getUrls();
+          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
           for (JsonRecipe rec : jc.getRecipes()) {
             JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
             addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, map, json1, submitter, urls.id, 
@@ -171,7 +171,7 @@ public class DagBuilder {
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getUrls();
+          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, submitter, urls.id, Settings.COOKBOOKS_ROOT_VENDOR_PATH,
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
           dag.addTask(t1);

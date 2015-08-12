@@ -23,6 +23,7 @@ import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.client.model.json.JsonRecipe;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -38,7 +39,7 @@ public class ChefJsonGenerator {
    * @return map of machineId-recipeName->json
    */
   public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, 
-      ClusterRuntime clusterEntity) {
+      ClusterRuntime clusterEntity) throws KaramelException {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
@@ -54,7 +55,7 @@ public class ChefJsonGenerator {
   }
 
   public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, 
-      GroupRuntime groupEntity) {
+      GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
     addCookbookAttributes(cb, json);
     for (MachineRuntime me : groupEntity.getMachines()) {

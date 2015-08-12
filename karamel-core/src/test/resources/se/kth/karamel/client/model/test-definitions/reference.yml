@@ -7,22 +7,26 @@ ec2:                                                                            
     price: 0.1
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
-  hopagent:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/test-repo"
-    cookbook: "hopagent-chef"
+  kagent:                                                                     #'name' is an alias used in the yaml
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/kagent-chef"
     branch: "master"    
-  hopdashboard:                                                                     #'name' is an alias used in the yaml
-    github: "hopstart/test-repo"
-    cookbook: "hopdashboard-chef"
+  hopsworks:                                                                     #'name' is an alias used in the yaml
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hopsworks-chef"
     branch: "master"  
-  hop: 
-    github: "hopstart/hop-chef"
+  hops: 
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hops-hadoop-chef"
     branch: "master"
   ndb:
-    github: "hopstart/ndb-chef"
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/ndb-chef"
     branch: "master"
-  cuneiform: 
-    github: "biobankcloud/cuneiform-chef"
+  hiway: 
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/biobankcloud/hiway-chef"
+    branch: "master"
     
 attrs:
 #  hadoop:
@@ -63,8 +67,8 @@ groups:
     ec2:                                                                        #this group inherits 'ec2' from global settings while it overwrites type of machines to large                                                  
         type: m3.large
     recipes:                                                                    #List of the recipes to be installed on this group, the convention is <cookbook_name>::<recipe_name>, if recipe_name is not specified it will assuem the 'default' recipe of the cookbook
-        - hopagent
-        - hopdashboard
+        - kagent
+        - hopsworks
         - ndb::mysqld
     attrs:                                                                      #Group-scoped attributes could be defined, it will override global-scoped attributes
         ndb:
@@ -74,13 +78,13 @@ groups:
     ec2: 
         type: m3.medium
     recipes: 
-        - hopagent
+        - kagent
         - ndb::memcached
         - ndb::mysqld
         - ndb::mgmd
-        - hop::nn
-        - hop::rm
-        - hop::jhs                                                              #Single recipe is acceptable, all will be added to the list of recipes for this group
+        - hops::nn
+        - hops::rm
+        - hops::jhs                                                              #Single recipe is acceptable, all will be added to the list of recipes for this group
   ndb:
     size: 2 
     baremetal: 
@@ -90,16 +94,16 @@ groups:
           - 192.168.33.14
         ip: 192.168.33.15
     recipes: 
-        - hopagent
+        - kagent
         - ndb::ndbd
   datanodes:
     size: 4
     ec2: 
         type: m3.medium
     recipes: 
-    - hopagent
-    - hop::dn
-    - hop::nm
+    - kagent
+    - hops::dn
+    - hops::nm
   gcevms:
     size: 3
     gce: 
