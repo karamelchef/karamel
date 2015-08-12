@@ -318,6 +318,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new PingKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
     environment.jersey().register(new Github.LoadGithubCredentials());
+    environment.jersey().register(new Github.SetGithubCredentials());
     environment.jersey().register(new Github.LoadExperiment());
     environment.jersey().register(new Github.GetGithubOrgs());
     environment.jersey().register(new Github.GetGithubRepos());
