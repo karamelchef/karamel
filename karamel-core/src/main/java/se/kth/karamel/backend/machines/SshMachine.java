@@ -27,7 +27,6 @@ import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
-import java.util.logging.Level;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
@@ -325,7 +324,7 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            java.util.logging.Logger.getLogger(SshMachine.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("", ex);
           }
           timeBetweenRetries *= scaleRetryTimeout;
         }

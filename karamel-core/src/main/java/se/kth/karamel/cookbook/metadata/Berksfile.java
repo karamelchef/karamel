@@ -99,7 +99,7 @@ public class Berksfile {
       String branch = branches.get(name);
       CookbookUrls.Builder builder = new CookbookUrls.Builder();
       CookbookUrls urls = builder.url(address).branchOrVersion(branch).build();
-      String homeUrl = urls.home;
+      String homeUrl = urls.cookbookUrl;
       String errorMsg = String.format("Cookbook-dependency '%s' doesn't refer to a valid url in Berksfile", name);
       try {
         if (validUrls.contains(homeUrl)) {

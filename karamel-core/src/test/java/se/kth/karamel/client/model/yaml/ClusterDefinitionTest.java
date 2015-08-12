@@ -6,6 +6,8 @@
 package se.kth.karamel.client.model.yaml;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import se.kth.karamel.client.model.Ec2;
@@ -15,21 +17,27 @@ import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.common.IoUtils;
+import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
  * @author kamal
  */
-public class YamlTest {
+public class ClusterDefinitionTest {
 
   @Test
-  public void testReferenceYaml() throws Exception {
+  public void testYamlToYamlObject() throws Exception {
     YamlCluster cluster;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/reference.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/reference.yml");
     cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
     assertNotNull(cluster);
     assertEquals("ReferenceYaml", cluster.getName());
@@ -56,36 +64,38 @@ public class YamlTest {
     assertEquals(cluster.getAttr("ndb/ndbd/port"), "10000");
 
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
-    assertTrue(cookbooks.containsKey("hopagent"));
-    assertEquals("hopstart/hopagent-chef", cookbooks.get("hopagent").getGithub());
-    assertEquals("master", cookbooks.get("hopagent").getBranch());
-    assertTrue(cookbooks.containsKey("hop"));
-    assertEquals("hopstart/hop-chef", cookbooks.get("hop").getGithub());
-    assertEquals("master", cookbooks.get("hop").getBranch());
-    assertTrue(cookbooks.containsKey("cuneiform"));
-    assertEquals("biobankcloud/cuneiform-chef", cookbooks.get("cuneiform").getGithub());
+    assertTrue(cookbooks.containsKey("kagent"));
+    assertEquals("testorg/testrepo", cookbooks.get("kagent").getGithub());
+    assertEquals("cookbooks/kagent-chef", cookbooks.get("kagent").getCookbook());
+    assertEquals("master", cookbooks.get("kagent").getBranch());
+    assertTrue(cookbooks.containsKey("hops"));
+    assertEquals("testorg/testrepo", cookbooks.get("hops").getGithub());
+    assertEquals("cookbooks/hopshadoop/hops-hadoop-chef", cookbooks.get("hops").getCookbook());
+    assertEquals("master", cookbooks.get("hops").getBranch());
+    assertTrue(cookbooks.containsKey("hiway"));
+    assertEquals("cookbooks/biobankcloud/hiway-chef", cookbooks.get("hiway").getCookbook());
     Map<String, YamlGroup> groups = cluster.getGroups();
     assertTrue(groups.containsKey("dashboard"));
     assertEquals(1, groups.get("dashboard").getSize());
     assertEquals("3306", groups.get("dashboard").getAttr("ndb/mysqld"));
-    assertTrue(groups.get("dashboard").getRecipes().contains("hopagent"));
-    assertTrue(groups.get("dashboard").getRecipes().contains("hopdashboard"));
+    assertTrue(groups.get("dashboard").getRecipes().contains("kagent"));
+    assertTrue(groups.get("dashboard").getRecipes().contains("hopsworks"));
     assertTrue(groups.get("dashboard").getRecipes().contains("ndb::mysqld"));
     assertTrue(groups.containsKey("namenodes"));
     assertEquals(2, groups.get("namenodes").getSize());
-    assertTrue(groups.get("namenodes").getRecipes().contains("hopagent"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("kagent"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::memcached"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::mysqld"));
     assertTrue(groups.get("namenodes").getRecipes().contains("ndb::mgmd"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::nn"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::rm"));
-    assertTrue(groups.get("namenodes").getRecipes().contains("hop::jhs"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::nn"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::rm"));
+    assertTrue(groups.get("namenodes").getRecipes().contains("hops::jhs"));
     assertTrue(groups.get("namenodes").getProvider() instanceof Ec2);
     Ec2 provider2 = (Ec2) groups.get("namenodes").getProvider();
     assertEquals("m3.medium", provider2.getType());
     assertTrue(groups.containsKey("ndb"));
     assertEquals(2, groups.get("ndb").getSize());
-    assertTrue(groups.get("ndb").getRecipes().contains("hopagent"));
+    assertTrue(groups.get("ndb").getRecipes().contains("kagent"));
     assertTrue(groups.get("ndb").getRecipes().contains("ndb::ndbd"));
     assertTrue(groups.get("ndb").getProvider() instanceof Baremetal);
     Baremetal provider3 = (Baremetal) groups.get("ndb").getProvider();
@@ -97,9 +107,9 @@ public class YamlTest {
     assertTrue(provider3.getIps().contains("192.168.33.15"));
     assertTrue(groups.containsKey("datanodes"));
     assertEquals(4, groups.get("datanodes").getSize());
-    assertTrue(groups.get("datanodes").getRecipes().contains("hopagent"));
-    assertTrue(groups.get("datanodes").getRecipes().contains("hop::dn"));
-    assertTrue(groups.get("datanodes").getRecipes().contains("hop::nm"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("kagent"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("hops::dn"));
+    assertTrue(groups.get("datanodes").getRecipes().contains("hops::nm"));
     assertTrue(groups.get("datanodes").getProvider() instanceof Ec2);
     Ec2 provider4 = (Ec2) groups.get("datanodes").getProvider();
     assertEquals("m3.medium", provider4.getType());
@@ -108,6 +118,19 @@ public class YamlTest {
     assertEquals("n1-standard-1", provider5.getType());
     assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
     assertEquals("europe-west1-b", provider5.getZone());
+  }
+
+  @Test
+  public void testJsonCookbook() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/reference.yml");
+    YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
+    Map<String, Cookbook> cookbooks = cluster.getCookbooks();
+    assertTrue(cookbooks.containsKey("kagent"));
+    Cookbook cookbook = cookbooks.get("kagent");
+    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, new HashMap<String, Object>());
+    assertEquals("testorg/testrepo", jc.getKaramelizedCookbook().getUrls().orgRepo);
+    assertEquals("cookbooks/kagent-chef", jc.getKaramelizedCookbook().getUrls().cookbookRelPath);
   }
 
   @Test
@@ -147,8 +170,66 @@ public class YamlTest {
 
     Yaml yaml = new Yaml();
     String output = yaml.dump(cluster);
-
-    System.out.println(output);
+    String expected = "attrs:\n"
+        + "  ndb:\n"
+        + "    nn: {jmxport: '8077', http_port: '50070'}\n"
+        + "    mysql:\n"
+        + "      server:\n"
+        + "        username: root\n"
+        + "        ports: ['5003', '5004', '5005']\n"
+        + "";
+    assertEquals(expected, output);
   }
 
+  @Test(expected = ValidationException.class)
+  public void testInvalidGroupSizeForBaremetal() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
+  }
+
+  @Test
+  public void testGroupLevelRecipesInJson() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String json = "  {\"name\":\"flink\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{}}],"
+        + "\"groups\":["
+        + "{\"name\":\"namenodes\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{},"
+        + "\"recipes\":["
+        + "{\"name\":\"hadoop::nn\"}]},"
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef\","
+        + "\"recipes\":["
+        + "{\"name\":\"flink\"}]}],"
+        + "\"size\":1,"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.11\"]}},"
+        + "{\"name\":\"datanodes\","
+        + "\"cookbooks\":["
+        + "{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/apache-hadoop-chef\","
+        + "\"attrs\":{},"
+        + "\"recipes\":[{\"name\":\"hadoop::dn\"}]}],"
+        + "\"size\":1,"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":null,\"ips\":[\"192.168.33.12\"]}}],"
+        + "\"ec2\":null,"
+        + "\"gce\":null,"
+        + "\"openstack\":null,"
+        + "\"baremetal\":{\"username\":\"vagrant\",\"ips\":[]}}";
+    JsonCluster jsonCluster = ClusterDefinitionService.jsonToJsonObject(json);
+    ClusterDefinitionValidator.validate(jsonCluster);
+    String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
+    jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
+    List<JsonCookbook> cookbooks = jsonCluster.getCookbooks();
+    assertEquals(2, cookbooks.size());
+    assertEquals("flink", cookbooks.get(1).getName());
+  }
 }

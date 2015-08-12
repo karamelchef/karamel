@@ -26,7 +26,7 @@ public class UserClusterDataExtractorTest {
   @Test
   public void clusterLinksTest() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/hopsworks.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     String links = UserClusterDataExtractor.clusterLinks(definition, null);
     String expected = "Visit <a target='_blank' href='http://www.hops.io/'>Hop's Website</a> or <a target='_blank' "

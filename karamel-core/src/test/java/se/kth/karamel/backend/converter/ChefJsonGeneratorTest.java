@@ -27,11 +27,15 @@ public class ChefJsonGeneratorTest {
   @Test
   public void testGenerateClusterChefJsons() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true; 
-    String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
-        + "\"111\"},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],\"groups\":[{\"name\":\"datanodes\","
-        + "\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\","
+    String jsonString = "  {\"name\":\"MySqlCluster\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{\"ndb/DataMemory\":"
+        + "\"111\"}}],\"groups\":[{\"name\":\"datanodes\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},"
         + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
-        + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
+        + "[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},\"recipes\":"
         + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
         + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
         + "null,\"vpc\":null,\"subnet\":null}}";
@@ -57,11 +61,15 @@ public class ChefJsonGeneratorTest {
   public void testEncodingInAttributes() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true; 
     //Related to https://github.com/karamelchef/karamel/issues/72
-    String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
-        + "\"1C==\"},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],\"groups\":[{\"name\":\"datanodes\","
-        + "\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\","
+    String jsonString = "  {\"name\":\"MySqlCluster\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{\"ndb/DataMemory\":"
+        + "\"1C==\"}}],\"groups\":[{\"name\":\"datanodes\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},"
         + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
-        + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
+        + "[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},\"recipes\":"
         + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
         + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
         + "null,\"vpc\":null,\"subnet\":null}}";
@@ -85,12 +93,16 @@ public class ChefJsonGeneratorTest {
   @Test
   public void testArrayAttribtuesInChefJsons() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true; 
-    String jsonString = "  {\"name\":\"MySqlCluster\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{\"ndb/DataMemory\":"
-        + "\"111\", \"ndb/ports\":[\"123\", \"134\", \"145\"]},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\"}],"
-        + "\"groups\":[{\"name\":\"datanodes\",\"cookbooks\":[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\","
-        + "\"github\":\"hopshadoop/ndb-chef\","
+    String jsonString = "  {\"name\":\"MySqlCluster\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{\"ndb/DataMemory\":"
+        + "\"111\", \"ndb/ports\":[\"123\", \"134\", \"145\"]}}],"
+        + "\"groups\":[{\"name\":\"datanodes\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},"
         + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
-        + "[{\"name\":\"ndb\",\"attrs\":{},\"branch\":\"master\",\"github\":\"hopshadoop/ndb-chef\",\"recipes\":"
+        + "[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},\"recipes\":"
         + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
         + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
         + "null,\"vpc\":null,\"subnet\":null}}";

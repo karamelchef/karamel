@@ -13,7 +13,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -85,7 +84,6 @@ public class GithubUserTest {
       assertEquals(password, u2.getPassword());
       // TODO review the generated test code and remove the default call to fail.
     } catch (KaramelException ex) {
-      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
       fail(ex.getMessage());
     }
   }
@@ -93,7 +91,7 @@ public class GithubUserTest {
   /**
    * List Organizations in github
    */
-  @Test
+//  @Test
   public void testListOrgs() {
     try {
       api.registerGithubAccount(user, password);
@@ -102,12 +100,11 @@ public class GithubUserTest {
         System.out.println("Organization: " + o.getName() + " : " + o.getGravitar());
       }
     } catch (KaramelException ex) {
-      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
       fail(ex.getMessage());
     }
   }
 
-  @Test
+//  @Test
   public void testListRepos() {
     try {
       List<RepoItem> orgs = api.listGithubRepos("hopshadoop");
@@ -115,12 +112,11 @@ public class GithubUserTest {
         System.out.println("Repo: " + o.getName() + " - " + o.getDescription() + " : " + o.getSshUrl());
       }
     } catch (KaramelException ex) {
-      Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
       fail(ex.getMessage());
     }
   }
 
-  @Test
+//  @Test
   public void testKaramelfile() {
 
     try {
@@ -183,7 +179,7 @@ public class GithubUserTest {
 
   }
 
-  @Test
+//  @Test
   public void testCreateAndDeleteRepo() {
     try {
       String owner = "karamelchef";
@@ -223,7 +219,7 @@ public class GithubUserTest {
       try {
         Thread.sleep(4000);
       } catch (InterruptedException ex) {
-        Logger.getLogger(GithubUserTest.class.getName()).log(Level.SEVERE, null, ex);
+        fail(ex.getMessage());
       }
 
       api.removeRepo(owner, "test", true, true);

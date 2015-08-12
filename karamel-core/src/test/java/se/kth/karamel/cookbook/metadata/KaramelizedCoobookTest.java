@@ -11,6 +11,7 @@ import org.junit.Test;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  *
@@ -19,26 +20,15 @@ import se.kth.karamel.common.exception.MetadataParseException;
 public class KaramelizedCoobookTest {
   
   @Test
-  public void testGetMetadataJson() throws CookbookUrlException, MetadataParseException {
+  public void testGetInfoJson() throws CookbookUrlException, MetadataParseException, ValidationException {
     Settings.CB_CLASSPATH_MODE = true;
-    KaramelizedCookbook cb = new KaramelizedCookbook("biobankcloud/hiway-chef", false);
-    String json = cb.getMetadataJson();
+    KaramelizedCookbook cb = new KaramelizedCookbook("testorg/testrepo/tree/master/cookbooks/biobankcloud/hiway-chef", false);
+    String json = cb.getInfoJson();
     String expecetdJson = "{\n" +
+"  \"id\": \"https://github.com/testorg/testrepo/tree/master/cookbooks/biobankcloud/hiway-chef\",\n" +
 "  \"name\": \"hiway\",\n" +
 "  \"description\": \"Chef recipes for installing Hi-WAY, its dependencies, and several workflows.\",\n" +
 "  \"version\": \"1.0.0\",\n" +
-"  \"recipes\": [\n" +
-"    {\n" +
-"      \"name\": \"hiway::install\",\n" +
-"      \"description\": \"Installs and sets up Hi-WAY\",\n" +
-"      \"links\": []\n" +
-"    },\n" +
-"    {\n" +
-"      \"name\": \"hiway::hiway_client\",\n" +
-"      \"description\": \"Configures Hadoop to support Hi-WAY on the Client\",\n" +
-"      \"links\": []\n" +
-"    }\n" +
-"  ],\n" +
 "  \"attributes\": [\n" +
 "    {\n" +
 "      \"name\": \"hiway/user\",\n" +
@@ -122,6 +112,18 @@ public class KaramelizedCoobookTest {
 "        \"chr22\",\n" +
 "        \"chrY\"\n" +
 "      ]\n" +
+"    }\n" +
+"  ],\n" +
+"  \"recipes\": [\n" +
+"    {\n" +
+"      \"name\": \"hiway::install\",\n" +
+"      \"description\": \"Installs and sets up Hi-WAY\",\n" +
+"      \"links\": []\n" +
+"    },\n" +
+"    {\n" +
+"      \"name\": \"hiway::hiway_client\",\n" +
+"      \"description\": \"Configures Hadoop to support Hi-WAY on the Client\",\n" +
+"      \"links\": []\n" +
 "    }\n" +
 "  ]\n" +
 "}";
