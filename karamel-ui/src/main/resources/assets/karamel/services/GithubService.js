@@ -32,7 +32,7 @@ angular.module('karamel.terminal')
 
                 self.setCredentials = function (user, password) {
 
-                    KaramelCoreRestServices.setGibhubCredentials(user, password)
+                    KaramelCoreRestServices.setGithubCredentials(user, password)
                             .success(function (data, status, headers, config) {
                                 self.githubCredentials.user = data.user;
                                 self.githubCredentials.password = data.password;
