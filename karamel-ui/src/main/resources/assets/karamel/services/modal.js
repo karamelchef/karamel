@@ -5,7 +5,7 @@ angular.module('karamel.main')
         return {
           confirm: function(size, title, msg) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/confirmModal.html',
+              templateUrl: 'karamel/partials/modal-confirm.html',
               controller: 'ModalCtrl as ctrl',
               size: size,
               resolve: {
@@ -34,7 +34,7 @@ angular.module('karamel.main')
           },
           experimentFactory: function(size, githubDetails) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/new-experiment.html',
+              templateUrl: 'karamel/partials/experiment-new.html',
               controller: 'NewExperimentCtrl as newExperimentCtrl',
               size: size,
               windowClass: 'app-modal-window',
@@ -49,7 +49,7 @@ angular.module('karamel.main')
           },
           loadExperiment: function(size, githubUrl) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/load-experiment.html',
+              templateUrl: 'karamel/partials/experiment-load.html',
               controller: 'LoadExperimentCtrl as loadExperimentCtrl',
               size: size,
               windowClass: 'app-modal-window',
