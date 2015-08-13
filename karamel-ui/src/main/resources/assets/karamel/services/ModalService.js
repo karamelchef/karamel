@@ -19,15 +19,12 @@ angular.module('karamel.main')
                         });
                         return modalInstance.result;
                     },
-                    profile: function (size, isLoggedIn) {
+                    profile: function (size) {
                         var modalInstance = $modal.open({
                             templateUrl: 'karamel/partials/profile.html',
                             controller: 'ProfileCtrl as profileCtrl',
                             size: size,
                             resolve: {
-                                isLoggedIn: function () {
-                                    return isLoggedIn;
-                                }
                             }
                         });
                         return modalInstance.result;

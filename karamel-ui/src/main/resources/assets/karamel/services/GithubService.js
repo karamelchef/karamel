@@ -44,6 +44,11 @@ angular.module('karamel.terminal')
                             });
                     return self.githubCredentials;
                 };
+                
+                self.generateEmailHash = function () {
+                  self.emailHash = md5.createHash(self.githubCredentials.email || '');
+                }
+                
                 self.getOrgs = function () {
                     KaramelCoreRestServices.getGithubOrgs()
                             .success(function (data, status, headers, config) {

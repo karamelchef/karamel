@@ -315,7 +315,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new ExitKaramel());
     environment.jersey().register(new PingKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
-    environment.jersey().register(new Github.LoadGithubCredentials());
+    environment.jersey().register(new Github.GetGithubCredentials());
     environment.jersey().register(new Github.SetGithubCredentials());
     environment.jersey().register(new Github.LoadExperiment());
     environment.jersey().register(new Github.GetGithubOrgs());
@@ -828,12 +828,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     @Path("/getGithubCredentials")
     @Produces(MediaType.APPLICATION_JSON)
-    public static class LoadGithubCredentials {
+    public static class GetGithubCredentials {
 
       @GET
       public Response getGithubCredentials() {
         Response response = null;
-        logger.info(" Received request to set github credentials.... ");
+        logger.info(" Received request to get github credentials.... ");
         try {
           GithubUser credentials = karamelApiHandler.loadGithubCredentials();
           response = Response.status(Response.Status.OK).
@@ -843,7 +843,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
               entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }
-
         return response;
       }
 
