@@ -303,7 +303,6 @@ angular.module('karamel.main')
           var exp = ExperimentsService.recover();
           if (exp !== false && exp !== null && typeof exp !== 'undefined') {
             self.deepCopyExperiment(exp);
-//                        $scope.landing = false;
           }
           restartTimer();
         }
@@ -324,10 +323,10 @@ angular.module('karamel.main')
             if (isConfirm) {
               // delete local clone of Repo
               KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
-                  .then(function (data, status, headers, config) {
+                  .success(function (data, status, headers, config) {
                     // delete Repo on GitHub
                     KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
-                        .then(function (data, status, headers, config) {
+                        .success(function (data, status, headers, config) {
                           // Core Rest Services
                           // delete Browser LocalStorage
                           clearExperiment();
@@ -361,7 +360,7 @@ angular.module('karamel.main')
           function (isConfirm) {
             if (isConfirm) {
               KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
-                  .then(function (data, status, headers, config) {
+                  .success(function (data, status, headers, config) {
                     // Core Rest Services
                     clearExperiment();
                     SweetAlert.swal("Deleted", "The experiment is now deleted locally", "info");
@@ -427,7 +426,7 @@ angular.module('karamel.main')
                 scriptContents: '',
                 configFileName: '',
                 configFileContents: '',
-                scriptType: ''
+                scriptType: 'bash'
               }
             ]
           };

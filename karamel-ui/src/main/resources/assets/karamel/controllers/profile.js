@@ -1,8 +1,8 @@
 'use strict'
 
 angular.module('karamel.main')
-    .controller('ProfileCtrl', ['$scope', 'md5', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
-      function ($scope, md5, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
+    .controller('ProfileCtrl', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
+      function ($scope, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
         var self = this;
         $scope.isLoggedIn = false;
 
@@ -18,12 +18,12 @@ angular.module('karamel.main')
         self.login = function () {
           KaramelCoreRestServices.setGithubCredentials($scope.github.githubCredentials.user,
               $scope.github.githubCredentials.password)
-              .then(function (data, status, headers, config) {
+              .success(function (data, status, headers, config) {
                 $scope.github.githubCredentials.user = data.user;
                 $scope.github.githubCredentials.password = data.password;
                 $scope.github.githubCredentials.email = data.email;
                 $scope.github.org.name = data.user;
-                $scope.github.emailHash = md5.createHash(data.email || '');
+                $scope.github.generateEmailHash();
                 if (data.email !== "") {
                   $scope.isLoggedIn = true;
                   self.close();
@@ -38,7 +38,7 @@ angular.module('karamel.main')
         };
 
         self.close = function () {
-          $modalInstance.close($scope.isLoggedIn);
+          $modalInstance.close();
         };
 
         $scope.getEmailHash = function () {
