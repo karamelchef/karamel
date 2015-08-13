@@ -1,290 +1,290 @@
 <div class="container" style="width: 100%;">
 
 
-    <div class="row" ng-show="landing">
+  <div class="row" ng-show="landing">
 
-        <div class="col-xs-3 col-sm-3 col-md-3 text-center" >
-            <div class="row" ng-show="gs.githubCredentials.email !== ''" ng-click="profileModal()" >
-                GitHub Account Details
-            </div>   
-            <div class ="row text-center">
-                <button ng-click="profileModal()" ng-show="gs.githubCredentials.email === ''" class="btn btn-primary"> Login to GitHub</button>
-            </div>
-            <div class="row">
-                <img src="http://gravatar.com/avatar/{{gs.emailHash}}?d=mm" ng-click="profileModal()" id="githubId" style="height: 50px; margin-left: 2px; border: 2px solid white;" class="profile-image img-circle">
-            </div>   
+    <div class="col-xs-3 col-sm-3 col-md-3 text-center" >
+      <div class="row" ng-show="gs.githubCredentials.email !== ''" ng-click="profileModal()" >
+        GitHub Account Details
+      </div>   
+      <div class ="row text-center">
+        <button ng-click="profileModal()" ng-show="gs.githubCredentials.email === ''" class="btn btn-primary"> Login to GitHub</button>
+      </div>
+      <div class="row">
+        <img src="http://gravatar.com/avatar/{{gs.emailHash}}?d=mm" ng-click="profileModal()" id="githubId" style="height: 50px; margin-left: 2px; border: 2px solid white;" class="profile-image img-circle">
+      </div>   
 
-            <div class="row">
-                <div class="col-xs-6 col-sm-6 col-md-6 text-right">
-                    <label class="text-muted" ng-show="gs.githubCredentials.email != ''">User: </label>
-                </div>
-                <div class="col-xs-6 col-sm-6 col-md-6 text-left">
-                    {{gs.githubCredentials.user| limitTo: 20}}
-                </div>
-            </div>   
-            <div class="row">
-                <div class="col-xs-6 col-sm-6 col-md-6 text-right">
-                    <label class="text-muted" ng-show="gs.githubCredentials.email != ''">Email: </label> 
-                </div>
-                <div class="col-xs-6 col-sm-6 col-md-6 text-left">
-                    {{gs.githubCredentials.email| limitTo: 20}}
-                </div>
-            </div>   
+      <div class="row">
+        <div class="col-xs-6 col-sm-6 col-md-6 text-right">
+          <label class="text-muted" ng-show="gs.githubCredentials.email != ''">User: </label>
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 text-left">
+          {{gs.githubCredentials.user| limitTo: 20}}
+        </div>
+      </div>   
+      <div class="row">
+        <div class="col-xs-6 col-sm-6 col-md-6 text-right">
+          <label class="text-muted" ng-show="gs.githubCredentials.email != ''">Email: </label> 
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 text-left">
+          {{gs.githubCredentials.email| limitTo: 20}}
+        </div>
+      </div>   
+    </div>        
+
+    <div class="col-xs-4 col-sm-4 col-md-4" ng-show="gs.githubCredentials.email != ''">
+      <div class="jumbotron text-center jumboNarrow">
+        <h2>New Experiment</h2> 
+        <div class="row">
+          <div class="form-group">    
+            <button type="button" class="btn btn-primary vcenter" ng-click="experimentFactoryModal()"  tabindex="1">New Repository in GitHub</button>
+          </div>        
         </div>        
+      </div>
+    </div>        
 
-        <div class="col-xs-4 col-sm-4 col-md-4" ng-show="gs.githubCredentials.email != ''">
-            <div class="jumbotron text-center jumboNarrow">
-                <h2>New Experiment</h2> 
-                <div class="row">
-                    <div class="form-group">    
-                        <button type="button" class="btn btn-primary vcenter" ng-click="experimentFactoryModal()"  tabindex="1">New Repository in GitHub</button>
-                    </div>        
-                </div>        
-            </div>
+    <div class="col-xs-4 col-sm-4 col-md-4" ng-show="gs.githubCredentials.email != ''">
+      <div class="jumbotron jumboNarrow text-center">
+        <h2>Load Experiment</h2> 
+        <div class="row">
+          <div class="form-group">
+            <button type="button" class="btn btn-primary vcenter" ng-click="loadExperimentProfile()"  tabindex="1">Open from GitHub</button>
+          </div>        
         </div>        
+      </div>
 
-        <div class="col-xs-4 col-sm-4 col-md-4" ng-show="gs.githubCredentials.email != ''">
-            <div class="jumbotron jumboNarrow text-center">
-                <h2>Load Experiment</h2> 
-                <div class="row">
-                    <div class="form-group">
-                        <button type="button" class="btn btn-primary vcenter" ng-click="loadExperimentProfile()"  tabindex="1">Open from GitHub</button>
-                    </div>        
-                </div>        
-            </div>
+    </div>
+  </div>
+
+
+  <div class="row col-xs-6 col-sm-12 col-md-12 col-lg-12" ng-show="!landing">
+
+
+    <form name="uploadExperiment" ng-submit="pushExperiment()" editable-form novalidate="">    
+
+      <div class="row">    
+
+        <span class="col-md-1 col-lg-1"></span>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <label class="control-label">Name: </label>
+          <span>{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}</span>     
+        </div>
+        <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
+          <button type="button" class="btn"  ng-disabled="!status.isModified"
+                  ng-class="{'btn-primary': status.isModified, 'btn-success': !status.isModified}"
+                  ng-click="pushExperiment($event)">
+            <span ng-show="status.isModified">Press to </span>Save<span ng-show="!status.isModified">d</span> <span class="glyphicon" 
+                                                                                                                    ng-class="{'icon-upload': status.isModified, 'glyphicon-thumbs-up': !status.isModified}"/>
+          </button>
 
         </div>
-    </div>
+        <div class="btn-group-sm col-xs-3 col-sm-3 col-md-3 col-lg-1" dropdown is-open="status.isopen">
+          <button type="button" class="btn btn-primary dropdown-toggle"  ng-disabled="disabled" dropdown-toggle >
+            Close or Delete<span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="cmenu">
+            <li><a href="#experiment" ng-click="closeBrowser($event)">Close</a></li>
+            <li><a href="#experiment" ng-click="deleteRepo($event)">Delete from your Computer and GitHub</a></li>
+          </ul>
+        </div>
 
+      </div>
+      <div class="row">    
+        <span class="col-md-1 col-lg-1"></span>
+        <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+          <label class="control-label">Dependency:</label>
+          cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', branch: master
 
-    <div class="row col-xs-6 col-sm-12 col-md-12 col-lg-12" ng-show="!landing">
+        </div>
+      </div>
 
+      <div class="row form-group" ng-show="!landing">    
+        <!--<div class="col-sm-10 col-md-10 col-lg-10">-->    
+        <span class="col-md-1 col-lg-1"></span>
+        <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced &nbsp;
+          <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
+        </label>
 
-        <form name="uploadExperiment" ng-submit="pushExperiment()" editable-form novalidate="">    
+        <!--                    <span class="col-md-9 col-lg-9"></span>
+                            <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Dependency: </label>cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}'
+                        </div>
+                        <div class="col-sm-10 col-md-10 col-lg-10">    
+                            <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" style="margin-right: 5px" ng-click="toggle()" ng-show="status.advanced">
+                                <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
+                            </span>-->
+        <!--</div>-->
+      </div>
 
-            <div class="row">    
+      <div class="row form-group col-lg-12" ng-show="status.advanced && !landing">
+        <span class="col-md-1 col-lg-1"></span>
+        <div class="row form-group col-sm-9 col-md-9 col-lg-9">
 
+          <accordion close-others="false">
+            <accordion-group is-open="status.userGroup">
+              <accordion-heading> 
+                <span class="col-md-1 col-lg-1">
+                  <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.userGroup, 'glyphicon-chevron-right': !status.userGroup}"></i></span>
+                Run experiment as Unix user/group
+              </accordion-heading>                            
+              <div class="row">
                 <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                    <label class="control-label">Name: </label>
-                    <span>{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}</span>     
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                  <label class="control-label" for="user">Username
+                    <input name="user" ng-model="experiment.user" class="form-control "
+                           type="text" tabindex="5" required ng-change="status.isModified = true">
+                  </label>
                 </div>
-                <div class="btn-group-sm col-xs-2 col-sm-1 col-md-1 col-lg-1" >
-                    <button type="button" class="btn"  ng-disabled="!status.isModified"
-                            ng-class="{'btn-primary': status.isModified, 'btn-success': !status.isModified}"
-                            ng-click="pushExperiment($event)">
-                        <span ng-show="status.isModified">Press to </span>Save<span ng-show="!status.isModified">d</span> <span class="glyphicon" 
-                                                                                                                                ng-class="{'icon-upload': status.isModified, 'glyphicon-thumbs-up': !status.isModified}"/>
-                    </button>
+                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                  <label class="control-label" for="group">Groupname
+                    <input name="group" ng-model="experiment.group" class="form-control "
+                           type="text" tabindex="6" required ng-change="status.isModified = true">
+                  </label>
+                </div>
+                <span class="col-md-1 col-lg-1 glyphicon glyphicon-question-sign pull-right text-right" tooltip-placement="left" tooltip="Username/group that is created and then used to run the experiment program and results. For Hadoop programs, use 'hadoop' as the groupname."></span>
 
-                </div>
-                <div class="btn-group-sm col-xs-3 col-sm-3 col-md-3 col-lg-1" dropdown is-open="status.isopen">
-                    <button type="button" class="btn btn-primary dropdown-toggle"  ng-disabled="disabled" dropdown-toggle >
-                        Close or Delete<span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="cmenu">
-                        <li><a href="#experiment" ng-click="closeBrowser($event)">Close</a></li>
-                        <li><a href="#experiment" ng-click="deleteRepo($event)">Delete from your Computer and GitHub</a></li>
-                    </ul>
-                </div>
+              </div>
 
-            </div>
-            <div class="row">    
+            </accordion-group>
+
+            <accordion-group is-open="status.orchestrationOpen">
+              <accordion-heading>
+                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
+                Orchestration 
+              </accordion-heading>
+
+              <div class="row form-group">
                 <span class="col-md-1 col-lg-1"></span>
-                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                    <label class="control-label">Dependency:</label>
-                    cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', branch: master
+                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
+                  <label for="localDependencies" class="control-label">Local Dependencies</label>
 
-                </div>
-            </div>
-
-            <div class="row form-group" ng-show="!landing">    
-                <!--<div class="col-sm-10 col-md-10 col-lg-10">-->    
-                    <span class="col-md-1 col-lg-1"></span>
-                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Advanced &nbsp;
-                        <input type="checkbox" id="status.advanced" name="status.advanced" ng-model="status.advanced" tabindex="4">
-                    </label>
-                    
-<!--                    <span class="col-md-9 col-lg-9"></span>
-                    <label for="status.advanced" class="control-label col-xs-2 col-sm-2 col-md-2 col-lg-2">Dependency: </label>cookbook '{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}', github: '{{experiment.githubOwner| limitTo: 24}}{{ experiment.githubOwner > 24 ? '...' : ''}}/{{experiment.githubRepo| limitTo: 24}}{{ experiment.githubRepo > 24 ? '...' : ''}}'
-                </div>
-                <div class="col-sm-10 col-md-10 col-lg-10">    
-                    <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" style="margin-right: 5px" ng-click="toggle()" ng-show="status.advanced">
-                        <i class="glyphicon" ng-class="{'glyphicon-resize-small': status.expanded, 'glyphicon-resize-full': !status.expanded}"></i>
-                    </span>-->
-                <!--</div>-->
-            </div>
-
-            <div class="row form-group col-lg-12" ng-show="status.advanced && !landing">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="row form-group col-sm-9 col-md-9 col-lg-9">
-
-                    <accordion close-others="false">
-                        <accordion-group is-open="status.userGroup">
-                            <accordion-heading> 
-                                <span class="col-md-1 col-lg-1">
-                                    <i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.userGroup, 'glyphicon-chevron-right': !status.userGroup}"></i></span>
-                                Run experiment as Unix user/group
-                            </accordion-heading>                            
-                            <div class="row">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <label class="control-label" for="user">Username
-                                        <input name="user" ng-model="experiment.user" class="form-control "
-                                               type="text" tabindex="5" required ng-change="status.isModified = true">
-                                    </label>
-                                </div>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
-                                    <label class="control-label" for="group">Groupname
-                                        <input name="group" ng-model="experiment.group" class="form-control "
-                                               type="text" tabindex="6" required ng-change="status.isModified = true">
-                                    </label>
-                                </div>
-                                <span class="col-md-1 col-lg-1 glyphicon glyphicon-question-sign pull-right text-right" tooltip-placement="left" tooltip="Username/group that is created and then used to run the experiment program and results. For Hadoop programs, use 'hadoop' as the groupname."></span>
-
-                            </div>
-
-                        </accordion-group>
-
-                        <accordion-group is-open="status.orchestrationOpen">
-                            <accordion-heading>
-                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
-                                Orchestration 
-                            </accordion-heading>
-
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
-                                    <label for="localDependencies" class="control-label">Local Dependencies</label>
-
-                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that are executed locally on this machine. These recipes must have been executed successfully locally on this machine before the experiment is started. This list is used when generating the Karamelfile."></span>
-<!--                                    <input placeholder="hadoop::install, spark::install" name="localDependencies"  class="form-control" ng-model="experiment.localDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">-->
-                                    <textarea placeholder="hadoop::install" name="localDependencies" id="localDependencies" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.localDependencies" tabindex="10" ng-change="status.isModified = true" class="form-control"></textarea>
-                                </div>        
-                            </div>        
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
-                                    <label for="globalDependencies" class="control-label">Global Dependencies</label>
-                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that could be executed on potentially any machine in the cluster (global). These recipes must have been executed successfully on all machines in the cluster that they are run on, before this experiment is started. This list is used when generating the Karamelfile."></span>
-<!--                                    <input placeholder="hadoop::dn, spark::slave" name="globalDependencies"  class="form-control" ng-model="experiment.globalDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">-->
-                                    <textarea placeholder="hadoop::dn" name="globalDependencies" id="globalDependencies" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.globalDependencies" tabindex="10" ng-change="status.isModified = true" class="form-control"></textarea>
-                                </div>        
-                            </div>        
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <label class="text" for="berksCode">Berksfile dependencies</label>
-                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Reference: http://berkshelf.com/v2.0/ . A list of cookbook entries (one per line) that will be installed on the host. The format for entries is: cookbook '{name}', '{version_constraint}', '{options}'. For example:\n cookbook 'ark'\n cookbook 'java' \n cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master'"></span>
-                                    <textarea id="berksCode" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="cookbook 'ark'\ncookbook 'java', '> 1.10.2'" tabindex="12" ng-change="status.isModified = true" class="form-control"></textarea>
-                                </div>
-                            </div>                            
-                        </accordion-group>
-                        <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
-                            <accordion-heading>
-                                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.chefOpen, 'glyphicon-chevron-right': !status.chefOpen}"></i></span>
-                                Experiment Setup with Chef  
-                            </accordion-heading>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
-                                    <label class="text" for="chefCode">Chef code executed before the Experiment program is run.</label>
-                                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below. For example: package do 'openjdk-7-jdk' end"></span>
-                                    <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified = true" class="form-control"></textarea>
-                                </div>
-                            </div>
-                        </accordion-group>
-                    </accordion>
-                </div>
-            </div>
-            <br/>
-
-
-
-            <div class="row form-group col-lg-12" ng-show="!landing">
-                <span class="col-md-1 col-lg-1"></span>
-                <div class="row form-group col-md-9 col-lg-9">
-                    <accordion close-others="false">
-                        <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code track by $index">
-                            <accordion-heading>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
-                                    <i class="glyphicon" ng-class="{'glyphicon-chevron-down': $scope.status.experiment[$index].status, 'glyphicon-chevron-right': !$scope.status.experiment[$index].status}"></i>
-                                </span>
-                                <span class="col-md-4 col-lg-4">Experiment {{$index + 1}}: {{exp.name}}</span>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" 
-                                      ng-click="removeExperiment(exp.name)">
-                                    <i class="glyphicon glyphicon-minus"></i>
-                                </span>
-                                <br/> 
-                            </accordion-heading>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="form-group col-xs-2 col-sm-2 col-md-2 col-lg-2">
-                                    <select ng-model="exp.scriptType" 
-                                            ng-init="exp.scriptType = exp.scriptType || options[0].value"
-                                            ng-options="option.value as option.name for option in options"
-                                            ng-change="status.isModified = true"
-                                            >
-                                    </select>
-                                </div>
-                                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-left glyphicon glyphicon-info-sign text-left pull-right" tooltip-placement="left" tooltip-html="<h5>Howto download Experiment Results</h5>Redirect stdout to <h4>> /tmp/{{experiment.githubRepo}}_{{exp.name}}.out </h4> Results will be downloaded to: <h5> ~/.karamel/results/</h5> For example: <br/> java -jar myProg.jar > /tmp/{{experiment.githubRepo}}_{{exp.name}}.out"></span>
-                                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip-html="<h4>Instructions</h4>(1) Select the type of script for the Experiment. <br/> (2) Write the experiment code in the box below. <br/><h5>Bash</h5>You should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment can be written in the form: #{node{{experiment.githubRepo}}.configParamKey}, where configParamKey is a key taken from any of the configuration files defined.<br/><h5>Python</h5>Write python code in the box below."></span>
-                            </div>
-                            <div class="row form-group">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
-                                    <textarea id="experimentScript" style="width:100%b; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified = true" class="form-control"></textarea>
-                                </div>
-                            </div>
-                            <br/>
-                            <div class="row form-group" ng-show="status.advanced">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
-                                    <div class="form-group">
-                                        <label>Relative path to config file</label>
-                                        <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="An experiment can include a configuration file that store experiment parameters. These parameters can then be set in the Karamel UI and are implemented as attributes in the attributes/default.rb file in Chef."></span>
-                                        <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control" ng-change="status.isModified = true">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row form-group" ng-show="status.advanced">
-                                <span class="col-md-1 col-lg-1"></span>
-                                <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
-                                    <div class="form-group" ng-show="exp.configFileName.length > 0">
-                                        <label>Configuration File for Experiment</label>
-                                        <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
-                                              tooltip="Enter key-value pairs here. A parameter can be referenced inside a script using the Chef attribute syntax: node[:repoName][:attrName]"></span>
-                                        <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14" ng-change="status.isModified = true" class="form-control"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </accordion-group>
-                    </accordion>              
-                </div>
-            </div>
-        </form>
-
-        <div class ="row" ng-show="!landing && status.advanced">
-            <span class="col-md-1 col-lg-1"></span>
-
-            <div class ="row col-xs-8 col-sm-8 col-md-8 col-lg-8">
-
-                <div class="form-group">
-                    <label  style="margin-left: 10px">Add Experiment Script</label>
-                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
-                          tooltip="You can have multiple experiment recipes. Write the name of the new experiment recipe and click 'add'."></span>
-                    <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="20" placeholder="Name of new experiment script. Prefix the name with 'experiment' to be able to automatically download its results" tooltip="Prefix the name with 'experiment' to be able to automatically download its results. For example, 'experimentFlinkJob'."  tooltip-trigger="focus" tooltip-placement="right" >
-                    <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default" tabindex="21">Add</button>
+                  <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that are executed locally on this machine. These recipes must have been executed successfully locally on this machine before the experiment is started. This list is used when generating the Karamelfile."></span>
+                  <!--                                    <input placeholder="hadoop::install, spark::install" name="localDependencies"  class="form-control" ng-model="experiment.localDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">-->
+                  <textarea placeholder="hadoop::install" name="localDependencies" id="localDependencies" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.localDependencies" tabindex="10" ng-change="status.isModified = true" class="form-control"></textarea>
                 </div>        
-            </div>        
-            <div class ="row" ng-show="newExperimentErr">
-                <span class="col-md-1 col-lg-1 text-warning"></span>
-                {{newExperimentErMsg}}
-            </div>        
-        </div>        
-        <br/>
+              </div>        
+              <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">    
+                  <label for="globalDependencies" class="control-label">Global Dependencies</label>
+                  <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="A comma-separated list of cookbook::recipe Chef recipes that could be executed on potentially any machine in the cluster (global). These recipes must have been executed successfully on all machines in the cluster that they are run on, before this experiment is started. This list is used when generating the Karamelfile."></span>
+                  <!--                                    <input placeholder="hadoop::dn, spark::slave" name="globalDependencies"  class="form-control" ng-model="experiment.globalDependencies" type="text" tabindex="10" required ng-change="status.isModified = true">-->
+                  <textarea placeholder="hadoop::dn" name="globalDependencies" id="globalDependencies" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.globalDependencies" tabindex="10" ng-change="status.isModified = true" class="form-control"></textarea>
+                </div>        
+              </div>        
+              <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                  <label class="text" for="berksCode">Berksfile dependencies</label>
+                  <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Reference: http://berkshelf.com/v2.0/ . A list of cookbook entries (one per line) that will be installed on the host. The format for entries is: cookbook '{name}', '{version_constraint}', '{options}'. For example:\n cookbook 'ark'\n cookbook 'java' \n cookbook 'ndb', github: 'hopshadoop/ndb-chef', branch: 'master'"></span>
+                  <textarea id="berksCode" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.berksfile" placeholder="cookbook 'ark'\ncookbook 'java', '> 1.10.2'" tabindex="12" ng-change="status.isModified = true" class="form-control"></textarea>
+                </div>
+              </div>                            
+            </accordion-group>
+            <accordion-group is-open="status.chefOpen" ng-show="status.advanced">
+              <accordion-heading>
+                <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.chefOpen, 'glyphicon-chevron-right': !status.chefOpen}"></i></span>
+                Experiment Setup with Chef  
+              </accordion-heading>
+              <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-4 col-md-10 col-lg-10">
+                  <label class="text" for="chefCode">Chef code executed before the Experiment program is run.</label>
+                  <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Write chef code in the box below. Note if you use resources that need to be 'included' from cookbooks, you can add cookbook names to the Berksfile box below and then use the resources in your Chef code below. For example: package do 'openjdk-7-jdk' end"></span>
+                  <textarea id="chefCode" style="width:100%; height:400px; overflow:scroll;" ng-model="experiment.experimentSetupCode" placeholder="Chef code run before the experiments (during install phase)."  tabindex="11" ng-change="status.isModified = true" class="form-control"></textarea>
+                </div>
+              </div>
+            </accordion-group>
+          </accordion>
+        </div>
+      </div>
+      <br/>
 
-        <br/>
-    </div>
+
+
+      <div class="row form-group col-lg-12" ng-show="!landing">
+        <span class="col-md-1 col-lg-1"></span>
+        <div class="row form-group col-md-9 col-lg-9">
+          <accordion close-others="false">
+            <accordion-group is-open="$scope.status.experiment[$index].status" ng-repeat="exp in experiment.code track by $index">
+              <accordion-heading>
+                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
+                  <i class="glyphicon" ng-class="{'glyphicon-chevron-down': $scope.status.experiment[$index].status, 'glyphicon-chevron-right': !$scope.status.experiment[$index].status}"></i>
+                </span>
+                <span class="col-md-4 col-lg-4">Experiment {{$index + 1}}: {{exp.name}}</span>
+                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" 
+                      ng-click="removeExperiment(exp.name)">
+                  <i class="glyphicon glyphicon-minus"></i>
+                </span>
+                <br/> 
+              </accordion-heading>
+              <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="form-group col-xs-2 col-sm-2 col-md-2 col-lg-2">
+                  <select ng-model="exp.scriptType" 
+                          ng-init="exp.scriptType = exp.scriptType || options[0].value"
+                          ng-options="option.value as option.name for option in options"
+                          ng-change="status.isModified = true"
+                          >
+                  </select>
+                </div>
+                <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-left glyphicon glyphicon-info-sign text-left pull-right" tooltip-placement="left" tooltip-html="<h5>Howto download Experiment Results</h5>Redirect stdout to <h4>> /tmp/{{experiment.githubRepo}}_{{exp.name}}.out </h4> Results will be downloaded to: <h5> ~/.karamel/results/</h5> For example: <br/> java -jar myProg.jar > /tmp/{{experiment.githubRepo}}_{{exp.name}}.out"></span>
+                <span class="col-xs-2 col-sm-2 col-md-2 col-lg-2 text-right glyphicon glyphicon-question-sign pull-right text-center" tooltip-placement="left" tooltip-html="<h4>Instructions</h4>(1) Select the type of script for the Experiment. <br/> (2) Write the experiment code in the box below. <br/><h5>Bash</h5>You should not include the shebang line (#!/bin/bash) at the top of the scripe. Parameters for the experiment can be written in the form: #{node{{experiment.githubRepo}}.configParamKey}, where configParamKey is a key taken from any of the configuration files defined.<br/><h5>Python</h5>Write python code in the box below."></span>
+              </div>
+              <div class="row form-group">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-4 col-sm-8 col-md-10 col-lg-10">
+                  <textarea id="experimentScript" style="width:100%b; float:left; height:400px; overflow:scroll;" ng-model="exp.scriptContents" placeholder="Enter the experiment code."  tabindex="13" ng-change="status.isModified = true" class="form-control"></textarea>
+                </div>
+              </div>
+              <br/>
+              <div class="row form-group" ng-show="status.advanced">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
+                  <div class="form-group">
+                    <label>Relative path to config file</label>
+                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="An experiment can include a configuration file that store experiment parameters. These parameters can then be set in the Karamel UI and are implemented as attributes in the attributes/default.rb file in Chef."></span>
+                    <input type="text"ng-model="exp.configFileName" placeholder="conf/config.props"  class="form-control" ng-change="status.isModified = true">
+                  </div>
+                </div>
+              </div>
+              <div class="row form-group" ng-show="status.advanced">
+                <span class="col-md-1 col-lg-1"></span>
+                <div class="col-xs-3 col-sm-4 col-md-10 col-lg-10">
+                  <div class="form-group" ng-show="exp.configFileName.length > 0">
+                    <label>Configuration File for Experiment</label>
+                    <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
+                          tooltip="Enter key-value pairs here. A parameter can be referenced inside a script using the Chef attribute syntax: node[:repoName][:attrName]"></span>
+                    <textarea id="configFile" style="width:100%; float:left; height:400px; overflow:scroll;" ng-model="exp.configFileContents" placeholder="key = value  (line-separated for every key-value pair)"  tabindex="14" ng-change="status.isModified = true" class="form-control"></textarea>
+                  </div>
+                </div>
+              </div>
+            </accordion-group>
+          </accordion>              
+        </div>
+      </div>
+    </form>
+
+    <div class ="row" ng-show="!landing && status.advanced">
+      <span class="col-md-1 col-lg-1"></span>
+
+      <div class ="row col-xs-8 col-sm-8 col-md-8 col-lg-8">
+
+        <div class="form-group">
+          <label  style="margin-left: 10px">Add Experiment Script</label>
+          <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" 
+                tooltip="You can have multiple experiment recipes. Write the name of the new experiment recipe and click 'add'."></span>
+          <input style="margin-left: 10px" ng-model="newExperimentName" class="form-control" type="text" tabindex="20" placeholder="Name of new experiment script. Prefix the name with 'experiment' to be able to automatically download its results" tooltip="Prefix the name with 'experiment' to be able to automatically download its results. For example, 'experimentFlinkJob'."  tooltip-trigger="focus" tooltip-placement="right" >
+          <button style="margin-left: 10px; margin-top: 10px" ng-click="newExperiment($event)" class="btn btn-default" tabindex="21">Add</button>
+        </div>        
+      </div>        
+      <div class ="row" ng-show="newExperimentErr">
+        <span class="col-md-1 col-lg-1 text-warning"></span>
+        {{newExperimentErMsg}}
+      </div>        
+    </div>        
+    <br/>
+
+    <br/>
+  </div>
 </div>

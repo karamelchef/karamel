@@ -1,84 +1,84 @@
 <div class="modal-header">
-    <button class="close" ng-click="loadExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
-    <h2 class="modal-title">First Select the GitHub Organization. </h2>
+  <button class="close" ng-click="loadExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
+  <h2 class="modal-title">First Select the GitHub Organization. </h2>
 </div>
 <div class="modal-body" id="experimentFactoryModal">
 
-    <div class="container" style="width: 100%">
+  <div class="container" style="width: 100%">
 
 
-        <div class = "row" >
-            <div class = "col-xs-6 col-sm-6 col-md-12" >
-                <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
-            </div>
-        </div>
-        <br/>
-        <br/>
-        <div class = "row" >
-            <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
-                <ul style="list-style-type: none;">
-                    <li>
-                        <div class="col-md-3 col-lg-3 repoIcon">
-                            <button type="button" class="btn btn-default" ng-click="loadExperimentCtrl.selectUserOrg()" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
-                                {{github.githubCredentials.user}} 
-                            </button></div>
-                    </li>
-                    <li ng-repeat="org in github.orgs | orderBy: '+name'">
-                        <div class="col-md-3 col-lg-3 repoIcon">
-                            <button type="button" class="btn btn-default" ng-class="{'border-button':github.org.name === org.name}" ng-click="loadExperimentCtrl.selectOrg(org.name)"> 
-                                <img class="img-thumbnail" style="height: 30px;" ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '..' : ''}}
-                            </button>
-
-                        </div>
-                    </li>
-                    <li ng-if="results.length == 0">
-                        <strong>No GitHub organizations found for user: {{github.githubCredentials.user}}</strong>
-                    </li>
-                </ul>                    
-            </div>
-        </div>
-        <br/>
-        <h2 class="modal-title">Then Select the Repository. </h2>
-        <hr>
-
-        <div class = "row" >
-            <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
-                <ul style="list-style-type: none;">
-                    <li ng-repeat="repo in github.repos | orderBy: '+name'">
-                        <div class="col-md-3 repoIcon">
-                            <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="loadExperimentCtrl.selectRepo(repo.name)">  &nbsp; {{repo.name | limitTo: 20 }}{{repo.name.length > 20 ? '...' : ''}}</button>
-
-                        </div>
-                    </li>
-                    <li ng-if="results.length == 0">
-                        <strong>No repositories found for: {{github.org.name}}</strong>
-                    </li>
-                </ul>                    
-            </div>
-        </div>        
-
-        <!--        <div class="row col-md-12">
-                    <div class="form-group col-xs-6 col-sm-6 col-md-6 text-center">
-                        <div class = "row" >
-                            <label for="newRepo" class="control-label">Repository</label>
-                        </div>
-                        <div class="row btn-group text-center" dropdown>
-                            <a class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-                                Select Repo
-                                <span class="caret"></span>
-                            </a>
-                            <ul class="dropdown-menu" role="cmenu">
-                                <li ng-repeat="repo in github.repos"><a ng-click="repoName = repo"> {{repo.name}}</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div> -->
-        <hr>
-        <div class="row text-center">
-            <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
-                <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="loadExperimentCtrl.close()" tabindex="3">Load Experiment</button>
-            </div>                
-        </div>                
-
+    <div class = "row" >
+      <div class = "col-xs-6 col-sm-6 col-md-12" >
+        <div id="orgSelected1">Selected GitHub Organization: </div> <div id="orgSelected1" class="text-primary text-bold"> {{github.org.name| limitTo: 12}}{{github.org.name > 12 ? '...' : ''}}</div>
+      </div>
     </div>
+    <br/>
+    <br/>
+    <div class = "row" >
+      <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
+        <ul style="list-style-type: none;">
+          <li>
+            <div class="col-md-3 col-lg-3 repoIcon">
+              <button type="button" class="btn btn-default" ng-click="loadExperimentCtrl.selectUserOrg()" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
+                {{github.githubCredentials.user}} 
+              </button></div>
+          </li>
+          <li ng-repeat="org in github.orgs| orderBy: '+name'">
+            <div class="col-md-3 col-lg-3 repoIcon">
+              <button type="button" class="btn btn-default" ng-class="{'border-button':github.org.name === org.name}" ng-click="loadExperimentCtrl.selectOrg(org.name)"> 
+                <img class="img-thumbnail" style="height: 30px;" ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '..' : ''}}
+              </button>
+
+            </div>
+          </li>
+          <li ng-if="results.length == 0">
+            <strong>No GitHub organizations found for user: {{github.githubCredentials.user}}</strong>
+          </li>
+        </ul>                    
+      </div>
+    </div>
+    <br/>
+    <h2 class="modal-title">Then Select the Repository. </h2>
+    <hr>
+
+    <div class = "row" >
+      <div class="form-group col-xs-12 col-sm-12 col-md-12 vcenter text-left">
+        <ul style="list-style-type: none;">
+          <li ng-repeat="repo in github.repos| orderBy: '+name'">
+            <div class="col-md-3 repoIcon">
+              <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="loadExperimentCtrl.selectRepo(repo.name)">  &nbsp; {{repo.name| limitTo: 20 }}{{repo.name.length > 20 ? '...' : ''}}</button>
+
+            </div>
+          </li>
+          <li ng-if="results.length == 0">
+            <strong>No repositories found for: {{github.org.name}}</strong>
+          </li>
+        </ul>                    
+      </div>
+    </div>        
+
+    <!--        <div class="row col-md-12">
+                <div class="form-group col-xs-6 col-sm-6 col-md-6 text-center">
+                    <div class = "row" >
+                        <label for="newRepo" class="control-label">Repository</label>
+                    </div>
+                    <div class="row btn-group text-center" dropdown>
+                        <a class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+                            Select Repo
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="cmenu">
+                            <li ng-repeat="repo in github.repos"><a ng-click="repoName = repo"> {{repo.name}}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div> -->
+    <hr>
+    <div class="row text-center">
+      <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
+        <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="loadExperimentCtrl.close()" tabindex="3">Load Experiment</button>
+      </div>                
+    </div>                
+
+  </div>
 
