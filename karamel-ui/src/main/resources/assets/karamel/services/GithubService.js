@@ -30,26 +30,6 @@ angular.module('karamel.terminal')
 
 
 
-                self.setCredentials = function (user, password) {
-
-                    KaramelCoreRestServices.setGithubCredentials(user, password)
-                            .success(function (data, status, headers, config) {
-                                self.githubCredentials.user = data.user;
-                                self.githubCredentials.password = data.password;
-                                self.githubCredentials.email = data.email;
-                                self.org.name = data.user;
-                                self.emailHash = md5.createHash(self.githubCredentials.email || '');
-                                $log.info("Github Credentials Registered Successfully.");
-                            })
-                            .error(function (data, status, headers, config) {
-                                self.errorMsg = error.data.errorMsg;
-//                            growl.error("Could not login to github.", {title: 'Error', ttl: 5000});
-                                $log.error("Github Credentials can't be Registered .");
-                            });
-
-                    return self.githubCredentials;
-                };
-
                 self.getCredentials = function () {
                     KaramelCoreRestServices.getGithubCredentials()
                             .success(function (data, status, headers, config) {

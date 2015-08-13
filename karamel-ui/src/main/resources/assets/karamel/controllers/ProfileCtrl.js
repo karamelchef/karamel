@@ -1,66 +1,47 @@
 'use strict'
 
 angular.module('karamel.main')
-        .controller('ProfileCtrl', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
-            function ($scope, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
+        .controller('ProfileCtrl', ['$scope', 'md5', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
+            function ($scope, md5, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
                 var self = this;
-                self.isLoggedIn = false;
-                self.isOrgSelected = false;
-                self.isRepoSelected = false;
+                $scope.isLoggedIn = false;
 
-                self.user = '';
-                self.password = '';
-                $scope.githubService = GithubService;
-
-                self.load = function () {
-                    GithubService.loadExperiment(self.experimentUrl);
-                };
+                $scope.github = GithubService;
 
                 self.profile = function () {
                     GithubService.getCredentials();
-                    self.user = GithubService.getUser();
-                    if (self.user !== "") {
-                        self.isLoggedIn = true;
+                    if ($scope.github.githubCredentials.email !== "") {
+                        $scope.isLoggedIn = true;
                     }
                 };
 
                 self.login = function () {
-                    var credentials = GithubService.setCredentials(self.user, self.password);
-                    if (credentials.email !== "") {
-                        self.isLoggedIn = true;
-                    }
-                };
+                    KaramelCoreRestServices.setGithubCredentials($scope.github.githubCredentials.user,
+                            $scope.github.githubCredentials.password)
+                            .then(function (data, status, headers, config) {
+                                $scope.github.githubCredentials.user = data.user;
+                                $scope.github.githubCredentials.password = data.password;
+                                $scope.github.githubCredentials.email = data.email;
+                                $scope.github.org.name = data.user;
+                                $scope.github.emailHash = md5.createHash(data.email || '');
+                                if (data.email !== "") {
+                                    $scope.isLoggedIn = true;
+                                    self.close();
+                                }
+                            })
+                            .error(function (data, status, headers, config) {
+                                self.errorMsg = error.data.errorMsg;
+                                $log.error("Github Credentials can't be Registered .");
+                            });
 
 
-                self.setRepo = function () {
-                    var ret = GithubService.setRepo(self.repo);
-                    if (ret !== null) {
-                        self.isRepoSelected = true;
-                    }
-                };
-
-                self.getRepo = function () {
-                    $scope.repo = GithubService.getRepo();
-                };
-
-
-                self.getRepos = function () {
-                    return GithubService.getRepos();
-                };
-
-                $scope.githubUser = function () {
-                    return self.user;
                 };
 
                 self.close = function () {
-                    $modalInstance.dismiss('cancel');
+                    $modalInstance.close($scope.isLoggedIn);
                 };
 
-                self.reset = function () {
-                    return null;
-                };
-
-                self.getEmailHash = function () {
+                $scope.getEmailHash = function () {
                     return GithubService.getEmailHash();
                 };
 

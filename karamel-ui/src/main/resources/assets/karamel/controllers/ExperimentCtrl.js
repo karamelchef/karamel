@@ -272,7 +272,7 @@ angular.module('karamel.main')
                     $log.info("Load experiment...");
                     $scope.gs.org.name = "";
                     $scope.gs.repo.name = "";
-                    
+
                     ModalService.loadExperiment('lg').then(
                             function (result) {
                                 if (angular.isDefined(result)) {
@@ -287,7 +287,15 @@ angular.module('karamel.main')
 
                 $scope.profileModal = function () {
                     $log.info("Loading profile by launching modal dialog.");
-                    ModalService.profile('lg');
+                    ModalService.profile('lg').then(
+                            function (result) {
+                                if (angular.isDefined(result)) {
+                                    if (result !== null && result === true) {
+                                        $log.info("Credentials entered");
+                                        GithubService.getCredentials();
+                                    }
+                                }
+                            });
                 };
 
 
@@ -318,10 +326,10 @@ angular.module('karamel.main')
                         if (isConfirm) {
                             // delete local clone of Repo
                             KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
-                                    .success(function (data, status, headers, config) {
+                                    .then(function (data, status, headers, config) {
                                         // delete Repo on GitHub
                                         KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
-                                                .success(function (data, status, headers, config) {
+                                                .then(function (data, status, headers, config) {
                                                     // Core Rest Services
                                                     // delete Browser LocalStorage
                                                     clearExperiment();
@@ -506,13 +514,13 @@ angular.module('karamel.main')
                 $scope.pushExperiment = function ($event) {
                     $event.preventDefault();
 
-                            KaramelCoreRestServices.pushExperiment($scope.experiment)
-                                    .success(function (data, status, headers, config) {
-                                        $scope.status.isModified = false;
-                                    })
-                                    .error(function (data, status, headers, config) {
-                                        SweetAlert.swal("Problem saving to GitHub", data.reason, "error");
-                                    });
+                    KaramelCoreRestServices.pushExperiment($scope.experiment)
+                            .success(function (data, status, headers, config) {
+                                $scope.status.isModified = false;
+                            })
+                            .error(function (data, status, headers, config) {
+                                SweetAlert.swal("Problem saving to GitHub", data.reason, "error");
+                            });
 
 
                 }
