@@ -1,7 +1,7 @@
 'use strict'
 
-angular.module('karamel.main')
-    .controller('ProfileCtrl', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
+angular.module('karamel-main.module')
+    .controller('profile.controller', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
       function ($scope, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
         var self = this;
         $scope.isLoggedIn = false;

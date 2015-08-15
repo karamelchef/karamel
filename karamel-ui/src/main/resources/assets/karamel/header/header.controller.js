@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('karamel.main')
-    .controller('HeaderCtrl', ['$timeout', '$scope', '$rootScope', 'BoardService', 'KaramelCoreRestServices',
+angular.module('karamel-main.module')
+    .controller('header.controller', ['$timeout', '$scope', '$rootScope', 'board.service', 'KaramelCoreRestServices',
       function ($timeout, $scope, $rootScope, BoardService, KaramelCoreRestServices) {
 
         var self = this;

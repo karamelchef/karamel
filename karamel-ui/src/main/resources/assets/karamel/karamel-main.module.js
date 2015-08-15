@@ -5,7 +5,7 @@
 'use strict';
 
 // Declare app level module which depends on other modules
-angular.module('karamel.main', [
+angular.module('karamel-main.module', [
   'ngRoute'
       , 'ngCookies'
       , 'ui.sortable' // moving cards on the board
@@ -25,9 +25,9 @@ angular.module('karamel.main', [
 // We add an interceptor to update the UI board name if the karamel-core application is not available.
 //
     .config(['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/', {templateUrl: 'board.html', controller: 'BoardController'});
-        $routeProvider.when('/terminal', {templateUrl: 'terminal.html', controller: 'karamelTerminalController'});
-        $routeProvider.when('/experiment', {templateUrl: 'experiment.html', controller: 'ExperimentCtrl'});
+        $routeProvider.when('/', {templateUrl: 'karamel/board/board.html', controller: 'board.controller'});
+        $routeProvider.when('/terminal', {templateUrl: 'karamel/terminal/terminal.html', controller: 'karamelTerminalController'});
+        $routeProvider.when('/experiment', {templateUrl: 'karamel/experiment/experiment.html', controller: 'experiment.controller'});
         $routeProvider.otherwise({redirectTo: '/'});
       }], function($httpProvider, $rootScope) {
       $httpProvider.interceptors.push(function($q) {

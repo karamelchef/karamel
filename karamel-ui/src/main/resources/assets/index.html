@@ -20,7 +20,7 @@
 
 
 </head>
-<body ng-app="karamel.main">
+<body ng-app="karamel-main.module">
   <!--scripts-->
   <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -41,7 +41,7 @@
   <script type="text/javascript" src="karamel/dist/ng-sortable.js"></script>
 
 
-  <script type="text/javascript" src="karamel/karamel-main.js"></script>
+  <script type="text/javascript" src="karamel/karamel-main.module.js"></script>
   <script type="text/javascript" src="karamel/terminal/karamel-terminal.js"></script>
   <script type="text/javascript" src="karamel/terminal/karamel-shell-emulator.js"></script>
   <script type="text/javascript" src="karamel/datamodel.js"></script>
@@ -49,23 +49,29 @@
   <script type="text/javascript" src="d3/dagre-d3.js"></script>
 
   <!-- controllers -->
-  <script type="text/javascript" src="karamel/controllers/groups.js"></script>
-  <script type="text/javascript" src="karamel/controllers/attributes.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/new-recipe.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/duplicate-recipe.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/attributes-editor.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/cookbook-manipulation.service.js"></script>
+  <script type="text/javascript" src="karamel/board/tabs/common-tabs.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/tabs/common-tabs-pane.directive.js"></script>
   <script type="text/javascript" src="karamel/controllers/editor-provider.js"></script>
   <script type="text/javascript" src="karamel/controllers/launch.js"></script>
   <script type="text/javascript" src="karamel/controllers/sshkeys.js"></script>
-  <script type="text/javascript" src="karamel/controllers/new-recipe.js"></script>
-  <script type="text/javascript" src="karamel/controllers/board.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment-load.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment-new.js"></script>
-  <script type="text/javascript" src="karamel/controllers/profile.js"></script>
+  <script type="text/javascript" src="karamel/board/board.contoller.js"></script>
+  <script type="text/javascript" src="karamel/board/board.service.js"></script>
+  <script type="text/javascript" src="karamel/board/yaml-uploader.directive.js"></script>
+  <script type="text/javascript" src="karamel/experiment/experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/load-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/new-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/profile.controller.js"></script>
   <script type="text/javascript" src="karamel/controllers/header.js"></script>
 
 
   <!-- services -->
   <script type="text/javascript" src="karamel/services/core-rest.js"></script>
-  <script type="text/javascript" src="karamel/services/modal.js"></script>
+  <script type="text/javascript" src="karamel/experiment/modal.factory.js"></script>
   <script type="text/javascript" src="karamel/services/github.js"></script>
   <script type="text/javascript" src="karamel/services/experiments.js"></script>
 
@@ -74,7 +80,7 @@
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
   </div>
 
-  <div ng-include='"header.html"' ng-controller="HeaderCtrl as headerCtrl"></div>
+  <div ng-include='"karamel/header/header.html"' ng-controller="header.controller"></div>
 
   <div ng-view></div>
 </body>

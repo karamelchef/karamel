@@ -1,4 +1,4 @@
-angular.module('karamel.main')
+angular.module('karamel-main.module')
     .controller('provider.editor', ['$log', '$scope', '$modalInstance', 'info', function($log, $scope, $modalInstance, info) {
 
         function _initScope(scope) {

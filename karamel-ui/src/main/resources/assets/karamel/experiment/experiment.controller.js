@@ -1,10 +1,10 @@
 'use strict';
 
-angular.module('karamel.main')
-    .controller('ExperimentCtrl', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
-      'GithubService', 'ModalService', 'ExperimentsService', 'BoardService',
-      function ($log, $scope, $rootScope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalService,
-          ExperimentsService, BoardService) {
+angular.module('karamel-main.module')
+    .controller('experiment.controller', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
+      'GithubService', 'modal.factory', 'ExperimentsService',
+      function ($log, $scope, $rootScope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalFactory,
+          ExperimentsService) {
 
         var self = this;
 
@@ -250,7 +250,7 @@ angular.module('karamel.main')
 
         $scope.experimentFactoryModal = function () {
           $log.info("New experiment...");
-          ModalService.experimentFactory('lg').then(
+          ModalFactory.experimentFactory('lg').then(
               function (result) {
                 if (angular.isDefined(result)) {
                   $log.info("new experiment modal experiment results ...");
@@ -271,7 +271,7 @@ angular.module('karamel.main')
           $scope.gs.org.name = "";
           $scope.gs.repo.name = "";
 
-          ModalService.loadExperiment('lg').then(
+          ModalFactory.loadExperiment('lg').then(
               function (result) {
                 if (angular.isDefined(result)) {
                   $log.info("load experiment modal experiment at " + result);
@@ -285,7 +285,7 @@ angular.module('karamel.main')
 
         $scope.profileModal = function () {
           $log.info("Loading profile by launching modal dialog.");
-          ModalService.profile('lg').then(
+          ModalFactory.profile('lg').then(
               function (result) {
                 if (angular.isDefined(result)) {
                   if (result !== null && result === true) {

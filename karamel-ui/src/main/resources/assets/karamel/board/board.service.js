@@ -3,122 +3,11 @@
 
 'use strict';
 
-angular.module('karamel.main')
-    .controller('BoardController', ['$rootScope', '$log', '$scope', 'BoardService', '$window', 'AlertService',
-      '$location',
-      function($rootScope, $log, $scope, BoardService, $window, AlertService, $location) {
-        var self = this;
-
-        $scope.bs = BoardService;
-
-
-        function initScope() {
-          if ($window['sessionStorage'] !== undefined) {
-            var clusterObj = $window.sessionStorage.getItem('karamel');
-            clusterObj = angular.fromJson(clusterObj);
-
-            if (clusterObj !== null) {
-              try {
-                var cluster = new Cluster();
-                cluster.copy(clusterObj);
-                $rootScope.activeCluster = cluster;
-                $rootScope.context = cluster.name;
-                AlertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
-              }
-              catch (err) {
-                $log.error(err);
-                AlertService.addAlert({type: 'danger', msg: 'Unable to parse the json to generate model.'});
-              }
-            }
-            else {
-              AlertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
-            }
-          }
-          else {
-            $log.error("No Support for session storage.");
-          }
-        }
-
-
-
-        $scope.configureGlobalProvider = function() {
-          BoardService.configureGlobalProvider();
-        };
-        $scope.configureGlobalAttributes = function() {
-          BoardService.configureGlobalAttributes();
-        };
-
-        $scope.editSshKeys = function() {
-          BoardService.editSshKeys();
-        };
-
-        $scope.launchCluster = function() {
-          BoardService.launchCluster();
-        };
-
-        $scope.switchToTerminal = function() {
-          $location.path('/terminal');
-        };
-
-        $scope.switchToExperiment = function() {
-          $location.path('/experiment');
-        };
-
-        $scope.exitKaramel = function() {
-          BoardService.exitKaramel();
-        };
-
-        $scope.sudoPassword = function(password) {
-          BoardService.sudoPassword(password);
-        };
-
-        $scope.githubCredentials = function(email, password) {
-          BoardService.githubCredentials(email, password);
-        };
-
-
-        $scope.removeRecipe = function(group, cookbook, recipe) {
-          BoardService.removeRecipe(group, cookbook, recipe);
-        };
-
-        $scope.removeColumn = function(group) {
-          BoardService.removeGroup(group);
-        };
-
-        $scope.addNewRecipe = function(group) {
-          BoardService.addNewRecipe(group);
-        };
-
-        $scope.updateGroup = function(group) {
-          BoardService.updateGroupInfo(group);
-        };
-
-        $scope.configureGroupAttributes = function(group) {
-          BoardService.configureGroupAttributes(group);
-        };
-
-        $scope.configureGroupProvider = function(group) {
-          BoardService.configureGroupProvider(group);
-        };
-
-        $scope.addGroup = function() {
-          BoardService.addGroup();
-        };
-
-        self.setExperimentActive = function() {
-          return BoardService.setExperimentActive();
-        };
-        self.setExperimentInActive = function() {
-          return BoardService.setExperimentInActive();
-        };
-
-        initScope();
-
-      }])
-    .service('BoardService', ['SweetAlert', '$log', '$modal', '$location'
-          , '$rootScope', '$window', 'KaramelCoreRestServices', 'BrowserCacheService', 'AlertService',
-      function(SweetAlert, $log, $modal, $location, $rootScope, $window,
-          KaramelCoreRestServices, BrowserCacheService, AlertService) {
+angular.module('karamel-main.module')
+    .service('board.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'KaramelCoreRestServices', 
+  'BrowserCacheService', 'AlertService',
+      function(SweetAlert, $log, $modal, $location, $rootScope, KaramelCoreRestServices, 
+      BrowserCacheService, AlertService) {
 
         var self = this;
         self.experimentActive = false;
@@ -173,8 +62,8 @@ angular.module('karamel.main')
           addNewRecipe: function(group) {
 
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/column-new-recipe.html',
-              controller: 'NewRecipeController',
+              templateUrl: 'karamel/board/groups/new-recipe.html',
+              controller: 'new-recipe.controller as ctrl',
               backdrop: 'static',
               resolve: {
                 group: function() {
@@ -317,8 +206,8 @@ angular.module('karamel.main')
           },
           addGroup: function() {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-group.html",
-              controller: "GroupsContoller",
+              templateUrl: "karamel/board/groups/group-editor.html",
+              controller: "group-editor.controller as ctrl",
               backdrop: 'static',
               resolve: {
                 groupInfo: function() {
@@ -338,8 +227,8 @@ angular.module('karamel.main')
           },
           updateGroupInfo: function(existingGroupInfo) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-group.html",
-              controller: "GroupsContoller",
+              templateUrl: "karamel/board/groups/group-editor.html",
+              controller: "group-editor.controller as ctrl",
               backdrop: 'static',
               resolve: {
                 groupInfo: function() {
@@ -369,8 +258,8 @@ angular.module('karamel.main')
           },
           configureGlobalAttributes: function() {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-attributes.html",
-              controller: "CookbookAttributeController",
+              templateUrl: "karamel/board/cookbooks/attributes.editor.html",
+              controller: "attributes-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
                 info: function() {
@@ -438,7 +327,7 @@ angular.module('karamel.main')
           configureGroupAttributes: function(group) {
             var modalInstance = $modal.open({
               templateUrl: "karamel/partials/editor-attributes.html",
-              controller: "CookbookAttributeController",
+              controller: "attributes-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
                 info: function() {
@@ -520,67 +409,6 @@ angular.module('karamel.main')
                 AlertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
               }
             });
-          }
-        }
-
-      }])
-    .directive('fileUploader', ['$log', '$rootScope', 'BoardService', 'KaramelCoreRestServices', '$window',
-      'AlertService', 'BrowserCacheService',
-      function($log, $rootScope, BoardService, KaramelCoreRestServices, $window, AlertService, BrowserCacheService) {
-        return{
-          restrict: 'A',
-          link: function(scope, element, attributes) {
-
-            element.bind('change', function(changeEvent) {
-              var reader = new FileReader();
-              reader.onload = function(loadEvent) {
-                var ymlJson = {
-                  yml: loadEvent.target.result
-                };
-                $log.info("Requesting Karamel Core Services for JSON. ");
-                BrowserCacheService.resetCache();
-                KaramelCoreRestServices.getJsonFromYaml(ymlJson)
-                    .success(function(data, status, headers, config) {
-                      $log.info("Success");
-
-                      try {
-                        var cluster = new Cluster();
-                        cluster.load(data);
-                        $rootScope.activeCluster = cluster;
-                        $rootScope.context = cluster.name;
-                        AlertService.addAlert({type: 'success', msg: 'Model Created Successfully.'});
-                      }
-                      catch (err) {
-                        $log.error(err);
-                        AlertService.addAlert({type: 'danger', msg: 'Unable to parse json from core.'});
-                      }
-
-                      $log.info($rootScope.activeCluster);
-                    })
-                    .error(function(data, status, headers, config) {
-                      $log.info("Fetch Call Failed.");
-                      AlertService.addAlert({type: 'danger', msg: 'Core: ' + data.message});
-                    });
-
-                element.val("");
-              };
-              reader.readAsText(changeEvent.target.files[0]);
-            });
-
-          }
-        }
-      }])
-    .directive('clickDirective', ['$log', function($log) {
-
-        return {
-          restrict: 'A',
-          link: function(scope, element, attributes) {
-
-            element.bind('click', function(clickEvent) {
-              var uploaderElement = angular.element(document.querySelector("#fileUploader"));
-              uploaderElement.trigger('click');
-            });
-
           }
         }
 

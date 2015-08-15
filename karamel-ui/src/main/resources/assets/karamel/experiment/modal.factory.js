@@ -1,12 +1,12 @@
 'use strict';
 
-angular.module('karamel.main')
-    .factory('ModalService', ['$modal', function ($modal) {
+angular.module('karamel-main.module')
+    .factory('modal.factory', ['$modal', function ($modal) {
         return {
           confirm: function (size, title, msg) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/modal-confirm.html',
-              controller: 'ModalCtrl as ctrl',
+              templateUrl: 'karamel/experiment/modal-confirm.html',
+              controller: 'modal.controller as ctrl',
               size: size,
               resolve: {
                 title: function () {
@@ -21,8 +21,8 @@ angular.module('karamel.main')
           },
           profile: function (size) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/profile.html',
-              controller: 'ProfileCtrl as profileCtrl',
+              templateUrl: 'karamel/experiment/profile.html',
+              controller: 'profile.controller as ctrl',
               size: size,
               resolve: {
               }
@@ -31,8 +31,8 @@ angular.module('karamel.main')
           },
           experimentFactory: function (size, githubDetails) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/experiment-new.html',
-              controller: 'NewExperimentCtrl as newExperimentCtrl',
+              templateUrl: 'karamel/experiment/new-experiment.html',
+              controller: 'new.experiment.controller as controller',
               size: size,
               windowClass: 'app-modal-window',
               resolve: {
@@ -46,8 +46,8 @@ angular.module('karamel.main')
           },
           loadExperiment: function (size, githubUrl) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/partials/experiment-load.html',
-              controller: 'LoadExperimentCtrl as loadExperimentCtrl',
+              templateUrl: 'karamel/experiment/load-experiment.html',
+              controller: 'load.experiment.contoller as controller',
               size: size,
               windowClass: 'app-modal-window',
               resolve: {

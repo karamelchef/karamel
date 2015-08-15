@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <button class="close" ng-click="loadExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
+  <button class="close" ng-click="controller.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
   <h2 class="modal-title">First Select the GitHub Organization. </h2>
 </div>
 <div class="modal-body" id="experimentFactoryModal">
@@ -19,13 +19,13 @@
         <ul style="list-style-type: none;">
           <li>
             <div class="col-md-3 col-lg-3 repoIcon">
-              <button type="button" class="btn btn-default" ng-click="loadExperimentCtrl.selectUserOrg()" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
+              <button type="button" class="btn btn-default" ng-click="controller.selectUserOrg()" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
                 {{github.githubCredentials.user}} 
               </button></div>
           </li>
           <li ng-repeat="org in github.orgs| orderBy: '+name'">
             <div class="col-md-3 col-lg-3 repoIcon">
-              <button type="button" class="btn btn-default" ng-class="{'border-button':github.org.name === org.name}" ng-click="loadExperimentCtrl.selectOrg(org.name)"> 
+              <button type="button" class="btn btn-default" ng-class="{'border-button':github.org.name === org.name}" ng-click="controller.selectOrg(org.name)"> 
                 <img class="img-thumbnail" style="height: 30px;" ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '..' : ''}}
               </button>
 
@@ -46,7 +46,7 @@
         <ul style="list-style-type: none;">
           <li ng-repeat="repo in github.repos| orderBy: '+name'">
             <div class="col-md-3 repoIcon">
-              <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="loadExperimentCtrl.selectRepo(repo.name)">  &nbsp; {{repo.name| limitTo: 20 }}{{repo.name.length > 20 ? '...' : ''}}</button>
+              <button type="button" class="btn btn-default" ng-class="{'border-button':github.repo.name === repo.name}" ng-click="controller.selectRepo(repo.name)">  &nbsp; {{repo.name| limitTo: 20 }}{{repo.name.length > 20 ? '...' : ''}}</button>
 
             </div>
           </li>
@@ -76,7 +76,7 @@
     <hr>
     <div class="row text-center">
       <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
-        <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="loadExperimentCtrl.close()" tabindex="3">Load Experiment</button>
+        <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="controller.close()" tabindex="3">Load Experiment</button>
       </div>                
     </div>                
 

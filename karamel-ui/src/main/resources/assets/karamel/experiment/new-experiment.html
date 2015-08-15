@@ -1,5 +1,5 @@
 <div class="modal-header">
-  <button class="close" ng-click="newExperimentCtrl.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
+  <button class="close" ng-click="controller.close()" data-dismiss="modal" aria-hidden="true" type="button">&times;</button>
   <h2 class="modal-title">Enter New GitHub Repository Details</h2>
 </div>
 <div class="modal-body" id="experimentFactoryModal">
@@ -39,7 +39,7 @@
         </div> 
         <div class="row">
           <div class="form-group col-xs-6 col-sm-6 col-md-6 vcenter" >    
-            <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="newExperimentCtrl.newExperiment()" tabindex="3">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
+            <button ng-disabled="submittedOngoing" type="button" class="btn btn-primary" ng-click="controller.newExperiment()" tabindex="3">Create New Experiment</button> <span ng-show="false" class="experimentLoader"><img class="ajax-loader" src="http://www.ajaxload.info/images/exemples/26.gif" style="height: 35px;"/></span>
           </div>                
         </div>                
       </div>
@@ -48,7 +48,7 @@
         <ul style="list-style-type: none;">
           <li >
             <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
-              <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(github.githubCredentials.user)" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
+              <button type="button" class="btn btn-default" ng-click="controller.selectOrg(github.githubCredentials.user)" ng-class="{'border-button':github.org.name === github.githubCredentials.user}">
                 {{github.githubCredentials.user}} 
               </button></div>
           </li>
@@ -57,7 +57,7 @@
 
           <li ng-repeat="org in github.orgs| orderBy: '+name'">
             <div class="col-sm-6 col-md-6 col-lg-6 repoIcon">
-              <button type="button" class="btn btn-default" ng-click="newExperimentCtrl.selectOrg(org.name)" ng-class="{'border-button':github.org.name === org.name}"> 
+              <button type="button" class="btn btn-default" ng-click="controller.selectOrg(org.name)" ng-class="{'border-button':github.org.name === org.name}"> 
                 <img class="img-thumbnail" style="height: 30px;"
                      ng-src="{{ org.gravitar}}"/> &nbsp; {{org.name| limitTo: 18}}{{org.name.length > 18 ? '...' : ''}}</button>
 

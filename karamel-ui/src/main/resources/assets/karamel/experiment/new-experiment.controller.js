@@ -1,7 +1,7 @@
 'use strict'
 
-angular.module('karamel.main')
-    .controller('NewExperimentCtrl', ['$scope', '$log', '$modalInstance', 'GithubService',
+angular.module('karamel-main.module')
+    .controller('new.experiment.controller', ['$scope', '$log', '$modalInstance', 'GithubService',
       function ($scope, $log, $modalInstance, GithubService) {
         var self = this;
 

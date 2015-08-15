@@ -3,7 +3,7 @@
  */
 // Controller for different providers.
 
-angular.module("karamel.main")
+angular.module("karamel-main.module")
     .controller('SshKeysController', ['$log', '$scope', '$modalInstance', 'KaramelCoreRestServices', function($log, $scope, $modalInstance, KaramelCoreRestServices) {
 
         function initKeys(scope) {

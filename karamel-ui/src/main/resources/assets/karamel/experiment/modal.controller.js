@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('karamel.main')
-    .controller('ModalCtrl', ['$modalInstance', '$scope', 'title', 'msg',
+angular.module('karamel-main.module')
+    .controller('modal.controller', ['$modalInstance', '$scope', 'title', 'msg',
       function ($modalInstance, $scope, title, msg) {
 
         var self = this;
