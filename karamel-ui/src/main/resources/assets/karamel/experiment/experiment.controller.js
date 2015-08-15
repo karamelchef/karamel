@@ -2,13 +2,13 @@
 
 angular.module('karamel-main.module')
     .controller('experiment.controller', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'core-rest.service',
-      'GithubService', 'modal.factory', 'ExperimentsService',
-      function ($log, $scope, $rootScope, $timeout, SweetAlert, coreService, GithubService, ModalFactory,
-          ExperimentsService) {
+      'github.service', 'modal.factory', 'experiment.factory',
+      function ($log, $scope, $rootScope, $timeout, SweetAlert, coreService, githubService, ModalFactory,
+          expFactory) {
 
         var self = this;
 
-        $scope.gs = GithubService;
+        $scope.gs = githubService;
 
         $scope.status = {
           isOpen: true,
@@ -290,7 +290,7 @@ angular.module('karamel-main.module')
                 if (angular.isDefined(result)) {
                   if (result !== null && result === true) {
                     $log.info("Credentials entered");
-                    GithubService.getCredentials();
+                    githubService.getCredentials();
                   }
                 }
               });
@@ -299,8 +299,8 @@ angular.module('karamel-main.module')
 
         function _initScope() {
           $log.log("Looking for cached GitHub Credentials...");
-          GithubService.getCredentials();
-          var exp = ExperimentsService.recover();
+          githubService.getCredentials();
+          var exp = expFactory.recover();
           if (exp !== false && exp !== null && typeof exp !== 'undefined') {
             self.deepCopyExperiment(exp);
           }
@@ -405,7 +405,7 @@ angular.module('karamel-main.module')
         function clearExperiment() {
           cancelTimer();
           $scope.landing = true;
-          ExperimentsService.clear();
+          expFactory.clear();
           $scope.experiment = {
             user: '',
             group: '',
@@ -457,7 +457,7 @@ angular.module('karamel-main.module')
         function saveExperimentTimer() {
           if (!$scope.landing && $scope.experiment !== {} && $scope.experiment.githubRepo !== ""
               && $scope.experiment.name !== "") {
-            ExperimentsService.store($scope.experiment);
+            expFactory.store($scope.experiment);
           }
           if ($rootScope.connected) {
             restartTimer();

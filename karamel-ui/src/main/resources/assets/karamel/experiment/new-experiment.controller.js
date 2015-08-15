@@ -1,11 +1,11 @@
 'use strict'
 
 angular.module('karamel-main.module')
-    .controller('new.experiment.controller', ['$scope', '$log', '$modalInstance', 'GithubService',
-      function ($scope, $log, $modalInstance, GithubService) {
+    .controller('new.experiment.controller', ['$scope', '$log', '$modalInstance', 'github.service',
+      function ($scope, $log, $modalInstance, githubService) {
         var self = this;
 
-        $scope.github = GithubService;
+        $scope.github = githubService;
 
         $scope.submitted = true;
         $scope.submittedOngoing = false;
@@ -31,7 +31,7 @@ angular.module('karamel-main.module')
         };
 
         self.selectOrg = function (name) {
-          GithubService.setOrg(name);
+          githubService.setOrg(name);
         };
 
         self.close = function (feedback) {
@@ -50,7 +50,7 @@ angular.module('karamel-main.module')
           $scope.submittedOngoing = true;
           $scope.submitted = true;
           $scope.submittedMsg = "";
-          GithubService.getRepos().then(
+          githubService.getRepos().then(
               function () {
                 // Check if the repository already exists for this user or organization
                 for (var i = 0; i < $scope.github.repos.length; i++) {
@@ -61,7 +61,7 @@ angular.module('karamel-main.module')
                   }
                 }
                 $log.info("new experiment being created...");
-                GithubService.newRepo($scope.repoName, $scope.repoDesc);
+                githubService.newRepo($scope.repoName, $scope.repoDesc);
                 self.githubDetails.user = $scope.github.repo.name;
                 self.githubDetails.group = $scope.github.repo.name;
                 self.githubDetails.githubRepo = $scope.github.repo.name;
@@ -76,7 +76,7 @@ angular.module('karamel-main.module')
         };
 
         self.getOrgs = function () {
-          GithubService.getOrgs();
+          githubService.getOrgs();
         }
 
         self.getOrgs();

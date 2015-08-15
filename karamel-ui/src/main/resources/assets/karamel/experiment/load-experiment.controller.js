@@ -1,11 +1,11 @@
 'use strict'
 
 angular.module('karamel-main.module')
-    .controller('load.experiment.controller', ['$scope', '$log', '$modalInstance', 'GithubService',
-      function ($scope, $log, $modalInstance, GithubService) {
+    .controller('load.experiment.controller', ['$scope', '$log', '$modalInstance', 'github.service',
+      function ($scope, $log, $modalInstance, githubService) {
         var self = this;
 
-        $scope.github = GithubService;
+        $scope.github = githubService;
 
         $scope.githubUrl = ""
 
@@ -15,11 +15,11 @@ angular.module('karamel-main.module')
           $scope.github.getRepos();
         }
         self.selectOrg = function (name) {
-          GithubService.setOrg(name);
+          githubService.setOrg(name);
         };
 
         self.selectRepo = function (name) {
-          GithubService.setRepo(name);
+          githubService.setRepo(name);
           $scope.github.repo.sshUrl = "https://github.com/" + $scope.github.org.name + "/" + name + ".git";
           $scope.githubUrl = "https://github.com/" + $scope.github.org.name + "/" + name + ".git";
         };
@@ -37,7 +37,7 @@ angular.module('karamel-main.module')
         };
 
         function _initScope() {
-          GithubService.getOrgs();
+          githubService.getOrgs();
           $scope.github.org.name = $scope.github.githubCredentials.user;
           self.selectUserOrg();
         }

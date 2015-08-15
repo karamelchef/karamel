@@ -21,7 +21,7 @@
 
 </head>
 <body ng-app="karamel-main.module">
-  <!--scripts-->
+  <!--angular-->
   <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
@@ -35,12 +35,13 @@
   <script type="text/javascript" src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
   <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
+  <!-- main module -->
   <script type="text/javascript" src="karamel/karamel-main.module.js"></script>
-
+  <script type="text/javascript" src="karamel/core-rest.service.js"></script>
   <script type="text/javascript" src="karamel/datamodel.js"></script>
 
 
-  <!-- controllers -->
+  <!-- board module -->
   <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
   <script type="text/javascript" src="karamel/board/groups/new-recipe.controller.js"></script>
   <script type="text/javascript" src="karamel/board/groups/duplicate-recipe.directive.js"></script>
@@ -59,20 +60,20 @@
   <script type="text/javascript" src="karamel/board/board.contoller.js"></script>
   <script type="text/javascript" src="karamel/board/board.service.js"></script>
   <script type="text/javascript" src="karamel/board/yaml-uploader.directive.js"></script>
-  <script type="text/javascript" src="karamel/experiment/experiment.controller.js"></script>
-  <script type="text/javascript" src="karamel/experiment/load-experiment.controller.js"></script>
-  <script type="text/javascript" src="karamel/experiment/new-experiment.controller.js"></script>
-  <script type="text/javascript" src="karamel/experiment/profile.controller.js"></script>
   <script type="text/javascript" src="karamel/controllers/header.js"></script>
 
 
-  <!-- services -->
-  <script type="text/javascript" src="karamel/core-rest.service.js"></script>
+  <!-- experiment module -->
+  <script type="text/javascript" src="karamel/experiment/experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/experiment.factory.js"></script>
+  <script type="text/javascript" src="karamel/experiment/load-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/modal.controller.js"></script>
   <script type="text/javascript" src="karamel/experiment/modal.factory.js"></script>
-  <script type="text/javascript" src="karamel/services/github.js"></script>
-  <script type="text/javascript" src="karamel/services/experiments.js"></script>
+  <script type="text/javascript" src="karamel/experiment/new-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/github/github-profile.controller.js"></script>
+  <script type="text/javascript" src="karamel/github/github.service.js"></script>
 
-  <!-- terminal -->
+  <!-- terminal module-->
   <script type="text/javascript" src="karamel/terminal/terminal.controller.js"></script>
   <script type="text/javascript" src="karamel/terminal/compile-data.directive.js"></script>
   <script type="text/javascript" src="karamel/terminal/dagre-dag.directive.js"></script>
