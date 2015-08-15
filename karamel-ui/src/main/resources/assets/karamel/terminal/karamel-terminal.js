@@ -1,12 +1,3 @@
-/**
- * Created by babbarshaer on 2014-10-29.
- */
-
-// This module deals with the core karamel services.
-
-/*jshint undef: false, unused: false, indent: 2*/
-/*global angular: false */
-
 'use strict';
 
 angular.module('karamel.terminal', [])

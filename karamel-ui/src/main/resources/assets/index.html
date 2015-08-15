@@ -35,18 +35,11 @@
   <script type="text/javascript" src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
   <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
-  <script type="text/javascript" src="karamel/dist/FileSaver.js"></script>
-  <script type="text/javascript" src="karamel/dist/yaml.js"></script> 
-  <script type="text/javascript" src="karamel/dist/underscore-min.js"></script>
-  <script type="text/javascript" src="karamel/dist/ng-sortable.js"></script>
-
-
   <script type="text/javascript" src="karamel/karamel-main.module.js"></script>
   <script type="text/javascript" src="karamel/terminal/karamel-terminal.js"></script>
   <script type="text/javascript" src="karamel/terminal/karamel-shell-emulator.js"></script>
   <script type="text/javascript" src="karamel/datamodel.js"></script>
-  <script type="text/javascript" src="d3/d3.v3.min.js"></script>
-  <script type="text/javascript" src="d3/dagre-d3.js"></script>
+
 
   <!-- controllers -->
   <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
@@ -80,7 +73,14 @@
   <script type="text/javascript" src="karamel/services/github.js"></script>
   <script type="text/javascript" src="karamel/services/experiments.js"></script>
 
-
+  <!-- thirdparties -->
+  <script type="text/javascript" src="karamel/thirdparties/FileSaver.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/yaml.js"></script> 
+  <script type="text/javascript" src="karamel/thirdparties/underscore-min.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/ng-sortable.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/d3/d3.v3.min.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/d3/dagre-d3.js"></script>
+  
   <div class="notifications" ng-controller="MainCtrl">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
   </div>
