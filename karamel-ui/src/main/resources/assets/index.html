@@ -36,8 +36,7 @@
   <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
   <script type="text/javascript" src="karamel/karamel-main.module.js"></script>
-  <script type="text/javascript" src="karamel/terminal/karamel-terminal.js"></script>
-  <script type="text/javascript" src="karamel/terminal/karamel-shell-emulator.js"></script>
+
   <script type="text/javascript" src="karamel/datamodel.js"></script>
 
 
@@ -73,14 +72,20 @@
   <script type="text/javascript" src="karamel/services/github.js"></script>
   <script type="text/javascript" src="karamel/services/experiments.js"></script>
 
-  <!-- thirdparties -->
+  <!-- terminal -->
+  <script type="text/javascript" src="karamel/terminal/terminal.controller.js"></script>
+  <script type="text/javascript" src="karamel/terminal/compile-data.directive.js"></script>
+  <script type="text/javascript" src="karamel/terminal/dagre-dag.directive.js"></script>
+  <script type="text/javascript" src="karamel/terminal/karamel-shell-emulator.js"></script>
+
+  <!-- third-parties -->
   <script type="text/javascript" src="karamel/thirdparties/FileSaver.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/yaml.js"></script> 
   <script type="text/javascript" src="karamel/thirdparties/underscore-min.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/ng-sortable.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/d3/d3.v3.min.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/d3/dagre-d3.js"></script>
-  
+
   <div class="notifications" ng-controller="MainCtrl">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
   </div>
