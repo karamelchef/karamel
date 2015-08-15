@@ -385,8 +385,8 @@ angular.module('karamel-main.module')
           },
           setCredentials: function(isLaunch) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/launch.html",
-              controller: "LaunchController",
+              templateUrl: "karamel/board/launch/launch.html",
+              controller: "launch.controller as ctrl",
               backdrop: "static",
               resolve: {
                 info: function() {
