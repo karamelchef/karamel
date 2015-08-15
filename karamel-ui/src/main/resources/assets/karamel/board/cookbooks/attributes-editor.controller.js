@@ -1,7 +1,7 @@
 /*jshint undef: false, unused: false, indent: 2*/
 /*global angular: false */
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
   .controller('attributes-editor.controller', ['$scope', '$modalInstance', 'info', 'cookbook-manipulation.service'
       , function($scope, $modalInstance, info, cbService) {
 

@@ -3,11 +3,11 @@
 
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .service('board.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'core-rest.service', 
-  'BrowserCacheService', 'AlertService',
+  'browser-cache.service', 'alert.service',
       function(SweetAlert, $log, $modal, $location, $rootScope, coreService, 
-      BrowserCacheService, AlertService) {
+      cacheService, alertService) {
 
         var self = this;
         self.experimentActive = false;
@@ -39,13 +39,13 @@ angular.module('karamel-main.module')
           coreService.startCluster(data)
               .success(function(data, status, headers, config) {
                 $log.info("Connection Successful.");
-                AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
+                alertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
                 $location.path('/terminal');
               })
               .error(function(data, status, headers, config) {
                 $log.info("Error Received.");
                 $log.info(data.message);
-                AlertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
+                alertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
               });
         }
 
@@ -97,7 +97,7 @@ angular.module('karamel-main.module')
 
                 $log.info(cluster);
                 localCookbook.addRecipe(new Recipe(info.recipe.name));
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -128,7 +128,7 @@ angular.module('karamel-main.module')
                   requiredCookbook.removeRecipe(recipe);
                 }
 
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               } else {
                 SweetAlert.swal("Cancelled", "Recipe Lives :)", "error");
               }
@@ -162,7 +162,7 @@ angular.module('karamel-main.module')
                   cluster.groups.splice(id, 1);
                 }
 
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               } else {
                 SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
               }
@@ -221,7 +221,7 @@ angular.module('karamel-main.module')
                 var group = new Group();
                 group.load(newGroupInfo);
                 $rootScope.activeCluster.addGroup(group);
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -252,7 +252,7 @@ angular.module('karamel-main.module')
                   cluster.groups[id].size = updatedGroupInfo.size;
                 }
 
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -274,7 +274,7 @@ angular.module('karamel-main.module')
             modalInstance.result.then(function(result) {
               if (result) {
                 $rootScope.activeCluster.cookbooks = result.cookbooks;
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -297,7 +297,7 @@ angular.module('karamel-main.module')
               if (result) {
                 $rootScope.activeCluster.ec2 = result.ec2;
                 $rootScope.activeCluster.baremetal = result.baremetal;
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
 
@@ -320,7 +320,7 @@ angular.module('karamel-main.module')
               if (result) {
                 group.ec2 = result.ec2;
                 group.baremetal = result.baremetal;
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -341,7 +341,7 @@ angular.module('karamel-main.module')
             modalInstance.result.then(function(result) {
               if (result) {
                 group.cookbooks = result.cookbooks;
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
               }
             });
           },
@@ -373,7 +373,7 @@ angular.module('karamel-main.module')
             var cluster = $rootScope.activeCluster;
             if (cluster === null) {
               $log.info("No Active Cluster Object Present.");
-              AlertService.addAlert({type: 'warning', msg: 'No Active Cluster Found.'});
+              alertService.addAlert({type: 'warning', msg: 'No Active Cluster Found.'});
               return;
             }
             if (!$rootScope.activeCluster.areCredentialsSet()) {
@@ -400,13 +400,13 @@ angular.module('karamel-main.module')
               if (updatedCluster) {
                 $rootScope.activeCluster.ec2 = updatedCluster.ec2;
                 $rootScope.activeCluster.sshKeyPair = updatedCluster.sshKeyPair;
-                BrowserCacheService.updateCache();
+                cacheService.updateCache();
 
                 if (isLaunch) {
                   _launchCluster();
                 }
               } else if (!$rootScope.activeCluster.areCredentialsSet()) {
-                AlertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
+                alertService.addAlert({type: 'warning', msg: 'Credentials Invalid.'});
               }
             });
           }

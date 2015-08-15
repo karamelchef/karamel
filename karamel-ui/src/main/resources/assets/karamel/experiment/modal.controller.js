@@ -1,8 +1,8 @@
 'use strict';
 
-angular.module('karamel-main.module')
-    .controller('modal.controller', ['$modalInstance', '$scope', 'title', 'msg',
-      function ($modalInstance, $scope, title, msg) {
+angular.module('main.module')
+    .controller('modal.controller', ['$modalInstance', 'title', 'msg',
+      function ($modalInstance, title, msg) {
 
         var self = this;
         self.title = title;

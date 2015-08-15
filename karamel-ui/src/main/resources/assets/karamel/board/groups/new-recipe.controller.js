@@ -1,5 +1,5 @@
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
   .controller('new-recipe.controller', ['$scope', '$log', '$modalInstance', 'group', 'core-rest.service',
     function($scope, $log, $modalInstance, group, coreService) {
 

@@ -1,7 +1,7 @@
 /*jshint undef: false, unused: false, indent: 2*/
 /*global angular: false */
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
     .service('cookbook-manipulation.service', ['$log', function($log) {
         return {
           prepareCookbookMetaData: function(scopeCookbook, defaultCookbook) {

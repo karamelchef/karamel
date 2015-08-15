@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel.terminal')
+angular.module('terminal.module')
   .factory('experiment.factory', ['$window', function($window) {
       return {
         clear: function() {

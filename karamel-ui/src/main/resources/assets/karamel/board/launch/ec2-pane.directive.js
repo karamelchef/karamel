@@ -1,4 +1,4 @@
-angular.module('karamel-main.module')
+angular.module('main.module')
   .directive('launchEc2Pane', ['$log', 'core-rest.service', function($log, coreService) {
       return{
         restrict: 'E',

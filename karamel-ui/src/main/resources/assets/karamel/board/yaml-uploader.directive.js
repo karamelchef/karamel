@@ -3,10 +3,10 @@
 
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .directive('yamlUploader', ['$log', '$rootScope', 'core-rest.service',
-      'AlertService', 'BrowserCacheService',
-      function($log, $rootScope, coreService, AlertService, BrowserCacheService) {
+      'alert.service', 'browser-cache.service',
+      function($log, $rootScope, coreService, alertService, cacheService) {
         return{
           restrict: 'A',
           link: function(scope, element, attributes) {
@@ -18,7 +18,7 @@ angular.module('karamel-main.module')
                   yml: loadEvent.target.result
                 };
                 $log.info("Requesting Karamel Core Services for JSON. ");
-                BrowserCacheService.resetCache();
+                cacheService.resetCache();
                 coreService.getJsonFromYaml(ymlJson)
                     .success(function(data, status, headers, config) {
                       $log.info("Success");
@@ -28,18 +28,18 @@ angular.module('karamel-main.module')
                         cluster.load(data);
                         $rootScope.activeCluster = cluster;
                         $rootScope.context = cluster.name;
-                        AlertService.addAlert({type: 'success', msg: 'Model Created Successfully.'});
+                        alertService.addAlert({type: 'success', msg: 'Model Created Successfully.'});
                       }
                       catch (err) {
                         $log.error(err);
-                        AlertService.addAlert({type: 'danger', msg: 'Unable to parse json from core.'});
+                        alertService.addAlert({type: 'danger', msg: 'Unable to parse json from core.'});
                       }
 
                       $log.info($rootScope.activeCluster);
                     })
                     .error(function(data, status, headers, config) {
                       $log.info("Fetch Call Failed.");
-                      AlertService.addAlert({type: 'danger', msg: 'Core: ' + data.message});
+                      alertService.addAlert({type: 'danger', msg: 'Core: ' + data.message});
                     });
 
                 element.val("");

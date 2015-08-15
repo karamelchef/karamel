@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel.terminal')
+angular.module('terminal.module')
   .service('github.service', ['$log', 'md5', 'core-rest.service', function($log, md5, coreService) {
 
       var self = this;

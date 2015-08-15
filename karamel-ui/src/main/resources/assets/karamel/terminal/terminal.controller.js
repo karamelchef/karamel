@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel.terminal', [])
+angular.module('terminal.module', [])
 
   .controller('terminal.controller', ['$log', '$rootScope', '$scope',
     '$interval', '$timeout', 'core-rest.service',

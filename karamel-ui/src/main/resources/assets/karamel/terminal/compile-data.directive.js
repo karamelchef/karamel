@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel.terminal', [])
+angular.module('terminal.module', [])
   .directive('compileData', ['$compile', function($compile) {
       return {
         restrict: 'A',

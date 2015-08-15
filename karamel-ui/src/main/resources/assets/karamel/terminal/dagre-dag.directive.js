@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel.terminal', [])
+angular.module('terminal.module', [])
   .directive('dagreDag', [function() {
       return {
         restrict: "A",

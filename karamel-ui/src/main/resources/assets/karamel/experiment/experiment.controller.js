@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .controller('experiment.controller', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'core-rest.service',
       'github.service', 'modal.factory', 'experiment.factory',
       function ($log, $scope, $rootScope, $timeout, SweetAlert, coreService, githubService, ModalFactory,

@@ -1,4 +1,4 @@
-angular.module('karamel.shell.emulator', ['karamel.terminal'])
+angular.module('shell-emulator.module', ['terminal.module'])
 
   .provider('shell-config.provider', function() {
 

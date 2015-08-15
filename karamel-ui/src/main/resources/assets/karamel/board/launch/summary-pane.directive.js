@@ -1,4 +1,4 @@
-angular.module('karamel-main.module')
+angular.module('main.module')
   .directive('launchSummaryPane', ['$log', function($log) {
       return{
         restrict: 'E',

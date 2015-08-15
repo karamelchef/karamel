@@ -1,7 +1,7 @@
 /*jshint undef: false, unused: false, indent: 2*/
 /*global angular: false */
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
     .directive('commonTabs', ['$log', function($log) {
         // Help tabs toggle between hide and show.
         return {

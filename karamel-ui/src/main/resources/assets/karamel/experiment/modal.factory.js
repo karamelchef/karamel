@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .factory('modal.factory', ['$modal', function ($modal) {
         return {
           confirm: function (size, title, msg) {

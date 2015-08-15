@@ -20,7 +20,7 @@
 
 
 </head>
-<body ng-app="karamel-main.module">
+<body ng-app="main.module">
   <!--angular-->
   <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
@@ -36,10 +36,12 @@
   <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
   <!-- main module -->
-  <script type="text/javascript" src="karamel/karamel-main.module.js"></script>
+  <script type="text/javascript" src="karamel/main.module.js"></script>
   <script type="text/javascript" src="karamel/core-rest.service.js"></script>
   <script type="text/javascript" src="karamel/datamodel.js"></script>
-
+  <script type="text/javascript" src="karamel/alert.controller.js"></script>
+  <script type="text/javascript" src="karamel/alert.service.js"></script>
+  <script type="text/javascript" src="karamel/browser-cache.service.js"></script>
 
   <!-- board module -->
   <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
@@ -90,7 +92,7 @@
   <script type="text/javascript" src="karamel/thirdparties/d3/d3.v3.min.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/d3/dagre-d3.js"></script>
 
-  <div class="notifications" ng-controller="MainCtrl">
+  <div class="notifications" ng-controller="alert.controller">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
   </div>
 

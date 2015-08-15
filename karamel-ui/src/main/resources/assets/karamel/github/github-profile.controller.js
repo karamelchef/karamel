@@ -1,6 +1,6 @@
 'use strict'
 
-angular.module('karamel-main.module')
+angular.module('main.module')
   .controller('github-profile.controller', ['$scope', '$log', '$modalInstance', 'core-rest.service', 'github.service',
     function($scope, $log, $modalInstance, coreService, githubService) {
       var self = this;

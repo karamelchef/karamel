@@ -1,4 +1,4 @@
-angular.module('karamel-main.module')
+angular.module('main.module')
     .controller('launch.controller', ['$log', '$scope', '$modalInstance', 'info', function($log, $scope, $modalInstance, info) {
 
         function _initScope(scope) {

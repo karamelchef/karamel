@@ -1,5 +1,5 @@
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
     .directive('duplicateRecipe', ['$log', function($log) {
         return{
           require: "ngModel",

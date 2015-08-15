@@ -4,7 +4,7 @@
 
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .controller('group-editor.controller', ['$scope', '$modalInstance', 'groupInfo', function($scope, $modalInstance, groupInfo) {
 
         function initScope(scope) {

@@ -1,4 +1,4 @@
-angular.module('karamel.shell.emulator', ['karamel.terminal'])
+angular.module('shell-emulator.module', ['terminal.module'])
   .service('prompt-creator.service', [function() {
       var prompt = function(config) {
         var me = {};

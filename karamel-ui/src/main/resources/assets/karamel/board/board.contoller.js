@@ -3,10 +3,10 @@
 
 'use strict';
 
-angular.module('karamel-main.module')
-    .controller('board.controller', ['$rootScope', '$log', '$scope', 'board.service', '$window', 'AlertService',
+angular.module('main.module')
+    .controller('board.controller', ['$rootScope', '$log', '$scope', 'board.service', '$window', 'alert.service',
       '$location',
-      function($rootScope, $log, $scope, BoardService, $window, AlertService, $location) {
+      function($rootScope, $log, $scope, BoardService, $window, alertService, $location) {
         var self = this;
 
         $scope.bs = BoardService;
@@ -23,15 +23,15 @@ angular.module('karamel-main.module')
                 cluster.copy(clusterObj);
                 $rootScope.activeCluster = cluster;
                 $rootScope.context = cluster.name;
-                AlertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
+                alertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
               }
               catch (err) {
                 $log.error(err);
-                AlertService.addAlert({type: 'danger', msg: 'Unable to parse the json to generate model.'});
+                alertService.addAlert({type: 'danger', msg: 'Unable to parse the json to generate model.'});
               }
             }
             else {
-              AlertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
+              alertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
             }
           }
           else {

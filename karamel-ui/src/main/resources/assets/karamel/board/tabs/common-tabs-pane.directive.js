@@ -1,7 +1,7 @@
 /*jshint undef: false, unused: false, indent: 2*/
 /*global angular: false */
 'use strict';
-angular.module('karamel-main.module')
+angular.module('main.module')
     .directive('commonTabsPane', ['$log', 'core-rest.service', 'cookbook-manipulation.service', 
     function($log, coreService, cbService) {
 

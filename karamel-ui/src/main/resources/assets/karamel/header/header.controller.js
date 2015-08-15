@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('karamel-main.module')
+angular.module('main.module')
     .controller('header.controller', ['$timeout', '$scope', '$rootScope', 'board.service', 'core-rest.service',
       function ($timeout, $scope, $rootScope, BoardService, coreService) {
 

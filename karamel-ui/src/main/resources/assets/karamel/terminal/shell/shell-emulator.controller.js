@@ -1,4 +1,4 @@
-angular.module('karamel.shell.emulator', ['karamel.terminal'])
+angular.module('shell-emulator.module', ['terminal.module'])
   .controller('shell-emulator.contoller', ['$scope', '$log', 'shell-config.provider', 'prompt-creator.service',
     function($scope, $log, terminalConfiguration, promptCreator) {
 
