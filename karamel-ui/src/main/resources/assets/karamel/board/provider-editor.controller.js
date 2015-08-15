@@ -1,5 +1,5 @@
 angular.module('karamel-main.module')
-    .controller('provider.editor', ['$log', '$scope', '$modalInstance', 'info', function($log, $scope, $modalInstance, info) {
+    .controller('provider-editor.controller', ['$log', '$scope', '$modalInstance', 'info', function($log, $scope, $modalInstance, info) {
 
         function _initScope(scope) {
           scope.ec2 = new Ec2();

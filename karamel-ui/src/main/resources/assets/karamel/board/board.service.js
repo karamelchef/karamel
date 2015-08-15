@@ -280,8 +280,8 @@ angular.module('karamel-main.module')
           },
           configureGlobalProvider: function() {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-provider.html",
-              controller: "provider.editor",
+              templateUrl: "karamel/partials/provider-editor.html",
+              controller: "provider-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
                 info: function() {
@@ -304,8 +304,8 @@ angular.module('karamel-main.module')
           },
           configureGroupProvider: function(group) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-provider.html",
-              controller: "provider.editor",
+              templateUrl: "karamel/partials/provider-editor.html",
+              controller: "provider-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
                 info: function() {
