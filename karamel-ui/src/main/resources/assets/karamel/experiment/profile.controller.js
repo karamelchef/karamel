@@ -1,8 +1,8 @@
 'use strict'
 
 angular.module('karamel-main.module')
-    .controller('profile.controller', ['$scope', '$log', '$modalInstance', 'KaramelCoreRestServices', 'GithubService',
-      function ($scope, $log, $modalInstance, KaramelCoreRestServices, GithubService) {
+    .controller('profile.controller', ['$scope', '$log', '$modalInstance', 'core-rest.service', 'GithubService',
+      function ($scope, $log, $modalInstance, coreService, GithubService) {
         var self = this;
         $scope.isLoggedIn = false;
 
@@ -16,7 +16,7 @@ angular.module('karamel-main.module')
         };
 
         self.login = function () {
-          KaramelCoreRestServices.setGithubCredentials($scope.github.githubCredentials.user,
+          coreService.setGithubCredentials($scope.github.githubCredentials.user,
               $scope.github.githubCredentials.password)
               .success(function (data, status, headers, config) {
                 $scope.github.githubCredentials.user = data.user;

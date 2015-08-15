@@ -4,9 +4,9 @@
 'use strict';
 
 angular.module('karamel-main.module')
-    .service('board.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'KaramelCoreRestServices', 
+    .service('board.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'core-rest.service', 
   'BrowserCacheService', 'AlertService',
-      function(SweetAlert, $log, $modal, $location, $rootScope, KaramelCoreRestServices, 
+      function(SweetAlert, $log, $modal, $location, $rootScope, coreService, 
       BrowserCacheService, AlertService) {
 
         var self = this;
@@ -36,7 +36,7 @@ angular.module('karamel-main.module')
           var data = {
             json: angular.toJson(coreFormatCluster)
           };
-          KaramelCoreRestServices.startCluster(data)
+          coreService.startCluster(data)
               .success(function(data, status, headers, config) {
                 $log.info("Connection Successful.");
                 AlertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
@@ -180,7 +180,7 @@ angular.module('karamel-main.module')
               closeOnCancel: false},
             function(isConfirm) {
               if (isConfirm) {
-                KaramelCoreRestServices.exitKaramel()
+                coreService.exitKaramel()
                     .success(function(data, status, headers, config) {
                       SweetAlert.swal("Shutdown", "Karamel engine has shutdown. Close your browser window.", "info");
                     })
@@ -195,7 +195,7 @@ angular.module('karamel-main.module')
           },
           sudoPassword: function(password) {
 
-            KaramelCoreRestServices.sudoPassword(password)
+            coreService.sudoPassword(password)
                 .success(function(data, status, headers, config) {
                   $log.info("Sudo password updated.");
                 })

@@ -1,5 +1,5 @@
 angular.module('karamel-main.module')
-  .directive('launchSshPane', ['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices) {
+  .directive('launchSshPane', ['$log', 'core-rest.service', function($log, coreService) {
       return{
         restrict: 'E',
 //            transclude: true,
@@ -83,7 +83,7 @@ angular.module('karamel-main.module')
 
               if (scope.bootUp) {
                 $log.info("ssh - first time try.");
-                KaramelCoreRestServices.loadSshKeys(scope.sshKeyPair.passphrase)
+                coreService.loadSshKeys(scope.sshKeyPair.passphrase)
                   .success(function(data) {
                     $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                     scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
@@ -105,7 +105,7 @@ angular.module('karamel-main.module')
 
 
           scope.generateKeys = function() {
-            KaramelCoreRestServices.generateSshKeys()
+            coreService.generateSshKeys()
               .success(function(data) {
                 $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
@@ -120,7 +120,7 @@ angular.module('karamel-main.module')
           };
 
           scope.registerKeys = function() {
-            KaramelCoreRestServices.registerSshKeys(scope.sshKeyPair)
+            coreService.registerSshKeys(scope.sshKeyPair)
               .success(function(data) {
                 $log.info("ssh data is:" + data.publicKeyPath + "," + data.privateKeyPath);
                 scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
@@ -137,7 +137,7 @@ angular.module('karamel-main.module')
           };
 
           scope.registerSudoPassword = function() {
-            KaramelCoreRestServices.sudoPassword(scope.sudoAccount)
+            coreService.sudoPassword(scope.sudoAccount)
               .success(function(data) {
                 _updateState('success', scope.sshKeyObj);
                 scope.sudoPasswordEnabled = true;

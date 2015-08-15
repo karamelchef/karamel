@@ -1,5 +1,5 @@
 angular.module('karamel-main.module')
-  .directive('launchGcePane', ['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices) {
+  .directive('launchGcePane', ['$log', 'core-rest.service', function($log, coreService) {
       return{
         restrict: 'E',
         require: "^launchTabs",
@@ -71,7 +71,7 @@ angular.module('karamel-main.module')
               $log.info('provider pane selected.');
 
               if (scope.bootUp) {
-                KaramelCoreRestServices.loadGceCredentials()
+                coreService.loadGceCredentials()
                   .success(function(data) {
                     scope.account.jsonKeyPath = data.jsonKeyPath;
                     _updateState('specialWarn', scope.gce);
@@ -92,7 +92,7 @@ angular.module('karamel-main.module')
           scope.validateGceCredentials = function() {
 
             if (scope.account.jsonKeyPath !== null) {
-              KaramelCoreRestServices.validateGceCredentials(scope.account)
+              coreService.validateGceCredentials(scope.account)
                 .success(function(data) {
                   _updateState('success', scope.gce);
                 })

@@ -4,9 +4,9 @@
 'use strict';
 
 angular.module('karamel-main.module')
-    .directive('yamlUploader', ['$log', '$rootScope', 'KaramelCoreRestServices',
+    .directive('yamlUploader', ['$log', '$rootScope', 'core-rest.service',
       'AlertService', 'BrowserCacheService',
-      function($log, $rootScope, KaramelCoreRestServices, AlertService, BrowserCacheService) {
+      function($log, $rootScope, coreService, AlertService, BrowserCacheService) {
         return{
           restrict: 'A',
           link: function(scope, element, attributes) {
@@ -19,7 +19,7 @@ angular.module('karamel-main.module')
                 };
                 $log.info("Requesting Karamel Core Services for JSON. ");
                 BrowserCacheService.resetCache();
-                KaramelCoreRestServices.getJsonFromYaml(ymlJson)
+                coreService.getJsonFromYaml(ymlJson)
                     .success(function(data, status, headers, config) {
                       $log.info("Success");
 

@@ -3,8 +3,8 @@
 angular.module('karamel.terminal', [])
 
   .controller('terminal.controller', ['$log', '$rootScope', '$scope',
-    '$interval', '$timeout', 'KaramelCoreRestServices',
-    function($log, $rootScope, $scope, $interval, $timeout, KaramelCoreRestServices) {
+    '$interval', '$timeout', 'core-rest.service',
+    function($log, $rootScope, $scope, $interval, $timeout, coreService) {
 
       function initScope(scope) {
         scope.commandObj = [];
@@ -125,7 +125,7 @@ angular.module('karamel.terminal', [])
           result: cmdArg
         };
 
-        KaramelCoreRestServices.processCommand(obj)
+        coreService.processCommand(obj)
 
           .success(function(data) {
             $scope.commandObj[index].errormsg = data.errormsg;

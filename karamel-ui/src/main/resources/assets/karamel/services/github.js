@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('karamel.terminal')
-    .service('GithubService', ['$log', 'md5', 'KaramelCoreRestServices', function ($log, md5, KaramelCoreRestServices) {
+    .service('GithubService', ['$log', 'md5', 'core-rest.service', function ($log, md5, coreService) {
 
         var self = this;
 
@@ -31,7 +31,7 @@ angular.module('karamel.terminal')
 
 
         self.getCredentials = function () {
-          KaramelCoreRestServices.getGithubCredentials()
+          coreService.getGithubCredentials()
               .success(function (data, status, headers, config) {
                 self.githubCredentials.user = data.user;
                 self.githubCredentials.password = data.password;
@@ -50,7 +50,7 @@ angular.module('karamel.terminal')
         }
 
         self.getOrgs = function () {
-          KaramelCoreRestServices.getGithubOrgs()
+          coreService.getGithubOrgs()
               .success(function (data, status, headers, config) {
                 for (var i = 0, len = data.length; i < len; i++) {
                   self.orgs[i] = {
@@ -64,7 +64,7 @@ angular.module('karamel.terminal')
               });
         };
         self.getRepos = function () {
-          return KaramelCoreRestServices.getGithubRepos(self.org.name)
+          return coreService.getGithubRepos(self.org.name)
               .success(function (data, status, headers, config) {
                 $log.info("GitHub Repos found: " + data.length);
                 for (var i = 0, len = data.length; i < len; i++) {

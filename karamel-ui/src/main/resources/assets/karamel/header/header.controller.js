@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('karamel-main.module')
-    .controller('header.controller', ['$timeout', '$scope', '$rootScope', 'board.service', 'KaramelCoreRestServices',
-      function ($timeout, $scope, $rootScope, BoardService, KaramelCoreRestServices) {
+    .controller('header.controller', ['$timeout', '$scope', '$rootScope', 'board.service', 'core-rest.service',
+      function ($timeout, $scope, $rootScope, BoardService, coreService) {
 
         var self = this;
 
@@ -35,7 +35,7 @@ angular.module('karamel-main.module')
         }
 
         function pingServer() {
-          KaramelCoreRestServices.ping()
+          coreService.ping()
               .success(function (data, status, headers, config) {
                 $rootScope.connected = true;
                 restartTimer();

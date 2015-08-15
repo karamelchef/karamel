@@ -1,5 +1,5 @@
 angular.module('karamel-main.module')
-  .directive('launchEc2Pane', ['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices) {
+  .directive('launchEc2Pane', ['$log', 'core-rest.service', function($log, coreService) {
       return{
         restrict: 'E',
         require: "^launchTabs",
@@ -72,7 +72,7 @@ angular.module('karamel-main.module')
               $log.info('provider pane selected.');
 
               if (scope.bootUp) {
-                KaramelCoreRestServices.loadEc2Credentials()
+                coreService.loadEc2Credentials()
                   .success(function(data) {
                     scope.account.accessKey = data.accessKey;
                     scope.account.secretKey = data.secretKey;
@@ -94,7 +94,7 @@ angular.module('karamel-main.module')
           scope.validateEc2Credentials = function() {
 
             if (scope.account.accessKey != null && scope.account.secretKey != null) {
-              KaramelCoreRestServices.validateEc2Credentials(scope.account)
+              coreService.validateEc2Credentials(scope.account)
                 .success(function(data) {
                   _updateState('success', scope.ec2);
                 })

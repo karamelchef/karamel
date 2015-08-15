@@ -2,7 +2,7 @@
 /*global angular: false */
 'use strict';
 angular.module('karamel-main.module')
-    .directive('commonTabsPane', ['$log', 'KaramelCoreRestServices', 'cookbook-manipulation.service', 
+    .directive('commonTabsPane', ['$log', 'core-rest.service', 'cookbook-manipulation.service', 
     function($log, coreService, cbService) {
 
         return{

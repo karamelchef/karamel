@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('karamel-main.module')
-    .controller('experiment.controller', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'KaramelCoreRestServices',
+    .controller('experiment.controller', ['$log', '$scope', '$rootScope', '$timeout', 'SweetAlert', 'core-rest.service',
       'GithubService', 'modal.factory', 'ExperimentsService',
-      function ($log, $scope, $rootScope, $timeout, SweetAlert, KaramelCoreRestServices, GithubService, ModalFactory,
+      function ($log, $scope, $rootScope, $timeout, SweetAlert, coreService, GithubService, ModalFactory,
           ExperimentsService) {
 
         var self = this;
@@ -221,7 +221,7 @@ angular.module('karamel-main.module')
 
               for (var i = 0; i < $scope.experiment.code.length; i++) {
                 if ($scope.experiment.code[i].name === experimentName) {
-                  KaramelCoreRestServices.removeFileFromExperiment($scope.gs.org.name, $scope.gs.repo.name, experimentName)
+                  coreService.removeFileFromExperiment($scope.gs.org.name, $scope.gs.repo.name, experimentName)
                       .success(function (data, status, headers, config) {
                         $scope.experiment.code.splice(i, 1);
                         SweetAlert.swal("Deleted", experimentName + " has been deleted.", "success");
@@ -322,10 +322,10 @@ angular.module('karamel-main.module')
           function (isConfirm) {
             if (isConfirm) {
               // delete local clone of Repo
-              KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
+              coreService.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
                   .success(function (data, status, headers, config) {
                     // delete Repo on GitHub
-                    KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
+                    coreService.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, true)
                         .success(function (data, status, headers, config) {
                           // Core Rest Services
                           // delete Browser LocalStorage
@@ -359,7 +359,7 @@ angular.module('karamel-main.module')
             closeOnCancel: false},
           function (isConfirm) {
             if (isConfirm) {
-              KaramelCoreRestServices.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
+              coreService.removeRepo($scope.experiment.githubOwner, $scope.experiment.githubRepo, true, false)
                   .success(function (data, status, headers, config) {
                     // Core Rest Services
                     clearExperiment();
@@ -502,7 +502,7 @@ angular.module('karamel-main.module')
 
         $scope.loadExperiment = function () {
 
-          KaramelCoreRestServices.loadExperiment($scope.experiment.urlGitClone)
+          coreService.loadExperiment($scope.experiment.urlGitClone)
               .success(function (data, status, headers, config) {
 
                 if (angular.isDefined(data)) {
@@ -520,7 +520,7 @@ angular.module('karamel-main.module')
         $scope.pushExperiment = function ($event) {
           $event.preventDefault();
 
-          KaramelCoreRestServices.pushExperiment($scope.experiment)
+          coreService.pushExperiment($scope.experiment)
               .success(function (data, status, headers, config) {
                 $scope.status.isModified = false;
               })
