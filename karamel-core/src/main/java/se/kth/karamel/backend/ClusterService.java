@@ -213,7 +213,7 @@ public class ClusterService {
     return validatedContext;
   }
 
-  public void registerNovaContext(NovaContext context) {
+  public synchronized void registerNovaContext(NovaContext context) {
     commonContext.setNovaContext(context);
   }
 }
