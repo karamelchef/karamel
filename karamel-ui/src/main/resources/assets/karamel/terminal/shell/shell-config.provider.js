@@ -1,4 +1,4 @@
-angular.module('shell-emulator.module', ['terminal.module'])
+angular.module('shell-emulator.module')
 
   .provider('shell-config.provider', function() {
 

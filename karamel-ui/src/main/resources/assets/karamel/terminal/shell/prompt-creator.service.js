@@ -1,4 +1,4 @@
-angular.module('shell-emulator.module', ['terminal.module'])
+angular.module('shell-emulator.module')
   .service('prompt-creator.service', [function() {
       var prompt = function(config) {
         var me = {};

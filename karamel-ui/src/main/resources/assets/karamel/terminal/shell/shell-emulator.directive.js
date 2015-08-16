@@ -1,4 +1,4 @@
-angular.module('shell-emulator.module', ['terminal.module'])
+angular.module('shell-emulator.module')
   .directive('shellEmulator', function($document) {
     return {
       restrict: 'E',
