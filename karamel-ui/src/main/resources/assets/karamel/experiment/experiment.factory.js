@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('terminal.module')
+angular.module('main.module')
   .factory('experiment.factory', ['$window', function($window) {
       return {
         clear: function() {

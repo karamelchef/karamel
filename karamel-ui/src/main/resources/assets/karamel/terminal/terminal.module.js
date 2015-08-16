@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('terminal.module', []);
+angular.module('terminal.module', ['main.module']);

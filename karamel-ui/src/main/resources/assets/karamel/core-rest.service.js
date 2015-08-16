@@ -1,4 +1,4 @@
-angular.module('terminal.module')
+angular.module('main.module')
   .service('core-rest.service', ['$log', '$http', '$location', function($log, $http, $location) {
 
       // Return the promise object to the users.
