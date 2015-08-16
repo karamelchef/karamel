@@ -23,9 +23,23 @@ import se.kth.karamel.backend.launcher.nova.NovaLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.running.model.serializers.*;
-import se.kth.karamel.backend.running.model.tasks.*;
-import se.kth.karamel.common.*;
+import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
+import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.ShellCommandSerializer;
+import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
+import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
+import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.backend.running.model.tasks.ShellCommand;
+import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
+import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.NovaCredentials;
+import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.SshKeyService;
 import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.settings.NovaSetting;
@@ -121,7 +135,8 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
-    NovaContext context = NovaLauncher.validateCredentials(credentials, ContextBuilder.newBuilder(new NovaApiMetadata()));
+    NovaContext context = NovaLauncher.validateCredentials(credentials,
+                                                            ContextBuilder.newBuilder(new NovaApiMetadata()));
     Confs confs = Confs.loadKaramelConfs();
     confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY, credentials.getAccountName());
     confs.put(NovaSetting.NOVA_ACCESSKEY_KEY, credentials.getAccountPass());

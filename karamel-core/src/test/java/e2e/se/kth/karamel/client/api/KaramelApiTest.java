@@ -262,6 +262,8 @@ public class KaramelApiTest {
     String expectedString = Resources.toString(Resources.getResource("se/kth/hop/json/flink_nova.json"), Charsets.UTF_8);
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
+    System.out.println(expectedString);
+    System.out.println(json);
     assertTrue(expectedString.equals(json));
   }
   //@Test

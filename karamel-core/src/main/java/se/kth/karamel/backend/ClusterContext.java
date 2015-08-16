@@ -11,6 +11,7 @@ import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.client.model.Ec2;
 import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.Nova;
 import se.kth.karamel.client.model.Provider;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonGroup;
@@ -120,11 +121,10 @@ public class ClusterContext {
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2 && context.getEc2Context() == null) {
         throw new KaramelException("No valid Ec2 credentials registered :-|");
-      }
-      if (provider instanceof Ec2 && context.getEc2Context() == null) {
-        throw new KaramelException("No valid Ec2 credentials registered :-|");
       } else if (provider instanceof Gce && context.getGceContext() == null) {
         throw new KaramelException("No valid Gce credentials registered :-|");
+      } else if (provider instanceof Nova && context.getNovaContext() == null){
+        throw new KaramelException("No valid Nova credentials registered :-|");
       }
     }
 
