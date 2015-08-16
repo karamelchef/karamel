@@ -6,19 +6,18 @@
 package se.kth.karamel.client.model.yaml;
 
 import com.google.common.collect.Lists;
-import java.util.HashMap;
-import java.util.List;
-import se.kth.karamel.client.model.Ec2;
-import java.util.Map;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.Cookbook;
-import se.kth.karamel.client.model.Gce;
+import se.kth.karamel.client.model.*;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.exception.MetadataParseException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -108,6 +107,12 @@ public class YamlTest {
     assertEquals("n1-standard-1", provider5.getType());
     assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
     assertEquals("europe-west1-b", provider5.getZone());
+
+    Nova provider6 = (Nova) groups.get("novavms").getProvider();
+    assertEquals("1", provider6.getFlavor());
+    assertEquals("ubuntu-1404", provider6.getImage());
+    assertEquals("regionSICS", provider6.getRegion());
+    assertEquals("10.20.40.30", provider6.getEndpoint());
   }
 
   @Test
