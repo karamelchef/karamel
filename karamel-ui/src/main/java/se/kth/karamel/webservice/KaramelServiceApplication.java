@@ -24,15 +24,17 @@ import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
+import se.kth.karamel.webservicemodel.Ec2JSON;
+import se.kth.karamel.webservicemodel.GceJson;
 import se.kth.karamel.webservicemodel.GithubCredentialsJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardYaml;
-import se.kth.karamel.webservicemodel.Ec2JSON;
-import se.kth.karamel.webservicemodel.GceJson;
+import se.kth.karamel.webservicemodel.NovaJSON;
 import se.kth.karamel.webservicemodel.ScaffoldJSON;
 import se.kth.karamel.webservicemodel.SshKeyJSON;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
@@ -281,7 +283,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class
     ), true, "/*");
     filter.setInitParameter(
-        "allowedOrigins", "*"); // allowed origins comma separated
+            "allowedOrigins", "*"); // allowed origins comma separated
     filter.setInitParameter(
         "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
     filter.setInitParameter(
@@ -307,6 +309,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Gce.Load());
     environment.jersey().register(new Gce.Validate());
+    environment.jersey().register(new Nova.Load());
+    environment.jersey().register(new Nova.Validate());
     environment.jersey().register(new Cluster.StartCluster());
     environment.jersey().register(new Scaffolder.ScaffoldCluster());
     environment.jersey().register(new Command.CheatSheet());
@@ -582,7 +586,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
 
         Logger.getLogger(KaramelServiceApplication.class.getName()).log(Level.FINEST,
-            " Received request to process a command with info: {0}", command.getCommand());
+                " Received request to process a command with info: {0}", command.getCommand());
         try {
           CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
           command.setResult(cmdRes.getResult());
@@ -733,6 +737,79 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     }
   }
+
+  public static class Nova {
+
+    @Path("/nova/loadCredentials")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Load {
+
+      @PUT
+      public Response loadCredentials() {
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+                log(Level.INFO, " Received request to load the ec2 credentials.");
+        try {
+          NovaCredentials credentials = karamelApiHandler.loadNovaCredentialsIfExist();
+          NovaJSON provider = new NovaJSON();
+          provider.setAccountName((credentials == null) ? "" : credentials.getAccountName());
+          provider.setAccountPass((credentials == null) ? "" : credentials.getAccountPass());
+          provider.setEndpoint((credentials == null) ? "" : credentials.getEndpoint());
+          provider.setRegion((credentials == null) ? "" : credentials.getRegion());
+
+          response = Response.status(Response.Status.OK).entity(provider).build();
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                  entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+
+    @Path("/nova/validateCredentials")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public static class Validate {
+
+      /**
+       * Validating the Provider based on the supplied credentials..
+       *
+       * @param providerJSON
+       * @return
+       */
+      @PUT
+      public Response validateCredentials(NovaJSON providerJSON) {
+
+        Response response = null;
+        Logger.getLogger(KaramelServiceApplication.class.getName()).
+                log(Level.INFO, " Received request to validate the ec2 credentials.");
+
+        try {
+          NovaCredentials credentials = new NovaCredentials();
+          credentials.setAccountName(providerJSON.getAccountName());
+          credentials.setAccountPass(providerJSON.getAccountPass());
+          credentials.setEndpoint(providerJSON.getEndpoint());
+          credentials.setRegion(providerJSON.getRegion());
+          if (karamelApiHandler.updateNovaCredentialsIfValid(credentials)) {
+            response = Response.status(Response.Status.OK).
+                    entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+          } else {
+            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                    entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
+          }
+
+        } catch (KaramelException e) {
+          e.printStackTrace();
+          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
+                  entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
+        }
+        return response;
+      }
+    }
+  }
+
 
   /**
    * Place holder class dealing with separate cluster state handling.
