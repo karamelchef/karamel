@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('terminal.module')
+angular.module('main.module')
 
   .controller('terminal.controller', ['$log', '$rootScope', '$scope',
     '$interval', '$timeout', 'core-rest.service',

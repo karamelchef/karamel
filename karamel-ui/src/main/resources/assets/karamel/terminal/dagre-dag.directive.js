@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('terminal.module', [])
+angular.module('main.module')
   .directive('dagreDag', [function() {
       return {
         restrict: "A",
