@@ -26,8 +26,8 @@ angular.module('main.module')
 
               if (scope.selected) {
 
-                if (scope.cookbook && scope.cookbook.github) {
-                  scope.urlInfo = scope.cookbook.github;
+                if (scope.cookbook) {
+                  scope.urlInfo = scope.cookbook.id;
                 }
 
                 if (scope.urlInfo) {

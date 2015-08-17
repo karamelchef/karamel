@@ -21,7 +21,7 @@ angular.module('main.module')
           },
           profile: function (size) {
             var modalInstance = $modal.open({
-              templateUrl: 'karamel/experiment/github-profile.html',
+              templateUrl: 'karamel/github/github-profile.html',
               controller: 'github-profile.controller as ctrl',
               size: size,
               resolve: {

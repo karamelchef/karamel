@@ -128,7 +128,7 @@ public class ClusterDefinitionTest {
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
     assertTrue(cookbooks.containsKey("kagent"));
     Cookbook cookbook = cookbooks.get("kagent");
-    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, new HashMap<String, Object>());
+    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, "kagent", new HashMap<String, Object>());
     assertEquals("testorg/testrepo", jc.getKaramelizedCookbook().getUrls().orgRepo);
     assertEquals("cookbooks/kagent-chef", jc.getKaramelizedCookbook().getUrls().cookbookRelPath);
   }

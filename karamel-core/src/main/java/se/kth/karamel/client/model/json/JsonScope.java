@@ -37,7 +37,7 @@ public class JsonScope extends Scope {
     Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
     //filtering invalid(not defined in metadata.rb) attributes from yaml model
     for (Map.Entry<String, Cookbook> entry : cks) {
-      String key = entry.getKey();
+      String cbAlias = entry.getKey();
       Cookbook cb = entry.getValue();
 
       KaramelizedCookbook metadata = CookbookCache.get(cb.getUrls().id);
@@ -48,7 +48,7 @@ public class JsonScope extends Scope {
           validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
         }
       }
-      JsonCookbook jck = new JsonCookbook(cb.getUrls().id, validUsedAttrs);
+      JsonCookbook jck = new JsonCookbook(cb.getUrls().id, cbAlias, validUsedAttrs);
       cookbooks.add(jck);
     }
 

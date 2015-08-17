@@ -20,7 +20,7 @@ function Cluster() {
     var id = -1;
     // In this we can also override the equals method in the cookbook object and then call the equals method TODO :==============
     for (var i = 0; i < this.cookbooks.length; i++) {
-      if (this.cookbooks[i].name === cookbook.name) {
+      if (this.cookbooks[i].id === cookbook.id) {
         id = i;
       }
     }
@@ -33,7 +33,7 @@ function Cluster() {
 
   this.containsCookbook = function(cookbook) {
     for (var i = 0; i < this.cookbooks.length; i++) {
-      if (cookbook.id === this.cookbooks[i].name) {
+      if (cookbook.id === this.cookbooks[i].id) {
         return this.cookbooks[i];
       }
     }
@@ -412,6 +412,7 @@ Baremetal.prototype = Object.create(Provider.prototype);
 // ===========================================  COOKBOOKS ============================================== //
 function Cookbook() {
   this.id = null;
+  this.alias = null;
   this.attributes = {};
   this.recipes = [];
 
@@ -435,6 +436,7 @@ function Cookbook() {
   // Load data into the cookbook.
   this.load = function(other) {
     this.id = other.id;
+    this.alias = other.alias;
     this.attributes = other.attrs;          // FIX ME: Name discrepancy should not be there.
     this.cookbookHomeUrl = other.cookbookHomeUrl;
   };
@@ -442,6 +444,7 @@ function Cookbook() {
 
   this.copy = function(other) {
     this.id = other.id;
+    this.alias = other.alias;
     this.attributes = other.attributes;
     this.cookbookHomeUrl = other.cookbookHomeUrl;
 
@@ -685,6 +688,7 @@ function toCoreApiFormat(uiCluster) {
 
   function _Cookbook() {
     this.id = null;
+    this.alias = null;
     this.attrs = null;
 
     this.addRecipe = function(recipe) {
@@ -697,6 +701,7 @@ function toCoreApiFormat(uiCluster) {
 
     this.load = function(other) {
       this.id = other.id;
+      this.alias = other.alias;
       this.attrs = other.attributes;
       _addRecipes(this, other.recipes);
     }
