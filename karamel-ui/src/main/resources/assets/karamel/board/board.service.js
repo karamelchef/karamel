@@ -258,7 +258,7 @@ angular.module('main.module')
           },
           configureGlobalAttributes: function() {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/board/cookbooks/attributes.editor.html",
+              templateUrl: "karamel/board/cookbooks/attributes-editor.html",
               controller: "attributes-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
@@ -280,7 +280,7 @@ angular.module('main.module')
           },
           configureGlobalProvider: function() {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/provider-editor.html",
+              templateUrl: "karamel/board/provider/provider-editor.html",
               controller: "provider-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
@@ -304,7 +304,7 @@ angular.module('main.module')
           },
           configureGroupProvider: function(group) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/provider-editor.html",
+              templateUrl: "karamel/board/provider/provider-editor.html",
               controller: "provider-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
@@ -326,7 +326,7 @@ angular.module('main.module')
           },
           configureGroupAttributes: function(group) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/partials/editor-attributes.html",
+              templateUrl: "karamel/board/cookbooks/editor-attributes.html",
               controller: "attributes-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
