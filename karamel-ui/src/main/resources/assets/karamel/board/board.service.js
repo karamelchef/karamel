@@ -326,7 +326,7 @@ angular.module('main.module')
           },
           configureGroupAttributes: function(group) {
             var modalInstance = $modal.open({
-              templateUrl: "karamel/board/cookbooks/editor-attributes.html",
+              templateUrl: "karamel/board/cookbooks/attributes-editor.html",
               controller: "attributes-editor.controller as ctrl",
               backdrop: "static",
               resolve: {
