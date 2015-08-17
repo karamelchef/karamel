@@ -1,55 +1,106 @@
 'use strict';
 
 angular.module('main.module')
-    .controller('header.controller', ['$timeout', '$scope', '$rootScope', 'board.service', 'core-rest.service',
-      function ($timeout, $scope, $rootScope, BoardService, coreService) {
+  .controller('header.controller', ['SweetAlert', '$timeout', '$scope', '$rootScope', 'active-cluster.service', 'core-rest.service', '$location',
+    function(SweetAlert, $timeout, $scope, $rootScope, activeClusterService, coreService, $location) {
 
-        var self = this;
+      $rootScope.connected = true;
 
-        $rootScope.connected = true;
+      $scope.experimentActive = false;
 
-        $scope.hasEc2 = function () {
-          return BoardService.hasEc2();
-        };
+      $scope.setExperimentActive = function() {
+        $scope.experimentActive = true;
+      };
+      $scope.setExperimentInActive = function() {
+        $scope.experimentActive = false;
+      };
 
-        $scope.hasBaremetal = function () {
-          return BoardService.hasBaremetal();
-        };
+      $scope.hasEc2 = function() {
+        return activeClusterService.hasEc2();
+      };
 
-        $scope.hasProvider = function () {
-          return $scope.hasEc2() || $scope.hasBaremetal() ||
-              $scope.hasGce() || $scope.hasOpenStack();
-        };
+      $scope.hasBaremetal = function() {
+        return activeClusterService.hasBaremetal();
+      };
 
-        $scope.hasGce = function () {
-          return BoardService.hasGce();
-        };
+      $scope.hasProvider = function() {
+        return $scope.hasEc2() || $scope.hasBaremetal() ||
+          $scope.hasGce() || $scope.hasOpenStack();
+      };
 
-        $scope.hasOpenStack = function () {
-          return BoardService.hasOpenStack();
-        };
+      $scope.hasGce = function() {
+        return activeClusterService.hasGce();
+      };
 
+      $scope.hasOpenStack = function() {
+        return activeClusterService.hasOpenStack();
+      };
 
-        function restartTimer() {
-          self.currentTimeout = $timeout(pingServer, 20000);
-        }
+      $scope.switchToTerminal = function() {
+        $location.path('/terminal');
+      };
 
-        function pingServer() {
-          coreService.ping()
-              .success(function (data, status, headers, config) {
-                $rootScope.connected = true;
-                restartTimer();
+      $scope.switchToExperiment = function() {
+        $location.path('/experiment');
+      };
+
+      $scope.exitKaramel = function() {
+        activeClusterService.exitKaramel();
+      };
+
+      $scope.sudoPassword = function(password) {
+        activeClusterService.sudoPassword(password);
+      };
+
+      $scope.githubCredentials = function(email, password) {
+        activeClusterService.githubCredentials(email, password);
+      };
+      
+      $scope.exitKaramel = function() {
+        SweetAlert.swal({
+          title: "Shutdown Karamel engine?",
+          text: "The Karamel Engine will shutdown and ongoing deployments will be lost.",
+          type: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, exit Karamel!",
+          cancelButtonText: "Cancel",
+          closeOnConfirm: false,
+          closeOnCancel: false},
+        function(isConfirm) {
+          if (isConfirm) {
+            coreService.exitKaramel()
+              .success(function(data, status, headers, config) {
+                SweetAlert.swal("Shutdown", "Karamel engine has shutdown. Close your browser window.", "info");
               })
-              .error(function (data, status, headers, config) {
-                $rootScope.connected = false;
+              .error(function(data, status, headers, config) {
+                SweetAlert.swal("Error", "There was a problem shutting down the Karamel Engine. Maybe it was already shutdown?", "error");
               });
-        }
 
+          } else {
+            SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
+          }
+        });
+      };
 
-        function _initScope() {
-          restartTimer();
-        }
-        ;
+      function restartTimer() {
+        currentTimeout = $timeout(pingServer, 20000);
+      }
 
-        _initScope();
-      }])
+      function pingServer() {
+        coreService.ping()
+          .success(function(data, status, headers, config) {
+            $rootScope.connected = true;
+            restartTimer();
+          })
+          .error(function(data, status, headers, config) {
+            $rootScope.connected = false;
+          });
+      }
+
+      function _initScope() {
+        restartTimer();
+      }
+      ;
+
+      _initScope();
+    }])

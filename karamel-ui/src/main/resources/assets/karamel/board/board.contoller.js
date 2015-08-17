@@ -4,12 +4,12 @@
 'use strict';
 
 angular.module('main.module')
-    .controller('board.controller', ['$rootScope', '$log', '$scope', 'board.service', '$window', 'alert.service',
+    .controller('board.controller', ['$rootScope', '$log', '$scope', 'active-cluster.service', '$window', 'alert.service',
       '$location',
-      function($rootScope, $log, $scope, BoardService, $window, alertService, $location) {
+      function($rootScope, $log, $scope, activeClusterService, $window, alertService, $location) {
         var self = this;
 
-        $scope.bs = BoardService;
+        $scope.bs = activeClusterService;
 
 
         function initScope() {
@@ -42,76 +42,48 @@ angular.module('main.module')
 
 
         $scope.configureGlobalProvider = function() {
-          BoardService.configureGlobalProvider();
+          activeClusterService.configureGlobalProvider();
         };
         $scope.configureGlobalAttributes = function() {
-          BoardService.configureGlobalAttributes();
+          activeClusterService.configureGlobalAttributes();
         };
 
         $scope.editSshKeys = function() {
-          BoardService.editSshKeys();
+          activeClusterService.editSshKeys();
         };
 
         $scope.launchCluster = function() {
-          BoardService.launchCluster();
+          activeClusterService.launchCluster();
         };
-
-        $scope.switchToTerminal = function() {
-          $location.path('/terminal');
-        };
-
-        $scope.switchToExperiment = function() {
-          $location.path('/experiment');
-        };
-
-        $scope.exitKaramel = function() {
-          BoardService.exitKaramel();
-        };
-
-        $scope.sudoPassword = function(password) {
-          BoardService.sudoPassword(password);
-        };
-
-        $scope.githubCredentials = function(email, password) {
-          BoardService.githubCredentials(email, password);
-        };
-
 
         $scope.removeRecipe = function(group, cookbook, recipe) {
-          BoardService.removeRecipe(group, cookbook, recipe);
+          activeClusterService.removeRecipe(group, cookbook, recipe);
         };
 
         $scope.removeColumn = function(group) {
-          BoardService.removeGroup(group);
+          activeClusterService.removeGroup(group);
         };
 
         $scope.addNewRecipe = function(group) {
-          BoardService.addNewRecipe(group);
+          activeClusterService.addNewRecipe(group);
         };
 
         $scope.updateGroup = function(group) {
-          BoardService.updateGroupInfo(group);
+          activeClusterService.updateGroupInfo(group);
         };
 
         $scope.configureGroupAttributes = function(group) {
-          BoardService.configureGroupAttributes(group);
+          activeClusterService.configureGroupAttributes(group);
         };
 
         $scope.configureGroupProvider = function(group) {
-          BoardService.configureGroupProvider(group);
+          activeClusterService.configureGroupProvider(group);
         };
 
         $scope.addGroup = function() {
-          BoardService.addGroup();
+          activeClusterService.addGroup();
         };
-
-        self.setExperimentActive = function() {
-          return BoardService.setExperimentActive();
-        };
-        self.setExperimentInActive = function() {
-          return BoardService.setExperimentInActive();
-        };
-
+        
         initScope();
 
       }]);

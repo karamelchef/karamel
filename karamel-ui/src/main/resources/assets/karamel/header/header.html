@@ -1,5 +1,5 @@
 <nav class="navbar navbar-fixed-top headerbackground" role="navigation">
-  <div class="container-fluid" ng-controller="board.controller">
+  <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
         <span class="sr-only">Toggle navigation</span>
@@ -8,7 +8,7 @@
         <span class="icon-bar"></span>
       </button>
       <!-- You'll want to use a responsive image option so this logo looks good on devices - I recommend using something like retina.js (do a quick Google search for it and you'll find it) -->
-      <a class="navbar-brand logoFont" href="#/" ng-click="board.controller.setExperimentInActive()">Karamel</a>
+      <a class="navbar-brand logoFont" href="#/" ng-click="setExperimentInActive()">Karamel</a>
     </div>
 
     <!-- Collect the nav links, forms, and other content for toggling -->
@@ -23,7 +23,7 @@
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
             <li class="divider"></li>
-            <li class="custom-font"><a ng-click="switchToExperiment()" ng-click="board.controller.setExperimentActive()">Experiment</a> </li>
+            <li class="custom-font"><a ng-click="switchToExperiment()" ng-click="setExperimentActive()">Experiment</a> </li>
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="exitKaramel()">Exit</a> </li>
           </ul>
@@ -33,7 +33,6 @@
         <li><span/></li>
         <li><span/></li>
         <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
-          <!--<li  ng-show="activeCluster.activeProvider === 'ec2'">-->
           <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
         </li>
         <li ng-show="activeCluster.activeProvider.name === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
@@ -52,7 +51,7 @@
         <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
       </ul>
 
-      <ul class="nav navbar-nav navbar-left" ng-show="bs.experimentActive">
+      <ul class="nav navbar-nav navbar-left" ng-show="experimentActive">
         <li><span/></li>
         <li><span/></li>
         <li>

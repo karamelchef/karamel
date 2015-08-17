@@ -4,32 +4,10 @@
 'use strict';
 
 angular.module('main.module')
-    .service('board.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'core-rest.service', 
+    .service('active-cluster.service', ['SweetAlert', '$log', '$modal', '$location', '$rootScope', 'core-rest.service', 
   'browser-cache.service', 'alert.service',
       function(SweetAlert, $log, $modal, $location, $rootScope, coreService, 
       cacheService, alertService) {
-
-        var self = this;
-        self.experimentActive = false;
-
-        function _normalizeUrl(originalUrl, pattern, replaceStr) {
-
-          if (originalUrl.indexOf(pattern) !== -1) {
-            originalUrl = originalUrl.replace(pattern, replaceStr);
-          }
-          return originalUrl;
-        }
-
-        function _isNullCluster() {
-          if ($rootScope.activeCluster === angular.undefined) {
-            return true;
-          }
-          if ($rootScope.activeCluster === null) {
-            return true;
-          }
-          return false;
-        }
-
 
         function _launchCluster() {
           var coreFormatCluster = $rootScope.activeCluster.toCoreApiFormat();
@@ -50,15 +28,6 @@ angular.module('main.module')
         }
 
         return {
-          isExperimentActive: function() {
-            return self.experimentActive;
-          },
-          setExperimentActive: function() {
-            self.experimentActive = true;
-          },
-          setExperimentInActive: function() {
-            self.experimentActive = false;
-          },
           addNewRecipe: function(group) {
 
             var modalInstance = $modal.open({
@@ -163,31 +132,6 @@ angular.module('main.module')
                 }
 
                 cacheService.updateCache();
-              } else {
-                SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
-              }
-            });
-          },
-          exitKaramel: function() {
-            SweetAlert.swal({
-              title: "Shutdown Karamel engine?",
-              text: "The Karamel Engine will shutdown and ongoing deployments will be lost.",
-              type: "warning",
-              showCancelButton: true,
-              confirmButtonColor: "#DD6B55", confirmButtonText: "Yes, exit Karamel!",
-              cancelButtonText: "Cancel",
-              closeOnConfirm: false,
-              closeOnCancel: false},
-            function(isConfirm) {
-              if (isConfirm) {
-                coreService.exitKaramel()
-                    .success(function(data, status, headers, config) {
-                      SweetAlert.swal("Shutdown", "Karamel engine has shutdown. Close your browser window.", "info");
-                    })
-                    .error(function(data, status, headers, config) {
-                      SweetAlert.swal("Error", "There was a problem shutting down the Karamel Engine. Maybe it was already shutdown?", "error");
-                    });
-
               } else {
                 SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
               }
@@ -346,28 +290,16 @@ angular.module('main.module')
             });
           },
           hasEc2: function() {
-            if (_isNullCluster()) {
-              return false;
-            }
-            return $rootScope.activeCluster.hasEc2();
+            return ($rootScope.activeCluster && $rootScope.activeCluster.hasEc2());
           },
           hasBaremetal: function() {
-            if (_isNullCluster()) {
-              return false;
-            }
-            return $rootScope.activeCluster.hasBaremetal();
+            return ($rootScope.activeCluster && $rootScope.activeCluster.hasBaremetal());
           },
           hasGce: function() {
-            if (_isNullCluster()) {
-              return false;
-            }
-            return $rootScope.activeCluster.hasGce();
+            return ($rootScope.activeCluster && $rootScope.activeCluster.hasGce());
           },
           hasOpenStack: function() {
-            if (_isNullCluster()) {
-              return false;
-            }
-            return $rootScope.activeCluster.hasOpenStack();
+            return ($rootScope.activeCluster && $rootScope.activeCluster.hasOpenStack());
           },
           launchCluster: function() {
             var cluster = $rootScope.activeCluster;
