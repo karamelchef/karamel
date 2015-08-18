@@ -1,0 +1,42 @@
+<div ng-model="activeCluster" id="board">
+  <div id="columns" class="row">
+    <div class="col-sm-2 col-xs-12"
+         ng-repeat="column in activeCluster.groups"
+         data-columnindex="{{$index}}" id="column{{$index}}">
+      <div class="column">
+        <div class="columnHeader">
+
+          <div class="dropdown small-caret" dropdown>
+            <a class="dropdown-toggle projectNameLeft" data-toggle="dropdown" dropdown-toggle><b class="glyphicon glyphicon-cog launch"></b></a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
+              <li class="custom-font"><a title="Add recipe to group" class="leftTextAlign" ng-click="clusterService.addNewRecipe(column)">Add Recipe</a></li>
+              <li class="custom-font"><a title="Configure Attributes" class="leftTextAlign" ng-click="clusterService.configureGroupAttributes(column)">Set Chef Attributes</a></li>
+              <li class="custom-font"><a title="Configure Provider" class="leftTextAlign" ng-click="clusterService.configureGroupProvider(column)">Update Provider</a></li>
+              <li class="custom-font"><a title="Delete" class="leftTextAlign" ng-click="clusterService.removeGroup(column)">Delete Group</a></li>
+
+            </ul>
+          </div>
+
+          <span>
+            <a ng-click="clusterService.updateGroupInfo(column)" ng-model="column.name">{{ column.name}}({{column.size}})</a>
+          </span>
+        </div>
+
+        <ul class="ul-format">
+          <li ng-repeat="cookbook in column.cookbooks">
+            <ul class="ul-format">
+              <li class="recipe" ng-repeat="recipe in cookbook.recipes" ng-include="'karamel/board/groups/recipe-card.html'"></li>
+            </ul>
+          </li>
+        </ul>
+        <br/>
+        <br/>
+      </div>
+    </div>
+    <div>
+      <a ng-click="clusterService.addGroup()" title="Add Node Group" class="headerFont" ng-show="activeCluster != null"><span
+          class="glyphicon glyphicon-plus"  style="color: #4d394b;"></span></a>
+    </div>
+  </div>
+</div>
+

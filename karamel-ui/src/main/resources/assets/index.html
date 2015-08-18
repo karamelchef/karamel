@@ -20,8 +20,8 @@
 
 
 </head>
-<body ng-app="karamel.main">
-  <!--scripts-->
+<body ng-app="main.module">
+  <!--angular-->
   <script type="text/javascript" src="bower_components/sweetalert/lib/sweet-alert.min.js"></script>
   <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
   <script type="text/javascript" src="bower_components/angular/angular.min.js"></script>
@@ -35,46 +35,68 @@
   <script type="text/javascript" src="bower_components/angular-xeditable/dist/js/xeditable.js"></script>
   <script type="text/javascript" src="bower_components/angular-md5/angular-md5.js"></script>
 
-  <script type="text/javascript" src="karamel/dist/FileSaver.js"></script>
-  <script type="text/javascript" src="karamel/dist/yaml.js"></script> 
-  <script type="text/javascript" src="karamel/dist/underscore-min.js"></script>
-  <script type="text/javascript" src="karamel/dist/ng-sortable.js"></script>
+  <!-- root objects -->
+  <script type="text/javascript" src="karamel/main.module.js"></script>
+  <script type="text/javascript" src="karamel/core-rest.service.js"></script>
+  <script type="text/javascript" src="karamel/alert.controller.js"></script>
+  <script type="text/javascript" src="karamel/alert.service.js"></script>
+  <script type="text/javascript" src="karamel/browser-cache.service.js"></script>
+  <script type="text/javascript" src="karamel/route.config.js"></script>
+  <script type="text/javascript" src="karamel/active-cluster.service.js"></script>
+
+  <!-- board module -->
+  <script type="text/javascript" src="karamel/board/datamodel.js"></script>
+  <script type="text/javascript" src="karamel/board/board.contoller.js"></script>
+  <script type="text/javascript" src="karamel/board/yaml-uploader.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/new-recipe.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/groups/duplicate-recipe.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/attributes-editor.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/cookbook-manipulation.service.js"></script>
+  <script type="text/javascript" src="karamel/board/tabs/common-tabs.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/tabs/common-tabs-pane.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/provider/provider-editor.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/launch.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/launch-tabs.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/ec2-pane.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/gce-pane.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/ssh-pane.directive.js"></script>
+  <script type="text/javascript" src="karamel/board/launch/summary-pane.directive.js"></script>
+  <script type="text/javascript" src="karamel/header/header.controller.js"></script>
 
 
-  <script type="text/javascript" src="karamel/karamel-main.js"></script>
-  <script type="text/javascript" src="karamel/terminal/karamel-terminal.js"></script>
-  <script type="text/javascript" src="karamel/terminal/karamel-shell-emulator.js"></script>
-  <script type="text/javascript" src="karamel/datamodel.js"></script>
-  <script type="text/javascript" src="d3/d3.v3.min.js"></script>
-  <script type="text/javascript" src="d3/dagre-d3.js"></script>
+  <!-- experiment -->
+  <script type="text/javascript" src="karamel/experiment/experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/experiment.factory.js"></script>
+  <script type="text/javascript" src="karamel/experiment/load-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/modal.controller.js"></script>
+  <script type="text/javascript" src="karamel/experiment/modal.factory.js"></script>
+  <script type="text/javascript" src="karamel/experiment/new-experiment.controller.js"></script>
+  <script type="text/javascript" src="karamel/github/github-profile.controller.js"></script>
+  <script type="text/javascript" src="karamel/github/github.service.js"></script>
 
-  <!-- controllers -->
-  <script type="text/javascript" src="karamel/controllers/groups.js"></script>
-  <script type="text/javascript" src="karamel/controllers/attributes.js"></script>
-  <script type="text/javascript" src="karamel/controllers/editor-provider.js"></script>
-  <script type="text/javascript" src="karamel/controllers/launch.js"></script>
-  <script type="text/javascript" src="karamel/controllers/sshkeys.js"></script>
-  <script type="text/javascript" src="karamel/controllers/new-recipe.js"></script>
-  <script type="text/javascript" src="karamel/controllers/board.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment-load.js"></script>
-  <script type="text/javascript" src="karamel/controllers/experiment-new.js"></script>
-  <script type="text/javascript" src="karamel/controllers/profile.js"></script>
-  <script type="text/javascript" src="karamel/controllers/header.js"></script>
+  <!-- terminal-->
+  <script type="text/javascript" src="karamel/terminal/terminal.controller.js"></script>
+  <script type="text/javascript" src="karamel/terminal/compile-data.directive.js"></script>
+  <script type="text/javascript" src="karamel/terminal/dagre-dag.directive.js"></script>
+  <script type="text/javascript" src="karamel/terminal/shell/prompt-creator.service.js"></script>
+  <script type="text/javascript" src="karamel/terminal/shell/shell-config.provider.js"></script>
+  <script type="text/javascript" src="karamel/terminal/shell/shell-emulator.controller.js"></script>
+  <script type="text/javascript" src="karamel/terminal/shell/shell-emulator.directive.js"></script>
 
+  <!-- third-parties -->
+  <script type="text/javascript" src="karamel/thirdparties/FileSaver.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/yaml.js"></script> 
+  <script type="text/javascript" src="karamel/thirdparties/underscore-min.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/ng-sortable.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/d3/d3.v3.min.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/d3/dagre-d3.js"></script>
 
-  <!-- services -->
-  <script type="text/javascript" src="karamel/services/core-rest.js"></script>
-  <script type="text/javascript" src="karamel/services/modal.js"></script>
-  <script type="text/javascript" src="karamel/services/github.js"></script>
-  <script type="text/javascript" src="karamel/services/experiments.js"></script>
-
-
-  <div class="notifications" ng-controller="MainCtrl">
+  <div class="notifications" ng-controller="alert.controller">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>
   </div>
 
-  <div ng-include='"header.html"' ng-controller="HeaderCtrl as headerCtrl"></div>
+  <div ng-include='"karamel/header/header.html"' ng-controller="header.controller"></div>
 
   <div ng-view></div>
 </body>

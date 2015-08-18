@@ -21,6 +21,7 @@ import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 public class JsonCookbook {
 
   String id;
+  String alias;
   //values of attrs could be string or array of string 
   Map<String, Object> attrs = new HashMap<>();
   Set<JsonRecipe> recipes = new HashSet<>();
@@ -30,8 +31,9 @@ public class JsonCookbook {
   public JsonCookbook() {
   }
 
-  public JsonCookbook(String id, Map<String, Object> attrs) {
+  public JsonCookbook(String id, String alias, Map<String, Object> attrs) {
     this.id = id;
+    this.alias = alias;
     this.attrs = attrs;
   }
 
@@ -47,6 +49,14 @@ public class JsonCookbook {
     this.id = id;
   }
 
+  public String getAlias() {
+    return alias;
+  }
+
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+  
   public Map<String, Object> getAttrs() {
     return attrs;
   }
