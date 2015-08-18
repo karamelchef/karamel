@@ -2,63 +2,63 @@
 /*global angular: false */
 'use strict';
 angular.module('main.module')
-    .directive('commonTabsPane', ['$log', 'core-rest.service', 'cookbook-manipulation.service', 
+  .directive('commonTabsPane', ['$log', 'core-rest.service', 'cookbook-manipulation.service',
     function($log, coreService, cbService) {
 
-        return{
-          restrict: 'E',
-          scope: {
-            title: "@",
-            cookbook: "=",
-            cookbooksFilteredData: "=",
-            urlInfo: "="
-          },
-          transclude: true,
-          require: "^commonTabs",
-          link: function(scope, elem, attrs, tabsCtrl) {
+      return{
+        restrict: 'E',
+        scope: {
+          title: "@",
+          cookbook: "=",
+          cookbooksFilteredData: "=",
+          urlInfo: "="
+        },
+        transclude: true,
+        require: "^commonTabs",
+        link: function(scope, elem, attrs, tabsCtrl) {
 
-            function initScope(scope) {
-              tabsCtrl.addPane(scope);
-            }
+          function initScope(scope) {
+            tabsCtrl.addPane(scope);
+          }
 
-            // Keep a watch on the selected value.
-            scope.$watch('selected', function() {
+          // Keep a watch on the selected value.
+          scope.$watch('selected', function() {
 
-              if (scope.selected) {
+            if (scope.selected) {
 
-                if (scope.cookbook) {
-                  scope.urlInfo = scope.cookbook.id;
-                }
+              if (scope.cookbook) {
+                scope.urlInfo = scope.cookbook.id;
+              }
 
-                if (scope.urlInfo) {
-                  scope.filteredData = scope.cookbooksFilteredData[scope.urlInfo];
-                  if (scope.filteredData == null) {
-                    var data = {
-                      "url": (scope.urlInfo),
-                      "refresh": false
-                    };
+              if (scope.urlInfo) {
+                scope.filteredData = scope.cookbooksFilteredData[scope.urlInfo];
+                if (scope.filteredData == null) {
+                  var data = {
+                    "url": (scope.urlInfo),
+                    "refresh": false
+                  };
 
-                    coreService.getCookBookInfo(data)
+                  coreService.getCookBookInfo(data)
 
-                        .success(function(data, status, headers, config) {
+                    .success(function(data, status, headers, config) {
 
-                          $log.info("Cookbook Details Fetched Successfully.");
-                          scope.filteredData = cbService.prepareCookbookMetaData(scope.cookbook, data);
-                          scope.cookbooksFilteredData[scope.urlInfo] = scope.filteredData;
-                        })
-                        .error(function(data, status, headers, config) {
-                          $log.info("Cookbook Details can't be Fetched.");
-                        });
-                  }
+                      $log.info("Cookbook Details Fetched Successfully.");
+                      scope.filteredData = cbService.prepareCookbookMetaData(scope.cookbook, data);
+                      scope.cookbooksFilteredData[scope.urlInfo] = scope.filteredData;
+                    })
+                    .error(function(data, status, headers, config) {
+                      $log.info("Cookbook Details can't be Fetched.");
+                    });
                 }
               }
-            });
+            }
+          });
 
-            initScope(scope);
-          },
-          templateUrl: "karamel/board/tabs/common-tabs-pane.html"
-        }
-      }]);
+          initScope(scope);
+        },
+        templateUrl: "karamel/board/tabs/common-tabs-pane.html"
+      }
+    }]);
 
 
 

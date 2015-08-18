@@ -302,9 +302,9 @@ angular.module('main.module')
           return ($rootScope.activeCluster && $rootScope.activeCluster.hasOpenStack());
         },
         hasProvider: function() {
-          return ($rootScope.activeCluster && 
-            ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() || 
-            $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasOpenStack()));
+          return ($rootScope.activeCluster &&
+            ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() ||
+              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasOpenStack()));
         },
         launchCluster: function() {
           var cluster = $rootScope.activeCluster;

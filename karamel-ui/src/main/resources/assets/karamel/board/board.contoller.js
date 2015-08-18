@@ -4,38 +4,38 @@
 'use strict';
 
 angular.module('main.module')
-    .controller('board.controller', ['$rootScope', '$log', '$scope', 'active-cluster.service', '$window', 'alert.service',
-      function($rootScope, $log, $scope, clusterService, $window, alertService) {
-        $scope.clusterService = clusterService;
+  .controller('board.controller', ['$rootScope', '$log', '$scope', 'active-cluster.service', '$window', 'alert.service',
+    function($rootScope, $log, $scope, clusterService, $window, alertService) {
+      $scope.clusterService = clusterService;
 
-        function initScope() {
-          if ($window['sessionStorage'] !== undefined) {
-            var clusterObj = $window.sessionStorage.getItem('karamel');
-            clusterObj = angular.fromJson(clusterObj);
+      function initScope() {
+        if ($window['sessionStorage'] !== undefined) {
+          var clusterObj = $window.sessionStorage.getItem('karamel');
+          clusterObj = angular.fromJson(clusterObj);
 
-            if (clusterObj !== null) {
-              try {
-                var cluster = new Cluster();
-                cluster.copy(clusterObj);
-                $rootScope.activeCluster = cluster;
-                $rootScope.context = cluster.name;
-                alertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
-              }
-              catch (err) {
-                $log.error(err);
-                alertService.addAlert({type: 'danger', msg: 'Unable to parse the json to generate model.'});
-              }
+          if (clusterObj !== null) {
+            try {
+              var cluster = new Cluster();
+              cluster.copy(clusterObj);
+              $rootScope.activeCluster = cluster;
+              $rootScope.context = cluster.name;
+              alertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});
             }
-            else {
-              alertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
+            catch (err) {
+              $log.error(err);
+              alertService.addAlert({type: 'danger', msg: 'Unable to parse the json to generate model.'});
             }
           }
           else {
-            $log.error("No Support for session storage.");
+            alertService.addAlert({type: 'info', msg: 'Loading new Karamel session.'});
           }
         }
-        
-        initScope();
+        else {
+          $log.error("No Support for session storage.");
+        }
+      }
 
-      }]);
+      initScope();
+
+    }]);
 

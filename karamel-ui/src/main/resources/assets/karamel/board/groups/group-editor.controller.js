@@ -5,32 +5,32 @@
 'use strict';
 
 angular.module('main.module')
-    .controller('group-editor.controller', ['$scope', '$modalInstance', 'groupInfo', function($scope, $modalInstance, groupInfo) {
+  .controller('group-editor.controller', ['$scope', '$modalInstance', 'groupInfo', function($scope, $modalInstance, groupInfo) {
 
-        function initScope(scope) {
+      function initScope(scope) {
 
-          if (groupInfo !== null) {
-            $scope.name = groupInfo.name;
-            $scope.size = groupInfo.size;
-          }
-          else {
-            $scope.size = 0;
-          }
-
+        if (groupInfo !== null) {
+          $scope.name = groupInfo.name;
+          $scope.size = groupInfo.size;
+        }
+        else {
+          $scope.size = 0;
         }
 
-        $scope.pushNodeGroup = function() {
-          if (!this.nodeGroupForm.$valid) {
-            return false;
-          }
-          $modalInstance.close({name: $scope.name, size: $scope.size});
-        };
+      }
 
-        $scope.close = function() {
-          $modalInstance.close();
-        };
+      $scope.pushNodeGroup = function() {
+        if (!this.nodeGroupForm.$valid) {
+          return false;
+        }
+        $modalInstance.close({name: $scope.name, size: $scope.size});
+      };
 
-        initScope($scope);
+      $scope.close = function() {
+        $modalInstance.close();
+      };
 
-      }]);
+      initScope($scope);
+
+    }]);
 

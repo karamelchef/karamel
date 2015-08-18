@@ -5,9 +5,9 @@ angular.module('main.module')
     function(SweetAlert, $timeout, $scope, $rootScope, clusterService, coreService, $location) {
 
       var currentTimeout;
-      
+
       $scope.clusterService = clusterService;
-      
+
       $rootScope.connected = true;
 
       $scope.experimentActive = false;
@@ -26,7 +26,7 @@ angular.module('main.module')
       $scope.switchToExperiment = function() {
         $location.path('/experiment');
       };
-      
+
       $scope.exitKaramel = function() {
         SweetAlert.swal({
           title: "Shutdown Karamel engine?",
