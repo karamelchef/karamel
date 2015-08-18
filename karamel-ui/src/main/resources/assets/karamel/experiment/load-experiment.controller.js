@@ -37,6 +37,7 @@ angular.module('main.module')
       };
 
       function _initScope() {
+        $log.info("Init Load experiment...");
         githubService.getOrgs();
         $scope.github.org.name = $scope.github.githubCredentials.user;
         self.selectUserOrg();

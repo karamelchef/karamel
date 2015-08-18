@@ -47,7 +47,7 @@ angular.module('main.module')
         loadExperiment: function(size, githubUrl) {
           var modalInstance = $modal.open({
             templateUrl: 'karamel/experiment/load-experiment.html',
-            controller: 'load.experiment.contoller as controller',
+            controller: 'load.experiment.controller as controller',
             size: size,
             windowClass: 'app-modal-window',
             resolve: {
