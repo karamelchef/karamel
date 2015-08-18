@@ -29,18 +29,18 @@
           </ul>
         </li>
       </ul>
-      <ul class="nav navbar-nav navbar-left" ng-show="hasProvider() && !bs.experimentActive">
+      <ul class="nav navbar-nav navbar-left" ng-show="clusterService.hasProvider() && !experimentActive">
         <li><span/></li>
         <li><span/></li>
         <li  ng-show="activeCluster.activeProvider.name === 'ec2'">
           <i class="glyphicon glyphicon-cloud specializeProvider"></i> 
         </li>
         <li ng-show="activeCluster.activeProvider.name === 'ec2'" class="custom-font"><a title="Set Global Provider" class="headerFont" 
-                                                                                         ng-click="configureGlobalProvider()">Provider</a></li>
+                                                                                         ng-click="clusterService.configureGlobalProvider()">Provider</a></li>
         <li><span/></li>
         <li class="glyphicon glyphicon-tasks specializeProvider"></li> 
         <li class="custom-font"><a title="Set Cookbook Attributes" class="headerFont" 
-                                   ng-click="configureGlobalAttributes()">Configure</a></li>
+                                   ng-click="clusterService.configureGlobalAttributes()">Configure</a></li>
         <li><span/></li>
         <!-- Launch a cluster. 
         It should present a model dialog that asks you to paste in your public openssh key
@@ -48,7 +48,7 @@
         -->
         <li class="glyphicon glyphicon-play specializeProvider">
         </li>
-        <li><a title="Launch" class="headerFont" ng-click="launchCluster()">Launch</a></li>
+        <li><a title="Launch" class="headerFont" ng-click="clusterService.launchCluster()">Launch</a></li>
       </ul>
 
       <ul class="nav navbar-nav navbar-left" ng-show="experimentActive">
@@ -58,15 +58,15 @@
           <i class="glyphicon glyphicon-cloud"></i> 
         </li>
         <li class="custom-font"><a title="Push" class="headerFont" 
-                                   ng-click="configureGlobalProvider()">Push</a></li>
+                                   ng-click="clusterService.configureGlobalProvider()">Push</a></li>
         <li><span/></li>
         <li class="glyphicon glyphicon-tasks"></li> 
         <li class="custom-font"><a title="Delete" class="headerFont" 
-                                   ng-click="configureGlobalAttributes()">Delete</a></li>
+                                   ng-click="clusterService.configureGlobalAttributes()">Delete</a></li>
         <li><span/></li>
         <li class="glyphicon glyphicon-play specializeProvider">
         </li>
-        <li><a title="Cluster" class="headerFont" ng-click="launchCluster()">Cluster</a></li>
+        <li><a title="Cluster" class="headerFont" ng-click="clusterService.launchCluster()">Cluster</a></li>
       </ul>
 
 

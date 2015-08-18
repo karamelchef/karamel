@@ -2,8 +2,12 @@
 
 angular.module('main.module')
   .controller('header.controller', ['SweetAlert', '$timeout', '$scope', '$rootScope', 'active-cluster.service', 'core-rest.service', '$location',
-    function(SweetAlert, $timeout, $scope, $rootScope, activeClusterService, coreService, $location) {
+    function(SweetAlert, $timeout, $scope, $rootScope, clusterService, coreService, $location) {
 
+      var currentTimeout;
+      
+      $scope.clusterService = clusterService;
+      
       $rootScope.connected = true;
 
       $scope.experimentActive = false;
@@ -15,45 +19,12 @@ angular.module('main.module')
         $scope.experimentActive = false;
       };
 
-      $scope.hasEc2 = function() {
-        return activeClusterService.hasEc2();
-      };
-
-      $scope.hasBaremetal = function() {
-        return activeClusterService.hasBaremetal();
-      };
-
-      $scope.hasProvider = function() {
-        return $scope.hasEc2() || $scope.hasBaremetal() ||
-          $scope.hasGce() || $scope.hasOpenStack();
-      };
-
-      $scope.hasGce = function() {
-        return activeClusterService.hasGce();
-      };
-
-      $scope.hasOpenStack = function() {
-        return activeClusterService.hasOpenStack();
-      };
-
       $scope.switchToTerminal = function() {
         $location.path('/terminal');
       };
 
       $scope.switchToExperiment = function() {
         $location.path('/experiment');
-      };
-
-      $scope.exitKaramel = function() {
-        activeClusterService.exitKaramel();
-      };
-
-      $scope.sudoPassword = function(password) {
-        activeClusterService.sudoPassword(password);
-      };
-
-      $scope.githubCredentials = function(email, password) {
-        activeClusterService.githubCredentials(email, password);
       };
       
       $scope.exitKaramel = function() {

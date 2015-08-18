@@ -5,12 +5,8 @@
 
 angular.module('main.module')
     .controller('board.controller', ['$rootScope', '$log', '$scope', 'active-cluster.service', '$window', 'alert.service',
-      '$location',
-      function($rootScope, $log, $scope, activeClusterService, $window, alertService, $location) {
-        var self = this;
-
-        $scope.bs = activeClusterService;
-
+      function($rootScope, $log, $scope, clusterService, $window, alertService) {
+        $scope.clusterService = clusterService;
 
         function initScope() {
           if ($window['sessionStorage'] !== undefined) {
@@ -38,51 +34,6 @@ angular.module('main.module')
             $log.error("No Support for session storage.");
           }
         }
-
-
-
-        $scope.configureGlobalProvider = function() {
-          activeClusterService.configureGlobalProvider();
-        };
-        $scope.configureGlobalAttributes = function() {
-          activeClusterService.configureGlobalAttributes();
-        };
-
-        $scope.editSshKeys = function() {
-          activeClusterService.editSshKeys();
-        };
-
-        $scope.launchCluster = function() {
-          activeClusterService.launchCluster();
-        };
-
-        $scope.removeRecipe = function(group, cookbook, recipe) {
-          activeClusterService.removeRecipe(group, cookbook, recipe);
-        };
-
-        $scope.removeColumn = function(group) {
-          activeClusterService.removeGroup(group);
-        };
-
-        $scope.addNewRecipe = function(group) {
-          activeClusterService.addNewRecipe(group);
-        };
-
-        $scope.updateGroup = function(group) {
-          activeClusterService.updateGroupInfo(group);
-        };
-
-        $scope.configureGroupAttributes = function(group) {
-          activeClusterService.configureGroupAttributes(group);
-        };
-
-        $scope.configureGroupProvider = function(group) {
-          activeClusterService.configureGroupProvider(group);
-        };
-
-        $scope.addGroup = function() {
-          activeClusterService.addGroup();
-        };
         
         initScope();
 

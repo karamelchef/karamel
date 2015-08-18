@@ -9,16 +9,16 @@
           <div class="dropdown small-caret" dropdown>
             <a class="dropdown-toggle projectNameLeft" data-toggle="dropdown" dropdown-toggle><b class="glyphicon glyphicon-cog launch"></b></a>
             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-              <li class="custom-font"><a title="Add recipe to group" class="leftTextAlign" ng-click="addNewRecipe(column)">Add Recipe</a></li>
-              <li class="custom-font"><a title="Configure Attributes" class="leftTextAlign" ng-click="configureGroupAttributes(column)">Set Chef Attributes</a></li>
-              <li class="custom-font"><a title="Configure Provider" class="leftTextAlign" ng-click="configureGroupProvider(column)">Update Provider</a></li>
-              <li class="custom-font"><a title="Delete" class="leftTextAlign" ng-click="removeColumn(column)">Delete Group</a></li>
+              <li class="custom-font"><a title="Add recipe to group" class="leftTextAlign" ng-click="clusterService.addNewRecipe(column)">Add Recipe</a></li>
+              <li class="custom-font"><a title="Configure Attributes" class="leftTextAlign" ng-click="clusterService.configureGroupAttributes(column)">Set Chef Attributes</a></li>
+              <li class="custom-font"><a title="Configure Provider" class="leftTextAlign" ng-click="clusterService.configureGroupProvider(column)">Update Provider</a></li>
+              <li class="custom-font"><a title="Delete" class="leftTextAlign" ng-click="clusterService.removeGroup(column)">Delete Group</a></li>
 
             </ul>
           </div>
 
           <span>
-            <a ng-click="updateGroup(column)" ng-model="column.name">{{ column.name}}({{column.size}})</a>
+            <a ng-click="clusterService.updateGroupInfo(column)" ng-model="column.name">{{ column.name}}({{column.size}})</a>
           </span>
         </div>
 
@@ -34,7 +34,7 @@
       </div>
     </div>
     <div>
-      <a ng-click="addGroup()" title="Add Node Group" class="headerFont" ng-show="activeCluster != null"><span
+      <a ng-click="clusterService.addGroup()" title="Add Node Group" class="headerFont" ng-show="activeCluster != null"><span
           class="glyphicon glyphicon-plus"  style="color: #4d394b;"></span></a>
     </div>
   </div>
