@@ -26,31 +26,15 @@ angular.module('main.module')
 
       // Services interacting with the karamel core.
       return{
-        // Based on the object passed get the complete url.
-        getCompleteYaml: function(json) {
-
+        jsonToYaml: function(json) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/fetchYaml");
-
+          var url = _defaultHost.concat("/definition/json2yaml");
           return _getPromiseObject(method, url, _defaultContentType, json);
-
         },
-        getCleanYaml: function(json) {
-
+        yamlToJson: function(ymlString) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/cleanYaml");
-
-          return  _getPromiseObject(method, url, _defaultContentType, json);
-
-        },
-        getJsonFromYaml: function(ymlString) {
-
-          var method = 'PUT';
-          var url = _defaultHost.concat("/fetchJson");
-
+          var url = _defaultHost.concat("/definition/yaml2json");
           return _getPromiseObject(method, url, _defaultContentType, ymlString);
-
-
         },
         getCookBookInfo: function(requestData) {
 
@@ -75,7 +59,7 @@ angular.module('main.module')
         },
         startCluster: function(clusterJson) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/startCluster");
+          var url = _defaultHost.concat("cluster/start");
           return _getPromiseObject(method, url, _defaultContentType, clusterJson);
         },
         viewCluster: function(clusterNameJson) {

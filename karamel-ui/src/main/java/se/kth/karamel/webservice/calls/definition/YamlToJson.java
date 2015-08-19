@@ -20,7 +20,7 @@ import se.kth.karamel.webservicemodel.KaramelBoardYaml;
  *
  * @author kamal
  */
-@Path("/fetchJson")
+@Path("/definition/yaml2json")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class YamlToJson extends AbstractCall{

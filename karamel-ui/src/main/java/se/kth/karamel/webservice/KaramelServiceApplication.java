@@ -62,6 +62,7 @@ import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
 import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
@@ -302,7 +303,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         .register("template", healthCheck);
 
     environment.jersey().register(new YamlToJson(karamelApi));
-    environment.jersey().register(new ConvertJSONToYaml());
+    environment.jersey().register(new JsonToYaml(karamelApi));
     environment.jersey().register(new Cookbook());
     environment.jersey().register(new Ssh.Load());
     environment.jersey().register(new Ssh.Register());
@@ -400,34 +401,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       openWebpage(url.toURI());
     } catch (URISyntaxException e) {
       e.printStackTrace();
-    }
-  }
-
-  /**
-   * For the cluster yml supplied by the UI, convert it into JSON Object and return.
-   */
-
-  @Path("/fetchYaml")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public static class ConvertJSONToYaml {
-
-    @PUT
-    public Response getYamlForJSON(KaramelBoardJSON karamelBoardJSON) {
-      Response response = null;
-      logger.debug("Fetch Yaml Called ... ");
-
-      try {
-        String yml = karamelApi.jsonToYaml(karamelBoardJSON.getJson());
-        KaramelBoardYaml karamelBoardYaml = new KaramelBoardYaml(yml);
-        response = Response.status(Response.Status.OK).entity(karamelBoardYaml).build();
-
-      } catch (KaramelException e) {
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        e.printStackTrace();
-      }
-      return response;
     }
   }
 

@@ -16,7 +16,7 @@ import se.kth.karamel.webservicemodel.StatusResponseJSON;
  */
 public abstract class AbstractCall {
 
-  private static final Logger logger = Logger.getLogger(AbstractCall.class);
+  protected static final Logger logger = Logger.getLogger(AbstractCall.class);
   protected KaramelApi karamelApi;
   
   public AbstractCall(KaramelApi karamelApi) {
