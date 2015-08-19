@@ -64,6 +64,9 @@ import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
+import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
+import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
+import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
 import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardJSON;
@@ -305,9 +308,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new YamlToJson(karamelApi));
     environment.jersey().register(new JsonToYaml(karamelApi));
     environment.jersey().register(new Cookbook());
-    environment.jersey().register(new Ssh.Load());
-    environment.jersey().register(new Ssh.Register());
-    environment.jersey().register(new Ssh.Generate());
+    environment.jersey().register(new LoadSshKeys(karamelApi));
+    environment.jersey().register(new RegisterSshKeys(karamelApi));
+    environment.jersey().register(new GenerateSshKeys(karamelApi));
     environment.jersey().register(new Ec2.Load());
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Gce.Load());
@@ -423,86 +426,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
 
       return response;
-    }
-  }
-
-  public static class Ssh {
-
-    @Path("/loadSshKeys")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Load {
-
-      @PUT
-      public Response loadSshKeys() {
-        Response response = null;
-        logger.debug(" Received request to load ssh keys.");
-        try {
-          SshKeyPair sshKeypair = karamelApi.loadSshKeysIfExist();
-          if (sshKeypair == null) {
-            sshKeypair = karamelApi.generateSshKeysAndUpdateConf();
-          }
-          karamelApi.registerSshKeys(sshKeypair);
-          response = Response.status(Response.Status.OK).entity(sshKeypair).build();
-        } catch (KaramelException ex) {
-          ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
-        }
-
-        return response;
-      }
-
-    }
-
-    @Path("/registerSshKeys")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Register {
-
-      @PUT
-      public Response registerSshKeys(SshKeyJSON sshKeysJSON) {
-        Response response = null;
-        logger.debug("Received request to register ssh keys.");
-        SshKeyPair sshKeypair = new SshKeyPair();
-        sshKeypair.setPublicKeyPath(sshKeysJSON.getPubKeyPath());
-        sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
-        sshKeypair.setPassphrase(sshKeysJSON.getPassphrase());
-        try {
-          karamelApi.registerSshKeys(sshKeypair);
-          response = Response.status(Response.Status.OK).entity(sshKeypair).build();
-        } catch (KaramelException ex) {
-          ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
-        }
-
-        return response;
-      }
-
-    }
-
-    @Path("/generateSshKeys")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Generate {
-
-      @PUT
-      public Response generateSshKeys() {
-        Response response = null;
-        logger.debug("Received request to generate ssh keys.");
-        try {
-          SshKeyPair sshKeypair = karamelApi.generateSshKeysAndUpdateConf();
-          karamelApi.registerSshKeys(sshKeypair);
-          response = Response.status(Response.Status.OK).entity(sshKeypair).build();
-        } catch (KaramelException ex) {
-          ex.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, ex.getMessage())).build();
-        }
-        return response;
-      }
-
     }
   }
 

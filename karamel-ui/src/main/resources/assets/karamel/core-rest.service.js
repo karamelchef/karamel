@@ -44,17 +44,17 @@ angular.module('main.module')
         },
         loadSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/loadSshKeys");
+          var url = _defaultHost.concat("/sshkeys/load");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         registerSshKeys: function(sshKeypair) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/registerSshKeys");
+          var url = _defaultHost.concat("/sshkeys/register");
           return _getPromiseObject(method, url, _defaultContentType, sshKeypair);
         },
         generateSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/generateSshKeys");
+          var url = _defaultHost.concat("/sshkeys/generate");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         startCluster: function(clusterJson) {
