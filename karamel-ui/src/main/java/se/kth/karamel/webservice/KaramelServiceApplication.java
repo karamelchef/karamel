@@ -1,5 +1,6 @@
 package se.kth.karamel.webservice;
 
+import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 import icons.TrayUI;
 import io.dropwizard.Application;
@@ -61,6 +62,7 @@ import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+import se.kth.karamel.webservice.calls.definition.YamlToJson;
 import se.kth.karamel.webservicemodel.CommandJSON;
 import se.kth.karamel.webservicemodel.CookbookJSON;
 import se.kth.karamel.webservicemodel.KaramelBoardJSON;
@@ -77,7 +79,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
       KaramelServiceApplication.class);
 
-  private static KaramelApi karamelApiHandler;
+  private static KaramelApi karamelApi;
 
   public static TrayUI trayUi;
 
@@ -165,7 +167,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     String[] modifiedArgs = new String[2];
     modifiedArgs[0] = "server";
 
-    karamelApiHandler = new KaramelApiImpl();
+    karamelApi = new KaramelApiImpl();
 
     try {
       CommandLine line = parser.parse(options, args);
@@ -191,9 +193,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         try {
           yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
           YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
-          String jsonTxt = karamelApiHandler.yamlToJson(yamlTxt);
+          String jsonTxt = karamelApi.yamlToJson(yamlTxt);
           boolean valid = false;
-          Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
+          Ec2Credentials credentials = karamelApi.loadEc2CredentialsIfExist();
 
           Console c = null;
           if (credentials == null) {
@@ -216,18 +218,18 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             credentials = new Ec2Credentials();
             credentials.setAccessKey(ec2AccountId);
             credentials.setSecretKey(ec2AccessKey);
-            valid = karamelApiHandler.updateEc2CredentialsIfValid(credentials);
+            valid = karamelApi.updateEc2CredentialsIfValid(credentials);
             if (!valid) {
               logger.info("Invalid Ec2 Credentials. Try again.");
               ec2AccountId = null;
               ec2AccessKey = null;
             }
           }
-          karamelApiHandler.startCluster(jsonTxt);
+          karamelApi.startCluster(jsonTxt);
 
           long ms1 = System.currentTimeMillis();
           while (ms1 + 6000000 > System.currentTimeMillis()) {
-            String clusterStatus = karamelApiHandler.getClusterStatus(cluster.getName());
+            String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
             logger.debug(clusterStatus);
             Thread.currentThread().sleep(30000);
           }
@@ -299,7 +301,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.healthChecks()
         .register("template", healthCheck);
 
-    environment.jersey().register(new ConvertYamlToJSON());
+    environment.jersey().register(new YamlToJson(karamelApi));
     environment.jersey().register(new ConvertJSONToYaml());
     environment.jersey().register(new Cookbook());
     environment.jersey().register(new Ssh.Load());
@@ -309,7 +311,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new Ec2.Validate());
     environment.jersey().register(new Gce.Load());
     environment.jersey().register(new Gce.Validate());
-    environment.jersey().register(new Cluster.StartCluster());
+    environment.jersey().register(new StartCluster(karamelApi));
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
     environment.jersey().register(new ExitKaramel());
@@ -404,26 +406,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   /**
    * For the cluster yml supplied by the UI, convert it into JSON Object and return.
    */
-  @Path("/fetchJson")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public static class ConvertYamlToJSON {
-
-    @PUT
-    public Response getJSONForYaml(KaramelBoardYaml cluster) {
-
-      Response response = null;
-      try {
-        String jsonClusterString = karamelApiHandler.yamlToJson(cluster.getYml());
-        response = Response.status(Response.Status.OK).entity(jsonClusterString).build();
-      } catch (KaramelException e) {
-        e.printStackTrace();
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-      }
-      return response;
-    }
-  }
 
   @Path("/fetchYaml")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -436,7 +418,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       logger.debug("Fetch Yaml Called ... ");
 
       try {
-        String yml = karamelApiHandler.jsonToYaml(karamelBoardJSON.getJson());
+        String yml = karamelApi.jsonToYaml(karamelBoardJSON.getJson());
         KaramelBoardYaml karamelBoardYaml = new KaramelBoardYaml(yml);
         response = Response.status(Response.Status.OK).entity(karamelBoardYaml).build();
 
@@ -458,7 +440,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     public Response getCookbook(CookbookJSON cookbookJSON) {
       Response response = null;
       try {
-        String cookbookDetails = karamelApiHandler.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
+        String cookbookDetails = karamelApi.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
         response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
 
       } catch (KaramelException e) {
@@ -483,11 +465,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.debug(" Received request to load ssh keys.");
         try {
-          SshKeyPair sshKeypair = karamelApiHandler.loadSshKeysIfExist();
+          SshKeyPair sshKeypair = karamelApi.loadSshKeysIfExist();
           if (sshKeypair == null) {
-            sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
+            sshKeypair = karamelApi.generateSshKeysAndUpdateConf();
           }
-          karamelApiHandler.registerSshKeys(sshKeypair);
+          karamelApi.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
@@ -514,7 +496,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         sshKeypair.setPrivateKeyPath(sshKeysJSON.getPrivKeyPath());
         sshKeypair.setPassphrase(sshKeysJSON.getPassphrase());
         try {
-          karamelApiHandler.registerSshKeys(sshKeypair);
+          karamelApi.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
@@ -537,8 +519,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.debug("Received request to generate ssh keys.");
         try {
-          SshKeyPair sshKeypair = karamelApiHandler.generateSshKeysAndUpdateConf();
-          karamelApiHandler.registerSshKeys(sshKeypair);
+          SshKeyPair sshKeypair = karamelApi.generateSshKeysAndUpdateConf();
+          karamelApi.registerSshKeys(sshKeypair);
           response = Response.status(Response.Status.OK).entity(sshKeypair).build();
         } catch (KaramelException ex) {
           ex.printStackTrace();
@@ -563,7 +545,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.debug("Received request to load the command cheatsheet.");
         try {
-          String cheatSheet = karamelApiHandler.commandCheatSheet();
+          String cheatSheet = karamelApi.commandCheatSheet();
           response = Response.status(Response.Status.OK).entity(cheatSheet).build();
         } catch (KaramelException e) {
           e.printStackTrace();
@@ -585,7 +567,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         logger.debug("Received request to process a command with info: " + command.getCommand());
         try {
-          CommandResponse cmdRes = karamelApiHandler.processCommand(command.getCommand(), command.getResult());
+          CommandResponse cmdRes = karamelApi.processCommand(command.getCommand(), command.getResult());
           command.setResult(cmdRes.getResult());
           command.setNextCmd(cmdRes.getNextCmd());
           command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
@@ -616,7 +598,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.debug("Received request to load the ec2 credentials.");
         try {
-          Ec2Credentials credentials = karamelApiHandler.loadEc2CredentialsIfExist();
+          Ec2Credentials credentials = karamelApi.loadEc2CredentialsIfExist();
           Ec2JSON provider = new Ec2JSON();
           provider.setAccountId((credentials == null) ? "" : credentials.getAccessKey());
           provider.setAccountKey((credentials == null) ? "" : credentials.getSecretKey());
@@ -651,7 +633,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           Ec2Credentials credentials = new Ec2Credentials();
           credentials.setAccessKey(providerJSON.getAccountId());
           credentials.setSecretKey(providerJSON.getAccountKey());
-          if (karamelApiHandler.updateEc2CredentialsIfValid(credentials)) {
+          if (karamelApi.updateEc2CredentialsIfValid(credentials)) {
             response = Response.status(Response.Status.OK).
                 entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
           } else {
@@ -681,7 +663,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.debug("Received request to load the gce credentials.");
         try {
-          String jsonKeyPath = karamelApiHandler.loadGceCredentialsIfExist();
+          String jsonKeyPath = karamelApi.loadGceCredentialsIfExist();
           GceJson provider = new GceJson();
           provider.setJsonKeyPath((jsonKeyPath == null) ? "" : jsonKeyPath);
           response = Response.status(Response.Status.OK).entity(provider).build();
@@ -713,7 +695,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         try {
           String jsonKeyPath = providerJSON.getJsonKeyPath();
-          if (karamelApiHandler.updateGceCredentialsIfValid(jsonKeyPath)) {
+          if (karamelApi.updateGceCredentialsIfValid(jsonKeyPath)) {
             response = Response.status(Response.Status.OK).
                 entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
           } else {
@@ -731,38 +713,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
-  /**
-   * Place holder class dealing with separate cluster state handling.
-   */
-  public static class Cluster {
-
-    @Path("/startCluster")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class StartCluster {
-
-      @PUT
-      public Response startCluster(KaramelBoardJSON boardJSON) {
-
-        Response response = null;
-        logger.debug("Start cluster: " + System.lineSeparator() + boardJSON.getJson());
-
-        try {
-          karamelApiHandler.startCluster(boardJSON.getJson());
-          response = Response.status(Response.Status.OK).
-              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-  }
 
   @Path("/exitKaramel")
   public static class ExitKaramel {
@@ -811,7 +761,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set sudo password....");
         try {
-          karamelApiHandler.registerSudoPassword(sudoPwd.getPassword());
+          karamelApi.registerSudoPassword(sudoPwd.getPassword());
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {
@@ -835,7 +785,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to get github credentials.... ");
         try {
-          GithubUser credentials = karamelApiHandler.loadGithubCredentials();
+          GithubUser credentials = karamelApi.loadGithubCredentials();
           response = Response.status(Response.Status.OK).
               entity(credentials).build();
         } catch (KaramelException e) {
@@ -858,7 +808,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          GithubUser githubUser = karamelApiHandler.registerGithubAccount(user, password);
+          GithubUser githubUser = karamelApi.registerGithubAccount(user, password);
 
           response = Response.status(Response.Status.OK).
               entity(githubUser).build();
@@ -881,7 +831,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          List<OrgItem> orgs = karamelApiHandler.listGithubOrganizations();
+          List<OrgItem> orgs = karamelApi.listGithubOrganizations();
           response = Response.status(Response.Status.OK).
               entity(orgs).build();
         } catch (KaramelException e) {
@@ -904,7 +854,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          List<RepoItem> repos = karamelApiHandler.listGithubRepos(org);
+          List<RepoItem> repos = karamelApi.listGithubRepos(org);
           response = Response.status(Response.Status.OK).
               entity(repos).build();
         } catch (KaramelException e) {
@@ -928,7 +878,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          karamelApiHandler.commitAndPushExperiment(experiment);
+          karamelApi.commitAndPushExperiment(experiment);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {
@@ -951,7 +901,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          Experiment ec = karamelApiHandler.loadExperiment(experimentUrl);
+          Experiment ec = karamelApi.loadExperiment(experimentUrl);
           response = Response.status(Response.Status.OK).entity(ec).build();
         } catch (KaramelException e) {
           e.printStackTrace();
@@ -972,7 +922,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       public Response removeFileFromExperiment(@FormParam("org") String org, @FormParam("repo") String repo,
           @FormParam("filename") String filename) {
         logger.info(" Received request to set github credentials.... ");
-        karamelApiHandler.removeFileFromExperiment(org, repo, filename);
+        karamelApi.removeFileFromExperiment(org, repo, filename);
         return Response.status(Response.Status.OK).entity(
             new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
       }
@@ -989,7 +939,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         Response response = null;
         logger.info(" Received request to set github credentials.... ");
         try {
-          karamelApiHandler.removeRepo(org, repo, local, remote);
+          karamelApi.removeRepo(org, repo, local, remote);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {

@@ -22,8 +22,8 @@ angular.module('main.module')
           })
           .error(function(data, status, headers, config) {
             $log.info("Error Received.");
-            $log.info(data.message);
-            alertService.addAlert({type: 'warning', msg: data.message || 'Unable to launch service'});
+            $log.info(data.reason);
+            alertService.addAlert({type: 'warning', msg: data.reason});
           });
       }
 
