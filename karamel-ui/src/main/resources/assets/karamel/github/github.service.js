@@ -17,6 +17,12 @@ angular.module('main.module')
 
       self.repos = [];
 
+//      self.reposSelected = [];
+//      self.reposSelected[0] = {
+//        name: '',
+//        ticked: false
+//      };
+
       self.org = {
         name: '',
         gravitar: ''
@@ -73,7 +79,8 @@ angular.module('main.module')
               self.repos[i] = {
                 name: data[i].name,
                 description: "",
-                sshUrl: data[i].sshUrl
+                sshUrl: data[i].sshUrl,
+                ticked: false
               };
             }
 
@@ -110,6 +117,18 @@ angular.module('main.module')
         }
         self.repo.name = repo;
       };
+
+      self.setTickedRepo = function() {
+        if (self.repos !== null) {
+          for (var i = 0, len = self.repos.length; i < len; i++) {
+            if (self.repos[i].ticked === true) {
+              self.repo.name = self.repos[i].name;
+              break;
+            }
+          }
+        }
+      };
+
 
       self.newRepo = function(repoName, description) {
         self.repo.name = repoName;
