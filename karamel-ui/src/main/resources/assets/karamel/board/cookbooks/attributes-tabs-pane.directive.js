@@ -2,8 +2,8 @@
 /*global angular: false */
 'use strict';
 angular.module('main.module')
-  .directive('commonTabsPane', ['$log', 'core-rest.service', 'cookbook-manipulation.service',
-    function($log, coreService, cbService) {
+  .directive('attributesTabsPane', ['$log', 'core-rest.service',
+    function($log, coreService) {
 
       return{
         restrict: 'E',
@@ -41,10 +41,27 @@ angular.module('main.module')
                   coreService.getCookBookInfo(data)
 
                     .success(function(data, status, headers, config) {
-
                       $log.info("Cookbook Details Fetched Successfully.");
-                      scope.filteredData = cbService.prepareCookbookMetaData(scope.cookbook, data);
-                      scope.cookbooksFilteredData[scope.urlInfo] = scope.filteredData;
+                      var globalCookbook = null;
+                      if (scope.cookbook["alias"] == data["name"]) {
+                        globalCookbook = scope.cookbook;
+                      }
+                      // If the attributes section is present.
+                      if (globalCookbook != null && globalCookbook["attributes"] != null) {
+                        angular.forEach(data["attributes"], function(attribute) {
+
+                          var storedAttributes = globalCookbook["attributes"];
+
+                          // If same property present replace the value from the cookbook.
+                          if (storedAttributes[attribute["name"]] != null) {
+                            attribute["value"] = storedAttributes[attribute["name"]];
+                          }
+                          else {
+                            attribute["value"] = attribute["default"];
+                          }
+                        });
+                      }
+                      scope.cookbooksFilteredData[scope.urlInfo] = data;
                     })
                     .error(function(data, status, headers, config) {
                       $log.info("Cookbook Details can't be Fetched.");
@@ -56,7 +73,7 @@ angular.module('main.module')
 
           initScope(scope);
         },
-        templateUrl: "karamel/board/tabs/common-tabs-pane.html"
+        templateUrl: "karamel/board/cookbooks/attributes-tabs-pane.html"
       }
     }]);
 
