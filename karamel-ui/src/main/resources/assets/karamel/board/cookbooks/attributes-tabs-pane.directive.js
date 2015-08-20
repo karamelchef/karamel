@@ -43,7 +43,7 @@ angular.module('main.module')
                     .success(function(data, status, headers, config) {
                       $log.info("Cookbook Details Fetched Successfully.");
                       var globalCookbook = null;
-                      if (scope.cookbook["name"] == data["name"]) {
+                      if (scope.cookbook["alias"] == data["name"]) {
                         globalCookbook = scope.cookbook;
                       }
                       // If the attributes section is present.
@@ -73,7 +73,7 @@ angular.module('main.module')
 
           initScope(scope);
         },
-        templateUrl: "karamel/board/tabs/attributes-tabs-pane.html"
+        templateUrl: "karamel/board/cookbooks/attributes-tabs-pane.html"
       }
     }]);
 

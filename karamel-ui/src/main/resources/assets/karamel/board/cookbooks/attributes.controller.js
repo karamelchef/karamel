@@ -29,7 +29,7 @@ angular.module('main.module')
             var foundCookbook = null;
 
             for (var i = 0; i < $scope.cookbooks.length; i++) {
-              if (cookbookMetaData["name"] === $scope.cookbooks[i]["name"]) {
+              if (cookbookMetaData["name"] === $scope.cookbooks[i]["alias"]) {
                 foundCookbook = $scope.cookbooks[i];
                 break;
               }
