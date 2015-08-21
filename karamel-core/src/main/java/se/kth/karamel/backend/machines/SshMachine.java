@@ -201,18 +201,37 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task) {
-    int numRetries = Settings.SSH_CMD_RETRY_NUM;
+  private boolean runSshCmd(ShellCommand shellCommand, Task task) {
+    int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
     Session session = null;
 
-    while (!stopping && !finished && numRetries > 0) {
+    while (!stopping && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
         logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
 
-        session = client.startSession();
+        int numConnectionRetries = Settings.SSH_CONNECTION_RETRY_NUM;
+        while (numConnectionRetries > 0) {
+          try {
+            session = client.startSession();
+            numConnectionRetries = -1;
+          } catch (ConnectionException | TransportException ex) {
+            logger.warn(String.format("Couldn't create ssh session to '%s' ", machineEntity.getId()), ex);
+            numConnectionRetries--;
+            try {
+              Thread.sleep(timeBetweenRetries);
+            } catch (InterruptedException exInterrupted) {
+              if (!stopping) {
+                logger.warn("Interrupted while waiting to connect to a machine. Continuing...");
+              }
+            }
+          }
+        }
+        if (numConnectionRetries != -1) {
+          return false;
+        }
         Session.Command cmd = session.exec(shellCommand.getCmdStr());
         cmd.join(Settings.SSH_CMD_LONGEST, TimeUnit.MINUTES);
         updateHeartbeat();
@@ -231,7 +250,7 @@ public class SshMachine implements MachineInterface, Runnable {
         }
       } finally {
         // Retry if we have a network problem
-        numRetries--;
+        numCmdRetries--;
         if (!finished) {
           try {
             Thread.sleep(timeBetweenRetries);
@@ -242,16 +261,16 @@ public class SshMachine implements MachineInterface, Runnable {
           }
           timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
         }
+        if (session != null) {
+          try {
+            session.close();
+          } catch (TransportException | ConnectionException ex) {
+            logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+          }
+        }
       }
     }
-    if (session != null) {
-      try {
-        session.close();
-      } catch (TransportException | ConnectionException ex) {
-        logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
-      }
-    }
-
+    return true;
   }
 
   private PasswordFinder getPasswordFinder() {
