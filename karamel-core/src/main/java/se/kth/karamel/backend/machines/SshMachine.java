@@ -112,11 +112,11 @@ public class SshMachine implements MachineInterface, Runnable {
               && (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING
               || machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.EMPTY)) {
             try {
-              if (this.activeTask == null) {
+              if (activeTask == null) {
                 if (taskQueue.isEmpty()) {
                   machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
                 }
-                this.activeTask = taskQueue.take();
+                activeTask = taskQueue.take();
                 logger.debug(String.format("%s: Taking a new task from the queue.", machineEntity.getId()));
                 machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
               } else {
@@ -125,8 +125,7 @@ public class SshMachine implements MachineInterface, Runnable {
                         machineEntity.getId()));
               }
               logger.debug(String.format("%s: Task for execution.. '%s'", machineEntity.getId(), activeTask.getName()));
-              runTask(this.activeTask);
-              this.activeTask = null;
+              runTask(activeTask);
             } catch (InterruptedException ex) {
               if (stopping) {
                 logger.info(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
@@ -201,6 +200,7 @@ public class SshMachine implements MachineInterface, Runnable {
       }
       if (task.getStatus() == Status.ONGOING) {
         task.succeed();
+        activeTask = null;
       }
     } catch (Exception ex) {
       task.failed(ex.getMessage());
