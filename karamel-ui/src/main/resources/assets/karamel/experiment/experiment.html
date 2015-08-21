@@ -143,9 +143,10 @@
 
         </accordion-group>
 
-        <accordion-group is-open="status.orchestrationOpen">
+
+       <accordion-group is-open="status.orchestrationOpen">
           <accordion-heading>
-            <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.dependenciesOpen, 'glyphicon-chevron-right': !status.dependenciesOpen}"></i></span>
+            <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.orchestrationOpen, 'glyphicon-chevron-right': !status.orchestrationOpen}"></i></span>
             Orchestration 
           </accordion-heading>
 
@@ -189,6 +190,23 @@
             </div>
           </div>
         </accordion-group>
+
+
+       <accordion-group is-open="status.parametersOpen">
+          <accordion-heading>
+            <span class="col-md-1 col-lg-1"><i class="pull-left glyphicon" ng-class="{'glyphicon-chevron-down': status.parametersOpen, 'glyphicon-chevron-right': !status.parametersOpen}"></i></span>
+            Parameters 
+          </accordion-heading>
+          <div class="row form-group">
+            <span class="col-md-1 col-lg-1"></span>
+            <div class="col-xs-8 col-sm-11 col-md-11 col-lg-11">
+              <label class="text" for="params">Parameters</label>
+              <span class="glyphicon glyphicon-question-sign pull-right" tooltip-placement="left" tooltip="Line-separated key-value pairs, that is a properties file. Users will be able to change the values in the Karamel UI when running a recipe (experiment)."></span>
+              <textarea id="params" style="width:100%; height:250px; overflow:scroll;" ng-model="experiment.defaultAttributes" placeholder="key=value # properties file" ng-change="status.isModified = true" class="form-control"></textarea>
+            </div>
+          </div>                            
+        </accordion-group>
+
       </accordion>
     </div>
   </div>

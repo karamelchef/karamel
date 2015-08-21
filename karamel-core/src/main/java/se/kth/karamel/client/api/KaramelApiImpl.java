@@ -365,6 +365,7 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setUrlBinary((String) attributes.getValue(repoName + "/url"));
     ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
+    ec.setDefaultAttributes(attributes.getExperimentContextFormat());
     ArrayList<YamlDependency> deps = kf.getDependencies();
     Set<String> localSet = new HashSet<>();
     Set<String> globalSet = new HashSet<>();

@@ -121,7 +121,8 @@ angular.module('main.module')
       self.setTickedRepo = function() {
         if (self.repos !== null) {
           for (var i = 0, len = self.repos.length; i < len; i++) {
-            if (self.repos[i].ticked === true) {
+            if (self.repos[i].ticked ===
+                true) {
               self.repo.name = self.repos[i].name;
               break;
             }
