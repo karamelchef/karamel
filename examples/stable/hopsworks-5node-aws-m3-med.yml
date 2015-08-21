@@ -1,0 +1,52 @@
+name: HopsWorksC32x
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
+    branch: "master"  
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+
+attrs:
+  hops:
+    use_hopsworks: "true"
+  hdfs:
+    user: glassfish
+  hadoop:
+    yarn: 
+        user: glassfish
+    mr: 
+        user: glassfish
+
+groups: 
+  server:
+    size: 1 
+    recipes:                                                                    
+        - ndb::mysqld                                                       
+        - ndb::mgmd
+        - ndb::memcached
+        - hops::client
+        - hopsworks
+  metadatanodes:
+    size: 1
+    recipes: 
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - hops::jhs                                                            
+  dbnodes:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  datanodes:
+    size: 2
+    recipes: 
+        - hops::dn
+        - hops::nm

@@ -265,7 +265,7 @@ public class Settings {
 
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
-  public static final int SSH_CONNECTION_RETRY_NUM = 2;
+  public static final int SSH_CONNECTION_RETRY_NUM = 10;
   public static final int SSH_CMD_RETRY_NUM = 2;
   public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
