@@ -104,7 +104,7 @@ public class SshMachine implements MachineInterface, Runnable {
 
   @Override
   public void run() {
-    logger.info(String.format("Started SSH_Machine to '%s' d'-'", machineEntity.getId()));
+    logger.info(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
     try {
       while (!stopping) {
         try {
@@ -117,20 +117,24 @@ public class SshMachine implements MachineInterface, Runnable {
                   machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
                 }
                 this.activeTask = taskQueue.take();
-                logger.debug("Taking a new task from the queue.");
+                logger.debug(String.format("%s: Taking a new task from the queue.", machineEntity.getId()));
                 machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
               } else {
-                logger.debug("Retrying a task that didn't complete on last execution attempt.");
+                logger.debug(
+                    String.format("%s: Retrying a task that didn't complete on last execution attempt.",
+                        machineEntity.getId()));
               }
-              logger.debug(String.format("Task for execution.. '%s'", activeTask.getName()));
+              logger.debug(String.format("%s: Task for execution.. '%s'", machineEntity.getId(), activeTask.getName()));
               runTask(this.activeTask);
               this.activeTask = null;
             } catch (InterruptedException ex) {
               if (stopping) {
-                logger.info(String.format("Stopping SSH_Machine to '%s'", machineEntity.getId()));
+                logger.info(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
                 return;
               } else {
-                logger.error("Got interrupted without having recieved stopping signal");
+                logger.error(
+                    String.format("%s: Got interrupted without having recieved stopping signal",
+                        machineEntity.getId()));
               }
             }
           } else {
@@ -141,12 +145,14 @@ public class SshMachine implements MachineInterface, Runnable {
               Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
             } catch (InterruptedException ex) {
               if (!stopping) {
-                logger.error("Got interrupted without having recieved stopping signal");
+                logger.error(
+                    String.format("%s: Got interrupted without having recieved stopping signal",
+                        machineEntity.getId()));
               }
             }
           }
         } catch (Exception e) {
-          logger.error("", e);
+          logger.error(String.format("%s: ", machineEntity.getId()), e);
         }
       }
     } finally {
@@ -155,12 +161,12 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void enqueue(Task task) throws KaramelException {
-    logger.debug(String.format("Queuing '%s'", task.toString()));
+    logger.debug(String.format("%s: Queuing '%s'", machineEntity.getId(), task.toString()));
     try {
       taskQueue.put(task);
       task.queued();
     } catch (InterruptedException ex) {
-      String message = String.format("Couldn't queue task '%s' on machine '%s'", task.getName(), machineEntity.getId());
+      String message = String.format("%s: Couldn't queue task '%s'", machineEntity.getId(), task.getName());
       task.failed(message);
       throw new KaramelException(message, ex);
     }
@@ -177,7 +183,7 @@ public class SshMachine implements MachineInterface, Runnable {
           runSshCmd(cmd, task);
 
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-            task.failed(String.format("Incompleted command '%s", cmd.getCmdStr()));
+            task.failed(String.format("%s: Incompleted command '%s", machineEntity.getId(), cmd.getCmdStr()));
             break;
           } else {
             try {
@@ -187,7 +193,7 @@ public class SshMachine implements MachineInterface, Runnable {
                 task.downloadExperimentResults(this);
               }
             } catch (KaramelException ex) {
-              logger.error("Error in collecting/downloading the results", ex);
+              logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()), ex);
               task.failed(ex.getMessage());
             }
           }
@@ -227,7 +233,7 @@ public class SshMachine implements MachineInterface, Runnable {
         LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
       } catch (ConnectionException | TransportException ex) {
         if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
-          logger.error(String.format("Couldn't excecute command on client '%s' ", machineEntity.getId()), ex);
+          logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
         }
       } finally {
         // Retry if we have a network problem
@@ -237,7 +243,8 @@ public class SshMachine implements MachineInterface, Runnable {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
             if (!stopping) {
-              logger.warn("Interrupted waiting to retry a task. Continuing...");
+              logger.warn(
+                  String.format("%s: Interrupted waiting to retry a task. Continuing...", machineEntity.getId()));
             }
           }
           timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
@@ -248,7 +255,7 @@ public class SshMachine implements MachineInterface, Runnable {
       try {
         session.close();
       } catch (TransportException | ConnectionException ex) {
-        logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+        logger.error(String.format("%s: Couldn't close ssh session", machineEntity.getId()), ex);
       }
     }
 
@@ -280,7 +287,7 @@ public class SshMachine implements MachineInterface, Runnable {
           ? client.loadKeys(serverPrivateKey, serverPubKey, null)
           : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
 
-      logger.info(String.format("connecting to '%s'...", machineEntity.getId()));
+      logger.info(String.format("%s: connecting ...", machineEntity.getId()));
 
       int numRetries = 3;
       int timeBetweenRetries = 2000;
@@ -291,47 +298,52 @@ public class SshMachine implements MachineInterface, Runnable {
         try {
           client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
         } catch (IOException ex) {
-          logger.warn(String.format("Opps!! coudln' t connect to '%s' :@", machineEntity.getId()));
+          logger.warn(String.format("%s: Opps!! coudln' t connect :@", machineEntity.getId()));
           if (passphrase != null && passphrase.isEmpty() == false) {
             if (numRetries > 1) {
-              logger.warn(String.format("Could be a slow network, will retry. "));
+              logger.warn(String.format("%s: Could be a slow network, will retry. ", machineEntity.getId()));
             } else {
-              logger.warn(String.format("Could be a network problem. But if your network is fine,"
-                  + "then you have probably entered an incorrect the passphrase for your private key."));
+              logger.warn(String.format("%s: Could be a network problem. But if your network is fine,"
+                  + "then you have probably entered an incorrect the passphrase for your private key.",
+                  machineEntity.getId()));
             }
           }
           logger.debug(ex);
         }
         if (client.isConnected()) {
           succeeded = true;
-          logger.info(String.format("Yey!! connected to '%s' ^-^", machineEntity.getId()));
+          logger.info(String.format("%s: Yey!! connected ^-^", machineEntity.getId()));
           machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH,
               machineEntity.getPublicIp()));
           client.authPublickey(machineEntity.getSshUser(), keys);
           machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
           return true;
         } else {
-          logger.error(String.format("Mehh!! no connection to '%s', is the port '%d' open?", machineEntity.getId(),
-              machineEntity.getSshPort()));
-          if (passphrase != null) {
-            logger.warn(String.format("Is the passphrase for your private key correct?"));
-          }
           machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
         }
-
+        
         numRetries--;
         if (!succeeded) {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            logger.error("", ex);
+            logger.error(String.format(""), ex);
           }
           timeBetweenRetries *= scaleRetryTimeout;
         }
       }
 
+      if (!succeeded) {
+        String message = String.format("%s: Mehh!! no connection, is the port '%d' open?", machineEntity.getId(),
+            machineEntity.getSshPort());
+        if (passphrase != null) {
+          message += " or is the passphrase for your private key correct?";
+        }
+        logger.error(message);
+      }
+
     } catch (UserAuthException ex) {
-      String message = "Authentication problem using ssh keys.";
+      String message = String.format("%s: Authentication problem using ssh keys.", machineEntity.getId());
       if (passphrase != null) {
         message = message + " Is the passphrase for your private key correct?";
       }
@@ -346,7 +358,7 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void disconnect() {
-    logger.info(String.format("Closing ssh session to '%s'", machineEntity.getId()));
+    logger.info(String.format("%s: Closing ssh session", machineEntity.getId()));
     try {
       if (client != null && client.isConnected()) {
         client.close();
@@ -383,7 +395,8 @@ public class SshMachine implements MachineInterface, Runnable {
       if (overwrite) {
         f.delete();
       } else {
-        throw new KaramelException(String.format("Local file already exist %s", localFilePath));
+        throw new KaramelException(String.format("%s: Local file already exist %s",
+            machineEntity.getId(), localFilePath));
       }
     }
     // If the file doesn't exist, it should quickly throw an IOException
