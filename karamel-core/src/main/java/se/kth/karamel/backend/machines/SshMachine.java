@@ -354,8 +354,8 @@ public class SshMachine implements MachineInterface, Runnable {
       }
 
       if (!succeeded) {
-        String message = String.format("%s: Mehh!! no connection, is the port '%d' open?", machineEntity.getId(),
-            machineEntity.getSshPort());
+        String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?", 
+            machineEntity.getId(), machineEntity.getSshPort());
         if (passphrase != null) {
           message += " or is the passphrase for your private key correct?";
         }
