@@ -225,7 +225,6 @@ public class SshMachine implements MachineInterface, Runnable {
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
-            numSessionRetries--;
             try {
               Thread.sleep(timeBetweenRetries);
             } catch (InterruptedException exInterrupted) {
@@ -234,12 +233,22 @@ public class SshMachine implements MachineInterface, Runnable {
                     machineEntity.getId()));
               }
             }
+          } finally {
+            numSessionRetries--;
+            if (numSessionRetries != -1) {
+              logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
+              return;
+            }
+            if (session != null) {
+              try {
+                session.close();
+              } catch (TransportException | ConnectionException ex) {
+                logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+              }
+            }
           }
         }
-        if (numSessionRetries != -1) {
-          logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
-          return;
-        }
+
         Session.Command cmd = null;
         try {
           cmd = session.exec(shellCommand.getCmdStr());
