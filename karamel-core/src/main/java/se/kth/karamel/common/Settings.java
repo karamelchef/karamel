@@ -265,11 +265,11 @@ public class Settings {
 
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
-  public static final int SSH_CONNECTION_RETRY_NUM = 10;
+  public static final int SSH_SESSION_RETRY_NUM = 10;
   public static final int SSH_CMD_RETRY_NUM = 2;
   public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
-  public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
+  public static final int SSH_CMD_MAX_TIOMEOUT = 24 * 60; // minutes
 
   //Git cookbook metadata 
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";

@@ -207,7 +207,7 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private boolean runSshCmd(ShellCommand shellCommand, Task task) {
+  private void runSshCmd(ShellCommand shellCommand, Task task) {
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
@@ -216,44 +216,50 @@ public class SshMachine implements MachineInterface, Runnable {
     while (!stopping && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
-        logger.info(machineEntity.getId() + " => " + shellCommand.getCmdStr());
+        logger.info(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
 
-        int numConnectionRetries = Settings.SSH_CONNECTION_RETRY_NUM;
-        while (numConnectionRetries > 0) {
+        int numSessionRetries = Settings.SSH_SESSION_RETRY_NUM;
+        while (numSessionRetries > 0) {
           try {
             session = client.startSession();
-            numConnectionRetries = -1;
+            numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
-            logger.warn(String.format("Couldn't create ssh session to '%s' ", machineEntity.getId()), ex);
-            numConnectionRetries--;
+            logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
+            numSessionRetries--;
             try {
               Thread.sleep(timeBetweenRetries);
             } catch (InterruptedException exInterrupted) {
               if (!stopping) {
-                logger.warn("Interrupted while waiting to connect to a machine. Continuing...");
+                logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
+                    machineEntity.getId()));
               }
             }
           }
         }
-        if (numConnectionRetries != -1) {
-          return false;
+        if (numSessionRetries != -1) {
+          logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
+          return;
         }
-        Session.Command cmd = session.exec(shellCommand.getCmdStr());
-        cmd.join(Settings.SSH_CMD_LONGEST, TimeUnit.MINUTES);
-        updateHeartbeat();
-        if (cmd.getExitStatus() != 0) {
-          shellCommand.setStatus(ShellCommand.Status.FAILED);
-          // Retry just in case there was a network problem somewhere on the server side
-        } else {
-          shellCommand.setStatus(ShellCommand.Status.DONE);
-          finished = true;
+        Session.Command cmd = null;
+        try {
+          cmd = session.exec(shellCommand.getCmdStr());
+          cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
+          updateHeartbeat();
+          if (cmd.getExitStatus() != 0) {
+            shellCommand.setStatus(ShellCommand.Status.FAILED);
+            // Retry just in case there was a network problem somewhere on the server side
+          } else {
+            shellCommand.setStatus(ShellCommand.Status.DONE);
+            finished = true;
+          }
+          SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
+          LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
+        } catch (ConnectionException | TransportException ex) {
+          if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+            logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
+          }
         }
-        SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
-        LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
-      } catch (ConnectionException | TransportException ex) {
-        if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
-          logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
-        }
+
       } finally {
         // Retry if we have a network problem
         numCmdRetries--;
@@ -263,7 +269,7 @@ public class SshMachine implements MachineInterface, Runnable {
           } catch (InterruptedException ex) {
             if (!stopping) {
               logger.warn(
-                  String.format("%s: Interrupted waiting to retry a task. Continuing...", machineEntity.getId()));
+                  String.format("%s: Interrupted waiting to retry a command. Continuing...", machineEntity.getId()));
             }
           }
           timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
@@ -277,8 +283,6 @@ public class SshMachine implements MachineInterface, Runnable {
         }
       }
     }
-
-    return true;
   }
 
   private PasswordFinder getPasswordFinder() {
@@ -354,7 +358,7 @@ public class SshMachine implements MachineInterface, Runnable {
       }
 
       if (!succeeded) {
-        String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?", 
+        String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?",
             machineEntity.getId(), machineEntity.getSshPort());
         if (passphrase != null) {
           message += " or is the passphrase for your private key correct?";
