@@ -227,7 +227,7 @@ public class SshMachine implements MachineInterface, Runnable {
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
             numSessionRetries--;
-            if (numSessionRetries != -1) {
+            if (numSessionRetries == -1) {
               logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
               return;
             }
@@ -311,85 +311,87 @@ public class SshMachine implements MachineInterface, Runnable {
     };
   }
 
-  private boolean connect() throws KaramelException {
-    try {
-      KeyProvider keys;
-      client = new SSHClient();
-      client.addHostKeyVerifier(new PromiscuousVerifier());
-      client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
-      client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-      keys = (passphrase == null)
-          ? client.loadKeys(serverPrivateKey, serverPubKey, null)
-          : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
+  private void connect() throws KaramelException {
+    if (client == null || !client.isConnected()) {
+      try {
+        KeyProvider keys;
+        client = new SSHClient();
+        client.addHostKeyVerifier(new PromiscuousVerifier());
+        client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
+        client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
+        keys = (passphrase == null)
+            ? client.loadKeys(serverPrivateKey, serverPubKey, null)
+            : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
 
-      logger.info(String.format("%s: connecting ...", machineEntity.getId()));
+        logger.info(String.format("%s: connecting ...", machineEntity.getId()));
 
-      int numRetries = 3;
-      int timeBetweenRetries = 2000;
-      float scaleRetryTimeout = 1.0f;
-      boolean succeeded = false;
-      while (!succeeded && numRetries > 0) {
+        int numRetries = 3;
+        int timeBetweenRetries = 2000;
+        float scaleRetryTimeout = 1.0f;
+        boolean succeeded = false;
+        while (!succeeded && numRetries > 0) {
 
-        try {
-          client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
-        } catch (IOException ex) {
-          logger.warn(String.format("%s: Opps!! coudln' t connect :@", machineEntity.getId()));
-          if (passphrase != null && passphrase.isEmpty() == false) {
-            if (numRetries > 1) {
-              logger.warn(String.format("%s: Could be a slow network, will retry. ", machineEntity.getId()));
-            } else {
-              logger.warn(String.format("%s: Could be a network problem. But if your network is fine,"
-                  + "then you have probably entered an incorrect the passphrase for your private key.",
-                  machineEntity.getId()));
-            }
-          }
-          logger.debug(ex);
-        }
-        if (client.isConnected()) {
-          succeeded = true;
-          logger.info(String.format("%s: Yey!! connected ^-^", machineEntity.getId()));
-          machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH,
-              machineEntity.getPublicIp()));
-          client.authPublickey(machineEntity.getSshUser(), keys);
-          machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
-          return true;
-        } else {
-          machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
-        }
-
-        numRetries--;
-        if (!succeeded) {
           try {
-            Thread.sleep(timeBetweenRetries);
-          } catch (InterruptedException ex) {
-            logger.error(String.format(""), ex);
+            client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
+          } catch (IOException ex) {
+            logger.warn(String.format("%s: Opps!! coudln' t connect :@", machineEntity.getId()));
+            if (passphrase != null && passphrase.isEmpty() == false) {
+              if (numRetries > 1) {
+                logger.warn(String.format("%s: Could be a slow network, will retry. ", machineEntity.getId()));
+              } else {
+                logger.warn(String.format("%s: Could be a network problem. But if your network is fine,"
+                    + "then you have probably entered an incorrect the passphrase for your private key.",
+                    machineEntity.getId()));
+              }
+            }
+            logger.debug(ex);
           }
-          timeBetweenRetries *= scaleRetryTimeout;
-        }
-      }
+          if (client.isConnected()) {
+            succeeded = true;
+            logger.info(String.format("%s: Yey!! connected ^-^", machineEntity.getId()));
+            machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH,
+                machineEntity.getPublicIp()));
+            client.authPublickey(machineEntity.getSshUser(), keys);
+            machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
+            return;
+          } else {
+            machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
+          }
 
-      if (!succeeded) {
-        String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?",
-            machineEntity.getId(), machineEntity.getSshPort());
+          numRetries--;
+          if (!succeeded) {
+            try {
+              Thread.sleep(timeBetweenRetries);
+            } catch (InterruptedException ex) {
+              logger.error(String.format(""), ex);
+            }
+            timeBetweenRetries *= scaleRetryTimeout;
+          }
+        }
+
+        if (!succeeded) {
+          String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?",
+              machineEntity.getId(), machineEntity.getSshPort());
+          if (passphrase != null) {
+            message += " or is the passphrase for your private key correct?";
+          }
+          logger.error(message);
+        }
+
+      } catch (UserAuthException ex) {
+        String message = String.format("%s: Authentication problem using ssh keys.", machineEntity.getId());
         if (passphrase != null) {
-          message += " or is the passphrase for your private key correct?";
+          message = message + " Is the passphrase for your private key correct?";
         }
-        logger.error(message);
+        KaramelException exp = new KaramelException(message, ex);
+        machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH,
+            machineEntity.getPublicIp(), message));
+        throw exp;
+      } catch (IOException e) {
+        throw new KaramelException(e);
       }
-
-    } catch (UserAuthException ex) {
-      String message = String.format("%s: Authentication problem using ssh keys.", machineEntity.getId());
-      if (passphrase != null) {
-        message = message + " Is the passphrase for your private key correct?";
-      }
-      KaramelException exp = new KaramelException(message, ex);
-      machineEntity.getGroup().getCluster().issueFailure(new Failure(Failure.Type.SSH_KEY_NOT_AUTH,
-          machineEntity.getPublicIp(), message));
-      throw exp;
-    } catch (IOException e) {
-      throw new KaramelException(e);
+      return;
     }
-    return false;
   }
 
   public void disconnect() {
@@ -402,16 +404,13 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  public boolean ping() throws KaramelException {
+  public void ping() throws KaramelException {
     if (lastHeartbeat < System.currentTimeMillis() - Settings.SSH_PING_INTERVAL) {
       if (client != null && client.isConnected()) {
         updateHeartbeat();
-        return true;
       } else {
-        return connect();
+        connect();
       }
-    } else {
-      return true;
     }
   }
 
