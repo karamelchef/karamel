@@ -205,7 +205,7 @@
             <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 pull-left" ng-click="$scope.status.experiment[$index].status = !$scope.status.experiment[$index].status">
               <i class="glyphicon" ng-class="{'glyphicon-chevron-down': $scope.status.experiment[$index].status, 'glyphicon-chevron-right': !$scope.status.experiment[$index].status}"></i>
             </span>
-            <span class="col-md-4 col-lg-4">{{experiment.githubRepo}}::{{exp.name}}</span>
+            <span class="col-md-8 col-lg-8">{{experiment.githubRepo}}::{{exp.name}}</span>
             <span class="col-xs-1 col-sm-1 col-md-1 col-lg-1 text-center pull-right" 
                   ng-click="removeExperiment(exp.name)">
               <i class="glyphicon glyphicon-minus"></i>

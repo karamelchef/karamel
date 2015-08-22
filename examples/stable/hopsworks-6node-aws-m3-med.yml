@@ -1,6 +1,6 @@
-name: HopsWorksC32x
+name: HopsWorks5Node
 ec2:
-    type: m3.medium
+    type: m3.large
     region: eu-west-1
 
 cookbooks:                                                                      
@@ -32,11 +32,12 @@ groups:
         - ndb::mysqld                                                       
         - ndb::mgmd
         - ndb::memcached
-        - hops::client
+        - hops::ndb
         - hopsworks
   metadatanodes:
     size: 1
     recipes: 
+        - ndb::client
         - hops::ndb
         - hops::rm
         - hops::nn
@@ -48,5 +49,7 @@ groups:
   datanodes:
     size: 2
     recipes: 
+        - ndb::client
+        - hops::ndb
         - hops::dn
         - hops::nm
