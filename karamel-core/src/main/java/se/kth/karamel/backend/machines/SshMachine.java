@@ -218,6 +218,7 @@ public class SshMachine implements MachineInterface, Runnable {
       try {
         logger.info(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
 
+        //there is no harm of retrying to start session several times for running a command
         int numSessionRetries = Settings.SSH_SESSION_RETRY_NUM;
         while (numSessionRetries > 0) {
           try {
@@ -225,25 +226,25 @@ public class SshMachine implements MachineInterface, Runnable {
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
-            try {
-              Thread.sleep(timeBetweenRetries);
-            } catch (InterruptedException exInterrupted) {
-              if (!stopping) {
-                logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
-                    machineEntity.getId()));
-              }
-            }
-          } finally {
             numSessionRetries--;
             if (numSessionRetries != -1) {
               logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
               return;
             }
+            //make sure to relese the session in case of exception to avoid to many session leak problem
             if (session != null) {
               try {
                 session.close();
-              } catch (TransportException | ConnectionException ex) {
+              } catch (TransportException | ConnectionException ex2) {
                 logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
+              }
+            }
+            try {
+              Thread.sleep(timeBetweenRetries);
+            } catch (InterruptedException ex3) {
+              if (!stopping) {
+                logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
+                    machineEntity.getId()));
               }
             }
           }
@@ -283,6 +284,7 @@ public class SshMachine implements MachineInterface, Runnable {
           }
           timeBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
         }
+        //regardless of sucess or fail we must release the session in each iteration of retrying the command
         if (session != null) {
           try {
             session.close();
