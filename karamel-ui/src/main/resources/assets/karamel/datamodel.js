@@ -5,6 +5,7 @@ function Cluster() {
   this.groups = [];
   this.ec2 = null;
   this.gce = null;
+  this.nova = null;
   this.baremetal = null;
   this.sshKeyPair = null;
 
@@ -54,6 +55,7 @@ function Cluster() {
     this.name = other.name;
     this.loadEc2(this, other["ec2"]);
     this.loadGce(this, other["gce"]);
+    this.loadNova(this, other["nova"]);
     this.loadBaremetal(this, other["baremetal"]);
     this.loadSshKeyPair(this, null);
     this.loadGroups(this, other["groups"]);
@@ -73,6 +75,12 @@ function Cluster() {
       this.gce.copy(other.gce);
     } else
       this.gce = null;
+
+    if (other.nova !== null) {
+      this.nova = new Nova();
+      this.nova.copy(other.gce);
+    } else
+      this.nova = null;
 
     if (other.baremetal !== null) {
       this.baremetal = new Baremetal();
@@ -127,6 +135,15 @@ function Cluster() {
       container.gce = gce;
     } else
       container.gce = null;
+  };
+
+  this.loadNova = function(container, provider) {
+    if (!(_.isUndefined(provider) || _.isNull(provider))) {
+      var nova = new Nova();
+      nova.load(provider);
+      container.nova = nova;
+    } else
+      container.nova = null;
   };
 
   this.loadBaremetal = function(container, provider) {
@@ -200,6 +217,18 @@ function Cluster() {
     return false;
   };
 
+  this.hasNova = function() {
+    if (this.nova)
+      return true;
+    else {
+      for (var i = 0; i < this.cookbooks; i++) {
+        if (cookbooks[i].nova)
+          return true;
+      }
+    }
+    return false;
+  };
+
   this.hasBaremetal = function() {
     if (this.baremetal)
       return true;
@@ -219,6 +248,9 @@ function Cluster() {
     }
     if (this.hasGce()) {
       result = result && this.gce.getIsValid();
+    }
+    if (this.hasNova()) {
+      result = result && this.nova.getIsValid();
     }
     result = result && this.sshKeyPair.getIsValid();
     return result;
@@ -340,6 +372,38 @@ function Gce() {
 // Inherit from the Provider.
 Gce.prototype = Object.create(Provider.prototype);
 
+function Nova() {
+  this.mapKey = "nova";
+  this.flavor = null;
+  this.region = null;
+  this.image = null;
+  this.endpoint = null;
+  this.accountName = null;
+  this.accountPass = null;
+
+  this.load = function(other) {
+    this.flavor = other.flavor || null;
+    this.region = other.region || null;
+    this.endpoint = other.endpoint || null;
+    this.image = other.image || null;
+  };
+
+  this.copy = function(other) {
+    this.flavor = other.flavor || null;
+    this.region = other.region || null;
+    this.endpoint = other.endpoint || null;
+    this.image = other.image || null;
+  };
+
+  this.addAccountDetails = function(other) {
+    this.accountName = other.accountName || null;
+    this.accountPass = other.accountPass || null;
+  };
+}
+
+// Inherit from the Provider.
+Nova.prototype = Object.create(Provider.prototype);
+
 function Baremetal() {
   this.mapKey = "baremetal";
   this.username = null;
@@ -458,6 +522,7 @@ function Group() {
   this.size = 0;
   this.ec2 = {};
   this.gce = {};
+  this.nova = {};
   this.baremetal = {};
   this.cookbooks = [];
 
@@ -471,6 +536,7 @@ function Group() {
     this.size = group.size;
     this.ec2 = group.ec2;
     this.gce = group.gce;
+    this.nova = group.nova;
     this.baremetal = group.baremetal;
   };
 
@@ -545,6 +611,14 @@ function toCoreApiFormat(uiCluster) {
     }
   }
 
+  function _addNova(container, provider) {
+    if (provider) {
+      var nova = new _Nova();
+      nova.load(provider);
+      container.nova = nova;
+    }
+  }
+
   function _addCookbooks(container, cookbooks) {
     for (var i = 0; i < cookbooks.length; i++) {
       var cookbook = new _Cookbook();
@@ -576,6 +650,7 @@ function toCoreApiFormat(uiCluster) {
     this.groups = null;
     this.ec2 = null;
     this.gce = null;
+    this.nova = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -596,6 +671,7 @@ function toCoreApiFormat(uiCluster) {
       this.name = other.name;
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
+      _addNova(this, other.nova);
       _addBaremetal(this, other.baremetal);
       _addCookbooks(this, other.cookbooks);
       _addGroups(this, other.groups);
@@ -681,6 +757,19 @@ function toCoreApiFormat(uiCluster) {
     this.load = function(other) {
       this.type = other.type || null;
       this.zone = other.zone || null;
+      this.image = other.image || null;
+    }
+  }
+
+  function _Nova(){
+    this.flavor = null;
+    this.region = null;
+    this.image = null;
+    this.endpoint = null;
+    this.load = function(other){
+      this.type = other.type || null;
+      this.flavor = other.flavor || null;
+      this.endpoint = other.endpoint || null;
       this.image = other.image || null;
     }
   }
