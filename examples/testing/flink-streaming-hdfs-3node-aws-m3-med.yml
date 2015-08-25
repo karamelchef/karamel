@@ -1,4 +1,4 @@
-name: FlinkStreamingZkKafka
+name: FlinkStreamingZookeeperKafka
 ec2:
     type: m3.medium
     region: eu-west-1
@@ -10,8 +10,8 @@ cookbooks:
     github: "hopshadoop/flink-chef"
   kzookeeper: 
     github: "hopshadoop/kzookeeper"
-  kkafka: 
-    github: "hopshadoop/kkafka"
+  kafka: 
+    github: "hopshadoop/kafka"
 
 attrs:
   flink:
@@ -22,10 +22,10 @@ groups:
     recipes: 
         - hadoop::nn
         - flink::jobmanager
-        - kkafka
   workers:
     size: 3
     recipes: 
         - hadoop::dn
         - flink::taskmanager
         - kzookeeper
+        - kafka
