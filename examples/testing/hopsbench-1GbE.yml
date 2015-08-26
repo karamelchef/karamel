@@ -2,6 +2,8 @@ name: Hops
 ec2:
     type: m3.medium
     region: eu-west-1
+    vpc: vpc-14d16271
+    subnet: subnet-ad9138f4
 
 cookbooks:                                                                      
   hops: 
