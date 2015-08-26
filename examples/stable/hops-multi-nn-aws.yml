@@ -24,7 +24,7 @@ groups:
         - ndb::mgmd
         - hops::rm
   metanodes:
-    size: 1 
+    size: 2
     recipes: 
         - ndb::mysqld
         - hops::ndb                                                          

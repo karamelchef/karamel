@@ -12,8 +12,8 @@ package se.kth.karamel.common;
  */
 public class Ec2Credentials {
   
-  private String accessKey;
-  private String secretKey;
+  private String accessKey="";
+  private String secretKey="";
 
   public String getSecretKey() {
     return secretKey;
