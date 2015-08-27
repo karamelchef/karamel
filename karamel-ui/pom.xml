@@ -53,7 +53,7 @@
                                         <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
                                         <preCp>lib\*.jar</preCp>
                                     </classPath>
-                                    <icon>favicon.ico</icon>
+                                    <icon>assets/favicon.ico</icon>
                                     <errTitle>Karamel Error</errTitle>
                                     <singleInstance>
                                         <mutexName>Karamel</mutexName>

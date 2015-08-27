@@ -36,6 +36,7 @@ angular.module('main.module')
       }
 
       initScope();
+      
 
     }]);
 

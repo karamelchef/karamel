@@ -50,10 +50,6 @@ public class ClusterService {
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
   }
-
-  public synchronized void saveYaml(String yaml) throws KaramelException {
-
-  }
   
   public synchronized void registerSudoAccountPassword(String password) {
     commonContext.setSudoAccountPassword(password);

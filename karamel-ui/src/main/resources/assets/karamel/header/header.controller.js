@@ -1,8 +1,9 @@
 'use strict';
 
 angular.module('main.module')
-  .controller('header.controller', ['SweetAlert', '$timeout', '$scope', '$rootScope', 'active-cluster.service', 'core-rest.service', '$location',
-    function(SweetAlert, $timeout, $scope, $rootScope, clusterService, coreService, $location) {
+  .controller('header.controller', ['SweetAlert', '$timeout', '$scope', '$rootScope', 'alert.service',
+'active-cluster.service', 'core-rest.service', '$location',
+    function(SweetAlert, $timeout, $scope, $rootScope, alertService, clusterService, coreService, $location) {
 
       var currentTimeout;
 
@@ -25,6 +26,19 @@ angular.module('main.module')
 
       $scope.switchToExperiment = function() {
         $location.path('/experiment');
+      };
+
+      $scope.saveYamlToDisk = function(){
+          
+        coreService.getCompleteYaml($scope.clusterService.getJsonForRest())
+                .success(function(data, status, headers, config) {
+                  var blob = new Blob([data.yml], {type: "text/plain;charset=utf-8"});
+                  saveAs(blob, clusterService.name().concat(".yml"));
+                })
+                .error(function(data, status, headers, config) {
+                      alertService.addAlert({type: 'danger', msg: 'Could not save the cluster definition.'});
+                });
+          
       };
 
       $scope.exitKaramel = function() {

@@ -20,6 +20,8 @@
             <li class="custom-font"><a href="#/yaml/open" click-directive>Load Definition</a></li>
             <li class="custom-font"><input type="file" id="yamlUploader" style="display: none"
                                            yaml-uploader></li>
+            <li class="divider" ng-show="clusterService.hasProvider()"></li>
+            <li class="custom-font"><a ng-click="saveYamlToDisk()" ng-show="clusterService.hasProvider()">Save</a></li>
             <li class="divider"></li>
             <li class="custom-font"><a ng-click="switchToTerminal()">Terminal</a> </li>
             <li class="divider"></li>
