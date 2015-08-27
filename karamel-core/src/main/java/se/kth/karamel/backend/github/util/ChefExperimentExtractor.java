@@ -73,7 +73,7 @@ public class ChefExperimentExtractor {
         String value = m.group(2);
         if (!name.isEmpty()) {
           cfs.put(name, value);
-          attrs.put(name, value);
+//          attrs.put(name, value);
         }
       }
     }
@@ -87,6 +87,17 @@ public class ChefExperimentExtractor {
           "group", experiment.getGroup(),
           "http_binaries", experiment.getUrlBinary()
       );
+ 
+      String str = experiment.getDefaultAttributes();
+      Pattern p = Pattern.compile("\\s*(.*)\\s*=\\s*(.*)\\s*");
+      Matcher m = p.matcher(str);
+      while (m.find()) {
+        String name = m.group(1);
+        String value = m.group(2);
+        if (!name.isEmpty()) {
+          attrs.put(name, value);
+        }
+      }     
 
       // Add all key-value pairs from the config files to the default attributes
       for (String key : attrs.keySet()) {
