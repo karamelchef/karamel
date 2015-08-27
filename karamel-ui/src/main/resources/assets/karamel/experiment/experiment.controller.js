@@ -240,8 +240,6 @@ angular.module('main.module')
           }
         });
 
-
-
       }
 
       $scope.toggleDropdown = function($event) {
@@ -263,6 +261,7 @@ angular.module('main.module')
               $scope.experiment.urlGitClone = "https://github.com:" + result.githubOwner
                 + "/" + result.githubRepo + ".git";
               $scope.experiment.description = result.description;
+              $scope.experiment.defaultAttributes = "user=" + $scope.experiment.user + "\ngroup=" + $scope.experiment.group;
               $scope.landing = false;
             }
           });

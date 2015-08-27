@@ -17,32 +17,8 @@ group node[:%%cookbook%%][:group] do
 end
 
 
-# See ark resource here: https://github.com/burtlo/ark
-# It will: fetch it to to /var/cache/chef/
-# unpack it to the default path (/usr/local/XXX-1.2.3)
-# create a symlink for :home_dir (/usr/local/XXX) 
-# add /user/local/XXX/bin to the enviroment PATH variable
-#  ark '%%name%%' do
-#    url node[:%%name%%][:url]
-#    version node[:%%name%%][:version]
-#    path node[:%%name%%][:version_dir]
-#    home_dir node[:%%name%%][:home_dir]
-#    %%checksum%%
-#    append_env_path true
-#    owner node[:%%name%%][:user]
-#  end
-
-# bash "experiment_install_bash" do
-#     user "root"
-#     code <<-EOF
-# Do something here...
-# touch #{node[:%%cookbook%%][:version_dir]}/.installed
-# EOF
-#   not_if { ::File.exists?( "#{node[:%%cookbook%%][:version_dir]}/.installed" ) }
-# end
-
-#my_private_ip= my_private_ip()
-#my_public_ip= my_public_ip()
+private_ip = my_private_ip()
+public_ip = my_public_ip()
 
 %%resolve_ips%%
 
