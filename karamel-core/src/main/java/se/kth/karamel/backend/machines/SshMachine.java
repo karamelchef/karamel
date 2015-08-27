@@ -182,7 +182,14 @@ public class SshMachine implements MachineInterface, Runnable {
           runSshCmd(cmd, task);
 
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-            task.failed(String.format("%s: Incompleted command '%s", machineEntity.getId(), cmd.getCmdStr()));
+            
+            // Filter out the sudo password from text propagated back to the User. Issue #113 in github.
+            String filteredStr = cmd.getCmdStr();
+            int pos = filteredStr.lastIndexOf("sudo -S");
+            if (pos != -1) {
+              filteredStr = filteredStr.substring(pos);
+            }
+            task.failed(String.format("%s: Command did not complete: '%s", machineEntity.getId(), filteredStr));
             break;
           } else {
             try {
