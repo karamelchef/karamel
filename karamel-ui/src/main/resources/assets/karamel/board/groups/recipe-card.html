@@ -4,7 +4,7 @@
 <div>
   <div class="row">
     <div class="col-sm-10">
-      <span  class="recipe-title">{{recipe.title| limitTo: 24}}{{ recipe.title > 24 ? '..' : ''}}</span>
+      <span class="recipe-title">{{recipe.title| limitTo: 24}}{{ recipe.title > 24 ? '..' : ''}}</span>
     </div>
     <div class="col-sm-2">
       <a data-no-drag class=" removeRecipe pull-right btn btn-xs" ng-click="clusterService.removeRecipe(column, cookbook, recipe)"><span

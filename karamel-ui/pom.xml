@@ -53,7 +53,7 @@
                                         <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
                                         <preCp>lib\*.jar</preCp>
                                     </classPath>
-                                    <icon>icons/karamel.ico</icon>
+                                    <icon>favicon.ico</icon>
                                     <errTitle>Karamel Error</errTitle>
                                     <singleInstance>
                                         <mutexName>Karamel</mutexName>
@@ -66,14 +66,6 @@
                                         <maxHeapSize>1024</maxHeapSize>
                                         <runtimeBits>64/32</runtimeBits>
                                     </jre>
-                                    <!--
-                                        <splash>
-                                        <file>icons/karamel-logo.bmp</file>
-                                        <waitForWindow>false</waitForWindow>
-                                        <timeout>2</timeout>
-                                        <timeoutErr>false</timeoutErr>
-                                        </splash>
-                                    -->
                                     <versionInfo>
                                         <fileVersion>0.0.0.1</fileVersion>
                                         <txtFileVersion>Karamel</txtFileVersion>
