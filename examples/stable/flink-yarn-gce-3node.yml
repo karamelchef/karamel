@@ -22,7 +22,6 @@ groups:
     recipes: 
         - hadoop::nn
         - hadoop::rm
-        - hadoop::jhs
         - flink::jobmanager
         - flink::wordcount
   datanodes:
