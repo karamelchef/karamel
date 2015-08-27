@@ -1,0 +1,31 @@
+name: Hops                                                  
+ec2:
+    type: m3.large
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+    
+groups: 
+  datanodes:
+    size: 2 
+    recipes: 
+        - ndb::ndbd
+        - hops::dn
+        - hops::nm
+  mgmnodes:
+    size: 1 
+    recipes: 
+        - ndb::mgmd
+        - hops::rm
+  metanodes:
+    size: 2
+    recipes: 
+        - ndb::mysqld
+        - hops::ndb                                                          
+        - hops::nn

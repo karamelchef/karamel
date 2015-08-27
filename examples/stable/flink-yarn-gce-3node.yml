@@ -1,8 +1,9 @@
 name: FlinkWithHadoop27
-ec2:
-    type: m3.medium
-    region: eu-west-1
-    
+gce:
+  type: n1-standard-1
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
+
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
@@ -27,5 +28,5 @@ groups:
     size: 2
     recipes: 
         - hadoop::dn
-        - hadoop::nm
+        - hadoop::rm
         - flink::taskmanager
