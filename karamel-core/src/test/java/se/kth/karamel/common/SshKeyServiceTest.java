@@ -5,7 +5,10 @@
  */
 package se.kth.karamel.common;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.Ignore;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -22,6 +25,10 @@ public class SshKeyServiceTest {
 
 //  @Test
   public void testGenerateKeys() {
-    SshKeyService.generateAndStoreSshKeys("HopsHup");
+    try {
+      SshKeyService.generateAndStoreSshKeys("HopsHup");
+    } catch (KaramelException ex) {
+      Logger.getLogger(SshKeyServiceTest.class.getName()).log(Level.SEVERE, null, ex);
+    }
   }
 }
