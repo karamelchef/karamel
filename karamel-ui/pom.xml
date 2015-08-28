@@ -356,7 +356,7 @@
                 </executions>
             </plugin>
 
-            <plugin>
+<!--            <plugin>
                 <groupId>com.pyx4me</groupId>
                 <artifactId>proguard-maven-plugin</artifactId>
                 <executions>
@@ -381,7 +381,7 @@
                     </libs>
                     <addMavenDescriptor>false</addMavenDescriptor>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 

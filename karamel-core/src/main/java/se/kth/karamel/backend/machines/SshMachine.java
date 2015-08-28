@@ -35,6 +35,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 
 /**
  *
@@ -188,10 +189,14 @@ public class SshMachine implements MachineInterface, Runnable {
             break;
           } else {
             try {
-              task.collectResults(this);
+              if (task instanceof RunRecipeTask) {
+                task.collectResults(this);
               // If this task is an experiment, try and download the experiment results
-              if (cmd.getCmdStr().contains("experiment") && cmd.getCmdStr().contains("json")) {
-                task.downloadExperimentResults(this);
+                // In contrast with 'collectResults' - the results will not necessarly be json objects,
+                // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
+                if (cmd.getCmdStr().contains("experiment") && cmd.getCmdStr().contains("json")) {
+                  task.downloadExperimentResults(this);
+                }
               }
             } catch (KaramelException ex) {
               logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()), ex);
@@ -429,6 +434,8 @@ public class SshMachine implements MachineInterface, Runnable {
   @Override
   public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite)
       throws KaramelException, IOException {
+
+    connect();
     SCPFileTransfer scp = client.newSCPFileTransfer();
     File f = new File(localFilePath);
     f.mkdirs();
@@ -443,5 +450,6 @@ public class SshMachine implements MachineInterface, Runnable {
     }
     // If the file doesn't exist, it should quickly throw an IOException
     scp.download(remoteFilePath, localFilePath);
+//                    client.newSCPFileTransfer().download(remoteFilePath, localFilePath);
   }
 }
