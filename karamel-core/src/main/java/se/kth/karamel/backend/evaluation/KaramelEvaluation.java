@@ -3,6 +3,7 @@ package se.kth.karamel.backend.evaluation;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
@@ -17,6 +18,7 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class KaramelEvaluation {
 
+  private static final Logger logger = Logger.getLogger(KaramelEvaluation.class);
   public static final String NUM_VM_PARAM = "numvm";
   static KaramelApi api = new KaramelApiImpl();
 
@@ -60,7 +62,7 @@ public class KaramelEvaluation {
       if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
         api.processCommand("purge " + clusterName);
       }
-      System.out.println(api.processCommand("status").getResult());
+      logger.info(api.processCommand("status").getResult());
       Thread.sleep(30000);
     }
   }
