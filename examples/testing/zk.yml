@@ -1,0 +1,15 @@
+name: FlinkStreamingZkKafka
+ec2:
+    type: m3.medium
+    region: eu-west-1
+    
+cookbooks:                                                                      
+  kzookeeper: 
+    github: "hopshadoop/kzookeeper"
+    branch: "master"
+
+groups: 
+  zks:
+    size: 3
+    recipes: 
+        - kzookeeper

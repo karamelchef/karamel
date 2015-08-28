@@ -1,0 +1,26 @@
+name: spark
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+  spark: 
+    github: "hopshadoop/spark-chef"
+    branch: "master"
+
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs
+        - spark::master
+  datanodes:
+    size: 2
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm
+        - spark::slave

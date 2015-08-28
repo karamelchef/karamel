@@ -1,0 +1,38 @@
+name: HopsWorks
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/apache-hadoop-chef"
+    branch: "master"   
+  hopsworks:   
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hopsworks-chef"
+    branch: "master"  
+  ndb:
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/ndb-chef"
+    branch: "master"
+
+groups: 
+  hopsworks:
+    size: 1 
+    recipes:                                                                    
+        - ndb::mysqld                                                       
+        - ndb::mgmd
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs                                                            
+        - hopsworks
+  ndb:
+    size: 2 
+    recipes: 
+        - ndb::ndbd
+  datanodes:
+    size: 1 
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm

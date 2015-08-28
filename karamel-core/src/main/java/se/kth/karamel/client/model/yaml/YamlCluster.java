@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.client.model.yaml;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,8 +13,10 @@ import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 
 /**
  *
@@ -28,17 +31,23 @@ public class YamlCluster extends YamlScope {
   public YamlCluster() {
   }
 
-  public YamlCluster(JsonCluster jsonCluster) throws MetadataParseException {
+  public YamlCluster(JsonCluster jsonCluster) throws MetadataParseException, KaramelException {
     super(jsonCluster);
     this.name = jsonCluster.getName();
     List<JsonGroup> jsonGroups = jsonCluster.getGroups();
+    List<JsonCookbook> allCbs = new ArrayList<>();
     for (JsonGroup jsonGroup : jsonGroups) {
       YamlGroup yamlGroup = new YamlGroup(jsonGroup);
+      allCbs.addAll(jsonGroup.getCookbooks());
       groups.put(jsonGroup.getName(), yamlGroup);
     }
-    List<JsonCookbook> jsonCookbooks = jsonCluster.getCookbooks();
-    for (JsonCookbook jck : jsonCookbooks) {
-      Cookbook ck = new Cookbook(jck);
+    allCbs.addAll(jsonCluster.getCookbooks());
+    for (JsonCookbook jck : allCbs) {
+      Cookbook ck = new Cookbook();
+      KaramelizedCookbook kc = jck.getKaramelizedCookbook();
+      ck.setBranch(kc.getUrls().branch);
+      ck.setCookbook(kc.getUrls().cookbookRelPath);
+      ck.setGithub(kc.getUrls().orgRepo);
       cookbooks.put(jck.getName(), ck);
     }
   }

@@ -39,7 +39,7 @@ public class UserClusterDataExtractor {
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {
-          String cbid = jc.getUrls().id;
+          String cbid = jc.getId();
           KaramelizedCookbook cb = CookbookCache.get(cbid);
           MetadataRb metadataRb = cb.getMetadataRb();
           List<Recipe> recipes = metadataRb.getRecipes();
@@ -121,9 +121,13 @@ public class UserClusterDataExtractor {
     Set<String> paths = new HashSet<>();
     for (JsonGroup gr : cluster.getGroups()) {
       for (JsonCookbook cb : gr.getCookbooks()) {
-        CookbookUrls urls = cb.getUrls();
-        paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + urls.repoName + Settings.SLASH + 
-            Settings.COOKBOOKS_VENDOR_SUBFOLDER);
+        CookbookUrls urls = cb.getKaramelizedCookbook().getUrls();
+        String cookbookPath = urls.repoName;
+        if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
+          cookbookPath += Settings.SLASH + urls.cookbookRelPath;
+        }
+        paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
+            + Settings.COOKBOOKS_VENDOR_SUBFOLDER);
       }
     }
     Object[] arr = paths.toArray();

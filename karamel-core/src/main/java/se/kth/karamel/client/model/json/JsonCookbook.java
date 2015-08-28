@@ -5,44 +5,63 @@
  */
 package se.kth.karamel.client.model.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import se.kth.karamel.client.model.Cookbook;
+import se.kth.karamel.client.api.CookbookCache;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 
 /**
  *
  * @author kamal
  */
-public class JsonCookbook extends Cookbook {
+public class JsonCookbook {
 
-  String name;
-  Map<String, String> attrs = new HashMap<>();
+  String id;
+  String alias;
+  //values of attrs could be string or array of string 
+  Map<String, Object> attrs = new HashMap<>();
   Set<JsonRecipe> recipes = new HashSet<>();
-  
+  @JsonIgnore
+  KaramelizedCookbook karamelizedCookbook;
+
   public JsonCookbook() {
   }
 
-  public JsonCookbook(Cookbook cb, String name, Map<String, String> attrs) {
-    super(cb);
-    this.name = name;
+  public JsonCookbook(String id, String alias, Map<String, Object> attrs) {
+    this.id = id;
+    this.alias = alias;
     this.attrs = attrs;
   }
 
-  public String getName() {
-    return name;
+  public String getName() throws KaramelException {
+    return getKaramelizedCookbook().getMetadataRb().getName();
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public String getId() {
+    return id;
   }
 
-  public Map<String, String> getAttrs() {
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getAlias() {
+    return alias;
+  }
+
+  public void setAlias(String alias) {
+    this.alias = alias;
+  }
+  
+  public Map<String, Object> getAttrs() {
     return attrs;
   }
 
-  public void setAttrs(Map<String, String> attrs) {
+  public void setAttrs(Map<String, Object> attrs) {
     this.attrs = attrs;
   }
 
@@ -53,5 +72,12 @@ public class JsonCookbook extends Cookbook {
   public void setRecipes(Set<JsonRecipe> recipes) {
     this.recipes = recipes;
   }
-  
+
+  public KaramelizedCookbook getKaramelizedCookbook() throws KaramelException {
+    if (karamelizedCookbook == null) {
+      karamelizedCookbook = CookbookCache.get(id);
+    }
+    return karamelizedCookbook;
+  }
+
 }

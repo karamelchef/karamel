@@ -65,12 +65,15 @@ public final class Ec2Launcher extends Launcher {
 
   public static Ec2Context validateCredentials(Ec2Credentials credentials) throws InvalidEc2CredentialsException {
     try {
+      if (credentials.getAccessKey().isEmpty() || credentials.getSecretKey().isEmpty()) {
+        throw new InvalidEc2CredentialsException("Ec2 credentials empty - not entered yet.");
+      }
       Ec2Context cxt = new Ec2Context(credentials);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
       return cxt;
     } catch (AuthorizationException e) {
-      throw new InvalidEc2CredentialsException("accountid:" + credentials.getAccessKey(), e);
+      throw new InvalidEc2CredentialsException(e.getMessage() + " - accountid:" + credentials.getAccessKey(), e);
     }
   }
 

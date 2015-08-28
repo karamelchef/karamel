@@ -5,7 +5,12 @@
  */
 package se.kth.karamel.client.api;
 
+import java.util.List;
+import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
+import se.kth.karamel.backend.github.GithubUser;
+import se.kth.karamel.backend.github.OrgItem;
+import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -26,9 +31,9 @@ public interface KaramelApi {
   public String commandCheatSheet() throws KaramelException;
 
   /**
-   * Parses the command, if valid fetches the result in string, result could have different 
-   * formatting depends on the command.
-   * 
+   * Parses the command, if valid fetches the result in string, result could have different formatting depends on the
+   * command.
+   *
    * @param command
    * @param args
    * @return
@@ -67,7 +72,6 @@ public interface KaramelApi {
   /**
    * Loads Karamel common keys
    *
-   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -77,7 +81,6 @@ public interface KaramelApi {
    * Loads cluster specific keys
    *
    * @param clusterName
-   * @param passphrase user-supplied password for ssh private key
    * @return
    * @throws KaramelException
    */
@@ -85,43 +88,48 @@ public interface KaramelApi {
 
   /**
    * Generates a common ssh keys in the karamel folder
+   *
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
-  
+
   /**
    * Generates cluster specific ssh keys
+   *
    * @param clusterName
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
    * Register ssh keys for the current runtime of karamel
+   *
    * @param keypair
-   * @return 
-   * @throws KaramelException 
+   * @return
+   * @throws KaramelException
    */
   public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
-  
+
   /**
    * Register ssh keys for the specified cluster
+   *
    * @param clusterName
    * @param keypair
-   * @return 
-   * @throws KaramelException 
+   * @return
+   * @throws KaramelException
    */
   public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file
+   *
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
-  
+
   /**
    * Validates user's credentials before starting the cluster
    *
@@ -185,23 +193,103 @@ public interface KaramelApi {
    */
   public String getInstallationDag(String clusterName) throws KaramelException;
 
-  
   /**
    * Register password for Baremetal sudo account
+   *
    * @param password
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public void registerSudoPassword(String password) throws KaramelException;
-  
-  
+
   /**
    * Register username/password for github account
-   * @param email github account name or email address
+   *
+   * @param user github account name 
    * @param password github password
-   * @throws KaramelException 
+   * @return GithubUser Json object also containing primary github email address
+   * @throws KaramelException
    */
-  public void registerGithubAccount(String email, String password) throws KaramelException;
+  public GithubUser registerGithubAccount(String user, String password) throws KaramelException;
 
+  /**
+   * Load any existing credentials stored locally
+   *
+   * @return GithubUser object
+   * @throws KaramelException
+   */
+  public GithubUser loadGithubCredentials() throws KaramelException;
+
+  /**
+   * Lists the available repos in a github organization.
+   *
+   * @param organization
+   * @return List of available repos
+   * @throws KaramelException
+   */
+  public List<RepoItem> listGithubRepos(String organization) throws KaramelException;
+
+  /**
+   * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
+   *
+   * @return List of available orgs
+   * @throws KaramelException
+   */
+  public List<OrgItem> listGithubOrganizations() throws KaramelException;
+
+//  /**
+//   * Create a new github repo in an organization
+//   *
+//   * @param organization if organization is empty or null, create the repo for the authenticated user
+//   * @param repo the name of the repo to create
+//   * @param description of what's in the repository
+//   * @throws KaramelException
+//   */
+//  public void createGithubRepo(String organization, String repo, String description) throws KaramelException;
+  /**
+   * Add a file to an existing repo, commit it, and push it to github.
+   *
+   * @param experiment bash scripts and config files to add, commit, and push.
+   * @throws KaramelException
+   */
+  public void commitAndPushExperiment(Experiment experiment)
+      throws KaramelException;
+
+  /**
+   * Loads an experiment into the Designer, given its clone URL
+   * @param githubRepoUrl url for github repo
+   * @return Json object for the ExperimentContext
+   * @throws se.kth.karamel.common.exception.KaramelException 
+   */
+  public Experiment loadExperiment(String githubRepoUrl) throws KaramelException;
+
+  /**
+   *
+   * @param org github org name
+   * @param repo github repo name
+   * @param description repo description
+   * @return RepoItem bean/json containing name, description of repo.
+   * @throws KaramelException
+   */
+  public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
+
+  /**
+   * 
+   * @param owner
+   * @param repo
+   * @param experimentName
+   */
+  public void removeFileFromExperiment(String owner, String repo, String experimentName) ;
+
+  
+  /**
+   * 
+   * @param owner
+   * @param repo 
+   * @param removeGitHub 
+   * @param removeLocal 
+   */
+  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
+  
   public String loadGceCredentialsIfExist() throws KaramelException;
 
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;

@@ -37,7 +37,7 @@ public class JsonGroup extends JsonScope {
     this.size = group.getSize();
     List<String> recipes = group.getRecipes();
     for (String rec : recipes) {
-      String[] comp = rec.split(Settings.COOOKBOOK_DELIMITER);
+      String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
       JsonCookbook cookbook = null;
       for (JsonCookbook cb : getCookbooks()) {
         if (cb.getName().equals(comp[0])) {
@@ -58,11 +58,11 @@ public class JsonGroup extends JsonScope {
         getCookbooks().remove(cb);
       }
     }
-    Map<String, String> attrs = new HashMap<>();
+    Map<String, Object> attrs = new HashMap<>();
     attrs.putAll(group.flattenAttrs());
     for (JsonCookbook jc : cookbooks) {
-      Map<String, String> attrs1 = jc.getAttrs();
-      for (Map.Entry<String, String> entry : attrs1.entrySet()) {
+      Map<String, Object> attrs1 = jc.getAttrs();
+      for (Map.Entry<String, Object> entry : attrs1.entrySet()) {
         String key = entry.getKey();
         if (attrs.containsKey(key)) {
           attrs.remove(key);

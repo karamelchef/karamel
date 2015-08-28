@@ -1,0 +1,57 @@
+<div>
+  <form name = "credentialsForm" ng-submit="credentialsFormSubmit()" class="form-horizontal" novalidate>
+
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="close()">&times;</button>
+      <h4>Credentials Access Center</h4>
+    </div>
+
+    <div class="modal-body">
+
+      <launch-tabs>
+
+        <br>
+        <hr/>
+        <br>
+
+        <launch-ssh-pane title="SSH Key Pair" map-key="ssh" credentials-holder-map="credentialsHolderMap">
+        </launch-ssh-pane>
+
+        <launch-ec2-pane title = "Amazon Ec2" map-key="ec2" credentials-holder-map="credentialsHolderMap">
+        </launch-ec2-pane>
+
+        <launch-gce-pane title = "Google Compute Engine" map-key="gce" credentials-holder-map="credentialsHolderMap">
+        </launch-gce-pane>
+
+        <launch-summary-pane title="Summary" map-key="summary" credentials-holder-map="credentialsHolderMap">
+        </launch-summary-pane>
+
+      </launch-tabs>
+    </div>
+
+
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col-xs-8">
+          <div class="" style="color:tomato; text-align: left" ng-show="credentialsForm.accessKey.$dirty && credentialsForm.accessKey.$error.required || credentialsForm.secretKey.$dirty && credentialsForm.secretKey.$error.required">
+            <span>Missing Mandatory Fields in Provider.</span>
+          </div>
+          <div class="" style="color:tomato; text-align: left" ng-show="credentialsForm.privateKey.$dirty && credentialsForm.privateKey.$error.required || credentialsForm.publicKey.$dirty && credentialsForm.publicKey.$error.required">
+            <span>Missing Mandatory Fields in Ssh Section.</span>
+          </div>
+          <div class="" style="color:tomato; text-align: left" ng-show="!summaryValid">
+            <span>Please check faulty tabs in summary page.</span>
+          </div>
+
+        </div>
+        <div class="col-xs-4">
+          <button class="btn btn-default" ng-click="close()">Cancel</button>
+          <button class="btn btn-primary">Submit</button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+
+</div>

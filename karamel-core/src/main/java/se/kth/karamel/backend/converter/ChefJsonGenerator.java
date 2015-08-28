@@ -23,6 +23,7 @@ import se.kth.karamel.client.model.json.JsonCookbook;
 import se.kth.karamel.client.model.json.JsonGroup;
 import se.kth.karamel.client.model.json.JsonRecipe;
 import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -38,7 +39,7 @@ public class ChefJsonGenerator {
    * @return map of machineId-recipeName->json
    */
   public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, 
-      ClusterRuntime clusterEntity) {
+      ClusterRuntime clusterEntity) throws KaramelException {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
@@ -54,7 +55,7 @@ public class ChefJsonGenerator {
   }
 
   public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, 
-      GroupRuntime groupEntity) {
+      GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
     addCookbookAttributes(cb, json);
     for (MachineRuntime me : groupEntity.getMachines()) {
@@ -62,7 +63,7 @@ public class ChefJsonGenerator {
         JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getCanonicalName());
         groupJsons.put(me.getId() + recipe.getCanonicalName(), clone);
       }
-      String installRecipeName = cb.getName() + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+      String installRecipeName = cb.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
       JsonObject clone = addMachineNRecipeToJson(json, me, installRecipeName);
       groupJsons.put(me.getId() + installRecipeName, clone);
     }
@@ -93,11 +94,11 @@ public class ChefJsonGenerator {
   }
 
   public static void addCookbookAttributes(JsonCookbook jc, JsonObject root) {
-    Set<Map.Entry<String, String>> entrySet = jc.getAttrs().entrySet();
-    for (Map.Entry<String, String> entry : entrySet) {
+    Set<Map.Entry<String, Object>> entrySet = jc.getAttrs().entrySet();
+    for (Map.Entry<String, Object> entry : entrySet) {
       String[] keyComps = entry.getKey().split(Settings.ATTR_DELIMITER);
-      String valStr = entry.getValue();
-      Object value = valStr;
+      Object value = entry.getValue();
+//      Object value = valStr;
 //      if (valStr.startsWith("$")) {
 //        if (valStr.contains(".")) {
 //          value = cluster.getVariable(valStr.substring(1));
@@ -140,7 +141,7 @@ public class ChefJsonGenerator {
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
-            if (!recipe.getCanonicalName().endsWith(Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
+            if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
               String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PRIVATE_IPS;
               String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PUBLIC_IPS;
               if (!privateIps.containsKey(privateAttr)) {
@@ -162,7 +163,7 @@ public class ChefJsonGenerator {
   public static void attr2Json(JsonObject root, Map<String, Set<String>> attrs) {
     Set<Map.Entry<String, Set<String>>> entrySet = attrs.entrySet();
     for (Map.Entry<String, Set<String>> entry : entrySet) {
-      String[] keyComps = entry.getKey().split(Settings.COOOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
+      String[] keyComps = entry.getKey().split(Settings.COOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
       JsonObject o1 = root;
       for (int i = 0; i < keyComps.length; i++) {
         String comp = keyComps[i];

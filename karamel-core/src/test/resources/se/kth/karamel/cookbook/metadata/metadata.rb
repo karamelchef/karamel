@@ -1,5 +1,5 @@
 #link:Visit our {website,www.hops.io}
-name             'hopshub'
+name             'hopsworks'
 maintainer       "Jim Dowling"
 maintainer_email "jdowling@kth.se"
 license          "Apache v2.0"
@@ -15,36 +15,36 @@ depends 'glassfish'
 depends 'ndb'
 depends 'kagent'
 
-recipe  "hopshub::install", "Installs HopsHub/Glassfish"
-#link:Click {here,https://%host%:8181/hop-dashboard} to launch hopshub in your browser
+recipe  "hopsworks::install", "Installs HopsHub/Glassfish"
+#link:Click {here,https://%host%:8181/hop-dashboard} to launch hopsworks in your browser
 #link:Visit Karamel {here,www.karamel.io}
-recipe  "hopshub::default", "Installs HopsHub war file, starts glassfish+application."
+recipe  "hopsworks::default", "Installs HopsHub war file, starts glassfish+application."
 
-attribute "hopshub/smtp/server",
+attribute "hopsworks/smtp/server",
 :display_name => "Smtp server address for sending emails",
 :description => "Smtp server address for sending emails",
 :type => 'string',
 :default => "smtp.gmail.com"
 
-attribute "hopshub/smtp/port",
+attribute "hopsworks/smtp/port",
 :display_name => "Smtp server port for sending emails",
 :description => "Smtp server port for sending emails",
 :type => 'string',
 :default => "465"
 
-attribute "hopshub/smtp/secure",
+attribute "hopsworks/smtp/secure",
 :display_name => "Use SSL to Smtp server",
 :description => "Use SSL to Smtp server",
 :type => 'string',
 :default => "true"
 
-attribute "hopshub/smtp/username",
+attribute "hopsworks/smtp/username",
 :display_name => "Email account username",
 :description =>  "Email account username",
 :type => 'string',
 :default => "sodugling@gmail.com"
 
-attribute "hopshub/smtp/password",
+attribute "hopsworks/smtp/password",
 :display_name => "Email account password",
 :description =>  "Email account password",
 :type => 'string',

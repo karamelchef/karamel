@@ -1,0 +1,70 @@
+<div class="tab-pane" ng-show="selected">
+
+  <div class="form-group">
+    <label for="publicKey" class="control-label col-xs-3" style="text-align: left">Public Key Path</label>
+    <div class="col-xs-9">
+      <input type="text" class="form-control" name="publicKey" id="publicKey" required ng-model="sshKeyPair.pubKeyPath" placeholder="Public Key Path" tabindex="1" >
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="privateKey" class="control-label col-xs-3" style="text-align: left">Private Key Path</label>
+    <div class="col-xs-9">
+      <input type="text" class="form-control" name="privateKey" id="privateKey" required ng-model="sshKeyPair.privKeyPath" placeholder="Private Key Path" tabindex="2">
+    </div>
+  </div>
+
+  <div class="form-group">    
+    <label for="usingPassphrase" class="control-label col-xs-3" style="text-align: left">Advanced</label>
+    <div class="col-xs-9">
+      <input type="checkbox" id="keyPassphrase" name="KeyPassword" ng-model="advancedSsh" tabindex="3"/>
+    </div>
+  </div>
+
+  <div class="form-group row row-same-height" ng-show="advancedSsh">
+    <label for="keyPassphrase" class="control-label col-xs-3" style="text-align: left;">ssh key password?</label>
+    <div class="col-xs-6">
+      <input type="password" class="form-control" name="keyPassphrase" required ng-model="sshKeyPair.passphrase" placeholder="Password for ssh key" tabindex="4" ng-change="usingPassword()">
+    </div>
+    <div class="col-xs-1" ng-show="advancedSsh">
+      <span ng-show="sshPassphraseEnabled" class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>
+      <span ng-show="!sshPassphraseEnabled" class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>        
+    </div>      
+    <div class="col-xs-2 pull-right" ng-show="advancedSsh">
+      <button type="button" class="btn btn-default pull-right" ng-click="registerKeys()" tabindex="5">Validate</button>
+    </div>
+  </div>    
+
+  <div class="form-group row row-same-height" ng-show="advancedSsh">
+    <label for="sudoPassphrase" class="control-label col-xs-3" style="text-align: left;">sudo password?</label>
+    <div class="col-xs-6">
+      <input type="password" class="form-control" name="sudoPassphrase" required ng-model="sudoAccount.password" placeholder="sudo account password" tabindex="6">
+    </div>
+    <div class="col-xs-1" ng-show="advancedSsh">
+      <span ng-show="sudoPasswordEnabled" class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>
+      <span ng-show="!sudoPasswordEnabled" class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>        
+    </div>      
+    <div class="col-xs-2" ng-show="advancedSsh">
+      <button type="button" class="btn btn-default pull-right" ng-click="registerSudoPassword()" tabindex="7">Activate</button>
+    </div>
+  </div>        
+
+  <div class="form-group" ng-show="advancedSsh">    
+    <label for="generateKeys" class="control-label col-xs-3" style="text-align: left">No Local Keys?</label>
+    <div class="col-xs-3">
+      <button type="button" class="btn btn-default" ng-click="generateKeys()" tabindex="8">Generate Keys</button>
+    </div>
+  </div>
+
+
+  <div class="form-group">
+    <div class="col-xs-9">
+      <span ng-show="currentState == availableStates.success"><span class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>{{stateMessage.success}}</span>
+      <span ng-show="currentState == availableStates.failure"><span class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>{{stateMessage.failure}}</span>
+      <span ng-show="currentState == availableStates.initialWarn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>{{stateMessage.initialWarn}}</span>
+      <span ng-show="currentState == availableStates.userWarn"><span class="glyphicon glyphicon-exclamation-sign" style="color: darkgoldenrod; margin-top: 5px; margin-right:5px"></span>{{stateMessage.userWarn}}</span>
+    </div>
+
+  </div>
+
+</div>

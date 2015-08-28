@@ -8,9 +8,12 @@ package se.kth.karamel.common;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
 
@@ -22,11 +25,12 @@ public class Settings {
 
   //test
   public static boolean CB_CLASSPATH_MODE = false;
-  public static final String TEST_CB_ROOT_FOLDER = "cookbooks";
+  // files
+  public static boolean USE_CLONED_REPO_FILES = false;
 
   //read
   public static final String ATTR_DELIMITER = "/";
-  public static final String COOOKBOOK_DELIMITER = "::";
+  public static final String COOKBOOK_DELIMITER = "::";
   public static final String COOOKBOOK_FS_PATH_DELIMITER = "__";
   public static final String INSTALL_RECIPE = "install";
   public final static String CHEF_PRIVATE_IPS = "private_ips";
@@ -37,30 +41,41 @@ public class Settings {
   public static final String GITHUB_DOMAIN = "github.com";
   public static final String GITHUB_DEFAULT_BRANCH = "master";
   public static final String SLASH = "/";
+  public static final String DOLLAR = "$";
+  public static final String CARET = "^";
   public static final String GITHUB_RAW_DOMAIN = "raw.githubusercontent.com";
   public static final String GITHUB_BASE_URL = HTTPS_PREFIX + GITHUB_DOMAIN;
   public static final String GITHUB_RAW_URL = HTTPS_PREFIX + GITHUB_RAW_DOMAIN;
-  public static final String GITHUB_BASE_URL_PATTERN = "http(s)?://github.com";
-  public static final String GITHUB_DEFAULT_REPO_URL1 = GITHUB_BASE_URL + "/hopshadoop";
-  public static final String GITHUB_DEFAULT_REPO_URL2 = GITHUB_BASE_URL + "/karamelize";
-  public static final String GITHUB_DEFAULT_REPO_URL3 = GITHUB_BASE_URL + "/hopstart";
-  public static final String REPO_WITH_BRANCH_PATTERN = "[^\\/]*/[^\\/]*/tree/[^\\/]*";
-  public static final String REPO_NO_BRANCH_PATTERN = "[^\\/]*/[^\\/]*";
-  public static final String GITHUB_REPO_WITH_BRANCH_PATTERN = "^"
-      + GITHUB_BASE_URL_PATTERN + "/" + REPO_WITH_BRANCH_PATTERN + "$";
-  public static final String GITHUB_REPO_NO_BRANCH_PATTERN = "^"
-      + GITHUB_BASE_URL_PATTERN + "/" + REPO_NO_BRANCH_PATTERN + "$";
+  public static final String GITHUB_BASE_URL_PATTERN = "http(?:s)?:\\/\\/github.com";
+  public static final Pattern REPO_WITH_SUBCOOKBOOK_PATTERN
+      = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)\\/(.*)");
+  public static final Pattern REPO_WITH_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)");
+  public static final Pattern REPO_NO_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)");
+  public static final Pattern GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_SUBCOOKBOOK_PATTERN.pattern() + DOLLAR);
+  public static final Pattern GITHUB_REPO_WITH_BRANCH_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_BRANCH_PATTERN.pattern() + DOLLAR);
+  public static final Pattern GITHUB_REPO_NO_BRANCH_PATTERN = Pattern.compile(
+      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_NO_BRANCH_PATTERN.pattern() + DOLLAR);
   public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
-  public static final int SSH_CONNECT_RETRIES = 5;
-  public static final int SSH_CONNECT_INTERVALS = 5 * 1000;
-  public static final int SSH_PING_INTERVAL = 10 * 1000;
-  public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
   public static final int CLUSTER_STATUS_CHECKING_INTERVAL = 1000;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
-  public static final int SSH_CONNECTION_TIMEOUT = 24 * 3600 * 1000;
-  public static final int SSH_SESSION_TIMEOUT = 24 * 3600 * 1000;
+  public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
+  public static final int MACHINES_TASKQUEUE_SIZE = 100;
+
+  public static final int DAY_IN_MS = 24 * 3600 * 1000;
+  public static final int DAY_IN_MIN = 24 * 60;
+  public static final int SEC_IN_MS = 1000;
+  public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;  
+  public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;  
+  public static final int SSH_PING_INTERVAL = 10 * SEC_IN_MS; 
+  public static final int SSH_SESSION_RETRY_NUM = 10;
+  public static final int SSH_CMD_RETRY_NUM = 2;
+  public static final int SSH_CMD_RETRY_INTERVALS = 3 * SEC_IN_MS; 
+  public static final float SSH_CMD_RETRY_SCALE = 1.5f;
+  public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
 
   //Jcloud settings
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -81,7 +96,6 @@ public class Settings {
   //Providers 
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
-  //  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
@@ -102,6 +116,8 @@ public class Settings {
   public static final String AWS_SECRET_KEY = "aws.secret.key";
   public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
+  public static final String GITHUB_USER = "github.email";
+  public static final String GITHUB_PASSWORD = "github.password";
   public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
 
   public static final String EC2_KEYPAIR_NAME(String clusterName, String region) {
@@ -126,10 +142,11 @@ public class Settings {
 
   /**
    * GCE firewall name.
+   *
    * @param networkName
    * @param port
    * @param protocol
-   * @return 
+   * @return
    */
   public static final String UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
@@ -143,7 +160,9 @@ public class Settings {
     return names;
   }
 
+  public static final String TEST_CB_ROOT_FOLDER = "testgithub";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
+  public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
@@ -181,8 +200,8 @@ public class Settings {
   }
 
   public static String RECIPE_CANONICAL_NAME(String recipeName) {
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      return recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      return recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       return recipeName;
     }
@@ -190,14 +209,14 @@ public class Settings {
 
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
 
     return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
   public static String CLUSTER_TEMP_FOLDER(String clusterName) {
@@ -210,13 +229,40 @@ public class Settings {
 
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
-    if (!recipeName.contains(COOOKBOOK_DELIMITER)) {
-      recName = recipeName + COOOKBOOK_DELIMITER + "default";
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
     } else {
       recName = recipeName;
     }
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator
-        + recName.replace(COOOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+  }
+
+  public static String EXPERIMENT_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_");
+  }
+
+  public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
+
+    return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
+        + File.separator + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + File.separator
+        + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + "-"
+        + sdf.format(new Date(System.currentTimeMillis())) + ".out";
   }
 
   public static final int EC2_RETRY_INTERVAL = 5 * 1000;
@@ -224,32 +270,34 @@ public class Settings {
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
 
-  public static final int MACHINES_TASKQUEUE_SIZE = 100;
-
-  public static final int SSH_CMD_RETRY_NUM = 2;
-  public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
-  public static final float SSH_CMD_RETRY_SCALE = 1.5f;
-  public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
-
   //Git cookbook metadata 
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
+  public static final String COOKBOOK_CONFIGFILE = "config.props";
+  public static final String COOKBOOK_CONFIGFILE_REL_URL = "/templates/default/" + COOKBOOK_CONFIGFILE;
+  public static final String COOKBOOK_CONFIGFILE_BASE_URL = "/templates/default/";
+  public static final String COOKBOOK_EXP_RECIPE_REL_URL = "/recipes/experiment.rb";
 
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
-  public static final String CB_TEMPLATE_PATH_ROOT = "se/kth/karamel/backend/templates/";
+  public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"
+      + File.separator + "backend" + File.separator + "templates" + File.separator;
+  public static final String CB_TEMPLATE_EXPERIMENT_CLUSTER = CB_TEMPLATE_PATH_ROOT + "experiment_cluster";
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
   public static final String CB_TEMPLATE_RECIPE_DEFAULT = CB_TEMPLATE_PATH_ROOT + "recipe_default";
-  public static final String CB_TEMPLATE_RECIPE_MASTER = CB_TEMPLATE_PATH_ROOT + "recipe_master";
+  public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
   public static final String CB_TEMPLATE_RECIPE_SLAVE = CB_TEMPLATE_PATH_ROOT + "recipe_slave";
-  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + "config.props";
+  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + COOKBOOK_CONFIGFILE;
   public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";
   public static final String CB_TEMPLATE_MASTER_SH = CB_TEMPLATE_PATH_ROOT + "master_sh";
   public static final String CB_TEMPLATE_SLAVE_SH = CB_TEMPLATE_PATH_ROOT + "slave_sh";
   public static final String CB_TEMPLATE_METADATA = CB_TEMPLATE_PATH_ROOT + "metadata";
   public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
+  public static final String CB_TEMPLATE_README = CB_TEMPLATE_PATH_ROOT + "README.md";
+  public static final String CB_TEMPLATE_PROVIDERS_START = CB_TEMPLATE_PATH_ROOT + "providers_start";
+  public static final String CB_TEMPLATE_RESOURCES_START = CB_TEMPLATE_PATH_ROOT + "resources_start";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
 
   // Relative file locations of files in cookbook scaffolding
@@ -258,7 +306,15 @@ public class Settings {
   public static final String COOKBOOK_METADATARB_REL_PATH = File.separator + "metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_PATH = File.separator + "Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_PATH = File.separator + "Berksfile";
-  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator + "install.rb";
+  public static final String COOKBOOK_README_PATH = File.separator + "README.md";
+  public static final String COOKBOOK_EXPERIMENT_CLUSTER_PATH
+      = File.separator + "experiments" + File.separator + "experiment.yml";
+  public static final String COOKBOOK_PROVIDERS_EXP_PATH
+      = File.separator + "providers" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RESOURCES_EXP_PATH
+      = File.separator + "resources" + File.separator + "experiment.rb";
+  public static final String COOKBOOK_RECIPE_INSTALL_PATH = File.separator + "recipes" + File.separator
+      + INSTALL_RECIPE + ".rb";
   public static final String COOKBOOK_RECIPE_DEFAULT_PATH = File.separator + "recipes" + File.separator + "default.rb";
   public static final String COOKBOOK_RECIPE_MASTER_PATH = File.separator + "recipes" + File.separator + "master.rb";
   public static final String COOKBOOK_RECIPE_SLAVE_PATH = File.separator + "recipes" + File.separator + "slave.rb";
@@ -290,7 +346,7 @@ public class Settings {
   }
 
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
-  
+
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
 }

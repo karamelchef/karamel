@@ -41,6 +41,8 @@ import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
+ * Terminal backend, a replacement for API with more flexibilities. It processes user commands and generates mere
+ * hyper-link aware textual pages. Each hyper-link is another command and results of each command is another page.
  *
  * @author kamal
  */
@@ -58,6 +60,7 @@ public class CommandService {
   private static String RUNNING_PAGE_TEMPLATE = "";
   private static String YAMLS_TABLE_PLH = "%YAMLS_TABLE%";
   private static String CLUSTERS_TABLE_PLH = "%CLUSTERS_TABLE%";
+  private static String HYPERLINKS_PLH = "%HYPERLINKS%";
 
   static {
     try {
@@ -68,10 +71,9 @@ public class CommandService {
 
     }
   }
-//  private static final KaramelApi api = new KaramelApiImpl();
 
   public static CommandResponse processCommand(String command, String... args) throws KaramelException {
-    String cmd = command.toLowerCase().trim();
+    String cmd = command;
     String nextCmd = null;
     CommandResponse.Renderer renderer = CommandResponse.Renderer.INFO;
     CommandResponse response = new CommandResponse();
@@ -81,10 +83,21 @@ public class CommandService {
     selectCluster();
     String result = null;
     String successMessage = null;
+    String context = chosenCluster();
     if (cmd.equals("help")) {
       result = HELP_PAGE_TEMPLATE;
     } else if (cmd.equals("running")) {
       result = RUNNING_PAGE_TEMPLATE.replace(CLUSTERS_TABLE_PLH, clustersTable());
+      ClusterManager cluster = cluster(context);
+      String hyperLinks;
+      if (cluster != null) {
+        hyperLinks = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+      } else {
+        String yml = ClusterDefinitionService.loadYaml(context);
+        JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
+        hyperLinks = UserClusterDataExtractor.clusterLinks(json, null);
+      }
+      result = result.replace(HYPERLINKS_PLH, hyperLinks);
       nextCmd = "running";
     } else if (cmd.equals("home")) {
       result = HOME_PAGE_TEMPLATE.replace(YAMLS_TABLE_PLH, yamlsTable());
@@ -261,24 +274,22 @@ public class CommandService {
           SshMachine machine = mm.getMachine(ip);
           if (machine != null) {
             shell = machine.getShell();
-            if (shell.isConnected()) {
-              throw new KaramelException("shell is already connected!!");
-            } else {
+            if (!shell.isConnected()) {
               shell.connect();
               if (!shell.isConnected()) {
-                throw new KaramelException("shell is not connected!!");
+                throw new KaramelException("attempt to connect shell was not successful!!");
               } else {
                 try {
                   Thread.sleep(200);
-
                 } catch (InterruptedException ex) {
                   logger.error("", ex);
                 }
-                result = shell.readStreams();
-                renderer = CommandResponse.Renderer.SSH;
-                response.addMenuItem("Disconnect Shell", "shelldisconnect");
               }
             }
+            context = chosenCluster() + "/" + shell.getIpAddress();
+            result = shell.readStreams();
+            renderer = CommandResponse.Renderer.SSH;
+            addActiveMachineMenus(response);
           } else {
             throw new KaramelException("Opps, machine was not found, make sure cluster is chosen first");
           }
@@ -303,26 +314,28 @@ public class CommandService {
         }
       }
 
-      p = Pattern.compile("shellexec(.+)");
+      p = Pattern.compile("shellexec((.|\n|\t|\r|\033|\003|\004)+)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
         found = true;
         String cmdStr = matcher.group(1);
+        cmdStr = cmdStr.replace("arrup", "\033[A");
+        cmdStr = cmdStr.replace("arrdown", "\033[B");
         if (chosenCluster() != null) {
           if (shell != null) {
             if (!shell.isConnected()) {
               throw new KaramelException("shell is not connected.");
             } else {
-              shell.exec(cmdStr + "\r");
+              shell.exec(cmdStr);
               try {
                 Thread.sleep(100);
-
               } catch (InterruptedException ex) {
                 logger.error("", ex);
               }
+              context = chosenCluster() + "/" + shell.getIpAddress();
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
-              response.addMenuItem("Disconnect Shell", "shelldisconnect");
+              addActiveMachineMenus(response);
             }
           } else {
             throw new KaramelException("Opps, there is not connected shell..");
@@ -341,9 +354,10 @@ public class CommandService {
             if (!shell.isConnected()) {
               throw new KaramelException("shell is not connected.");
             } else {
+              context = chosenCluster() + "/" + shell.getIpAddress();
               result = shell.readStreams();
               renderer = CommandResponse.Renderer.SSH;
-              response.addMenuItem("Disconnect Shell", "shelldisconnect");
+              addActiveMachineMenus(response);
             }
           } else {
             throw new KaramelException("Opps, there is not connected shell..");
@@ -507,7 +521,7 @@ public class CommandService {
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();
           if (sshKeyPair != null) {
-            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(), 
+            result = String.format("public key path: %s \nprivate key path: %s", sshKeyPair.getPublicKeyPath(),
                 sshKeyPair.getPrivateKeyPath());
           } else {
             throw new KaramelException("no ssh keys has been chosen yet!!");
@@ -518,6 +532,7 @@ public class CommandService {
     if (result == null && successMessage == null) {
       throw new KaramelException(String.format("Command '%s' not found", cmd));
     }
+    response.setContext(context);
     response.setSuccessMessage(successMessage);
     response.addMenuItem("Help", "help");
     response.setNextCmd(nextCmd);
@@ -571,10 +586,10 @@ public class CommandService {
       data[i][0] = name;
       data[i][1] = cluster.getRuntime().getPhase();
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
-      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag " + 
-          name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines " + 
-          name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge " + 
-          name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+      data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag "
+          + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines "
+          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge "
+          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
       i++;
     }
 
@@ -588,9 +603,9 @@ public class CommandService {
     int i = 0;
     for (String yaml : defs) {
       data[i][0] = yaml;
-      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag " + 
-          yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove " + 
-          yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+      data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag "
+          + yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove "
+          + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
       i++;
     }
 
@@ -620,7 +635,11 @@ public class CommandService {
       data[i][1] = task.getStatus();
       data[i][2] = task.getMachineId();
       String uuid = task.getUuid();
-      data[i][3] = "<a kref='log " + uuid + "'>log</a>";
+      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
+        data[i][3] = "<a kref='log " + uuid + "'>log</a>";
+      } else {
+        data[i][3] = "";
+      }
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
@@ -656,6 +675,12 @@ public class CommandService {
     return builder.toString();
   }
 
+  private static void addActiveMachineMenus(CommandResponse response) {
+    response.addMenuItem("Status", "status");
+    response.addMenuItem("Machines", "machines");
+    response.addMenuItem("Close Shell", "shelldisconnect");
+  }
+
   private static void addActiveClusterMenus(CommandResponse response) {
     ClusterManager cluster = cluster(chosenCluster());
     String clusterName = cluster.getDefinition().getName().toLowerCase();
@@ -678,7 +703,7 @@ public class CommandService {
 
   }
 
-  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd) 
+  private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd)
       throws KaramelException {
     Pattern p = Pattern.compile(cmd + "(\\s+(\\w+))?");
     Matcher matcher = p.matcher(userinput);

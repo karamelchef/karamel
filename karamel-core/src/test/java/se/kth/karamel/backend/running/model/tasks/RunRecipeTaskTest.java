@@ -17,10 +17,6 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 
-/**
- *
- * @author jdowling
- */
 public class RunRecipeTaskTest {
   
   public RunRecipeTaskTest() {

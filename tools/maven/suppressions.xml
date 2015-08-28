@@ -6,4 +6,5 @@
 <suppressions>
 		<suppress checks="LineLength" files="LaunchLogDialog.java"/>
     <suppress checks="Indentation" files="LaunchLogDialog.java"/>
+    <suppress checks="Regexp" files="KaramelServiceApplication.java"/>
 </suppressions>

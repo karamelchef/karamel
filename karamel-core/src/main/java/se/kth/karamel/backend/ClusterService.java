@@ -13,12 +13,16 @@ import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.SshKeyPair;
 
 /**
- *
+ * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is 
+ * stored inside a context. There is a common context with shared values between clusters and each cluster has its own 
+ * context inside which values can be overwritten. 
+ * 
  * @author kamal
  */
 public class ClusterService {
@@ -46,17 +50,7 @@ public class ClusterService {
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
   }
-
-  public synchronized void saveYaml(String yaml) throws KaramelException {
-
-  }
-
-  public synchronized void registerGithubContext(String email, String password) throws KaramelException {
-    commonContext.setGithubEmail(email);
-    commonContext.setGithubPassword(password);
-    // TODO  - login to validate github credentials
-  }
-
+  
   public synchronized void registerSudoAccountPassword(String password) {
     commonContext.setSudoAccountPassword(password);
   }
@@ -126,7 +120,7 @@ public class ClusterService {
   public synchronized void startCluster(String json) throws KaramelException {
     Gson gson = new Gson();
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
-    jsonCluster.validate();
+    ClusterDefinitionValidator.validate(jsonCluster);
     String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
     //We have to do it again otherwise the global scope attributes get lost
     //for more info refer to https://github.com/karamelchef/karamel/issues/28

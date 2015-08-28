@@ -28,7 +28,7 @@ public abstract class Scope {
     this.gce = scope.getGce();
   }
 
-  public abstract String getAttr(String key);
+  public abstract Object getAttr(String key);
 
   public Provider getProvider() {
     if (ec2 != null) {
