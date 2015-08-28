@@ -215,7 +215,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/"
         + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
@@ -246,7 +246,6 @@ public class Settings {
       recName = recipeName;
     }
 
-    // File.separator
     return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
   }
 
