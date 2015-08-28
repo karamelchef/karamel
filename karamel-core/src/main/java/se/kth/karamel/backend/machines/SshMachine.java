@@ -31,6 +31,7 @@ import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
@@ -182,14 +183,8 @@ public class SshMachine implements MachineInterface, Runnable {
           runSshCmd(cmd, task);
 
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-            
-            // Filter out the sudo password from text propagated back to the User. Issue #113 in github.
-            String filteredStr = cmd.getCmdStr();
-            int pos = filteredStr.lastIndexOf("sudo -S");
-            if (pos != -1) {
-              filteredStr = filteredStr.substring(pos);
-            }
-            task.failed(String.format("%s: Command did not complete: '%s", machineEntity.getId(), filteredStr));
+            task.failed(String.format("%s: Command did not complete: '%s", machineEntity.getId(),
+                cmd.getCmdStr()));
             break;
           } else {
             try {
@@ -259,7 +254,13 @@ public class SshMachine implements MachineInterface, Runnable {
 
         Session.Command cmd = null;
         try {
-          cmd = session.exec(shellCommand.getCmdStr());
+          String cmdStr = shellCommand.getCmdStr();
+          String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+          if (password != null && !password.isEmpty()) {
+            cmd = session.exec(cmdStr.replaceAll("%password_hidden%", password));
+          } else {
+            cmd = session.exec(cmdStr);
+          }
           cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
           updateHeartbeat();
           if (cmd.getExitStatus() != 0) {

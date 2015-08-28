@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.dag.DagTask;
 import se.kth.karamel.backend.dag.DagTaskCallback;
 import se.kth.karamel.backend.machines.MachineInterface;
@@ -140,8 +141,13 @@ public abstract class Task implements DagTask, TaskCallback {
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
   }
-  
+
   public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
+  }
+
+  public String getSudoCommand() {
+    String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+    return (password == null || password.isEmpty()) ? "sudo" : "echo \"%password_hidden%\" | sudo -S ";
   }
 }
