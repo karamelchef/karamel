@@ -28,5 +28,14 @@
         </div>
       </div>
     </li>
+    <li ng-show="credentialsHolderMap['nova']">
+      <div class="row">
+        <div class="col-xs-4">Nova Provider Status</div>
+        <div class="col-xs-6 col-xs col-sm-offset-1">
+          <span ng-show="summary['nova']" class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>
+          <span ng-show="!summary['nova']" class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px" ></span>
+        </div>
+      </div>
+    </li>
   </ul>
 </div>

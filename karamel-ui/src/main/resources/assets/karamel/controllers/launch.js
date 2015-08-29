@@ -264,12 +264,15 @@ angular.module('karamel.main')
               if (scope.bootUp) {
                 KaramelCoreRestServices.loadNovaCredentials()
                     .success(function(data) {
-                      scope.account.jsonKeyPath = data.jsonKeyPath;
+                      scope.account.accountName = data.accountName;
+                      scope.account.accountPass = data.accountPass;
+                      scope.account.endpoint = data.endpoint;
+                      scope.account.region = data.region;
                       _updateState('specialWarn', scope.nova);
                       scope.validateNovaCredentials();
                     })
                     .error(function(data) {
-                      $log.warn("No GCE credentials is available");
+                      $log.warn("No Nova credentials is available");
                       _updateState('initialWarn', scope.nova);
                     });
                 scope.bootUp = false;
@@ -282,7 +285,8 @@ angular.module('karamel.main')
 
           scope.validateNovaCredentials = function() {
 
-            if (scope.account.jsonKeyPath !== null) {
+            if (scope.account.accountName !== null && scope.account.accountPass !== null
+                && scope.account.endpoint !== null && scope.account.region !== null) {
               KaramelCoreRestServices.validateNovaCredentials(scope.account)
                   .success(function(data) {
                     _updateState('success', scope.nova);

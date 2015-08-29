@@ -403,6 +403,16 @@ angular.module('karamel.terminal', [])
           var url = _defaultHost.concat("/gce/validateCredentials");
           return _getPromiseObject(method, url, _defaultContentType, providerInfo);
         },
+        loadNovaCredentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/nova/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateNovaCredentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/nova/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+        },
         startCluster: function(clusterJson) {
           var method = 'PUT';
           var url = _defaultHost.concat("/startCluster");
