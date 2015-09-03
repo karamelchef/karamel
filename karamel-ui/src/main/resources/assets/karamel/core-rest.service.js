@@ -39,28 +39,38 @@ angular.module('main.module')
         getCookBookInfo: function(requestData) {
 
           var method = 'PUT';
-          var url = _defaultHost.concat("/fetchCookbook");
+          var url = _defaultHost.concat("/definition/fetchCookbook");
           return _getPromiseObject(method, url, _defaultContentType, requestData);
         },
         loadSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/sshkeys/load");
+          var url = _defaultHost.concat("/ssh/loadKey");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         registerSshKeys: function(sshKeypair) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/sshkeys/register");
+          var url = _defaultHost.concat("/ssh/registerKey");
           return _getPromiseObject(method, url, _defaultContentType, sshKeypair);
         },
         generateSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/sshkeys/generate");
+          var url = _defaultHost.concat("/ssh/generateKey");
           return _getPromiseObject(method, url, _defaultContentType);
+        },
+        sudoPassword: function(sudoAccount) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/ssh/setSudoPassword");
+          return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
         startCluster: function(clusterJson) {
           var method = 'PUT';
           var url = _defaultHost.concat("cluster/start");
           return _getPromiseObject(method, url, _defaultContentType, clusterJson);
+        },
+        processCommand: function(commandName) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/cluster/processCommand");
+          return _getPromiseObject(method, url, _defaultContentType, commandName);
         },
         viewCluster: function(clusterNameJson) {
           var method = 'PUT';
@@ -84,18 +94,13 @@ angular.module('main.module')
         },
         exitKaramel: function() {
           var method = 'GET';
-          var url = _defaultHost.concat("/exitKaramel");
+          var url = _defaultHost.concat("/system/exit");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         ping: function() {
           var method = 'GET';
-          var url = _defaultHost.concat("/ping");
+          var url = _defaultHost.concat("/system/ping");
           return _getPromiseObject(method, url, _defaultContentType);
-        },
-        sudoPassword: function(sudoAccount) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/sudoPassword");
-          return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
         setGithubCredentials: function(username, password) {
           var method = 'POST';
@@ -141,12 +146,6 @@ angular.module('main.module')
           var url = _defaultHost.concat("/experiment/removeFile");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"org": org, "repo": repo, "filename": fileName}));
-        },
-
-        processCommand: function(commandName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/processCommand");
-          return _getPromiseObject(method, url, _defaultContentType, commandName);
         },
         loadEc2Credentials: function() {
           var method = 'PUT';

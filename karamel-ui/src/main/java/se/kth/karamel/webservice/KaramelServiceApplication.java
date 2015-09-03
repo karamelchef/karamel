@@ -36,11 +36,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.EnumSet;
-import java.util.List;
 import javax.swing.ImageIcon;
-import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -52,16 +49,13 @@ import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.backend.Experiment;
-import se.kth.karamel.backend.command.CommandResponse;
-import se.kth.karamel.backend.github.GithubUser;
-import se.kth.karamel.backend.github.OrgItem;
-import se.kth.karamel.backend.github.RepoItem;
+import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
+import se.kth.karamel.webservice.calls.definition.FetchCookbook;
 import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
 import se.kth.karamel.webservice.calls.ec2.LoadEc2Credentials;
@@ -79,14 +73,9 @@ import se.kth.karamel.webservice.calls.github.SetGithubCredentials;
 import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
-import se.kth.karamel.webservicemodel.CommandJSON;
-import se.kth.karamel.webservicemodel.CookbookJSON;
-import se.kth.karamel.webservicemodel.KaramelBoardJSON;
-import se.kth.karamel.webservicemodel.KaramelBoardYaml;
-
-import se.kth.karamel.webservicemodel.Ec2JSON;
-import se.kth.karamel.webservicemodel.GceJson;
-import se.kth.karamel.webservicemodel.SshKeyJSON;
+import se.kth.karamel.webservice.calls.sshkeys.SetSudoPassword;
+import se.kth.karamel.webservice.calls.system.ExitKaramel;
+import se.kth.karamel.webservice.calls.system.PingServer;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
 import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
@@ -317,30 +306,44 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.healthChecks()
         .register("template", healthCheck);
 
+    //definitions
     environment.jersey().register(new YamlToJson(karamelApi));
     environment.jersey().register(new JsonToYaml(karamelApi));
-    environment.jersey().register(new Cookbook());
+    environment.jersey().register(new FetchCookbook(karamelApi));
+    
+    //ssh
     environment.jersey().register(new LoadSshKeys(karamelApi));
     environment.jersey().register(new RegisterSshKeys(karamelApi));
     environment.jersey().register(new GenerateSshKeys(karamelApi));
+    environment.jersey().register(new SetSudoPassword(karamelApi));
+    
+    //ec2
     environment.jersey().register(new LoadEc2Credentials(karamelApi));
     environment.jersey().register(new ValidateEc2Credentials(karamelApi));
+    
+    //gce
     environment.jersey().register(new LoadGceCredentials(karamelApi));
     environment.jersey().register(new ValidateGceCredentials(karamelApi));
+    
+    //cluster
     environment.jersey().register(new StartCluster(karamelApi));
-    environment.jersey().register(new Command.CheatSheet());
-    environment.jersey().register(new Command.Process());
-    environment.jersey().register(new ExitKaramel());
-    environment.jersey().register(new PingKaramel());
-    environment.jersey().register(new Sudo.SudoPassword());
+    environment.jersey().register(new ProcessCommand(karamelApi));
+    
+    
+    environment.jersey().register(new ExitKaramel(karamelApi));
+    environment.jersey().register(new PingServer(karamelApi));
+    
+    //github
     environment.jersey().register(new GetGithubCredentials(karamelApi));
     environment.jersey().register(new SetGithubCredentials(karamelApi));
-    environment.jersey().register(new LoadExperiment(karamelApi));
     environment.jersey().register(new GetGithubOrgs(karamelApi));
     environment.jersey().register(new GetGithubRepos(karamelApi));
+    environment.jersey().register(new RemoveRepository(karamelApi));
+    
+    //experiment
+    environment.jersey().register(new LoadExperiment(karamelApi));
     environment.jersey().register(new PushExperiment(karamelApi));
     environment.jersey().register(new RemoveFileFromExperiment(karamelApi));
-    environment.jersey().register(new RemoveRepository(karamelApi));
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -419,140 +422,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
-  @Path("/fetchCookbook")
-  @Consumes(MediaType.APPLICATION_JSON)
-  @Produces(MediaType.APPLICATION_JSON)
-  public static class Cookbook {
-
-    @PUT
-    public Response getCookbook(CookbookJSON cookbookJSON) {
-      Response response = null;
-      try {
-        String cookbookDetails = karamelApi.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
-        response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
-
-      } catch (KaramelException e) {
-        e.printStackTrace();
-        response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-            entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-      }
-
-      return response;
-    }
-  }
-
-  public static class Command {
-
-    @Path("/getCommandCheetSheet")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class CheatSheet {
-
-      @PUT
-      public Response getCommandCheetSheet() {
-        Response response = null;
-        logger.debug("Received request to load the command cheatsheet.");
-        try {
-          String cheatSheet = karamelApi.commandCheatSheet();
-          response = Response.status(Response.Status.OK).entity(cheatSheet).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-
-    @Path("/processCommand")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Process {
-
-      @PUT
-      public Response processCommand(CommandJSON command) {
-        Response response = null;
-
-        logger.debug("Received request to process a command with info: " + command.getCommand());
-        try {
-          CommandResponse cmdRes = karamelApi.processCommand(command.getCommand(), command.getResult());
-          command.setResult(cmdRes.getResult());
-          command.setNextCmd(cmdRes.getNextCmd());
-          command.setRenderer(cmdRes.getRenderer().name().toLowerCase());
-          command.getMenuItems().addAll(cmdRes.getMenuItems());
-          command.setSuccessmsg(cmdRes.getSuccessMessage());
-          command.setContext(cmdRes.getContext());
-        } catch (KaramelException e) {
-          command.setErrormsg(e.getMessage());
-        } catch (Exception e) {
-          command.setErrormsg(e.getMessage());
-        } finally {
-          response = Response.status(Response.Status.OK).entity(command).build();
-        }
-        return response;
-      }
-    }
-  }
-
-  @Path("/exitKaramel")
-  public static class ExitKaramel {
-
-    @GET
-    public Response exitKaramel() {
-      Response response = Response.status(Response.Status.OK).build();
-
-      new Thread() {
-        @Override
-        public void run() {
-          try {
-            Thread.sleep(2000);
-          } catch (InterruptedException ex) {
-            logger.warn(ex.getMessage());
-          } finally {
-            logger.info("Karamel Shutdown finished.");
-            System.exit(0);
-          }
-        }
-      }.start();
-
-      return response;
-    }
-  }
-
-  @Path("/ping")
-  public static class PingKaramel {
-
-    @GET
-    public Response pingKaramel() {
-      Response response = Response.status(Response.Status.OK).build();
-      return response;
-    }
-  }
-
-  public static class Sudo {
-
-    @Path("/sudoPassword")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class SudoPassword {
-
-      @PUT
-      public Response sudoPassword(SudoPasswordJSON sudoPwd) {
-        Response response = null;
-        logger.info(" Received request to set sudo password....");
-        try {
-          karamelApi.registerSudoPassword(sudoPwd.getPassword());
-          response = Response.status(Response.Status.OK).
-              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-  }
 
   static class KaramelCleanupBeforeShutdownThread extends Thread {
 

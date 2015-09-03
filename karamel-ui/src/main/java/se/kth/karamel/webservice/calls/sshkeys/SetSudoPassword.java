@@ -12,39 +12,35 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.webservice.calls.AbstractCall;
+import se.kth.karamel.webservicemodel.StatusResponseJSON;
+import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
 /**
  *
  * @author kamal
  */
-@Path("/ssk/loadKey")
+@Path("/ssh/setSudoPassword")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class LoadSshKeys extends AbstractCall {
+public class SetSudoPassword extends AbstractCall {
 
-  public LoadSshKeys(KaramelApi karamelApi) {
+  public SetSudoPassword(KaramelApi karamelApi) {
     super(karamelApi);
   }
 
   @PUT
-  public Response load() {
+  public Response sudoPassword(SudoPasswordJSON sudoPwd) {
     Response response = null;
-    logger.debug(" Received request to load ssh keys.");
+    logger.info(" Received request to set sudo password....");
     try {
-      SshKeyPair sshKeypair = karamelApi.loadSshKeysIfExist();
-      if (sshKeypair == null) {
-        sshKeypair = karamelApi.generateSshKeysAndUpdateConf();
-      }
-      karamelApi.registerSshKeys(sshKeypair);
-      response = Response.status(Response.Status.OK).entity(sshKeypair).build();
-    } catch (KaramelException ex) {
-      response = buildExceptionResponse(ex);
+      karamelApi.registerSudoPassword(sudoPwd.getPassword());
+      response = Response.status(Response.Status.OK).
+          entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+    } catch (KaramelException e) {
+      response = buildExceptionResponse(e);
     }
-
     return response;
   }
-
 }

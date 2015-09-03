@@ -20,7 +20,7 @@ import se.kth.karamel.webservice.calls.AbstractCall;
  *
  * @author kamal
  */
-@Path("/sshkeys/generate")
+@Path("/ssh/generateKey")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class GenerateSshKeys extends AbstractCall {
