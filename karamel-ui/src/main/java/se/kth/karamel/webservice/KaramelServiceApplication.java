@@ -29,15 +29,8 @@ import se.kth.karamel.common.exception.KaramelException;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.util.EnumSet;
 import javax.swing.ImageIcon;
-import javax.ws.rs.GET;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -49,7 +42,6 @@ import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.client.model.Cookbook;
 import se.kth.karamel.client.model.yaml.YamlCluster;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.CookbookScaffolder;
@@ -76,8 +68,6 @@ import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.SetSudoPassword;
 import se.kth.karamel.webservice.calls.system.ExitKaramel;
 import se.kth.karamel.webservice.calls.system.PingServer;
-import se.kth.karamel.webservicemodel.StatusResponseJSON;
-import se.kth.karamel.webservicemodel.SudoPasswordJSON;
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
@@ -310,36 +300,35 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new YamlToJson(karamelApi));
     environment.jersey().register(new JsonToYaml(karamelApi));
     environment.jersey().register(new FetchCookbook(karamelApi));
-    
+
     //ssh
     environment.jersey().register(new LoadSshKeys(karamelApi));
     environment.jersey().register(new RegisterSshKeys(karamelApi));
     environment.jersey().register(new GenerateSshKeys(karamelApi));
     environment.jersey().register(new SetSudoPassword(karamelApi));
-    
+
     //ec2
     environment.jersey().register(new LoadEc2Credentials(karamelApi));
     environment.jersey().register(new ValidateEc2Credentials(karamelApi));
-    
+
     //gce
     environment.jersey().register(new LoadGceCredentials(karamelApi));
     environment.jersey().register(new ValidateGceCredentials(karamelApi));
-    
+
     //cluster
     environment.jersey().register(new StartCluster(karamelApi));
     environment.jersey().register(new ProcessCommand(karamelApi));
-    
-    
+
     environment.jersey().register(new ExitKaramel(karamelApi));
     environment.jersey().register(new PingServer(karamelApi));
-    
+
     //github
     environment.jersey().register(new GetGithubCredentials(karamelApi));
     environment.jersey().register(new SetGithubCredentials(karamelApi));
     environment.jersey().register(new GetGithubOrgs(karamelApi));
     environment.jersey().register(new GetGithubRepos(karamelApi));
     environment.jersey().register(new RemoveRepository(karamelApi));
-    
+
     //experiment
     environment.jersey().register(new LoadExperiment(karamelApi));
     environment.jersey().register(new PushExperiment(karamelApi));
@@ -421,7 +410,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       e.printStackTrace();
     }
   }
-
 
   static class KaramelCleanupBeforeShutdownThread extends Thread {
 
