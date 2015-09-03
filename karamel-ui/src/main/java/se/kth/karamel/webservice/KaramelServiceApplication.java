@@ -538,7 +538,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
           }
 
         } catch (KaramelException e) {
-          e.printStackTrace();
           response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
               entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
         }

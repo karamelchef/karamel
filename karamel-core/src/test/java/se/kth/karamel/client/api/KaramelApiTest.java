@@ -9,12 +9,10 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
-import se.kth.karamel.backend.github.util.ChefExperimentExtractor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.Ec2Credentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
 
 /**
  *

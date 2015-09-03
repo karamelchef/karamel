@@ -1,4 +1,4 @@
-name: HopsWorksC32x
+name: HopsWorks5Node
 ec2:
     type: m3.large
     region: eu-west-1
@@ -15,6 +15,8 @@ cookbooks:
     branch: "master"
 
 attrs:
+  hops:
+    use_hopsworks: "true"
   hdfs:
     user: glassfish
   hadoop:
@@ -24,20 +26,30 @@ attrs:
         user: glassfish
 
 groups: 
-  hopsworksmetabig:
+  server:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
         - ndb::memcached
         - hops::ndb
+        - hopsworks
+  metadatanodes:
+    size: 1
+    recipes: 
+        - ndb::client
+        - hops::ndb
         - hops::rm
         - hops::nn
         - hops::jhs                                                            
-        - hopsworks
-  hopsworksdatabig:
+  dbnodes:
     size: 2
     recipes: 
         - ndb::ndbd
+  datanodes:
+    size: 2
+    recipes: 
+        - ndb::client
+        - hops::ndb
         - hops::dn
         - hops::nm

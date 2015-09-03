@@ -1,7 +1,2 @@
-default[:%%name%%][:url] = "%%http_binaries%%"
-default[:%%name%%][:version] = "0.1"
-default[:%%name%%][:user] = "%%user%%"
-default[:%%name%%][:group] = "%%group%%"
-
-default[:%%name%%][:version_dir] = "/usr/local/%%name%%-#{node[:%%name%%][:version]}"
-default[:%%name%%][:home_dir] = "/usr/local/%%name%%"
+# 'user' and 'group' define the unix user and group, respectively, 
+# that the experiment will be excecuted as.

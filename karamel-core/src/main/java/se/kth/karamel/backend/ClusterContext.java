@@ -28,24 +28,9 @@ public class ClusterContext {
   private GceContext gceContext;
   private SshKeyPair sshKeyPair;
   private String sudoAccountPassword = "";
-  private boolean sudoAccountPasswordRequired = false;
-  private String githubEmail = "anonymous@anonymous.org";
-  private String githubPassword;
-
-  public void setSudoAccountPasswordRequired(boolean sudoAccountPasswordRequired) {
-    this.sudoAccountPasswordRequired = sudoAccountPasswordRequired;
-  }
-
-  public boolean isSudoAccountPasswordRequired() {
-    return sudoAccountPasswordRequired;
-  }
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
     this.sudoAccountPassword = sudoAccountPassword;
-  }
-
-  public String getGithubEmail() {
-    return GithubApi.getUser();
   }
 
   public String getGithubUsername() {
@@ -53,16 +38,8 @@ public class ClusterContext {
         GithubApi.getEmail().lastIndexOf("@"));
   }
 
-  public String getGithubPassword() {
-    return GithubApi.getPassword();
-  }
-
   public String getSudoAccountPassword() {
     return sudoAccountPassword;
-  }
-
-  public String getSudoCommand() {
-    return sudoAccountPassword.isEmpty() ? "sudo" : "echo \"" + sudoAccountPassword + "\" | sudo -S ";
   }
 
   public Ec2Context getEc2Context() {

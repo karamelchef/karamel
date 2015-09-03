@@ -28,17 +28,17 @@ public class AptGetEssentialsTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS, 
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand(),
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
+          "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername());
     }
     return commands;
   }
 
   public static String makeUniqueId(String machineId) {
-    return  "apt-get essentials on "+ machineId;
+    return "apt-get essentials on " + machineId;
   }
-  
+
   @Override
   public String uniqueId() {
     return makeUniqueId(super.getMachineId());
@@ -48,7 +48,5 @@ public class AptGetEssentialsTask extends Task {
   public Set<String> dagDependencies() {
     return Collections.EMPTY_SET;
   }
-  
-  
 
 }

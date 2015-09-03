@@ -20,6 +20,7 @@ angular.module('main.module')
         configOpen: false,
         orchestrationOpen: false,
         depdenciesOpen: false,
+        parametersOpen: false, 
         chefOpen: false,
         advanced: false,
         expanded: false,
@@ -60,6 +61,7 @@ angular.module('main.module')
         $scope.status.configOpen = !$scope.status.configOpen;
         $scope.status.depdenciesOpen = !$scope.status.depdenciesOpen;
         $scope.status.orchestrationOpen = !$scope.status.orchestrationOpen;
+        $scope.status.parametersOpen = !$scope.status.parametersOpen;
         $scope.status.chefOpen = !$scope.status.chefOpen;
         $scope.status.expanded = !$scope.status.expanded;
         for (var i = 0; i < $scope.status.experiment.length; i++) {
@@ -238,8 +240,6 @@ angular.module('main.module')
           }
         });
 
-
-
       }
 
       $scope.toggleDropdown = function($event) {
@@ -261,6 +261,7 @@ angular.module('main.module')
               $scope.experiment.urlGitClone = "https://github.com:" + result.githubOwner
                 + "/" + result.githubRepo + ".git";
               $scope.experiment.description = result.description;
+              $scope.experiment.defaultAttributes = "user=" + $scope.experiment.user + "\ngroup=" + $scope.experiment.group;
               $scope.landing = false;
             }
           });

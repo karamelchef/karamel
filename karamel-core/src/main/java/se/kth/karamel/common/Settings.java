@@ -47,8 +47,8 @@ public class Settings {
   public static final String GITHUB_BASE_URL = HTTPS_PREFIX + GITHUB_DOMAIN;
   public static final String GITHUB_RAW_URL = HTTPS_PREFIX + GITHUB_RAW_DOMAIN;
   public static final String GITHUB_BASE_URL_PATTERN = "http(?:s)?:\\/\\/github.com";
-  public static final Pattern REPO_WITH_SUBCOOKBOOK_PATTERN = 
-      Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)\\/(.*)");
+  public static final Pattern REPO_WITH_SUBCOOKBOOK_PATTERN
+      = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)\\/(.*)");
   public static final Pattern REPO_WITH_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)");
   public static final Pattern REPO_NO_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)");
   public static final Pattern GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN = Pattern.compile(
@@ -60,14 +60,22 @@ public class Settings {
   public static final String EC2_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
-  public static final int SSH_CONNECT_RETRIES = 5;
-  public static final int SSH_CONNECT_INTERVALS = 5 * 1000;
-  public static final int SSH_PING_INTERVAL = 10 * 1000;
-  public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
   public static final int CLUSTER_STATUS_CHECKING_INTERVAL = 1000;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
-  public static final int SSH_CONNECTION_TIMEOUT = 24 * 3600 * 1000;
-  public static final int SSH_SESSION_TIMEOUT = 24 * 3600 * 1000;
+  public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
+  public static final int MACHINES_TASKQUEUE_SIZE = 100;
+
+  public static final int DAY_IN_MS = 24 * 3600 * 1000;
+  public static final int DAY_IN_MIN = 24 * 60;
+  public static final int SEC_IN_MS = 1000;
+  public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;  
+  public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;  
+  public static final int SSH_PING_INTERVAL = 10 * SEC_IN_MS; 
+  public static final int SSH_SESSION_RETRY_NUM = 10;
+  public static final int SSH_CMD_RETRY_NUM = 2;
+  public static final int SSH_CMD_RETRY_INTERVALS = 3 * SEC_IN_MS; 
+  public static final float SSH_CMD_RETRY_SCALE = 1.5f;
+  public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
 
   //Jcloud settings
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -88,7 +96,6 @@ public class Settings {
   //Providers 
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
-  //  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
@@ -208,7 +215,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/"
         + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
@@ -239,7 +246,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_");
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
   }
 
   public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
@@ -263,22 +270,15 @@ public class Settings {
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
 
-  public static final int MACHINES_TASKQUEUE_SIZE = 100;
-
-  public static final int SSH_CMD_RETRY_NUM = 2;
-  public static final int SSH_CMD_RETRY_INTERVALS = 3000; //ms
-  public static final float SSH_CMD_RETRY_SCALE = 1.5f;
-  public static final int SSH_CMD_LONGEST = 24 * 60; // minutes
-
   //Git cookbook metadata 
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
   public static final String COOKBOOK_BERKSFILE_REL_URL = "/Berksfile";
   public static final String COOKBOOK_CONFIGFILE = "config.props";
-  public static final String COOKBOOK_CONFIGFILE_REL_URL =  "/templates/default/" + COOKBOOK_CONFIGFILE;
+  public static final String COOKBOOK_CONFIGFILE_REL_URL = "/templates/default/" + COOKBOOK_CONFIGFILE;
   public static final String COOKBOOK_CONFIGFILE_BASE_URL = "/templates/default/";
-  public static final String COOKBOOK_EXP_RECIPE_REL_URL =  "/recipes/experiment.rb";
+  public static final String COOKBOOK_EXP_RECIPE_REL_URL = "/recipes/experiment.rb";
 
   // Template files for generating scaffolding for a cookbook. Taken from src/resources folder.
   public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"

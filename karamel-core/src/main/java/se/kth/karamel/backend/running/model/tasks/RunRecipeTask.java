@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.MachineInterface;
@@ -114,7 +113,7 @@ public class RunRecipeTask extends Task {
           "chef_json", json,
           "json_file_name", jsonFileName,
           "log_file_name", jsonFileName,
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
+          "sudo_command", getSudoCommand());
     }
     return commands;
   }

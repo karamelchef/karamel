@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -28,9 +27,9 @@ public class VendorCookbookTask extends Task {
   private final String subCookbookName;
   private final String branch;
 
-  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome, 
+  public VendorCookbookTask(MachineRuntime machine, TaskSubmitter submitter, String cookbookId, String cookbooksHome,
       String githubRepoUrl, String githubRepoName, String subCookbookName, String branch) {
-    super("clone and vendor " + ((subCookbookName == null) ? githubRepoName: subCookbookName), machine, submitter);
+    super("clone and vendor " + ((subCookbookName == null) ? githubRepoName : subCookbookName), machine, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;
     this.githubRepoName = githubRepoName;
@@ -42,17 +41,18 @@ public class VendorCookbookTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     String cookbookPath = githubRepoName;
-    if (subCookbookName != null && !subCookbookName.isEmpty())
+    if (subCookbookName != null && !subCookbookName.isEmpty()) {
       cookbookPath += Settings.SLASH + subCookbookName;
+    }
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
-              "cookbooks_home", cookbooksHome,
-              "github_repo_name", githubRepoName,
-              "cookbook_path", cookbookPath,
-              "github_repo_url", githubRepoUrl,
-              "branch_name", branch,
-              "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER,
-              "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
+          "cookbooks_home", cookbooksHome,
+          "github_repo_name", githubRepoName,
+          "cookbook_path", cookbookPath,
+          "github_repo_url", githubRepoUrl,
+          "branch_name", branch,
+          "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER,
+          "sudo_command", getSudoCommand());
     }
     return commands;
   }

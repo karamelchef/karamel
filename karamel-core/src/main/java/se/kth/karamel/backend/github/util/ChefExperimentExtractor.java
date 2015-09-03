@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.backend.Experiment;
@@ -31,7 +33,7 @@ public class ChefExperimentExtractor {
   private static final String YAML_RECIPE_PREFIX = "  - recipe: ";
 
   // <AttrName, AttrValue> pair added to attributes/default.rb 
-  private static final Map<String, String> attrs = new HashMap<>();
+  private static final SortedMap<String, String> attrs = new TreeMap<>();
   private static final Map<String, Map<String, String>> configFiles = new HashMap<>();
 
   /**
@@ -73,7 +75,7 @@ public class ChefExperimentExtractor {
         String value = m.group(2);
         if (!name.isEmpty()) {
           cfs.put(name, value);
-          attrs.put(name, value);
+//          attrs.put(name, value);
         }
       }
     }
@@ -81,12 +83,23 @@ public class ChefExperimentExtractor {
     String email = (GithubApi.getEmail() == null) ? "karamel@karamel.io" : GithubApi.getEmail();
     try {
       StringBuilder defaults_rb = CookbookGenerator.instantiateFromTemplate(
-          Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT,
-          "name", repoName,
-          "user", experiment.getUser(),
-          "group", experiment.getGroup(),
-          "http_binaries", experiment.getUrlBinary()
+          Settings.CB_TEMPLATE_ATTRIBUTES_DEFAULT
+      //          , "name", repoName,
+      //          "user", experiment.getUser(),
+      //          "group", experiment.getGroup(),
+      //          "http_binaries", experiment.getUrlBinary()
       );
+
+      String str = experiment.getDefaultAttributes();
+      Pattern p = Pattern.compile("\\s*(.*)\\s*=\\s*(.*)\\s*");
+      Matcher m = p.matcher(str);
+      while (m.find()) {
+        String name = m.group(1);
+        String value = m.group(2);
+        if (!name.isEmpty()) {
+          attrs.put(name, value);
+        }
+      }
 
       // Add all key-value pairs from the config files to the default attributes
       for (String key : attrs.keySet()) {
@@ -223,13 +236,16 @@ public class ChefExperimentExtractor {
 
         String email = (GithubApi.getEmail() == null) ? "karamel@karamel.io" : GithubApi.getEmail();
 
+        String username = attrs.containsKey("user") ? attrs.get("user") : experimentContext.getUser();
+        String groupname = attrs.containsKey("group") ? attrs.get("group") : experimentContext.getUser();
+
         StringBuilder recipe_rb = CookbookGenerator.instantiateFromTemplate(
             Settings.CB_TEMPLATE_RECIPE_EXPERIMENT,
             "cookbook", repoName,
             "name", experimentName,
             "interpreter", experiment.getScriptType(),
-            "user", experimentContext.getUser(),
-            "group", experimentContext.getGroup(),
+            "user", username,
+            "group", groupname,
             "script_contents", experiment.getScriptContents()
         );
 
@@ -252,8 +268,10 @@ public class ChefExperimentExtractor {
 
         // 3. write them to files and push to github
         GithubApi.addFile(owner, repoName, "recipes" + File.separator + experimentName + ".rb", recipeContents);
-        GithubApi.addFile(owner, repoName,
-            "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
+        if (!configFileName.isEmpty()) {
+          GithubApi.addFile(owner, repoName,
+              "templates" + File.separator + "defaults" + File.separator + configFileName + ".erb", configFileContents);
+        }
 
       }
 
