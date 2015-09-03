@@ -14,6 +14,7 @@
   <link rel="stylesheet" type="text/css" href="karamel/thirdparties/d3/css/d3dag.css">
   <link rel="stylesheet" type="text/css" href="karamel/thirdparties/css/ng-sortable.min.css">
   <link rel="stylesheet" type="text/css" href="karamel/thirdparties/css/sweet-alert.css">
+  <link rel="stylesheet" type="text/css" href="karamel/thirdparties/css/isteven-multi-select.css">
   
   <link rel="stylesheet" type="text/css" href="karamel/board/css/board.css">
   <link rel="stylesheet" type="text/css" href="karamel/terminal/shell/css/shell.emulator.css">
@@ -52,10 +53,9 @@
   <script type="text/javascript" src="karamel/board/groups/group-editor.controller.js"></script>
   <script type="text/javascript" src="karamel/board/groups/new-recipe.controller.js"></script>
   <script type="text/javascript" src="karamel/board/groups/duplicate-recipe.directive.js"></script>
-  <script type="text/javascript" src="karamel/board/cookbooks/attributes-editor.controller.js"></script>
-  <script type="text/javascript" src="karamel/board/cookbooks/cookbook-manipulation.service.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/attributes.controller.js"></script>
+  <script type="text/javascript" src="karamel/board/cookbooks/attributes-tabs-pane.directive.js"></script>
   <script type="text/javascript" src="karamel/board/tabs/common-tabs.directive.js"></script>
-  <script type="text/javascript" src="karamel/board/tabs/common-tabs-pane.directive.js"></script>
   <script type="text/javascript" src="karamel/board/provider/provider-editor.controller.js"></script>
   <script type="text/javascript" src="karamel/board/launch/launch.controller.js"></script>
   <script type="text/javascript" src="karamel/board/launch/launch-tabs.directive.js"></script>
@@ -92,6 +92,7 @@
   <script type="text/javascript" src="karamel/thirdparties/ng-sortable.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/d3/d3.v3.min.js"></script>
   <script type="text/javascript" src="karamel/thirdparties/d3/dagre-d3.js"></script>
+  <script type="text/javascript" src="karamel/thirdparties/isteven-multi-select.js"></script>
 
   <div class="notifications" ng-controller="alert.controller">
     <alert ng-repeat="alert in alerts" type="{{alert.type}}" close="closeAlert($index)">{{alert.msg}}</alert>

@@ -202,8 +202,8 @@ angular.module('main.module')
         },
         configureGlobalAttributes: function() {
           var modalInstance = $modal.open({
-            templateUrl: "karamel/board/cookbooks/attributes-editor.html",
-            controller: "attributes-editor.controller as ctrl",
+            templateUrl: "karamel/board/cookbooks/attributes.html",
+            controller: "attributes.controller as ctrl",
             backdrop: "static",
             resolve: {
               info: function() {
@@ -270,8 +270,8 @@ angular.module('main.module')
         },
         configureGroupAttributes: function(group) {
           var modalInstance = $modal.open({
-            templateUrl: "karamel/board/cookbooks/attributes-editor.html",
-            controller: "attributes-editor.controller as ctrl",
+            templateUrl: "karamel/board/cookbooks/attributes.html",
+            controller: "attributes.controller as ctrl",
             backdrop: "static",
             resolve: {
               info: function() {

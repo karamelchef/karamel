@@ -9,6 +9,7 @@ angular.module('main.module', [
     , "xeditable"// edit project name
     , "oitozero.ngSweetAlert"
     , 'angular-md5'
+    , 'isteven-multi-select'
     , 'blockUI'
 ]).run(function(editableOptions) {
   editableOptions.theme = 'bs3'; // bootstrap3 theme for xeditable

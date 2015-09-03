@@ -38,6 +38,22 @@
       </div>
     </div>
     <br/>
+    <!--        <div class="row">
+    
+                <isteven-multi-select    
+                    input-model="github.repos"
+                    output-model="github.reposSelected"
+                    button-label="repository"
+                    item-label="name"
+                    tick-property="ticked"
+                    selection-mode="single"
+                    disable-property="disabled"
+                    on-item-click="github.setTickedRepo()"
+                >
+                </isteven-multi-select>            
+            </div>-->
+
+
     <h2 class="modal-title">Then Select the Repository. </h2>
     <hr>
 
@@ -63,23 +79,25 @@
       </div>                
     </div>                
 
+
+
   </div>
 
 </div>
-    
-        <!--        <div class="row col-md-12">
-                <div class="form-group col-xs-6 col-sm-6 col-md-6 text-center">
-                    <div class = "row" >
-                        <label for="newRepo" class="control-label">Repository</label>
-                    </div>
-                    <div class="row btn-group text-center" dropdown>
-                        <a class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-                            Select Repo
-                            <span class="caret"></span>
-                        </a>
-                        <ul class="dropdown-menu" role="cmenu">
-                            <li ng-repeat="repo in github.repos"><a ng-click="repoName = repo"> {{repo.name}}</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div> -->
+
+<!--        <div class="row col-md-12">
+        <div class="form-group col-xs-6 col-sm-6 col-md-6 text-center">
+            <div class = "row" >
+                <label for="newRepo" class="control-label">Repository</label>
+            </div>
+            <div class="row btn-group text-center" dropdown>
+                <a class="btn btn-primary dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+                    Select Repo
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="cmenu">
+                    <li ng-repeat="repo in github.repos"><a ng-click="repoName = repo"> {{repo.name}}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div> -->
