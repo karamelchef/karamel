@@ -348,5 +348,8 @@ public class Settings {
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
 
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
+  
+  public static final String KANDY_REST_STATS_STORE = 
+      "http://snurran.sics.se:8080/CloudServiceRecommender-1.0-SNAPSHOT/api/stats/cluster/store";
 
 }
