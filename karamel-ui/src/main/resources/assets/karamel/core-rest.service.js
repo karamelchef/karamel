@@ -64,33 +64,13 @@ angular.module('main.module')
         },
         startCluster: function(clusterJson) {
           var method = 'PUT';
-          var url = _defaultHost.concat("cluster/start");
+          var url = _defaultHost.concat("/cluster/start");
           return _getPromiseObject(method, url, _defaultContentType, clusterJson);
         },
         processCommand: function(commandName) {
           var method = 'PUT';
           var url = _defaultHost.concat("/cluster/processCommand");
           return _getPromiseObject(method, url, _defaultContentType, commandName);
-        },
-        viewCluster: function(clusterNameJson) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/viewCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterNameJson);
-        },
-        pauseCluster: function(clusterName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/pauseCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterName);
-        },
-        stopCluster: function(clusterName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/stopCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterName);
-        },
-        commandSheet: function() {
-          var method = 'GET';
-          var url = _defaultHost.concat("/getCommandSheet");
-          return _getPromiseObject(method, url, _defaultContentType);
         },
         exitKaramel: function() {
           var method = 'GET';
