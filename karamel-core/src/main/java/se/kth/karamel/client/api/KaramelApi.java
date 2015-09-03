@@ -37,10 +37,10 @@ public interface KaramelApi {
    * @param command
    * @param args
    * @return
-   * @throws KaramelException 
+   * @throws KaramelException
    */
   public CommandResponse processCommand(String command, String... args) throws KaramelException;
-  
+
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
    *
@@ -68,7 +68,7 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public String yamlToJson(String yaml) throws KaramelException;
-  
+
   /**
    * Loads Karamel common keys
    *
@@ -204,7 +204,7 @@ public interface KaramelApi {
   /**
    * Register username/password for github account
    *
-   * @param user github account name 
+   * @param user github account name
    * @param password github password
    * @return GithubUser Json object also containing primary github email address
    * @throws KaramelException
@@ -256,9 +256,10 @@ public interface KaramelApi {
 
   /**
    * Loads an experiment into the Designer, given its clone URL
+   *
    * @param githubRepoUrl url for github repo
    * @return Json object for the ExperimentContext
-   * @throws se.kth.karamel.common.exception.KaramelException 
+   * @throws se.kth.karamel.common.exception.KaramelException
    */
   public Experiment loadExperiment(String githubRepoUrl) throws KaramelException;
 
@@ -273,23 +274,22 @@ public interface KaramelApi {
   public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
 
   /**
-   * 
+   *
    * @param owner
    * @param repo
    * @param experimentName
    */
-  public void removeFileFromExperiment(String owner, String repo, String experimentName) ;
+  public void removeFileFromExperiment(String owner, String repo, String experimentName);
 
-  
   /**
-   * 
+   *
    * @param owner
-   * @param repo 
-   * @param removeGitHub 
-   * @param removeLocal 
+   * @param repo
+   * @param removeGitHub
+   * @param removeLocal
    */
   public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
-  
+
   public String loadGceCredentialsIfExist() throws KaramelException;
 
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;

@@ -4,7 +4,6 @@ import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import se.kth.karamel.backend.evaluation.ClusterStatistics;
 import java.util.ArrayList;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -258,10 +257,8 @@ public class KaramelApiTest {
   public void testGce() throws KaramelException, IOException, InterruptedException {
     String fileName = "flink_gce";
     String clusterName = "flinkgce";
-    int vms = 3;
-    ClusterStatistics.setFileName("timestat.txt");
-    ClusterStatistics.setExperimentName(String.format("%s%d", fileName, vms));
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/" + fileName + ".yml"), Charsets.UTF_8);
+
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_gce.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");

@@ -68,12 +68,12 @@ public class Settings {
   public static final int DAY_IN_MS = 24 * 3600 * 1000;
   public static final int DAY_IN_MIN = 24 * 60;
   public static final int SEC_IN_MS = 1000;
-  public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;  
-  public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;  
-  public static final int SSH_PING_INTERVAL = 10 * SEC_IN_MS; 
+  public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;
+  public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;
+  public static final int SSH_PING_INTERVAL = 10 * SEC_IN_MS;
   public static final int SSH_SESSION_RETRY_NUM = 10;
   public static final int SSH_CMD_RETRY_NUM = 2;
-  public static final int SSH_CMD_RETRY_INTERVALS = 3 * SEC_IN_MS; 
+  public static final int SSH_CMD_RETRY_INTERVALS = 3 * SEC_IN_MS;
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
 
@@ -215,7 +215,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/"
         + recName.replace(COOKBOOK_DELIMITER, COOOKBOOK_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
   }
 
@@ -246,7 +246,7 @@ public class Settings {
       recName = recipeName;
     }
 
-    return Settings.SYSTEM_TMP_FOLDER_PATH + File.separator + recName.replace(COOKBOOK_DELIMITER, "_");
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
   }
 
   public static String EXPERIMENT_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {

@@ -26,147 +26,106 @@ angular.module('main.module')
 
       // Services interacting with the karamel core.
       return{
-        // Based on the object passed get the complete url.
-        getCompleteYaml: function(json) {
-
+        jsonToYaml: function(json) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/fetchYaml");
-
+          var url = _defaultHost.concat("/definition/json2yaml");
           return _getPromiseObject(method, url, _defaultContentType, json);
-
         },
-        getCleanYaml: function(json) {
-
+        yamlToJson: function(ymlString) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/cleanYaml");
-
-          return  _getPromiseObject(method, url, _defaultContentType, json);
-
-        },
-        getJsonFromYaml: function(ymlString) {
-
-          var method = 'PUT';
-          var url = _defaultHost.concat("/fetchJson");
-
+          var url = _defaultHost.concat("/definition/yaml2json");
           return _getPromiseObject(method, url, _defaultContentType, ymlString);
-
-
         },
         getCookBookInfo: function(requestData) {
 
           var method = 'PUT';
-          var url = _defaultHost.concat("/fetchCookbook");
+          var url = _defaultHost.concat("/definition/fetchCookbook");
           return _getPromiseObject(method, url, _defaultContentType, requestData);
         },
         loadSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/loadSshKeys");
+          var url = _defaultHost.concat("/ssh/loadKey");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         registerSshKeys: function(sshKeypair) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/registerSshKeys");
+          var url = _defaultHost.concat("/ssh/registerKey");
           return _getPromiseObject(method, url, _defaultContentType, sshKeypair);
         },
         generateSshKeys: function() {
           var method = 'PUT';
-          var url = _defaultHost.concat("/generateSshKeys");
-          return _getPromiseObject(method, url, _defaultContentType);
-        },
-        startCluster: function(clusterJson) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/startCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterJson);
-        },
-        viewCluster: function(clusterNameJson) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/viewCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterNameJson);
-        },
-        pauseCluster: function(clusterName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/pauseCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterName);
-        },
-        stopCluster: function(clusterName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/stopCluster");
-          return _getPromiseObject(method, url, _defaultContentType, clusterName);
-        },
-        commandSheet: function() {
-          var method = 'GET';
-          var url = _defaultHost.concat("/getCommandSheet");
-          return _getPromiseObject(method, url, _defaultContentType);
-        },
-        exitKaramel: function() {
-          var method = 'GET';
-          var url = _defaultHost.concat("/exitKaramel");
-          return _getPromiseObject(method, url, _defaultContentType);
-        },
-        ping: function() {
-          var method = 'GET';
-          var url = _defaultHost.concat("/ping");
+          var url = _defaultHost.concat("/ssh/generateKey");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         sudoPassword: function(sudoAccount) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/sudoPassword");
+          var url = _defaultHost.concat("/ssh/setSudoPassword");
           return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
-        githubCredentials: function(githubCredentials) {
+        startCluster: function(clusterJson) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/githubCredentials");
-          return _getPromiseObject(method, url, _defaultContentType, githubCredentials);
+          var url = _defaultHost.concat("/cluster/start");
+          return _getPromiseObject(method, url, _defaultContentType, clusterJson);
+        },
+        processCommand: function(commandName) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/cluster/processCommand");
+          return _getPromiseObject(method, url, _defaultContentType, commandName);
+        },
+        exitKaramel: function() {
+          var method = 'GET';
+          var url = _defaultHost.concat("/system/exit");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        ping: function() {
+          var method = 'GET';
+          var url = _defaultHost.concat("/system/ping");
+          return _getPromiseObject(method, url, _defaultContentType);
         },
         setGithubCredentials: function(username, password) {
           var method = 'POST';
-          var url = _defaultHost.concat("/setGithubCredentials");
+          var url = _defaultHost.concat("/github/setCredentials");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"user": username, "password": password}));
         },
         getGithubCredentials: function() {
           var method = 'GET';
-          var url = _defaultHost.concat("/getGithubCredentials");
+          var url = _defaultHost.concat("/github/getCredentials");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         getGithubOrgs: function() {
           var method = 'POST';
-          var url = _defaultHost.concat("/getGithubOrgs");
+          var url = _defaultHost.concat("/github/getOrgs");
           return _getPromiseObject(method, url, _defaultContentType, "", true);
         },
         getGithubRepos: function(org) {
           var method = 'POST';
-          var url = _defaultHost.concat("/getGithubRepos");
+          var url = _defaultHost.concat("/github/getRepos");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"org": org}), true);
         },
+        removeRepo: function(org, repo, removeLocal, removeRemote) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/github/removeRepository");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
+            $.param({"org": org, "repo": repo, "local": removeLocal, "remote": removeRemote}));
+        },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
-          var url = _defaultHost.concat("/loadExperiment");
+          var url = _defaultHost.concat("/experiment/load");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"experimentUrl": experimentUrl}));
         },
         pushExperiment: function(experiment) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/pushExperiment");
+          var url = _defaultHost.concat("/experiment/push");
           return _getPromiseObject(method, url, _defaultContentType, experiment);
         },
         removeFileFromExperiment: function(org, repo, fileName) {
           var method = 'POST';
-          var url = _defaultHost.concat("/removeFileFromExperiment");
+          var url = _defaultHost.concat("/experiment/removeFile");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"org": org, "repo": repo, "filename": fileName}));
-        },
-        removeRepo: function(org, repo, removeLocal, removeRemote) {
-          var method = 'POST';
-          var url = _defaultHost.concat("/removeRepository");
-          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
-            $.param({"org": org, "repo": repo, "local": removeLocal, "remote": removeRemote}));
-        },
-        processCommand: function(commandName) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/processCommand");
-          return _getPromiseObject(method, url, _defaultContentType, commandName);
         },
         loadEc2Credentials: function() {
           var method = 'PUT';

@@ -1,5 +1,5 @@
 angular.module('main.module')
-  .directive('launchSshPane', ['$log', 'core-rest.service', function($log, coreService) {
+  .directive('launchSshPane', ['$log', 'core-rest.service', 'alert.service', function($log, coreService, alertService) {
       return{
         restrict: 'E',
 //            transclude: true,
@@ -94,6 +94,7 @@ angular.module('main.module')
                   .error(function(data) {
                     $log.warn("No default ssh key available");
                     _updateState('initialWarn', scope.sshKeyObj);
+                    alertService.addAlert({type: 'danger', msg: data.reason});
                   });
                 scope.bootUp = false;
               }
@@ -116,6 +117,7 @@ angular.module('main.module')
               .error(function(data) {
                 $log.warn("Couldn't generate ssh-keys");
                 _updateState('failure', scope.sshKeyObj);
+                alertService.addAlert({type: 'danger', msg: data.reason});
               });
           };
 
@@ -133,6 +135,7 @@ angular.module('main.module')
                 $log.warn("Couldn't generate ssh-keys");
                 _updateState('failure', scope.sshKeyObj);
                 scope.sshPassphraseEnabled = false;
+                alertService.addAlert({type: 'danger', msg: data.reason});
               });
           };
 
