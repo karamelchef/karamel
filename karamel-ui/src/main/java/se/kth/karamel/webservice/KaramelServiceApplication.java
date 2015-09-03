@@ -64,6 +64,18 @@ import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
+import se.kth.karamel.webservice.calls.ec2.LoadEc2Credentials;
+import se.kth.karamel.webservice.calls.ec2.ValidateEc2Credentials;
+import se.kth.karamel.webservice.calls.experiment.LoadExperiment;
+import se.kth.karamel.webservice.calls.experiment.PushExperiment;
+import se.kth.karamel.webservice.calls.experiment.RemoveFileFromExperiment;
+import se.kth.karamel.webservice.calls.gce.LoadGceCredentials;
+import se.kth.karamel.webservice.calls.gce.ValidateGceCredentials;
+import se.kth.karamel.webservice.calls.github.GetGithubCredentials;
+import se.kth.karamel.webservice.calls.github.GetGithubOrgs;
+import se.kth.karamel.webservice.calls.github.GetGithubRepos;
+import se.kth.karamel.webservice.calls.github.RemoveRepository;
+import se.kth.karamel.webservice.calls.github.SetGithubCredentials;
 import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
@@ -311,24 +323,24 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new LoadSshKeys(karamelApi));
     environment.jersey().register(new RegisterSshKeys(karamelApi));
     environment.jersey().register(new GenerateSshKeys(karamelApi));
-    environment.jersey().register(new Ec2.Load());
-    environment.jersey().register(new Ec2.Validate());
-    environment.jersey().register(new Gce.Load());
-    environment.jersey().register(new Gce.Validate());
+    environment.jersey().register(new LoadEc2Credentials(karamelApi));
+    environment.jersey().register(new ValidateEc2Credentials(karamelApi));
+    environment.jersey().register(new LoadGceCredentials(karamelApi));
+    environment.jersey().register(new ValidateGceCredentials(karamelApi));
     environment.jersey().register(new StartCluster(karamelApi));
     environment.jersey().register(new Command.CheatSheet());
     environment.jersey().register(new Command.Process());
     environment.jersey().register(new ExitKaramel());
     environment.jersey().register(new PingKaramel());
     environment.jersey().register(new Sudo.SudoPassword());
-    environment.jersey().register(new Github.GetGithubCredentials());
-    environment.jersey().register(new Github.SetGithubCredentials());
-    environment.jersey().register(new Github.LoadExperiment());
-    environment.jersey().register(new Github.GetGithubOrgs());
-    environment.jersey().register(new Github.GetGithubRepos());
-    environment.jersey().register(new Github.PushExperiment());
-    environment.jersey().register(new Github.RemoveFileFromExperiment());
-    environment.jersey().register(new Github.RemoveRepository());
+    environment.jersey().register(new GetGithubCredentials(karamelApi));
+    environment.jersey().register(new SetGithubCredentials(karamelApi));
+    environment.jersey().register(new LoadExperiment(karamelApi));
+    environment.jersey().register(new GetGithubOrgs(karamelApi));
+    environment.jersey().register(new GetGithubRepos(karamelApi));
+    environment.jersey().register(new PushExperiment(karamelApi));
+    environment.jersey().register(new RemoveFileFromExperiment(karamelApi));
+    environment.jersey().register(new RemoveRepository(karamelApi));
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
@@ -482,133 +494,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
   }
 
-  public static class Ec2 {
-
-    @Path("/ec2/loadCredentials")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Load {
-
-      @PUT
-      public Response loadCredentials() {
-        Response response = null;
-        logger.debug("Received request to load the ec2 credentials.");
-        try {
-          Ec2Credentials credentials = karamelApi.loadEc2CredentialsIfExist();
-          Ec2JSON provider = new Ec2JSON();
-          provider.setAccountId((credentials == null) ? "" : credentials.getAccessKey());
-          provider.setAccountKey((credentials == null) ? "" : credentials.getSecretKey());
-          response = Response.status(Response.Status.OK).entity(provider).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-
-    @Path("/ec2/validateCredentials")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Validate {
-
-      /**
-       * Validating the Provider based on the supplied credentials..
-       *
-       * @param providerJSON
-       * @return
-       */
-      @PUT
-      public Response validateCredentials(Ec2JSON providerJSON) {
-
-        Response response = null;
-        logger.debug("Received request to validate the ec2 credentials.");
-
-        try {
-          Ec2Credentials credentials = new Ec2Credentials();
-          credentials.setAccessKey(providerJSON.getAccountId());
-          credentials.setSecretKey(providerJSON.getAccountKey());
-          if (karamelApi.updateEc2CredentialsIfValid(credentials)) {
-            response = Response.status(Response.Status.OK).
-                entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-          } else {
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-                entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
-          }
-
-        } catch (KaramelException e) {
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-  }
-
-  public static class Gce {
-
-    @Path("/gce/loadCredentials")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Load {
-
-      @PUT
-      public Response loadCredentials() {
-        Response response = null;
-        logger.debug("Received request to load the gce credentials.");
-        try {
-          String jsonKeyPath = karamelApi.loadGceCredentialsIfExist();
-          GceJson provider = new GceJson();
-          provider.setJsonKeyPath((jsonKeyPath == null) ? "" : jsonKeyPath);
-          response = Response.status(Response.Status.OK).entity(provider).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-
-    @Path("/gce/validateCredentials")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class Validate {
-
-      /**
-       * Validating the Provider based on the supplied credentials..
-       *
-       * @param providerJSON
-       * @return
-       */
-      @PUT
-      public Response validateCredentials(GceJson providerJSON) {
-
-        Response response = null;
-        logger.debug("Received request to validate the gce credentials.");
-
-        try {
-          String jsonKeyPath = providerJSON.getJsonKeyPath();
-          if (karamelApi.updateGceCredentialsIfValid(jsonKeyPath)) {
-            response = Response.status(Response.Status.OK).
-                entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-          } else {
-            response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-                entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, "Invalid Credentials")).build();
-          }
-
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-  }
-
-
   @Path("/exitKaramel")
   public static class ExitKaramel {
 
@@ -657,184 +542,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         logger.info(" Received request to set sudo password....");
         try {
           karamelApi.registerSudoPassword(sudoPwd.getPassword());
-          response = Response.status(Response.Status.OK).
-              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-    }
-  }
-
-  public static class Github {
-
-    @Path("/getGithubCredentials")
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class GetGithubCredentials {
-
-      @GET
-      public Response getGithubCredentials() {
-        Response response = null;
-        logger.info(" Received request to get github credentials.... ");
-        try {
-          GithubUser credentials = karamelApi.loadGithubCredentials();
-          response = Response.status(Response.Status.OK).
-              entity(credentials).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-        return response;
-      }
-
-    }
-
-    @Path("/setGithubCredentials")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class SetGithubCredentials {
-
-      @POST
-      public Response setGithubCredentials(@FormParam("user") String user, @FormParam("password") String password) {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          GithubUser githubUser = karamelApi.registerGithubAccount(user, password);
-
-          response = Response.status(Response.Status.OK).
-              entity(githubUser).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-    @Path("/getGithubOrgs")
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class GetGithubOrgs {
-
-      @POST
-      public Response getGithubOrgs() {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          List<OrgItem> orgs = karamelApi.listGithubOrganizations();
-          response = Response.status(Response.Status.OK).
-              entity(orgs).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-    @Path("/getGithubRepos")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class GetGithubRepos {
-
-      @POST
-      public Response getGithubRepos(@FormParam("org") String org) {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          List<RepoItem> repos = karamelApi.listGithubRepos(org);
-          response = Response.status(Response.Status.OK).
-              entity(repos).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-
-    @Path("/pushExperiment")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public static class PushExperiment {
-
-      @PUT
-      public Response pushExperiment(Experiment experiment) {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          karamelApi.commitAndPushExperiment(experiment);
-          response = Response.status(Response.Status.OK).
-              entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-    @Path("/loadExperiment")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class LoadExperiment {
-
-      @POST
-      public Response loadExperiment(@FormParam("experimentUrl") String experimentUrl) {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          Experiment ec = karamelApi.loadExperiment(experimentUrl);
-          response = Response.status(Response.Status.OK).entity(ec).build();
-        } catch (KaramelException e) {
-          e.printStackTrace();
-          response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).
-              entity(new StatusResponseJSON(StatusResponseJSON.ERROR_STRING, e.getMessage())).build();
-        }
-
-        return response;
-      }
-    }
-
-    @Path("/removeFileFromExperiment")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class RemoveFileFromExperiment {
-
-      @POST
-      public Response removeFileFromExperiment(@FormParam("org") String org, @FormParam("repo") String repo,
-          @FormParam("filename") String filename) {
-        logger.info(" Received request to set github credentials.... ");
-        karamelApi.removeFileFromExperiment(org, repo, filename);
-        return Response.status(Response.Status.OK).entity(
-            new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
-      }
-    }
-
-    @Path("/removeRepository")
-    @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public static class RemoveRepository {
-
-      @POST
-      public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo,
-          @FormParam("local") boolean local, @FormParam("remote") boolean remote) {
-        Response response = null;
-        logger.info(" Received request to set github credentials.... ");
-        try {
-          karamelApi.removeRepo(org, repo, local, remote);
           response = Response.status(Response.Status.OK).
               entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
         } catch (KaramelException e) {

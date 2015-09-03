@@ -97,56 +97,52 @@ angular.module('main.module')
           var url = _defaultHost.concat("/sudoPassword");
           return _getPromiseObject(method, url, _defaultContentType, sudoAccount);
         },
-        githubCredentials: function(githubCredentials) {
-          var method = 'PUT';
-          var url = _defaultHost.concat("/githubCredentials");
-          return _getPromiseObject(method, url, _defaultContentType, githubCredentials);
-        },
         setGithubCredentials: function(username, password) {
           var method = 'POST';
-          var url = _defaultHost.concat("/setGithubCredentials");
+          var url = _defaultHost.concat("/github/setCredentials");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"user": username, "password": password}));
         },
         getGithubCredentials: function() {
           var method = 'GET';
-          var url = _defaultHost.concat("/getGithubCredentials");
+          var url = _defaultHost.concat("/github/getCredentials");
           return _getPromiseObject(method, url, _defaultContentType);
         },
         getGithubOrgs: function() {
           var method = 'POST';
-          var url = _defaultHost.concat("/getGithubOrgs");
+          var url = _defaultHost.concat("/github/getOrgs");
           return _getPromiseObject(method, url, _defaultContentType, "", true);
         },
         getGithubRepos: function(org) {
           var method = 'POST';
-          var url = _defaultHost.concat("/getGithubRepos");
+          var url = _defaultHost.concat("/github/getRepos");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"org": org}), true);
         },
+        removeRepo: function(org, repo, removeLocal, removeRemote) {
+          var method = 'POST';
+          var url = _defaultHost.concat("/github/removeRepository");
+          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
+            $.param({"org": org, "repo": repo, "local": removeLocal, "remote": removeRemote}));
+        },
         loadExperiment: function(experimentUrl) {
           var method = 'POST';
-          var url = _defaultHost.concat("/loadExperiment");
+          var url = _defaultHost.concat("/experiment/load");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"experimentUrl": experimentUrl}));
         },
         pushExperiment: function(experiment) {
           var method = 'PUT';
-          var url = _defaultHost.concat("/pushExperiment");
+          var url = _defaultHost.concat("/experiment/push");
           return _getPromiseObject(method, url, _defaultContentType, experiment);
         },
         removeFileFromExperiment: function(org, repo, fileName) {
           var method = 'POST';
-          var url = _defaultHost.concat("/removeFileFromExperiment");
+          var url = _defaultHost.concat("/experiment/removeFile");
           return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
             $.param({"org": org, "repo": repo, "filename": fileName}));
         },
-        removeRepo: function(org, repo, removeLocal, removeRemote) {
-          var method = 'POST';
-          var url = _defaultHost.concat("/removeRepository");
-          return _getPromiseObject(method, url, 'application/x-www-form-urlencoded',
-            $.param({"org": org, "repo": repo, "local": removeLocal, "remote": removeRemote}));
-        },
+
         processCommand: function(commandName) {
           var method = 'PUT';
           var url = _defaultHost.concat("/processCommand");
