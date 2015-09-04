@@ -1,4 +1,4 @@
-package se.kth.karamel.backend.evaluation;
+package se.kth.karamel.backend.stats;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;

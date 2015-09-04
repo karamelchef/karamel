@@ -1,4 +1,4 @@
-package se.kth.karamel.backend.evaluation;
+package se.kth.karamel.backend.stats;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,7 +26,7 @@ public class ClusterStatistics {
     timeStats.put(key, time);
     logger.info(String.format("%s time: %d", key, time));
     try {
-      if (getFileName() != null) {
+      if (fileName != null) {
         if (writer == null) {
           writer = new FileWriter(new File(DEFAULT_TIME_STAT_FILE_DIR + "/" + fileName), true);
         }
@@ -36,11 +36,6 @@ public class ClusterStatistics {
     } catch (IOException ex) {
       logger.error(ex.getMessage(), ex);
     }
-
-  }
-
-  public static long getTimeStat(String key) {
-    return timeStats.get(key);
   }
 
   public static void startTimer() {
@@ -52,24 +47,10 @@ public class ClusterStatistics {
   }
 
   /**
-   * @return the fileName
-   */
-  public static String getFileName() {
-    return fileName;
-  }
-
-  /**
    * @param aFileName the fileName to set
    */
   public static void setFileName(String aFileName) {
     fileName = aFileName;
-  }
-
-  /**
-   * @return the experimentName
-   */
-  public static String getExperimentName() {
-    return experimentName;
   }
 
   /**
