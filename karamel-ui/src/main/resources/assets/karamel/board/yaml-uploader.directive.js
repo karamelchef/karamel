@@ -19,7 +19,7 @@ angular.module('main.module')
               };
               $log.info("Requesting Karamel Core Services for JSON. ");
               cacheService.resetCache();
-              coreService.getJsonFromYaml(ymlJson)
+              coreService.yamlToJson(ymlJson)
                 .success(function(data, status, headers, config) {
                   $log.info("Success");
 
@@ -39,7 +39,7 @@ angular.module('main.module')
                 })
                 .error(function(data, status, headers, config) {
                   $log.info("Fetch Call Failed.");
-                  alertService.addAlert({type: 'danger', msg: 'Core: ' + data.message});
+                  alertService.addAlert({type: 'danger', msg: data.reason});
                 });
 
               element.val("");
