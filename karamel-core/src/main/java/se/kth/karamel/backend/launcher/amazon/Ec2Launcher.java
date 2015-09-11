@@ -7,6 +7,7 @@ package se.kth.karamel.backend.launcher.amazon;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -148,9 +149,12 @@ public final class Ec2Launcher extends Launcher {
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
-        IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).
-            cidrBlock("0.0.0.0/0").build();
-        client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, ippermission);
+        IpPermission tcpPerms = IpPermission.builder().ipProtocol(IpProtocol.TCP).
+            fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        IpPermission udpPerms = IpPermission.builder().ipProtocol(IpProtocol.UDP).
+            fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        ArrayList<IpPermission> perms = Lists.newArrayList(tcpPerms, udpPerms);
+        client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, perms);
         logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
       }
       logger.info(String.format("Security group '%s' was created :)", uniqeGroupName));
