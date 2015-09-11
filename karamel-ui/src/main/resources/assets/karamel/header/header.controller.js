@@ -30,7 +30,7 @@ angular.module('main.module')
 
       $scope.saveYamlToDisk = function(){
           
-        coreService.getCompleteYaml($scope.clusterService.getJsonForRest())
+        coreService.jsonToYaml($scope.clusterService.getJsonForRest())
                 .success(function(data, status, headers, config) {
                   var blob = new Blob([data.yml], {type: "text/plain;charset=utf-8"});
                   saveAs(blob, clusterService.name().concat(".yml"));
