@@ -1,0 +1,53 @@
+name: Hopsbench                                                  
+ec2:
+    type: m3.medium
+    region: eu-west-1
+    ami: ami-efb29698
+    vpc: vpc-13fb6176 
+    subnet: subnet-6ce7b209 
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+  hopsbench:
+    github: "hopshadoop/hopsbench"
+    branch: "master"
+
+attrs:
+  ndb:
+    DataMemory: '500'
+    IndexMemory: '120'
+    NoOfReplicas: 2
+    
+groups: 
+  namenodes:
+    size: 12
+    recipes: 
+        - ndb::mysqld
+        - hops::ndb                                                          
+        - hops::nn
+  datanodes:
+    size: 4
+    recipes: 
+        - ndb::ndbd
+  master:
+    size: 1
+    recipes: 
+        - ndb::mgmd
+        - ndb::mysqld
+        - ndb::bench
+        - hops::ndb                                                          
+        - hops::client
+        - hopsbench::master
+  slaves:
+    size: 6
+    recipes: 
+        - ndb::install
+        - ndb::mysqld
+        - hops::ndb                                                          
+        - hops::client
+        - hopsbench::slave
