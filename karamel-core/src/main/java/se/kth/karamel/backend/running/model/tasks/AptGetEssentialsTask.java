@@ -13,6 +13,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.stats.ClusterStats;
 import se.kth.karamel.common.Settings;
 
 /**
@@ -21,8 +22,8 @@ import se.kth.karamel.common.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineRuntime machine, TaskSubmitter submitter) {
-    super("apt-get essentials", machine, submitter);
+  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("apt-get essentials", machine, clusterStats, submitter);
   }
 
   @Override

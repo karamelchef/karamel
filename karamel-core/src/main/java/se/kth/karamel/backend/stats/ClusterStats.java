@@ -19,6 +19,8 @@ public class ClusterStats {
   String userId;
   String userIp;
   String definition;
+  long startTime;
+  long endTime;
   List<PhaseStat> phases = new ArrayList<>();
   List<TaskStat> tasks = new ArrayList<>();
 
@@ -54,11 +56,27 @@ public class ClusterStats {
     return userIp;
   }
 
+  public long getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(long startTime) {
+    this.startTime = startTime;
+  }
+
+  public long getEndTime() {
+    return endTime;
+  }
+
+  public void setEndTime(long endTime) {
+    this.endTime = endTime;
+  }
+
   public List<TaskStat> getTasks() {
     return tasks;
   }
 
-  public void addTask(TaskStat task) {
+  public synchronized  void addTask(TaskStat task) {
     this.tasks.add(task);
   }
 
@@ -66,7 +84,7 @@ public class ClusterStats {
     return phases;
   }
 
-  public void addPhase(PhaseStat phase) {
+  public synchronized  void addPhase(PhaseStat phase) {
     this.phases.add(phase);
   }
   

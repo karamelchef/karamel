@@ -12,6 +12,7 @@ import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.stats.ClusterStats;
 import se.kth.karamel.common.Settings;
 
 /**
@@ -22,8 +23,8 @@ public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, TaskSubmitter submitter) {
-    super("make solo.rb", machine, submitter);
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("make solo.rb", machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
   }
 

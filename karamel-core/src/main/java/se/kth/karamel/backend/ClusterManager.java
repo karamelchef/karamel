@@ -32,6 +32,8 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
+import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.backend.stats.PhaseStat;
 import se.kth.karamel.client.model.Baremetal;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.client.model.Ec2;
@@ -66,8 +68,9 @@ public class ClusterManager implements Runnable {
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
+  private final ClusterStats stats = new ClusterStats();
 
-  public ClusterManager(JsonCluster definition, ClusterContext clusterContext) {
+  public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterRuntime(definition);
@@ -75,6 +78,11 @@ public class ClusterManager implements Runnable {
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
     initLaunchers();
+    String yaml = ClusterDefinitionService.jsonToYaml(definition);
+    this.stats.setDefinition(yaml);
+    this.stats.setUserId(Settings.USER_NAME);
+    this.stats.setUserIp(Settings.IP_Address);
+    this.stats.setStartTime(System.currentTimeMillis());
   }
 
   public Dag getInstallationDag() {
@@ -248,7 +256,7 @@ public class ClusterManager implements Runnable {
 
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
-      installationDag = DagBuilder.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
+      installationDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
       installationDag.start();
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
@@ -335,35 +343,43 @@ public class ClusterManager implements Runnable {
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               clean(false);
-              ClusterStatistics.addTimeStat(
-                  ClusterRuntime.ClusterPhases.PRECLEANING.name(), ClusterStatistics.stopTimer());
+              long duration = ClusterStatistics.stopTimer();
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PRECLEANING.name(), "succeed", duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkGroups();
-              ClusterStatistics.addTimeStat(
-                  ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), ClusterStatistics.stopTimer());
+              long duration = ClusterStatistics.stopTimer();
+              PhaseStat phaseStat
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), "succeed", duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkMachines();
-              ClusterStatistics.addTimeStat(
-                  ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), ClusterStatistics.stopTimer());
+              long duration = ClusterStatistics.stopTimer();
+              PhaseStat phaseStat
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), "succeed", duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               install();
-              ClusterStatistics.addTimeStat(
-                  ClusterRuntime.ClusterPhases.INSTALLING.name(), ClusterStatistics.stopTimer());
+              long duration = ClusterStatistics.stopTimer();
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), "succeed", duration);
+              stats.addPhase(phaseStat);
             }
             break;
           case PURGE:
             ClusterStatistics.startTimer();
             purge();
-            ClusterStatistics.addTimeStat(ClusterRuntime.ClusterPhases.PURGING.name(), ClusterStatistics.stopTimer());
+            long duration = ClusterStatistics.stopTimer();
+            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), "succeed", duration);
+            stats.addPhase(phaseStat);
             break;
         }
       } catch (java.lang.InterruptedException ex) {
