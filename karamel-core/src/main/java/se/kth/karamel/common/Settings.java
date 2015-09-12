@@ -349,10 +349,11 @@ public class Settings {
 
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
-  public static final String KANDY_REST_STATS_STORE
-      = "http://snurran.sics.se:8080/CloudServiceRecommender/api/stats/cluster/store";
+  public static final String KANDY_REST_ROOT = "http://snurran.sics.se:8080/CloudServiceRecommender/api/stats";
+  public static final String KANDY_REST_STATS_STORE= KANDY_REST_ROOT + "/cluster/store";
 
-  public static final String KANDY_REST_STATS_UPDATE
-      = "http://snurran.sics.se:8080/CloudServiceRecommender/api/stats/cluster/update";
+  public static final String KANDY_REST_STATS_UPDATE(String id) {
+      return String.format("%s/cluster/update/%s", KANDY_REST_ROOT, id);
+  }
 
 }

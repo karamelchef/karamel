@@ -27,14 +27,12 @@ public class KandyRestClient {
   private static ClientConfig config;
   private static Client client;
   private static WebResource storeService;
-  private static WebResource updateService;
 
   private static synchronized void checkResources() {
     if (config == null) {
       config = new DefaultClientConfig();
       client = Client.create(config);
       storeService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_STORE).build());
-      updateService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE).build());
     }
   }
 
@@ -68,9 +66,13 @@ public class KandyRestClient {
     builder.disableHtmlEscaping();
     Gson gson = builder.setPrettyPrinting().create();
     String json = gson.toJson(stats);
+    WebResource updateService = 
+        client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE(stats.getId())).build());
 
     ClientResponse response = updateService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
-    if (response.getStatus() >= 300) {
+
+    if (response.getStatus()
+        >= 300) {
       throw new KaramelException(String.format("Kandy server couldn't store the cluster stats because '%s'",
           response.getStatusInfo().getReasonPhrase()));
     }
