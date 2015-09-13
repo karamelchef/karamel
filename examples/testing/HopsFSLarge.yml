@@ -44,7 +44,6 @@ groups:
     - ndb::ndbd
   master:
     size: 1
-    attrs:
     recipes:
     - ndb::bench
     - ndb::mgmd
