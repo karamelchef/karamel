@@ -185,7 +185,7 @@ public class KaramelApiTest {
     }
   }
 
-//   @Test
+   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hiway";
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hiway.yml"), Charsets.UTF_8);

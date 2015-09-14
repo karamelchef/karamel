@@ -15,8 +15,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import org.apache.log4j.Logger;
 import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -24,19 +24,24 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class KandyRestClient {
 
+  private static final Logger logger = Logger.getLogger(KandyRestClient.class);
   private static ClientConfig config;
   private static Client client;
   private static WebResource storeService;
 
   private static synchronized void checkResources() {
-    if (config == null) {
-      config = new DefaultClientConfig();
-      client = Client.create(config);
-      storeService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_STORE).build());
+    try {
+      if (config == null) {
+        config = new DefaultClientConfig();
+        client = Client.create(config);
+        storeService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_STORE).build());
+      }
+    } catch (Exception e) {
+      logger.error("exception during intitalizing the KandyClient", e);
     }
   }
 
-  public static void pushClusterStats(ClusterStats stats) throws KaramelException {
+  public static void pushClusterStats(ClusterStats stats) {
     checkResources();
     if (stats.getId() == null) {
       storeNewStat(stats);
@@ -46,35 +51,45 @@ public class KandyRestClient {
 
   }
 
-  private static void storeNewStat(ClusterStats stats) throws KaramelException {
-    GsonBuilder builder = new GsonBuilder();
-    builder.disableHtmlEscaping();
-    Gson gson = builder.setPrettyPrinting().create();
-    String json = gson.toJson(stats);
+  private static void storeNewStat(ClusterStats stats) {
+    try {
+      GsonBuilder builder = new GsonBuilder();
+      builder.disableHtmlEscaping();
+      Gson gson = builder.setPrettyPrinting().create();
+      String json = gson.toJson(stats);
 
-    ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
-    String id = response.getEntity(String.class);
-    stats.setId(id);
-    if (response.getStatus() >= 300) {
-      throw new KaramelException(String.format("Kandy server couldn't store the cluster stats because '%s'",
-          response.getStatusInfo().getReasonPhrase()));
+      ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
+      String id = response.getEntity(String.class);
+      stats.setId(id);
+      if (response.getStatus() >= 300) {
+        logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
+            response.getStatusInfo().getReasonPhrase()));
+      }
+      logger.debug(String.format("Cluster status is stored for the first time in Kandy with id %s", id));
+    } catch (Exception e) {
+      logger.error("exception during storing cluster stats to Kandy", e);
     }
   }
 
-  private static void updateStat(ClusterStats stats) throws KaramelException {
-    GsonBuilder builder = new GsonBuilder();
-    builder.disableHtmlEscaping();
-    Gson gson = builder.setPrettyPrinting().create();
-    String json = gson.toJson(stats);
-    WebResource updateService = 
-        client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE(stats.getId())).build());
+  private static void updateStat(ClusterStats stats) {
+    try {
+      GsonBuilder builder = new GsonBuilder();
+      builder.disableHtmlEscaping();
+      Gson gson = builder.setPrettyPrinting().create();
+      String json = gson.toJson(stats);
+      WebResource updateService
+          = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE(stats.getId())).build());
 
-    ClientResponse response = updateService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
+      ClientResponse response = updateService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
 
-    if (response.getStatus()
-        >= 300) {
-      throw new KaramelException(String.format("Kandy server couldn't store the cluster stats because '%s'",
-          response.getStatusInfo().getReasonPhrase()));
+      if (response.getStatus()
+          >= 300) {
+        logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
+            response.getStatusInfo().getReasonPhrase()));
+      }
+      logger.debug(String.format("Cluster status is updated in Kandy with id %s", stats.getId()));
+    } catch (Exception e) {
+      logger.error("exception during updatinig cluster stats to Kandy", e);
     }
   }
 

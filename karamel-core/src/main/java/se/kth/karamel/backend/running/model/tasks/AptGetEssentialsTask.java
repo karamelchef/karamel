@@ -23,7 +23,7 @@ import se.kth.karamel.common.Settings;
 public class AptGetEssentialsTask extends Task {
 
   public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("apt-get essentials", machine, clusterStats, submitter);
+    super("apt-get essentials", "apt-get essentials", machine, clusterStats, submitter);
   }
 
   @Override

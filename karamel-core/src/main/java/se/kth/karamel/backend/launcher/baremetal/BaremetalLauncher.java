@@ -56,6 +56,7 @@ public class BaremetalLauncher extends Launcher {
     List<MachineRuntime> machines = new ArrayList<>();
     for (String ip : baremetal.retriveAllIps()) {
       MachineRuntime machine = new MachineRuntime(gr);
+      machine.setMachineType("baremetal");
       machine.setName(ip);
       machine.setPrivateIp(ip);
       machine.setPublicIp(ip);

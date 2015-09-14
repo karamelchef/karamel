@@ -304,6 +304,8 @@ public final class Ec2Launcher extends Launcher {
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
             publicIps.addAll(node.getPublicAddresses());
+            machine.setMachineType("ec2/" + ec2.getRegion() + "/" +ec2.getType() + "/" + ec2.getAmi() + "/" 
+                + ec2.getVpc() + "/" + ec2.getPrice());
             machine.setVmId(node.getId());
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));

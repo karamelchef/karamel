@@ -34,6 +34,7 @@ public abstract class Task implements DagTask, TaskCallback {
   }
   private Status status = Status.WAITING;
   private final String name;
+  private final String id;
   private final String machineId;
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
@@ -43,8 +44,9 @@ public abstract class Task implements DagTask, TaskCallback {
   private final ClusterStats clusterStats;
   private long startTime;
 
-  public Task(String name, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public Task(String name, String id, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     this.name = name;
+    this.id = id;
     this.machineId = machine.getId();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
@@ -64,6 +66,10 @@ public abstract class Task implements DagTask, TaskCallback {
     return name;
   }
 
+  public String getId() {
+    return id;
+  }
+  
   public abstract List<ShellCommand> getCommands() throws IOException;
 
   public void setCommands(List<ShellCommand> commands) {
@@ -161,7 +167,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   private void addStats() {
     long duration = System.currentTimeMillis() - startTime;
-    TaskStat taskStat = new TaskStat(getName(), "", status.name(), duration);
+    TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
     clusterStats.addTask(taskStat);
   }
 }

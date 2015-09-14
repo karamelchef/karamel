@@ -20,8 +20,8 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class KandyRestClientTest {
 
-  @Test
-  public void testPushStats() throws KaramelException, IOException {
+//  @Test
+  public void testPushStats() throws IOException {
     ClusterStats stats = new ClusterStats();
     String yml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/flink.yml");
     stats.setDefinition(yml);
