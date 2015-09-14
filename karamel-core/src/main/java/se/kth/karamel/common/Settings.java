@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.apache.log4j.Logger;
 import org.jclouds.aws.domain.Region;
 import org.jclouds.ec2.domain.InstanceType;
 
@@ -22,6 +23,8 @@ import org.jclouds.ec2.domain.InstanceType;
  * @author kamal
  */
 public class Settings {
+
+  private static final Logger logger = Logger.getLogger(Settings.class);
 
   //test
   public static boolean CB_CLASSPATH_MODE = false;
@@ -118,6 +121,8 @@ public class Settings {
   public static final String AWS_SECRET_KEY = "aws.secret.key";
   public static final String AWS_SECRET_KEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
   public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
+  public static final Integer AWS_BATCH_SIZE_DEFAULT_VALUE = 1;
+  public static final String AWS_BATCH_SIZE = "aws.batch.size";
   public static final String GITHUB_USER = "github.email";
   public static final String GITHUB_PASSWORD = "github.password";
   public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
@@ -134,12 +139,25 @@ public class Settings {
     return (provider + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
   }
 
-  public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int size) {
+  public static final List<String> EC2_UNIQUE_VM_NAMES(String clusterName, String groupName, int startCount, int size) {
     List<String> names = new ArrayList<>();
-    for (int i = 1; i <= size; i++) {
+    for (int i = startCount; i <= size; i++) {
       names.add(EC2_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
     }
     return names;
+  }
+
+  public static final int EC2_VM_BATCH_SIZE() {
+    Confs confs = Confs.loadKaramelConfs();
+    int batchSize = Settings.AWS_BATCH_SIZE_DEFAULT_VALUE;
+    if (confs != null && confs.getProperty(Settings.AWS_BATCH_SIZE) != null) {
+      try {
+        batchSize = Integer.parseInt(confs.getProperty(Settings.AWS_BATCH_SIZE));
+      } catch (NumberFormatException ex) {
+        logger.warn("Batch size in karamel config file is not a valid integer");
+      }
+    }
+    return batchSize;
   }
 
   /**
@@ -267,8 +285,8 @@ public class Settings {
         + sdf.format(new Date(System.currentTimeMillis())) + ".out";
   }
 
-  public static final int EC2_RETRY_INTERVAL = 5 * 1000;
-  public static final int EC2_RETRY_MAX = 100;
+  public static final int EC2_RETRY_INTERVAL = 6 * 1000;
+  public static final int EC2_RETRY_MAX = 300;
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
 

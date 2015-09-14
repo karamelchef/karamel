@@ -1,0 +1,56 @@
+name: HopsFSLarge
+ec2:
+    type: c3.8xlarge
+    region: eu-west-1
+    ami: ami-efb29698
+    vpc: vpc-13fb6176 
+    subnet: subnet-6ce7b209 
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+  hopsbench:
+    github: "hopshadoop/hopsbench"
+    branch: "master"
+
+attrs:
+  ndb:
+    DataMemory: '1000'
+    IndexMemory: '200'
+    ThreadConfig: main={count=1,cpubind=0},io={count=1,cpubind=1},rep={count=1,cpubind=2},recv={count=4,cpubind=3-5,26},send={count=4,cpubind=6-7,24-25},ldm={count=8,cpubind=8-15},tc={count=8,cpubind=16-23}
+    NoOfFragmentLogParts: '8'
+    NoOfReplicas: 2
+    
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - ndb::mysqld
+        - hops::ndb                                            
+        - hops::nn
+        - hopsbench::nn
+  datanodes:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  master:
+    size: 1
+    recipes: 
+        - ndb::mgmd
+        - ndb::bench
+        - hops::ndb                                                          
+        - hops::client
+        - hopsbench::master
+        - hopsbench::slave
+  slaves:
+    size: 1
+    recipes: 
+        - ndb::install
+        - ndb::bench
+        - hopsbench::slave
+        - hops::ndb                                                          
+        - hops::client
