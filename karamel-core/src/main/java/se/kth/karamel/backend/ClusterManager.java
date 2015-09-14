@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
@@ -76,13 +77,13 @@ public class ClusterManager implements Runnable {
     this.runtime = new ClusterRuntime(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
-    clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
-    initLaunchers();
     String yaml = ClusterDefinitionService.jsonToYaml(definition);
     this.stats.setDefinition(yaml);
     this.stats.setUserId(Settings.USER_NAME);
     this.stats.setUserIp(Settings.IP_Address);
     this.stats.setStartTime(System.currentTimeMillis());
+    clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
+    initLaunchers();
   }
 
   public Dag getInstallationDag() {
@@ -290,13 +291,14 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private void purge() throws InterruptedException {
+  private void purge() throws InterruptedException, KaramelException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
     stopping = true;
     clean(true);
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
+    KandyRestClient.pushClusterStats(stats);
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 

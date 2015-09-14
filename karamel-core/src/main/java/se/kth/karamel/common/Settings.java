@@ -62,12 +62,14 @@ public class Settings {
   public static final int INSTALLATION_DAG_THREADPOOL_SIZE = 100;
   public static final int CLUSTER_STATUS_CHECKING_INTERVAL = 1000;
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
+  public static final int CLUSTER_STAT_REPORT_INTERVAL = Settings.MIN_IN_MS;
   public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
 
   public static final int DAY_IN_MS = 24 * 3600 * 1000;
   public static final int DAY_IN_MIN = 24 * 60;
   public static final int SEC_IN_MS = 1000;
+  public static final int MIN_IN_MS = 60 * SEC_IN_MS;
   public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;
   public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;
   public static final int SSH_PING_INTERVAL = 10 * SEC_IN_MS;
