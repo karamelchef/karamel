@@ -12,7 +12,6 @@ import se.kth.karamel.backend.stats.PhaseStat;
 import se.kth.karamel.backend.stats.TaskStat;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -20,13 +19,12 @@ import se.kth.karamel.common.exception.KaramelException;
  */
 public class KandyRestClientTest {
 
-//  @Test
+  @Test
   public void testPushStats() throws IOException {
     ClusterStats stats = new ClusterStats();
     String yml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/flink.yml");
     stats.setDefinition(yml);
     stats.setUserId("kamal-mac");
-    stats.setUserIp("172.0.2.1");
     PhaseStat phase = new PhaseStat("PRECLEANING", "SUCCEED", 10 * Settings.SEC_IN_MS);
     stats.addPhase(phase);
     phase = new PhaseStat("FORKING GROUPS", "SUCCEED", 7 * Settings.SEC_IN_MS);

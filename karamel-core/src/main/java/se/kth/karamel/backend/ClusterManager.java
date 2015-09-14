@@ -80,7 +80,6 @@ public class ClusterManager implements Runnable {
     String yaml = ClusterDefinitionService.jsonToYaml(definition);
     this.stats.setDefinition(yaml);
     this.stats.setUserId(Settings.USER_NAME);
-    this.stats.setUserIp(Settings.IP_Address);
     this.stats.setStartTime(System.currentTimeMillis());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
     initLaunchers();

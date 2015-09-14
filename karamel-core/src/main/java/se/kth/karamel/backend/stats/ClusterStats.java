@@ -17,7 +17,6 @@ public class ClusterStats {
   
   String id;
   String userId;
-  String userIp;
   String definition;
   long startTime;
   long endTime;
@@ -47,15 +46,7 @@ public class ClusterStats {
   public String getUserId() {
     return userId;
   }
-
-  public void setUserIp(String userIp) {
-    this.userIp = userIp;
-  }
   
-  public String getUserIp() {
-    return userIp;
-  }
-
   public long getStartTime() {
     return startTime;
   }
