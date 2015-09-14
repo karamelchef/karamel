@@ -1,0 +1,23 @@
+name: ambari
+gce:
+  type: n1-standard-2
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
+
+cookbooks:                                                                      
+  ambari: 
+    github: "jimdowling/ambari"
+    branch: "master"
+    
+groups: 
+  server:
+    size: 1
+    recipes: 
+        - ambari::server
+  agents:
+    size: 2
+    recipes: 
+        - ambari::agent
+
+
+

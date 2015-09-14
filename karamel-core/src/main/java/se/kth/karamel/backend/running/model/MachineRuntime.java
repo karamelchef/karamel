@@ -34,6 +34,7 @@ public class MachineRuntime {
   private String publicIp;
   private int sshPort;
   private String sshUser;
+  private String machineType;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -97,6 +98,14 @@ public class MachineRuntime {
     return tasks;
   }
 
+  public String getMachineType() {
+    return machineType;
+  }
+
+  public void setMachineType(String machineType) {
+    this.machineType = machineType;
+  }
+  
   public void addTask(Task task) {
     tasks.add(task);
   }

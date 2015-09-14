@@ -185,7 +185,7 @@ public class KaramelApiTest {
     }
   }
 
-//   @Test
+   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hiway";
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hiway.yml"), Charsets.UTF_8);
@@ -255,7 +255,9 @@ public class KaramelApiTest {
 
 //  @Test
   public void testGce() throws KaramelException, IOException, InterruptedException {
+    String fileName = "flink_gce";
     String clusterName = "flinkgce";
+
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_gce.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
@@ -267,10 +269,16 @@ public class KaramelApiTest {
 //    String keyPath = api.loadGceCredentialsIfExist();
     api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH + "/gce-key.json");
     api.startCluster(json);
-    long ms1 = System.currentTimeMillis();
-    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+    Thread.sleep(2000);
+
+    ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
+    while (clusterRuntime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED || clusterRuntime.isFailed()) {
+
+      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
+        api.processCommand("purge " + clusterName);
+      }
       System.out.println(api.processCommand("status").getResult());
-      Thread.currentThread().sleep(60000);
+      Thread.currentThread().sleep(10000);
     }
   }
 

@@ -23,6 +23,7 @@ import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
+import se.kth.karamel.backend.stats.ClusterStats;
 
 /**
  *
@@ -50,7 +51,8 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
-    Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, dummyTaskSubmitter, chefJsons);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
     System.out.println(dag.print());
 //    dag.start();
@@ -76,10 +78,11 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
-    Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, dummyTaskSubmitter, chefJsons);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
     System.out.println(dag.print());
-    
+
     Assert.assertTrue(dag.isRoot("apt-get essentials on namenodes1"));
     Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install berkshelf on namenodes1"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));

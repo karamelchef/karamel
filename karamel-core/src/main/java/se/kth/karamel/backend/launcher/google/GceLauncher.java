@@ -199,6 +199,7 @@ public class GceLauncher extends Launcher {
           metadata.put("sshKeys", gce.getUsername() + ":" + sshKeyPair.getPublicKey());
           metadataOperations.add(instanceApi.setMetadata(allVmNames.get(i), metadata));
           MachineRuntime machine = new MachineRuntime(group);
+          machine.setMachineType("gce/"+ gce.getZone() + "/" + gce.getType() + "/" + gce.getImage());
           machine.setVmId(vm.id());
           machine.setName(vm.name());
           Instance.NetworkInterface netInterface = vm.networkInterfaces().get(0);
