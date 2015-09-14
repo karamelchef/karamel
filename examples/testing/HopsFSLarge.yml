@@ -22,6 +22,10 @@ attrs:
     DataMemory: '1000'
     IndexMemory: '200'
     NoOfReplicas: '2'
+  hops:
+    nn:
+       direct_memory_size: 1000
+       heap_size: 2000
 groups:
   slaves:
     size: 5

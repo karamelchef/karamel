@@ -206,15 +206,32 @@ public final class Ec2Launcher extends Launcher {
       uploadSshPublicKey(keypairname, ec2, true);
       keys.add(keypairname);
     }
-    return forkMachines(keypairname, group, gids, Integer.valueOf(definedGroup.getSize()), ec2);
+
+    int numForked = 0;
+
+    List<MachineRuntime> allMachines = new ArrayList<>();
+    int requestSize = context.getVmBatchSize();
+    try {
+      while (numForked < definedGroup.getSize()) {
+        int forkSize = Math.min(definedGroup.getSize() - numForked, requestSize);
+        List<MachineRuntime> machines = forkMachines(keypairname, group, gids, numForked,
+            forkSize, ec2);
+        allMachines.addAll(machines);
+        numForked += forkSize;
+      }
+    } catch (KaramelException ex) {
+      logger.error(
+          "Didn't get all machines in this node group. Got " + allMachines.size() + "/" + definedGroup.getSize());
+    }
+    return allMachines;
   }
 
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
-      Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
-    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
+      Set<String> securityGroupIds, int startCount, int numberToLaunch, Ec2 ec2) throws KaramelException {
+    String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
     List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(),
-        totalSize);
-    logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
+        startCount, numberToLaunch);
+    logger.info(String.format("Start forking %d machine(s) for '%s' ...", numberToLaunch, uniqueGroupName));
 
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -236,7 +253,7 @@ public final class Ec2Launcher extends Launcher {
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
-      int requestSize = totalSize - successfulNodes.size();
+      int requestSize = numberToLaunch - successfulNodes.size();
       if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
         requestSize = Settings.EC2_MAX_FORK_VMS_PER_REQUEST;
         toBeForkedVmNames = unforkedVmNames.subList(0, Settings.EC2_MAX_FORK_VMS_PER_REQUEST);
@@ -259,39 +276,39 @@ public final class Ec2Launcher extends Launcher {
       Set<NodeMetadata> succ = new HashSet<>();
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
-            requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
+            requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
         succ.addAll(context.getComputeService().createNodesInGroup(
-            uniqeGroupName, requestSize, template.build()));
+            uniqueGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (AWSResponseException e) {
         if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
           throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
               + "size of your cluster or increase the limitation of your account.", e);
+        } else if ("RequestLimitExceeded".equals(e.getError().getCode())) {
+          logger.warn("RequestLimitExceeded. Can recover from it by sleeping longer between requests.");
         } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
-//          throw new KaramelException(String.format("It seems your ec2 account doesn't have sufficent capacity for %s "
-//              + "instances", ec2.getType()), e);
           logger.warn(
               "InsufficientInstanceCapacity. Can recover from it, by reducing the number of instances in the request, "
               + "or waiting for additional capacity to become available");
         } else {
-          logger.error("", e);
+          logger.error(e.getMessage(), e);
         }
       } catch (IllegalStateException ex) {
         logger.error("", ex);
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-            uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+            uniqueGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
       successfulNodes.addAll(succ);
-      if (successfulNodes.size() < totalSize) {
+      if (successfulNodes.size() < numberToLaunch) {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
               + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
               failedNodes.size(),
-              totalSize, uniqeGroupName));
+              numberToLaunch, uniqueGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
@@ -299,7 +316,7 @@ public final class Ec2Launcher extends Launcher {
       } else {
         succeed = true;
         logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
-            + "before we go on..", totalSize, uniqeGroupName, failedNodes.size()));
+            + "before we go on..", numberToLaunch, uniqueGroupName, failedNodes.size()));
         if (failedNodes.size() > 0) {
           cleanupFailedNodes(failedNodes);
         }
@@ -397,7 +414,7 @@ public final class Ec2Launcher extends Launcher {
         }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
         List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
-            jg.getSize());
+            1, jg.getSize());
         allEc2Vms.addAll(vmNames);
         groupRegion.put(group.getName(), ((Ec2) provider).getRegion());
       }
