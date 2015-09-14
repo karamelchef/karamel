@@ -190,7 +190,7 @@ angular.module('karamel.main')
       }
     }])
 
-    .directive('launchNova',['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices){
+    .directive('launchNovaPane',['$log', 'KaramelCoreRestServices', function($log, KaramelCoreRestServices){
       return{
         restrict: 'E',
         require: "^launchTabs",
@@ -205,7 +205,10 @@ angular.module('karamel.main')
             scp.mapKey = 'nova';
             scp.bootUp = true;
             scp.account = {
-              jsonKeyPath: null
+              accountName: null,
+              accountPass: null,
+              region: null,
+              endpoint: null
             };
             scp.availableStates = {
               success: 'success',
