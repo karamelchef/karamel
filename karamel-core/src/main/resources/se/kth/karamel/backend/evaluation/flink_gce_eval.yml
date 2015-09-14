@@ -1,4 +1,4 @@
-name: flinkgce
+name: flink
 gce:
   type: n1-standard-2
   zone: europe-west1-b
@@ -20,7 +20,7 @@ groups:
         - flink::jobmanager
         - flink::wordcount
   datanodes:
-    size: 2
+    size: numvm
     recipes: 
         - hadoop::dn
         - flink::taskmanager

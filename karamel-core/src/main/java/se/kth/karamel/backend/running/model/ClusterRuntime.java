@@ -31,7 +31,7 @@ public class ClusterRuntime {
 
   private List<GroupRuntime> groups = new ArrayList<>();
   
-  private Map<String, Failure> failures = new HashMap<>();
+  private final Map<String, Failure> failures = new HashMap<>();
   
   public ClusterRuntime(String name) {
     this.name = name;

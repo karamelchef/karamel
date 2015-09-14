@@ -34,6 +34,7 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.running.model.tasks.Task;
+import se.kth.karamel.backend.stats.ClusterStats;
 import se.kth.karamel.client.model.json.JsonCluster;
 import se.kth.karamel.common.IoUtils;
 import se.kth.karamel.common.SshKeyPair;
@@ -391,7 +392,9 @@ public class CommandService {
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
           Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
-          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, dummyTaskSubmitter, chefJsons);
+          ClusterStats clusterStats = new ClusterStats();
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter, 
+              chefJsons);
           installationDag.validate();
           result = installationDag.print();
         } else {
@@ -425,7 +428,9 @@ public class CommandService {
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
           Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
-          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, dummyTaskSubmitter, chefJsons);
+          ClusterStats clusterStats = new ClusterStats();
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter, 
+              chefJsons);
           installationDag.validate();
           result = installationDag.asJson();
         } else {

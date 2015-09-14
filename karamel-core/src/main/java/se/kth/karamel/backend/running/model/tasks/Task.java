@@ -16,6 +16,8 @@ import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.backend.stats.TaskStat;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -32,18 +34,23 @@ public abstract class Task implements DagTask, TaskCallback {
   }
   private Status status = Status.WAITING;
   private final String name;
+  private final String id;
   private final String machineId;
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
   private DagTaskCallback dagCallback;
   private final TaskSubmitter submitter;
+  private final ClusterStats clusterStats;
+  private long startTime;
 
-  public Task(String name, MachineRuntime machine, TaskSubmitter submitter) {
+  public Task(String name, String id, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     this.name = name;
+    this.id = id;
     this.machineId = machine.getId();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
+    this.clusterStats = clusterStats;
     this.submitter = submitter;
   }
 
@@ -59,6 +66,10 @@ public abstract class Task implements DagTask, TaskCallback {
     return name;
   }
 
+  public String getId() {
+    return id;
+  }
+  
   public abstract List<ShellCommand> getCommands() throws IOException;
 
   public void setCommands(List<ShellCommand> commands) {
@@ -122,12 +133,14 @@ public abstract class Task implements DagTask, TaskCallback {
   @Override
   public void started() {
     status = Status.ONGOING;
+    startTime = System.currentTimeMillis();
     dagCallback.started();
   }
 
   @Override
   public void succeed() {
     status = Status.DONE;
+    addStats();
     dagCallback.succeed();
   }
 
@@ -135,6 +148,7 @@ public abstract class Task implements DagTask, TaskCallback {
   public void failed(String reason) {
     this.status = Status.FAILED;
     machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, reason);
+    addStats();
     dagCallback.failed(reason);
   }
 
@@ -149,5 +163,11 @@ public abstract class Task implements DagTask, TaskCallback {
   public String getSudoCommand() {
     String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
     return (password == null || password.isEmpty()) ? "sudo" : "echo \"%password_hidden%\" | sudo -S ";
+  }
+
+  private void addStats() {
+    long duration = System.currentTimeMillis() - startTime;
+    TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
+    clusterStats.addTask(taskStat);
   }
 }
