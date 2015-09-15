@@ -25,13 +25,14 @@ attrs:
     
 groups: 
   namenodes:
-    size: 12
+    size: 2
     recipes: 
         - ndb::mysqld
         - hops::ndb                                                          
         - hops::nn
+        - hopsbench::nn
   datanodes:
-    size: 4
+    size: 2
     recipes: 
         - ndb::ndbd
   master:
@@ -44,7 +45,7 @@ groups:
         - hops::client
         - hopsbench::master
   slaves:
-    size: 6
+    size: 1
     recipes: 
         - ndb::install
         - ndb::mysqld

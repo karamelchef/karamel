@@ -208,14 +208,13 @@ public final class Ec2Launcher extends Launcher {
     }
 
     int numForked = 0;
-
+    final int numMachines = definedGroup.getSize();
     List<MachineRuntime> allMachines = new ArrayList<>();
     int requestSize = context.getVmBatchSize();
     try {
-      while (numForked < definedGroup.getSize()) {
-        int forkSize = Math.min(definedGroup.getSize() - numForked, requestSize);
-        List<MachineRuntime> machines = forkMachines(keypairname, group, gids, numForked,
-            forkSize, ec2);
+      while (numForked < numMachines) {
+        int forkSize = Math.min(numMachines, requestSize);
+        List<MachineRuntime> machines = forkMachines(keypairname, group, gids, numForked, forkSize, ec2);
         allMachines.addAll(machines);
         numForked += forkSize;
       }
@@ -277,8 +276,7 @@ public final class Ec2Launcher extends Launcher {
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
             requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
-        succ.addAll(context.getComputeService().createNodesInGroup(
-            uniqueGroupName, requestSize, template.build()));
+        succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (AWSResponseException e) {
