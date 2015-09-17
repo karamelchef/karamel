@@ -19,6 +19,10 @@ import se.kth.karamel.common.Settings;
  */
 public class KandyRestClientTest {
 
+  @Test
+  public void dummyTest() {
+    
+  }
 //  @Test
   public void testPushStats() throws IOException {
     ClusterStats stats = new ClusterStats();
