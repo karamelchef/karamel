@@ -1,0 +1,39 @@
+name: ApacheHadoopBench
+ec2:
+    type: m3.medium
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  kzookeeper: 
+    github: "hopshadoop/kzookeeper"
+  hopsbench:
+    branch: master
+    github: hopshadoop/hopsbench
+    
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hopsbench::nn
+  zk:
+    size: 3
+    recipes: 
+        - hadoop::jn
+        - kzookeeper
+  slaves:
+    size: 2
+    recipes:
+    - hadoop::dn
+    - hopsbench::slave
+  master:
+    size: 1
+    recipes:
+    - hadoop::dn
+    - hopsbench::master
+
+
+
