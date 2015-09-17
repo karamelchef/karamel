@@ -11,8 +11,8 @@ cookbooks:
     github: hopshadoop/kzookeeper
     branch: master
   hopsbench:
-    github: hopshadoop/hopsbench
-    branch: apache
+    github: jimdowling/hopsbench
+    branch: master
     
 groups: 
   namenodes:
