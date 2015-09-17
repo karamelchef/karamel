@@ -5,13 +5,14 @@ ec2:
 
 cookbooks:                                                                      
   hadoop: 
-    github: "hopshadoop/apache-hadoop-chef"
-    branch: "master"
-  kzookeeper: 
-    github: "hopshadoop/kzookeeper"
-  hopsbench:
+    github: hopshadoop/apache-hadoop-chef
     branch: master
+  kzookeeper: 
+    github: hopshadoop/kzookeeper
+    branch: master
+  hopsbench:
     github: hopshadoop/hopsbench
+    branch: apache
     
 groups: 
   namenodes:
@@ -27,13 +28,13 @@ groups:
   slaves:
     size: 2
     recipes:
-    - hadoop::dn
-    - hopsbench::slave
+        - hadoop::dn
+        - hopsbench::slave
   master:
     size: 1
     recipes:
-    - hadoop::dn
-    - hopsbench::master
+        - hadoop::dn
+        - hopsbench::master
 
 
 
