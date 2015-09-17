@@ -44,7 +44,7 @@
                                     <goal>launch4j</goal>
                                 </goals>
                                 <configuration>
-                                    <cmdLine>-server conf/dropwizard.yml</cmdLine>
+                                    <cmdLine>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000 -server conf/dropwizard.yml</cmdLine>
                                     <headerType>gui</headerType>
                                     <outfile>${project.build.directory}/karamel.exe</outfile>
                                     <dontWrapJar>false</dontWrapJar>

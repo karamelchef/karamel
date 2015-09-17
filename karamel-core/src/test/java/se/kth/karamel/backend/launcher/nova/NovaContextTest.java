@@ -2,19 +2,19 @@ package se.kth.karamel.backend.launcher.nova;
 
 import com.google.common.base.Optional;
 import org.jclouds.ContextBuilder;
-import org.jclouds.compute.ComputeService;
 import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
 import org.jclouds.openstack.nova.v2_0.compute.NovaComputeService;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.junit.Before;
-import static org.mockito.Mockito.*;
-
 import org.junit.Test;
 import se.kth.karamel.common.NovaCredentials;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class NovaContextTest {
     private NovaCredentials credentials;
@@ -44,6 +44,8 @@ public class NovaContextTest {
         when(credentials.getEndpoint()).thenReturn("nova endpoint");
         when(credentials.getRegion()).thenReturn("region");
 
+        when(builder.credentials(credentials.getAccountName(), credentials.getAccountPass())).thenReturn(builder);
+        when(builder.endpoint(credentials.getEndpoint())).thenReturn(builder);
         when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
         when(serviceContext.getComputeService()).thenReturn(novaComputeService);
 
@@ -53,7 +55,7 @@ public class NovaContextTest {
         when(novaApi.getSecurityGroupApi(credentials.getRegion())).thenReturn(securityGroupApiOptional);
         when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
 
-        when(novaApi.getKeyPairApi(credentials.getEndpoint())).thenReturn(keyPairApiOptional);
+        when(novaApi.getKeyPairApi(credentials.getRegion())).thenReturn(keyPairApiOptional);
         when(keyPairApiOptional.get()).thenReturn(keyPairApi);
 
     }
@@ -75,7 +77,7 @@ public class NovaContextTest {
 
         assertEquals("pepe",credentials.getAccountName());
         assertEquals("1234",credentials.getAccountPass());
-        assertEquals("nova endpoint",credentials.getEndpoint());
+        assertEquals("nova endpoint", credentials.getEndpoint());
 
     }
 

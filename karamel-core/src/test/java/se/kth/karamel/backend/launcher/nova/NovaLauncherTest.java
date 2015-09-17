@@ -112,6 +112,8 @@ public class NovaLauncherTest {
     when(novaContext.getKeyPairApi()).thenReturn(keyPairApi);
     when(novaContext.getComputeService()).thenReturn(novaComputeService);
 
+    when(builder.credentials(novaCredentials.getAccountName(),novaCredentials.getAccountPass())).thenReturn(builder);
+    when(builder.endpoint(novaCredentials.getEndpoint())).thenReturn(builder);
     when(builder.buildView(ComputeServiceContext.class)).thenReturn(serviceContext);
     when(serviceContext.getComputeService()).thenReturn(novaComputeService);
 
@@ -122,7 +124,7 @@ public class NovaLauncherTest {
     when(securityGroupApiOptional.isPresent()).thenReturn(true);
     when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
 
-    when(novaApi.getKeyPairApi(novaCredentials.getEndpoint())).thenReturn(keyPairApiOptional);
+    when(novaApi.getKeyPairApi(novaCredentials.getRegion())).thenReturn(keyPairApiOptional);
     when(keyPairApiOptional.get()).thenReturn(keyPairApi);
 
 

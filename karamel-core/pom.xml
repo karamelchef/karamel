@@ -57,6 +57,11 @@
             <version>${jclouds.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.jclouds.api</groupId>
+            <artifactId>openstack-keystone</artifactId>
+            <version>${jclouds.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.jclouds.provider</groupId>
             <artifactId>aws-ec2</artifactId>
             <version>${jclouds.version}</version>

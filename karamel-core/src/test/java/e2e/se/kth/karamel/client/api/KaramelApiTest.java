@@ -267,25 +267,30 @@ public class KaramelApiTest {
     System.out.println(json);
     assertTrue(expectedString.equals(json));
   }
-  //@Test
+  @Test
   public void testNova() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flinknova";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
-    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+    /*SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
-    api.registerSshKeys(sshKeys);
-    NovaCredentials credentials = api.loadNovaCredentialsIfExist();
-    api.updateNovaCredentialsIfValid(credentials);
+    api.registerSshKeys(sshKeys);*/
+    /*NovaCredentials credentials = api.loadNovaCredentialsIfExist();*/
+    NovaCredentials novaCredentials = new NovaCredentials();
+    novaCredentials.setAccountName("sics:jim");
+    novaCredentials.setAccountPass("jim123");
+    novaCredentials.setRegion("RegionSICS");
+    novaCredentials.setEndpoint("http://193.10.64.166:5000/v2.0");
+    api.updateNovaCredentialsIfValid(novaCredentials);
 
-    api.startCluster(json);
+   /* api.startCluster(json);
     long ms1 = System.currentTimeMillis();
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
-    }
+    }*/
   }
 }

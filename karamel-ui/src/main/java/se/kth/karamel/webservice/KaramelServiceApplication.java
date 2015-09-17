@@ -784,7 +784,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         Response response = null;
         Logger.getLogger(KaramelServiceApplication.class.getName()).
-                log(Level.INFO, " Received request to validate the ec2 credentials.");
+                log(Level.INFO, " Received request to validate the nova credentials.");
 
         try {
           NovaCredentials credentials = new NovaCredentials();

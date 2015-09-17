@@ -298,8 +298,6 @@ public final class NovaLauncher extends Launcher{
 
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqueGroupName));
 
-    NovaTemplateOptions options = novaContext.getComputeService().templateOptions();
-
     boolean succeed = false;
     int tries = 0;
     Set<NodeMetadata> successfulNodes = Sets.newLinkedHashSet();
@@ -317,9 +315,9 @@ public final class NovaLauncher extends Launcher{
         toBeForkedVmNames = unforkedVmNames;
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
-      options.keyPairName(keypairName);
-      options.securityGroups(groupIds);
-      options.nodeNames(toBeForkedVmNames);
+      NovaTemplateOptions options = NovaTemplateOptions.Builder.keyPairName(keypairName)
+              .securityGroupNames(groupIds)
+              .nodeNames(toBeForkedVmNames);
 
       template.options(options);
       template.os64Bit(true);
