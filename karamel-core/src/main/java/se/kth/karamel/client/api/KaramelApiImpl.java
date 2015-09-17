@@ -138,10 +138,10 @@ public class KaramelApiImpl implements KaramelApi {
     NovaContext context = NovaLauncher.validateCredentials(credentials,
                                                             ContextBuilder.newBuilder(new NovaApiMetadata()));
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY, credentials.getAccountName());
-    confs.put(NovaSetting.NOVA_ACCESSKEY_KEY, credentials.getAccountPass());
-    confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT, credentials.getEndpoint());
-    confs.put(NovaSetting.NOVA_REGION, credentials.getRegion());
+    confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter(), credentials.getAccountName());
+    confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
+    confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter(), credentials.getEndpoint());
+    confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
     confs.writeKaramelConfs();
     clusterService.registerNovaContext(context);
     return true;
