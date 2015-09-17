@@ -13,7 +13,12 @@ cookbooks:
   hopsbench:
     github: jimdowling/hopsbench
     branch: master
-    
+
+attrs:
+  hadoop:
+    ha_enabled: "true"
+    nn: 
+       heap_size: 3000    
 groups: 
   namenodes:
     size: 2
