@@ -15,7 +15,7 @@ cookbooks:
     
 groups: 
   namenodes:
-    size: 1
+    size: 2
     recipes: 
         - hadoop::nn
         - hopsbench::nn
