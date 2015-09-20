@@ -131,7 +131,7 @@ public final class NovaLauncher extends Launcher{
       }
     } else {
       Ingress ingress = Ingress.builder()
-              .fromPort(0)
+              .fromPort(1)
               .toPort(65535)
               .ipProtocol(IpProtocol.TCP)
               .build();
