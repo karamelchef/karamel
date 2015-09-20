@@ -178,6 +178,7 @@ public class NovaLauncherTest {
             .ipProtocol(IpProtocol.TCP)
             .build();
 
+    when(novaContext.getSecurityGroupApi()).thenReturn(securityGroupApi);
     when(securityGroupApi.createWithDescription(uniqueGroup, uniqueDescription)).thenReturn(securityGroupCreated);
     when(securityGroupCreated.getId()).thenReturn("10");
     when(securityGroupApi.createRuleAllowingCidrBlock("10", ingress, "0.0.0.0/0")).thenReturn(rule);
@@ -185,15 +186,6 @@ public class NovaLauncherTest {
     NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
     String groupId = novaLauncher.createSecurityGroup(clusterName, groupName, nova, ports);
     assertEquals("10", groupId);
-  }
-
-  @Test
-  public void createSecurityGroupTestWithTestingFlagAndNoSecurityAPIPresent() throws KaramelException {
-    when(securityGroupApiOptional.isPresent()).thenReturn(false);
-
-    NovaLauncher novaLauncher = new NovaLauncher(novaContext, sshKeyPair);
-    String groupId = novaLauncher.createSecurityGroup(clusterName, groupName, nova, ports);
-    assertNull(groupId);
   }
 
   @Test
@@ -300,6 +292,7 @@ public class NovaLauncherTest {
             .ipProtocol(IpProtocol.TCP)
             .build();
 
+    when(novaContext.getSecurityGroupApi()).thenReturn(securityGroupApi);
     when(securityGroupApi.createWithDescription(uniqueGroup, uniqueDescription)).thenReturn(securityGroupCreated);
     when(securityGroupCreated.getId()).thenReturn("10");
     when(securityGroupApi.createRuleAllowingCidrBlock("10", ingress, "0.0.0.0/0")).thenReturn(rule);

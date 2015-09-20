@@ -1,6 +1,5 @@
 package se.kth.karamel.backend.launcher.nova;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
@@ -101,52 +100,46 @@ public final class NovaLauncher extends Launcher{
   public String createSecurityGroup(String clusterName, String groupName, Nova nova, Set<String> ports) {
     String securityGroupUniqueName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", securityGroupUniqueName));
-    Optional<? extends SecurityGroupApi> securityGroupExt = novaContext.getNovaApi().getSecurityGroupApi(nova
-            .getRegion());
-    if (securityGroupExt.isPresent()) {
-      SecurityGroupApi client = securityGroupExt.get();
-
-      String groupId;
-      //TODO Do we have something similar to VPC EC2 in Nova?
-      SecurityGroup created = client.createWithDescription(securityGroupUniqueName, NovaSetting
+    SecurityGroupApi client = novaContext.getSecurityGroupApi();
+    String groupId;
+    //TODO Do we have something similar to VPC EC2 in Nova?
+    SecurityGroup created = client.createWithDescription(securityGroupUniqueName, NovaSetting
               .NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName, groupName));
-      //Get id of the security group
-      groupId = created.getId();
-      //Go over the ips
-      if (!TESTING) {
-        for (String port : ports) {
-          Integer portNumber;
-          IpProtocol ipProtocol;
-          if (port.contains("/")) {
-            String[] s = port.split("/");
-            portNumber = Integer.valueOf(s[0]);
-            ipProtocol = IpProtocol.valueOf(s[1]);
-          } else {
-            portNumber = Integer.valueOf(port);
-            ipProtocol = IpProtocol.TCP;
-          }
-          Ingress ingress = Ingress.builder()
-                  .fromPort(portNumber)
-                  .toPort(portNumber)
-                  .ipProtocol(ipProtocol)
-                  .build();
-
-          client.createRuleAllowingCidrBlock(groupId, ingress, "0.0.0.0/0");
-          logger.info(String.format("Ports became open for '%s'", securityGroupUniqueName));
+    //Get id of the security group
+    groupId = created.getId();
+    //Go over the ips
+    if (!TESTING) {
+      for (String port : ports) {
+        Integer portNumber;
+        IpProtocol ipProtocol;
+        if (port.contains("/")) {
+          String[] s = port.split("/");
+          portNumber = Integer.valueOf(s[0]);
+          ipProtocol = IpProtocol.valueOf(s[1]);
+        } else {
+          portNumber = Integer.valueOf(port);
+          ipProtocol = IpProtocol.TCP;
         }
-      } else {
         Ingress ingress = Ingress.builder()
-                .fromPort(0)
-                .toPort(65535)
-                .ipProtocol(IpProtocol.TCP)
+                .fromPort(portNumber)
+                .toPort(portNumber)
+                .ipProtocol(ipProtocol)
                 .build();
+
         client.createRuleAllowingCidrBlock(groupId, ingress, "0.0.0.0/0");
         logger.info(String.format("Ports became open for '%s'", securityGroupUniqueName));
       }
-      logger.info(String.format("Security group '%s' was created :)", securityGroupUniqueName));
-      return groupId;
+    } else {
+      Ingress ingress = Ingress.builder()
+              .fromPort(0)
+              .toPort(65535)
+              .ipProtocol(IpProtocol.TCP)
+              .build();
+      client.createRuleAllowingCidrBlock(groupId, ingress, "0.0.0.0/0");
+      logger.info(String.format("Ports became open for '%s'", securityGroupUniqueName));
     }
-    return null;
+    logger.info(String.format("Security group '%s' was created :)", securityGroupUniqueName));
+    return groupId;
   }
 
   public boolean uploadSshPublicKey(String keyPairName, Nova nova, boolean removeOld) {
