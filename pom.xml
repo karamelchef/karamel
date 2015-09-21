@@ -13,6 +13,7 @@
     <modules>
         <module>karamel-ui</module>
         <module>karamel-core</module>
+    <module>karamel-common</module>
   </modules>
 
     <properties>
