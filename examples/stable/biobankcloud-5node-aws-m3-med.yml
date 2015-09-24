@@ -1,6 +1,6 @@
-name: BiobankCloudSingleNode
+name: BiobankCloud
 ec2:
-    type: m3.large
+    type: m3.medium
     region: eu-west-1
 
 cookbooks:                                                                      
@@ -13,17 +13,19 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
-  hiway:
-    github: "biobankcloud/hiway-chef"
-    branch: "master"
   spark:
     github: "hopshadoop/spark-chef"
     branch: "master"
   zeppelin:
     github: "hopshadoop/zeppelin-chef"
     branch: "master"
+  hiway:
+    github: "biobankcloud/hiway-chef"
+    branch: "master"
 
 attrs:
+  hops:
+    use_hopsworks: "true"
   hdfs:
     user: glassfish
   hadoop:
@@ -33,30 +35,34 @@ attrs:
         user: glassfish
   spark:
     user: glassfish
-  hiway:
-    user: glassfish
-    release: "true"
 
 groups: 
-  master:
+  server:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - ndb::ndbd
+        - ndb::memcached
+        - hops::client
+        - hops::ndb
+        - hops::jhs                                                            
+        - hopsworks
+        - spark::master
+        - spark::slave
+        - zeppelin
+  metadatanodes:
+    size: 1
+    recipes: 
+        - ndb::mysqld                                                       
         - hops::ndb
         - hops::rm
         - hops::nn
+  dbnodes:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  datanodes:
+    size: 2
+    recipes: 
         - hops::dn
         - hops::nm
-        - hopsworks
-        - zeppelin
-        - spark::master
-        - spark::slave
-        - adam
-        - hiway::hiway_client
-        - hiway::cuneiform_client
-        - hiway::helloworld_client
-        - hiway::wordcount_client
-        - hiway::hiway_worker 
-        - hiway::cuneiform_worker
