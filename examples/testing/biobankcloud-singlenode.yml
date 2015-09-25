@@ -22,6 +22,9 @@ cookbooks:
   zeppelin:
     github: "hopshadoop/zeppelin-chef"
     branch: "master"
+  adam:
+    github: "biobankcloud/adam-chef"
+    branch: "master"
 
 attrs:
   hdfs:
