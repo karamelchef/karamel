@@ -22,6 +22,7 @@ attrs:
     DataMemory: '1000'
     IndexMemory: '200'
     NoOfReplicas: '2'
+    root_dir: "/mnt/mysql-cluster"
   hops:
     nn:
        direct_memory_size: 4000
