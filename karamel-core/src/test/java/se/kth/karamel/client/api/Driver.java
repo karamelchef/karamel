@@ -8,7 +8,7 @@ package se.kth.karamel.client.api;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
-import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

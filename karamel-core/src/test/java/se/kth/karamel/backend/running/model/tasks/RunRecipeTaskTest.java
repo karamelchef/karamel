@@ -16,7 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.common.stats.ClusterStats;
 
 public class RunRecipeTaskTest {
 

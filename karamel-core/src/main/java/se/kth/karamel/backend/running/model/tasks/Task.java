@@ -16,8 +16,8 @@ import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.stats.ClusterStats;
-import se.kth.karamel.backend.stats.TaskStat;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.TaskStat;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

@@ -12,8 +12,8 @@ import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.stats.ClusterStats;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *

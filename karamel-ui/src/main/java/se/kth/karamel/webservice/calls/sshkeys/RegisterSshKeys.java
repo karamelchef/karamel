@@ -12,7 +12,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.webservice.calls.AbstractCall;
 import se.kth.karamel.webservicemodel.SshKeyJSON;

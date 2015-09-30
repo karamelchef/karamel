@@ -1,0 +1,14 @@
+dependencies: 
+  - recipe: hopsworks::install
+    local:  
+      - ndb::install
+      - hadoop::install
+  - recipe: hopsworks::default
+    local:  
+      - hopsworks::install
+    global:  
+      - ndb::mysqld
+      - hadoop::dn
+      - hadoop::nn
+      - hops::dn
+      - hops::nn

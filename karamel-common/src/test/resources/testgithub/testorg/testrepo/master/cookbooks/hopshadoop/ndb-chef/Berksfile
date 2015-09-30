@@ -1,0 +1,7 @@
+source "https://api.berkshelf.com"
+
+
+cookbook 'kagent', github: 'karamelchef/kagent-chef'
+cookbook 'btsync', github: "hopshadoop/btsync-chef"
+
+metadata

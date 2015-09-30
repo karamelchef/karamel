@@ -24,8 +24,8 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *

@@ -21,18 +21,18 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.scanner.ScannerException;
-import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.ClusterDefinitionValidator;
-import se.kth.karamel.client.model.Cookbook;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Gce;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.yaml.YamlCluster;
-import se.kth.karamel.client.model.yaml.YamlGroup;
-import se.kth.karamel.client.model.yaml.YamlPropertyRepresenter;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.Baremetal;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
+import se.kth.karamel.common.clusterdef.Cookbook;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
+import se.kth.karamel.common.clusterdef.yaml.YamlPropertyRepresenter;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.FilesystemUtil;
+import se.kth.karamel.common.util.FilesystemUtil;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.

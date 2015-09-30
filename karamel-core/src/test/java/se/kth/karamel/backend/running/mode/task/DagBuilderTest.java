@@ -19,11 +19,11 @@ import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
-import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.common.stats.ClusterStats;
 
 /**
  *

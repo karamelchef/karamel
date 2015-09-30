@@ -12,8 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
 

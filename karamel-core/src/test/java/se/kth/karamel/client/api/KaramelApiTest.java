@@ -10,9 +10,9 @@ import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
 
 /**
  *

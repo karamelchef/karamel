@@ -11,13 +11,11 @@
 
     <groupId>se.kth.karamel</groupId>
     <artifactId>karamel-ui</artifactId>
-    <version>0.2</version>
     <packaging>jar</packaging>
     <name>karamel-ui</name>
 
     <properties>
         <dropwizard.version>0.7.0</dropwizard.version>
-        <karamel-core-version>${project.version}</karamel-core-version>
     </properties>
 
 
@@ -94,7 +92,6 @@
                 <dependency>
                     <groupId>se.kth</groupId>
                     <artifactId>karamel-core</artifactId>
-                    <version>${karamel-core-version}</version>
                     <scope>compile</scope>
                     <exclusions>
                         <exclusion>
@@ -129,7 +126,6 @@
                 <dependency>
                     <groupId>se.kth</groupId>
                     <artifactId>karamel-core</artifactId>
-                    <version>${karamel-core-version}</version>
                     <scope>compile</scope>
                     <exclusions>
                         <exclusion>

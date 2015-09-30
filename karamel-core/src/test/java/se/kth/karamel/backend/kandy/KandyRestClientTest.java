@@ -7,11 +7,11 @@ package se.kth.karamel.backend.kandy;
 
 import java.io.IOException;
 import org.junit.Test;
-import se.kth.karamel.backend.stats.ClusterStats;
-import se.kth.karamel.backend.stats.PhaseStat;
-import se.kth.karamel.backend.stats.TaskStat;
-import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.PhaseStat;
+import se.kth.karamel.common.stats.TaskStat;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
