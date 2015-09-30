@@ -1,7 +1,7 @@
 package se.kth.karamel.backend.github.util;
 
 import java.io.IOException;
-import se.kth.karamel.common.IoUtils;
+import se.kth.karamel.common.util.IoUtils;
 
 public class CookbookGenerator {
 

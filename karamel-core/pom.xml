@@ -10,7 +10,6 @@
 
   <groupId>se.kth</groupId>
   <artifactId>karamel-core</artifactId>
-  <version>0.2</version>
   <packaging>jar</packaging>
 
   <name>karamel-core</name>
@@ -26,6 +25,10 @@
     </repository>
   </repositories>
   <dependencies>
+    <dependency>
+      <groupId>se.kth.karamel</groupId>
+      <artifactId>karamel-common</artifactId>
+    </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
@@ -60,36 +63,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.7.7</version>
-    </dependency>
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.11</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>aws-ec2</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>            
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-bouncycastle</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-sshj</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-enterprise</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.labs</groupId>
-      <artifactId>google-compute-engine</artifactId>
-      <version>${jclouds.version}</version>
     </dependency>
   </dependencies>
   <build>

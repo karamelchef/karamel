@@ -7,7 +7,7 @@ package se.kth.karamel.backend.running.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
 
 /**
  *

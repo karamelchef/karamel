@@ -12,7 +12,7 @@ package se.kth.karamel.client.api;
 import java.util.HashMap;
 import java.util.Map;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 
 /**
  *

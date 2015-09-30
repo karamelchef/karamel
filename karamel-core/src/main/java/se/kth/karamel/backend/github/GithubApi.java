@@ -26,9 +26,9 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import se.kth.karamel.common.Confs;
+import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

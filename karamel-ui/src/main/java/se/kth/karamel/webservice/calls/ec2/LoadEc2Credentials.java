@@ -13,7 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.common.Ec2Credentials;
+import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.webservice.calls.AbstractCall;
 import se.kth.karamel.webservicemodel.Ec2JSON;

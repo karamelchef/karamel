@@ -5,9 +5,7 @@
  */
 package se.kth.karamel.backend.kandy;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.common.stats.ClusterStats;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 import com.sun.jersey.api.client.Client;
@@ -16,7 +14,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import org.apache.log4j.Logger;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -48,16 +46,11 @@ public class KandyRestClient {
     } else {
       updateStat(stats);
     }
-
   }
 
   private static void storeNewStat(ClusterStats stats) {
     try {
-      GsonBuilder builder = new GsonBuilder();
-      builder.disableHtmlEscaping();
-      Gson gson = builder.setPrettyPrinting().create();
-      String json = gson.toJson(stats);
-
+      String json = stats.toJsonAndMarkNotUpdated();
       ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
       String id = response.getEntity(String.class);
       stats.setId(id);
@@ -73,10 +66,7 @@ public class KandyRestClient {
 
   private static void updateStat(ClusterStats stats) {
     try {
-      GsonBuilder builder = new GsonBuilder();
-      builder.disableHtmlEscaping();
-      Gson gson = builder.setPrettyPrinting().create();
-      String json = gson.toJson(stats);
+      String json = stats.toJsonAndMarkNotUpdated();
       WebResource updateService
           = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE(stats.getId())).build());
 

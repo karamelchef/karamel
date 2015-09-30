@@ -29,15 +29,15 @@ import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.github.util.CookbookGenerator;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.client.model.json.JsonRecipe;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelFile;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlKaramelFile;
+import se.kth.karamel.common.cookbookmeta.KaramelFile;
+import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
+import se.kth.karamel.common.cookbookmeta.KaramelFileYamlRep;
 
 public class GithubUserTest {
 
@@ -146,7 +146,7 @@ public class GithubUserTest {
           + "        - ndb::mysqld\n"
           + "        - ndb::memcached";
       JsonCluster jsonCluster = ClusterDefinitionService.yamlToJsonObject(ymlString);
-      YamlDependency yd = new YamlDependency();
+      KaramelFileYamlDeps yd = new KaramelFileYamlDeps();
       List<String> clusterDependencies = new ArrayList<>();
       for (JsonGroup g : jsonCluster.getGroups()) {
         for (JsonCookbook cb : g.getCookbooks()) {
@@ -158,13 +158,13 @@ public class GithubUserTest {
       yd.setRecipe("test::test");
       yd.setGlobal(clusterDependencies);
       yd.setLocal(null);
-      List<YamlDependency> yds = karamelFile.getDependencies();
+      List<KaramelFileYamlDeps> yds = karamelFile.getDependencies();
       yds.add(yd);
       DumperOptions options = new DumperOptions();
       options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
       Representer r = new Representer();
       r.addClassTag(KaramelFile.class, Tag.MAP);
-      Yaml karamelYml = new Yaml(new Constructor(YamlKaramelFile.class), r, options);
+      Yaml karamelYml = new Yaml(new Constructor(KaramelFileYamlRep.class), r, options);
       String karamelFileContents = karamelYml.dump(karamelFile);
 
       File f = File.createTempFile("karamelfile", "out");

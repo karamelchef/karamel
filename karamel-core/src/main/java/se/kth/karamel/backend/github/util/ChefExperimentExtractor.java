@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.Experiment.Code;
 import se.kth.karamel.backend.github.GithubApi;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

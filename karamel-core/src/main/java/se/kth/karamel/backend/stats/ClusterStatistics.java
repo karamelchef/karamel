@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.log4j.Logger;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *

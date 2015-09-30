@@ -8,8 +8,8 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

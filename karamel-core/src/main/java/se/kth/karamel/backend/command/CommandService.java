@@ -34,10 +34,10 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.backend.stats.ClusterStats;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
 

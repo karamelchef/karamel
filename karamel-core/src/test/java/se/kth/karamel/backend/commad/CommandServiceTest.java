@@ -11,8 +11,8 @@ import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
-import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

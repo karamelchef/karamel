@@ -13,10 +13,10 @@ import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.clusterdef.Baremetal;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
