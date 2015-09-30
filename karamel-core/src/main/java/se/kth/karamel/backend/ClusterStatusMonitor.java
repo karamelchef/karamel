@@ -50,7 +50,7 @@ public class ClusterStatusMonitor implements Runnable {
         }
         try {
           long lastReportInterval = System.currentTimeMillis() - lastStatsReport;
-          if (lastReportInterval > Settings.CLUSTER_STAT_REPORT_INTERVAL) {
+          if (lastReportInterval > Settings.CLUSTER_STAT_REPORT_INTERVAL && stats.isUpdated()) {
             KandyRestClient.pushClusterStats(stats);
             lastStatsReport = System.currentTimeMillis();
           }

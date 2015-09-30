@@ -5,8 +5,6 @@
  */
 package se.kth.karamel.backend.kandy;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import se.kth.karamel.common.stats.ClusterStats;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -48,16 +46,11 @@ public class KandyRestClient {
     } else {
       updateStat(stats);
     }
-
   }
 
   private static void storeNewStat(ClusterStats stats) {
     try {
-      GsonBuilder builder = new GsonBuilder();
-      builder.disableHtmlEscaping();
-      Gson gson = builder.setPrettyPrinting().create();
-      String json = gson.toJson(stats);
-
+      String json = stats.toJsonAndMarkNotUpdated();
       ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
       String id = response.getEntity(String.class);
       stats.setId(id);
@@ -73,10 +66,7 @@ public class KandyRestClient {
 
   private static void updateStat(ClusterStats stats) {
     try {
-      GsonBuilder builder = new GsonBuilder();
-      builder.disableHtmlEscaping();
-      Gson gson = builder.setPrettyPrinting().create();
-      String json = gson.toJson(stats);
+      String json = stats.toJsonAndMarkNotUpdated();
       WebResource updateService
           = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_UPDATE(stats.getId())).build());
 

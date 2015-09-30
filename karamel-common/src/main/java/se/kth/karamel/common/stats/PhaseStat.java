@@ -12,6 +12,7 @@ package se.kth.karamel.common.stats;
  */
 public class PhaseStat {
   
+  long id;
   String name;
   String status;
   long duration;
@@ -20,6 +21,14 @@ public class PhaseStat {
     this.name = name;
     this.status = status;
     this.duration = duration;
+  }
+
+  public void setId(long id) {
+    this.id = id;
+  }
+
+  public long getId() {
+    return id;
   }
 
   public long getDuration() {

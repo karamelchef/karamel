@@ -11,6 +11,7 @@ package se.kth.karamel.common.stats;
  */
 public class TaskStat {
 
+  private long id;
   private String taskId;
   private String machineType;
   private String status;
@@ -23,6 +24,14 @@ public class TaskStat {
     this.duration = duration;
   }
 
+  public void setId(long id) {
+    this.id = id;
+  }
+
+  public long getId() {
+    return id;
+  }
+  
   public void setRecipeId(String recipeId) {
     this.taskId = recipeId;
   }
