@@ -5,9 +5,10 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 
 /**

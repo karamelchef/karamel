@@ -16,8 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.common.FilesystemUtil;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.FilesystemUtil;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

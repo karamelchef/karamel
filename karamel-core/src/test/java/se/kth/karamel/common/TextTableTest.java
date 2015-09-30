@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.common;
 
+import se.kth.karamel.common.util.Settings;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -15,7 +16,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

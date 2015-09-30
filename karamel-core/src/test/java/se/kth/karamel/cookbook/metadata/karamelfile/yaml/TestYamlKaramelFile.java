@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.cookbook.metadata.karamelfile.yaml;
 
+import se.kth.karamel.common.cookbookmeta.KaramelFileYamlRep;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -22,8 +23,8 @@ public class TestYamlKaramelFile {
   @Test
   public void testDeserialize() throws IOException {
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/cookbook/metadata/karamelfile/yaml/KaramelFile"), Charsets.UTF_8);
-    Yaml yaml = new Yaml(new Constructor(YamlKaramelFile.class));
-    YamlKaramelFile file = (YamlKaramelFile) yaml.load(ymlString);
+    Yaml yaml = new Yaml(new Constructor(KaramelFileYamlRep.class));
+    KaramelFileYamlRep file = (KaramelFileYamlRep) yaml.load(ymlString);
     Assert.assertNotNull(file);
   }
 }

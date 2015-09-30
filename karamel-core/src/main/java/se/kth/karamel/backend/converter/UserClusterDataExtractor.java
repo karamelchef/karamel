@@ -13,18 +13,18 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.api.CookbookCache;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Provider;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.client.model.json.JsonRecipe;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
-import se.kth.karamel.cookbook.metadata.CookbookUrls;
-import se.kth.karamel.cookbook.metadata.MetadataRb;
-import se.kth.karamel.cookbook.metadata.Recipe;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.CookbookUrls;
+import se.kth.karamel.common.cookbookmeta.MetadataRb;
+import se.kth.karamel.common.cookbookmeta.Recipe;
 
 /**
  *

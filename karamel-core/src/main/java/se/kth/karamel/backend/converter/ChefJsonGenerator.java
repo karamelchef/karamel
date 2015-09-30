@@ -18,11 +18,11 @@ import java.util.Set;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.client.model.json.JsonRecipe;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

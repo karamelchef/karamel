@@ -5,6 +5,13 @@
  */
 package se.kth.karamel.cookbook.metadata;
 
+import se.kth.karamel.common.cookbookmeta.Recipe;
+import se.kth.karamel.common.cookbookmeta.ExperimentRecipe;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.MetadataRb;
+import se.kth.karamel.common.cookbookmeta.MetadataParser;
+import se.kth.karamel.common.cookbookmeta.ExperimentRecipeParser;
+import se.kth.karamel.common.cookbookmeta.Berksfile;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
@@ -13,8 +20,8 @@ import java.util.Set;
 import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;

@@ -9,12 +9,12 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Gce;
-import se.kth.karamel.client.model.Provider;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

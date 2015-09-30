@@ -11,8 +11,8 @@ import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

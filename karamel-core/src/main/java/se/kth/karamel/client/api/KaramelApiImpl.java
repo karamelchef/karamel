@@ -40,18 +40,18 @@ import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
-import se.kth.karamel.common.Confs;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.common.SshKeyService;
-import se.kth.karamel.cookbook.metadata.Berksfile;
-import se.kth.karamel.cookbook.metadata.DefaultRb;
-import se.kth.karamel.cookbook.metadata.ExperimentRecipe;
-import se.kth.karamel.cookbook.metadata.InstallRecipe;
-import se.kth.karamel.cookbook.metadata.KaramelFile;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.common.util.SshKeyService;
+import se.kth.karamel.common.cookbookmeta.Berksfile;
+import se.kth.karamel.common.cookbookmeta.DefaultRb;
+import se.kth.karamel.common.cookbookmeta.ExperimentRecipe;
+import se.kth.karamel.common.cookbookmeta.InstallRecipe;
+import se.kth.karamel.common.cookbookmeta.KaramelFile;
+import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
 
 /**
  * Implementation of the Karamel Api for UI
@@ -366,10 +366,10 @@ public class KaramelApiImpl implements KaramelApi {
     ec.setBerksfile(bf.toString());
     ec.setExperimentSetupCode(ir.getSetupCode());
     ec.setDefaultAttributes(attributes.getExperimentContextFormat());
-    ArrayList<YamlDependency> deps = kf.getDependencies();
+    ArrayList<KaramelFileYamlDeps> deps = kf.getDependencies();
     Set<String> localSet = new HashSet<>();
     Set<String> globalSet = new HashSet<>();
-    for (YamlDependency yd : deps) {
+    for (KaramelFileYamlDeps yd : deps) {
       if (!yd.getRecipe().contains(Settings.COOKBOOK_DELIMITER + "install")) {
         List<String> locals = yd.getLocal();
         // remove duplicates from locals

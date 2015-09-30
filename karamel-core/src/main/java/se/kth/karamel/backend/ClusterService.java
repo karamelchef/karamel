@@ -15,8 +15,8 @@ import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.model.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.SshKeyPair;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is 

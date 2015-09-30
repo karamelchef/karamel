@@ -35,15 +35,15 @@ import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Provider;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.Confs;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 
 /**

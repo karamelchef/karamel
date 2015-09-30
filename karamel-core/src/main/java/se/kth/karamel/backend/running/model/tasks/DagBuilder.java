@@ -18,18 +18,18 @@ import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.stats.ClusterStats;
+import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.client.api.CookbookCache;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.client.model.json.JsonRecipe;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.CookbookUrls;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
-import se.kth.karamel.cookbook.metadata.karamelfile.yaml.YamlDependency;
+import se.kth.karamel.common.cookbookmeta.CookbookUrls;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
 
 /**
  *
@@ -57,7 +57,7 @@ public class DagBuilder {
     for (RunRecipeTask task : allRecipeTasks.values()) {
       String tid = task.uniqueId();
       KaramelizedCookbook kcb = CookbookCache.get(task.getCookbookId());
-      YamlDependency dependency = kcb.getKaramelFile().getDependency(task.getRecipeCanonicalName());
+      KaramelFileYamlDeps dependency = kcb.getKaramelFile().getDependency(task.getRecipeCanonicalName());
       if (dependency != null) {
         for (String depRec : dependency.getLocal()) {
           String depId = RunRecipeTask.makeUniqueId(task.getMachineId(), depRec);

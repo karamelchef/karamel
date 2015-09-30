@@ -6,9 +6,10 @@
 
 package se.kth.karamel.cookbook.metadata;
 
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import org.junit.Assert;
 import org.junit.Test;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;

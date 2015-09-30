@@ -5,6 +5,9 @@
  */
 package se.kth.karamel.common;
 
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.SshKeyService;
+import se.kth.karamel.common.util.Settings;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Ignore;

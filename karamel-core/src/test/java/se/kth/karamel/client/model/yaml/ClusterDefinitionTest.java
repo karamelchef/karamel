@@ -5,25 +5,28 @@
  */
 package se.kth.karamel.client.model.yaml;
 
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlScope;
+import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import se.kth.karamel.client.model.Ec2;
+import se.kth.karamel.common.clusterdef.Ec2;
 import java.util.Map;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.client.model.Baremetal;
+import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.client.model.ClusterDefinitionValidator;
-import se.kth.karamel.client.model.Cookbook;
-import se.kth.karamel.client.model.Gce;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonCookbook;
-import se.kth.karamel.common.IoUtils;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.clusterdef.Cookbook;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
