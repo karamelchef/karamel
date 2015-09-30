@@ -10,7 +10,6 @@
 
   <groupId>se.kth</groupId>
   <artifactId>karamel-core</artifactId>
-  <version>0.2</version>
   <packaging>jar</packaging>
 
   <name>karamel-core</name>
@@ -29,7 +28,6 @@
     <dependency>
       <groupId>se.kth.karamel</groupId>
       <artifactId>karamel-common</artifactId>
-      <version>0.2</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>

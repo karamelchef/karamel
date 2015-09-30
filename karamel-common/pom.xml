@@ -9,7 +9,6 @@
   </parent>
   <groupId>se.kth.karamel</groupId>
   <artifactId>karamel-common</artifactId>
-  <version>0.2</version>
   <name>karamel-common</name>
   <url>http://maven.apache.org</url>
   <properties>
