@@ -48,8 +48,7 @@ public enum NovaSetting {
   }
 
   public static final String NOVA_KEYPAIR_NAME(String clusterName, String region) {
-    return (SystemSetting.USER_NAME.getParameter() + "-" + clusterName + "-" + region + "-" + SystemSetting
-            .OS_NAME.getParameter() + "-" + SystemSetting.IP_Address.getParameter()).toLowerCase();
+    return (SystemSetting.USER_NAME.getParameter() + "-" + clusterName).toLowerCase();
   }
 
   public static final String NOVA_UNIQUE_GROUP_DESCRIPTION(String clusterName, String groupName) {
