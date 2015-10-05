@@ -43,6 +43,7 @@ public abstract class Task implements DagTask, TaskCallback {
   private final TaskSubmitter submitter;
   private final ClusterStats clusterStats;
   private long startTime;
+  private long duration = 0;
 
   public Task(String name, String id, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     this.name = name;
@@ -52,6 +53,10 @@ public abstract class Task implements DagTask, TaskCallback {
     this.uuid = UUID.randomUUID().toString();
     this.clusterStats = clusterStats;
     this.submitter = submitter;
+  }
+
+  public long getDuration() {
+    return duration;
   }
 
   public Status getStatus() {
@@ -166,7 +171,7 @@ public abstract class Task implements DagTask, TaskCallback {
   }
 
   private void addStats() {
-    long duration = System.currentTimeMillis() - startTime;
+    duration = System.currentTimeMillis() - startTime;
     TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
     clusterStats.addTask(taskStat);
   }

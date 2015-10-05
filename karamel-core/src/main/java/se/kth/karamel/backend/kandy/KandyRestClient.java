@@ -52,13 +52,14 @@ public class KandyRestClient {
     try {
       String json = stats.toJsonAndMarkNotUpdated();
       ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
-      String id = response.getEntity(String.class);
-      stats.setId(id);
       if (response.getStatus() >= 300) {
         logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
             response.getStatusInfo().getReasonPhrase()));
+      } else {
+        String id = response.getEntity(String.class);
+        stats.setId(id);
+        logger.debug(String.format("Cluster status is stored for the first time in Kandy with id %s", id));
       }
-      logger.debug(String.format("Cluster status is stored for the first time in Kandy with id %s", id));
     } catch (Exception e) {
       logger.error("exception during storing cluster stats to Kandy", e);
     }

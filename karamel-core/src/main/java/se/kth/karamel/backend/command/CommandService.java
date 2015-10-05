@@ -632,7 +632,7 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Machine", "Logs"};
+    String[] columnNames = {"Task", "Status", "Machine", "Logs", "Duration(ms)"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
@@ -645,6 +645,11 @@ public class CommandService {
       } else {
         data[i][3] = "";
       }
+      
+      if (task.getDuration() > 0)
+        data[i][4] = task.getDuration();
+      else
+        data[i][4] = "";
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
