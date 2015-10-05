@@ -35,7 +35,7 @@ public class KandyRestClient {
         storeService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_STORE).build());
       }
     } catch (Exception e) {
-      logger.error("exception during intitalizing the KandyClient", e);
+      logger.debug("exception during intitalizing the KandyClient", e);
     }
   }
 
@@ -61,7 +61,7 @@ public class KandyRestClient {
         logger.debug(String.format("Cluster status is stored for the first time in Kandy with id %s", id));
       }
     } catch (Exception e) {
-      logger.error("exception during storing cluster stats to Kandy", e);
+      logger.debug("exception during storing cluster stats to Kandy: " + e.getMessage());
     }
   }
 
@@ -75,12 +75,12 @@ public class KandyRestClient {
 
       if (response.getStatus()
           >= 300) {
-        logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
+        logger.debug(String.format("Kandy server couldn't store the cluster stats because '%s'",
             response.getStatusInfo().getReasonPhrase()));
       }
       logger.debug(String.format("Cluster status is updated in Kandy with id %s", stats.getId()));
     } catch (Exception e) {
-      logger.error("exception during updatinig cluster stats to Kandy", e);
+      logger.debug("exception during updatinig cluster stats to Kandy: "+ e.getMessage());
     }
   }
 
