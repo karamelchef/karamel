@@ -26,6 +26,9 @@ public class ClusterStats {
   List<PhaseStat> phases = new ArrayList<>();
   List<TaskStat> tasks = new ArrayList<>();
 
+  public ClusterStats() {
+  }
+
   public boolean isUpdated() {
     return updated;
   }

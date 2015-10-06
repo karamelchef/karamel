@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package se.kth.karamel.common.stats;
 
 /**
@@ -11,7 +10,7 @@ package se.kth.karamel.common.stats;
  * @author kamal
  */
 public class PhaseStat {
-  
+
   long id;
   String name;
   String status;
@@ -21,6 +20,9 @@ public class PhaseStat {
     this.name = name;
     this.status = status;
     this.duration = duration;
+  }
+
+  public PhaseStat() {
   }
 
   public void setId(long id) {
@@ -54,5 +56,4 @@ public class PhaseStat {
   public void setStatus(String status) {
     this.status = status;
   }
-  
 }

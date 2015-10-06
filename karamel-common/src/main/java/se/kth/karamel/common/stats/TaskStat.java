@@ -24,6 +24,9 @@ public class TaskStat {
     this.duration = duration;
   }
 
+  public TaskStat() {
+  }
+
   public void setId(long id) {
     this.id = id;
   }
@@ -31,13 +34,13 @@ public class TaskStat {
   public long getId() {
     return id;
   }
-  
-  public void setRecipeId(String recipeId) {
-    this.taskId = recipeId;
+
+  public String getTaskId() {
+    return taskId;
   }
 
-  public String getRecipeId() {
-    return taskId;
+  public void setTaskId(String taskId) {
+    this.taskId = taskId;
   }
 
   public void setDuration(long duration) {
@@ -63,5 +66,5 @@ public class TaskStat {
   public String getStatus() {
     return status;
   }
-  
+
 }
