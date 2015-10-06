@@ -1,15 +1,15 @@
 package se.kth.karamel.client.api;
 
-import se.kth.karamel.common.exception.KaramelException;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import java.io.IOException;
 import java.util.ArrayList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
@@ -62,7 +62,8 @@ public class KaramelApiTest {
 
 //  @Test
   public void testYamlToJson() throws IOException, KaramelException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.
+        getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     assertFalse(json.isEmpty());
     System.out.println(json);
@@ -70,7 +71,8 @@ public class KaramelApiTest {
 
 //  @Test
   public void testJsonToYaml() throws KaramelException, IOException {
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.
+        getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     String convertedYaml = api.jsonToYaml(json);
     assertFalse(convertedYaml.isEmpty());
@@ -80,7 +82,8 @@ public class KaramelApiTest {
 //  @Test
   public void testPauseResumePurge() throws KaramelException, IOException, InterruptedException {
     String clusterName = "spark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.
+        getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -114,7 +117,8 @@ public class KaramelApiTest {
 //  @Test
   public void testForkMachineScale() throws KaramelException, IOException, InterruptedException {
     String clusterName = "bigspark";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/bigspark.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/bigspark.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -140,7 +144,8 @@ public class KaramelApiTest {
 //  @Test
   public void testVcpMachines() throws KaramelException, IOException, InterruptedException {
     String clusterName = "sparkonvpc";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/sparkonvpc.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/sparkonvpc.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -166,7 +171,8 @@ public class KaramelApiTest {
 //  @Test
   public void testDag() throws KaramelException, IOException, InterruptedException {
     String clusterName = "hopsonenode";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hops-1node-aws-m3-med.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/hops-1node-aws-m3-med.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -185,10 +191,11 @@ public class KaramelApiTest {
     }
   }
 
-   @Test
+//   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flink";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_ec2.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/flink_ec2.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -210,7 +217,8 @@ public class KaramelApiTest {
 //  @Test
   public void testReturnResults() throws KaramelException, IOException, InterruptedException {
     String clusterName = "ndb";
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/ndb.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/ndb.yml"),
+        Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -258,7 +266,8 @@ public class KaramelApiTest {
     String fileName = "flink_gce";
     String clusterName = "flinkgce";
 
-    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink_gce.yml"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/flink_gce.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
