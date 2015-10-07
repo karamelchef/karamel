@@ -69,7 +69,8 @@ angular.module('main.module')
           };
 
           scope.usingPassword = function() {
-            _updateState('initialWarn', scope.sshKeyObj);
+            // This confused Joergen, so dont place a red cross here
+//            _updateState('initialWarn', scope.sshKeyObj);
           };
 
           scope.usingSudoPassword = function() {
@@ -129,7 +130,6 @@ angular.module('main.module')
                 scope.sshKeyPair.privKeyPath = data.privateKeyPath;
                 _updateState('success', scope.sshKeyObj);
                 scope.sshPassphraseEnabled = true;
-                v
               })
               .error(function(data) {
                 $log.warn("Couldn't generate ssh-keys");

@@ -16,19 +16,5 @@ depends "kagent"
   supports os
 end
 
-attribute "%%name%%/version",
-:description => "Version of %%name%%",
-:type => 'string',
-:default => "0.1"
 
-
-attribute "%%name%%/url",
-:description => "Url to download binaries for %%name%%",
-:type => 'string',
-:default => ""
-
-attribute "%%name%%/user",
-:description => "Run %%name%% as this user",
-:type => 'string',
-:default => "%%name%%"
 

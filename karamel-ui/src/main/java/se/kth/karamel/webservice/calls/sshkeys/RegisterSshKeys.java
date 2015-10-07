@@ -21,7 +21,7 @@ import se.kth.karamel.webservicemodel.SshKeyJSON;
  *
  * @author kamal
  */
-@Path("/ssk/registerKey")
+@Path("/ssh/registerKey")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class RegisterSshKeys extends AbstractCall {
