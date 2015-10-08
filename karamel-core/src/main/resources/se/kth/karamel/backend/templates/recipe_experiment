@@ -1,9 +1,7 @@
-#private_ip = my_private_ip()
-#public_ip = my_public_ip()
 
 script 'run_experiment' do
-  cwd "/home/%%cookbook%%"
-   user node['%%cookbook%%']['user']
+  cwd "/tmp"
+  user node['%%cookbook%%']['user']
   group node['%%cookbook%%']['group']
   interpreter "%%interpreter%%"
   code <<-EOM
