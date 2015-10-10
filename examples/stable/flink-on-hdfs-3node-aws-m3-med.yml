@@ -17,7 +17,6 @@ groups:
     recipes: 
         - hadoop::nn
         - flink::jobmanager
-        - flink::wordcount
   datanodes:
     size: 2
     recipes: 
