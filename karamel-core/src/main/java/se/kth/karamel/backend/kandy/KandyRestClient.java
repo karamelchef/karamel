@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.kandy;
 
+import com.google.common.io.Files;
 import se.kth.karamel.common.stats.ClusterStats;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
@@ -13,7 +14,13 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import org.apache.log4j.Logger;
+import static se.kth.karamel.backend.ClusterDefinitionService.yamlToYamlObject;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Settings;
 
 /**
@@ -39,12 +46,31 @@ public class KandyRestClient {
     }
   }
 
-  public static void pushClusterStats(ClusterStats stats) {
+  public static void pushClusterStats(String clusterName, ClusterStats stats) {
     checkResources();
     if (stats.getId() == null) {
       storeNewStat(stats);
     } else {
       updateStat(stats);
+    }
+    storeLocally(clusterName, stats);
+  }
+
+  private static void storeLocally(String clusterName, ClusterStats stats) {
+    String json = stats.toJsonAndMarkNotUpdated();
+    try {
+      String name = clusterName.toLowerCase();
+      File folder = new File(Settings.CLUSTER_STATS_FOLDER(name));
+      if (!folder.exists()) {
+        folder.mkdirs();
+      }
+      File file = new File(Settings.CLUSTER_STATS_PATH(name, stats.getLocalId()));
+      if (file.exists()) {
+        file.delete();
+      }
+      Files.write(json, file, Charset.forName("UTF-8"));
+    } catch (IOException ex) {
+      logger.error("Could not save cluster stats locally " + ex.getMessage());
     }
   }
 
@@ -80,7 +106,7 @@ public class KandyRestClient {
       }
       logger.debug(String.format("Cluster status is updated in Kandy with id %s", stats.getId()));
     } catch (Exception e) {
-      logger.debug("exception during updatinig cluster stats to Kandy: "+ e.getMessage());
+      logger.debug("exception during updatinig cluster stats to Kandy: " + e.getMessage());
     }
   }
 

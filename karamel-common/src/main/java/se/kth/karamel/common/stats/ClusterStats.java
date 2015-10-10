@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  *
@@ -18,6 +19,7 @@ public class ClusterStats {
 
   //Only for karamel-core usage
   boolean updated = true;
+  long localId;
   String id;
   String userId;
   String definition;
@@ -27,6 +29,11 @@ public class ClusterStats {
   List<TaskStat> tasks = new ArrayList<>();
 
   public ClusterStats() {
+    localId = UUID.randomUUID().timestamp();
+  }
+
+  public ClusterStats(long localId) {
+    this.localId = localId;
   }
 
   public boolean isUpdated() {
@@ -35,6 +42,14 @@ public class ClusterStats {
 
   public synchronized void setUpdated(boolean updated) {
     this.updated = updated;
+  }
+
+  public long getLocalId() {
+    return localId;
+  }
+
+  public void setLocalId(long localId) {
+    this.localId = localId;
   }
 
   public String getId() {

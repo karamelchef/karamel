@@ -297,7 +297,7 @@ public class ClusterManager implements Runnable {
     clean(true);
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
-    KandyRestClient.pushClusterStats(stats);
+    KandyRestClient.pushClusterStats(definition.getName(), stats);
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 

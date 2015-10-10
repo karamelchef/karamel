@@ -186,6 +186,7 @@ public class Settings {
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
+  public static final String STATS_FOLDER_NAME = "stats";
   public static final String TMP_FOLDER_NAME = "tmp";
   public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
@@ -217,6 +218,14 @@ public class Settings {
 
   public static String CLUSTER_YAML_PATH(String clusterName) {
     return CLUSTER_ROOT_PATH(clusterName) + File.separator + YAML_FILE_NAME;
+  }
+
+  public static String CLUSTER_STATS_FOLDER(String clusterName) {
+    return CLUSTER_ROOT_PATH(clusterName) + File.separator + STATS_FOLDER_NAME;
+  }
+
+  public static String CLUSTER_STATS_PATH(String clusterName, long statsName) {
+    return CLUSTER_STATS_FOLDER(clusterName) + File.separator + statsName;
   }
 
   public static String RECIPE_CANONICAL_NAME(String recipeName) {
