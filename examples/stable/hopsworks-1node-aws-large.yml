@@ -1,0 +1,64 @@
+name: HopsWorksOneNodeAws
+ec2:
+    type: m3.large
+    region: eu-west-1
+
+cookbooks:                                                                      
+  hops: 
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
+    branch: "master"  
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+  spark:
+    github: "hopshadoop/spark-chef"
+    branch: "master"
+  flink:
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+  elastic:
+    github: "hopshadoop/elasticsearch-chef"
+    branch: "master"
+  zeppelin:
+    github: "hopshadoop/zeppelin-chef"
+    branch: "master"
+
+attrs:
+  hdfs:
+    user: glassfish
+  hadoop:
+    yarn: 
+        user: glassfish
+    mr: 
+        user: glassfish
+  hops:
+    use_hopsworks: true
+  spark:
+    user: glassfish
+  flink:
+    user: glassfish
+
+groups: 
+  hopsworks:
+    size: 1 
+    recipes:                                                                    
+        - ndb::mysqld                                                       
+        - ndb::ndbd
+        - ndb::mgmd
+        - ndb::memcached
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - hops::jhs                                                            
+        - hops::nm
+        - hops::nm
+        - spark::master
+        - spark::slave
+        - flink::jobmanager
+        - flink::taskmanager
+        - elastic
+        - zeppelin
+        - hopsworks
