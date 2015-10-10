@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 /**
  *
@@ -29,7 +28,7 @@ public class ClusterStats {
   List<TaskStat> tasks = new ArrayList<>();
 
   public ClusterStats() {
-    localId = UUID.randomUUID().timestamp();
+    localId = System.currentTimeMillis();
   }
 
   public ClusterStats(long localId) {

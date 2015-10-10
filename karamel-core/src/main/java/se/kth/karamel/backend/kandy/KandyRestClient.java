@@ -18,9 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import org.apache.log4j.Logger;
-import static se.kth.karamel.backend.ClusterDefinitionService.yamlToYamlObject;
-import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Settings;
 
 /**
