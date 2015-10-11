@@ -349,7 +349,8 @@ public class ClusterManager implements Runnable {
               ClusterStatistics.startTimer();
               clean(false);
               long duration = ClusterStatistics.stopTimer();
-              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PRECLEANING.name(), "succeed", duration);
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PRECLEANING.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
@@ -357,8 +358,9 @@ public class ClusterManager implements Runnable {
               ClusterStatistics.startTimer();
               forkGroups();
               long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), "succeed", duration);
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
@@ -366,8 +368,9 @@ public class ClusterManager implements Runnable {
               ClusterStatistics.startTimer();
               forkMachines();
               long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), "succeed", duration);
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
@@ -375,7 +378,8 @@ public class ClusterManager implements Runnable {
               ClusterStatistics.startTimer();
               install();
               long duration = ClusterStatistics.stopTimer();
-              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), "succeed", duration);
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             break;
@@ -383,7 +387,8 @@ public class ClusterManager implements Runnable {
             ClusterStatistics.startTimer();
             purge();
             long duration = ClusterStatistics.stopTimer();
-            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), "succeed", duration);
+            String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), status, duration);
             stats.addPhase(phaseStat);
             break;
         }
