@@ -211,6 +211,12 @@ public class CommandService {
           builder.append(failureTable(clusterEntity.getFailures().values(), true));
         }
         builder.append("\n");
+        builder.append("Passed Phases:");
+        builder.append("\n");
+        builder.append(phaseStatsTable(cluster.getStats()));
+        builder.append("\n");
+        builder.append("Tasks' Status:");
+        builder.append("\n");
         builder.append(machinesTasksTable(clusterEntity));
         result = builder.toString();
         nextCmd = "status " + clusterNameInUserInput;
@@ -449,8 +455,9 @@ public class CommandService {
               chefJsons);
           installationDag.validate();
           result = installationDag.asJson();
-          if (cluster != null)
+          if (cluster != null) {
             addActiveClusterMenus(response);
+          }
         } else {
           result = cluster.getInstallationDag().asJson();
           addActiveClusterMenus(response);
