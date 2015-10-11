@@ -10,7 +10,6 @@ import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -161,7 +160,7 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         response.addMenuItem("Save", "save");
-        if (chosenCluster().equals(clusterNameInUserInput)) {
+        if (chosenCluster().toLowerCase().equals(clusterNameInUserInput.toLowerCase())) {
           addActiveClusterMenus(response);
         }
         renderer = CommandResponse.Renderer.YAML;
@@ -450,6 +449,8 @@ public class CommandService {
               chefJsons);
           installationDag.validate();
           result = installationDag.asJson();
+          if (cluster != null)
+            addActiveClusterMenus(response);
         } else {
           result = cluster.getInstallationDag().asJson();
           addActiveClusterMenus(response);
