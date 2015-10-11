@@ -210,11 +210,11 @@ public class CommandService {
           builder.append(" List of failures: ").append("\n");
           builder.append(failureTable(clusterEntity.getFailures().values(), true));
         }
-        builder.append("\n");
+        builder.append("\n\n");
         builder.append("Passed Phases:");
         builder.append("\n");
         builder.append(phaseStatsTable(cluster.getStats()));
-        builder.append("\n");
+        builder.append("\n\n");
         builder.append("Tasks' Status:");
         builder.append("\n");
         builder.append(machinesTasksTable(clusterEntity));
