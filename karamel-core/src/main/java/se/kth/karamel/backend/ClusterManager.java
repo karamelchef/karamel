@@ -85,6 +85,10 @@ public class ClusterManager implements Runnable {
     initLaunchers();
   }
 
+  public ClusterStats getStats() {
+    return stats;
+  }
+
   public Dag getInstallationDag() {
     return installationDag;
   }

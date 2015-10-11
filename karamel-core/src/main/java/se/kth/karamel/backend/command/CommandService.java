@@ -5,10 +5,12 @@
  */
 package se.kth.karamel.backend.command;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +42,8 @@ import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.TextTable;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.PhaseStat;
+import se.kth.karamel.common.stats.TaskStat;
 
 /**
  * Terminal backend, a replacement for API with more flexibilities. It processes user commands and generates mere
@@ -157,6 +161,9 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         response.addMenuItem("Save", "save");
+        if (chosenCluster().equals(clusterNameInUserInput)) {
+          addActiveClusterMenus(response);
+        }
         renderer = CommandResponse.Renderer.YAML;
         result = ClusterDefinitionService.loadYaml(clusterNameInUserInput);
       }
@@ -261,6 +268,16 @@ public class CommandService {
         ClusterRuntime clusterEntity = cluster.getRuntime();
         result = machinesTasksTable(clusterEntity);
         nextCmd = "tasks " + clusterNameInUserInput;
+      }
+
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "stats");
+      if (!found && clusterNameInUserInput != null) {
+        found = true;
+        addActiveClusterMenus(response);
+        ClusterManager cluster = cluster(clusterNameInUserInput);
+        ClusterStats stats = cluster.getStats();
+        result = statsTable(cluster.getDefinition().getName(), stats);
+        nextCmd = "stats " + clusterNameInUserInput;
       }
 
       p = Pattern.compile("shellconnect\\s+((\\d|.)+)");
@@ -393,7 +410,7 @@ public class CommandService {
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
           Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
-          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter, 
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
           installationDag.validate();
           result = installationDag.print();
@@ -429,7 +446,7 @@ public class CommandService {
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
           Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
-          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter, 
+          Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
           installationDag.validate();
           result = installationDag.asJson();
@@ -632,24 +649,24 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Machine", "Logs", "Duration(ms)"};
+    String[] columnNames = {"Task", "Status", "Logs", "Duration(ms)"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
       data[i][0] = task.getName();
       data[i][1] = task.getStatus();
-      data[i][2] = task.getMachineId();
       String uuid = task.getUuid();
       if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
-        data[i][3] = "<a kref='log " + uuid + "'>log</a>";
+        data[i][2] = "<a kref='log " + uuid + "'>log</a>";
+      } else {
+        data[i][2] = "";
+      }
+
+      if (task.getDuration() > 0) {
+        data[i][3] = task.getDuration();
       } else {
         data[i][3] = "";
       }
-      
-      if (task.getDuration() > 0)
-        data[i][4] = task.getDuration();
-      else
-        data[i][4] = "";
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
@@ -668,6 +685,43 @@ public class CommandService {
       data[i][6] = machine.getTasksStatus();
     }
     return TextTable.makeTable(columnNames, 6, data, rowNumbering);
+  }
+
+  private static String statsTable(String clusterName, ClusterStats stats) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("Total Time: ").append(stats.getEndTime() - stats.getStartTime());
+    builder.append("\n");
+    builder.append(phaseStatsTable(stats));
+    builder.append("\n");
+    builder.append(taskStatsTable(stats));
+    builder.append("\n");
+    return builder.toString();
+  }
+
+  private static String phaseStatsTable(ClusterStats stats) {
+    String[] columnNames = {"Phase", "Status", "Duration"};
+    ArrayList<PhaseStat> phases = Lists.newArrayList(stats.getPhases());
+    Object[][] data = new Object[phases.size()][columnNames.length];
+    for (int i = 0; i < phases.size(); i++) {
+      PhaseStat phase = phases.get(i);
+      data[i][0] = phase.getName();
+      data[i][1] = phase.getStatus();
+      data[i][2] = phase.getDuration();
+    }
+    return TextTable.makeTable(columnNames, 0, data, true);
+  }
+
+  private static String taskStatsTable(ClusterStats stats) {
+    String[] columnNames = {"Task", "Status", "Duration"};
+    ArrayList<TaskStat> tasks = Lists.newArrayList(stats.getTasks());
+    Object[][] data = new Object[tasks.size()][columnNames.length];
+    for (int i = 0; i < tasks.size(); i++) {
+      TaskStat task = tasks.get(i);
+      data[i][0] = task.getTaskId();
+      data[i][1] = task.getStatus();
+      data[i][2] = task.getDuration();
+    }
+    return TextTable.makeTable(columnNames, 0, data, true);
   }
 
   private static String machinesTasksTable(ClusterRuntime clusterEntity) {
@@ -697,13 +751,9 @@ public class CommandService {
     ClusterRuntime clusterEntity = cluster.getRuntime();
     response.addMenuItem("View Definition", "yaml");
     response.addMenuItem("Status", "status");
-    response.addMenuItem("TDAG", "tdag " + clusterName);
-    response.addMenuItem("VDAG", "vdag " + clusterName);
-    response.addMenuItem("Detail", "detail");
-    response.addMenuItem("Groups", "groups");
-    response.addMenuItem("Machines", "machines");
-    response.addMenuItem("Tasks", "tasks");
-    response.addMenuItem("Services", "links " + clusterName);
+    response.addMenuItem("Orchestration DAG", "vdag " + clusterName);
+    response.addMenuItem("Quick Links", "links " + clusterName);
+    response.addMenuItem("Statistics", "stats " + clusterName);
     if (clusterEntity.isPaused()) {
       response.addMenuItem("Resume", "resume");
     } else {
