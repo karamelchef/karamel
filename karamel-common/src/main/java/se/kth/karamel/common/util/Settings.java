@@ -98,10 +98,10 @@ public class Settings {
   public static final String SCRIPT_PATH_MAKE_SOLO_RB = SCRIPT_PATH_ROOT + "make_solo_rb.sc";
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
 
-  //Providers 
+  //Providers
   public static final String PROVIDER_EC2_DEFAULT_TYPE = InstanceType.M1_MEDIUM;
   public static final String PROVIDER_EC2_DEFAULT_REGION = Region.EU_WEST_1;
-  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04 
+  public static final String PROVIDER_EC2_DEFAULT_AMI = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String PROVIDER_EC2_DEFAULT_USERNAME = "ubuntu";
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
 
@@ -299,7 +299,7 @@ public class Settings {
   public static final List<String> EC2_DEFAULT_PORTS = Arrays.asList(new String[]{"22"});
   public static final String VAGRANT_MACHINES_KEY = "vagrant.machines";
 
-  //Git cookbook metadata 
+  //Git cookbook metadata
   public static final String COOKBOOK_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String COOKBOOK_METADATARB_REL_URL = "/metadata.rb";
   public static final String COOKBOOK_KARAMELFILE_REL_URL = "/Karamelfile";
@@ -378,7 +378,7 @@ public class Settings {
 
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
-  public static final String KANDY_REST_ROOT = "http://snurran.sics.se:8080/CloudServiceRecommender/api/stats";
+  public static final String KANDY_REST_ROOT = "http://130.237.238.190:8080/CloudServiceRecommender/api/stats";
   public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/cluster/store";
 
   public static final String KANDY_REST_STATS_UPDATE(String id) {
