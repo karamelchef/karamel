@@ -309,14 +309,14 @@ public final class NovaLauncher extends Launcher{
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
       NovaTemplateOptions options = NovaTemplateOptions.Builder.keyPairName(keypairName)
-              .securityGroupNames(groupIds)
+              /*.securityGroupNames(groupIds)*/
               .nodeNames(toBeForkedVmNames);
 
       template.options(options);
       template.os64Bit(true);
-      template.hardwareId(nova.getFlavor());
-      template.imageId(nova.getImage());
-      template.locationId(nova.getRegion());
+      template.hardwareId(novaContext.getNovaCredentials().getRegion()+"/"+nova.getFlavor());
+      template.imageId(novaContext.getNovaCredentials().getRegion()+"/"+nova.getImage());
+      template.locationId(novaContext.getNovaCredentials().getRegion());
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();
       try {
@@ -367,7 +367,11 @@ public final class NovaLauncher extends Launcher{
             machine.setVmId(node.getId());
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));
-            machine.setPublicIp(publicIps.get(0));
+
+            //TODO fix this, for now we set ip to the same private
+            String publicIp = publicIps.isEmpty()?privateIps.get(0):publicIps.get(0);
+
+            machine.setPublicIp(publicIp);
             machine.setSshPort(node.getLoginPort());
             machine.setSshUser(node.getCredentials().getUser());
             machines.add(machine);

@@ -273,7 +273,7 @@
                         <configuration>
                             <configurationDirectory>conf</configurationDirectory>
                             <copyConfigurationDirectory>true</copyConfigurationDirectory>
-                            <extraJvmArguments>-Xms128m</extraJvmArguments>
+                            <extraJvmArguments>-Xms128m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</extraJvmArguments>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>

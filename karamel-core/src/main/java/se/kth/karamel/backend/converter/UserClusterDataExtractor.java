@@ -109,7 +109,7 @@ public class UserClusterDataExtractor {
       provider = Ec2.makeDefault();
     } else if (groupScopeProvider == null && clusterScopeProvider != null) {
       provider = (Provider) clusterScopeProvider.cloneMe();
-      provider = provider.applyDefaults();
+      //provider = provider.applyDefaults();
     } else if (groupScopeProvider != null && clusterScopeProvider != null) {
       provider = groupScopeProvider.applyParentScope(clusterScopeProvider);
       provider = provider.applyDefaults();
