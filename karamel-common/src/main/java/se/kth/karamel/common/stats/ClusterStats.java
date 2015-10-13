@@ -18,6 +18,7 @@ public class ClusterStats {
 
   //Only for karamel-core usage
   boolean updated = true;
+  long localId;
   String id;
   String userId;
   String definition;
@@ -27,6 +28,11 @@ public class ClusterStats {
   List<TaskStat> tasks = new ArrayList<>();
 
   public ClusterStats() {
+    localId = System.currentTimeMillis();
+  }
+
+  public ClusterStats(long localId) {
+    this.localId = localId;
   }
 
   public boolean isUpdated() {
@@ -35,6 +41,14 @@ public class ClusterStats {
 
   public synchronized void setUpdated(boolean updated) {
     this.updated = updated;
+  }
+
+  public long getLocalId() {
+    return localId;
+  }
+
+  public void setLocalId(long localId) {
+    this.localId = localId;
   }
 
   public String getId() {

@@ -43,9 +43,9 @@ public class KandyRestClientTest {
     stats.addTask(task);
     task = new TaskStat("test-task2", "test-machine2", "succeed", 6 * Settings.SEC_IN_MS);
     stats.addTask(task);
-    KandyRestClient.pushClusterStats(stats);
+    KandyRestClient.pushClusterStats("test-cluster", stats);
     task = new TaskStat("test-task3", "test-machine3", "succeed", 6 * Settings.SEC_IN_MS);
     stats.addTask(task);
-    KandyRestClient.pushClusterStats(stats);
+    KandyRestClient.pushClusterStats("test-cluster", stats);
   }
 }

@@ -16,4 +16,3 @@ groups:
     recipes:
     - flink::jobmanager
     - hadoop::nn
-    - flink::wordcount
