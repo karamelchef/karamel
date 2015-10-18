@@ -24,4 +24,4 @@ groups:
     size: 2
     recipes: 
         - hadoop::dn
-        - spark::slave
+        - spark::worker

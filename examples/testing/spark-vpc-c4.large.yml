@@ -26,4 +26,4 @@ groups:
     recipes: 
         - hadoop::dn
         - hadoop::nm
-        - spark::slave
+        - spark::worker

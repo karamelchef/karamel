@@ -48,7 +48,7 @@ groups:
         - hops::jhs                                                            
         - hopsworks
         - spark::master
-        - spark::slave
+        - spark::worker
         - zeppelin
   metadatanodes:
     size: 1

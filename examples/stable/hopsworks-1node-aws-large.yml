@@ -55,7 +55,7 @@ groups:
         - hops::dn
         - hops::nm
         - spark::master
-        - spark::slave
+        - spark::worker
         - flink::jobmanager
         - flink::taskmanager
         - elastic

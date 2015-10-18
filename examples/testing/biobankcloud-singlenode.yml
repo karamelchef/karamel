@@ -55,7 +55,7 @@ groups:
         - hopsworks
         - zeppelin
         - spark::master
-        - spark::slave
+        - spark::worker
         - adam
         - hiway::hiway_client
         - hiway::cuneiform_client

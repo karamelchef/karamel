@@ -61,5 +61,5 @@ groups:
         - hops::ndb
         - hops::dn
         - hops::nm
-        - spark::slave
+        - spark::worker
         - flink::taskmanager
