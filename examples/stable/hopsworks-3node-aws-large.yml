@@ -1,4 +1,4 @@
-name: HopsWorks5Node
+name: HopsWorksOneNodeAws
 ec2:
     type: m3.large
     region: eu-west-1
@@ -13,10 +13,20 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
+  spark:
+    github: "hopshadoop/spark-chef"
+    branch: "hops"
+  flink:
+    github: "hopshadoop/flink-chef"
+    branch: "hops"
+  elastic:
+    github: "hopshadoop/elasticsearch-chef"
+    branch: "master"
+  zeppelin:
+    github: "hopshadoop/zeppelin-chef"
+    branch: "master"
 
 attrs:
-  hops:
-    use_hopsworks: "true"
   hdfs:
     user: glassfish
   hadoop:
@@ -24,32 +34,32 @@ attrs:
         user: glassfish
     mr: 
         user: glassfish
+  hops:
+    use_hopsworks: true
+  spark:
+    user: glassfish
+  flink:
+    user: glassfish
 
 groups: 
-  server:
+  mgmtnode:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - ndb::memcached
         - hops::ndb
-        - hopsworks
-  metadatanodes:
-    size: 1
-    recipes: 
-        - ndb::client
-        - hops::ndb
-        - hops::rm
         - hops::nn
+        - hops::rm
         - hops::jhs                                                            
-  dbnodes:
-    size: 2
-    recipes: 
-        - ndb::ndbd
+        - spark::master
+        - flink::jobmanager
+        - elastic
+        - zeppelin
+        - hopsworks
   datanodes:
-    size: 2
-    recipes: 
-        - ndb::client
+        - ndb::ndbd
         - hops::ndb
         - hops::dn
         - hops::nm
+        - spark::slave
+        - flink::taskmanager

@@ -15,10 +15,10 @@ cookbooks:
     branch: "master"
   spark:
     github: "hopshadoop/spark-chef"
-    branch: "master"
+    branch: "hops"
   flink:
     github: "hopshadoop/flink-chef"
-    branch: "master"
+    branch: "hops"
   elastic:
     github: "hopshadoop/elasticsearch-chef"
     branch: "master"
@@ -48,12 +48,11 @@ groups:
         - ndb::mysqld                                                       
         - ndb::ndbd
         - ndb::mgmd
-        - ndb::memcached
         - hops::ndb
         - hops::rm
         - hops::nn
         - hops::jhs                                                            
-        - hops::nm
+        - hops::dn
         - hops::nm
         - spark::master
         - spark::slave
