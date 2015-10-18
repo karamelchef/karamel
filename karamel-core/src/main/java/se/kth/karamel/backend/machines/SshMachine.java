@@ -332,7 +332,7 @@ public class SshMachine implements MachineInterface, Runnable {
         client.addHostKeyVerifier(new PromiscuousVerifier());
         client.setConnectTimeout(Settings.SSH_CONNECTION_TIMEOUT);
         client.setTimeout(Settings.SSH_SESSION_TIMEOUT);
-        keys = (passphrase == null)
+        keys = (passphrase == null || passphrase.isEmpty())
             ? client.loadKeys(serverPrivateKey, serverPubKey, null)
             : client.loadKeys(serverPrivateKey, serverPubKey, getPasswordFinder());
 
@@ -385,7 +385,7 @@ public class SshMachine implements MachineInterface, Runnable {
         if (!succeeded) {
           String message = String.format("%s: Exhausted retry for ssh connection, is the port '%d' open?",
               machineEntity.getId(), machineEntity.getSshPort());
-          if (passphrase != null) {
+          if (passphrase != null && !passphrase.isEmpty()) {
             message += " or is the passphrase for your private key correct?";
           }
           logger.error(message);
@@ -393,7 +393,7 @@ public class SshMachine implements MachineInterface, Runnable {
 
       } catch (UserAuthException ex) {
         String message = String.format("%s: Authentication problem using ssh keys.", machineEntity.getId());
-        if (passphrase != null) {
+        if (passphrase != null && !passphrase.isEmpty()) {
           message = message + " Is the passphrase for your private key correct?";
         }
         KaramelException exp = new KaramelException(message, ex);

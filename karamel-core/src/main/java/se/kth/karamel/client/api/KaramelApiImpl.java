@@ -240,9 +240,6 @@ public class KaramelApiImpl implements KaramelApi {
   private void saveSshConfs(SshKeyPair keypair, Confs confs) {
     confs.put(Settings.SSH_PRIVKEY_PATH_KEY, keypair.getPrivateKeyPath());
     confs.put(Settings.SSH_PUBKEY_PATH_KEY, keypair.getPublicKeyPath());
-    if (keypair.getPassphrase() != null && keypair.getPassphrase().isEmpty() == false) {
-      confs.put(Settings.SSH_PRIVKEY_PASSPHRASE, keypair.getPassphrase());
-    }
   }
 
   @Override

@@ -18,7 +18,7 @@ public class SshKeyPair {
   private String passphrase;
 
   public String getPassphrase() {
-    return passphrase;
+    return (passphrase != null && passphrase.isEmpty()) ? null : passphrase;
   }
 
   public void setPassphrase(String password) {

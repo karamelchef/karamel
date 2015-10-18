@@ -115,7 +115,6 @@ public class Settings {
   public static final String DEFAULT_PRIKEY_PATH = UNIX_OS ? USER_HOME + "/.ssh/id_rsa" : null;
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
-  public static final String SSH_PRIVKEY_PASSPHRASE = "ssh.privatekey.passphrase";
   public static final String AWS_ACCESS_KEY = "aws.access.key";
   public static final String AWS_ACCESS_KEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRET_KEY = "aws.secret.key";
