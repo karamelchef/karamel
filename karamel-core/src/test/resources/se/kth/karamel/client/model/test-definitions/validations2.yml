@@ -1,0 +1,26 @@
+name: ReferenceYaml                                                             
+ec2:                                                                            
+    type: m1.small
+    ami: ami-0307ce74
+
+cookbooks:                                                                      
+  hopsworks:                                                                     
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/hopsworks-chef"
+    branch: "master"   
+  ndb:
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/ndb-chef"
+    branch: "master"
+    
+attrs:
+  hadoop: 
+    version: 2.2.2
+
+groups: 
+  dashboard:
+    size: 1 
+    recipes:                                                                    
+        - hopsworks
+        - ndb::mysqld
+        - hopsworks::default

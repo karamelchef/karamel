@@ -190,6 +190,13 @@ public class ClusterDefinitionTest {
     ClusterDefinitionService.yamlToJson(yaml);
   }
 
+  @Test(expected = ValidationException.class)
+  public void testDuplciateRecipeInAGroup() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations2.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
+  }
+
   @Test
   public void testGroupLevelRecipesInJson() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
