@@ -38,7 +38,7 @@ public class ChefJsonGenerator {
    * @param clusterEntity
    * @return map of machineId-recipeName->json
    */
-  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition, 
+  public static Map<String, JsonObject> generateClusterChefJsons(JsonCluster definition,
       ClusterRuntime clusterEntity) throws KaramelException {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
@@ -46,6 +46,10 @@ public class ChefJsonGenerator {
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
+      //Adding all attribtues to all chef-jsons
+      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
+        addCookbookAttributes(cb, clone);
+      }
       for (JsonCookbook cb : jsonGroup.getCookbooks()) {
         Map<String, JsonObject> gj = generateRecipesChefJsons(clone, cb, groupEntity);
         chefJsons.putAll(gj);
@@ -54,10 +58,10 @@ public class ChefJsonGenerator {
     return chefJsons;
   }
 
-  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb, 
+  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb,
       GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
-    addCookbookAttributes(cb, json);
+
     for (MachineRuntime me : groupEntity.getMachines()) {
       for (JsonRecipe recipe : cb.getRecipes()) {
         JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getCanonicalName());
