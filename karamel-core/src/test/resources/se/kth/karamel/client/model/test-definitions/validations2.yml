@@ -12,10 +12,7 @@ cookbooks:
     github: "testorg/testrepo"
     cookbook: "cookbooks/hopshadoop/ndb-chef"
     branch: "master"
-    
-attrs:
-  hadoop: 
-    version: 2.2.2
+
 
 groups: 
   dashboard:
