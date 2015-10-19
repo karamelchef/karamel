@@ -199,7 +199,7 @@ div.task h3 {
 .default-color { background-color: #ffffff; }
 
 .recipe {
-  padding: 10px;
+  padding: 5px;
   background-color: white ;
   margin: 5px 0px;
 }
@@ -258,7 +258,7 @@ div.task h3 {
 }
 
 .removeRecipe {
-  padding: 12px;
+  padding: 2px;
   color: #444;
 }
 
