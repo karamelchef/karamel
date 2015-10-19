@@ -2,14 +2,10 @@
 Installation
 ============
 
-Install HopsWorks and Hops with Vagrant::
+Install Karamel
 
-    $ git clone https://github.com/hopshadoop/hopsworks-chef.git
-    $ cd hopsworks-chef
-    $ berks vendor cookbooks
-    $ vagrant up
+    $ wget  
+    $ cd karamel-0.2  
+    $ ./bin/karamel
 
 
-Install HopsWorks and Hops for AWS(EC2), GCE, OpenStack, or On-Premises (with Chef/Karamel)::
-
-    $ wget https://github.com/hopshadoop/hopsworks-chef.git
