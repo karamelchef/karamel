@@ -332,9 +332,9 @@ textarea[name="pubkey"]{
 
 /* Command Page CSS*/
 .editorResponseArea{
-  font-family:Courier;
+  font-family:Arial;
   padding: 10px;
-  font-size: 12px;
+  font-size: 14px;
   height: 1600px;
   width: 100%;
 }
