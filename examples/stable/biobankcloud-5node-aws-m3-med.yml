@@ -42,7 +42,6 @@ groups:
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
-        - ndb::memcached
         - hops::client
         - hops::ndb
         - hops::jhs                                                            

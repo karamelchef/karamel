@@ -22,7 +22,6 @@ groups:
     size: 1 
     recipes: 
         - ndb::mysqld
-        - ndb::memcached
         - ndb::mgmd
         - hops::ndb                                                          
         - hops::rm

@@ -1,4 +1,4 @@
-name: HopsWorksOneNodeAws
+name: HopsWorksDistributedAws
 ec2:
     type: m3.large
     region: eu-west-1
@@ -57,6 +57,11 @@ groups:
         - zeppelin
         - hopsworks
   datanodes:
+    size: 2
+    attrs:
+      hops:
+        install_db: "false"
+    recipes:                                                                    
         - ndb::ndbd
         - hops::ndb
         - hops::dn

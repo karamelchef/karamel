@@ -15,6 +15,5 @@ groups:
         - ndb::mgmd
         - ndb::ndbd
         - ndb::mysqld
-        - ndb::memcached
 
 

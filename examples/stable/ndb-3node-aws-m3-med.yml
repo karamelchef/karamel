@@ -17,7 +17,6 @@ groups:
     size: 1 
     recipes: 
         - ndb::mysqld
-        - ndb::memcached
         - ndb::mgmd
 
 
