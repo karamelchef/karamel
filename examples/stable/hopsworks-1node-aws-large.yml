@@ -51,7 +51,6 @@ groups:
         - hops::ndb
         - hops::rm
         - hops::nn
-        - hops::jhs                                                            
         - hops::dn
         - hops::nm
         - spark::master

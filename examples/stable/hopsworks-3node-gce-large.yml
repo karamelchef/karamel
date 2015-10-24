@@ -1,7 +1,8 @@
-name: HopsWorksDistributedAws
-ec2:
-    type: m3.large
-    region: eu-west-1
+name: HopsWorksOneNodeAws
+gce:
+  type: n1-standard-1
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
 
 cookbooks:                                                                      
   hops: 
@@ -50,14 +51,13 @@ groups:
         - hops::ndb
         - hops::nn
         - hops::rm
+        - hops::jhs                                                            
         - spark::master
         - flink::jobmanager
         - elastic
         - zeppelin
         - hopsworks
   datanodes:
-    size: 2
-    recipes:                                                                    
         - ndb::ndbd
         - hops::ndb
         - hops::dn
