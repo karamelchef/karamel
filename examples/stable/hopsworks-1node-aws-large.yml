@@ -40,6 +40,10 @@ attrs:
     user: glassfish
   flink:
     user: glassfish
+  ndb:
+    dir: "/mnt"
+  mysql:
+    dir: "/mnt"
 
 groups: 
   hopsworks:
