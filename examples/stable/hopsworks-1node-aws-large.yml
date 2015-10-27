@@ -46,8 +46,6 @@ attrs:
     dir: "/mnt"
   zeppelin:
     user: glassfish
-  elastic:
-    dir: "/mnt"
 
 groups: 
   hopsworks:
