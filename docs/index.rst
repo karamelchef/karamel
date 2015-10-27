@@ -4,6 +4,7 @@ Karamel Documentation
 Contents:
 
 .. toctree::
+   :numbered:
    :maxdepth: 2
 
    text/overview
