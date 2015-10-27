@@ -44,10 +44,17 @@ attrs:
     dir: "/mnt"
   mysql:
     dir: "/mnt"
+  zeppelin:
+    user: glassfish
+  elastic:
+    dir: "/mnt"
 
 groups: 
   mgmtnode:
     size: 1 
+    attrs:
+       ndb:
+          dir: "/var/lib"
     recipes:                                                                    
         - ndb::mysqld                                                       
         - ndb::mgmd
