@@ -11,7 +11,7 @@ Software packages in Karamel are cookbooks in Chef, each cookbook is deployed se
 
 Karamel introduces Karamelfile to orchestrate the execution of Chef recipes. Karmelfiles are written in YAML and define dependencies between recipes, that is, the order in which Chef recipes should be run. At the cluster level, the set of Karamelfiles defines a directed acyclic graph (DAG) of recipe dependencies.
 
-We leverage Berkshelf to transparently download and install transitive cookbook dependencies, so large systems can be defined in a few lines of code. Finally, the Karamel runtime builds and manages the execution of the DAG of Chef recipes by executing them with Chef Solo
+We leverage Berkshelf to transparently download and install transitive cookbook dependencies, so large systems can be defined in a few lines of code. Finally, the Karamel runtime builds and manages the execution of the DAG of Chef recipes by executing them with Chef Solo.
 
 .. _Chef: https://www.chef.io/
 .. _hopsHop: https://github.com/hopshadoop
