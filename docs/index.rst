@@ -6,12 +6,6 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   text/overview
-   text/installation
-   text/contribute
-   text/authors
-   text/license
-
 .. include:: text/overview.rst
 .. include:: text/installation.rst
 .. include:: text/contribute.rst
