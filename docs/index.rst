@@ -1,8 +1,3 @@
-.. Read the Docs Template documentation master file, created by
-   sphinx-quickstart on Tue Aug 26 14:19:49 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Karamel Documentation
 ==================================================
 
@@ -10,21 +5,15 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
-   :glob:
 
-   *
+   text/overview
+   text/installation
+   text/contribute
+   text/authors
+   text/license
 
-API Reference
--------------
-
-.. autosummary::
-   :toctree: api
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+.. include:: text/overview.rst
+.. include:: text/installation.rst
+.. include:: text/contribute.rst
+.. include:: text/authors.rst
+.. include:: text/license.rst
