@@ -1,6 +1,6 @@
 name: HopsWorksOneNodeAws
 ec2:
-    type: m3.large
+    type: m3.xlarge
     region: eu-west-1
 
 cookbooks:                                                                      
@@ -46,8 +46,6 @@ attrs:
     dir: "/mnt"
   zeppelin:
     user: glassfish
-  elastic:
-    dir: "/mnt"
 
 groups: 
   hopsworks:
