@@ -2,8 +2,9 @@ Karamel Documentation
 =====================
 
 The documentation for Karamel is organized into following sections: 
-
+ 
 * :ref:`Overview <overview>`
+* :ref:`Getting Started <start>`
 * :ref:`Installation <installation>`
 * :ref:`Cluster Definition <clusterdef>`
 * :ref:`Developers' Guide <devguide>`
@@ -12,6 +13,12 @@ The documentation for Karamel is organized into following sections:
 
 .. _overview:
 .. include:: text/overview.rst   
+
+.. _start:
+.. toctree::
+   :maxdepth: 2
+    
+   text/getting-started
 
 .. _installation:
 .. toctree::
