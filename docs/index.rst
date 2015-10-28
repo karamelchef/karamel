@@ -1,24 +1,44 @@
 Karamel Documentation
-==================================================
+=====================
 
-Contents:
+The documentation for Karamel is organized into following sections: 
 
+* :ref:`Overview <overview>`
+* :ref:`Installation <installation>`
+* :ref:`Cluster Definition <clusterdef>`
+* :ref:`Developers' Guide <devguide>`
+* :ref:`How to Contribtue <contribute>`
+* :ref:`License <license>`
+
+.. _overview:
+.. include:: text/overview.rst   
+
+.. _installation:
 .. toctree::
-   :numbered:
+   :maxdepth: 2
+    
+   text/installation
+  
+.. _clusterdef:
+.. toctree::
    :maxdepth: 2
 
-   text/overview
-   text/installation
    text/cluster-definition
-   text/developers-guide
-   text/contribute
-   text/authors
-   text/license
 
-.. include:: text/overview.rst
-.. include:: text/installation.rst
-.. include:: text/cluster-definition.rst
-.. include:: text/developers-guide.rst
-.. include:: text/contribute.rst
-.. include:: text/authors.rst
-.. include:: text/license.rst
+.. _devguide:
+.. toctree::
+   :maxdepth: 2
+
+   text/developers-guide
+
+.. _contribute:
+.. toctree::
+   :maxdepth: 2
+
+   text/contribute
+
+.. _license:
+.. toctree::
+   :maxdepth: 2
+
+   text/license
