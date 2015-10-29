@@ -5,7 +5,7 @@ The documentation for Karamel is organized into following sections:
  
 * :ref:`Overview <overview>`
 * :ref:`Getting Started <start>`
-* :ref:`Installation <installation>`
+* :ref:`Karamel Terminal <terminal>`
 * :ref:`Cluster Definition <clusterdef>`
 * :ref:`Developers' Guide <devguide>`
 * :ref:`How to Contribtue <contribute>`
@@ -20,11 +20,11 @@ The documentation for Karamel is organized into following sections:
     
    text/getting-started
 
-.. _installation:
+.. _terminal:
 .. toctree::
    :maxdepth: 2
     
-   text/installation
+   text/terminal
   
 .. _clusterdef:
 .. toctree::
