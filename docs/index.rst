@@ -7,6 +7,7 @@ The documentation for Karamel is organized into following sections:
 * :ref:`Getting Started <start>`
 * :ref:`Karamel Terminal <terminal>`
 * :ref:`Cluster Definition <clusterdef>`
+* :ref:`Cloud Providers <cloudproviders>`
 * :ref:`Developers' Guide <devguide>`
 * :ref:`How to Contribtue <contribute>`
 * :ref:`License <license>`
@@ -31,6 +32,12 @@ The documentation for Karamel is organized into following sections:
    :maxdepth: 2
 
    text/cluster-definition
+
+.. _cloudproviders:
+.. toctree::
+   :maxdepth: 2
+
+   text/cloud-providers
 
 .. _devguide:
 .. toctree::

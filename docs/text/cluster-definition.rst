@@ -7,7 +7,7 @@ Cluster definition is an expressive DSL based on YAML as you can see in the foll
 
 Currently We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova) and bare-metal(baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a separate sections following. 
 
- Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
+Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
 
 We group machines based on the software stack(list of recipes) that should be installed on them, number of machines in each group and list of recipes must be defined under each group name. 
  
