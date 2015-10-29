@@ -13,7 +13,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.NovaCredentials;
 import se.kth.karamel.common.Settings;
 import se.kth.karamel.common.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
@@ -267,7 +266,7 @@ public class KaramelApiTest {
     System.out.println(json);
     assertTrue(expectedString.equals(json));
   }
-  @Test
+  //@Test
   public void testNova() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flinknova";
     String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
@@ -279,12 +278,6 @@ public class KaramelApiTest {
     }
     api.registerSshKeys(sshKeys);*/
     /*NovaCredentials credentials = api.loadNovaCredentialsIfExist();*/
-    NovaCredentials novaCredentials = new NovaCredentials();
-    novaCredentials.setAccountName("sics:jim");
-    novaCredentials.setAccountPass("jim123");
-    novaCredentials.setRegion("RegionSICS");
-    novaCredentials.setEndpoint("http://193.10.64.166:5000/v2.0");
-    api.updateNovaCredentialsIfValid(novaCredentials);
 
    /* api.startCluster(json);
     long ms1 = System.currentTimeMillis();
