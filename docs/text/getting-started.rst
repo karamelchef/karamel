@@ -17,10 +17,10 @@ To run your cluster with our Web-Application take the following steps:
 **1. Download Binary** 
   Download Karamel binary from github, unzip it and access its folder through your machine's terminal and run this command:: 
 
-  .. code-block:: bash
+    .. code-block:: bash
 
-    cd karamel-0.x  
-    ./bin/karamel
+      cd karamel-0.x
+      ./bin/karamel
 
 
 **2. Load Cluster Definition** 
@@ -51,7 +51,7 @@ To run your cluster with our Web-Application take the following steps:
 
 
 **6. Launch**
-  When you have all the steps passed in the summary tab you can launch your cluster, it will bring you to the :ref:`Karamel-Terminal <karamel-terminal>` there you can control the installation of your cluster.
+  When you have all the steps passed in the summary tab you can launch your cluster, it will bring you to the :ref:`terminal <karamel-terminal>` there you can control the installation of your cluster.
 
 
 Java-API:
@@ -70,7 +70,7 @@ You can run your cluster in your Java program by using our API.
       </dependency>
 
 **2. Call KaramelApi**
-  Load your content of your cluster definition into a variable and call KaramelApi like this example:
+  Load the content of your cluster definition into a variable and call KaramelApi like this example:
   
     .. code-block:: java
 
