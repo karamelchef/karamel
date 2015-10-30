@@ -9,14 +9,9 @@ Web-UI:
 ```````
 To run your cluster with our Web-Application take the following steps:
 
-**1. Download Binary** 
-  Download Karamel binary from github, unzip it and access its folder through your machine's terminal and run this command:: 
+**1. Download and Run** 
 
-    .. code-block:: bash
-
-      cd karamel-0.x
-      ./bin/karamel
-
+  .. include:: run-web-app.rst
 
 **2. Load Cluster Definition** 
   It opens the Web-UI in your browser. From the top-left most menu-items, open your cluster definition. 
