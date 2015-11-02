@@ -1,3 +1,8 @@
+.. _experiment-designer:
+
+Experiment Designer
+===================
+
 Experiment Designer in Karamel helps you to design your experiment in bash script or phyton without needing to know Chef or Git. Take the following steps to design and deploy your experiment.
 
 1. When you have Karamel web app up and running, you can access the experiment designer from the Experiment menu-item on the left-hand side of the application.

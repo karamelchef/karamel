@@ -4,14 +4,8 @@ Our web-app is a lightweight standalone application to be run on user machines. 
 
 .. include:: run-web-app.rst
 
-Board-UI
---------
+.. include:: board-ui.rst
 
+.. include:: terminal.rst
 
-Terminal
---------
-
-
-Experiment Designer
--------------------
-
+.. include:: experiment-designer.rst
