@@ -15,3 +15,7 @@ A single experiment in Karamel is a Chef recipe, they usually contains "experime
 A Simple Experiment: Wordcount on Apache-Flink
 ----------------------------------------------
 .. include:: simple-experiment.rst
+
+How to write a Karamlelized Cookbook
+------------------------------------
+.. include:: how-to-write-karamelized-cookbook.rst

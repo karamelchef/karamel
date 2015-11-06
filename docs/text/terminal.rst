@@ -35,6 +35,7 @@ Cluster Status
   .. image:: ../imgs/terminal2.png
       :align: center
 
+  
   Cluster phases are the following:
     * Pre-Cleaning
     * Forking Groups
@@ -48,6 +49,7 @@ Cluster Status
   .. image:: ../imgs/terminal3.png
       :align: center
 
+  
   Once all machines forked tasks a bunch of tasks are displayed for each machine. Karamel Scheduler orders tasks and decides when each task is ready to be run. The scheduler assigns a status label to each task.
   
   Task status labels are:
@@ -64,11 +66,40 @@ Cluster Status
 
 Orchestartion DAG
 `````````````````
+  Scheduler in Karamel makes a Directed Acyclic Graph (DAG) out of the all available tasks in the cluster. Tasks could be installation, configuration or running and experiment. In our terminal there is a possibility to watch cluster progress by clicking on the "Orchestration DAG" button. 
+
+  Each Node of the DAG represents a task that must be run on a certain machine. Nodes dynamically change their color according to the status change of their tasks. Here is the meaning of each color:
+
+    * Blue: Waiting
+    * Ready: Yellow
+    * Ongoing: Blinking orange
+    * Succeed: Green
+    * Failed: Red
+
   .. image:: ../imgs/terminal5.png
       :align: center
 
+
+  Orchestration DAG is not only useful to see the cluster progress but also to grasp a deeper insight about how efficiently you use your machine resources by having a maximum parallelization factor. Technically speaking when a task has a lot of dependency it becomes a bottleneck to maximize the parallelization. It is hard to know this much detail when you design your system's/experiment's cookbooks.   
+
 Quick Links
 ```````````
+  Quick links a facility that Karamel provides in terminal to access service links of your cluster quickly. For example when you install Apache Hadoop, you might want to have access to NameNode's or DataNode's web-ui. Those links must :ref:`be designed <write_quick_links>` in karamelized cookbooks of Hadoop then Karamel will bind their dynamic links and will display them in terminal. 
 
   .. image:: ../imgs/terminal6.png
       :align: center
+
+
+Statistics
+``````````
+  Currently Karamel collects time duration for all tasks when you run a cluster. Time duration statistics are available by clicking on statistics button, it will show the name of tasks versus their execution time. It might be have you have several instance of each task in your cluster, for example you may install hadoop::dn recipe on several machines in your cluster, consequently all instances will appear in the statistics table. 
+
+  Statistics is a good way for performance measurement for some type of experiments. You can just draw a plot on them for showing performance of your experiment.
+
+Pause/Resume
+````````````
+  A cluster may pause running either because the user's order or when a failure happens. It is a good way if user wants to change something or if he wants to avoid running the entire cluster for some reason. In that case when you click on the "Pause" button it takes some time until all machines finish their current running task and go into the paused mode. When cluster is paused, a resume button will appear which proceeds running the cluster again.
+
+Purge
+`````
+  Purge is a button to destroy and release all the machine resources both on Clouds and Karamel-runtime. It is recommended to use purge function via Karamel for clean-up resources rather than manually doing so - Karamel makes sure all ssh connections, local threads, virtual machines and security groups are released completely. 
