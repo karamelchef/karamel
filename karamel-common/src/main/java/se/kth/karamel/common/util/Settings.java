@@ -377,8 +377,8 @@ public class Settings {
 
   public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
 
-  public static final String KANDY_REST_ROOT = "http://130.237.238.190:8080/CloudServiceRecommender/api/stats";
-  public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/cluster/store";
+  public static final String KANDY_REST_ROOT = "http://130.237.238.190:8080/CloudServiceRecommender/api/cluster";
+  public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/stats/store";
 
   public static final String KANDY_REST_STATS_UPDATE(String id) {
     return String.format("%s/cluster/update/%s", KANDY_REST_ROOT, id);

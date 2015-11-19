@@ -16,9 +16,9 @@ import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.TaskStat;
-import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
@@ -55,6 +55,10 @@ public abstract class Task implements DagTask, TaskCallback {
     this.submitter = submitter;
   }
 
+  public void setDuration(long duration) {
+    this.duration = duration;
+  }
+
   public long getDuration() {
     return duration;
   }
@@ -74,7 +78,7 @@ public abstract class Task implements DagTask, TaskCallback {
   public String getId() {
     return id;
   }
-  
+
   public abstract List<ShellCommand> getCommands() throws IOException;
 
   public void setCommands(List<ShellCommand> commands) {

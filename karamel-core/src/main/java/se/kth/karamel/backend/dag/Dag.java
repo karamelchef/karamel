@@ -5,13 +5,12 @@
  */
 package se.kth.karamel.backend.dag;
 
-
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashMap;
 import java.util.UUID;
 import org.apache.log4j.Logger;
 import se.kth.karamel.common.exception.DagConstructionException;
@@ -90,19 +89,21 @@ public class Dag {
       node.start();
     }
   }
-  
-  public boolean isFailed()  {
+
+  public boolean isFailed() {
     for (DagNode node : allNodes.values()) {
-      if (node.getStatus() == DagNode.Status.FAILED)
+      if (node.getStatus() == DagNode.Status.FAILED) {
         return true;
+      }
     }
     return false;
   }
 
-  public boolean isDone()  {
+  public boolean isDone() {
     for (DagNode node : allNodes.values()) {
-      if (node.getStatus() != DagNode.Status.DONE)
+      if (node.getStatus() != DagNode.Status.DONE) {
         return false;
+      }
     }
     return true;
   }
@@ -112,7 +113,7 @@ public class Dag {
     for (DagNode node : allNodes.values()) {
       if (node.getTask() == null) {
         throw new DagConstructionException(String.format("No task assigned to '%s' while it appreard in dependencies.. "
-            + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(), 
+            + "predecessors: %s successors: %s", node.getId(), node.getPredecessors().toString(),
             node.getSuccessors().toString()));
       }
     }
