@@ -60,16 +60,17 @@ attrs:
       worker:
         memory_mb: '3072'
         vcores: '1'
-  zeppelin:
-    dir: /mnt
   hopsworks:
     user: glassfish
-    twofactor_auth: "false"
+    twofactor_auth: "true"
   hops:
     use_hopsworks: "true"
   ndb:
     DataMemory: '50'
     IndexMemory: '15'
+    dir: "/mnt"
+    shared_folder: "/mnt"
+  mysql:
     dir: "/mnt"
   charon:
     user: glassfish
