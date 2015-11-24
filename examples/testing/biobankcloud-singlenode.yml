@@ -1,4 +1,4 @@
-name: BiobankCloudSingleNode
+name: BiobankCloudSingleNodeFull1
 ec2:
     type: m3.xlarge
     region: eu-west-1
@@ -57,20 +57,23 @@ attrs:
       worker:
         memory_mb: '3072'
         vcores: '1'
-  charon:
-    user: glassfish
-    group: hadoop
-    user_email: jdowling@kth.se
-    use_only_aws: true
   hopsworks:
     user: glassfish
     twofactor_auth: "false"
   hops:
     use_hopsworks: "true"
   ndb:
-    DataMemory: '1000'
-    IndexMemory: '200'
+    DataMemory: '50'
+    IndexMemory: '15'
     dir: "/mnt"
+    shared_folder: "/mnt"
+  mysql:
+    dir: "/mnt"
+  charon:
+    user: glassfish
+    group: hadoop
+    user_email: jdowling@kth.se
+    use_only_aws: true
     
 groups: 
   master:
@@ -85,11 +88,11 @@ groups:
         - hops::dn
         - hops::nm
         - hopsworks
-        - elastic
         - zeppelin
+        - charon
+        - elastic
         - spark::master
         - spark::worker
-        - charon
         - hiway::hiway_client
         - hiway::cuneiform_client
         - hiway::helloworld_client

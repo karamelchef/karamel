@@ -1,11 +1,14 @@
 name: BiobankCloudSingleNode
 ec2:
-    type: m3.large
+    type: m3.xlarge
     region: eu-west-1
 
-cookbooks:                                                                      
+cookbooks:                                                             
   hops: 
     github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
   hopsworks:                                                                     
     github: "hopshadoop/hopsworks-chef"
@@ -18,55 +21,61 @@ cookbooks:
     branch: "master"
   spark:
     github: "hopshadoop/spark-chef"
-    branch: "master"
+    branch: "hops"
   zeppelin:
     github: "hopshadoop/zeppelin-chef"
     branch: "master"
-  adam:
-    github: "biobankcloud/adam-chef"
+  elastic:
+    github: "hopshadoop/elasticsearch-chef"
     branch: "master"
   charon:
     github: "biobankcloud/charon-chef"
     branch: "master"
+  adam:
+    github: "biobankcloud/adam-chef"
+    branch: "master"
 
 attrs:
-  authorization:
-    sudo:
-      users: ['vagrant']
-      passwordless: true
-      include_sudoers_d: true
   hdfs:
     user: glassfish
-    conf_dir: "/srv/hadoop/etc/hadoop"
+    conf_dir: /mnt/hadoop/etc/hadoop
   hadoop:
+    dir: /mnt
     yarn: 
         user: glassfish
-    mr: 
+        nm:
+          memory_mbs: 9600
+        vcores: 4
+    mr:
         user: glassfish
   spark:
     user: glassfish
   hiway:
     user: glassfish
-    release: "false"
-    am:
-       memory_mb: '512'
-       vcores: '1'
-    worker:
-       memory_mb: '3072'
-       vcores: '1'
+    release: false
+    hiway:
+      am:
+        memory_mb: '512'
+        vcores: '1'
+      worker:
+        memory_mb: '3072'
+        vcores: '1'
+  zeppelin:
+    dir: /mnt
+  hopsworks:
+    user: glassfish
+    twofactor_auth: "false"
+  hops:
+    use_hopsworks: "true"
+  ndb:
+    DataMemory: '50'
+    IndexMemory: '15'
+    dir: "/mnt"
   charon:
     user: glassfish
     group: hadoop
     user_email: jdowling@kth.se
     use_only_aws: true
-  hopsworks:
-    user: glassfish
-    user_envs: "false"
-    twofactor_auth: "true"
-  ndb:
-    enabled: "true"
-  hops:
-    use_hopsworks: "true"
     
 groups: 
   master:
@@ -82,9 +91,10 @@ groups:
         - hops::nm
         - hopsworks
         - zeppelin
+        - charon
+        - elastic
         - spark::master
         - spark::worker
-        - charon
         - hiway::hiway_client
         - hiway::cuneiform_client
         - hiway::helloworld_client
@@ -92,3 +102,4 @@ groups:
         - hiway::hiway_worker 
         - hiway::cuneiform_worker
         - hiway::variantcall_worker
+        - adam
