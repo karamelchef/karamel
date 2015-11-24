@@ -114,7 +114,7 @@ Delete group
      :figclass: align-center
      :scale: 50
 
-     Node Group has been deleted.
+     Delete Confirmation.
 	      
 	      
 Fine-tune cluster scope attributes
@@ -126,9 +126,9 @@ Fine-tune cluster scope attributes
      :figclass: align-center
      :scale: 50
 
-     Filling in optional and mandatory attributes.
+     To fill in optional and mandatory attributes.
 	      
-.. comments By default each cookbook has a parameter for the operating system's user-name and group-name. It is recommended to set the same user and group for all cookbooks that you don't face with permission issues. 
+  By default each cookbook has a parameter for the operating system's user-name and group-name. It is recommended to set the same user and group for all cookbooks that you don't face with permission issues. 
 
   It is also important to fine-tune your systems with the right parameters, for instance according to type of the machines in your cluster you should allocate enough memory to each system. 
 
@@ -137,6 +137,7 @@ Fine-tune cluster scope attributes
      :figclass: align-center
      :scale: 90
 
+     Filling in optional and mandatory attributes.
 		
 Start to Launch Cluster
 ```````````````````````
@@ -146,6 +147,8 @@ Start to Launch Cluster
      :alt:
      :figclass: align-center
      :scale: 90
+
+     Launch Button.
 		      
 Set SSH Keys
 ````````````
@@ -156,6 +159,8 @@ Set SSH Keys
      :figclass: align-center
      :scale: 90
 	      
+     SSH key paths.
+
 Generate SSH Key
 ````````````````
   If you want to change the default ssh-key you can just check the advance box and from there ask Karamel to generate a new key pair for you. 
@@ -168,6 +173,8 @@ Password Protected SSH Keys
      :alt:
      :figclass: align-center
      :scale: 90
+
+     Advanced options for SSH keys.
 	      
 Cloud Provider Credentials
 ``````````````````````````
@@ -177,6 +184,8 @@ In the second step of launch you need to give credentials for accessing the clou
      :alt:
      :figclass: align-center
      :scale: 80
+     
+     Provider-specific credentials.
 
 Final Control
 `````````````
@@ -186,4 +195,6 @@ Final Control
      :alt:
      :figclass: align-center
      :scale: 80
+
+     Validity summary for keys and credentials. 
 
