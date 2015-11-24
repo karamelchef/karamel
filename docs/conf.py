@@ -197,7 +197,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'karamel.tex', u'Karamel Documentation',
-   u'Kamal Hakimzadeh, Jim Dowling', 'manual'),
+   u'www.karamel.io', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
