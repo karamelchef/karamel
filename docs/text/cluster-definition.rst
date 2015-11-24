@@ -10,7 +10,11 @@ Currently We support four cloud providers: Amazon EC2 (ec2), Google Compute Engi
 Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
 
 We group machines based on the software stack(list of recipes) that should be installed on them, number of machines in each group and list of recipes must be defined under each group name. 
- 
+
+.. raw:: latex
+
+    \newpage
+
 .. code-block:: yaml
 
   name: spark

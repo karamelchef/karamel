@@ -8,8 +8,6 @@ cookbooks:
     github: "hopshadoop/apache-hadoop-chef"
   flink: 
     github: "hopshadoop/flink-chef"
-  spark: 
-    github: "hopshadoop/spark-chef"
   kzookeeper: 
     github: "hopshadoop/kzookeeper"
   kkafka: 
@@ -24,12 +22,10 @@ groups:
     recipes: 
         - hadoop::nn
         - flink::jobmanager
-        - spark::master
   workers:
-    size: 3
+    size: 2
     recipes: 
         - hadoop::dn
         - flink::taskmanager
-        - spark::worker
         - kzookeeper
-        - kkafka
+        - kafka

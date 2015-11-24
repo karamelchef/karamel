@@ -7,12 +7,16 @@ Our terminal enables user to monitor and manage running clusters as well as debu
 Open Terminal
 `````````````
 
-  Board-UI redirects to terminal as soon as a cluster launches. Another way to access the terminal is by clicking on its menu-item in the main top-left menu like the bellow screen-shot.  
+  The Board-UI redirects to the terminal as soon as a cluster launches. Another way to access the terminal is by clicking on the ``terminal``  menu-item from the menu dropdown list, as shown in the screen-shot below.  
 
-  .. image:: ../imgs/terminal0.png
-      :align: center
+  .. figure:: ../imgs/terminal0.png
+     :alt: Selecting the terminal perspective
+     :scale: 50
+     :figclass: align-center	  
 
+     Selecting the terminal perspective.
 
+		 
 Button Bar
 ``````````
   Terminal has a button bar with blue color on top, its buttons change dynamically based on the content. 
