@@ -22,6 +22,9 @@ cookbooks:
   zeppelin:
     github: "hopshadoop/zeppelin-chef"
     branch: "master"
+  adam:
+    github: "biobankcloud/adam-chef"
+    branch: "master"
   charon:
     github: "biobankcloud/charon-chef"
     branch: "master"
@@ -59,7 +62,7 @@ attrs:
   hopsworks:
     user: glassfish
     user_envs: "false"
-    twofactor_auth: "false"
+    twofactor_auth: "true"
   ndb:
     enabled: "true"
   hops:

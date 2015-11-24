@@ -59,7 +59,7 @@ attrs:
   hopsworks:
     user: glassfish
     user_envs: "false"
-    twofactor_auth: "false"
+    twofactor_auth: "true"
   ndb:
     enabled: "true"
   hops:
