@@ -1,17 +1,6 @@
 Karamel Documentation
 =====================
 
-The documentation for Karamel is organized into following sections: 
- 
-* :ref:`Overview <overview>`
-* :ref:`Getting Started <start>`
-* :ref:`Web-App <web-ui>`
-* :ref:`Cluster Definition <clusterdef>`
-* :ref:`Cloud Providers <cloudproviders>`
-* :ref:`Developers' Guide <devguide>`
-* :ref:`How to Contribtue <contribute>`
-* :ref:`License <license>`
-
 .. _overview:
 .. toctree::
    :maxdepth: 2
