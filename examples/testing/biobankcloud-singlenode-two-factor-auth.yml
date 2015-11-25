@@ -1,4 +1,4 @@
-name: BiobankCloudSingleNodeFull2
+name: BiobankCloudSingleNodeFull4
 ec2:
     type: m3.xlarge
     region: eu-west-1
@@ -16,9 +16,6 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
-  hiway:
-    github: "biobankcloud/hiway-chef"
-    branch: "master"
   spark:
     github: "hopshadoop/spark-chef"
     branch: "hops"
@@ -30,6 +27,9 @@ cookbooks:
     branch: "master"
   charon:
     github: "biobankcloud/charon-chef"
+    branch: "master"
+  hiway:
+    github: "biobankcloud/hiway-chef"
     branch: "master"
 
 attrs:
@@ -48,6 +48,7 @@ attrs:
   spark:
     user: glassfish
   hiway:
+    home: /mnt/hiway
     user: glassfish
     release: false
     hiway:
@@ -92,7 +93,6 @@ groups:
         - charon
         - elastic
         - spark::master
-        - spark::worker
         - hiway::hiway_client
         - hiway::cuneiform_client
         - hiway::helloworld_client
