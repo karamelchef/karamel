@@ -110,8 +110,12 @@ Quick Links
 ```````````
   Quick links a facility that Karamel provides in terminal to access service links of your cluster quickly. For example when you install Apache Hadoop, you might want to have access to NameNode's or DataNode's web-ui. Those links must :ref:`be designed <write_quick_links>` in karamelized cookbooks of Hadoop then Karamel will bind their dynamic links and will display them in terminal. 
 
-  .. image:: ../imgs/terminal6.png
-      :align: center
+  .. figure:: ../imgs/terminal6.png
+     :alt: Quick Links
+     :figclass: align-center
+     :scale: 100
+     
+     Quick Links
 
 
 Statistics
