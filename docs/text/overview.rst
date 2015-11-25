@@ -1,5 +1,5 @@
 Overview
---------
+========
 Karamel is a set of management tools that simplifies reproducing distributed experiments on multi-cloud environment. Infrastructure, software, parameters, data and experimenter are different elements involved in Karamelized experiments. In Karamel, infrastructure and software are delivered as code while parameters are modifiable. By using Github as artifact-server, all experiment artifacts are globally available - any person around the globe can replay/reproduce any experiment.
 
 Karamel leverages virtual-machines to provision infrastructures on different clouds. We have cloud-connectors for Amazon EC2, Google Compute Engine and in house premises (bare-metal) that are fully working now and Openstack Nova is under construction. 

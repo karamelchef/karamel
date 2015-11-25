@@ -13,7 +13,10 @@ The documentation for Karamel is organized into following sections:
 * :ref:`License <license>`
 
 .. _overview:
-.. include:: text/overview.rst   
+.. toctree::
+   :maxdepth: 2
+    
+   text/overview  
 
 .. _start:
 .. toctree::
