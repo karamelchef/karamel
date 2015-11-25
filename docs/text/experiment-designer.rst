@@ -11,7 +11,7 @@ Find experiment designer
 
   .. figure:: ../imgs/exp1.png
      :alt: Get into the experiment designer.
-     :scale: 100
+     :scale: 50
      :figclass: align-center	  
 
      Get into the experiment designer.
@@ -22,14 +22,14 @@ Login into Github
 
   .. figure:: ../imgs/exp2.png
      :alt: Login button.
-     :scale: 100
+     :scale: 50
      :figclass: align-center	  
 
      Login button.
 
   .. figure:: ../imgs/exp3.png
      :alt: Github credentials.
-     :scale: 100
+     :scale: 50
      :figclass: align-center	  
 
      Github credentials.
@@ -40,7 +40,7 @@ Start working on experiment
 
   .. figure:: ../imgs/exp4.png
      :alt: Work on a new or old experiment.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      Work on a new or old experiment.
@@ -51,7 +51,7 @@ Create a new experiment
 
   .. figure:: ../imgs/exp5.png
      :alt: New experiment on a Github repo.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      New experiment on a Github repo.
@@ -62,7 +62,7 @@ Write body of experiment
 
   .. figure:: ../imgs/exp6.png
      :alt: Experiment's script.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      Experiment's script.
@@ -74,7 +74,7 @@ Define orchestration rules for experiment
 
   .. figure:: ../imgs/exp7.png
      :alt: Orchestration rules for new cluster.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      Orchestration rules for new cluster.
@@ -85,7 +85,7 @@ Push your experiment into Github
 
   .. figure:: ../imgs/exp8.png
      :alt: Push the experiment into Github.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      Push the experiment into Github.
@@ -97,7 +97,7 @@ Look into your Github repo you can see your cookbook.
 
   .. figure:: ../imgs/exp9.png
      :alt: New experiment landed into Github.
-     :scale: 100
+     :scale: 80
      :figclass: align-center	  
 
      New experiment landed into Github.

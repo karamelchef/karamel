@@ -32,7 +32,7 @@ Main Page
     .. figure:: ../imgs/terminal1.png
      :alt: Successful launch redirects to terminal page.
      :figclass: align-center
-     :scale: 100
+     :scale: 80
      
      Successful launch redirects to terminal page.
 
@@ -43,7 +43,7 @@ Cluster Status
   .. figure:: ../imgs/terminal2.png
      :alt: Cluster Status - A just started cluster
      :figclass: align-center
-     :scale: 100
+     :scale: 80
 
      Cluster Status - A just started cluster
 
@@ -61,7 +61,7 @@ Cluster Status
   .. figure:: ../imgs/terminal3.png
      :alt: Cluster Status - Forking Machines
      :figclass: align-center
-     :scale: 100
+     :scale: 80
      
      luster Status - Forking Machines
   
@@ -79,7 +79,7 @@ Cluster Status
   .. figure:: ../imgs/terminal4.png
      :alt: Cluster Status - Installing
      :figclass: align-center
-     :scale: 100
+     :scale: 80
 
      Cluster Status - Installing
 
@@ -99,7 +99,7 @@ Orchestartion DAG
   .. figure:: ../imgs/terminal5.png
      :alt: Orchestration DAG
      :figclass: align-center
-     :scale: 100
+     :scale: 80
      
      Orchestration DAG
 
@@ -113,7 +113,7 @@ Quick Links
   .. figure:: ../imgs/terminal6.png
      :alt: Quick Links
      :figclass: align-center
-     :scale: 100
+     :scale: 80
      
      Quick Links
 
