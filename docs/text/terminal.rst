@@ -29,15 +29,23 @@ Main Page
 `````````
   The main page in the terminal shows available running clusters - you can run multiple clusters at the same time they just need to have different names - where you see general status of your cluster. There are some actions in front of each cluster where you can obtain more detail information about each cluster. 
 
-  .. image:: ../imgs/terminal1.png
-      :align: center
+    .. figure:: ../imgs/terminal1.png
+     :alt: Successful launch redirects to terminal page.
+     :figclass: align-center
+     :scale: 100
+     
+     Successful launch redirects to terminal page.
 
 Cluster Status
 ``````````````
   Status page pushes the new status for the chosen cluster very often. In the first table you see phases of the cluster and each of them they passed successfully or not. 
 
-  .. image:: ../imgs/terminal2.png
-      :align: center
+  .. figure:: ../imgs/terminal2.png
+     :alt: Cluster Status - A just started cluster
+     :figclass: align-center
+     :scale: 100
+
+     Cluster Status - A just started cluster
 
   
   Cluster phases are the following:
@@ -50,9 +58,12 @@ Cluster Status
   
   Inside each machine table there exist a smaller table for showing tasks that are going to be submitted into that machine. Before all machines became forked and ready, all task tables are empty for all machines.
 
-  .. image:: ../imgs/terminal3.png
-      :align: center
-
+  .. figure:: ../imgs/terminal3.png
+     :alt: Cluster Status - Forking Machines
+     :figclass: align-center
+     :scale: 100
+     
+     luster Status - Forking Machines
   
   Once all machines forked tasks a bunch of tasks are displayed for each machine. Karamel Scheduler orders tasks and decides when each task is ready to be run. The scheduler assigns a status label to each task.
   
@@ -65,8 +76,13 @@ Cluster Status
 
   When a task is finished a link to its log content will be displayed in the third column of task table. The log is the merged content of output and error streams. 
 
-  .. image:: ../imgs/terminal4.png
-      :align: center
+  .. figure:: ../imgs/terminal4.png
+     :alt: Cluster Status - Installing
+     :figclass: align-center
+     :scale: 100
+
+     Cluster Status - Installing
+
 
 Orchestartion DAG
 `````````````````
@@ -80,8 +96,12 @@ Orchestartion DAG
     * Succeed: Green
     * Failed: Red
 
-  .. image:: ../imgs/terminal5.png
-      :align: center
+  .. figure:: ../imgs/terminal5.png
+     :alt: Orchestration DAG
+     :figclass: align-center
+     :scale: 100
+     
+     Orchestration DAG
 
 
   Orchestration DAG is not only useful to see the cluster progress but also to grasp a deeper insight about how efficiently you use your machine resources by having a maximum parallelization factor. Technically speaking when a task has a lot of dependency it becomes a bottleneck to maximize the parallelization. It is hard to know this much detail when you design your system's/experiment's cookbooks.   
