@@ -381,7 +381,7 @@ public class Settings {
   public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/stats/store";
 
   public static final String KANDY_REST_STATS_UPDATE(String id) {
-    return String.format("%s/cluster/update/%s", KANDY_REST_ROOT, id);
+    return String.format("%s/stats/update/%s", KANDY_REST_ROOT, id);
   }
 
 }
