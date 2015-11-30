@@ -23,6 +23,7 @@ import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.machines.SshMachine;
@@ -35,14 +36,14 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.util.IoUtils;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.TextTable;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.stats.TaskStat;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.SshKeyPair;
 
 /**
  * Terminal backend, a replacement for API with more flexibilities. It processes user commands and generates mere
@@ -156,18 +157,19 @@ public class CommandService {
         }
       }
 
-      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "yaml");
-      if (!found && clusterNameInUserInput != null) {
+      p = Pattern.compile("yaml\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
         found = true;
-        response.addMenuItem("Save", "save");
-        if (chosenCluster().toLowerCase().equals(clusterNameInUserInput.toLowerCase())) {
+        String clusterName = matcher.group(1);
+        if (chosenCluster().toLowerCase().equals(clusterName.toLowerCase())) {
           addActiveClusterMenus(response);
         }
         renderer = CommandResponse.Renderer.YAML;
-        result = ClusterDefinitionService.loadYaml(clusterNameInUserInput);
+        result = ClusterDefinitionService.loadYaml(clusterName);
       }
 
-      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
+      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.pauseCluster(clusterNameInUserInput);
@@ -502,6 +504,24 @@ public class CommandService {
         }
       }
 
+      p = Pattern.compile("cost\\s+(\\w+)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String clusterName = matcher.group(1);
+        String yaml = ClusterDefinitionService.loadYaml(clusterName);
+        if (yaml != null) {
+          result = KandyRestClient.estimateCost(yaml);
+          if (result != null) {
+            renderer = CommandResponse.Renderer.INFO;
+          } else {
+            throw new KaramelException("Kandy could not estimate the cost.");
+          }
+        } else {
+          throw new KaramelException("The cluster definition does not exist.");
+        }
+      }
+
       p = Pattern.compile("log\\s+(.*)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
@@ -619,7 +639,8 @@ public class CommandService {
       data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag "
           + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines "
           + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge "
-          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml " + name + "'>yaml</a>";
+          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml "
+          + name + "'>yaml</a> <a kref='cost " + name + "'>cost</a>";
       i++;
     }
 
@@ -635,7 +656,7 @@ public class CommandService {
       data[i][0] = yaml;
       data[i][1] = "<a kref='yaml " + yaml + "'>edit</a> <a kref='tdag " + yaml + "'>tdag</a> <a kref='vdag "
           + yaml + "'>vdag</a> <a kref='launch " + yaml + "'>launch</a> <a kref='remove "
-          + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>";
+          + yaml + "'>remove</a> <a kref='links " + yaml + "'>services</a>  <a kref='cost " + yaml + "'>cost</a>";
       i++;
     }
 

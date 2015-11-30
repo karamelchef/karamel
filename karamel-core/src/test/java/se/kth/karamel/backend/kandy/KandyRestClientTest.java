@@ -6,7 +6,9 @@
 package se.kth.karamel.backend.kandy;
 
 import java.io.IOException;
+import org.junit.Assert;
 import org.junit.Test;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.stats.TaskStat;
@@ -21,9 +23,10 @@ public class KandyRestClientTest {
 
   @Test
   public void dummyTest() {
-    
+
   }
-//  @Test
+
+  //  @Test
   public void testPushStats() throws IOException {
     ClusterStats stats = new ClusterStats();
     String yml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/flink.yml");
@@ -47,5 +50,13 @@ public class KandyRestClientTest {
     task = new TaskStat("test-task3", "test-machine3", "succeed", 6 * Settings.SEC_IN_MS);
     stats.addTask(task);
     KandyRestClient.pushClusterStats("test-cluster", stats);
+  }
+
+  //  @Test
+  public void testEstimateCost() throws IOException, KaramelException {
+    String yml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/flink_ec2.yml");
+    String cost = KandyRestClient.estimateCost(yml);
+    Assert.assertNotNull(cost);
+    System.out.println(cost);
   }
 }

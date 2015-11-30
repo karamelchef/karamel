@@ -6,9 +6,6 @@
 package se.kth.karamel.backend.kandy;
 
 import com.google.common.io.Files;
-import se.kth.karamel.common.stats.ClusterStats;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriBuilder;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -17,7 +14,11 @@ import com.sun.jersey.api.client.config.DefaultClientConfig;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriBuilder;
 import org.apache.log4j.Logger;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
 /**
@@ -30,6 +31,7 @@ public class KandyRestClient {
   private static ClientConfig config;
   private static Client client;
   private static WebResource storeService;
+  private static WebResource costService;
 
   private static synchronized void checkResources() {
     try {
@@ -37,6 +39,7 @@ public class KandyRestClient {
         config = new DefaultClientConfig();
         client = Client.create(config);
         storeService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_STATS_STORE).build());
+        costService = client.resource(UriBuilder.fromUri(Settings.KANDY_REST_CLUSTER_COST).build());
       }
     } catch (Exception e) {
       logger.debug("exception during intitalizing the KandyClient", e);
@@ -105,6 +108,24 @@ public class KandyRestClient {
     } catch (Exception e) {
       logger.debug("exception during updatinig cluster stats to Kandy: " + e.getMessage());
     }
+  }
+
+  public static String estimateCost(String clusterDef) throws KaramelException {
+    try {
+      checkResources();
+      ClientResponse response = costService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, clusterDef);
+      if (response.getStatus() >= 300) {
+        logger.error(String.format("Kandy server couldn't return the cluster cost because '%s'",
+            response.getStatusInfo().getReasonPhrase()));
+      } else {
+        String cost = response.getEntity(String.class);
+        return cost;
+      }
+    } catch (Exception e) {
+      logger.error("exception during calling cost estimation to Kandy: " + e.getMessage());
+      throw new KaramelException(e.getMessage());
+    }
+    return null;
   }
 
 }

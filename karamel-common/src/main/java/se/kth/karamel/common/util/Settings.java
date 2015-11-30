@@ -379,6 +379,7 @@ public class Settings {
 
   public static final String KANDY_REST_ROOT = "http://130.237.238.190:8080/CloudServiceRecommender/api/cluster";
   public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/stats/store";
+  public static final String KANDY_REST_CLUSTER_COST = KANDY_REST_ROOT + "/cost";
 
   public static final String KANDY_REST_STATS_UPDATE(String id) {
     return String.format("%s/stats/update/%s", KANDY_REST_ROOT, id);
