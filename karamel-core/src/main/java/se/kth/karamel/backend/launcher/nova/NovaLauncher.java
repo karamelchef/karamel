@@ -10,6 +10,7 @@ import org.jclouds.ContextBuilder;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.compute.options.TemplateOptions;
 import org.jclouds.http.HttpResponseException;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
@@ -227,7 +228,7 @@ public final class NovaLauncher extends Launcher{
       String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
       for (SecurityGroup secgroup : novaContext.getSecurityGroupApi().list()) {
         //TODO find the real name of the jclouds groups in openstack
-        if (secgroup.getName().startsWith("jclouds#" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
+        if (secgroup.getName().startsWith("jclouds-" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
           logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
           boolean retry = false;
           int count = 0;
@@ -308,9 +309,10 @@ public final class NovaLauncher extends Launcher{
         toBeForkedVmNames = unforkedVmNames;
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
-      NovaTemplateOptions options = NovaTemplateOptions.Builder.keyPairName(keypairName)
+      TemplateOptions templateOptions = novaContext.getComputeService().templateOptions().securityGroups(groupIds);
+      NovaTemplateOptions options = templateOptions.as(NovaTemplateOptions.class)
+              .keyPairName(keypairName)
               .autoAssignFloatingIp(true)
-              /*.securityGroupNames(groupIds)*/
               .nodeNames(toBeForkedVmNames);
 
       template.options(options);
