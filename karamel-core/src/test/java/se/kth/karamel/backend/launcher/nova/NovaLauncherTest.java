@@ -80,8 +80,6 @@ public class NovaLauncherTest {
 
 
     nova = new Nova();
-    nova.setRegion("SICSRegion");
-    nova.setEndpoint(novaCredentials.getEndpoint());
     nova.setImage("ubuntu14.04");
     nova.setFlavor("1");
 
@@ -120,7 +118,7 @@ public class NovaLauncherTest {
     when(novaComputeService.getContext()).thenReturn(serviceContext);
     when(serviceContext.unwrapApi(NovaApi.class)).thenReturn(novaApi);
 
-    when(novaApi.getSecurityGroupApi(nova.getRegion())).thenReturn(securityGroupApiOptional);
+    when(novaApi.getSecurityGroupApi(novaCredentials.getRegion())).thenReturn(securityGroupApiOptional);
     when(securityGroupApiOptional.isPresent()).thenReturn(true);
     when(securityGroupApiOptional.get()).thenReturn(securityGroupApi);
 

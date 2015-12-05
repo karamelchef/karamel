@@ -111,8 +111,6 @@ public class YamlTest {
     Nova provider6 = (Nova) groups.get("novavms").getProvider();
     assertEquals("1", provider6.getFlavor());
     assertEquals("ubuntu-1404", provider6.getImage());
-    assertEquals("regionSICS", provider6.getRegion());
-    assertEquals("10.20.40.30", provider6.getEndpoint());
   }
 
   @Test

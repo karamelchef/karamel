@@ -9,21 +9,11 @@ import se.kth.karamel.common.settings.NovaSetting;
 public class Nova extends Provider {
 
   private String flavor;
-  private String region;
   private String image;
-  private String endpoint;
 
   public static Nova makeDefault() {
     Nova nova = new Nova();
     return nova.applyDefaults();
-  }
-
-  public String getEndpoint() {
-    return endpoint;
-  }
-
-  public void setEndpoint(String endpoint) {
-    this.endpoint = endpoint;
   }
 
   public String getFlavor() {
@@ -32,14 +22,6 @@ public class Nova extends Provider {
 
   public void setFlavor(String flavor) {
     this.flavor = flavor;
-  }
-
-  public String getRegion() {
-    return region;
-  }
-
-  public void setRegion(String region) {
-    this.region = region;
   }
 
   public String getImage() {
@@ -56,8 +38,6 @@ public class Nova extends Provider {
     nova.setUsername(getUsername());
     nova.setImage(image);
     nova.setFlavor(flavor);
-    nova.setRegion(region);
-    nova.setEndpoint(endpoint);
     return nova;
   }
 
@@ -71,12 +51,6 @@ public class Nova extends Provider {
       }
       if (clone.getImage() == null) {
         clone.setImage(parentNova.getImage());
-      }
-      if (clone.getRegion() == null) {
-        clone.setRegion(parentNova.getRegion());
-      }
-      if (clone.getEndpoint() == null) {
-        clone.setEndpoint(parentNova.getEndpoint());
       }
     }
     return clone;
@@ -94,12 +68,6 @@ public class Nova extends Provider {
     }
     if (clone.getFlavor() == null) {
       clone.setFlavor(NovaSetting.NOVA_DEFAULT_FLAVOR.getParameter());
-    }
-    if (clone.getRegion() == null) {
-      clone.setImage(NovaSetting.NOVA_DEFAULT_REGION.getParameter());
-    }
-    if (clone.getEndpoint() == null) {
-      clone.setImage(NovaSetting.NOVA_DEFAULT_ENDPOINT.getParameter());
     }
     return clone;
   }

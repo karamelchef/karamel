@@ -206,7 +206,7 @@ public final class NovaLauncher extends Launcher{
         List<String> vmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
                 jg.getSize());
         allNovaVms.addAll(vmNames);
-        groupRegion.put(group.getName(), ((Nova) provider).getRegion());
+        groupRegion.put(group.getName(), novaContext.getNovaCredentials().getRegion());
       }
     }
     cleanup(definition.getName(), allNovaVmsIds, allNovaVms, groupRegion);
