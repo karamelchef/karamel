@@ -1,9 +1,7 @@
 name: flinknova
 nova:
   flavor: 11
-  region: "regionSICS"
   image: "0f40bf75-6e93-442d-a032-094884b75ba6"
-  endpoint: "http://193.10.64.166:5000/v2.0"
 
 cookbooks:
   hadoop:
@@ -21,7 +19,7 @@ groups:
         - flink::jobmanager
         - flink::wordcount
   datanodes:
-    size: 50
+    size: 3
     recipes:
         - hadoop::dn
         - flink::taskmanager
