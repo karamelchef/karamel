@@ -8,6 +8,7 @@ import org.jclouds.compute.ComputeServiceContext;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.openstack.nova.v2_0.NovaApi;
+import org.jclouds.openstack.nova.v2_0.config.NovaProperties;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.sshj.config.SshjSshClientModule;
@@ -39,6 +40,7 @@ public class NovaContext {
 
   public static ContextBuilder buildContext(NovaCredentials credentials) {
     Properties properties = new Properties();
+    properties.setProperty(NovaProperties.AUTO_ALLOCATE_FLOATING_IPS, "true");
     Iterable<Module> modules = ImmutableSet.<Module>of(
             new SshjSshClientModule(),
             new SLF4JLoggingModule(),

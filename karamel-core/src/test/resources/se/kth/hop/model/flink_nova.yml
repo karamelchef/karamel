@@ -1,7 +1,7 @@
 name: flinknova
 nova:
-  flavor: 11
-  image: "0f40bf75-6e93-442d-a032-094884b75ba6"
+  flavor: 3
+  image: "99f4625e-f425-472d-8e21-7aa9c3db1c3e"
 
 cookbooks:
   hadoop:
@@ -19,7 +19,7 @@ groups:
         - flink::jobmanager
         - flink::wordcount
   datanodes:
-    size: 3
+    size: 2
     recipes:
         - hadoop::dn
         - flink::taskmanager

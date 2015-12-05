@@ -309,6 +309,7 @@ public final class NovaLauncher extends Launcher{
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
       NovaTemplateOptions options = NovaTemplateOptions.Builder.keyPairName(keypairName)
+              .autoAssignFloatingIp(true)
               /*.securityGroupNames(groupIds)*/
               .nodeNames(toBeForkedVmNames);
 
@@ -368,7 +369,7 @@ public final class NovaLauncher extends Launcher{
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));
 
-            //TODO fix this, for now we set ip to the same private
+            //TODO fix this, for now we set ip to the same private if not accessible
             String publicIp = publicIps.isEmpty()?privateIps.get(0):publicIps.get(0);
 
             machine.setPublicIp(publicIp);
