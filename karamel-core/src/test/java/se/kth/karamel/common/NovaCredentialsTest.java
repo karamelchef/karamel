@@ -1,8 +1,9 @@
 package se.kth.karamel.common;
 
 import org.junit.Test;
+import se.kth.karamel.common.util.NovaCredentials;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class NovaCredentialsTest {
 

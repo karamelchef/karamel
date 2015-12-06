@@ -209,6 +209,11 @@
             <artifactId>dropwizard-jetty</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
+        <dependency>
+            <groupId>se.kth</groupId>
+            <artifactId>karamel-core</artifactId>
+            <version>0.2</version>
+        </dependency>
     </dependencies>
 
     <build>

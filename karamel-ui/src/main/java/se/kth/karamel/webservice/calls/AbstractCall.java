@@ -5,10 +5,11 @@
  */
 package se.kth.karamel.webservice.calls;
 
-import javax.ws.rs.core.Response;
 import org.apache.log4j.Logger;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
+
+import javax.ws.rs.core.Response;
 
 /**
  *

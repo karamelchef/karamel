@@ -12,7 +12,7 @@ import org.jclouds.openstack.nova.v2_0.config.NovaProperties;
 import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.sshj.config.SshjSshClientModule;
-import se.kth.karamel.common.NovaCredentials;
+import se.kth.karamel.common.util.NovaCredentials;
 
 import java.util.Properties;
 

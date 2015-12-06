@@ -7,18 +7,11 @@ package se.kth.karamel.backend.launcher.amazon;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Module;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import org.jclouds.Constants;
-import static org.jclouds.Constants.PROPERTY_CONNECTION_TIMEOUT;
 import org.jclouds.ContextBuilder;
 import org.jclouds.aws.ec2.compute.AWSEC2ComputeService;
 import org.jclouds.aws.ec2.features.AWSKeyPairApi;
-import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
-import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
 import org.jclouds.compute.ComputeServiceContext;
-import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_PORT_OPEN;
-import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 import org.jclouds.ec2.EC2Api;
 import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
@@ -26,6 +19,15 @@ import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;
+
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import static org.jclouds.Constants.PROPERTY_CONNECTION_TIMEOUT;
+import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_AMI_QUERY;
+import static org.jclouds.aws.ec2.reference.AWSEC2Constants.PROPERTY_EC2_CC_AMI_QUERY;
+import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_PORT_OPEN;
+import static org.jclouds.compute.config.ComputeServiceProperties.TIMEOUT_SCRIPT_COMPLETE;
 
 /**
  *

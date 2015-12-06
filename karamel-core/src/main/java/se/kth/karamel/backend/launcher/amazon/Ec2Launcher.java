@@ -10,12 +10,6 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -35,17 +29,16 @@ import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.util.Confs;
-import se.kth.karamel.common.util.Ec2Credentials;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -496,8 +489,8 @@ public final class Ec2Launcher extends Launcher {
         String id = nodeMetadata.getId();
         String name = nodeMetadata.getName();
         String group = nodeMetadata.getGroup();
-        return ((id != null && ids.contains(id)) || (name != null && names.contains(name)
-            || (group != null && groupNames.contains(group))));
+        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) ||
+            (group != null && groupNames.contains(group))));
       }
 
       @Override

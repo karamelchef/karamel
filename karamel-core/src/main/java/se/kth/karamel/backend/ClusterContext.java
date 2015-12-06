@@ -9,14 +9,15 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.client.model.Nova;
+import se.kth.karamel.common.util.SshKeyPair;
 /**
  * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is
  * stored here in memory. It is valid just until the system is running otherwise it will disappear.  *
@@ -27,6 +28,7 @@ public class ClusterContext {
   private Ec2Context ec2Context;
   private GceContext gceContext;
   private SshKeyPair sshKeyPair;
+  private NovaContext novaContext;
   private String sudoAccountPassword = "";
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
@@ -68,7 +70,7 @@ public class ClusterContext {
     if (sshKeyPair == null) {
       sshKeyPair = commonContext.getSshKeyPair();
     }
-    if (novaContext == null){
+    if (novaContext == null) {
       novaContext = commonContext.getNovaContext();
     }
   }
@@ -113,5 +115,9 @@ public class ClusterContext {
 
   public void setNovaContext(NovaContext novaContext) {
     this.novaContext = novaContext;
+  }
+
+  public NovaContext getNovaContext() {
+    return novaContext;
   }
 }

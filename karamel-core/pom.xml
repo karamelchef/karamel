@@ -95,6 +95,16 @@
             <artifactId>jersey-client</artifactId>
             <version>1.19</version>
         </dependency>
+        <dependency>
+            <groupId>se.kth.karamel</groupId>
+            <artifactId>karamel-common</artifactId>
+            <version>0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.68</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

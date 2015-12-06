@@ -9,7 +9,7 @@ import org.jclouds.openstack.nova.v2_0.extensions.KeyPairApi;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.junit.Before;
 import org.junit.Test;
-import se.kth.karamel.common.NovaCredentials;
+import se.kth.karamel.common.util.NovaCredentials;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

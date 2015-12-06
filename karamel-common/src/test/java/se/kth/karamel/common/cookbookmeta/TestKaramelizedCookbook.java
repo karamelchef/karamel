@@ -7,18 +7,20 @@ package se.kth.karamel.common.cookbookmeta;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import java.util.List;
-import java.util.Set;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import se.kth.karamel.common.util.IoUtils;
-import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.RecipeParseException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *

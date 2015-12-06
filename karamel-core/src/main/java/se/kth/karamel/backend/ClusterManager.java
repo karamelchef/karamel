@@ -5,25 +5,13 @@
  */
 package se.kth.karamel.backend;
 
-import se.kth.karamel.backend.stats.ClusterStatistics;
-import se.kth.karamel.backend.launcher.Launcher;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
+import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
@@ -34,16 +22,30 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
-import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.common.stats.PhaseStat;
+import se.kth.karamel.backend.stats.ClusterStatistics;
 import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  *

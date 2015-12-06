@@ -2,9 +2,6 @@ package se.kth.karamel.client.api;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import java.util.ArrayList;
-import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -13,14 +10,9 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
-import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
-import se.kth.karamel.common.exception.KaramelException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
