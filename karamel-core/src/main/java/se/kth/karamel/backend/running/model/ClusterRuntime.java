@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
 
 /**
  *
@@ -31,7 +31,7 @@ public class ClusterRuntime {
 
   private List<GroupRuntime> groups = new ArrayList<>();
   
-  private Map<String, Failure> failures = new HashMap<>();
+  private final Map<String, Failure> failures = new HashMap<>();
   
   public ClusterRuntime(String name) {
     this.name = name;

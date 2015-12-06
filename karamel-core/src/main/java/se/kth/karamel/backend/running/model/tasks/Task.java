@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.dag.DagTask;
 import se.kth.karamel.backend.dag.DagTaskCallback;
 import se.kth.karamel.backend.machines.MachineInterface;
@@ -16,6 +17,8 @@ import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.TaskStat;
 
 /**
  *
@@ -31,19 +34,33 @@ public abstract class Task implements DagTask, TaskCallback {
   }
   private Status status = Status.WAITING;
   private final String name;
+  private final String id;
   private final String machineId;
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
   private DagTaskCallback dagCallback;
   private final TaskSubmitter submitter;
+  private final ClusterStats clusterStats;
+  private long startTime;
+  private long duration = 0;
 
-  public Task(String name, MachineRuntime machine, TaskSubmitter submitter) {
+  public Task(String name, String id, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     this.name = name;
+    this.id = id;
     this.machineId = machine.getId();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
+    this.clusterStats = clusterStats;
     this.submitter = submitter;
+  }
+
+  public void setDuration(long duration) {
+    this.duration = duration;
+  }
+
+  public long getDuration() {
+    return duration;
   }
 
   public Status getStatus() {
@@ -56,6 +73,10 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public String getName() {
     return name;
+  }
+
+  public String getId() {
+    return id;
   }
 
   public abstract List<ShellCommand> getCommands() throws IOException;
@@ -121,12 +142,14 @@ public abstract class Task implements DagTask, TaskCallback {
   @Override
   public void started() {
     status = Status.ONGOING;
+    startTime = System.currentTimeMillis();
     dagCallback.started();
   }
 
   @Override
   public void succeed() {
     status = Status.DONE;
+    addStats();
     dagCallback.succeed();
   }
 
@@ -134,10 +157,26 @@ public abstract class Task implements DagTask, TaskCallback {
   public void failed(String reason) {
     this.status = Status.FAILED;
     machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, reason);
+    addStats();
     dagCallback.failed(reason);
   }
 
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
+  }
+
+  public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
+    //override it in the subclasses if needed
+  }
+
+  public String getSudoCommand() {
+    String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+    return (password == null || password.isEmpty()) ? "sudo" : "echo \"%password_hidden%\" | sudo -S ";
+  }
+
+  private void addStats() {
+    duration = System.currentTimeMillis() - startTime;
+    TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
+    clusterStats.addTask(taskStat);
   }
 }

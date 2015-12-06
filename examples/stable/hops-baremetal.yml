@@ -16,7 +16,6 @@ groups:
         - ndb::mgmd
         - ndb::ndbd
         - ndb::mysqld                                                       
-        - ndb::memcached
         - hops::ndb
         - hops::rm
         - hops::nn

@@ -12,7 +12,7 @@ package se.kth.karamel.client.api;
 import java.util.HashMap;
 import java.util.Map;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.cookbook.metadata.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 
 /**
  *
@@ -23,7 +23,7 @@ public class CookbookCache {
   public static Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
   
   public static KaramelizedCookbook load(String cookbookUrl) throws KaramelException {
-    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl);
+    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl, false);
     cookbooks.put(cookbookUrl, cookbook);
     return cookbook;
   }

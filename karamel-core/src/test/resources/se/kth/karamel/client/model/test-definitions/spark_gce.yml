@@ -1,0 +1,27 @@
+name: sparkongce
+gce:
+  type: n1-standard-2
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+  spark: 
+    github: "hopshadoop/spark-chef"
+    branch: "master"
+    
+groups: 
+  namenodes:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs
+        - spark::master
+  datanodes:
+    size: 2
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm
+        - spark::slave

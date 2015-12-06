@@ -5,13 +5,15 @@
  */
 package se.kth.karamel.backend.commad;
 
+import java.io.IOException;
+import static org.junit.Assert.*;
 import org.junit.Test;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  *
@@ -19,6 +21,8 @@ import static org.junit.Assert.assertNotNull;
  */
 public class CommandServiceTest {
 
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(CommandServiceTest.class);
+  
   @Test
   public void testCommands() throws KaramelException {
     CommandResponse commandResponse = CommandService.processCommand("home");
@@ -36,14 +40,14 @@ public class CommandServiceTest {
     }
   }
   
-  /*@Test
+  @Test
   public void testOfflineDag() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
-    String yaml = IoUtils.readContentFromClasspath("se/kth/hop/model/hopshub.yml");
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/hopsworks.yml");
     ClusterDefinitionService.saveYaml(yaml);
-    CommandResponse commandResponse = CommandService.processCommand("tdag hopshub");
+    CommandResponse commandResponse = CommandService.processCommand("tdag hopsworks");
     assertEquals(CommandResponse.Renderer.INFO, commandResponse.getRenderer());
     assertNotNull(commandResponse.getResult());
-    System.out.println(commandResponse.getResult());
-  }*/
+    logger.info(commandResponse.getResult());
+  }
 }

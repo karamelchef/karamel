@@ -9,10 +9,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import javax.swing.JTextArea;
 
-/**
- *
- * @author jdowling
- */
 public class CustomOutputStream extends OutputStream {
 
   private JTextArea textArea;

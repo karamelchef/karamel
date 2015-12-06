@@ -1,0 +1,18 @@
+name: flink
+ec2:
+  region: eu-west-1
+  type: m3.medium
+cookbooks:
+  hadoop:
+    branch: master
+    github: hopshadoop/apache-hadoop-chef
+  flink:
+    branch: master
+    github: hopshadoop/flink-chef
+
+groups:
+  namenodes:
+    size: 1
+    recipes:
+    - flink::jobmanager
+    - hadoop::nn

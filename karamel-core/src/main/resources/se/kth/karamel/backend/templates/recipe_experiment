@@ -1,0 +1,10 @@
+
+script 'run_experiment' do
+  cwd "/tmp"
+  user node['%%cookbook%%']['user']
+  group node['%%cookbook%%']['group']
+  interpreter "%%interpreter%%"
+  code <<-EOM
+%%script_contents%%
+  EOM
+end

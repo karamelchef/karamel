@@ -8,7 +8,7 @@ version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/
 echo "version is: $version"
 
 dist=karamel-$version
-certs_dir=/home/jdowling/Dropbox/karamel/certs
+certs_dir=/home/$USER/Dropbox/karamel/certs
 
 mvn clean package
 cd target
@@ -43,7 +43,6 @@ osslsigncode -spc ${certs_dir}/authenticode.spc -key ${certs_dir}/authenticode.k
 mv karamel-signed.exe $dist/karamel.exe
 #create windows archive
 cp ../README.windows $dist/README.txt
-cp -r ../src/main/resources/icons $dist/
 zip -r ${dist}.zip $dist
 
 mv ${dist} ${dist}-windows

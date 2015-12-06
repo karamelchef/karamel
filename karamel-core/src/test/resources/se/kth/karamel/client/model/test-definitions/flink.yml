@@ -1,0 +1,28 @@
+name: flink
+ec2:
+  type: c3.2xlarge
+  region: us-east-1
+  ami: ami-d05e75b8
+
+cookbooks:
+  hadoop:
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink:
+    github: "testorg/testrepo"
+    cookbook: "cookbooks/flink-chef"
+    branch: "master"
+
+groups:
+  namenodes:
+    size: 1
+    recipes:
+        - hadoop::nn
+        - flink::jobmanager
+        - flink::wordcount
+  datanodes:
+    size: 2
+    recipes:
+        - hadoop::dn
+        - flink::taskmanager

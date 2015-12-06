@@ -1,9 +1,12 @@
 package se.kth.karamel.webservicemodel;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
 /**
  * JSON representing the new cookbook to be created.
  *
  */
+@XmlRootElement
 public class ScaffoldJSON {
 
   private String name;

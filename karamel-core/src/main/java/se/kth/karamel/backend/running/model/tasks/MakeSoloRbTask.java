@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -23,17 +23,17 @@ public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, TaskSubmitter submitter) {
-    super("make solo.rb", machine, submitter);
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("make solo.rb", "make solo.rb", machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
   }
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB, 
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "cookbooks_path", vendorPath,
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
+          "sudo_command", getSudoCommand());
     }
     return commands;
   }

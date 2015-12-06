@@ -4,10 +4,7 @@
  */
 package icons;
 
-/**
- *
- * @author jdowling
- */
+
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -31,6 +28,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 public class TrayUI extends TrayIcon implements PropertyChangeListener {
+
+  private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(TrayUI.class);
 
   private JPopupMenu menu;
   private LaunchLogDialog logDialog;
@@ -189,7 +188,7 @@ public class TrayUI extends TrayIcon implements PropertyChangeListener {
 
       @Override
       public void actionPerformed(ActionEvent e) {
-        System.out.println("Shutdown clicked. Exiting Karamel...");
+        logger.info("Shutdown clicked. Exiting Karamel...");
         System.exit(0);
       }
     });

@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -42,9 +42,9 @@ public class RunRecipeTask extends Task {
   private final String cookbookId;
   private final String cookbookName;
 
-  public RunRecipeTask(MachineRuntime machine, String recipe, String json, TaskSubmitter submitter, String cookbookId,
-      String cookbookName) {
-    super("recipe " + recipe, machine, submitter);
+  public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
+      TaskSubmitter submitter, String cookbookId, String cookbookName) {
+    super(recipe, cookbookId + "/" + recipe, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
     this.cookbookId = cookbookId;
@@ -109,12 +109,12 @@ public class RunRecipeTask extends Task {
     }
 
     if (commands == null) {
-      String jsonFileName = recipeCanonicalName.replaceAll(Settings.COOOKBOOK_DELIMITER, "__");
+      String jsonFileName = recipeCanonicalName.replaceAll(Settings.COOKBOOK_DELIMITER, "__");
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE,
           "chef_json", json,
           "json_file_name", jsonFileName,
           "log_file_name", jsonFileName,
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
+          "sudo_command", getSudoCommand());
     }
     return commands;
   }
@@ -128,7 +128,7 @@ public class RunRecipeTask extends Task {
   }
 
   public String getRecipeName() {
-    return recipeCanonicalName.split(Settings.COOOKBOOK_DELIMITER)[1];
+    return recipeCanonicalName.split(Settings.COOKBOOK_DELIMITER)[1];
   }
 
   public String getCookbookName() {
@@ -136,13 +136,13 @@ public class RunRecipeTask extends Task {
   }
 
   public static String installRecipeIdFromCookbookName(String machineId, String cookbook) {
-    String installName = cookbook + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+    String installName = cookbook + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
     return makeUniqueId(machineId, installName);
   }
 
   public static String installRecipeIdFromAnotherRecipeName(String machineId, String recipe) {
-    String[] cmp = recipe.split(Settings.COOOKBOOK_DELIMITER);
-    String installName = cmp[0] + Settings.COOOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+    String[] cmp = recipe.split(Settings.COOKBOOK_DELIMITER);
+    String installName = cmp[0] + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
     return makeUniqueId(machineId, installName);
   }
 
@@ -204,4 +204,17 @@ public class RunRecipeTask extends Task {
     }
   }
 
+  @Override
+  public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
+    String remoteFile = Settings.EXPERIMENT_RESULT_REMOTE_PATH(getRecipeCanonicalName()) + ".out";
+    String localResultsFile = Settings.EXPERIMENT_RESULT_LOCAL_PATH(getRecipeCanonicalName(),
+        getMachine().getGroup().getCluster().getName(), getMachine().getPublicIp());
+    try {
+      sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
+    } catch (IOException ex) {
+      logger.info(String.format("Cannot find experiment results for download for %s on %s", getRecipeCanonicalName(),
+          getMachine().getPublicIp()));
+      return;
+    }
+  }
 }

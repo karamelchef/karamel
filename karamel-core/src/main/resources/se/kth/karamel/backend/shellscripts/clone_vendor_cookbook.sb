@@ -1,5 +1,5 @@
 %sudo_command% mkdir -p %cookbooks_home%
-cd %cookbooks_home% && %sudo_command% rm -fr %cookbook_name%
-cd %cookbooks_home% && %sudo_command% git clone %cookbook_url%
-cd %cookbooks_home%/%cookbook_name% && %sudo_command% git checkout %branch_name%
-cd %cookbooks_home%/%cookbook_name% && %sudo_command% berks vendor %vendor_subfolder%
+cd %cookbooks_home% && %sudo_command% rm -fr %github_repo_name%
+cd %cookbooks_home% && %sudo_command% git clone %github_repo_url%
+cd %cookbooks_home%/%github_repo_name% && %sudo_command% git checkout %branch_name%
+cd %cookbooks_home%/%cookbook_path% && %sudo_command% berks vendor %vendor_subfolder%

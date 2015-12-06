@@ -13,7 +13,8 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -21,24 +22,24 @@ import se.kth.karamel.common.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineRuntime machine, TaskSubmitter submitter) {
-    super("apt-get essentials", machine, submitter);
+  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("apt-get essentials", "apt-get essentials", machine, clusterStats, submitter);
   }
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS, 
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand(),
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
+          "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername());
     }
     return commands;
   }
 
   public static String makeUniqueId(String machineId) {
-    return  "apt-get essentials on "+ machineId;
+    return "apt-get essentials on " + machineId;
   }
-  
+
   @Override
   public String uniqueId() {
     return makeUniqueId(super.getMachineId());
@@ -48,7 +49,5 @@ public class AptGetEssentialsTask extends Task {
   public Set<String> dagDependencies() {
     return Collections.EMPTY_SET;
   }
-  
-  
 
 }

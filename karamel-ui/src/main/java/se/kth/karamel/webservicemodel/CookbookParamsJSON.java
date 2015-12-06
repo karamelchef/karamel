@@ -5,10 +5,6 @@
  */
 package se.kth.karamel.webservicemodel;
 
-/**
- *
- * @author jdowling
- */
 public class CookbookParamsJSON {
 
   private final String cluster;

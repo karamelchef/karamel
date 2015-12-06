@@ -6,18 +6,16 @@
     <parent>
         <groupId>se.kth.karamel</groupId>
         <artifactId>karamel-parent</artifactId>
-        <version>0.1</version>
+        <version>0.2</version>
     </parent>
 
     <groupId>se.kth.karamel</groupId>
     <artifactId>karamel-ui</artifactId>
-    <version>0.1</version>
     <packaging>jar</packaging>
     <name>karamel-ui</name>
 
     <properties>
         <dropwizard.version>0.7.0</dropwizard.version>
-        <karamel-core-version>${project.version}</karamel-core-version>
     </properties>
 
 
@@ -53,7 +51,7 @@
                                         <mainClass>se.kth.karamel.webservice.KaramelServiceApplication</mainClass>
                                         <preCp>lib\*.jar</preCp>
                                     </classPath>
-                                    <icon>icons/karamel.ico</icon>
+                                    <icon>target/classes/assets/favicon.ico</icon>
                                     <errTitle>Karamel Error</errTitle>
                                     <singleInstance>
                                         <mutexName>Karamel</mutexName>
@@ -66,14 +64,6 @@
                                         <maxHeapSize>1024</maxHeapSize>
                                         <runtimeBits>64/32</runtimeBits>
                                     </jre>
-                                    <!--
-                                        <splash>
-                                        <file>icons/karamel-logo.bmp</file>
-                                        <waitForWindow>false</waitForWindow>
-                                        <timeout>2</timeout>
-                                        <timeoutErr>false</timeoutErr>
-                                        </splash>
-                                    -->
                                     <versionInfo>
                                         <fileVersion>0.0.0.1</fileVersion>
                                         <txtFileVersion>Karamel</txtFileVersion>
@@ -102,7 +92,6 @@
                 <dependency>
                     <groupId>se.kth</groupId>
                     <artifactId>karamel-core</artifactId>
-                    <version>${karamel-core-version}</version>
                     <scope>compile</scope>
                     <exclusions>
                         <exclusion>
@@ -137,7 +126,6 @@
                 <dependency>
                     <groupId>se.kth</groupId>
                     <artifactId>karamel-core</artifactId>
-                    <version>${karamel-core-version}</version>
                     <scope>compile</scope>
                     <exclusions>
                         <exclusion>
@@ -245,6 +233,7 @@
                                 </transformer>
                             </transformers>
                             <filters>
+                                <!-- Required by Windows signing certificate -->
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
@@ -291,7 +280,6 @@
                     </execution>
                 </executions>
             </plugin>
-
 
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -360,11 +348,11 @@
                                 </resource>
                             </resources>              
                         </configuration>            
-                    </execution>                    
+                    </execution>
                 </executions>
             </plugin>
 
-            <plugin>
+<!--            <plugin>
                 <groupId>com.pyx4me</groupId>
                 <artifactId>proguard-maven-plugin</artifactId>
                 <executions>
@@ -389,7 +377,7 @@
                     </libs>
                     <addMavenDescriptor>false</addMavenDescriptor>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 

@@ -1,0 +1,24 @@
+name: HopsHadoop
+
+gce:
+  type: n1-standard-2
+  zone: europe-west1-b
+  image: ubuntu-1404-trusty-v20150316
+
+cookbooks:                                                                      
+  hadoop: 
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+    
+groups: 
+  nns:
+    size: 1
+    recipes: 
+        - hadoop::nn
+        - hadoop::rm
+        - hadoop::jhs                                                            
+  dns:
+    size: 50
+    recipes: 
+        - hadoop::dn
+        - hadoop::nm

@@ -8,7 +8,7 @@ package se.kth.karamel.backend.launcher;
 import java.util.List;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.model.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**

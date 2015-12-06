@@ -1,4 +1,12 @@
-
-data_size=<%= node[:%%NAME%%][:data_memory_mbs] %>
-timeout=<%= node[:%%NAME%%][:timeout_ms] %>
-master_ip=<%= @master_ip %>
+template "#{node[:%%name%%][:version_dir]}/%%configFilePath%%" do
+  source "%%configFileName%%.erb"
+  owner node[:%%name%%][:user]
+  group node[:%%name%%][:group]
+  mode "755"
+ variables({
+     %%ip_params%%
+              :private_ip => my_private_ip,
+              :public_ip => my_public_ip
+           })
+  action :create
+end

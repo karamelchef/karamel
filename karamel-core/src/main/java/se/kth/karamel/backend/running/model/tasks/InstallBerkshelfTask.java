@@ -9,11 +9,11 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -21,15 +21,15 @@ import se.kth.karamel.common.Settings;
  */
 public class InstallBerkshelfTask extends Task {
 
-  public InstallBerkshelfTask(MachineRuntime machine, TaskSubmitter submitter) {
-    super("install berkshelf", machine, submitter);
+  public InstallBerkshelfTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("install berkshelf", "install berkshelf", machine, clusterStats, submitter);
   }
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF, 
-          "sudo_command", ClusterService.getInstance().getCommonContext().getSudoCommand());
+      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
+          "sudo_command", getSudoCommand());
     }
     return commands;
   }
@@ -50,6 +50,5 @@ public class InstallBerkshelfTask extends Task {
     deps.add(id);
     return deps;
   }
-  
-  
+
 }

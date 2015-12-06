@@ -20,8 +20,14 @@
       <property name="ignoreComments" value="true"/>
     </module>
     <module name="AvoidStarImport"/>
-    <module name="IllegalImport"/>
+    <module name="IllegalImport">
+      <property name="illegalPkgs" value="java.util.logging"/>
+    </module>
     <module name="RedundantImport"/>
     <module name="UnusedImports"/>
+    <module name="Regexp">
+      <property name="format" value="System\.out\.print(?:ln)?|System\.err\.print(?:ln)?"/>
+      <property name="illegalPattern" value="true"/>
+    </module>
   </module>
 </module>

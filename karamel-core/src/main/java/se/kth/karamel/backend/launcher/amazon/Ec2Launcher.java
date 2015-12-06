@@ -7,8 +7,15 @@ package se.kth.karamel.backend.launcher.amazon;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -28,14 +35,15 @@ import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Provider;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.Confs;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -69,17 +77,20 @@ public final class Ec2Launcher extends Launcher {
 
   public static Ec2Context validateCredentials(Ec2Credentials credentials) throws InvalidEc2CredentialsException {
     try {
+      if (credentials.getAccessKey().isEmpty() || credentials.getSecretKey().isEmpty()) {
+        throw new InvalidEc2CredentialsException("Ec2 credentials empty - not entered yet.");
+      }
       Ec2Context cxt = new Ec2Context(credentials);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
       securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
       return cxt;
     } catch (AuthorizationException e) {
-      throw new InvalidEc2CredentialsException("accountid:" + credentials.getAccessKey(), e);
+      throw new InvalidEc2CredentialsException(e.getMessage() + " - accountid:" + credentials.getAccessKey(), e);
     }
   }
 
-  public static Ec2Credentials readCredentials(Confs confs) {  
-    String accessKey =  System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
+  public static Ec2Credentials readCredentials(Confs confs) {
+    String accessKey = System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
     String secretKey = System.getenv(Settings.AWS_SECRET_KEY_ENV_VAR);
 
     if (accessKey == null || accessKey.isEmpty()) {
@@ -149,9 +160,12 @@ public final class Ec2Launcher extends Launcher {
           logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
         }
       } else {
-        IpPermission ippermission = IpPermission.builder().ipProtocol(IpProtocol.TCP).fromPort(0).toPort(65535).
-            cidrBlock("0.0.0.0/0").build();
-        client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, ippermission);
+        IpPermission tcpPerms = IpPermission.builder().ipProtocol(IpProtocol.TCP).
+            fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        IpPermission udpPerms = IpPermission.builder().ipProtocol(IpProtocol.UDP).
+            fromPort(0).toPort(65535).cidrBlock("0.0.0.0/0").build();
+        ArrayList<IpPermission> perms = Lists.newArrayList(tcpPerms, udpPerms);
+        client.authorizeSecurityGroupIngressInRegion(ec2.getRegion(), groupId, perms);
         logger.info(String.format("Ports became open for '%s'", uniqeGroupName));
       }
       logger.info(String.format("Security group '%s' was created :)", uniqeGroupName));
@@ -201,15 +215,31 @@ public final class Ec2Launcher extends Launcher {
       uploadSshPublicKey(keypairname, ec2, true);
       keys.add(keypairname);
     }
-    return forkMachines(keypairname, group, gids, Integer.valueOf(definedGroup.getSize()), ec2);
+
+    int numForked = 0;
+    final int numMachines = definedGroup.getSize();
+    List<MachineRuntime> allMachines = new ArrayList<>();
+    int requestSize = context.getVmBatchSize();
+    try {
+      while (numForked < numMachines) {
+        int forkSize = Math.min(numMachines, requestSize);
+        List<MachineRuntime> machines = forkMachines(keypairname, group, gids, numForked, forkSize, ec2);
+        allMachines.addAll(machines);
+        numForked += forkSize;
+      }
+    } catch (KaramelException ex) {
+      logger.error(
+          "Didn't get all machines in this node group. Got " + allMachines.size() + "/" + definedGroup.getSize());
+    }
+    return allMachines;
   }
 
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
-      Set<String> securityGroupIds, int totalSize, Ec2 ec2) throws KaramelException {
-    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
-    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(), 
-        totalSize);
-    logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
+      Set<String> securityGroupIds, int startCount, int numberToLaunch, Ec2 ec2) throws KaramelException {
+    String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
+    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(),
+        startCount, numberToLaunch);
+    logger.info(String.format("Start forking %d machine(s) for '%s' ...", numberToLaunch, uniqueGroupName));
 
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -231,7 +261,7 @@ public final class Ec2Launcher extends Launcher {
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
-      int requestSize = totalSize - successfulNodes.size();
+      int requestSize = numberToLaunch - successfulNodes.size();
       if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
         requestSize = Settings.EC2_MAX_FORK_VMS_PER_REQUEST;
         toBeForkedVmNames = unforkedVmNames.subList(0, Settings.EC2_MAX_FORK_VMS_PER_REQUEST);
@@ -253,37 +283,39 @@ public final class Ec2Launcher extends Launcher {
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();
       try {
-        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)", 
-            requestSize, uniqeGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
-        succ.addAll(context.getComputeService().createNodesInGroup(
-            uniqeGroupName, requestSize, template.build()));
+        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
+            requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
+        succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
       } catch (AWSResponseException e) {
         if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
           throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
               + "size of your cluster or increase the limitation of your account.", e);
+        } else if ("RequestLimitExceeded".equals(e.getError().getCode())) {
+          logger.warn("RequestLimitExceeded. Can recover from it by sleeping longer between requests.");
         } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
-          throw new KaramelException(String.format("It seems your ec2 account doesn't have sufficent capacity for %s "
-              + "instances", ec2.getType()), e);
+          logger.warn(
+              "InsufficientInstanceCapacity. Can recover from it, by reducing the number of instances in the request, "
+              + "or waiting for additional capacity to become available");
         } else {
-          logger.error("", e);
+          logger.error(e.getMessage(), e);
         }
       } catch (IllegalStateException ex) {
         logger.error("", ex);
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-            uniqeGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+            uniqueGroupName, Settings.EC2_RETRY_INTERVAL), ex);
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
       successfulNodes.addAll(succ);
-      if (successfulNodes.size() < totalSize) {
+      if (successfulNodes.size() < numberToLaunch) {
         try {
           succeed = false;
           logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-              + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(), 
+              + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
               failedNodes.size(),
-              totalSize, uniqeGroupName));
+              numberToLaunch, uniqueGroupName));
           Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
@@ -291,7 +323,7 @@ public final class Ec2Launcher extends Launcher {
       } else {
         succeed = true;
         logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
-            + "before we go on..", totalSize, uniqeGroupName, failedNodes.size()));
+            + "before we go on..", numberToLaunch, uniqueGroupName, failedNodes.size()));
         if (failedNodes.size() > 0) {
           cleanupFailedNodes(failedNodes);
         }
@@ -303,6 +335,8 @@ public final class Ec2Launcher extends Launcher {
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
             publicIps.addAll(node.getPublicAddresses());
+            machine.setMachineType("ec2/" + ec2.getRegion() + "/" +ec2.getType() + "/" + ec2.getAmi() + "/"
+                + ec2.getVpc() + "/" + ec2.getPrice());
             machine.setVmId(node.getId());
             machine.setName(node.getName());
             machine.setPrivateIp(privateIps.get(0));
@@ -335,8 +369,8 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
-  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata, 
-      Throwable> lostNodes) {
+  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes,
+      Map<NodeMetadata, Throwable> lostNodes) {
     // workaround https://code.google.com/p/jclouds/issues/detail?id=923 
     // by ensuring that any nodes in the "NodeErrors" do not get considered 
     // successful 
@@ -388,8 +422,8 @@ public final class Ec2Launcher extends Launcher {
           }
         }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
-        List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(), 
-            jg.getSize());
+        List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
+            1, jg.getSize());
         allEc2Vms.addAll(vmNames);
         groupRegion.put(group.getName(), ((Ec2) provider).getRegion());
       }
@@ -397,7 +431,7 @@ public final class Ec2Launcher extends Launcher {
     cleanup(definition.getName(), allEc2VmsIds, allEc2Vms, groupRegion);
   }
 
-  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion) 
+  public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion)
       throws KaramelException {
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -426,7 +460,7 @@ public final class Ec2Launcher extends Launcher {
             count++;
             try {
               logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
-              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(gp.getValue(), 
+              ((AWSSecurityGroupApi) context.getSecurityGroupApi()).deleteSecurityGroupInRegionById(gp.getValue(),
                   secgroup.getId());
             } catch (IllegalStateException ex) {
               Throwable cause = ex.getCause();
@@ -434,7 +468,7 @@ public final class Ec2Launcher extends Launcher {
                 AWSResponseException e = (AWSResponseException) cause;
                 if (e.getError().getCode().equals("InvalidGroup.InUse") || e.getError().getCode().
                     equals("DependencyViolation")) {
-                  logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@", 
+                  logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@",
                       uniqueGroupName, Settings.EC2_RETRY_INTERVAL));
                   retry = true;
                   try {
@@ -454,7 +488,7 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
-  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names, 
+  public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names,
       final Set<String> groupNames) {
     return new Predicate<NodeMetadata>() {
       @Override
@@ -462,8 +496,8 @@ public final class Ec2Launcher extends Launcher {
         String id = nodeMetadata.getId();
         String name = nodeMetadata.getName();
         String group = nodeMetadata.getGroup();
-        return ((id != null && ids.contains(id)) || (name != null && names.contains(name) || 
-            (group != null && groupNames.contains(group))));
+        return ((id != null && ids.contains(id)) || (name != null && names.contains(name)
+            || (group != null && groupNames.contains(group))));
       }
 
       @Override

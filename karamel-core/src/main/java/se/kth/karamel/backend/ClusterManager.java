@@ -5,12 +5,25 @@
  */
 package se.kth.karamel.backend;
 
+import se.kth.karamel.backend.stats.ClusterStatistics;
+import se.kth.karamel.backend.launcher.Launcher;
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.launcher.Launcher;
+import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
@@ -21,27 +34,16 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
-import se.kth.karamel.client.model.Baremetal;
-import se.kth.karamel.client.model.Ec2;
-import se.kth.karamel.client.model.Gce;
-import se.kth.karamel.client.model.Nova;
-import se.kth.karamel.client.model.Provider;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.client.model.json.JsonGroup;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.PhaseStat;
+import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.exception.KaramelException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -68,15 +70,24 @@ public class ClusterManager implements Runnable {
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
+  private final ClusterStats stats = new ClusterStats();
 
-  public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException{
+  public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterRuntime(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
-    clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime);
+    String yaml = ClusterDefinitionService.jsonToYaml(definition);
+    this.stats.setDefinition(yaml);
+    this.stats.setUserId(Settings.USER_NAME);
+    this.stats.setStartTime(System.currentTimeMillis());
+    clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
     initLaunchers();
+  }
+
+  public ClusterStats getStats() {
+    return stats;
   }
 
   public Dag getInstallationDag() {
@@ -252,7 +263,7 @@ public class ClusterManager implements Runnable {
 
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, runtime);
-      installationDag = DagBuilder.getInstallationDag(definition, runtime, machinesMonitor, chefJsons);
+      installationDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
       installationDag.start();
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
@@ -286,13 +297,14 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private void purge() throws InterruptedException {
+  private void purge() throws InterruptedException, KaramelException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
     stopping = true;
     clean(true);
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
+    KandyRestClient.pushClusterStats(definition.getName(), stats);
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
@@ -337,23 +349,50 @@ public class ClusterManager implements Runnable {
           case LAUNCH:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               clean(false);
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PRECLEANING.name(), status, duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               forkGroups();
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               forkMachines();
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat
+                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
+              stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
+              ClusterStatistics.startTimer();
               install();
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), status, duration);
+              stats.addPhase(phaseStat);
             }
             break;
           case PURGE:
+            ClusterStatistics.startTimer();
             purge();
+            long duration = ClusterStatistics.stopTimer();
+            String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), status, duration);
+            stats.addPhase(phaseStat);
             break;
         }
       } catch (java.lang.InterruptedException ex) {

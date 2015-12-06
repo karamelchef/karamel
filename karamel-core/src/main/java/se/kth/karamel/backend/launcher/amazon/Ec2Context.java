@@ -24,8 +24,8 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.enterprise.config.EnterpriseConfigurationModule;
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule;
 import org.jclouds.sshj.config.SshjSshClientModule;
-import se.kth.karamel.common.Ec2Credentials;
-import se.kth.karamel.common.Settings;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -38,6 +38,7 @@ public class Ec2Context {
   private final EC2Api ec2api;
   private final SecurityGroupApi securityGroupApi;
   private final AWSKeyPairApi keypairApi;
+  private final int vmBatchSize;
 
   public Ec2Context(Ec2Credentials credentials) {
     this.credentials = credentials;
@@ -48,8 +49,8 @@ public class Ec2Context {
     properties.setProperty(PROPERTY_CONNECTION_TIMEOUT, scriptTimeout + "");
     properties.setProperty(PROPERTY_EC2_AMI_QUERY, "owner-id=137112412989;state=available;image-type=machine");
     properties.setProperty(PROPERTY_EC2_CC_AMI_QUERY, "");
-    properties.setProperty(Constants.PROPERTY_MAX_RETRIES, Settings.JCLOUDS_PROPERTY_MAX_RETRIES + ""); 
-    properties.setProperty(Constants.PROPERTY_RETRY_DELAY_START, Settings.JCLOUDS_PROPERTY_RETRY_DELAY_START + ""); 
+    properties.setProperty(Constants.PROPERTY_MAX_RETRIES, Settings.JCLOUDS_PROPERTY_MAX_RETRIES + "");
+    properties.setProperty(Constants.PROPERTY_RETRY_DELAY_START, Settings.JCLOUDS_PROPERTY_RETRY_DELAY_START + "");
 
     Iterable<Module> modules = ImmutableSet.<Module>of(
         new SshjSshClientModule(),
@@ -65,6 +66,12 @@ public class Ec2Context {
     this.ec2api = computeService.getContext().unwrapApi(EC2Api.class);
     this.securityGroupApi = ec2api.getSecurityGroupApi().get();
     this.keypairApi = (AWSKeyPairApi) ec2api.getKeyPairApi().get();
+
+    vmBatchSize = Settings.EC2_VM_BATCH_SIZE();
+  }
+
+  public int getVmBatchSize() {
+    return vmBatchSize;
   }
 
   public Ec2Credentials getCredentials() {

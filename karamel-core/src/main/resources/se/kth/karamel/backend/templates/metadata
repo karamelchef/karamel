@@ -1,34 +1,20 @@
-name             '%%NAME%%'
-maintainer       "%%USER%%"
-maintainer_email "%%USER%%@company.com"
+name             '%%name%%'
+maintainer       "%%user%%"
+maintainer_email "%%email%%"
 license          "Apache v2.0"
-description      'Installs/Configures %%NAME%%'
+description      'Installs/Configures/Runs %%name%%'
 version          "0.1"
 
-recipe            "%%NAME%%::default", "Installs and starts %%NAME%%"
-recipe            "%%NAME%%::master", "Installs and starts %%NAME%% master"
-recipe            "%%NAME%%::slave", "Installs and starts %%NAME%% slave"
+recipe            "%%name%%::install", "Experiment setup for %%name%%"
+%%more_recipes%%
 
-depends 'kagent'
-depends 'java'
-depends 'ark'
+depends "kagent"
+
+%%depends%%
 
 %w{ ubuntu debian rhel centos }.each do |os|
   supports os
 end
 
-attribute "%%NAME%%/version",
-:description => "Version of %%NAME%%",
-:type => 'string',
-:default => "0.1"
 
 
-attribute "%%NAME%%/url",
-:description => "Url to download binaries for %%NAME%%",
-:type => 'string',
-:default => ""
-
-attribute "%%NAME%%/user",
-:description => "Run %%NAME%% as this user",
-:type => 'string',
-:default => "%%NAME%%"

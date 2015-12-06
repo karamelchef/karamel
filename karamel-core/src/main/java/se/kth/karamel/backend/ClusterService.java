@@ -6,19 +6,18 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.client.model.ClusterDefinitionValidator;
-import se.kth.karamel.client.model.json.JsonCluster;
-import se.kth.karamel.common.SshKeyPair;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.util.SshKeyPair;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is 
@@ -51,16 +50,6 @@ public class ClusterService {
 
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
-  }
-
-  public synchronized void saveYaml(String yaml) throws KaramelException {
-
-  }
-
-  public synchronized void registerGithubContext(String email, String password) throws KaramelException {
-    commonContext.setGithubEmail(email);
-    commonContext.setGithubPassword(password);
-    // TODO  - login to validate github credentials
   }
 
   public synchronized void registerSudoAccountPassword(String password) {
