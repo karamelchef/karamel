@@ -251,7 +251,11 @@ public final class Ec2Launcher extends Launcher {
     List<String> toBeForkedVmNames;
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
+
+    int numSuccess=0, numFailed=0;
+
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
+      long startTime = System.currentTimeMillis();
       int requestSize = numberToLaunch - successfulNodes.size();
       if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
         requestSize = Settings.EC2_MAX_FORK_VMS_PER_REQUEST;
@@ -277,8 +281,13 @@ public final class Ec2Launcher extends Launcher {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
             requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
         succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
+        long finishTime = System.currentTimeMillis();
+        numSuccess += succ.size();
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
+        
+        numSuccess += succ.size();
+        numFailed += failedNodes.size();
       } catch (AWSResponseException e) {
         if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
           throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
@@ -326,7 +335,7 @@ public final class Ec2Launcher extends Launcher {
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
             publicIps.addAll(node.getPublicAddresses());
-            machine.setMachineType("ec2/" + ec2.getRegion() + "/" +ec2.getType() + "/" + ec2.getAmi() + "/" 
+            machine.setMachineType("ec2/" + ec2.getRegion() + "/" + ec2.getType() + "/" + ec2.getAmi() + "/"
                 + ec2.getVpc() + "/" + ec2.getPrice());
             machine.setVmId(node.getId());
             machine.setName(node.getName());
@@ -337,9 +346,21 @@ public final class Ec2Launcher extends Launcher {
             machines.add(machine);
           }
         }
+        
+        // Report aggregrate results
+        // numSuccess, numFailed, numberToLaunch, InstanceType, **RequestLimitExceeded, **InsufficientInstanceCapacity,
+        // RequestResourceCountExceeded, ResourceCountExceeded, InsufficientAddressCapacity**
+        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more information, see Query API Request Rate.
+        //  http://docs.aws.amazon.com/AWSEC2/latest/APIReference/query-api-troubleshooting.html#api-request-rate
+        // InvalidInstanceID.NotFound, InvalidGroup.NotFound -> eventual consistency
+        // Spot instances: MaxSpotInstanceCountExceeded
+        // Groups of Spot instances: MaxSpotFleetRequestCountExceeded
+        // http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet.html#spot-fleet-limitations
         return machines;
       }
-    }
+      
+   }
+        // Report aggregrate results
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
