@@ -348,6 +348,7 @@ public final class Ec2Launcher extends Launcher {
         }
         
         // Report aggregrate results
+        // timeTaken (#machines, #batchSize)
         // numSuccess, numFailed, numberToLaunch, InstanceType, **RequestLimitExceeded, **InsufficientInstanceCapacity,
         // RequestResourceCountExceeded, ResourceCountExceeded, InsufficientAddressCapacity**
         // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more information, see Query API Request Rate.
