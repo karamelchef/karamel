@@ -252,7 +252,7 @@ public final class Ec2Launcher extends Launcher {
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
 
-    int numSuccess=0, numFailed=0;
+    int numSuccess = 0, numFailed = 0;
 
     while (!succeed && tries < Settings.EC2_RETRY_MAX) {
       long startTime = System.currentTimeMillis();
@@ -285,7 +285,7 @@ public final class Ec2Launcher extends Launcher {
         numSuccess += succ.size();
       } catch (RunNodesException ex) {
         addSuccessAndLostNodes(ex, succ, failedNodes);
-        
+
         numSuccess += succ.size();
         numFailed += failedNodes.size();
       } catch (AWSResponseException e) {
@@ -346,12 +346,13 @@ public final class Ec2Launcher extends Launcher {
             machines.add(machine);
           }
         }
-        
+
         // Report aggregrate results
         // timeTaken (#machines, #batchSize)
         // numSuccess, numFailed, numberToLaunch, InstanceType, **RequestLimitExceeded, **InsufficientInstanceCapacity,
         // RequestResourceCountExceeded, ResourceCountExceeded, InsufficientAddressCapacity**
-        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more information, see Query API Request Rate.
+        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more 
+        //information, see Query API Request Rate.
         //  http://docs.aws.amazon.com/AWSEC2/latest/APIReference/query-api-troubleshooting.html#api-request-rate
         // InvalidInstanceID.NotFound, InvalidGroup.NotFound -> eventual consistency
         // Spot instances: MaxSpotInstanceCountExceeded
@@ -359,9 +360,9 @@ public final class Ec2Launcher extends Launcher {
         // http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet.html#spot-fleet-limitations
         return machines;
       }
-      
-   }
-        // Report aggregrate results
+
+    }
+    // Report aggregrate results
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
   }
 
