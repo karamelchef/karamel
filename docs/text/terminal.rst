@@ -99,7 +99,7 @@ Each Node of the DAG represents a task that must be run on a certain machine. No
   .. figure:: ../imgs/terminal5.png
      :alt: Orchestration DAG
      :figclass: align-center
-     :scale: 80
+     :scale: 100
      
      Orchestration DAG
 
@@ -113,7 +113,7 @@ Quick links a facility that Karamel provides in the terminal perspective to acce
   .. figure:: ../imgs/terminal6.png
      :alt: Quick Links
      :figclass: align-center
-     :scale: 80
+     :scale: 100
      
      Quick Links
 

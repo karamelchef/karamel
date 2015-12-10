@@ -11,7 +11,7 @@ When you have Karamel web app up and running, you can access the experiment desi
 
   .. figure:: ../imgs/exp1.png
      :alt: Get into the experiment designer.
-     :scale: 50
+     :scale: 75
      :figclass: align-center	  
 
      Get into the experiment designer.
@@ -22,14 +22,14 @@ Github is Karamel's artifact server, here you will have to login into your Githu
 
   .. figure:: ../imgs/exp2.png
      :alt: Login button.
-     :scale: 50
+     :scale: 75
      :figclass: align-center	  
 
      Login button.
 
   .. figure:: ../imgs/exp3.png
      :alt: Github credentials.
-     :scale: 50
+     :scale: 60
      :figclass: align-center	  
 
      Github credentials.
@@ -40,7 +40,7 @@ You can either create a new experiment or alternatively load the already designe
 
   .. figure:: ../imgs/exp4.png
      :alt: Work on a new or old experiment.
-     :scale: 80
+     :scale: 100
      :figclass: align-center	  
 
      Work on a new or old experiment.
@@ -51,7 +51,7 @@ If you choose to create a new experiment you will need to choose a name for it, 
 
   .. figure:: ../imgs/exp5.png
      :alt: New experiment on a Github repo.
-     :scale: 80
+     :scale: 100
      :figclass: align-center	  
 
      New experiment on a Github repo.
@@ -62,7 +62,7 @@ At this point you land into the programming section of your experiment. The defa
 
   .. figure:: ../imgs/exp6.png
      :alt: Experiment's script.
-     :scale: 80
+     :scale: 100
      :figclass: align-center	  
 
      Experiment bash script.
@@ -74,7 +74,7 @@ Placing your experiment in the right order in the cluster orchestration is a ver
 
   .. figure:: ../imgs/exp7.png
      :alt: Orchestration rules for new cluster.
-     :scale: 80
+     :scale: 100
      :figclass: align-center	  
 
      Orchestration rules for new cluster.
@@ -85,7 +85,7 @@ You can save your cluster to GitHub by pressing the save button in the top-right
 
   .. figure:: ../imgs/exp8.png
      :alt: Push the experiment into Github.
-     :scale: 80
+     :scale: 100
      :figclass: align-center	  
 
      Push the experiment to a Github repository.
@@ -97,7 +97,7 @@ Navigate to your Github repo on your web browser and you can see your cookbook.
 
   .. figure:: ../imgs/exp9.png
      :alt: New experiment landed into Github.
-     :scale: 80
+     :scale: 90
      :figclass: align-center	  
 
      New experiment added to Github.

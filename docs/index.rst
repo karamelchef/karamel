@@ -25,26 +25,23 @@ Karamel Documentation
 
    text/cluster-definition
 
-.. _cloudproviders:
-.. toctree::
-   :maxdepth: 2
-
-..   text/cloud-providers
-
 .. _devguide:
 .. toctree::
    :maxdepth: 2
 
    text/developers-guide
 
-.. _contribute:
-.. toctree::
-   :maxdepth: 2
 
-..   text/contribute
+.. .. _cloudproviders:
+.. .. toctree::
+..   :maxdepth: 2
+..   text/cloud-providers
+.. .. _contribute:
+.. .. toctree::
+..    :maxdepth: 2
+.. .. _license:
+.. .. toctree::
+..   :maxdepth: 2
 
-.. _license:
-.. toctree::
-   :maxdepth: 2
-
+..   text/contribute	      
 ..   text/license
