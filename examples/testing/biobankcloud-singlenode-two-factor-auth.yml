@@ -1,4 +1,4 @@
-name: BiobankCloudSingleNodeFull4
+name: BiobankCloudSingleNodeFuller
 ec2:
     type: m3.xlarge
     region: eu-west-1

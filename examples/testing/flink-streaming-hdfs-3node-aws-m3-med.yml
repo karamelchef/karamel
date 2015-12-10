@@ -1,6 +1,6 @@
 name: FlinkStreamingZookeeperKafka
 ec2:
-    type: m3.medium
+    type: m3.large
     region: eu-west-1
     
 cookbooks:                                                                      
@@ -14,10 +14,24 @@ cookbooks:
     github: "hopshadoop/kzookeeper"
   kkafka: 
     github: "hopshadoop/kkafka"
+  streamingbenchmarks: 
+    github: "jimdowling/streamingbenchmarks"
 
 attrs:
   flink:
     mode: streaming
+  kafka:
+    ulimit_file: 128000
+    broker:
+      log_dirs: ['/mnt/kafka-logs-1', '/mnt/kafka-logs-2']
+      zookeeper_connect: ['localhost:2181']
+      zookeeper_connection_timeout_ms: 15_000
+  java:
+   jdk_version: 8
+      install_flavor: oracle
+      oracle:
+        accept_oracle_download_terms: true
+    
 groups:
   mgr:
     size: 1
@@ -25,11 +39,18 @@ groups:
         - hadoop::nn
         - flink::jobmanager
         - spark::master
+        - streamingbenchmarks
+        - streamingbenchmarks::consume
+  kafka:
+    size: 1
+    recipes: 
+        - kzookeeper
+        - kkafka
+        - kkafka::monitor
   workers:
-    size: 3
+    size: 2
     recipes: 
         - hadoop::dn
         - flink::taskmanager
         - spark::worker
-        - kzookeeper
-        - kkafka
+

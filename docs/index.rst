@@ -29,7 +29,7 @@ Karamel Documentation
 .. toctree::
    :maxdepth: 2
 
-   text/cloud-providers
+..   text/cloud-providers
 
 .. _devguide:
 .. toctree::
@@ -41,10 +41,10 @@ Karamel Documentation
 .. toctree::
    :maxdepth: 2
 
-   text/contribute
+..   text/contribute
 
 .. _license:
 .. toctree::
    :maxdepth: 2
 
-   text/license
+..   text/license
