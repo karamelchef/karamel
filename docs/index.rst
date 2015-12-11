@@ -25,6 +25,13 @@ Karamel Documentation
 
    text/cluster-definition
 
+.. _bbc:
+.. toctree::
+   :maxdepth: 2
+
+   text/biobankcloud
+
+   
 .. _devguide:
 .. toctree::
    :maxdepth: 2
