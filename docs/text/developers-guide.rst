@@ -56,6 +56,7 @@ You need to have 32-bit libraries to build the windows exe from Linux, as the la
   ln -s /usr/bin/x86_64-w64-mingw32-windres ./windres
 
 Then run maven with the -Pwin to run the plugin:
+  
 .. code-block:: bash
 
   mvn -Dwin package
