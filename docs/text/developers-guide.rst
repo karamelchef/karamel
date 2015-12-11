@@ -1,4 +1,4 @@
-Developers' Guide
+Developer Guide
 =================
 
 We have organized our code into two main projects, *karamel-core* and *karamel-ui*. The core is our engine for launching, installing and monitoring clusters. The UI is a standalone web application containing several designers and visualizers. There is a REST-API in between the UI and the core.
