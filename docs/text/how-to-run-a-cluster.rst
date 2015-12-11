@@ -1,23 +1,40 @@
-To run a simple cluster you need the have: 
-  * a :ref:`cluster definition <cluster-definition>` file 
-  * access to the cloud-provider of your choice
-  * Karamel system up and running. 
 
-You can use Karamel standalone web application on your machine or alternatively use our Java-API to start your cluster. 
+To run a simple cluster you need: 
+  * a :ref:`cluster definition <cluster-definition>` file;
+  * access to a cloud (or bare-metal cluster);
+  * the Karamel client application.
 
-Web-UI:
-```````
-To run your cluster with our Web-Application do as the following:
+You can use Karamel as a standalone application with a Web UI or embed Karamel as a library in your application, using the Java-API to start your cluster. 
 
-**1. Download and Run**
+Linux/Mac
+``````````````
+
+**1. Starting Karamel**
 
   .. include:: run-web-app.rst
 
-**2. Customize and run your cluster** 
+	       
+Windows
+``````````````
+**1. Starting Karamel**
+
+To run Karamel, download the Windows binaries from http://www.karamel.io. You first have to unzip the binaries. From Windows Explorer, navigate to the folder ``karamel-0.2`` (probably in the ``Downloads`` folder) and double-click on ``karamel.exe`` file to start Karamel. 
+
+
+  .. figure:: ../imgs/karamel-landingpage.png
+     :alt: Karamel Landing Page.
+     :figclass: align-center
+     :scale: 60
+	   
+     Karamel Homepage. Click on ``Menu`` to load a Cluster Definition file.
+	   
+
+**2. Customize and launch your cluster** 
 Take a look into the :ref:`Board-UI <board-ui>`.
 
-Command-Line:
-`````````````
+
+Command-Line in Linux/Mac
+``````````````````````````
 You can either set environment variables containing your EC2 credentials or enter them from the console. We recommend you set the environment variables, as shown below.
 
   .. code-block:: bash
@@ -47,7 +64,7 @@ You can run your cluster in your Java program by using our API.
         <scope>compile</scope>
       </dependency>
 
-**2. Call KaramelApi**
+**2. Karamel Java API**
   Load the content of your cluster definition into a variable and call KaramelApi like this example:
   
     .. code-block:: java
@@ -87,4 +104,4 @@ You can run your cluster in your Java program by using our API.
         Thread.currentThread().sleep(60000);
       }
 
-  The code prints out your cluster status in the console every minute. 
+  This code block will print out your cluster status to the console every minute. 

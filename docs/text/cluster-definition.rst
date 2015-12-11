@@ -3,13 +3,13 @@
 Cluster Definition
 ==================
 
-Cluster definition is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, name of the cluster must be unique in each Karamel-runtime.
+The cluster definition format is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, the name of each cluster must be unique.
 
-Currently We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova) and bare-metal(baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a separate sections following. 
+Currently We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova) and bare-metal(baremetal). You can define a provider globally within a cluster definition file or you can define a different provider for each group in the cluster definition file. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can choose an entirely different cloud provider, defining a multi-cloud deployment. Settings and properties for each provider is introduced in later section. For a single cloud deployment, one often uses group-scope provider details to override the type of instance used for machines in the group. For example, one group of nodes may require lots of memory and processing power, while other nodes require less. For AWS, you would achive this by overriding the ``instanceType`` attribute.
 
-Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
+The Cookbooks section specifies GitHub references to the cookbooks used in the cluster definition. It is possible to refer to a specific version or branch for each GitHub repository.
 
-We group machines based on the software stack(list of recipes) that should be installed on them, number of machines in each group and list of recipes must be defined under each group name. 
+We group machines based on the application stack (list of recipes) that should be installed on the machines in the group. The number of machines in each group and list of recipes must be defined under each group name. 
 
 .. raw:: latex
 
@@ -47,7 +47,7 @@ We group machines based on the software stack(list of recipes) that should be in
 
 AWS(Amazon EC2)
 ---------------
-In cluster definition we use key word *ec2* for deploying the cluster on Amazon EC2 Cloud.  Following code snippet shows all supported attributes for AWS.
+In cluster definitions, we use key word *ec2* for deploying the cluster on Amazon EC2 Cloud.  The following code snippet shows all supported attributes for AWS.
 
 .. code-block:: yaml
 
@@ -92,7 +92,7 @@ Karamel uses Compute Engine’s OAuth 2.0 authentication method. Therefore, an O
 
 Bare-metal
 ----------
-In case of bare-metal muchies must be ready before hand and their ip-address are specified in the cluster definition. If you have many ip-addresses in a range, it is possible to give range of addresses instead of specifying them one by one (second following exmaple). Machines' credentials with super-user previlledges are required for establishing ssh connection. The username goes into the cluster definition while the sudo-password must be registered through our API.   
+Bare-metal clusters are supported, but the machines must first be prepared with support for login using a ssh-key that is stored on the Karamel client. The target hosts must be contactable using ssh from the Karamel client, and the target hosts' ip-addresses must be specified in the cluster definition. If you have many ip-addresses in a range, it is possible to give range of addresses instead of specifying them one by one (the second example below). The public key stored on the Karamel client should be copied to the *.ssh/authorized_keys* file in the home folder of the sudo account on the target machines that will be used to install the software. The username goes into the cluster definition is the sudo account, and if there is a password required to get sudo access, it  must be entered in the Web UI or entered through Karamel's programmatic API.   
 
 .. code-block:: yaml
 
