@@ -67,7 +67,7 @@ public class Ec2Context {
     this.securityGroupApi = ec2api.getSecurityGroupApi().get();
     this.keypairApi = (AWSKeyPairApi) ec2api.getKeyPairApi().get();
 
-    vmBatchSize = Settings.EC2_VM_BATCH_SIZE();
+    vmBatchSize = Settings.AWS_VM_BATCH_SIZE();
   }
 
   public int getVmBatchSize() {

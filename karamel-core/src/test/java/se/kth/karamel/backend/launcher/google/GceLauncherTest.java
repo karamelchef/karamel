@@ -120,8 +120,8 @@ public class GceLauncherTest {
     String pr = "tcp";
     String networkName = launcher.createFirewall(clusterName, groupName,
         Settings.GCE_DEFAULT_IP_RANGE, ImmutableSet.of(p1 + "/" + pr, p2 + "/" + pr));
-    String fw1Name = Settings.UNIQUE_FIREWALL_NAME(networkName, p1, pr);
-    String fw2Name = Settings.UNIQUE_FIREWALL_NAME(networkName, p2, pr);
+    String fw1Name = Settings.GCE_UNIQUE_FIREWALL_NAME(networkName, p1, pr);
+    String fw2Name = Settings.GCE_UNIQUE_FIREWALL_NAME(networkName, p2, pr);
     FirewallApi fwApi = context.getFireWallApi();
     Firewall fw = fwApi.get(fw1Name);
     assert fw != null && !fw.allowed().isEmpty()

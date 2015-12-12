@@ -27,6 +27,7 @@ import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.ArrayList;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
@@ -58,6 +59,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private boolean stopping = false;
   private final SshShell shell;
   private Task activeTask;
+  private List<String> taskHistory = new ArrayList<>();
 
   /**
    * This constructor is used for users with SSH keys protected by a password

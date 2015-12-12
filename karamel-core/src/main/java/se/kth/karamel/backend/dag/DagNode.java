@@ -14,8 +14,8 @@ import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- * Unit of execution in the DAG that knows about its predecessors and successors. 
- * 
+ * Unit of execution in the DAG that knows about its predecessors and successors.
+ *
  * @author kamal
  */
 public class DagNode implements DagTaskCallback {
@@ -51,7 +51,7 @@ public class DagNode implements DagTaskCallback {
   public Status getStatus() {
     return status;
   }
-  
+
   public void setTask(DagTask task) throws DagConstructionException {
     if (this.task == null) {
       this.task = task;
@@ -170,13 +170,13 @@ public class DagNode implements DagTaskCallback {
     status = Status.READY;
   }
 
-    @Override
+  @Override
   public void skipped() {
     logger.debug(String.format("Skipped '%s' because idempotent and exists in the machine.", id));
     status = Status.SKIPPED;
     signalChildren();
   }
-  
+
   @Override
   public void started() {
     status = Status.ONGOING;
@@ -192,7 +192,7 @@ public class DagNode implements DagTaskCallback {
     status = Status.DONE;
     signalChildren();
   }
-  
+
   private void signalChildren() {
     for (DagNode succ : successors) {
       try {

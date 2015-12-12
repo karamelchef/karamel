@@ -68,8 +68,8 @@ public class GithubApi {
       client.setCredentials(user, password);
       client.getUser();
       Confs confs = Confs.loadKaramelConfs();
-      confs.put(Settings.GITHUB_USER, user);
-      confs.put(Settings.GITHUB_PASSWORD, password);
+      confs.put(Settings.GITHUB_USER_KEY, user);
+      confs.put(Settings.GITHUB_PASSWORD_KEY, password);
       confs.writeKaramelConfs();
       UserService us = new UserService(client);
       if (us == null) {
@@ -96,8 +96,8 @@ public class GithubApi {
 
   public static GithubUser loadGithubCredentials() throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
-    GithubApi.user = confs.getProperty(Settings.GITHUB_USER);
-    GithubApi.password = confs.getProperty(Settings.GITHUB_PASSWORD);
+    GithubApi.user = confs.getProperty(Settings.GITHUB_USER_KEY);
+    GithubApi.password = confs.getProperty(Settings.GITHUB_PASSWORD_KEY);
     if (GithubApi.user != null && GithubApi.password != null) {
       registerCredentials(GithubApi.user, GithubApi.password);
     }

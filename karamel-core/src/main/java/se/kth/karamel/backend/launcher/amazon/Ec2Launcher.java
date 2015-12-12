@@ -71,7 +71,7 @@ public final class Ec2Launcher extends Launcher {
       }
       Ec2Context cxt = new Ec2Context(credentials);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
-      securityGroupApi.describeSecurityGroupsInRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
+      securityGroupApi.describeSecurityGroupsInRegion(Settings.AWS_REGION_DEFAULT);
       return cxt;
     } catch (AuthorizationException e) {
       throw new InvalidEc2CredentialsException(e.getMessage() + " - accountid:" + credentials.getAccessKey(), e);
@@ -79,14 +79,14 @@ public final class Ec2Launcher extends Launcher {
   }
 
   public static Ec2Credentials readCredentials(Confs confs) {
-    String accessKey = System.getenv(Settings.AWS_ACCESS_KEY_ENV_VAR);
-    String secretKey = System.getenv(Settings.AWS_SECRET_KEY_ENV_VAR);
+    String accessKey = System.getenv(Settings.AWS_ACCESSKEY_ENV_VAR);
+    String secretKey = System.getenv(Settings.AWS_SECRETKEY_ENV_VAR);
 
     if (accessKey == null || accessKey.isEmpty()) {
-      accessKey = confs.getProperty(Settings.AWS_ACCESS_KEY);
+      accessKey = confs.getProperty(Settings.AWS_ACCESSKEY_KEY);
     }
     if (secretKey == null || secretKey.isEmpty()) {
-      secretKey = confs.getProperty(Settings.AWS_SECRET_KEY);
+      secretKey = confs.getProperty(Settings.AWS_SECRETKEY_KEY);
     }
     Ec2Credentials credentials = null;
     if (accessKey != null && !accessKey.isEmpty() && secretKey != null && !accessKey.isEmpty()) {
@@ -103,14 +103,14 @@ public final class Ec2Launcher extends Launcher {
     Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
     Ec2 ec2 = (Ec2) provider;
     Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
     String groupId = createSecurityGroup(definition.getName(), jg.getName(), ec2, ports);
     return groupId;
   }
 
   public String createSecurityGroup(String clusterName, String groupName, Ec2 ec2, Set<String> ports)
       throws KaramelException {
-    String uniqeGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, groupName);
+    String uniqeGroupName = Settings.AWS_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", uniqeGroupName));
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
@@ -201,7 +201,7 @@ public final class Ec2Launcher extends Launcher {
     HashSet<String> gids = new HashSet<>();
     gids.add(group.getId());
 
-    String keypairname = Settings.EC2_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+    String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
     if (!keys.contains(keypairname)) {
       uploadSshPublicKey(keypairname, ec2, true);
       keys.add(keypairname);
@@ -227,8 +227,8 @@ public final class Ec2Launcher extends Launcher {
 
   public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
       Set<String> securityGroupIds, int startCount, int numberToLaunch, Ec2 ec2) throws KaramelException {
-    String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
-    List<String> allVmNames = Settings.EC2_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(),
+    String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
+    List<String> allVmNames = Settings.AWS_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(),
         startCount, numberToLaunch);
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", numberToLaunch, uniqueGroupName));
 
@@ -254,7 +254,7 @@ public final class Ec2Launcher extends Launcher {
 
     int numSuccess = 0, numFailed = 0;
 
-    while (!succeed && tries < Settings.EC2_RETRY_MAX) {
+    while (!succeed && tries < Settings.AWS_RETRY_MAX) {
       long startTime = System.currentTimeMillis();
       int requestSize = numberToLaunch - successfulNodes.size();
       if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
@@ -304,7 +304,7 @@ public final class Ec2Launcher extends Launcher {
       } catch (IllegalStateException ex) {
         logger.error("", ex);
         logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-            uniqueGroupName, Settings.EC2_RETRY_INTERVAL), ex);
+            uniqueGroupName, Settings.AWS_RETRY_INTERVAL), ex);
       }
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
@@ -316,7 +316,7 @@ public final class Ec2Launcher extends Launcher {
               + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
               failedNodes.size(),
               numberToLaunch, uniqueGroupName));
-          Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
+          Thread.currentThread().sleep(Settings.AWS_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
         }
@@ -436,7 +436,7 @@ public final class Ec2Launcher extends Launcher {
           }
         }
         JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
-        List<String> vmNames = Settings.EC2_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
+        List<String> vmNames = Settings.AWS_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
             1, jg.getSize());
         allEc2Vms.addAll(vmNames);
         groupRegion.put(group.getName(), ((Ec2) provider).getRegion());
@@ -456,7 +456,7 @@ public final class Ec2Launcher extends Launcher {
     }
     Set<String> groupNames = new HashSet<>();
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
-      groupNames.add(Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
+      groupNames.add(Settings.AWS_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
     }
     logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: "
         + "%s", vmNames.toString(), groupNames, vmIds));
@@ -464,7 +464,7 @@ public final class Ec2Launcher extends Launcher {
     context.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
     logger.info(String.format("All machines destroyed in all the security groups. :) "));
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
-      String uniqueGroupName = Settings.EC2_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
+      String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
       for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(gp.getValue())) {
         if (secgroup.getName().startsWith("jclouds#" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
           logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
@@ -483,10 +483,10 @@ public final class Ec2Launcher extends Launcher {
                 if (e.getError().getCode().equals("InvalidGroup.InUse") || e.getError().getCode().
                     equals("DependencyViolation")) {
                   logger.info(String.format("Hurry up EC2!! terminate machines!! '%s', will retry in %d ms :@",
-                      uniqueGroupName, Settings.EC2_RETRY_INTERVAL));
+                      uniqueGroupName, Settings.AWS_RETRY_INTERVAL));
                   retry = true;
                   try {
-                    Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
+                    Thread.currentThread().sleep(Settings.AWS_RETRY_INTERVAL);
                   } catch (InterruptedException ex1) {
                     logger.error("", ex1);
                   }
