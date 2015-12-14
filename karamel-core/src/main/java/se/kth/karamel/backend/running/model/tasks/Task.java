@@ -149,7 +149,7 @@ public abstract class Task implements DagTask, TaskCallback {
   @Override
   public void skipped() {
     status = Status.SKIPPED;
-    dagCallback.queued();
+    dagCallback.skipped();
   }
   
   @Override

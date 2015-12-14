@@ -178,9 +178,9 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void runTask(Task task) {
-    if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.uniqueId())) {
+    if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
       task.skipped();
-      logger.info(String.format("Task skipped due to idempotency '%s'", task.uniqueId()));
+      logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
       activeTask = null;
     } else {
       try {
@@ -208,7 +208,7 @@ public class SshMachine implements MachineInterface, Runnable {
                   }
                 }
               } catch (KaramelException ex) {
-                logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()), 
+                logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()),
                     ex);
                 task.failed(ex.getMessage());
               }
@@ -448,12 +448,14 @@ public class SshMachine implements MachineInterface, Runnable {
   //ssh machine maintains the list of succeed tasks synced with the remote machine, it downloads it just if the ssh 
   //connection is lost
   private void loadSucceedListFromMachineToMemory() throws KaramelException {
+    logger.info(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
     String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
-    String localSucceedPath = Settings.MACHINE_SUCCEED_LIST_FILENAME;
-    String remoteSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
+    String remoteSucceedPath = Settings.MACHINE_SUCCEED_LIST_FILENAME;
+    String localSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
     try {
       downloadRemoteFile(localSucceedPath, remoteSucceedPath, true);
     } catch (IOException ex) {
+      logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()));
       //remote file does not exists
     } finally {
       try {

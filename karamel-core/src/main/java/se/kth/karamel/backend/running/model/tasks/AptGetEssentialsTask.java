@@ -32,7 +32,7 @@ public class AptGetEssentialsTask extends Task {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
-          "task_id", uniqueId(),
+          "task_id", getId(),
           "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME);
     }
     return commands;
