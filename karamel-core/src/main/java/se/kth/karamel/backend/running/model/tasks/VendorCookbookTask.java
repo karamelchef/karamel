@@ -56,7 +56,9 @@ public class VendorCookbookTask extends Task {
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
           "vendor_subfolder", Settings.REMOTE_CB_VENDOR_SUBFOLDER,
-          "sudo_command", getSudoCommand());
+          "sudo_command", getSudoCommand(),
+          "task_id", uniqueId(),
+          "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME);
     }
     return commands;
   }

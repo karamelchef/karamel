@@ -114,7 +114,9 @@ public class RunRecipeTask extends Task {
           "chef_json", json,
           "json_file_name", jsonFileName,
           "log_file_name", jsonFileName,
-          "sudo_command", getSudoCommand());
+          "sudo_command", getSudoCommand(),
+          "task_id", uniqueId(),
+          "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME);
     }
     return commands;
   }

@@ -153,6 +153,8 @@ public class Settings {
     return (networkName + "-" + protocol + port).toLowerCase();
   }
 
+  //--------------------------------Cluster General---------------------------------------------------------------------
+  public static final String MACHINE_SUCCEED_LIST_FILENAME = "succeed_list";
   //--------------------------------Target Macines----------------------------------------------------------------------
   public static final String REMOTE_CB_VENDOR_PATH = "/tmp/cookbooks";
   public static final String REMOTE_CB_VENDOR_SUBFOLDER = "berks-cookbooks";
@@ -327,6 +329,10 @@ public class Settings {
 
   public static String MACHINE_TEMP_FOLDER(String clusterName, String machineIp) {
     return CLUSTER_TEMP_FOLDER(clusterName) + File.separator + machineIp;
+  }
+
+  public static String MACHINE_SUCCEEDTASKS_PATH(String clusterName, String machineIp) {
+    return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + MACHINE_SUCCEED_LIST_FILENAME;
   }
 
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
