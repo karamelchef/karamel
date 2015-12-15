@@ -8,6 +8,7 @@ package se.kth.karamel.backend.machines;
 import java.io.File;
 import java.io.IOException;
 import java.io.SequenceInputStream;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -61,7 +62,8 @@ public class SshMachine implements MachineInterface, Runnable {
   private boolean stopping = false;
   private final SshShell shell;
   private Task activeTask;
-  private List<String> succeedTasksHistory = new ArrayList<>();
+  private boolean isSucceedTaskHistoryUpdated = false;
+  private final List<String> succeedTasksHistory = new ArrayList<>();
 
   /**
    * This constructor is used for users with SSH keys protected by a password
@@ -178,6 +180,10 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void runTask(Task task) {
+    if (!isSucceedTaskHistoryUpdated) {
+      loadSucceedListFromMachineToMemory();
+      isSucceedTaskHistoryUpdated = true;
+    }
     if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
       task.skipped();
       logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
@@ -193,7 +199,7 @@ public class SshMachine implements MachineInterface, Runnable {
             runSshCmd(cmd, task);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
-              task.failed(String.format("%s: Command did not complete: '%s", machineEntity.getId(),
+              task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
                   cmd.getCmdStr()));
               break;
             } else {
@@ -338,6 +344,7 @@ public class SshMachine implements MachineInterface, Runnable {
 
   private void connect() throws KaramelException {
     if (client == null || !client.isConnected()) {
+      isSucceedTaskHistoryUpdated = false;
       try {
         KeyProvider keys;
         client = new SSHClient();
@@ -378,8 +385,6 @@ public class SshMachine implements MachineInterface, Runnable {
                 machineEntity.getPublicIp()));
             client.authPublickey(machineEntity.getSshUser(), keys);
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
-            //it runs only if machine becomes disconnected
-            loadSucceedListFromMachineToMemory();
             return;
           } else {
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
@@ -447,16 +452,23 @@ public class SshMachine implements MachineInterface, Runnable {
 
   //ssh machine maintains the list of succeed tasks synced with the remote machine, it downloads it just if the ssh 
   //connection is lost
-  private void loadSucceedListFromMachineToMemory() throws KaramelException {
+  private void loadSucceedListFromMachineToMemory() {
     logger.info(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
     String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
     String remoteSucceedPath = Settings.MACHINE_SUCCEED_LIST_FILENAME;
     String localSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
+    File localFile = new File(localSucceedPath);
     try {
-      downloadRemoteFile(localSucceedPath, remoteSucceedPath, true);
+      Files.deleteIfExists(localFile.toPath());
+    } catch (IOException ex) {
+    }
+    try {
+      downloadRemoteFile(remoteSucceedPath, localSucceedPath, true);
     } catch (IOException ex) {
       logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()));
       //remote file does not exists
+    } catch (KaramelException ex) {
+      //shoudn't throw this because I am deleting the local file already here
     } finally {
       try {
         String list = IoUtils.readContentFromPath(localSucceedPath);
