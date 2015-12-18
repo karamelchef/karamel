@@ -75,6 +75,7 @@ public class Settings {
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
   public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
+  public static final String SCRIPET_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
   public static final String SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF = "install_ruby_chef_berkshelf.sh";
   public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT
       + SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF;
@@ -103,6 +104,10 @@ public class Settings {
   public static final String AWS_REGION_DEFAULT = Region.EU_WEST_1;
   public static final String AWS_AMI_DEFAULT = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
   public static final String AWS_VM_USERNAME_DEFAULT = "ubuntu";
+  public static final String AWS_STORAGE_MAPPINGNAME_PREFIX = "/dev/sd";
+  public static final String AWS_STORAGE_VIRTUALNAME_PREFIX = "ephemeral";
+  public static final String AWS_STORAGE_KERNELALIAS_PREFIX = "/dev/xvd";
+  public static final String AWS_STORAGE_MOUNTPOINT_PREFIX = "/mnt/disk";
   public static final List<String> AWS_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
   public static final String AWS_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 

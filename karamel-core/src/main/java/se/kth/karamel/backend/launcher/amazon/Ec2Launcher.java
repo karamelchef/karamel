@@ -24,6 +24,7 @@ import org.jclouds.aws.ec2.options.CreateSecurityGroupOptions;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
+import org.jclouds.ec2.domain.BlockDeviceMapping;
 import org.jclouds.ec2.domain.KeyPair;
 import org.jclouds.ec2.domain.SecurityGroup;
 import org.jclouds.ec2.features.SecurityGroupApi;
@@ -243,6 +244,10 @@ public final class Ec2Launcher extends Launcher {
     if (ec2.getPrice() != null) {
       options.spotPrice(ec2.getPrice());
     }
+    
+    InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+    List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+    options.blockDeviceMappings(maps);
 
     boolean succeed = false;
     int tries = 0;
@@ -342,7 +347,7 @@ public final class Ec2Launcher extends Launcher {
             machine.setPrivateIp(privateIps.get(0));
             machine.setPublicIp(publicIps.get(0));
             machine.setSshPort(node.getLoginPort());
-            machine.setSshUser(node.getCredentials().getUser());
+            machine.setSshUser(ec2.getUsername());
             machines.add(machine);
           }
         }

@@ -6,7 +6,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.ClusterService;
@@ -22,8 +22,12 @@ import se.kth.karamel.common.util.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  private final boolean storagePreparation;
+
+  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+      boolean storagePreparation) {
     super("apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
+    this.storagePreparation = storagePreparation;
   }
 
   @Override
@@ -49,7 +53,12 @@ public class AptGetEssentialsTask extends Task {
 
   @Override
   public Set<String> dagDependencies() {
-    return Collections.EMPTY_SET;
+    Set<String> deps = new HashSet<>();
+    if (storagePreparation) {
+      String uniqId = PrepareStoragesTask.makeUniqueId(getMachineId());
+      deps.add(uniqId);
+    }
+    return deps;
   }
 
 }
