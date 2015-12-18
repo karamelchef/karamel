@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.common.util;
 
-import se.kth.karamel.common.util.IpAddressUtil;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Rule;

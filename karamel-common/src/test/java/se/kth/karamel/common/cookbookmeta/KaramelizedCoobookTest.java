@@ -6,7 +6,6 @@
 
 package se.kth.karamel.common.cookbookmeta;
 
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import org.junit.Assert;
 import org.junit.Test;
 import se.kth.karamel.common.util.Settings;

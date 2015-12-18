@@ -110,7 +110,7 @@ public class Gce extends Provider {
   public Gce applyDefaults() {
     Gce clone = cloneMe();
     if (clone.getUsername() == null) {
-      clone.setUsername(Settings.PROVIDER_EC2_DEFAULT_USERNAME);
+      clone.setUsername(Settings.AWS_VM_USERNAME_DEFAULT);
     }
     if (clone.getImage() == null) {
       clone.setImage(GceSettings.DEFAULT_IMAGE);

@@ -105,8 +105,8 @@ public class KaramelApiImpl implements KaramelApi {
   public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException {
     Ec2Context context = Ec2Launcher.validateCredentials(credentials);
     Confs confs = Confs.loadKaramelConfs();
-    confs.put(Settings.AWS_ACCESS_KEY, credentials.getAccessKey());
-    confs.put(Settings.AWS_SECRET_KEY, credentials.getSecretKey());
+    confs.put(Settings.AWS_ACCESSKEY_KEY, credentials.getAccessKey());
+    confs.put(Settings.AWS_SECRETKEY_KEY, credentials.getSecretKey());
     confs.writeKaramelConfs();
     clusterService.registerEc2Context(context);
     return true;

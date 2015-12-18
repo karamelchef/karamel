@@ -126,8 +126,8 @@ public class UserClusterDataExtractor {
         if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
           cookbookPath += Settings.SLASH + urls.cookbookRelPath;
         }
-        paths.add(Settings.COOKBOOKS_ROOT_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
-            + Settings.COOKBOOKS_VENDOR_SUBFOLDER);
+        paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
+            + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
       }
     }
     Object[] arr = paths.toArray();

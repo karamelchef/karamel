@@ -78,16 +78,16 @@ public class Ec2 extends Provider {
   public Ec2 applyDefaults() {
     Ec2 clone = cloneMe();
     if (clone.getUsername() == null) {
-      clone.setUsername(Settings.PROVIDER_EC2_DEFAULT_USERNAME);
+      clone.setUsername(Settings.AWS_VM_USERNAME_DEFAULT);
     }
     if (clone.getAmi() == null) {
-      clone.setAmi(Settings.PROVIDER_EC2_DEFAULT_AMI);
+      clone.setAmi(Settings.AWS_AMI_DEFAULT);
     }
     if (clone.getRegion() == null) {
-      clone.setRegion(Settings.PROVIDER_EC2_DEFAULT_REGION);
+      clone.setRegion(Settings.AWS_REGION_DEFAULT);
     }
     if (clone.getType() == null) {
-      clone.setType(Settings.PROVIDER_EC2_DEFAULT_TYPE);
+      clone.setType(Settings.AWS_VM_TYPE_DEFAULT);
     }
     return clone;
   }

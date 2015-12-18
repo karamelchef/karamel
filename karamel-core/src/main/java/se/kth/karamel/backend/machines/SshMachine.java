@@ -8,6 +8,7 @@ package se.kth.karamel.backend.machines;
 import java.io.File;
 import java.io.IOException;
 import java.io.SequenceInputStream;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -27,6 +28,8 @@ import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.Arrays;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
@@ -36,6 +39,7 @@ import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.common.util.IoUtils;
 
 /**
  *
@@ -58,6 +62,8 @@ public class SshMachine implements MachineInterface, Runnable {
   private boolean stopping = false;
   private final SshShell shell;
   private Task activeTask;
+  private boolean isSucceedTaskHistoryUpdated = false;
+  private final List<String> succeedTasksHistory = new ArrayList<>();
 
   /**
    * This constructor is used for users with SSH keys protected by a password
@@ -174,43 +180,55 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void runTask(Task task) {
-    try {
-      task.started();
-      List<ShellCommand> commands = task.getCommands();
+    if (!isSucceedTaskHistoryUpdated) {
+      loadSucceedListFromMachineToMemory();
+      isSucceedTaskHistoryUpdated = true;
+    }
+    if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
+      task.skipped();
+      logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
+      activeTask = null;
+    } else {
+      try {
+        task.started();
+        List<ShellCommand> commands = task.getCommands();
 
-      for (ShellCommand cmd : commands) {
-        if (cmd.getStatus() != ShellCommand.Status.DONE) {
-
-          runSshCmd(cmd, task);
-
+        for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-            task.failed(String.format("%s: Command did not complete: '%s", machineEntity.getId(),
-                cmd.getCmdStr()));
-            break;
-          } else {
-            try {
-              if (task instanceof RunRecipeTask) {
-                task.collectResults(this);
-              // If this task is an experiment, try and download the experiment results
-                // In contrast with 'collectResults' - the results will not necessarly be json objects,
-                // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
-                if (cmd.getCmdStr().contains("experiment") && cmd.getCmdStr().contains("json")) {
-                  task.downloadExperimentResults(this);
+
+            runSshCmd(cmd, task);
+
+            if (cmd.getStatus() != ShellCommand.Status.DONE) {
+              task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
+                  cmd.getCmdStr()));
+              break;
+            } else {
+              try {
+                if (task instanceof RunRecipeTask) {
+                  task.collectResults(this);
+                  // If this task is an experiment, try and download the experiment results
+                  // In contrast with 'collectResults' - the results will not necessarly be json objects,
+                  // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
+                  if (cmd.getCmdStr().contains("experiment") && cmd.getCmdStr().contains("json")) {
+                    task.downloadExperimentResults(this);
+                  }
                 }
+              } catch (KaramelException ex) {
+                logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()),
+                    ex);
+                task.failed(ex.getMessage());
               }
-            } catch (KaramelException ex) {
-              logger.error(String.format("%s: Error in collecting/downloading the results", machineEntity.getId()), ex);
-              task.failed(ex.getMessage());
             }
           }
         }
+        if (task.getStatus() == Status.ONGOING) {
+          task.succeed();
+          succeedTasksHistory.add(task.uniqueId());
+          activeTask = null;
+        }
+      } catch (Exception ex) {
+        task.failed(ex.getMessage());
       }
-      if (task.getStatus() == Status.ONGOING) {
-        task.succeed();
-        activeTask = null;
-      }
-    } catch (Exception ex) {
-      task.failed(ex.getMessage());
     }
   }
 
@@ -326,6 +344,7 @@ public class SshMachine implements MachineInterface, Runnable {
 
   private void connect() throws KaramelException {
     if (client == null || !client.isConnected()) {
+      isSucceedTaskHistoryUpdated = false;
       try {
         KeyProvider keys;
         client = new SSHClient();
@@ -431,6 +450,38 @@ public class SshMachine implements MachineInterface, Runnable {
     lastHeartbeat = System.currentTimeMillis();
   }
 
+  //ssh machine maintains the list of succeed tasks synced with the remote machine, it downloads it just if the ssh 
+  //connection is lost
+  private void loadSucceedListFromMachineToMemory() {
+    logger.info(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
+    String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
+    String remoteSucceedPath = Settings.MACHINE_SUCCEED_LIST_FILENAME;
+    String localSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
+    File localFile = new File(localSucceedPath);
+    try {
+      Files.deleteIfExists(localFile.toPath());
+    } catch (IOException ex) {
+    }
+    try {
+      downloadRemoteFile(remoteSucceedPath, localSucceedPath, true);
+    } catch (IOException ex) {
+      logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()));
+      //remote file does not exists
+    } catch (KaramelException ex) {
+      //shoudn't throw this because I am deleting the local file already here
+    } finally {
+      try {
+        String list = IoUtils.readContentFromPath(localSucceedPath);
+        String[] items = list.split("\n");
+        succeedTasksHistory.clear();
+        succeedTasksHistory.addAll(Arrays.asList(items));
+      } catch (IOException ex) {
+        //local file does not exists, list is considered to be empty
+        succeedTasksHistory.clear();
+      }
+    }
+  }
+
   @Override
   public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite)
       throws KaramelException, IOException {
@@ -450,6 +501,5 @@ public class SshMachine implements MachineInterface, Runnable {
     }
     // If the file doesn't exist, it should quickly throw an IOException
     scp.download(remoteFilePath, localFilePath);
-//                    client.newSCPFileTransfer().download(remoteFilePath, localFilePath);
   }
 }

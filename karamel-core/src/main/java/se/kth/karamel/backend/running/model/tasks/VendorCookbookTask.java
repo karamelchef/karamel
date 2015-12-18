@@ -32,7 +32,7 @@ public class VendorCookbookTask extends Task {
       String cookbookId, String cookbooksHome, String githubRepoUrl, String githubRepoName, String subCookbookName, 
       String branch) {
     super("clone and vendor " + ((subCookbookName == null) ? githubRepoName : subCookbookName), 
-        "clone and vendor " + cookbookId, machine, 
+        "clone and vendor " + cookbookId, true, machine, 
         clusterStats, submitter);
     this.cookbookId = cookbookId;
     this.cookbooksHome = cookbooksHome;
@@ -55,8 +55,10 @@ public class VendorCookbookTask extends Task {
           "cookbook_path", cookbookPath,
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
-          "vendor_subfolder", Settings.COOKBOOKS_VENDOR_SUBFOLDER,
-          "sudo_command", getSudoCommand());
+          "vendor_subfolder", Settings.REMOTE_CB_VENDOR_SUBFOLDER,
+          "sudo_command", getSudoCommand(),
+          "task_id", getId(),
+          "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME);
     }
     return commands;
   }

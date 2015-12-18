@@ -117,7 +117,7 @@ public class Confs<K extends String, V extends String> extends Properties {
   public static Confs applyDefaults(Confs prop) {
     String pubKeyPath = prop.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
     String priKeyPath = prop.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
-    String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE);
+    String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE_KEY);
     if ((pubKeyPath == null || priKeyPath == null)) {
       if (Settings.DEFAULT_PRIKEY_PATH != null) {
         pubKeyPath = Settings.DEFAULT_PUBKEY_PATH;
@@ -127,7 +127,7 @@ public class Confs<K extends String, V extends String> extends Properties {
       }
     }
     if (batchSize == null) {
-      prop.put(Settings.AWS_BATCH_SIZE, Settings.AWS_BATCH_SIZE_DEFAULT_VALUE.toString());
+      prop.put(Settings.AWS_BATCH_SIZE_KEY, Settings.AWS_BATCH_SIZE_DEFAULT.toString());
     }
     return prop;
   }

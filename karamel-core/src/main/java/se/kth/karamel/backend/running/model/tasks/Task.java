@@ -30,7 +30,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, ONGOING, DONE, FAILED;
+    WAITING, READY, SKIPPED, ONGOING, DONE, FAILED;
   }
   private Status status = Status.WAITING;
   private final String name;
@@ -39,15 +39,18 @@ public abstract class Task implements DagTask, TaskCallback {
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
+  private final boolean skippableIfExists;
   private DagTaskCallback dagCallback;
   private final TaskSubmitter submitter;
   private final ClusterStats clusterStats;
   private long startTime;
   private long duration = 0;
 
-  public Task(String name, String id, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public Task(String name, String id, boolean skippableIfExists, MachineRuntime machine, ClusterStats clusterStats, 
+      TaskSubmitter submitter) {
     this.name = name;
     this.id = id;
+    this.skippableIfExists = skippableIfExists;
     this.machineId = machine.getId();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
@@ -79,6 +82,10 @@ public abstract class Task implements DagTask, TaskCallback {
     return id;
   }
 
+  public boolean isSkippableIfExists() {
+    return skippableIfExists;
+  }
+  
   public abstract List<ShellCommand> getCommands() throws IOException;
 
   public void setCommands(List<ShellCommand> commands) {
@@ -139,6 +146,12 @@ public abstract class Task implements DagTask, TaskCallback {
     dagCallback.queued();
   }
 
+  @Override
+  public void skipped() {
+    status = Status.SKIPPED;
+    dagCallback.skipped();
+  }
+  
   @Override
   public void started() {
     status = Status.ONGOING;
