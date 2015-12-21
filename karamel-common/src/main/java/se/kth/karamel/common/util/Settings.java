@@ -100,9 +100,8 @@ public class Settings {
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
 
   //--------------------------------------------AWS EC2-----------------------------------------------------------------
-  public static final String AWS_VM_TYPE_DEFAULT = InstanceType.M1_MEDIUM;
-  public static final String AWS_REGION_DEFAULT = Region.EU_WEST_1;
-  public static final String AWS_AMI_DEFAULT = "ami-0307ce74"; //12.04  "ami-896c96fe"; // 14.04
+  public static final String AWS_VM_TYPE_DEFAULT = InstanceType.M3_MEDIUM;
+  public static final String AWS_REGION_CODE_DEFAULT = Region.EU_WEST_1;
   public static final String AWS_VM_USERNAME_DEFAULT = "ubuntu";
   public static final String AWS_STORAGE_MAPPINGNAME_PREFIX = "/dev/sd";
   public static final String AWS_STORAGE_VIRTUALNAME_PREFIX = "ephemeral";

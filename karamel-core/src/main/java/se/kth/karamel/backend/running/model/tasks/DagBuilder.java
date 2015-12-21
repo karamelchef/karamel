@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.backend.launcher.amazon.InstanceType;
+import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;

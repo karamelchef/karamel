@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend.launcher.amazon;
 
+import se.kth.karamel.common.launcher.amazon.InstanceType;
 import java.util.List;
 import org.jclouds.ec2.domain.BlockDeviceMapping;
 import org.junit.Assert;

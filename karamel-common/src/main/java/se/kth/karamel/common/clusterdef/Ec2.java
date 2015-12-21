@@ -7,6 +7,7 @@ package se.kth.karamel.common.clusterdef;
 
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.launcher.amazon.Region;
 
 /**
  *
@@ -80,11 +81,13 @@ public class Ec2 extends Provider {
     if (clone.getUsername() == null) {
       clone.setUsername(Settings.AWS_VM_USERNAME_DEFAULT);
     }
-    if (clone.getAmi() == null) {
-      clone.setAmi(Settings.AWS_AMI_DEFAULT);
-    }
     if (clone.getRegion() == null) {
-      clone.setRegion(Settings.AWS_REGION_DEFAULT);
+      clone.setRegion(Settings.AWS_REGION_CODE_DEFAULT);
+    }
+
+    if (clone.getAmi() == null) {
+      Region reg = Region.valueByCode(clone.getRegion());
+      clone.setAmi(reg.ubuntu_12_04_default_ami);
     }
     if (clone.getType() == null) {
       clone.setType(Settings.AWS_VM_TYPE_DEFAULT);
@@ -137,8 +140,9 @@ public class Ec2 extends Provider {
 
   @Override
   public void validate() throws ValidationException {
-    if ((subnet != null && vpc == null) || (subnet == null && vpc != null))
+    if ((subnet != null && vpc == null) || (subnet == null && vpc != null)) {
       throw new ValidationException("Both subnet and vpc ids are required for vpc settings on ec2");
+    }
   }
 
 }

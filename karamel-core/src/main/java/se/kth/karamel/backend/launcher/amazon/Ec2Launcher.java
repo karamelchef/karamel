@@ -4,6 +4,7 @@
  */
 package se.kth.karamel.backend.launcher.amazon;
 
+import se.kth.karamel.common.launcher.amazon.InstanceType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -72,7 +73,7 @@ public final class Ec2Launcher extends Launcher {
       }
       Ec2Context cxt = new Ec2Context(credentials);
       SecurityGroupApi securityGroupApi = cxt.getSecurityGroupApi();
-      securityGroupApi.describeSecurityGroupsInRegion(Settings.AWS_REGION_DEFAULT);
+      securityGroupApi.describeSecurityGroupsInRegion(Settings.AWS_REGION_CODE_DEFAULT);
       return cxt;
     } catch (AuthorizationException e) {
       throw new InvalidEc2CredentialsException(e.getMessage() + " - accountid:" + credentials.getAccessKey(), e);
