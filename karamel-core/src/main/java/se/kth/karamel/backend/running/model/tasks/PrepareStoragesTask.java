@@ -40,7 +40,7 @@ public class PrepareStoragesTask extends Task {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPET_PATH_PREPARE_STORAGE,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME,
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "device_mountpoint_tuple", tuple.toString()
       );
     }

@@ -1,9 +1,9 @@
 name: provision
 ec2:
-  type: i2.4xlarge
+  type: i2.8xlarge
   ami: ami-b8706fd9
   region: us-west-2
-  price: 0.35
+  price: 0.69
 groups: 
   nodes:
     size: 1

@@ -455,7 +455,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private void loadSucceedListFromMachineToMemory() {
     logger.info(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
     String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
-    String remoteSucceedPath = Settings.MACHINE_SUCCEED_LIST_FILENAME;
+    String remoteSucceedPath = Settings.REMOTE_SUCCEEDTASKS_PATH(machineEntity.getSshUser());
     String localSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
     File localFile = new File(localSucceedPath);
     try {

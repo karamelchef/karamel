@@ -58,7 +58,7 @@ public class VendorCookbookTask extends Task {
           "vendor_subfolder", Settings.REMOTE_CB_VENDOR_SUBFOLDER,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.MACHINE_SUCCEED_LIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
     }
     return commands;
   }

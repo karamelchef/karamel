@@ -49,7 +49,7 @@ public enum InstanceType {
   i2_xlarge("i2.xlarge", 4, 30.5, 1, 800),
   i2_2xlarge("i2.2xlarge", 8, 61, 2, 800),
   i2_4xlarge("i2_4xlarge", 16, 122, 4, 800),
-  i2_8xlarge("i2.8xlarge", 32, 244, 800, 800),
+  i2_8xlarge("i2.8xlarge", 32, 244, 8, 800),
   d2_xlarge("d2.xlarge", 4, 30.5, 3, 2000),
   d2_2xlarge("d2.2xlarge", 8, 61, 6, 2000),
   d2_4xlarge("d2.4xlarge", 16, 122, 12, 2000),

@@ -158,39 +158,6 @@ public class Settings {
     return (networkName + "-" + protocol + port).toLowerCase();
   }
 
-  //--------------------------------Cluster General---------------------------------------------------------------------
-  public static final String MACHINE_SUCCEED_LIST_FILENAME = "succeed_list";
-  //--------------------------------Target Macines----------------------------------------------------------------------
-  public static final String REMOTE_CB_VENDOR_PATH = "/tmp/cookbooks";
-  public static final String REMOTE_CB_VENDOR_SUBFOLDER = "berks-cookbooks";
-  public static final String REMOTE_CB_FS_PATH_DELIMITER = "__";
-  public final static String REMOTE_CHEFJSON_PRIVATEIPS_TAG = "private_ips";
-  public final static String REMOTE_CHEFJSON_PUBLICIPS_TAG = "public_ips";
-  public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
-
-  public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
-    String recName;
-    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
-      recName = recipeName + COOKBOOK_DELIMITER + "default";
-    } else {
-      recName = recipeName;
-    }
-
-    return Settings.SYSTEM_TMP_FOLDER_PATH + "/"
-        + recName.replace(COOKBOOK_DELIMITER, REMOTE_CB_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
-  }
-
-  public static String EXPERIMENT_RESULT_REMOTE_PATH(String recipeName) {
-    String recName;
-    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
-      recName = recipeName + COOKBOOK_DELIMITER + "default";
-    } else {
-      recName = recipeName;
-    }
-
-    return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
-  }
-
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
   public static final String CB_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String CB_METADATARB_REL_URL = "/metadata.rb";
@@ -252,6 +219,51 @@ public class Settings {
   public static final Pattern GITHUB_REPO_NO_BRANCH_PATTERN = Pattern.compile(
       CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_NO_BRANCH_PATTERN.pattern() + DOLLAR);
 
+  //-----------------------------------------Machine General------------------------------------------------------------
+  public static final String TMP_FOLDER_NAME = "tmp";
+  public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
+  public static final String SUCCEED_TASKLIST_FILENAME = "succeed_list";
+
+  //--------------------------------Target Macines----------------------------------------------------------------------
+  public static final String REMOTE_CB_VENDOR_PATH = "/tmp/cookbooks";
+  public static final String REMOTE_HOME_ROOT = "/home";
+  public static final String REMOTE_CB_VENDOR_SUBFOLDER = "berks-cookbooks";
+  public static final String REMOTE_CB_FS_PATH_DELIMITER = "__";
+  public final static String REMOTE_CHEFJSON_PRIVATEIPS_TAG = "private_ips";
+  public final static String REMOTE_CHEFJSON_PUBLICIPS_TAG = "public_ips";
+  public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
+
+  public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/"
+        + recName.replace(COOKBOOK_DELIMITER, REMOTE_CB_FS_PATH_DELIMITER) + RECIPE_RESULT_POSFIX;
+  }
+
+  public static String EXPERIMENT_RESULT_REMOTE_PATH(String recipeName) {
+    String recName;
+    if (!recipeName.contains(COOKBOOK_DELIMITER)) {
+      recName = recipeName + COOKBOOK_DELIMITER + "default";
+    } else {
+      recName = recipeName;
+    }
+
+    return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
+  }
+
+  public static String REMOTE_USER_HOME(String sshUserName) {
+    return REMOTE_HOME_ROOT + File.separator + sshUserName;
+  }
+
+  public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
+    return REMOTE_USER_HOME(sshUserName) + File.separator + SUCCEED_TASKLIST_FILENAME;
+  }
+
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");
@@ -270,8 +282,6 @@ public class Settings {
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
   public static final String STATS_FOLDER_NAME = "stats";
-  public static final String TMP_FOLDER_NAME = "tmp";
-  public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
   public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
   public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
@@ -337,7 +347,7 @@ public class Settings {
   }
 
   public static String MACHINE_SUCCEEDTASKS_PATH(String clusterName, String machineIp) {
-    return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + MACHINE_SUCCEED_LIST_FILENAME;
+    return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + SUCCEED_TASKLIST_FILENAME;
   }
 
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
