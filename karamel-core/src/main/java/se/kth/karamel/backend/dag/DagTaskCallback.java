@@ -14,7 +14,7 @@ public interface DagTaskCallback {
 
   public void queued();
 
-  public void skipped();
+  public void exists();
   
   public void started();
 

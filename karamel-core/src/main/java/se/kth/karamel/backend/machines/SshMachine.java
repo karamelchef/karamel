@@ -38,6 +38,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.common.util.IoUtils;
 
@@ -179,15 +180,22 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
+  public void killSession() {
+    KillSessionTask task = new KillSessionTask();
+    runTask(task);
+  }
+
   private void runTask(Task task) {
     if (!isSucceedTaskHistoryUpdated) {
       loadSucceedListFromMachineToMemory();
       isSucceedTaskHistoryUpdated = true;
     }
-    if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
-      task.skipped();
+    if (task.isIdempotent() && succeedTasksHistory.contains(task.getId())) {
+      task.exists();
       logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
-      activeTask = null;
+      if (!(task instanceof KillSessionTask)) {
+        activeTask = null;
+      }
     } else {
       try {
         task.started();
@@ -196,7 +204,7 @@ public class SshMachine implements MachineInterface, Runnable {
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
 
-            runSshCmd(cmd, task);
+            runSshCmd(cmd, task, false);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
@@ -222,9 +230,11 @@ public class SshMachine implements MachineInterface, Runnable {
           }
         }
         if (task.getStatus() == Status.ONGOING) {
-          task.succeed();
-          succeedTasksHistory.add(task.uniqueId());
-          activeTask = null;
+          if (!(task instanceof KillSessionTask)) {
+            task.succeed();
+            succeedTasksHistory.add(task.uniqueId());
+            activeTask = null;
+          }
         }
       } catch (Exception ex) {
         task.failed(ex.getMessage());
@@ -232,7 +242,7 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task) {
+  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;

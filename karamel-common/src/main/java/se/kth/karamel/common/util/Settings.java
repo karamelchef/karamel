@@ -81,6 +81,7 @@ public class Settings {
       + SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF;
   public static final String SCRIPT_PATH_MAKE_SOLO_RB = SCRIPT_PATH_ROOT + "make_solo_rb.sc";
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
+  public static final String SCRIPT_PATH_KILL_RUNNING_SESSION = SCRIPT_PATH_ROOT + "kill_current_session.sh";
 
   //----------------------------------------Providers General-----------------------------------------------------------
   public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {
@@ -220,6 +221,7 @@ public class Settings {
 
   //-----------------------------------------Machine General------------------------------------------------------------
   public static final String TMP_FOLDER_NAME = "tmp";
+  public static final String PID_FILE_NAME = "pid";
   public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
   public static final String SUCCEED_TASKLIST_FILENAME = "succeed_list";
 
@@ -263,6 +265,9 @@ public class Settings {
     return REMOTE_USER_HOME(sshUserName) + File.separator + SUCCEED_TASKLIST_FILENAME;
   }
 
+  public static String REMOTE_PIDFILE_PATH(String sshUserName) {
+    return REMOTE_USER_HOME(sshUserName) + File.separator + PID_FILE_NAME;
+  }
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");

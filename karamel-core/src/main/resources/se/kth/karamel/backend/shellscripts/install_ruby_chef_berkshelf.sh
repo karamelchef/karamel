@@ -1,1 +1,1 @@
-rm chefdk_0.6.2-1_amd64.deb -f && wget https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chefdk_0.6.2-1_amd64.deb && %sudo_command% dpkg -i chefdk_0.6.2-1_amd64.deb && echo '%task_id%' >> %succeedtasks_filepath%
+echo $$ > %pid_file%; rm chefdk_0.6.2-1_amd64.deb -f && wget https://opscode-omnibus-packages.s3.amazonaws.com/ubuntu/12.04/x86_64/chefdk_0.6.2-1_amd64.deb && %sudo_command% dpkg -i chefdk_0.6.2-1_amd64.deb && echo '%task_id%' >> %succeedtasks_filepath%

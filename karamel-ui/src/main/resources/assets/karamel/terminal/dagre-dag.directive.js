@@ -38,8 +38,8 @@ angular.module('main.module')
               var className = '';
               if (task.status === 'WAITING')
                 className += 'waiting';
-              else if (task.status === "SKIPPED")
-                className += 'skipped';
+              else if (task.status === "EXIST")
+                className += 'exist';
               else if (task.status === "READY")
                 className += 'ready ';
               else if (task.status === "ONGOING")

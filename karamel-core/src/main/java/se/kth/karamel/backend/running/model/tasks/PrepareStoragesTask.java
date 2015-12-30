@@ -41,7 +41,8 @@ public class PrepareStoragesTask extends Task {
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
-          "device_mountpoint_tuple", tuple.toString()
+          "device_mountpoint_tuple", tuple.toString(),
+          "pid_file", Settings.PID_FILE_NAME
       );
     }
     return commands;

@@ -280,6 +280,11 @@ public class ClusterManager implements Runnable {
     }
   }
 
+  private void killOngoingTask() {
+    logger.info(String.format("Killing ongoing taks"));
+    machinesMonitor.pause();
+  }
+
   private void pause() {
     logger.info(String.format("Pausing '%s'", definition.getName()));
     machinesMonitor.pause();

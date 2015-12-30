@@ -116,7 +116,8 @@ public class RunRecipeTask extends Task {
           "log_file_name", jsonFileName,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

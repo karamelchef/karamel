@@ -33,7 +33,8 @@ public class MakeSoloRbTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "cookbooks_path", vendorPath,
-          "sudo_command", getSudoCommand());
+          "sudo_command", getSudoCommand(),
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

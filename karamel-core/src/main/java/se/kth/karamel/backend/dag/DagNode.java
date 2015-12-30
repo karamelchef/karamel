@@ -22,7 +22,7 @@ public class DagNode implements DagTaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, SKIPPED, ONGOING, DONE, FAILED;
+    WAITING, READY, EXIST, ONGOING, DONE, FAILED;
   }
   private static final Logger logger = Logger.getLogger(DagNode.class);
   private final String id;
@@ -171,9 +171,9 @@ public class DagNode implements DagTaskCallback {
   }
 
   @Override
-  public void skipped() {
+  public void exists() {
     logger.debug(String.format("Skipped '%s' because idempotent and exists in the machine.", id));
-    status = Status.SKIPPED;
+    status = Status.EXIST;
     signalChildren();
   }
 

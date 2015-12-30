@@ -550,6 +550,36 @@ public class CommandService {
         }
       }
 
+      p = Pattern.compile("kill\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  if (task.getStatus() == Task.Status.ONGOING) {
+                    
+                  }
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
+          }
+          addActiveClusterMenus(response);
+        } else {
+          throw new KaramelException("no cluster has been chosen yet!!");
+        }
+      }
+
       p = Pattern.compile("which\\s+(cluster|aws|ssh)");
       matcher = p.matcher(cmd);
       if (!found && matcher.matches()) {
