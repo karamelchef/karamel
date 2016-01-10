@@ -13,7 +13,8 @@ Karamel is an orchestration engine that orchestrates:
 
 * the creation of  virtual machines if a cloud provider is used;
 * the global order for installing and starting services on each node;
-* the injection of configuration parameters and passing of parameters between services.
+* the injection of configuration parameters and passing of parameters between services;
+* connecting to hosts using ssh and running chef recipes using chef solo.
 
   Karamel enables the deployment of arbitrarily large distributed systems on both virtualized platforms (AWS, Vagrant) and bare-metal hosts.
 
