@@ -9,7 +9,7 @@ ec2:
 cookbooks:                                                                      
   hadoop: 
     github: hopshadoop/apache-hadoop-chef
-    branch: master
+    branch: ha
   kzookeeper: 
     github: hopshadoop/kzookeeper
     branch: master
