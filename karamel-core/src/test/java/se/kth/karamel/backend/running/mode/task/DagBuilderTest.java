@@ -24,6 +24,7 @@ import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Confs;
 
 /**
  *
@@ -74,6 +75,65 @@ public class DagBuilderTest {
     };
 
     Settings.CB_CLASSPATH_MODE = true;
+    Confs confs = new Confs();
+    confs.put(Settings.PREPARE_STORAGES_KEY, "false");
+    Confs.setMemConfs(confs);
+    
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
+    dag.validate();
+    System.out.println(dag.print());
+
+    Assert.assertTrue(dag.isRoot("apt-get essentials on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("make solo.rb on namenodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1", "flink::install on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("flink::install on namenodes1", "flink::jobmanager on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("flink::install on namenodes1", "flink::wordcount on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "hadoop::nn on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "flink::install on namenodes1"));
+
+    Assert.assertTrue(dag.isRoot("apt-get essentials on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1", "flink::install on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("flink::install on datanodes1", "flink::taskmanager on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "hadoop::dn on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "flink::install on datanodes1"));
+
+    Assert.assertTrue(dag.isRoot("apt-get essentials on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes2", "make solo.rb on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes2", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2", "flink::install on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("flink::install on datanodes2", "flink::taskmanager on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "hadoop::dn on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "flink::install on datanodes2"));
+  }
+  
+  @Test
+  public void testFlinkDagPrepStorage() throws IOException, KaramelException {
+    TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+      @Override
+      public void submitTask(Task task) throws KaramelException {
+        System.out.println(task.uniqueId());
+        task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
+    };
+
+    Settings.CB_CLASSPATH_MODE = true;
+    Confs confs = new Confs();
+    confs.put(Settings.PREPARE_STORAGES_KEY, "true");
+    Confs.setMemConfs(confs);
+    
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);

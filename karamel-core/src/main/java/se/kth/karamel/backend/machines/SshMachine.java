@@ -39,6 +39,7 @@ import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.IoUtils;
 
 /**
@@ -64,7 +65,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private Task activeTask;
   private boolean isSucceedTaskHistoryUpdated = false;
   private final List<String> succeedTasksHistory = new ArrayList<>();
-
+  private static Confs confs = Confs.loadKaramelConfs();
   /**
    * This constructor is used for users with SSH keys protected by a password
    *
@@ -184,7 +185,9 @@ public class SshMachine implements MachineInterface, Runnable {
       loadSucceedListFromMachineToMemory();
       isSucceedTaskHistoryUpdated = true;
     }
-    if (task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
+    String skipConf = confs.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
+    if (skipConf != null && skipConf.equalsIgnoreCase("true") 
+        && task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
       task.skipped();
       logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
       activeTask = null;

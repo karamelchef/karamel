@@ -33,6 +33,7 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
+import se.kth.karamel.common.util.Confs;
 
 /**
  *
@@ -206,13 +207,15 @@ public class DagBuilder {
 
   public static void machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Dag dag) throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
     String vendorPath = UserClusterDataExtractor.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
-        boolean storagePreparation = false;
-        if (provider instanceof Ec2) {
-          storagePreparation = true;
+        boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true") 
+            && (provider instanceof Ec2));
+        if (storagePreparation) {
           String model = ((Ec2) provider).getType();
           InstanceType instanceType = InstanceType.valueByModel(model);
           PrepareStoragesTask st

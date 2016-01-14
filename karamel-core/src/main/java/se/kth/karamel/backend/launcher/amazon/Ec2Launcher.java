@@ -246,9 +246,13 @@ public final class Ec2Launcher extends Launcher {
       options.spotPrice(ec2.getPrice());
     }
     
-    InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
-    List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
-    options.blockDeviceMappings(maps);
+    Confs confs = Confs.loadKaramelConfs();
+    String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
+    if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
+      InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+      List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+      options.blockDeviceMappings(maps);
+    }
 
     boolean succeed = false;
     int tries = 0;
