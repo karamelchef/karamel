@@ -245,10 +245,14 @@ public final class Ec2Launcher extends Launcher {
     if (ec2.getPrice() != null) {
       options.spotPrice(ec2.getPrice());
     }
-    
-    InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
-    List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
-    options.blockDeviceMappings(maps);
+
+    Confs confs = Confs.loadKaramelConfs();
+    String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
+    if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
+      InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+      List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+      options.blockDeviceMappings(maps);
+    }
 
     boolean succeed = false;
     int tries = 0;
@@ -315,6 +319,7 @@ public final class Ec2Launcher extends Launcher {
 
       unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
       successfulNodes.addAll(succ);
+      sanityCheckSuccessfulNodes(successfulNodes, failedNodes);
       if (successfulNodes.size() < numberToLaunch) {
         try {
           succeed = false;
@@ -345,6 +350,7 @@ public final class Ec2Launcher extends Launcher {
                 + ec2.getVpc() + "/" + ec2.getPrice());
             machine.setVmId(node.getId());
             machine.setName(node.getName());
+            // we check availability of ip addresses in the sanitycheck
             machine.setPrivateIp(privateIps.get(0));
             machine.setPublicIp(publicIps.get(0));
             machine.setSshPort(node.getLoginPort());
@@ -386,6 +392,28 @@ public final class Ec2Launcher extends Launcher {
         lostIds.add(destroyed.getId());
       }
       logger.info("Failed nodes destroyed ;)");
+    }
+  }
+
+  private void sanityCheckSuccessfulNodes(Set<NodeMetadata> successfulNodes,
+      Map<NodeMetadata, Throwable> lostNodes) {
+    logger.info(String.format("Sanity check on successful nodes... "));
+    List<NodeMetadata> tmpNodes = new ArrayList<>();
+    tmpNodes.addAll(successfulNodes);
+    successfulNodes.clear();
+    for (int i = 0; i < tmpNodes.size(); i++) {
+      NodeMetadata nm = tmpNodes.get(i);
+      if (nm == null) {
+        logger.info("for some reason one of the nodes is null, we removed it from the successfull nodes");
+      } else if (nm.getPublicAddresses() == null || nm.getPublicAddresses().isEmpty()) {
+        logger.info("Ec2 hasn't assined public-ip address to a node, we remove it from successfull nodes");
+        lostNodes.put(nm, new KaramelException("No public-ip assigned"));
+      } else if (nm.getPrivateAddresses() == null || nm.getPrivateAddresses().isEmpty()) {
+        logger.info("Ec2 hasn't assined private-ip address to a node, we remove it from successfull nodes");
+        lostNodes.put(nm, new KaramelException("No private-ip assigned"));
+      } else {
+        successfulNodes.add(nm);
+      }
     }
   }
 

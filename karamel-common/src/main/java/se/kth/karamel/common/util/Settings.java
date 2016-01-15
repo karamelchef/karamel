@@ -96,6 +96,11 @@ public class Settings {
     return names;
   }
 
+  public static final String PREPARE_STORAGES_KEY = "karamel.prepare.storages";
+  public static final String PREPARE_STORAGES_DEFAULT = "false";
+  public static final String SKIP_EXISTINGTASKS_KEY = "karamel.skip.existing.tasks";
+  public static final String SKIP_EXISTINGTASKS_DEFAULT = "false";
+
   //--------------------------------------------Baremetal---------------------------------------------------------------
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
