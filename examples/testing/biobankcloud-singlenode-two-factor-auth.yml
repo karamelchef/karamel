@@ -35,9 +35,8 @@ cookbooks:
 attrs:
   hdfs:
     user: glassfish
-    conf_dir: /mnt/hadoop/etc/hadoop
   hadoop:
-    dir: /mnt
+    dir: /mnt/disk1
     yarn: 
         user: glassfish
         nm:
@@ -48,7 +47,7 @@ attrs:
   spark:
     user: glassfish
   hiway:
-    home: /mnt/hiway
+    home: /mnt/disk1/hiway
     user: glassfish
     release: false
     hiway:
@@ -66,15 +65,14 @@ attrs:
   ndb:
     DataMemory: '50'
     IndexMemory: '15'
-    dir: "/mnt"
-    shared_folder: "/mnt"
+    dir: "/mnt/disk1"
+    shared_folder: "/mnt/disk1"
   mysql:
-    dir: "/mnt"
+    dir: "/mnt/disk1"
   charon:
     user: glassfish
     group: hadoop
     user_email: jdowling@kth.se
-    use_only_aws: true
     
 groups: 
   master:
@@ -92,7 +90,7 @@ groups:
         - zeppelin
         - charon
         - elastic
-        - spark::master
+        - spark::yarn
         - hiway::hiway_client
         - hiway::cuneiform_client
         - hiway::helloworld_client
