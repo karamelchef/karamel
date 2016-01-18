@@ -62,6 +62,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stopping = false;
+  private boolean killing = false;
   private final SshShell shell;
   private Task activeTask;
   private boolean isSucceedTaskHistoryUpdated = false;
@@ -184,8 +185,13 @@ public class SshMachine implements MachineInterface, Runnable {
 
   public void killTaskSession(Task task) {
     if (activeTask == task) {
+      logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       KillSessionTask killTask = new KillSessionTask();
+      killing = true;
       runTask(killTask);
+    } else {
+      logger.warn(String.format("Request to kill '%s' on '%s' but the task is not ongoing now", task.getName(), 
+          task.getMachine().getPublicIp()));
     }
   }
 
@@ -254,7 +260,7 @@ public class SshMachine implements MachineInterface, Runnable {
     boolean finished = false;
     Session session = null;
 
-    while (!stopping && !finished && numCmdRetries > 0) {
+    while (!stopping && !killing && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
         logger.info(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
@@ -283,7 +289,7 @@ public class SshMachine implements MachineInterface, Runnable {
             try {
               Thread.sleep(timeBetweenRetries);
             } catch (InterruptedException ex3) {
-              if (!stopping) {
+              if (!stopping && !killing) {
                 logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
                     machineEntity.getId()));
               }
@@ -312,8 +318,13 @@ public class SshMachine implements MachineInterface, Runnable {
           SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
-          if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+          if (!killing && 
+              getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
+          }
+          
+          if (killing) {
+            logger.info(String.format("Killed '%s' on '%s' successfully...", task.getName(), machineEntity.getId()));
           }
         }
 
@@ -324,7 +335,7 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            if (!stopping) {
+            if (!stopping && !killing) {
               logger.warn(
                   String.format("%s: Interrupted waiting to retry a command. Continuing...", machineEntity.getId()));
             }
@@ -339,6 +350,7 @@ public class SshMachine implements MachineInterface, Runnable {
             logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
           }
         }
+        killing = false;
       }
     }
   }
