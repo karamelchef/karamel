@@ -45,6 +45,10 @@ public class DagBuilderTest {
       @Override
       public void prepareToStart(Task task) throws KaramelException {
       }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
+      }
     };
 
     Settings.CB_CLASSPATH_MODE = true;
@@ -71,6 +75,10 @@ public class DagBuilderTest {
 
       @Override
       public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
       }
     };
 
@@ -126,6 +134,10 @@ public class DagBuilderTest {
 
       @Override
       public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
       }
     };
 

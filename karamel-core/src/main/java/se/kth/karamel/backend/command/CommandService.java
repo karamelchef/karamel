@@ -411,6 +411,10 @@ public class CommandService {
             @Override
             public void prepareToStart(Task task) throws KaramelException {
             }
+
+            @Override
+            public void killMe(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -446,6 +450,10 @@ public class CommandService {
 
             @Override
             public void prepareToStart(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void killMe(Task task) throws KaramelException {
             }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
@@ -565,7 +573,7 @@ public class CommandService {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
                   if (task.getStatus() == Task.Status.ONGOING) {
-                    
+                    task.kill();
                   }
                 }
               }
@@ -708,23 +716,29 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Logs", "Duration(ms)"};
+    String[] columnNames = {"Task", "Status", "Actions", "Logs", "Duration(ms)"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
       data[i][0] = task.getName();
       data[i][1] = task.getStatus();
       String uuid = task.getUuid();
-      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
-        data[i][2] = "<a kref='log " + uuid + "'>log</a>";
+      if (task.getStatus().ordinal() == Task.Status.ONGOING.ordinal()) {
+        data[i][2] = "<a kref='kill " + uuid + "'>kill</a>";
       } else {
         data[i][2] = "";
       }
-
-      if (task.getDuration() > 0) {
-        data[i][3] = task.getDuration();
+      
+      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
+        data[i][3] = "<a kref='log " + uuid + "'>log</a>";
       } else {
         data[i][3] = "";
+      }
+
+      if (task.getDuration() > 0) {
+        data[i][4] = task.getDuration();
+      } else {
+        data[i][4] = "";
       }
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);

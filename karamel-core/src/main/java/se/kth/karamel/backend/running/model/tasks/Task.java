@@ -201,4 +201,8 @@ public abstract class Task implements DagTask, TaskCallback {
     TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
     clusterStats.addTask(taskStat);
   }
+  
+  public void kill() throws KaramelException {
+    submitter.killMe(this);
+  }
 }

@@ -33,12 +33,12 @@ public class KillSessionTask extends Task {
 
   @Override
   public String uniqueId() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return null;
   }
 
   @Override
   public Set<String> dagDependencies() {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    return null;
   }
 
 }

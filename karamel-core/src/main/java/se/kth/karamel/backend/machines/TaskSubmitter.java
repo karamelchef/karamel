@@ -18,4 +18,6 @@ public interface TaskSubmitter {
   public void prepareToStart(Task task) throws KaramelException;
 
   public void submitTask(Task task) throws KaramelException;
+  
+  public void killMe(Task task) throws KaramelException;
 }

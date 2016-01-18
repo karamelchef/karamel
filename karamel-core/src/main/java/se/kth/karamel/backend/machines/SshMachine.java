@@ -67,6 +67,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private boolean isSucceedTaskHistoryUpdated = false;
   private final List<String> succeedTasksHistory = new ArrayList<>();
   private static Confs confs = Confs.loadKaramelConfs();
+
   /**
    * This constructor is used for users with SSH keys protected by a password
    *
@@ -181,9 +182,11 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  public void killSession() {
-    KillSessionTask task = new KillSessionTask();
-    runTask(task);
+  public void killTaskSession(Task task) {
+    if (activeTask == task) {
+      KillSessionTask killTask = new KillSessionTask();
+      runTask(killTask);
+    }
   }
 
   private void runTask(Task task) {
@@ -192,7 +195,7 @@ public class SshMachine implements MachineInterface, Runnable {
       isSucceedTaskHistoryUpdated = true;
     }
     String skipConf = confs.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
-    if (skipConf != null && skipConf.equalsIgnoreCase("true")  
+    if (skipConf != null && skipConf.equalsIgnoreCase("true")
         && task.isIdempotent() && succeedTasksHistory.contains(task.getId())) {
       task.exists();
       logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
