@@ -194,6 +194,32 @@ public class SshMachine implements MachineInterface, Runnable {
           task.getMachine().getPublicIp()));
     }
   }
+  
+  public void retryFailedTask(Task task) throws KaramelException {
+    if (task.getStatus() == Status.FAILED) {
+      logger.info(String.format("Retrying '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
+      machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
+      runTask(task);
+    } else {
+      String msg = String.format("Impossible to retry '%s' on '%s' because the task is not failed", task.getName(), 
+          task.getMachineId());
+      logger.error(msg);
+      throw new KaramelException(msg);
+    }
+  }
+  
+  public void skipFailedTask(Task task) throws KaramelException {
+    if (task.getStatus() == Status.FAILED) {
+      logger.info(String.format("Skipping '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
+      machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
+      task.skipped();
+    } else {
+      String msg = String.format("Impossible to skip '%s' on '%s' because the task is not failed", task.getName(), 
+          task.getMachineId());
+      logger.error(msg);
+      throw new KaramelException(msg);
+    }
+  }
 
   private void runTask(Task task) {
     if (!isSucceedTaskHistoryUpdated) {

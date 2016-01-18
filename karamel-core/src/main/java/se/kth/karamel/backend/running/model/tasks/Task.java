@@ -30,7 +30,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, EXIST, ONGOING, DONE, FAILED;
+    WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
   }
   private Status status = Status.WAITING;
   private final String name;
@@ -47,7 +47,7 @@ public abstract class Task implements DagTask, TaskCallback {
   private long duration = 0;
   private boolean markSkip = false;
 
-  public Task(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats, 
+  public Task(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats,
       TaskSubmitter submitter) {
     this.name = name;
     this.id = id;
@@ -94,7 +94,7 @@ public abstract class Task implements DagTask, TaskCallback {
   public boolean isMarkSkip() {
     return markSkip;
   }
-  
+
   public abstract List<ShellCommand> getCommands() throws IOException;
 
   public void setCommands(List<ShellCommand> commands) {
@@ -160,7 +160,7 @@ public abstract class Task implements DagTask, TaskCallback {
     status = Status.EXIST;
     dagCallback.exists();
   }
-  
+
   @Override
   public void started() {
     status = Status.ONGOING;
@@ -174,13 +174,20 @@ public abstract class Task implements DagTask, TaskCallback {
     addStats();
     dagCallback.succeed();
   }
-
+  
   @Override
   public void failed(String reason) {
     this.status = Status.FAILED;
     machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, reason);
     addStats();
     dagCallback.failed(reason);
+  }
+
+  @Override
+  public void skipped() {
+    status = Status.SKIPPED;
+    addStats();
+    dagCallback.skipped();
   }
 
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
@@ -201,8 +208,17 @@ public abstract class Task implements DagTask, TaskCallback {
     TaskStat taskStat = new TaskStat(getId(), machine.getMachineType(), status.name(), duration);
     clusterStats.addTask(taskStat);
   }
-  
+
   public void kill() throws KaramelException {
     submitter.killMe(this);
   }
+
+  public void retry() throws KaramelException {
+    submitter.retryMe(this);
+  }
+
+  public void skip() throws KaramelException {
+    submitter.skipMe(this);
+  }
+  
 }
