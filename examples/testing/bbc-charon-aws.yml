@@ -1,4 +1,4 @@
-name: BiobankCloudSingleNodeFuller
+name: BiobankCloudCharon
 ec2:
     type: m3.xlarge
     region: eu-west-1
@@ -75,7 +75,7 @@ attrs:
     user_email: jdowling@kth.se
     
 groups: 
-  master:
+  donald:
     size: 1 
     recipes:                                                                    
         - ndb::mysqld                                                       
@@ -91,10 +91,20 @@ groups:
         - charon
         - elastic
         - spark::yarn
-        - hiway::hiway_client
-        - hiway::cuneiform_client
-        - hiway::helloworld_client
-        - hiway::wordcount_client
-        - hiway::hiway_worker 
-        - hiway::cuneiform_worker
-        - hiway::variantcall_worker
+  douglas:
+    size: 1
+    recipes:
+        - ndb::mysqld
+        - ndb::mgmd
+        - ndb::ndbd
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - hops::dn
+        - hops::nm
+        - hopsworks
+        - zeppelin
+        - charon
+        - elastic
+        - spark::yarn
+

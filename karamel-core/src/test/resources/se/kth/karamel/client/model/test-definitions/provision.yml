@@ -1,50 +1,9 @@
 name: provision
 
 ec2:
-  region: ap-northeast-1
+  region: eu-west-1
+  type: i2.4xlarge
   
 groups: 
-  nodes1:
-    ec2:
-      region: ap-northeast-1
-    size: 1
-    
-  nodes2:
-    ec2:
-      region: ap-southeast-1
-    size: 1
-    
-  nodes3:
-    ec2:
-      region: ap-southeast-2
-    size: 1
-    
-  nodes4:
-    ec2:
-      region: eu-central-1
-    size: 1
-    
-  nodes5:
-    ec2:
-      region: eu-west-1
-    size: 1
-
-  nodes6:
-    ec2:
-      region: sa-east-1
-    size: 1
-    
-  nodes7:
-    ec2:
-      region: us-east-1
-    size: 1
-    
-  nodes8:
-    ec2:
-      region: us-west-1
-    size: 1
-
-  nodes9:
-    ec2:
-      region: us-west-2
+  nodes:
     size: 1
