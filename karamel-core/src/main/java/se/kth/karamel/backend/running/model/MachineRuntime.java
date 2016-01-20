@@ -61,7 +61,7 @@ public class MachineRuntime {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public String getPublicIp() {
     return publicIp;
   }
@@ -105,7 +105,7 @@ public class MachineRuntime {
   public void setMachineType(String machineType) {
     this.machineType = machineType;
   }
-  
+
   public void addTask(Task task) {
     tasks.add(task);
   }
@@ -122,15 +122,15 @@ public class MachineRuntime {
     return tasksStatus;
   }
 
-  public synchronized  void setTasksStatus(TasksStatus tasksStatus, String taskId, String failureMessage) {
+  public synchronized void setTasksStatus(TasksStatus tasksStatus, String taskId, String failureMessage) {
     this.tasksStatus = tasksStatus;
-    if (tasksStatus == TasksStatus.FAILED)
+    if (tasksStatus == TasksStatus.FAILED) {
       group.getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, taskId, failureMessage));
+    }
   }
 
   public String getId() {
     return publicIp;
   }
-  
-  
+
 }

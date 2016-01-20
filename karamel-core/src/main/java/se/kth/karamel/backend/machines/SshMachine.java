@@ -105,7 +105,15 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void resume() {
-    if (machineEntity.getTasksStatus() != MachineRuntime.TasksStatus.FAILED) {
+    boolean anyfailure = false;
+    if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.FAILED) {
+      for (Task task : machineEntity.getTasks()) {
+        if (task.getStatus() == Task.Status.FAILED) {
+          anyfailure = true;
+        }
+      }
+    }
+    if (!anyfailure) {
       if (taskQueue.isEmpty()) {
         machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
       } else {
@@ -190,31 +198,33 @@ public class SshMachine implements MachineInterface, Runnable {
       killing = true;
       runTask(killTask);
     } else {
-      logger.warn(String.format("Request to kill '%s' on '%s' but the task is not ongoing now", task.getName(), 
+      logger.warn(String.format("Request to kill '%s' on '%s' but the task is not ongoing now", task.getName(),
           task.getMachine().getPublicIp()));
     }
   }
-  
+
   public void retryFailedTask(Task task) throws KaramelException {
     if (task.getStatus() == Status.FAILED) {
       logger.info(String.format("Retrying '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
       runTask(task);
     } else {
-      String msg = String.format("Impossible to retry '%s' on '%s' because the task is not failed", task.getName(), 
+      String msg = String.format("Impossible to retry '%s' on '%s' because the task is not failed", task.getName(),
           task.getMachineId());
       logger.error(msg);
       throw new KaramelException(msg);
     }
   }
-  
+
   public void skipFailedTask(Task task) throws KaramelException {
     if (task.getStatus() == Status.FAILED) {
       logger.info(String.format("Skipping '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
       task.skipped();
+      if (activeTask == task)
+        activeTask = null;
     } else {
-      String msg = String.format("Impossible to skip '%s' on '%s' because the task is not failed", task.getName(), 
+      String msg = String.format("Impossible to skip '%s' on '%s' because the task is not failed", task.getName(),
           task.getMachineId());
       logger.error(msg);
       throw new KaramelException(msg);
@@ -344,11 +354,11 @@ public class SshMachine implements MachineInterface, Runnable {
           SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
-          if (!killing && 
-              getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+          if (!killing
+              && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
           }
-          
+
           if (killing) {
             logger.info(String.format("Killed '%s' on '%s' successfully...", task.getName(), machineEntity.getId()));
           }
