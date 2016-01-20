@@ -103,7 +103,7 @@ public class KandyRestClient {
           >= 300) {
         logger.debug(String.format("Kandy server couldn't store the cluster stats because '%s'",
             response.getStatusInfo().getReasonPhrase()));
-      }
+      } else
       logger.debug(String.format("Cluster status is updated in Kandy with id %s", stats.getId()));
     } catch (Exception e) {
       logger.debug("exception during updatinig cluster stats to Kandy: " + e.getMessage());

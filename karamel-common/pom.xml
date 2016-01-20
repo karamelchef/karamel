@@ -13,7 +13,7 @@
   <url>http://maven.apache.org</url>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jclouds.version>1.9.0</jclouds.version>
+    <jclouds.version>1.9.2</jclouds.version>
   </properties>
   <dependencies>
     <dependency>
@@ -24,7 +24,7 @@
     <dependency>
       <groupId>org.apache.jclouds</groupId>
       <artifactId>jclouds-compute</artifactId>
-      <version>1.9.1</version>
+      <version>${jclouds.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
