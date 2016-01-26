@@ -25,6 +25,8 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
+import se.kth.karamel.backend.launcher.occi.OcciContext;
+import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -52,7 +54,8 @@ import se.kth.karamel.common.cookbookmeta.ExperimentRecipe;
 import se.kth.karamel.common.cookbookmeta.InstallRecipe;
 import se.kth.karamel.common.cookbookmeta.KaramelFile;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
-
+import se.kth.karamel.common.exception.InvalidOcciCredentialsException;
+import se.kth.karamel.common.util.OcciCredentials;
 /**
  * Implementation of the Karamel Api for UI
  *
@@ -141,6 +144,24 @@ public class KaramelApiImpl implements KaramelApi {
     } catch (Throwable ex) {
       throw new KaramelException(ex.getMessage());
     }
+    return true;
+  }
+
+  @Override
+  public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    
+    return OcciLauncher.readCredentials(confs);
+  }
+
+  @Override
+  public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws InvalidOcciCredentialsException {
+    OcciContext context = OcciLauncher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put("OCCI_USER_CERTIFICATE_PATH", credentials.getUserCertificatePath());
+    confs.put("OCCI_CERTIFICATE_DIR", credentials.getSystemCertDir());
+    confs.writeKaramelConfs();
+    clusterService.registerOcciContext(context);
     return true;
   }
 

@@ -9,8 +9,10 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Occi;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
@@ -27,6 +29,7 @@ public class ClusterContext {
   private Ec2Context ec2Context;
   private GceContext gceContext;
   private SshKeyPair sshKeyPair;
+  private OcciContext occiContext;
   private String sudoAccountPassword = "";
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
@@ -68,6 +71,9 @@ public class ClusterContext {
     if (sshKeyPair == null) {
       sshKeyPair = commonContext.getSshKeyPair();
     }
+    if (occiContext == null) {
+      occiContext = commonContext.getOcciContext();
+    }
   }
 
   public static ClusterContext validateContext(JsonCluster definition,
@@ -86,6 +92,8 @@ public class ClusterContext {
         throw new KaramelException("No valid Ec2 credentials registered :-|");
       } else if (provider instanceof Gce && context.getGceContext() == null) {
         throw new KaramelException("No valid Gce credentials registered :-|");
+      } else if (provider instanceof Occi && context.getOcciContext() == null){
+        throw new KaramelException("No valid Occi credentials registered :-|");
       }
     }
 
@@ -108,4 +116,14 @@ public class ClusterContext {
   public void setGceContext(GceContext gceContext) {
     this.gceContext = gceContext;
   }
+
+  
+  public void setOcciContext(OcciContext occiContext) {
+    this.occiContext = occiContext;
+  }
+
+  public OcciContext getOcciContext() {
+    return occiContext;
+  }
+  
 }

@@ -17,6 +17,7 @@ public abstract class Scope {
   private Vagrant vagrant;
   private Baremetal baremetal;
   private Gce gce;
+  private Occi occi;
 
   public Scope() {
   }
@@ -26,6 +27,7 @@ public abstract class Scope {
     this.vagrant = scope.getVagrant();
     this.baremetal = scope.getBaremetal();
     this.gce = scope.getGce();
+    this.occi = scope.getOcci();
   }
 
   public abstract Object getAttr(String key);
@@ -37,6 +39,8 @@ public abstract class Scope {
       return gce;
     } else if (vagrant != null) {
       return vagrant;
+    } else if(occi != null){
+      return occi;
     } else {
       return baremetal;
     }
@@ -73,6 +77,14 @@ public abstract class Scope {
   public void setGce(Gce gce) {
     this.gce = gce;
   }
+  
+  public Occi getOcci() {
+    return occi;
+  }
+  
+  public void setOcci(Occi occi) {
+    this.occi = occi;
+  }
 
   public void validate() throws ValidationException {
     if (ec2 != null) {
@@ -83,6 +95,9 @@ public abstract class Scope {
     }
     if (vagrant != null) {
       vagrant.validate();
+    }
+    if(occi != null){
+      occi.validate();
     }
   }
 ;

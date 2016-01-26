@@ -12,6 +12,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
@@ -201,4 +202,8 @@ public class ClusterService {
     return validatedContext;
   }
 
+  
+  public synchronized void registerOcciContext(OcciContext context) {
+    commonContext.setOcciContext(context);
+  }
 }

@@ -14,6 +14,9 @@ angular.module('main.module')
         if (info.cluster.hasGce()) {
           map[info.cluster.gce.getMapKey()] = info.cluster.gce;
         }
+        if(info.cluster.hasOcci()){
+              map[info.cluster.occi.getMapKey()] = info.cluster.occi;
+        }
         map[info.cluster.sshKeyPair.getMapKey()] = info.cluster.sshKeyPair;
       }
 

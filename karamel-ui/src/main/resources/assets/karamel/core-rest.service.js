@@ -137,6 +137,16 @@ angular.module('main.module')
           var url = _defaultHost.concat("/ec2/validateCredentials");
           return _getPromiseObject(method, url, _defaultContentType, providerInfo);
         },
+        loadOcciCredentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/occi/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateOcciCredentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/occi/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+        },
         loadGceCredentials: function() {
           var method = 'PUT';
           var url = _defaultHost.concat("/gce/loadCredentials");

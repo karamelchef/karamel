@@ -24,6 +24,7 @@ angular.module('main.module')
                   $log.info("Success");
 
                   try {
+                    $log.info(data);
                     var cluster = new Cluster();
                     cluster.load(data);
                     $rootScope.activeCluster = cluster;

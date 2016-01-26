@@ -7,6 +7,7 @@ function Cluster() {
   this.gce = null;
   this.openstack = null;
   this.baremetal = null;
+  this.occi = null;
   this.sshKeyPair = null;
 
   this.addCookbook = function(cookbook) {
@@ -55,7 +56,7 @@ function Cluster() {
     this.name = other.name;
     this.loadEc2(this, other["ec2"]);
     this.loadGce(this, other["gce"]);
-    this.loadOpenStack(this, other["openstack"]);
+    this.loadOcci(this, other["occi"]);
     this.loadBaremetal(this, other["baremetal"]);
     this.loadSshKeyPair(this, null);
     this.loadGroups(this, other["groups"]);
@@ -75,6 +76,13 @@ function Cluster() {
       this.gce.copy(other.gce);
     } else
       this.gce = null;
+
+  
+    if (other.occi !== null) {
+      this.occi = new Occi();
+      this.occi.copy(other.occi);
+    } else
+      this.occi = null;
 
     if (other.baremetal !== null) {
       this.baremetal = new Baremetal();
@@ -138,6 +146,15 @@ function Cluster() {
       container.openstack = os;
     } else
       container.os = null;
+  };
+
+  this.loadOcci = function(container, provider) {
+    if (!(_.isUndefined(provider) || _.isNull(provider))) {
+      var occi = new Occi();
+      occi.load(provider);
+      container.occi = occi;
+    } else
+      container.occi = null;
   };
 
   this.loadBaremetal = function(container, provider) {
@@ -223,6 +240,18 @@ function Cluster() {
     return false;
   };
 
+  this.hasOcci = function() {
+    if (this.occi)
+      return true;
+    else {
+      for (var i = 0; i < this.cookbooks; i++) {
+        if (cookbooks[i].occi)
+          return true;
+      }
+    }
+    return false;
+  };
+
 
   this.hasBaremetal = function() {
     if (this.baremetal)
@@ -243,6 +272,9 @@ function Cluster() {
     }
     if (this.hasGce()) {
       result = result && this.gce.getIsValid();
+    }
+    if (this.hasOcci()) {
+      result = result && this.occi.getIsValid();
     }
     result = result && this.sshKeyPair.getIsValid();
     return result;
@@ -388,7 +420,41 @@ function OpenStack() {
 // Inherit from the Provider.
 OpenStack.prototype = Object.create(Provider.prototype);
 
+function Occi() {
+  this.mapKey = "occi";
+  //this.userCertificatePath = null;
+  this.username = null;
+  this.occiEndpoint = null;
+  this.occiImage = null;  
+  this.occiImageSize = null; 
 
+  this.load = function(other) {
+    //this.userCertificatePath = other.userCertificatePath || null;
+    this.username = other.username || null;
+    this.occiEndpoint = other.occiEndpoint || null;
+    this.occiImage = other.occiImage || null;
+    this.occiImageSize = other.occiImageSize || null;
+  };
+
+  this.copy = function(other) {
+    //this.userCertificatePath = other.userCertificatePath || null;
+    this.username = other.username || null;
+    this.occiEndpoint = other.occiEndpoint || null;
+    this.occiImage = other.occiImage || null;
+    this.occiImageSize = other.occiImageSize || null;
+  };
+
+  this.addAccountDetails = function(other) {
+    //this.userCertificatePath = other.userCertificatePath || null;
+    this.username = other.username || null;
+    this.occiEndpoint = other.occiEndpoint || null;
+    this.occiImage = other.occiImage || null;
+    this.occiImageSize = other.occiImageSize || null;
+  };
+}
+
+// Inherit from the Provider.
+Occi.prototype = Object.create(Provider.prototype);
 
 function Baremetal() {
   this.mapKey = "baremetal";
@@ -502,6 +568,7 @@ function Group() {
   this.ec2 = {};
   this.gce = {};
   this.openstack = {};
+  this.occi = {};
   this.baremetal = {};
   this.cookbooks = [];
 
@@ -516,6 +583,7 @@ function Group() {
     this.ec2 = group.ec2;
     this.gce = group.gce;
     this.openstack = group.openstack;
+    this.occi = group.occi;
     this.baremetal = group.baremetal;
   };
 
@@ -529,6 +597,7 @@ function Group() {
     this.ec2 = other.ec2;
     this.gce = other.gce;
     this.openstack = other.openstack;
+    this.occi = other.occi;
     this.baremetal = other.baremetal;
 
     // Load cookbooks instead of copying.
@@ -598,6 +667,15 @@ function toCoreApiFormat(uiCluster) {
       container.openstack = openstack;
     }
   }
+  
+ function _addOcci(container, provider) {
+    if (provider) {
+      var occi = new _Occi();
+      occi.load(provider);
+      container.occi = occi;
+    }
+  }
+
   function _addCookbooks(container, cookbooks) {
     for (var i = 0; i < cookbooks.length; i++) {
       var cookbook = new _Cookbook();
@@ -630,6 +708,7 @@ function toCoreApiFormat(uiCluster) {
     this.ec2 = null;
     this.gce = null;
     this.openstack = null;
+    this.occi = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -651,6 +730,7 @@ function toCoreApiFormat(uiCluster) {
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
       _addOpenStack(this, other.openstack);
+      _addOcci(this, other.occi);
       _addBaremetal(this, other.baremetal);
       _addCookbooks(this, other.cookbooks);
       _addGroups(this, other.groups);
@@ -666,6 +746,7 @@ function toCoreApiFormat(uiCluster) {
     this.ec2 = null;
     this.gce = null;
     this.openstack = null;
+    this.occi = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -682,6 +763,7 @@ function toCoreApiFormat(uiCluster) {
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
       _addOpenStack(this, other.openstack);
+      _addOcci(this, other.occi);
       _addBaremetal(this, other.baremetal);
     }
   }
@@ -742,6 +824,19 @@ function toCoreApiFormat(uiCluster) {
     this.load = function(other) {
       this.type = other.type || null;
       this.image = other.image || null;
+    }
+  }
+
+  function _Occi(){
+    this.username = null;;
+    this.occiImage = null;
+    this.occiEndpoint = null;
+    this.occiImageSize = null;
+    this.load = function(other){
+      this.username = other.username|| null;
+      this.occiEndpoint = other.occiEndpoint || null;
+      this.occiImage = other.occiImage || null;
+      this.occiImageSize = other.occiImageSize || null;
     }
   }
 

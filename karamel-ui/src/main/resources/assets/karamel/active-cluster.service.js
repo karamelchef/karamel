@@ -14,6 +14,7 @@ angular.module('main.module')
         var data = {
           json: angular.toJson(coreFormatCluster)
         };
+        $log.info(data);
         coreService.startCluster(data)
           .success(function(data, status, headers, config) {
             $log.info("Connection Successful.");
@@ -301,22 +302,26 @@ angular.module('main.module')
         hasOpenStack: function() {
           return ($rootScope.activeCluster && $rootScope.activeCluster.hasOpenStack());
         },
+	hasOcci: function() {
+          return ($rootScope.activeCluster && $rootScope.activeCluster.hasOcci());
+        },
         hasProvider: function() {
           return ($rootScope.activeCluster &&
             ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() ||
-              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasOpenStack()));
+              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasOpenStack() ||
+	       $rootScope.activeCluster.hasOcci()));
         },
         name: function() {
           return $rootScope.activeCluster.name;
         },
         launchCluster: function() {
-          var cluster = $rootScope.activeCluster;
+          var cluster = $rootScope.activeCluster;         
           if (cluster === null) {
             $log.info("No Active Cluster Object Present.");
             alertService.addAlert({type: 'warning', msg: 'No Active Cluster Found.'});
             return;
           }
-          if (!$rootScope.activeCluster.areCredentialsSet()) {
+          if (!$rootScope.activeCluster.areCredentialsSet()) {             
             this.setCredentials(true);
           }
           else {
