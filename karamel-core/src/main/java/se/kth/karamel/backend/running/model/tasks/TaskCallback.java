@@ -18,4 +18,5 @@ public interface TaskCallback {
   public void succeed();
   public void failed(String reason);
   public void skipped();
+  public void retried();
 }

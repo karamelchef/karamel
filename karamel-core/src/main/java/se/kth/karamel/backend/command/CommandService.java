@@ -590,7 +590,7 @@ public class CommandService {
                   taskFound = true;
                   if (task.getStatus() == Task.Status.FAILED) {
                     task.skip();
-                    successMessage = String.format("The failed task '%s' on '%s' has been skipped successfully", 
+                    successMessage = String.format("The failed task '%s' on '%s' has been skipped successfully",
                         task.getName(), task.getMachineId());
                   }
                 }
@@ -623,7 +623,7 @@ public class CommandService {
                   taskFound = true;
                   if (task.getStatus() == Task.Status.FAILED) {
                     task.retry();
-                    successMessage = String.format("The failed task '%s' on '%s' has been retried successfully", 
+                    successMessage = String.format("The failed task '%s' on '%s' has been retried successfully",
                         task.getName(), task.getMachineId());
                   }
                 }
@@ -656,7 +656,7 @@ public class CommandService {
                   taskFound = true;
                   if (task.getStatus() == Task.Status.ONGOING) {
                     task.kill();
-                    successMessage = String.format("The failed task '%s' on '%s' has been killed successfully", 
+                    successMessage = String.format("The failed task '%s' on '%s' has been killed successfully",
                         task.getName(), task.getMachineId());
                   }
                 }
@@ -811,17 +811,17 @@ public class CommandService {
       String actions = "";
       if (task.getStatus().ordinal() == Task.Status.ONGOING.ordinal()) {
         actions += "<a kref='kill " + uuid + "'>kill</a>";
-      } 
-      
-      if (task.getStatus().ordinal() == Task.Status.FAILED.ordinal()) {
-        actions += "<a kref='retryfailed " + uuid + "'>retry</a>" + 
-            "  <a kref='skipfailed " + uuid + "'>skip</a>";
-      } 
-      
-      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
-        actions += "  <a kref='log " + uuid + "'>log</a>";
       }
-      
+
+      if (task.getStatus().ordinal() == Task.Status.FAILED.ordinal()) {
+        actions += "<a kref='retryfailed " + uuid + "'>retry</a>"
+            + "  <a kref='skipfailed " + uuid + "'>skip</a>";
+      }
+
+      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
+        actions += "<a kref='log " + uuid + "'>log</a>";
+      }
+
       data[i][2] = actions;
 
       if (task.getDuration() > 0) {

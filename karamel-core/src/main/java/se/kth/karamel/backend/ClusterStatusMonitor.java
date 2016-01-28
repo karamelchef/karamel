@@ -47,8 +47,10 @@ public class ClusterStatusMonitor implements Runnable {
       try {
         if (clusterEntity.isFailed()) {
           machinesMonitor.pause();
+          clusterEntity.setPaused(true);
         } else {
           machinesMonitor.resume();
+          clusterEntity.setPaused(false);
         }
         try {
           long lastReportInterval = System.currentTimeMillis() - lastStatsReport;

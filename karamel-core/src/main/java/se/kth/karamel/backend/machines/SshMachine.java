@@ -99,12 +99,22 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void pause() {
-    if (machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
+    if (anyFailure() && machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
       machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSING, null, null);
     }
   }
 
   public void resume() {
+    if (!anyFailure()) {
+      if (taskQueue.isEmpty()) {
+        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
+      } else {
+        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
+      }
+    }
+  }
+
+  private boolean anyFailure() {
     boolean anyfailure = false;
     if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.FAILED) {
       for (Task task : machineEntity.getTasks()) {
@@ -113,13 +123,7 @@ public class SshMachine implements MachineInterface, Runnable {
         }
       }
     }
-    if (!anyfailure) {
-      if (taskQueue.isEmpty()) {
-        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
-      } else {
-        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
-      }
-    }
+    return anyfailure;
   }
 
   @Override
@@ -207,7 +211,9 @@ public class SshMachine implements MachineInterface, Runnable {
     if (task.getStatus() == Status.FAILED) {
       logger.info(String.format("Retrying '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
-      runTask(task);
+      task.retried();
+      activeTask = task;
+      resume();
     } else {
       String msg = String.format("Impossible to retry '%s' on '%s' because the task is not failed", task.getName(),
           task.getMachineId());
@@ -221,8 +227,10 @@ public class SshMachine implements MachineInterface, Runnable {
       logger.info(String.format("Skipping '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
       task.skipped();
-      if (activeTask == task)
+      if (activeTask == task) {
         activeTask = null;
+      }
+      resume();
     } else {
       String msg = String.format("Impossible to skip '%s' on '%s' because the task is not failed", task.getName(),
           task.getMachineId());

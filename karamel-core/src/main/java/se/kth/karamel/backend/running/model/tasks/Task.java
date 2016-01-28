@@ -184,6 +184,12 @@ public abstract class Task implements DagTask, TaskCallback {
   }
 
   @Override
+  public void retried() {
+    status = Status.READY;
+    addStats();
+  }
+
+  @Override
   public void skipped() {
     status = Status.SKIPPED;
     addStats();
