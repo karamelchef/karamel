@@ -37,7 +37,8 @@ public class AptGetEssentialsTask extends Task {
           "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

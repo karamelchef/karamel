@@ -101,7 +101,7 @@ public class Dag {
 
   public boolean isDone() {
     for (DagNode node : allNodes.values()) {
-      if (node.getStatus() != DagNode.Status.DONE && node.getStatus() != DagNode.Status.SKIPPED) {
+      if (node.getStatus() != DagNode.Status.DONE && node.getStatus() != DagNode.Status.EXIST) {
         return false;
       }
     }

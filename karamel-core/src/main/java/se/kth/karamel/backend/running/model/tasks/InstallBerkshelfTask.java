@@ -31,7 +31,8 @@ public class InstallBerkshelfTask extends Task {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

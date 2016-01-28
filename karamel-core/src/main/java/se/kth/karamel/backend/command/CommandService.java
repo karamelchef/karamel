@@ -411,6 +411,18 @@ public class CommandService {
             @Override
             public void prepareToStart(Task task) throws KaramelException {
             }
+
+            @Override
+            public void killMe(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void retryMe(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void skipMe(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -446,6 +458,18 @@ public class CommandService {
 
             @Override
             public void prepareToStart(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void killMe(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void retryMe(Task task) throws KaramelException {
+            }
+
+            @Override
+            public void skipMe(Task task) throws KaramelException {
             }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
@@ -548,6 +572,105 @@ public class CommandService {
         } else {
           throw new KaramelException("no cluster has been chosen yet!!");
         }
+      }
+
+      p = Pattern.compile("skipfailed\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  if (task.getStatus() == Task.Status.FAILED) {
+                    task.skip();
+                    successMessage = String.format("The failed task '%s' on '%s' has been skipped successfully",
+                        task.getName(), task.getMachineId());
+                  }
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
+          }
+          addActiveClusterMenus(response);
+        } else {
+          throw new KaramelException("no cluster has been chosen yet!!");
+        }
+        nextCmd = "status";
+      }
+
+      p = Pattern.compile("retryfailed\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  if (task.getStatus() == Task.Status.FAILED) {
+                    task.retry();
+                    successMessage = String.format("The failed task '%s' on '%s' has been retried successfully",
+                        task.getName(), task.getMachineId());
+                  }
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
+          }
+          addActiveClusterMenus(response);
+        } else {
+          throw new KaramelException("no cluster has been chosen yet!!");
+        }
+        nextCmd = "status";
+      }
+
+      p = Pattern.compile("kill\\s+(.*)");
+      matcher = p.matcher(cmd);
+      if (!found && matcher.matches()) {
+        found = true;
+        String taskuuid = matcher.group(1);
+        if (chosenCluster() != null) {
+          boolean taskFound = false;
+          ClusterManager cluster = cluster(chosenCluster());
+          ClusterRuntime clusterEntity = cluster.getRuntime();
+          for (GroupRuntime group : clusterEntity.getGroups()) {
+            for (MachineRuntime machine : group.getMachines()) {
+              for (Task task : machine.getTasks()) {
+                if (task.getUuid().equals(taskuuid)) {
+                  taskFound = true;
+                  if (task.getStatus() == Task.Status.ONGOING) {
+                    task.kill();
+                    successMessage = String.format("The failed task '%s' on '%s' has been killed successfully",
+                        task.getName(), task.getMachineId());
+                  }
+                }
+              }
+            }
+          }
+          if (!taskFound) {
+            throw new KaramelException("Opps, task was not found, make sure cluster is chosen first");
+          }
+          addActiveClusterMenus(response);
+        } else {
+          throw new KaramelException("no cluster has been chosen yet!!");
+        }
+        nextCmd = "status";
       }
 
       p = Pattern.compile("which\\s+(cluster|aws|ssh)");
@@ -678,18 +801,28 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Logs", "Duration(ms)"};
+    String[] columnNames = {"Task", "Status", "Actions", "Duration(ms)"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
       data[i][0] = task.getName();
       data[i][1] = task.getStatus();
       String uuid = task.getUuid();
-      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
-        data[i][2] = "<a kref='log " + uuid + "'>log</a>";
-      } else {
-        data[i][2] = "";
+      String actions = "";
+      if (task.getStatus().ordinal() == Task.Status.ONGOING.ordinal()) {
+        actions += "<a kref='kill " + uuid + "'>kill</a>";
       }
+
+      if (task.getStatus().ordinal() == Task.Status.FAILED.ordinal()) {
+        actions += "<a kref='retryfailed " + uuid + "'>retry</a>"
+            + "  <a kref='skipfailed " + uuid + "'>skip</a>";
+      }
+
+      if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
+        actions += "<a kref='log " + uuid + "'>log</a>";
+      }
+
+      data[i][2] = actions;
 
       if (task.getDuration() > 0) {
         data[i][3] = task.getDuration();

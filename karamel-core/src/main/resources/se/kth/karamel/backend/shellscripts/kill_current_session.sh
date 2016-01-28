@@ -1,0 +1,1 @@
+if %sudo_command% ps -p $(<%pid_file%) > /dev/null; then %sudo_command% pkill -9 -s $(<%pid_file%); fi
