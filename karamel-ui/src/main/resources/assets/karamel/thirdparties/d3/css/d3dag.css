@@ -83,6 +83,10 @@ svg {
     background-color: #336699;
 }
 
+.live.map .exist .status {
+    background-color: #ffffff;
+}
+
 .live.map .ready .status {
     background-color: #ffcc00;
 }

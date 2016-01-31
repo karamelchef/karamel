@@ -44,7 +44,7 @@ public class RunRecipeTask extends Task {
 
   public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
       TaskSubmitter submitter, String cookbookId, String cookbookName) {
-    super(recipe, cookbookId + "/" + recipe, machine, clusterStats, submitter);
+    super(recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
     this.cookbookId = cookbookId;
@@ -114,7 +114,10 @@ public class RunRecipeTask extends Task {
           "chef_json", json,
           "json_file_name", jsonFileName,
           "log_file_name", jsonFileName,
-          "sudo_command", getSudoCommand());
+          "sudo_command", getSudoCommand(),
+          "task_id", getId(),
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

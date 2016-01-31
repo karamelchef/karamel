@@ -84,7 +84,7 @@ public class ChefJsonGenerator {
   public static void addRunListForRecipe(JsonObject chefJson, String recipeName) {
     JsonArray jarr = new JsonArray();
     jarr.add(new JsonPrimitive(recipeName));
-    chefJson.add(Settings.CHEF_JSON_RUNLIST_TAG, jarr);
+    chefJson.add(Settings.REMOTE_CHEFJSON_RUNLIST_TAG, jarr);
   }
 
   public static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
@@ -146,8 +146,10 @@ public class ChefJsonGenerator {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
             if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
-              String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PRIVATE_IPS;
-              String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + Settings.CHEF_PUBLIC_IPS;
+              String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
+                  Settings.REMOTE_CHEFJSON_PRIVATEIPS_TAG;
+              String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
+                  Settings.REMOTE_CHEFJSON_PUBLICIPS_TAG;
               if (!privateIps.containsKey(privateAttr)) {
                 privateIps.put(privateAttr, new HashSet<String>());
                 publicIps.put(publicAttr, new HashSet<String>());

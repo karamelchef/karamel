@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.common.cookbookmeta;
 
-import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.common.util.Settings;

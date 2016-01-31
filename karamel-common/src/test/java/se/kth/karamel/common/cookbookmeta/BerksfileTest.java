@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.common.cookbookmeta;
 
-import se.kth.karamel.common.cookbookmeta.Berksfile;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.Assert;

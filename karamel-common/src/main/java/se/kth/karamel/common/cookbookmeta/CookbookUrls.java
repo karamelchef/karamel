@@ -9,11 +9,11 @@ import java.util.regex.Matcher;
 import se.kth.karamel.common.util.Settings;
 import static se.kth.karamel.common.util.Settings.CB_CLASSPATH_MODE;
 import static se.kth.karamel.common.util.Settings.COOKBOOKS_PATH;
-import static se.kth.karamel.common.util.Settings.COOKBOOK_BERKSFILE_REL_URL;
-import static se.kth.karamel.common.util.Settings.COOKBOOK_CONFIGFILE_REL_URL;
-import static se.kth.karamel.common.util.Settings.COOKBOOK_DEFAULTRB_REL_URL;
-import static se.kth.karamel.common.util.Settings.COOKBOOK_KARAMELFILE_REL_URL;
-import static se.kth.karamel.common.util.Settings.COOKBOOK_METADATARB_REL_URL;
+import static se.kth.karamel.common.util.Settings.CB_BERKSFILE_REL_URL;
+import static se.kth.karamel.common.util.Settings.CB_CONFIGFILE_REL_URL;
+import static se.kth.karamel.common.util.Settings.CB_DEFAULTRB_REL_URL;
+import static se.kth.karamel.common.util.Settings.CB_KARAMELFILE_REL_URL;
+import static se.kth.karamel.common.util.Settings.CB_METADATARB_REL_URL;
 import static se.kth.karamel.common.util.Settings.GITHUB_BASE_URL;
 import static se.kth.karamel.common.util.Settings.GITHUB_RAW_URL;
 import static se.kth.karamel.common.util.Settings.GITHUB_REPO_NO_BRANCH_PATTERN;
@@ -211,11 +211,11 @@ public class CookbookUrls {
         rawHome = COOKBOOKS_PATH + SLASH + repo;
       }
 
-      String attrFile = rawHome + COOKBOOK_DEFAULTRB_REL_URL;
-      String metadataFile = rawHome + COOKBOOK_METADATARB_REL_URL;
-      String karamelFile = rawHome + COOKBOOK_KARAMELFILE_REL_URL;
-      String berksFile = rawHome + COOKBOOK_BERKSFILE_REL_URL;
-      String configFile = rawHome + COOKBOOK_CONFIGFILE_REL_URL;
+      String attrFile = rawHome + CB_DEFAULTRB_REL_URL;
+      String metadataFile = rawHome + CB_METADATARB_REL_URL;
+      String karamelFile = rawHome + CB_KARAMELFILE_REL_URL;
+      String berksFile = rawHome + CB_BERKSFILE_REL_URL;
+      String configFile = rawHome + CB_CONFIGFILE_REL_URL;
       String recipesHome = rawHome + "/recipes/";
       CookbookUrls urls = new CookbookUrls(org, repo, org + SLASH + repo, repoHome, branch, cookbookRelPath, id, home,
           rawHome, attrFile, metadataFile, karamelFile, berksFile, configFile, recipesHome);

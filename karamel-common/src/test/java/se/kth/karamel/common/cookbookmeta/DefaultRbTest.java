@@ -5,8 +5,6 @@
  */
 package se.kth.karamel.common.cookbookmeta;
 
-import se.kth.karamel.common.cookbookmeta.DefaultRb;
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;

@@ -14,15 +14,15 @@ import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
- * Unit of execution in the DAG that knows about its predecessors and successors. 
- * 
+ * Unit of execution in the DAG that knows about its predecessors and successors.
+ *
  * @author kamal
  */
 public class DagNode implements DagTaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, ONGOING, DONE, FAILED;
+    WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
   }
   private static final Logger logger = Logger.getLogger(DagNode.class);
   private final String id;
@@ -51,7 +51,7 @@ public class DagNode implements DagTaskCallback {
   public Status getStatus() {
     return status;
   }
-  
+
   public void setTask(DagTask task) throws DagConstructionException {
     if (this.task == null) {
       this.task = task;
@@ -171,6 +171,13 @@ public class DagNode implements DagTaskCallback {
   }
 
   @Override
+  public void exists() {
+    logger.debug(String.format("Skipped '%s' because idempotent and exists in the machine.", id));
+    status = Status.EXIST;
+    signalChildren();
+  }
+
+  @Override
   public void started() {
     status = Status.ONGOING;
   }
@@ -183,6 +190,17 @@ public class DagNode implements DagTaskCallback {
   public void succeed() {
     logger.debug(String.format("Done '%s'", id));
     status = Status.DONE;
+    signalChildren();
+  }
+
+  @Override
+  public void skipped() {
+    logger.debug(String.format("Skip '%s'", id));
+    status = Status.SKIPPED;
+    signalChildren();
+  }
+
+  private void signalChildren() {
     for (DagNode succ : successors) {
       try {
         succ.signal(this);

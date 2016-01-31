@@ -26,6 +26,8 @@ public class Confs<K extends String, V extends String> extends Properties {
 
   private static final Logger logger = Logger.getLogger(Confs.class);
 
+  private static Confs memConfs;
+
   public synchronized <K, V> void set(K k, V v) {
     if (v == null || v.toString().isEmpty()) {
       if (contains(k)) {
@@ -34,6 +36,10 @@ public class Confs<K extends String, V extends String> extends Properties {
     } else {
       super.put(k, v);
     }
+  }
+
+  public static void setMemConfs(Confs confs) {
+    memConfs = confs;
   }
 
   public void writeKaramelConfs() {
@@ -57,7 +63,7 @@ public class Confs<K extends String, V extends String> extends Properties {
       out = new FileOutputStream(file);
       store(out, "Karamel configurations");
 
-      if ( System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
+      if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
         Set<PosixFilePermission> perms = new HashSet<>();
         perms.add(PosixFilePermission.OWNER_READ);
         perms.add(PosixFilePermission.OWNER_WRITE);
@@ -89,7 +95,11 @@ public class Confs<K extends String, V extends String> extends Properties {
   }
 
   public static Confs loadKaramelConfs() {
-    return loadConfs(Settings.KARAMEL_ROOT_PATH);
+    if (memConfs == null) {
+      return loadConfs(Settings.KARAMEL_ROOT_PATH);
+    } else {
+      return applyDefaults(memConfs);
+    }
   }
 
   public static Confs loadConfs(String folder) {
@@ -117,7 +127,9 @@ public class Confs<K extends String, V extends String> extends Properties {
   public static Confs applyDefaults(Confs prop) {
     String pubKeyPath = prop.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
     String priKeyPath = prop.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
-    String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE);
+    String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE_KEY);
+    String prepareStorage = prop.getProperty(Settings.PREPARE_STORAGES_KEY);
+    String skipExistingTasks = prop.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
     if ((pubKeyPath == null || priKeyPath == null)) {
       if (Settings.DEFAULT_PRIKEY_PATH != null) {
         pubKeyPath = Settings.DEFAULT_PUBKEY_PATH;
@@ -127,7 +139,13 @@ public class Confs<K extends String, V extends String> extends Properties {
       }
     }
     if (batchSize == null) {
-      prop.put(Settings.AWS_BATCH_SIZE, Settings.AWS_BATCH_SIZE_DEFAULT_VALUE.toString());
+      prop.put(Settings.AWS_BATCH_SIZE_KEY, Settings.AWS_BATCH_SIZE_DEFAULT.toString());
+    }
+    if (prepareStorage == null) {
+      prop.put(Settings.PREPARE_STORAGES_KEY, Settings.PREPARE_STORAGES_DEFAULT);
+    }
+    if (skipExistingTasks == null) {
+      prop.put(Settings.SKIP_EXISTINGTASKS_KEY, Settings.SKIP_EXISTINGTASKS_DEFAULT);
     }
     return prop;
   }

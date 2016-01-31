@@ -277,7 +277,7 @@
                                     <id>karamel</id>
                                     <commandLineArguments>
                                         <commandLineArgument>-server</commandLineArgument>
-                                        <commandLineArgument>conf/dropwizard.yml</commandLineArgument>
+                                        <commandLineArgument>$BASEDIR/conf/dropwizard.yml</commandLineArgument>
                                     </commandLineArguments>
                                 </program>
                             </programs>

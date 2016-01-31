@@ -6,7 +6,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.ClusterService;
@@ -22,8 +22,12 @@ import se.kth.karamel.common.util.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("apt-get essentials", "apt-get essentials", machine, clusterStats, submitter);
+  private final boolean storagePreparation;
+
+  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+      boolean storagePreparation) {
+    super("apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
+    this.storagePreparation = storagePreparation;
   }
 
   @Override
@@ -31,7 +35,10 @@ public class AptGetEssentialsTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", getSudoCommand(),
-          "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername());
+          "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
+          "task_id", getId(),
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }
@@ -47,7 +54,12 @@ public class AptGetEssentialsTask extends Task {
 
   @Override
   public Set<String> dagDependencies() {
-    return Collections.EMPTY_SET;
+    Set<String> deps = new HashSet<>();
+    if (storagePreparation) {
+      String uniqId = PrepareStoragesTask.makeUniqueId(getMachineId());
+      deps.add(uniqId);
+    }
+    return deps;
   }
 
 }

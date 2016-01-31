@@ -1,0 +1,9 @@
+name: provision
+
+ec2:
+  region: eu-west-1
+  type: i2.4xlarge
+  
+groups: 
+  nodes:
+    size: 1

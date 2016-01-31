@@ -110,7 +110,7 @@ public class GceLauncher extends Launcher {
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
     JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
     Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
     // TODO: assign arbitrary ip range.
     String groupId = createFirewall(definition.getName(), jg.getName(), Settings.GCE_DEFAULT_IP_RANGE, ports);
     return groupId;
@@ -141,7 +141,7 @@ public class GceLauncher extends Launcher {
         FirewallOptions firewall = new FirewallOptions()
             .addAllowedRule(Firewall.Rule.create(pr, ImmutableList.of(p)))
             .addSourceRange("0.0.0.0/0");
-        String fwName = Settings.UNIQUE_FIREWALL_NAME(networkName, p, pr);
+        String fwName = Settings.GCE_UNIQUE_FIREWALL_NAME(networkName, p, pr);
         operations.add(context.getFireWallApi().createInNetwork(fwName, networkUri, firewall));
         logger.info(String.format("Ports became open for '%s'", networkName));
       }

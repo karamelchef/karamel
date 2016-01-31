@@ -149,4 +149,34 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     MachineRuntime machine = task.getMachine();
     machine.addTask(task);
   }
+
+  @Override
+  public void killMe(Task task) throws KaramelException {
+    String machineName = task.getMachineId();
+    if (!machines.containsKey(machineName)) {
+      throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
+    }
+    SshMachine machine = machines.get(machineName);
+    machine.killTaskSession(task);
+  }
+
+  @Override
+  public void retryMe(Task task) throws KaramelException {
+    String machineName = task.getMachineId();
+    if (!machines.containsKey(machineName)) {
+      throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
+    }
+    SshMachine machine = machines.get(machineName);
+    machine.retryFailedTask(task);
+  }
+
+  @Override
+  public void skipMe(Task task) throws KaramelException {
+    String machineName = task.getMachineId();
+    if (!machines.containsKey(machineName)) {
+      throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
+    }
+    SshMachine machine = machines.get(machineName);
+    machine.skipFailedTask(task);
+  }
 }

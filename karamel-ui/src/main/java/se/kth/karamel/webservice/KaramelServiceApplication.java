@@ -88,6 +88,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
   private static final int PORT = 58931;
   private static ServerSocket s;
+  private static boolean cli = false;
 
   static {
 // Ensure a single instance of the app is running
@@ -158,7 +159,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   public static void main(String[] args) throws Exception {
 
     System.setProperty("java.net.preferIPv4Stack", "true");
-    boolean cli = false;
     String yamlTxt;
 
     // These args are sent to the Dropwizard app (thread)
@@ -343,22 +343,25 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
 
-    if (SystemTray.isSupported()) {
-      trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
-    }
-    new Thread("webpage opening..") {
-      public void run() {
-        try {
-          Thread.sleep(1500);
-          openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
-        } catch (InterruptedException e) {
-//           swallow the exception
-        } catch (java.net.MalformedURLException e) {
-          // swallow the exception
-        }
+    if (!cli) {
+      if (SystemTray.isSupported()) {
+        trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
       }
-    }.start();
 
+      new Thread("webpage opening..") {
+        public void run() {
+          try {
+            Thread.sleep(1500);
+            openWebpage(new URL("http://localhost:" + webPort + "/index.html#/"));
+          } catch (InterruptedException e) {
+            // swallow the exception
+          } catch (java.net.MalformedURLException e) {
+            // swallow the exception
+          }
+        }
+      }.start();
+
+    }
   }
 
   protected static Image createImage(String path, String description) {

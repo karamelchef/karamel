@@ -24,7 +24,7 @@ public class MakeSoloRbTask extends Task {
   private final String vendorPath;
 
   public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("make solo.rb", "make solo.rb", machine, clusterStats, submitter);
+    super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
   }
 
@@ -33,7 +33,8 @@ public class MakeSoloRbTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "cookbooks_path", vendorPath,
-          "sudo_command", getSudoCommand());
+          "sudo_command", getSudoCommand(),
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }
