@@ -260,7 +260,7 @@ public final class NovaLauncher extends Launcher{
     Provider provider = UserClusterDataExtractor.getGroupProvider(definition,name);
     Nova nova = (Nova) provider;
     Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.EC2_DEFAULT_PORTS);
+    ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
     String groupId = createSecurityGroup(definition.getName(), jg.getName(), nova, ports);
     return groupId;
   }
@@ -299,7 +299,7 @@ public final class NovaLauncher extends Launcher{
     List<String> toBeForkedVmNames;
     unforkedVmNames.addAll(allVmNames);
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
-    while (!succeed && tries < Settings.EC2_RETRY_MAX) {
+    while (!succeed && tries < Settings.AWS_RETRY_MAX) {
       int requestSize = totalSize - successfulNodes.size();
       int maxForkRequests = Integer.parseInt(NovaSetting.NOVA_MAX_FORK_VMS_PER_REQUEST.getParameter());
       if (requestSize > maxForkRequests) {
@@ -348,7 +348,7 @@ public final class NovaLauncher extends Launcher{
                           + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
                   failedNodes.size(),
                   totalSize, uniqueGroupName));
-          Thread.currentThread().sleep(Settings.EC2_RETRY_INTERVAL);
+          Thread.currentThread().sleep(Settings.AWS_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
           logger.error("", ex1);
         }
