@@ -298,13 +298,13 @@ angular.module('main.module')
         hasGce: function() {
           return ($rootScope.activeCluster && $rootScope.activeCluster.hasGce());
         },
-        hasOpenStack: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasOpenStack());
+        hasNova: function() {
+          return ($rootScope.activeCluster && $rootScope.activeCluster.hasNova());
         },
         hasProvider: function() {
           return ($rootScope.activeCluster &&
             ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() ||
-              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasOpenStack()));
+              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasNova()));
         },
         name: function() {
           return $rootScope.activeCluster.name;

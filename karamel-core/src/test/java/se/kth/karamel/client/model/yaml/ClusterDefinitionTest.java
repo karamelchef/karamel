@@ -5,30 +5,33 @@
  */
 package se.kth.karamel.client.model.yaml;
 
-import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
-import se.kth.karamel.common.clusterdef.yaml.YamlScope;
-import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import com.google.common.collect.Lists;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import se.kth.karamel.common.clusterdef.Ec2;
-import java.util.Map;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.clusterdef.Cookbook;
+import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
-import se.kth.karamel.common.util.IoUtils;
-import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
+import se.kth.karamel.common.clusterdef.yaml.YamlScope;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  *
@@ -120,6 +123,10 @@ public class ClusterDefinitionTest {
     assertEquals("n1-standard-1", provider5.getType());
     assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
     assertEquals("europe-west1-b", provider5.getZone());
+
+    Nova provider6 = (Nova) groups.get("novavms").getProvider();
+    assertEquals("1", provider6.getFlavor());
+    assertEquals("ubuntu-1404", provider6.getImage());
   }
 
   @Test

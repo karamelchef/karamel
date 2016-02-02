@@ -5,13 +5,6 @@
  */
 package se.kth.karamel.backend.github;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.SearchRepository;
@@ -26,10 +19,18 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.CookbookScaffolder;
-import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Settings;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 1. Call registerCredentials() to store your github credentials in memory. 2. Then call methods like addFile(),

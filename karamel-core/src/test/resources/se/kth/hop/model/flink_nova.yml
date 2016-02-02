@@ -1,0 +1,25 @@
+name: flinknova
+nova:
+  flavor: 3
+  image: "99f4625e-f425-472d-8e21-7aa9c3db1c3e"
+
+cookbooks:
+  hadoop:
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  flink:
+    github: "hopshadoop/flink-chef"
+    branch: "master"
+
+groups:
+  namenodes:
+    size: 1
+    recipes:
+        - hadoop::nn
+        - flink::jobmanager
+        - flink::wordcount
+  datanodes:
+    size: 2
+    recipes:
+        - hadoop::dn
+        - flink::taskmanager

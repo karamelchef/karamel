@@ -6,16 +6,18 @@
 package se.kth.karamel.common.cookbookmeta;
 
 import com.google.common.collect.Lists;
+import org.junit.Test;
+import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.util.IoUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import static org.junit.Assert.*;
-import org.junit.Test;
-import se.kth.karamel.common.util.IoUtils;
-import se.kth.karamel.common.exception.MetadataParseException;
 
 /**
  *

@@ -1,0 +1,86 @@
+{
+  "name": "flinknova",
+  "groups": [
+    {
+      "name": "namenodes",
+      "size": 1,
+      "cookbooks": [
+        {
+          "name": "flink",
+          "attrs": {},
+          "recipes": [
+            {
+              "name": "flink::wordcount"
+            },
+            {
+              "name": "flink::jobmanager"
+            }
+          ],
+          "github": "hopshadoop/flink-chef",
+          "branch": "master"
+        },
+        {
+          "name": "hadoop",
+          "attrs": {},
+          "recipes": [
+            {
+              "name": "hadoop::nn"
+            }
+          ],
+          "github": "hopshadoop/apache-hadoop-chef",
+          "branch": "master"
+        }
+      ]
+    },
+    {
+      "name": "datanodes",
+      "size": 50,
+      "cookbooks": [
+        {
+          "name": "flink",
+          "attrs": {},
+          "recipes": [
+            {
+              "name": "flink::taskmanager"
+            }
+          ],
+          "github": "hopshadoop/flink-chef",
+          "branch": "master"
+        },
+        {
+          "name": "hadoop",
+          "attrs": {},
+          "recipes": [
+            {
+              "name": "hadoop::dn"
+            }
+          ],
+          "github": "hopshadoop/apache-hadoop-chef",
+          "branch": "master"
+        }
+      ]
+    }
+  ],
+  "cookbooks": [
+    {
+      "name": "flink",
+      "attrs": {},
+      "recipes": [],
+      "github": "hopshadoop/flink-chef",
+      "branch": "master"
+    },
+    {
+      "name": "hadoop",
+      "attrs": {},
+      "recipes": [],
+      "github": "hopshadoop/apache-hadoop-chef",
+      "branch": "master"
+    }
+  ],
+  "nova": {
+    "flavor": "1",
+    "region": "regionSICS",
+    "image": "ubuntu-1404",
+    "endpoint": "10.20.40.30"
+  }
+}

@@ -5,7 +5,7 @@ function Cluster() {
   this.groups = [];
   this.ec2 = null;
   this.gce = null;
-  this.openstack = null;
+  this.nova = null;
   this.baremetal = null;
   this.sshKeyPair = null;
 
@@ -55,7 +55,7 @@ function Cluster() {
     this.name = other.name;
     this.loadEc2(this, other["ec2"]);
     this.loadGce(this, other["gce"]);
-    this.loadOpenStack(this, other["openstack"]);
+    this.loadNova(this, other["nova"]);
     this.loadBaremetal(this, other["baremetal"]);
     this.loadSshKeyPair(this, null);
     this.loadGroups(this, other["groups"]);
@@ -75,6 +75,12 @@ function Cluster() {
       this.gce.copy(other.gce);
     } else
       this.gce = null;
+
+    if (other.nova !== null) {
+      this.nova = new Nova();
+      this.nova.copy(other.gce);
+    } else
+      this.nova = null;
 
     if (other.baremetal !== null) {
       this.baremetal = new Baremetal();
@@ -131,13 +137,13 @@ function Cluster() {
       container.gce = null;
   };
 
-  this.loadOpenStack = function(container, provider) {
+  this.loadNova = function(container, provider) {
     if (!(_.isUndefined(provider) || _.isNull(provider))) {
-      var os = new OpenStack();
-      os.load(provider);
-      container.openstack = os;
+      var nova = new Nova();
+      nova.load(provider);
+      container.nova = nova;
     } else
-      container.os = null;
+      container.nova = null;
   };
 
   this.loadBaremetal = function(container, provider) {
@@ -211,12 +217,12 @@ function Cluster() {
     return false;
   };
 
-  this.hasOpenStack = function() {
-    if (this.openstack)
+  this.hasNova = function() {
+    if (this.nova)
       return true;
     else {
       for (var i = 0; i < this.cookbooks; i++) {
-        if (cookbooks[i].openstack)
+        if (cookbooks[i].nova)
           return true;
       }
     }
@@ -243,6 +249,9 @@ function Cluster() {
     }
     if (this.hasGce()) {
       result = result && this.gce.getIsValid();
+    }
+    if (this.hasNova()) {
+      result = result && this.nova.getIsValid();
     }
     result = result && this.sshKeyPair.getIsValid();
     return result;
@@ -364,29 +373,31 @@ function Gce() {
 // Inherit from the Provider.
 Gce.prototype = Object.create(Provider.prototype);
 
-function OpenStack() {
-  this.mapKey = "openstack";
-  this.type = null;
+function Nova() {
+  this.mapKey = "nova";
+  this.flavor = null;
   this.image = null;
-  this.osKeyPath = null;
+  this.accountName = null;
+  this.accountPass = null;
 
   this.load = function(other) {
-    this.type = other.type || null;
+    this.flavor = other.flavor || null;
     this.image = other.image || null;
   };
 
   this.copy = function(other) {
-    this.type = other.type || null;
+    this.flavor = other.flavor || null;
     this.image = other.image || null;
   };
 
   this.addAccountDetails = function(other) {
-    this.osKeyPath = null;
+    this.accountName = other.accountName || null;
+    this.accountPass = other.accountPass || null;
   };
 }
 
 // Inherit from the Provider.
-OpenStack.prototype = Object.create(Provider.prototype);
+Nova.prototype = Object.create(Provider.prototype);
 
 
 
@@ -501,7 +512,7 @@ function Group() {
   this.size = 0;
   this.ec2 = {};
   this.gce = {};
-  this.openstack = {};
+  this.nova = {};
   this.baremetal = {};
   this.cookbooks = [];
 
@@ -515,7 +526,7 @@ function Group() {
     this.size = group.size;
     this.ec2 = group.ec2;
     this.gce = group.gce;
-    this.openstack = group.openstack;
+    this.nova = group.nova;
     this.baremetal = group.baremetal;
   };
 
@@ -528,7 +539,7 @@ function Group() {
     this.size = other.size;
     this.ec2 = other.ec2;
     this.gce = other.gce;
-    this.openstack = other.openstack;
+    this.nova = other.nova;
     this.baremetal = other.baremetal;
 
     // Load cookbooks instead of copying.
@@ -591,13 +602,14 @@ function toCoreApiFormat(uiCluster) {
     }
   }
 
-  function _addOpenStack(container, provider) {
+  function _addNova(container, provider) {
     if (provider) {
-      var openstack = new _OpenStack();
-      openstack.load(provider);
-      container.openstack = openstack;
+      var nova = new _Nova();
+      nova.load(provider);
+      container.nova = nova;
     }
   }
+
   function _addCookbooks(container, cookbooks) {
     for (var i = 0; i < cookbooks.length; i++) {
       var cookbook = new _Cookbook();
@@ -629,7 +641,7 @@ function toCoreApiFormat(uiCluster) {
     this.groups = null;
     this.ec2 = null;
     this.gce = null;
-    this.openstack = null;
+    this.nova = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -650,7 +662,7 @@ function toCoreApiFormat(uiCluster) {
       this.name = other.name;
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
-      _addOpenStack(this, other.openstack);
+      _addNova(this, other.nova);
       _addBaremetal(this, other.baremetal);
       _addCookbooks(this, other.cookbooks);
       _addGroups(this, other.groups);
@@ -665,7 +677,7 @@ function toCoreApiFormat(uiCluster) {
     this.size = null;
     this.ec2 = null;
     this.gce = null;
-    this.openstack = null;
+    this.nova = null;
     this.baremetal = null;
 
     this.addCookbook = function(cookbook) {
@@ -681,7 +693,7 @@ function toCoreApiFormat(uiCluster) {
       _addCookbooks(this, other.cookbooks);
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
-      _addOpenStack(this, other.openstack);
+      _addNova(this, other.nova);
       _addBaremetal(this, other.baremetal);
     }
   }
@@ -736,11 +748,11 @@ function toCoreApiFormat(uiCluster) {
     }
   }
 
-  function _OpenStack() {
-    this.type = null;
+  function _Nova(){
+    this.flavor = null;;
     this.image = null;
-    this.load = function(other) {
-      this.type = other.type || null;
+    this.load = function(other){
+      this.flavor = other.flavor || null;
       this.image = other.image || null;
     }
   }

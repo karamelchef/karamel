@@ -5,6 +5,10 @@
  */
 package se.kth.karamel.common.util;
 
+import org.apache.log4j.Logger;
+import org.jclouds.aws.domain.Region;
+import org.jclouds.ec2.domain.InstanceType;
+
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,9 +18,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
-import org.apache.log4j.Logger;
-import org.jclouds.aws.domain.Region;
-import org.jclouds.ec2.domain.InstanceType;
 
 /**
  *

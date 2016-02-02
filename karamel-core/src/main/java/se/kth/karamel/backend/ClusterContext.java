@@ -9,14 +9,15 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
-
+import se.kth.karamel.common.util.SshKeyPair;
 /**
  * Authenticated APIs and privacy-sensitive data, that must not be revealed by storing them in the file-system, is
  * stored here in memory. It is valid just until the system is running otherwise it will disappear.  *
@@ -27,6 +28,7 @@ public class ClusterContext {
   private Ec2Context ec2Context;
   private GceContext gceContext;
   private SshKeyPair sshKeyPair;
+  private NovaContext novaContext;
   private String sudoAccountPassword = "";
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
@@ -68,6 +70,9 @@ public class ClusterContext {
     if (sshKeyPair == null) {
       sshKeyPair = commonContext.getSshKeyPair();
     }
+    if (novaContext == null) {
+      novaContext = commonContext.getNovaContext();
+    }
   }
 
   public static ClusterContext validateContext(JsonCluster definition,
@@ -81,11 +86,10 @@ public class ClusterContext {
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2 && context.getEc2Context() == null) {
         throw new KaramelException("No valid Ec2 credentials registered :-|");
-      }
-      if (provider instanceof Ec2 && context.getEc2Context() == null) {
-        throw new KaramelException("No valid Ec2 credentials registered :-|");
       } else if (provider instanceof Gce && context.getGceContext() == null) {
         throw new KaramelException("No valid Gce credentials registered :-|");
+      } else if (provider instanceof Nova && context.getNovaContext() == null){
+        throw new KaramelException("No valid Nova credentials registered :-|");
       }
     }
 
@@ -107,5 +111,13 @@ public class ClusterContext {
    */
   public void setGceContext(GceContext gceContext) {
     this.gceContext = gceContext;
+  }
+
+  public void setNovaContext(NovaContext novaContext) {
+    this.novaContext = novaContext;
+  }
+
+  public NovaContext getNovaContext() {
+    return novaContext;
   }
 }

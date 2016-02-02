@@ -6,7 +6,7 @@
     <parent>
         <groupId>se.kth.karamel</groupId>
         <artifactId>karamel-parent</artifactId>
-        <version>0.2</version>
+        <version>0.3</version>
     </parent>
 
     <groupId>se.kth.karamel</groupId>
@@ -42,7 +42,7 @@
                                     <goal>launch4j</goal>
                                 </goals>
                                 <configuration>
-                                    <cmdLine>-server conf/dropwizard.yml</cmdLine>
+                                    <cmdLine>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=8000 -server conf/dropwizard.yml</cmdLine>
                                     <headerType>gui</headerType>
                                     <outfile>${project.build.directory}/karamel.exe</outfile>
                                     <dontWrapJar>false</dontWrapJar>
@@ -209,6 +209,11 @@
             <artifactId>dropwizard-jetty</artifactId>
             <version>${dropwizard.version}</version>
         </dependency>
+        <dependency>
+            <groupId>se.kth</groupId>
+            <artifactId>karamel-core</artifactId>
+            <version>0.2</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -262,7 +267,7 @@
                         <configuration>
                             <configurationDirectory>conf</configurationDirectory>
                             <copyConfigurationDirectory>true</copyConfigurationDirectory>
-                            <extraJvmArguments>-Xms128m</extraJvmArguments>
+                            <extraJvmArguments>-Xms128m -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005</extraJvmArguments>
                             <platforms>
                                 <platform>unix</platform>
                             </platforms>

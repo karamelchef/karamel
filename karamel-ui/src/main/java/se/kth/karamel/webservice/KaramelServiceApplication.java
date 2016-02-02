@@ -1,36 +1,11 @@
 package se.kth.karamel.webservice;
 
-import se.kth.karamel.webservice.calls.cluster.StartCluster;
-import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 import icons.TrayUI;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jetty.MutableServletContextHandler;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import java.awt.Desktop;
-import java.awt.Image;
-import java.awt.SystemTray;
-import java.io.BufferedReader;
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import org.eclipse.jetty.servlets.CrossOriginFilter;
-import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.client.api.KaramelApiImpl;
-import se.kth.karamel.common.exception.KaramelException;
-
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import java.util.EnumSet;
-import javax.swing.ImageIcon;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -41,12 +16,16 @@ import org.apache.commons.cli.ParseException;
 import org.eclipse.jetty.server.AbstractNetworkConnector;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.backend.ClusterDefinitionService;
-import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
-import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.client.api.KaramelApi;
+import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
-import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
+import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.calls.definition.FetchCookbook;
 import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
@@ -62,12 +41,36 @@ import se.kth.karamel.webservice.calls.github.GetGithubOrgs;
 import se.kth.karamel.webservice.calls.github.GetGithubRepos;
 import se.kth.karamel.webservice.calls.github.RemoveRepository;
 import se.kth.karamel.webservice.calls.github.SetGithubCredentials;
+import se.kth.karamel.webservice.calls.nova.LoadNovaCredentials;
+import se.kth.karamel.webservice.calls.nova.ValidateNovaCredentials;
 import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.SetSudoPassword;
 import se.kth.karamel.webservice.calls.system.ExitKaramel;
 import se.kth.karamel.webservice.calls.system.PingServer;
+import se.kth.karamel.webservice.utils.TemplateHealthCheck;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import javax.swing.ImageIcon;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.EnumSet;
+
+import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
@@ -334,6 +337,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new PushExperiment(karamelApi));
     environment.jersey().register(new RemoveFileFromExperiment(karamelApi));
 
+    //Openstack nova
+    environment.jersey().register(new LoadNovaCredentials(karamelApi));
+    environment.jersey().register(new ValidateNovaCredentials(karamelApi));
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
 

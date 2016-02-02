@@ -58,6 +58,8 @@ public final class Ec2Launcher extends Launcher {
   public final Ec2Context context;
   public final SshKeyPair sshKeyPair;
 
+  Set<String> keys = new HashSet<>();
+
   public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
     this.context = context;
     this.sshKeyPair = sshKeyPair;
@@ -191,8 +193,6 @@ public final class Ec2Launcher extends Launcher {
       regions.add(ec2.getRegion());
     }
   }
-
-  Set<String> keys = new HashSet<>();
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
@@ -363,7 +363,7 @@ public final class Ec2Launcher extends Launcher {
         // timeTaken (#machines, #batchSize)
         // numSuccess, numFailed, numberToLaunch, InstanceType, **RequestLimitExceeded, **InsufficientInstanceCapacity,
         // RequestResourceCountExceeded, ResourceCountExceeded, InsufficientAddressCapacity**
-        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more 
+        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more
         //information, see Query API Request Rate.
         //  http://docs.aws.amazon.com/AWSEC2/latest/APIReference/query-api-troubleshooting.html#api-request-rate
         // InvalidInstanceID.NotFound, InvalidGroup.NotFound -> eventual consistency

@@ -137,6 +137,16 @@ angular.module('main.module')
           var url = _defaultHost.concat("/ec2/validateCredentials");
           return _getPromiseObject(method, url, _defaultContentType, providerInfo);
         },
+        loadNovaCredentials: function() {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/nova/loadCredentials");
+          return _getPromiseObject(method, url, _defaultContentType);
+        },
+        validateNovaCredentials: function(providerInfo) {
+          var method = 'PUT';
+          var url = _defaultHost.concat("/nova/validateCredentials");
+          return _getPromiseObject(method, url, _defaultContentType, providerInfo);
+        },
         loadGceCredentials: function() {
           var method = 'PUT';
           var url = _defaultHost.concat("/gce/loadCredentials");

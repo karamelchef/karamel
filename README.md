@@ -79,6 +79,37 @@ We support <a href="http://aws.amazon.com/vpc/">AWS VPC</a> on EC2 for better pe
 3. Make a routing table for your VPC and add a row for your gateway into it, on this row open all ips '0.0.0.0/0'.
 4. Add your vpc-id and subnet-id into the ec2 section of your yaml like the following example. Also make sure you are using the right image and type of instance for your vpc. 
 
+####Openstack
+
+If you want to use your private Openstack cloud infrastructure, you need to make use of the keyword _nova_ in the 
+cluster definition file. In this case, the syntax and keywords for some of the terms change compared to other providers.
+
+_Flavor_ corresponds to the type of instance in terms of HW and resources you have configured, in this case this value
+needs to match to one of your configured flavors and it needs to be the flavor id.
+
+_image_ corresponds to the image it will use on the VM and it corresponds to the image id you can get from the uploaded 
+images list, which usually is a hashed id value in your list of available images.
+
+Here is an example of an Openstack yaml configuration:
+
+ ```yaml
+nova:
+  flavor: 3
+  image: "99f4625e-f425-472d-8e21-7aa9c3db1c3e"
+```
+
+#####Using Openstack credentials
+
+Before deploying your cluster, you will have the option of configuring your credentials. For this provider, you will need
+to retrieve the following:
+
+- __Keystone Endpoint:__ HTTP url to your openstack system, usually it is a URL with the form http://xxx.xxx.xxx.xxx:5000/v2
+- __Openstack Region:__ The name of the region where your have access to you tenancy access.
+- __Account Pass:__ Your password for your user.
+- __Account Name:__ Your access name with your corresponding tenant access, in the following form "tenantSpace:TenantName".
+In most cases, the tenantSpace can corresponding to your project, so if your project is __"HOPS"__, and the username 
+is __"flink"__, then the account name is _"HOPS:flink"_
+
 ####Google Compute Engine
 To deploy the cluster on Google’s infrastructure, we use the keyword _gce_ in the cluster definition YAML file. Following code snippet shows the current supported attributes:
  ```yaml

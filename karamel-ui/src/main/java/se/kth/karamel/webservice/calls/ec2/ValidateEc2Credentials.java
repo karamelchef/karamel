@@ -5,19 +5,20 @@
  */
 package se.kth.karamel.webservice.calls.ec2;
 
+import org.apache.log4j.Logger;
+import se.kth.karamel.client.api.KaramelApi;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.webservice.calls.AbstractCall;
+import se.kth.karamel.webservicemodel.Ec2JSON;
+import se.kth.karamel.webservicemodel.StatusResponseJSON;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import org.apache.log4j.Logger;
-import se.kth.karamel.client.api.KaramelApi;
-import se.kth.karamel.common.util.Ec2Credentials;
-import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.webservice.calls.AbstractCall;
-import se.kth.karamel.webservicemodel.Ec2JSON;
-import se.kth.karamel.webservicemodel.StatusResponseJSON;
 
 /**
  *
