@@ -110,7 +110,7 @@ public class RunRecipeTask extends Task {
 
     if (commands == null) {
       String jsonFileName = recipeCanonicalName.replaceAll(Settings.COOKBOOK_DELIMITER, "__");
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_RUN_RECIPE,
+      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPT_PATH_RUN_RECIPE,
           "chef_json", json,
           "json_file_name", jsonFileName,
           "log_file_name", jsonFileName,

@@ -28,7 +28,7 @@ public class InstallBerkshelfTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
+      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,

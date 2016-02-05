@@ -24,7 +24,7 @@ public class KillSessionTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_KILL_RUNNING_SESSION,
+      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPT_PATH_KILL_RUNNING_SESSION,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME);
     }

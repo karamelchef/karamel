@@ -33,7 +33,7 @@ public class AptGetEssentialsTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
           "task_id", getId(),

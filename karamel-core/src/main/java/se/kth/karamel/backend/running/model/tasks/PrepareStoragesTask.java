@@ -37,7 +37,7 @@ public class PrepareStoragesTask extends Task {
       for (StorageDevice device : storageDevices) {
         tuple.append(String.format("'%s','%s' ", device.kernelAlias(), device.mountPoint()));
       }
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPET_PATH_PREPARE_STORAGE,
+      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPET_PATH_PREPARE_STORAGE,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
