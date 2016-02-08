@@ -49,7 +49,7 @@ public class VendorCookbookTask extends Task {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
     if (commands == null) {
-      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
+      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,
           "github_repo_name", githubRepoName,
           "cookbook_path", cookbookPath,
