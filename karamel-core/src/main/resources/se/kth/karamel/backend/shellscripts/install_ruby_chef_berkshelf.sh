@@ -41,4 +41,4 @@ rm chefdk_0.6.2-1_amd64.deb -f && wget https://opscode-omnibus-packages.s3.amazo
 echo \"Found ubuntu\"
 else # ubuntu
  echo \"Unrecognized version of linux. Not ubuntu or redhat family.\"
-fi' > build.sh ; chmod +x build.sh ; ./build.sh
+fi' > berks-install.sh ; chmod +x berks-install.sh ; ./berks-install.sh
