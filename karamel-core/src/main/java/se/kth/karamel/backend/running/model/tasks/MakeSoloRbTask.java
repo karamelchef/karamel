@@ -31,7 +31,7 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2LinebyLineCommands(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "cookbooks_path", vendorPath,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME);

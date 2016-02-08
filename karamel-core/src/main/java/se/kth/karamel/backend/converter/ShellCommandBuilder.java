@@ -18,13 +18,13 @@ import se.kth.karamel.common.util.IoUtils;
  */
 public class ShellCommandBuilder {
 
-  public static List<ShellCommand> fileScript2LinebyLineCommands(String filePath, String... pairs) 
+  public static List<ShellCommand> fileScript2LinebyLineCommands(String filePath, String... pairs)
       throws IOException {
     String script = IoUtils.readContentFromClasspath(filePath);
-    if (pairs.length > 0 ) {
-      for (int i = 0; i < pairs.length; i+=2) {
+    if (pairs.length > 0) {
+      for (int i = 0; i < pairs.length; i += 2) {
         String key = pairs[i];
-        String val = pairs[i+1];
+        String val = pairs[i + 1];
         script = script.replaceAll("%" + key + "%", val);
       }
     }
@@ -53,13 +53,13 @@ public class ShellCommandBuilder {
     return tasks;
   }
 
-  public static List<ShellCommand> makeSingleFileCommand(String filePath, String... pairs) 
+  public static List<ShellCommand> makeSingleFileCommand(String filePath, String... pairs)
       throws IOException {
     String script = IoUtils.readContentFromClasspath(filePath);
-    if (pairs.length > 0 ) {
-      for (int i = 0; i < pairs.length; i+=2) {
+    if (pairs.length > 0) {
+      for (int i = 0; i < pairs.length; i += 2) {
         String key = pairs[i];
-        String val = pairs[i+1];
+        String val = pairs[i + 1];
         script = script.replaceAll("%" + key + "%", val);
       }
     }
