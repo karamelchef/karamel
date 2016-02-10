@@ -164,7 +164,7 @@ public class ClusterService {
 
   }
 
-  public synchronized void purgeCluster(String clusterName) throws KaramelException {
+  public synchronized void terminateCluster(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
     logger.info(String.format("User asked for purging the cluster '%s'", clusterName));
     if (!repository.containsKey(name)) {
@@ -177,12 +177,12 @@ public class ClusterService {
       public void run() {
         try {
           ClusterRuntime runtime = cluster.getRuntime();
-          cluster.enqueue(ClusterManager.Command.PURGE);
+          cluster.enqueue(ClusterManager.Command.TERMINATE);
           while (runtime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED) {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
-          logger.info(String.format("Cluster '%s' purged, rmoving it from the list of running clusters", 
+          logger.info(String.format("Cluster '%s' terminated, rmoving it from the list of running clusters", 
               runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {

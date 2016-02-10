@@ -55,7 +55,7 @@ public class ClusterManager implements Runnable {
 
   public static enum Command {
 
-    LAUNCH, PAUSE, RESUME, PURGE
+    LAUNCH, PAUSE, RESUME, TERMINATE
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -118,7 +118,7 @@ public class ClusterManager implements Runnable {
       }
     }
 
-    if (command == Command.PURGE) {
+    if (command == Command.TERMINATE) {
       if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
         logger.info(String.format("Forcing to stop ClusterManager of '%s'", definition.getName()));
         clusterManagerFuture.cancel(true);
@@ -299,7 +299,7 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' RESUMED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private void purge() throws InterruptedException, KaramelException {
+  private void terminate() throws InterruptedException, KaramelException {
     logger.info(String.format("Purging '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
     stopping = true;
@@ -307,7 +307,7 @@ public class ClusterManager implements Runnable {
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
     KandyRestClient.pushClusterStats(definition.getName(), stats);
-    logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+    logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' TERMINATED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
   private void forkMachines() throws Exception {
@@ -388,9 +388,9 @@ public class ClusterManager implements Runnable {
               stats.addPhase(phaseStat);
             }
             break;
-          case PURGE:
+          case TERMINATE:
             ClusterStatistics.startTimer();
-            purge();
+            terminate();
             long duration = ClusterStatistics.stopTimer();
             String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
             PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), status, duration);

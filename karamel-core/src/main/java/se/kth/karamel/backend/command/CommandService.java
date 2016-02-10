@@ -187,10 +187,10 @@ public class CommandService {
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "purge");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "terminate");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.purgeCluster(clusterNameInUserInput);
+        clusterService.terminateCluster(clusterNameInUserInput);
         successMessage = clusterNameInUserInput + " was scheduled for purging, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
@@ -517,7 +517,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         if (cluster(clusterName) != null) {
-          throw new KaramelException(String.format("%s is already running, purge it first!!", clusterName));
+          throw new KaramelException(String.format("%s is already running, terminate it first!!", clusterName));
         } else {
           String yaml = ClusterDefinitionService.loadYaml(clusterName);
           String json = ClusterDefinitionService.yamlToJson(yaml);
@@ -761,8 +761,8 @@ public class CommandService {
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
       data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag "
           + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines "
-          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge "
-          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml "
+          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='terminate "
+          + name + "'>terminate</a> <a kref='links " + name + "'>services</a> <a kref='yaml "
           + name + "'>yaml</a> <a kref='cost " + name + "'>cost</a>";
       i++;
     }
@@ -921,7 +921,7 @@ public class CommandService {
     } else {
       response.addMenuItem("Pause", "pause");
     }
-    response.addMenuItem("Purge", "purge");
+    response.addMenuItem("Terminate", "terminate");
 
   }
 
@@ -936,7 +936,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the "
+          throw new KaramelException("No cluster has been chosen yet! When you terminate a cluster it is removed from the "
               + "context.");
         }
       } else {

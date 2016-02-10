@@ -205,7 +205,7 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void purgeCluster(String clusterName) throws KaramelException {
+  public void terminateCluster(String clusterName) throws KaramelException {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

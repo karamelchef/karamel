@@ -83,7 +83,7 @@ public class KaramelApiTest {
   }
 
 //  @Test
-  public void testPauseResumePurge() throws KaramelException, IOException, InterruptedException {
+  public void testPauseResumeTerminate() throws KaramelException, IOException, InterruptedException {
     String clusterName = "spark";
     String ymlString = Resources.toString(Resources.
         getResource("se/kth/karamel/client/model/test-definitions/spark.yml"), Charsets.UTF_8);
@@ -110,7 +110,7 @@ public class KaramelApiTest {
         System.out.println(api.processCommand("status").getResult());
       }
       if (mins == 7) {
-        api.processCommand("purge");
+        api.processCommand("terminate");
         System.out.println(api.processCommand("status").getResult());
       }
       Thread.currentThread().sleep(60000);
@@ -137,7 +137,7 @@ public class KaramelApiTest {
       mins++;
       ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
       if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.FORKING_MACHINES.ordinal()) {
-        api.processCommand("purge " + clusterName);
+        api.processCommand("terminate " + clusterName);
       }
       System.out.println(api.processCommand("machines").getResult());
       Thread.currentThread().sleep(60000);
@@ -164,7 +164,7 @@ public class KaramelApiTest {
       mins++;
       ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
       if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.INSTALLED.ordinal()) {
-        api.processCommand("purge " + clusterName);
+        api.processCommand("terminate " + clusterName);
       }
       System.out.println(api.processCommand("machines").getResult());
       Thread.currentThread().sleep(30000);
@@ -287,7 +287,7 @@ public class KaramelApiTest {
     while (clusterRuntime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED || clusterRuntime.isFailed()) {
 
       if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
-        api.processCommand("purge " + clusterName);
+        api.processCommand("terminate " + clusterName);
       }
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(10000);

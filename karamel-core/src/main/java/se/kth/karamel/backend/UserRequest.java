@@ -12,7 +12,7 @@ package se.kth.karamel.backend;
 public class UserRequest {
 
   public static enum Command {
-    LAUNCH, PAUSE, RESUME, PURGE
+    LAUNCH, PAUSE, RESUME, TERMINATE
   }
 
   private final Command command;
