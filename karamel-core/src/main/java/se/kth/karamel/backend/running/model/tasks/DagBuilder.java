@@ -43,12 +43,31 @@ public class DagBuilder {
 
   private static final Logger logger = Logger.getLogger(DagBuilder.class);
 
+  /**
+   * 1. Machine-level tasks such as:
+   *     - AptGetEssential
+   *     - PrepareStorage
+   *     - InstallBerkshelf
+   *     - MakeSoloRb
+   * 2.Cookbook-level tasks such as:
+   *     - CloneAndVendorCookbook
+   *     - RunRecipeTask for Install
+   * 3.Recipe-level tasks such as:
+   *     - RunRecipe tasks for all recipes except install
+   * @param cluster
+   * @param clusterEntity
+   * @param clusterStats
+   * @param submitter
+   * @param chefJsons
+   * @return
+   * @throws KaramelException 
+   */
   public static Dag getInstallationDag(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Map<String, JsonObject> chefJsons) throws KaramelException {
     Dag dag = new Dag();
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag);
-    cookbookLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
+    cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
         allRecipeTasks, dag);
     updateKaramelDependencies(allRecipeTasks, dag, rlts);
@@ -158,6 +177,53 @@ public class DagBuilder {
     return runRecipeTask;
   }
 
+    /**
+   * machine -> taskid -> task
+   *
+   * @param cluster
+   * @param clusterEntity
+   * @param clusterStats
+   * @param chefJsons
+   * @param submitter
+   * @param allRecipeTasks
+   * @param dag
+   * @return
+   * @throws KaramelException
+   */
+  public static Map<String, Map<String, Task>> cookbookLevelPurgingTasks(JsonCluster cluster, 
+      ClusterRuntime clusterEntity, ClusterStats clusterStats, Map<String, JsonObject> chefJsons, 
+      TaskSubmitter submitter, Map<String, RunRecipeTask> allRecipeTasks, Dag dag) throws KaramelException {
+    Map<String, Map<String, Task>> map = new HashMap<>();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
+      for (MachineRuntime me : ge.getMachines()) {
+        Map<String, Task> map1 = new HashMap<>();
+        for (JsonCookbook jc : jg.getCookbooks()) {
+          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
+          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
+              Settings.REMOTE_CB_VENDOR_PATH,
+              urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
+          dag.addTask(t1);
+          map1.put(t1.uniqueId(), t1);
+          String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
+          JsonObject json = chefJsons.get(me.getId() + recipeName);
+          RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats,
+              json, submitter, urls.id, jc.getName(),
+              allRecipeTasks, dag);
+          map1.put(t2.uniqueId(), t2);
+        }
+        logger.debug(String.format("Cookbook-level tasks for the machine '%s' in the group '%s' are: %s",
+            me.getPublicIp(), ge.getName(), map1.keySet()));
+        if (map.get(me.getId()) != null) {
+          map.get(me.getId()).putAll(map1);
+        } else {
+          map.put(me.getId(), map1);
+        }
+      }
+    }
+    return map;
+  }
+  
   /**
    * machine -> taskid -> task
    *
@@ -171,9 +237,9 @@ public class DagBuilder {
    * @return
    * @throws KaramelException
    */
-  public static Map<String, Map<String, Task>> cookbookLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity,
-      ClusterStats clusterStats, Map<String, JsonObject> chefJsons, TaskSubmitter submitter,
-      Map<String, RunRecipeTask> allRecipeTasks, Dag dag) throws KaramelException {
+  public static Map<String, Map<String, Task>> cookbookLevelInstallationTasks(JsonCluster cluster, 
+      ClusterRuntime clusterEntity, ClusterStats clusterStats, Map<String, JsonObject> chefJsons, 
+      TaskSubmitter submitter, Map<String, RunRecipeTask> allRecipeTasks, Dag dag) throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
@@ -205,6 +271,20 @@ public class DagBuilder {
     return map;
   }
 
+  /**
+   * Tasks that are machine specific, specifically those that are run in the very start preparation phase.
+   * For example:
+   *     - AptGetEssential
+   *     - PrepareStorage
+   *     - InstallBerkshelf
+   *     - MakeSoloRb
+   * @param cluster
+   * @param clusterEntity
+   * @param clusterStats
+   * @param submitter
+   * @param dag
+   * @throws KaramelException 
+   */
   public static void machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Dag dag) throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
