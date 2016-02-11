@@ -58,6 +58,14 @@ public class ChefJsonGenerator {
     return chefJsons;
   }
 
+  /**
+   * For a specific cookbook, generates all chef-jsons for all the combinations of machine-recipe. 
+   * @param json
+   * @param cb
+   * @param groupEntity
+   * @return
+   * @throws KaramelException 
+   */
   public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb,
       GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
@@ -81,12 +89,23 @@ public class ChefJsonGenerator {
     return clone;
   }
 
+  /**
+   * Takes a machine-specific json with a recipe-name that has to be run on that machine, it then generates
+   * the run_list section into the json with the recipe-name. 
+   * @param chefJson
+   * @param recipeName 
+   */
   public static void addRunListForRecipe(JsonObject chefJson, String recipeName) {
     JsonArray jarr = new JsonArray();
     jarr.add(new JsonPrimitive(recipeName));
     chefJson.add(Settings.REMOTE_CHEFJSON_RUNLIST_TAG, jarr);
   }
 
+  /**
+   * It takes a machine-specfic json and adds private_ips and public_ips into it. 
+   * @param json
+   * @param machineEntity 
+   */
   public static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
     JsonArray ips = new JsonArray();
     ips.add(new JsonPrimitive(machineEntity.getPrivateIp()));
@@ -97,6 +116,12 @@ public class ChefJsonGenerator {
     json.add("public_ips", ips);
   }
 
+  /**
+   * It adds those attributes related to one cookbook into the json object. 
+   * For example [ndb/ports=[123, 134, 145], ndb/DataMemory=111]
+   * @param jc
+   * @param root 
+   */
   public static void addCookbookAttributes(JsonCookbook jc, JsonObject root) {
     Set<Map.Entry<String, Object>> entrySet = jc.getAttrs().entrySet();
     for (Map.Entry<String, Object> entry : entrySet) {
@@ -137,6 +162,16 @@ public class ChefJsonGenerator {
     }
   }
 
+  /**
+   * Adds private_ips and public_ips of all machines per each recipe as an attribute. 
+   * For example 
+   *            hadoop::dn/private_ips: [192.168.0.1, 192.168.0.2]
+   *            hadoop::dn/public_ips: [80.70.33.22, 80.70.33.23]
+   * install recipes are ignored here
+   * @param json
+   * @param definition
+   * @param clusterEntity 
+   */
   public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
     Map<String, Set<String>> privateIps = new HashMap<>();
     Map<String, Set<String>> publicIps = new HashMap<>();
@@ -166,6 +201,13 @@ public class ChefJsonGenerator {
     attr2Json(json, publicIps);
   }
 
+  /**
+   * It converts attributes into the json format and adds them into the root json object. 
+   * For example hadoop::dn/private_ips: [192.168.0.1, 192.168.0.2] is converted into 
+   * {"hadoop":{"dn":{"private_ips":["192.168.0.1", "192.168.0.2"]}}}
+   * @param root
+   * @param attrs 
+   */
   public static void attr2Json(JsonObject root, Map<String, Set<String>> attrs) {
     Set<Map.Entry<String, Set<String>>> entrySet = attrs.entrySet();
     for (Map.Entry<String, Set<String>> entry : entrySet) {
