@@ -427,7 +427,8 @@ public class CommandService {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+              generateClusterChefJsonsForInstallation(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
@@ -475,7 +476,8 @@ public class CommandService {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+              generateClusterChefJsonsForInstallation(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
@@ -936,8 +938,8 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("No cluster has been chosen yet! When you terminate a cluster it is removed from the "
-              + "context.");
+          throw new KaramelException("No cluster has been chosen yet! When you terminate a cluster it is removed "
+              + "from the context.");
         }
       } else {
         clusterName = matcher.group(2);
