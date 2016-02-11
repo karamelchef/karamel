@@ -427,7 +427,7 @@ public class CommandService {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
@@ -475,7 +475,7 @@ public class CommandService {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);

@@ -63,7 +63,7 @@ public class DagBuilderTest {
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
@@ -106,7 +106,7 @@ public class DagBuilderTest {
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
@@ -173,7 +173,7 @@ public class DagBuilderTest {
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();

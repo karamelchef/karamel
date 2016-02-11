@@ -36,6 +36,7 @@ public class Settings {
   public static final String ATTR_DELIMITER = "/";
   public static final String COOKBOOK_DELIMITER = "::";
   public static final String INSTALL_RECIPE = "install";
+  public static final String PURGE_RECIPE = "purge";
   public static final String HTTP_PREFIX = "http://";
   public static final String HTTPS_PREFIX = "https://";
   public static final String SLASH = "/";
