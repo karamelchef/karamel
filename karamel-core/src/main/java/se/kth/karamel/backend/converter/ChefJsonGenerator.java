@@ -32,7 +32,13 @@ import se.kth.karamel.common.exception.KaramelException;
 public class ChefJsonGenerator {
 
   /**
-   * Generates all chef-jsons per machine&recipe pair
+   * Generates all chef-jsons per machine&recipe pair through the following steps:
+   *  1. root-json: makes an empty json object as root
+   *  2. all-ips: adds all recipe private and public ips into the root json
+   *  3. group-jsons: per group in the cluster clones a new json from the root json
+   *     3.1 all cookbooks' attributes: adds all attributes related to all cookboos in that group
+   *     3.2 recipe-json: clones the group-json per recipea and adds machine-ips and run-list for that recipe
+   *     3.3 returns all generated jsons for all machine-recipe combination
    *
    * @param definition
    * @param clusterEntity
