@@ -20,7 +20,7 @@ public class ClusterRuntime {
 
   public static enum ClusterPhases {
     NOT_STARTED, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, 
-    INSTALLING, INSTALLED, TERMINATING ;
+    INSTALLING, INSTALLED, PURGING, PURGED, TERMINATING ;
   }
   
   private final String name;

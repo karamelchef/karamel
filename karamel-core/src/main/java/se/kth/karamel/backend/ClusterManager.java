@@ -55,7 +55,7 @@ public class ClusterManager implements Runnable {
 
   public static enum Command {
 
-    LAUNCH, PAUSE, RESUME, TERMINATE
+    LAUNCH, PAUSE, RESUME, PURGE, TERMINATE
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -64,6 +64,7 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
+  private Dag purgeDag;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
@@ -127,7 +128,7 @@ public class ClusterManager implements Runnable {
       pause();
     } else if (command == Command.RESUME) {
       resume();
-    }
+    } 
 
   }
 
@@ -251,6 +252,39 @@ public class ClusterManager implements Runnable {
       runtime.setPhase(ClusterRuntime.ClusterPhases.GROUPS_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' GROUPS_FORKED \\o/\\o/\\o/\\o/\\o/",
           definition.getName()));
+    }
+  }
+
+  private void purge() throws Exception {
+    logger.info(String.format("Purging '%s' ...", definition.getName()));
+    runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
+    runtime.resolveFailure(Failure.hash(Failure.Type.INSTALLATION_FAILURE, null));
+    runtime.resolveFailure(Failure.hash(Failure.Type.PURGE_FAULIRE, null));
+    List<GroupRuntime> groups = runtime.getGroups();
+    for (GroupRuntime group : groups) {
+      group.setPhase(GroupRuntime.GroupPhase.PURGING);
+    }
+
+    try {
+      Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+          generateClusterChefJsonsForPurge(definition, runtime);
+      purgeDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
+      purgeDag.start();
+    } catch (Exception ex) {
+      runtime.issueFailure(new Failure(Failure.Type.PURGE_FAULIRE, ex.getMessage()));
+      throw ex;
+    }
+
+    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.PURGING && !purgeDag.isDone()) {
+      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
+    }
+
+    if (!runtime.isFailed()) {
+      runtime.setPhase(ClusterRuntime.ClusterPhases.PURGED);
+      for (GroupRuntime group : groups) {
+        group.setPhase(GroupRuntime.GroupPhase.PURGED);
+      }
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
   }
 
