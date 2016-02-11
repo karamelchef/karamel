@@ -191,7 +191,7 @@ public class CommandService {
       if (!found && clusterNameInUserInput != null) {
         found = true;
         clusterService.terminateCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+        successMessage = clusterNameInUserInput + " was scheduled for terminating, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }

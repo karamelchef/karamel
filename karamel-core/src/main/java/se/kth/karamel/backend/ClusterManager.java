@@ -174,8 +174,8 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private void clean(boolean purging) {
-    if (!purging) {
+  private void clean(boolean terminating) {
+    if (!terminating) {
       LogService.cleanup(definition.getName());
       logger.info(String.format("Prelaunch Cleaning '%s' ...", definition.getName()));
       runtime.setPhase(ClusterRuntime.ClusterPhases.PRECLEANING);
@@ -184,8 +184,8 @@ public class ClusterManager implements Runnable {
     List<GroupRuntime> groups = runtime.getGroups();
     List<GroupRuntime> ec2GroupEntities = new ArrayList<>();
     for (GroupRuntime group : groups) {
-      if (purging) {
-        group.setPhase(GroupRuntime.GroupPhase.PURGING);
+      if (terminating) {
+        group.setPhase(GroupRuntime.GroupPhase.TERMINATING);
       } else {
         group.setPhase(GroupRuntime.GroupPhase.PRECLEANING);
       }
@@ -199,7 +199,7 @@ public class ClusterManager implements Runnable {
         launcher.cleanup(definition, runtime);
       }
       for (GroupRuntime group : ec2GroupEntities) {
-        if (purging) {
+        if (terminating) {
           group.setMachines(Collections.EMPTY_LIST);
           group.setPhase(GroupRuntime.GroupPhase.NONE);
         } else {
@@ -213,7 +213,7 @@ public class ClusterManager implements Runnable {
       }
     }
 
-    if (!purging && !runtime.isFailed()) {
+    if (!terminating && !runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.PRECLEANED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PRECLEANED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
@@ -301,8 +301,8 @@ public class ClusterManager implements Runnable {
   }
 
   private void terminate() throws InterruptedException, KaramelException {
-    logger.info(String.format("Purging '%s' ...", definition.getName()));
-    runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
+    logger.info(String.format("Terminating '%s' ...", definition.getName()));
+    runtime.setPhase(ClusterRuntime.ClusterPhases.TERMINATING);
     stopping = true;
     clean(true);
     stop();
@@ -394,7 +394,7 @@ public class ClusterManager implements Runnable {
             terminate();
             long duration = ClusterStatistics.stopTimer();
             String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
-            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.PURGING.name(), status, duration);
+            PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.TERMINATING.name(), status, duration);
             stats.addPhase(phaseStat);
             break;
         }

@@ -363,7 +363,7 @@ public class SshMachine implements MachineInterface, Runnable {
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
           if (!killing
-              && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+              && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.TERMINATING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
           }
 

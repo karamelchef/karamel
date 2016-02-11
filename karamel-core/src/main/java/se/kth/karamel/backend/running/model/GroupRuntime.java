@@ -18,7 +18,7 @@ public class GroupRuntime {
   public static enum GroupPhase {
 
     NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, 
-    INSTALLING, INSTALLED, PURGING;
+    INSTALLING, INSTALLED, TERMINATING;
   }
 
   private final ClusterRuntime cluster;

@@ -166,7 +166,7 @@ public class ClusterService {
 
   public synchronized void terminateCluster(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
-    logger.info(String.format("User asked for purging the cluster '%s'", clusterName));
+    logger.info(String.format("User asked for terminating the cluster '%s'", clusterName));
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }
