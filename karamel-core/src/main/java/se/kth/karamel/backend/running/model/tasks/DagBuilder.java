@@ -43,6 +43,32 @@ public class DagBuilder {
 
   private static final Logger logger = Logger.getLogger(DagBuilder.class);
 
+    /**
+   * 1. Machine-level tasks such as:
+   *     - AptGetEssential
+   *     - PrepareStorage
+   *     - InstallBerkshelf
+   *     - MakeSoloRb
+   * 2.Cookbook-level tasks such as:
+   *     - CloneAndVendorCookbook
+   *     - RunRecipeTask for purge
+   * @param cluster
+   * @param clusterEntity
+   * @param clusterStats
+   * @param submitter
+   * @param chefJsons
+   * @return
+   * @throws KaramelException 
+   */
+  public static Dag getPurgingDag(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
+      TaskSubmitter submitter, Map<String, JsonObject> chefJsons) throws KaramelException {
+    Dag dag = new Dag();
+    Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
+    machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag);
+    cookbookLevelPurgingTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
+    return dag;
+  }
+  
   /**
    * 1. Machine-level tasks such as:
    *     - AptGetEssential
@@ -54,6 +80,7 @@ public class DagBuilder {
    *     - RunRecipeTask for Install
    * 3.Recipe-level tasks such as:
    *     - RunRecipe tasks for all recipes except install
+   * 4.Applies dependencies that are defined in the Karamelfile
    * @param cluster
    * @param clusterEntity
    * @param clusterStats
