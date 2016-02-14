@@ -195,6 +195,14 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
+  public void remove(Task task) throws KaramelException {
+    logger.debug(String.format("%s: De-queuing '%s'", machineEntity.getId(), task.toString()));
+    taskQueue.remove(task);
+    if (activeTask == task) {
+      activeTask = null;
+    }
+  }
+
   public void killTaskSession(Task task) {
     if (activeTask == task) {
       logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));

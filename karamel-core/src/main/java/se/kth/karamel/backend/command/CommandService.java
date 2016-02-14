@@ -168,11 +168,28 @@ public class CommandService {
         renderer = CommandResponse.Renderer.YAML;
         result = ClusterDefinitionService.loadYaml(clusterName);
       }
-
-      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
+      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "install");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.pauseCluster(clusterNameInUserInput);
+        clusterService.submitInstallationDag(clusterNameInUserInput);
+        successMessage = clusterNameInUserInput + " was scheduled for installing, "
+            + "it might take some time please be patient!";
+        nextCmd = "status " + clusterNameInUserInput;
+      }
+
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "purge");
+      if (!found && clusterNameInUserInput != null) {
+        found = true;
+        clusterService.submitPurgeDag(clusterNameInUserInput);
+        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+            + "it might take some time please be patient!";
+        nextCmd = "status " + clusterNameInUserInput;
+      }
+
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
+      if (!found && clusterNameInUserInput != null) {
+        found = true;
+        clusterService.pauseDag(clusterNameInUserInput);
         successMessage = clusterNameInUserInput + " was scheduled for pausing, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
@@ -181,7 +198,7 @@ public class CommandService {
       clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "resume");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.resumeCluster(clusterNameInUserInput);
+        clusterService.resumeDag(clusterNameInUserInput);
         successMessage = clusterNameInUserInput + " was scheduled for resuming, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
@@ -399,7 +416,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         ClusterManager cluster = cluster(clusterName);
-        if (cluster == null || cluster.getInstallationDag() == null) {
+        if (cluster == null || cluster.getCurrentDag() == null) {
           TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
 
             @Override
@@ -423,6 +440,10 @@ public class CommandService {
             @Override
             public void skipMe(Task task) throws KaramelException {
             }
+
+            @Override
+            public void terminate(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -435,7 +456,7 @@ public class CommandService {
           installationDag.validate();
           result = installationDag.print();
         } else {
-          result = cluster.getInstallationDag().print();
+          result = cluster.getCurrentDag().print();
           addActiveClusterMenus(response);
           nextCmd = cmd;
         }
@@ -449,7 +470,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         ClusterManager cluster = cluster(clusterName);
-        if (cluster == null || cluster.getInstallationDag() == null) {
+        if (cluster == null || cluster.getCurrentDag() == null) {
           TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
 
             @Override
@@ -472,6 +493,10 @@ public class CommandService {
             @Override
             public void skipMe(Task task) throws KaramelException {
             }
+
+            @Override
+            public void terminate(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
@@ -487,7 +512,7 @@ public class CommandService {
             addActiveClusterMenus(response);
           }
         } else {
-          result = cluster.getInstallationDag().asJson();
+          result = cluster.getCurrentDag().asJson();
           addActiveClusterMenus(response);
           nextCmd = cmd;
         }
@@ -918,13 +943,19 @@ public class CommandService {
     response.addMenuItem("Orchestration DAG", "vdag " + clusterName);
     response.addMenuItem("Quick Links", "links " + clusterName);
     response.addMenuItem("Statistics", "stats " + clusterName);
-    if (clusterEntity.isPaused()) {
-      response.addMenuItem("Resume", "resume");
-    } else {
-      response.addMenuItem("Pause", "pause");
+    if (clusterEntity.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
+        || clusterEntity.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal()) {
+      response.addMenuItem("Install", "install");
+      response.addMenuItem("Purge", "purge");
+    }
+    if (clusterEntity.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG) {
+      if (clusterEntity.isPaused()) {
+        response.addMenuItem("Resume", "resume");
+      } else {
+        response.addMenuItem("Pause", "pause");
+      }
     }
     response.addMenuItem("Terminate", "terminate");
-
   }
 
   private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd)

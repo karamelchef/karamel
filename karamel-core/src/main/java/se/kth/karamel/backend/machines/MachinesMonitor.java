@@ -151,6 +151,19 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   }
 
   @Override
+  public void terminate(Task task) throws KaramelException {
+    logger.debug(String.format("Recieved '%s' from DAG to remove", task.toString()));
+    String machineName = task.getMachineId();
+    if (!machines.containsKey(machineName)) {
+      throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
+    }
+    SshMachine sshMachine = machines.get(machineName);
+    sshMachine.remove(task);
+    MachineRuntime machine = task.getMachine();
+    machine.removeTask(task);
+  }
+
+  @Override
   public void killMe(Task task) throws KaramelException {
     String machineName = task.getMachineId();
     if (!machines.containsKey(machineName)) {

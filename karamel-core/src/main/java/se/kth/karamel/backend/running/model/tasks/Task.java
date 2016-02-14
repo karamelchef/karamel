@@ -138,6 +138,16 @@ public abstract class Task implements DagTask, TaskCallback {
   }
 
   @Override
+  public void terminate() {
+    try {
+      submitter.terminate(this);
+    } catch (KaramelException ex) {
+      logger.error("", ex);
+      dagCallback.failed(ex.getMessage());
+    }
+  }
+
+  @Override
   public void submit(DagTaskCallback callback) {
     this.dagCallback = callback;
     try {
@@ -174,7 +184,7 @@ public abstract class Task implements DagTask, TaskCallback {
     addStats();
     dagCallback.succeed();
   }
-  
+
   @Override
   public void failed(String reason) {
     this.status = Status.FAILED;
@@ -226,5 +236,5 @@ public abstract class Task implements DagTask, TaskCallback {
   public void skip() throws KaramelException {
     submitter.skipMe(this);
   }
-  
+
 }

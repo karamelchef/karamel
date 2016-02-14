@@ -163,7 +163,7 @@ public class KaramelApiTest {
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
       mins++;
       ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
-      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.INSTALLED.ordinal()) {
+      if (clusterRuntime.getPhase().ordinal() > ClusterRuntime.ClusterPhases.DAG_DONE.ordinal()) {
         api.processCommand("terminate " + clusterName);
       }
       System.out.println(api.processCommand("machines").getResult());
@@ -286,7 +286,7 @@ public class KaramelApiTest {
     ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
     while (clusterRuntime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED || clusterRuntime.isFailed()) {
 
-      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
+      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.DAG_DONE) {
         api.processCommand("terminate " + clusterName);
       }
       System.out.println(api.processCommand("status").getResult());

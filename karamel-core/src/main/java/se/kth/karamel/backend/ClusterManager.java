@@ -55,7 +55,9 @@ public class ClusterManager implements Runnable {
 
   public static enum Command {
 
-    LAUNCH, PAUSE, RESUME, PURGE, TERMINATE
+    LAUNCH_CLUSTER, INTERRUPT_CLUSTER, TERMINATE_CLUSTER,
+    SUBMIT_INSTALL_DAG, SUBMIT_PURGE_DAG, INTERRUPT_DAG, PAUSE_DAG, RESUME_DAG;
+    
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -63,9 +65,8 @@ public class ClusterManager implements Runnable {
   private final ClusterRuntime runtime;
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
-  private Dag installationDag;
-  private Dag purgeDag;
-  private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
+  private Dag currentDag;
+  private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(2);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
   private Map<Class, Launcher> launchers = new HashMap<>();
@@ -93,8 +94,8 @@ public class ClusterManager implements Runnable {
     return stats;
   }
 
-  public Dag getInstallationDag() {
-    return installationDag;
+  public Dag getCurrentDag() {
+    return currentDag;
   }
 
   public MachinesMonitor getMachinesMonitor() {
@@ -110,7 +111,8 @@ public class ClusterManager implements Runnable {
   }
 
   public void enqueue(Command command) throws KaramelException {
-    if (command != Command.PAUSE && command != Command.RESUME) {
+    if (command != Command.PAUSE_DAG && command != Command.RESUME_DAG 
+        && command != Command.INTERRUPT_DAG && command != Command.INTERRUPT_CLUSTER) {
       if (!cmdQueue.offer(command)) {
         String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command,
             definition.getName());
@@ -119,16 +121,17 @@ public class ClusterManager implements Runnable {
       }
     }
 
-    if (command == Command.TERMINATE) {
+    if (command == Command.INTERRUPT_CLUSTER || 
+        (command == Command.INTERRUPT_DAG && runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG)) {
       if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
-        logger.info(String.format("Forcing to stop ClusterManager of '%s'", definition.getName()));
+        logger.info(String.format("Forcing to interrupt ClusterManager of '%s'", definition.getName()));
         clusterManagerFuture.cancel(true);
       }
-    } else if (command == Command.PAUSE) {
+    } else if (command == Command.PAUSE_DAG) {
       pause();
-    } else if (command == Command.RESUME) {
+    } else if (command == Command.RESUME_DAG) {
       resume();
-    } 
+    }
 
   }
 
@@ -156,7 +159,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private void initLaunchers() throws KaramelException{
+  private void initLaunchers() throws KaramelException {
     for (JsonGroup group : definition.getGroups()) {
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       Launcher launcher = launchers.get(provider.getClass());
@@ -167,8 +170,8 @@ public class ClusterManager implements Runnable {
           launcher = new BaremetalLauncher(clusterContext.getSshKeyPair());
         } else if (provider instanceof Gce) {
           launcher = new GceLauncher(clusterContext.getGceContext(), clusterContext.getSshKeyPair());
-        } else if (provider instanceof Nova){
-          launcher = new NovaLauncher(clusterContext.getNovaContext(),clusterContext.getSshKeyPair());
+        } else if (provider instanceof Nova) {
+          launcher = new NovaLauncher(clusterContext.getNovaContext(), clusterContext.getSshKeyPair());
         }
         launchers.put(provider.getClass(), launcher);
       }
@@ -255,68 +258,44 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private void purge() throws Exception {
-    logger.info(String.format("Purging '%s' ...", definition.getName()));
-    runtime.setPhase(ClusterRuntime.ClusterPhases.PURGING);
-    runtime.resolveFailure(Failure.hash(Failure.Type.INSTALLATION_FAILURE, null));
-    runtime.resolveFailure(Failure.hash(Failure.Type.PURGE_FAULIRE, null));
+  private void runDag(boolean installDag) throws Exception {
+    logger.info(String.format("Running the DAG for '%s' ...", definition.getName()));
+    if (currentDag != null) {
+      logger.info(String.format("Terminating the previous DAG before running the new one for '%s' ...", 
+          definition.getName()));
+      currentDag.termiante();
+    }
+    runtime.setPhase(ClusterRuntime.ClusterPhases.RUNNING_DAG);
+    runtime.resolveFailure(Failure.hash(Failure.Type.DAG_FAILURE, null));
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
-      group.setPhase(GroupRuntime.GroupPhase.PURGING);
-    }
-
-    try {
-      Map<String, JsonObject> chefJsons = ChefJsonGenerator.
-          generateClusterChefJsonsForPurge(definition, runtime);
-      purgeDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
-      purgeDag.start();
-    } catch (Exception ex) {
-      runtime.issueFailure(new Failure(Failure.Type.PURGE_FAULIRE, ex.getMessage()));
-      throw ex;
-    }
-
-    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.PURGING && !purgeDag.isDone()) {
-      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
-    }
-
-    if (!runtime.isFailed()) {
-      runtime.setPhase(ClusterRuntime.ClusterPhases.PURGED);
-      for (GroupRuntime group : groups) {
-        group.setPhase(GroupRuntime.GroupPhase.PURGED);
-      }
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
-    }
-  }
-
-  private void install() throws Exception {
-    logger.info(String.format("Installing '%s' ...", definition.getName()));
-    runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLING);
-    runtime.resolveFailure(Failure.hash(Failure.Type.INSTALLATION_FAILURE, null));
-    List<GroupRuntime> groups = runtime.getGroups();
-    for (GroupRuntime group : groups) {
-      group.setPhase(GroupRuntime.GroupPhase.INSTALLING);
+      group.setPhase(GroupRuntime.GroupPhase.RUNNING_DAG);
     }
 
     try {
       Map<String, JsonObject> chefJsons = ChefJsonGenerator.
           generateClusterChefJsonsForInstallation(definition, runtime);
-      installationDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
-      installationDag.start();
+      if (installDag) {
+        currentDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
+      } else {
+        currentDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
+      }
+      currentDag.start();
     } catch (Exception ex) {
-      runtime.issueFailure(new Failure(Failure.Type.INSTALLATION_FAILURE, ex.getMessage()));
+      runtime.issueFailure(new Failure(Failure.Type.DAG_FAILURE, ex.getMessage()));
       throw ex;
     }
 
-    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && !installationDag.isDone()) {
+    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG && !currentDag.isDone()) {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
     if (!runtime.isFailed()) {
-      runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLED);
+      runtime.setPhase(ClusterRuntime.ClusterPhases.DAG_DONE);
       for (GroupRuntime group : groups) {
-        group.setPhase(GroupRuntime.GroupPhase.INSTALLED);
+        group.setPhase(GroupRuntime.GroupPhase.DAG_DONE);
       }
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' INSTALLED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' DAG IS DONE \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
   }
 
@@ -383,7 +362,7 @@ public class ClusterManager implements Runnable {
         Command cmd = cmdQueue.take();
         logger.info(String.format("Going to serve '%s'", cmd.toString()));
         switch (cmd) {
-          case LAUNCH:
+          case LAUNCH_CLUSTER:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
@@ -413,17 +392,30 @@ public class ClusterManager implements Runnable {
                   = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
             }
-            if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
+            break;
+          case SUBMIT_INSTALL_DAG:
+            if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
+                && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
               ClusterStatistics.startTimer();
-              install();
+              runDag(true);
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
-              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), status, duration);
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             break;
-          case TERMINATE:
+          case SUBMIT_PURGE_DAG:
+            if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
+                && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
+              ClusterStatistics.startTimer();
+              runDag(false);
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name(), status, duration);
+              stats.addPhase(phaseStat);
+            }
+            break;
+          case TERMINATE_CLUSTER:
             ClusterStatistics.startTimer();
             terminate();
             long duration = ClusterStatistics.stopTimer();

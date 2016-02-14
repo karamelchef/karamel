@@ -22,5 +22,7 @@ public interface DagTaskCallback {
 
   public void failed(String reason);
 
+  public void terminated();
+  
   public void skipped();
 }

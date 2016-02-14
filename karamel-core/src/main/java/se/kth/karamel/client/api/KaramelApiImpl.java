@@ -196,12 +196,12 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void pauseCluster(String clusterName) throws KaramelException {
-    clusterService.pauseCluster(clusterName);
+    clusterService.pauseDag(clusterName);
   }
 
   @Override
   public void resumeCluster(String clusterName) throws KaramelException {
-    clusterService.resumeCluster(clusterName);
+    clusterService.resumeDag(clusterName);
   }
 
   @Override
