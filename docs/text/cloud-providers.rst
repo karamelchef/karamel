@@ -9,9 +9,32 @@ Most of the cloud providers have security-group notion, that is only machines in
 AWS (Amazon EC2)
 ----------------
 
-
 Google Compute Engine
 ---------------------
 
 Bare-metal
 ----------
+
+
+Operating Systems
+======================
+
+Ubuntu
+--------------
+Karamel supports Ubuntu natively. It should just work for Ubuntu.
+
+Centos/Redhat  (Requiretty)
+------------------------------
+
+Centos has some extra security features that need to be addressed when using Karamel.
+First, you need to disable the requiretty option in sudoers file:
+The requiretty if set in sudo config file sudoers, sudo will only run when the user is logged in to a real tty. When this flag is set, sudo can only be run from a login session and not via other means such as cron, shell/perl/python or cgi-bin scripts. This flag is set on many distores by default. Edit /etc/sudoers, file, enter:
+# visudo
+
+Find line the following line and comment it out:
+
+```Defaults    requiretty```
+
+change to:
+
+``` #Defaults    requiretty```
