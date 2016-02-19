@@ -91,6 +91,10 @@ public class MachineRuntime {
   }
 
   public synchronized void setSshUser(String sshUser) {
+    if (sshUser == null) {
+//      throw new NullPointerException("Trying to set sshUser to null");
+      sshUser = "ec2-user";
+    }
     this.sshUser = sshUser;
   }
 
