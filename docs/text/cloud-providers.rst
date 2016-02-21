@@ -38,3 +38,9 @@ Find line the following line and comment it out:
 change to:
 
 ``` #Defaults    requiretty```
+
+
+You may also need to disable firewalls (or open the correct ports):
+
+```systemctl stop firewalld```
+```systemctl disable firewalld```
