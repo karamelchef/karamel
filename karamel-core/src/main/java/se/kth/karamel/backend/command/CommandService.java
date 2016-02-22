@@ -819,7 +819,7 @@ public class CommandService {
       }
 
       if (task.getStatus().ordinal() > Task.Status.ONGOING.ordinal()) {
-        actions += "<a kref='log " + uuid + "'>log</a>";
+        actions += "  <a kref='log " + uuid + "'>log</a>";
       }
 
       data[i][2] = actions;

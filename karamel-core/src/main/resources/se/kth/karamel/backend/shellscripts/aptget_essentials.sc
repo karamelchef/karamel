@@ -38,6 +38,7 @@ if [ $OS_TYPE -eq 1 ] ; then
 %sudo_command% yum install curl -y
 %sudo_command% yum install git -y
 %sudo_command% yum install make -y
+%sudo_command% yum install wget -y
 git config --global user.name %github_username% 
 git config --global http.sslVerify false
 git config --global http.postBuffer 524288000
