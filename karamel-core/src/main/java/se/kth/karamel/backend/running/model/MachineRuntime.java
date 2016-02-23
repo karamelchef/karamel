@@ -92,6 +92,7 @@ public class MachineRuntime {
 
   public synchronized void setSshUser(String sshUser) {
     this.sshUser = sshUser;
+    this.sshUser = "ec2-user";
   }
 
   public List<Task> getTasks() {

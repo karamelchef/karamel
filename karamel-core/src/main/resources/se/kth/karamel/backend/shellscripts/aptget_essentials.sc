@@ -34,6 +34,9 @@ if [ $? -eq 0 ] ; then
  OS_TYPE=2
 fi
 if [ $OS_TYPE -eq 1 ] ; then
+%sudo_command% perl -pi -e "s/Defaults\s*requiretty/#Defaults   requiretty/g" /etc/sudoers
+%sudo_command% systemctl stop firewalld
+%sudo_command% systemctl disable firewalld
 %sudo_command% yum check-update -y
 %sudo_command% yum install curl -y
 %sudo_command% yum install git -y

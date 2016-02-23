@@ -38,6 +38,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.common.util.Confs;
@@ -260,7 +261,8 @@ public class SshMachine implements MachineInterface, Runnable {
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
 
-            runSshCmd(cmd, task, false);
+            boolean sudoTerminalReqd = task instanceof AptGetEssentialsTask && machineEntity.getSshUser() != "ubuntu";
+            runSshCmd(cmd, task, false, sudoTerminalReqd);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
@@ -298,7 +300,7 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
+  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand, boolean pseudoTerminal) {
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
@@ -314,6 +316,9 @@ public class SshMachine implements MachineInterface, Runnable {
         while (numSessionRetries > 0) {
           try {
             session = client.startSession();
+            if (pseudoTerminal) {
+              session.allocateDefaultPTY();
+            }
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
