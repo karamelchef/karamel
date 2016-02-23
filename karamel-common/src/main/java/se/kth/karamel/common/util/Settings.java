@@ -110,7 +110,6 @@ public class Settings {
   public static final String AWS_VM_TYPE_DEFAULT = InstanceType.M3_MEDIUM;
   public static final String AWS_REGION_CODE_DEFAULT = Region.EU_WEST_1;
   public static final String AWS_VM_USERNAME_DEFAULT = "ubuntu";
-//  public static final String AWS_VM_USERNAME_DEFAULT = "ec2-user";
   public static final String AWS_STORAGE_MAPPINGNAME_PREFIX = "/dev/sd";
   public static final String AWS_STORAGE_VIRTUALNAME_PREFIX = "ephemeral";
   public static final String AWS_STORAGE_KERNELALIAS_PREFIX = "/dev/xvd";

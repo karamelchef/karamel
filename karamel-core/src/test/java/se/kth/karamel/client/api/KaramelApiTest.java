@@ -196,9 +196,9 @@ public class KaramelApiTest {
 
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "provision";
+    String clusterName = "hopscentosbig";
     String ymlString = Resources.toString(Resources.getResource(
-        "se/kth/karamel/client/model/test-definitions/provision.yml"), Charsets.UTF_8);
+        "se/kth/karamel/client/model/test-definitions/hops-aws-centos.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
