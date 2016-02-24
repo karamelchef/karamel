@@ -310,6 +310,7 @@ function Ec2() {
   this.mapKey = "ec2";
   this.type = null;
   this.ami = null;
+  this.username = null;
   this.region = null;
   this.price = null;
   this.vpc = null;
@@ -320,6 +321,7 @@ function Ec2() {
   this.load = function(other) {
     this.type = other.type || null;
     this.ami = other.ami || null;
+    this.username = other.username|| null;
     this.region = other.region || null;
     this.price = other.price || null;
     this.vpc = other.vpc || null;
@@ -329,6 +331,7 @@ function Ec2() {
   this.copy = function(other) {
     this.type = other.type || null;
     this.ami = other.ami || null;
+    this.username = other.username|| null;
     this.region = other.region || null;
     this.price = other.price || null;
     this.vpc = other.vpc || null;
@@ -350,18 +353,21 @@ function Gce() {
   this.mapKey = "gce";
   this.type = null;
   this.zone = null;
+  this.username = null;
   this.image = null;
   this.jsonKeyPath = null;
 
   this.load = function(other) {
     this.type = other.type || null;
     this.zone = other.zone || null;
+    this.username = other.username || null;
     this.image = other.image || null;
   };
 
   this.copy = function(other) {
     this.type = other.type || null;
     this.zone = other.zone || null;
+    this.username = other.username || null;
     this.image = other.image || null;
   };
 
@@ -376,17 +382,20 @@ Gce.prototype = Object.create(Provider.prototype);
 function Nova() {
   this.mapKey = "nova";
   this.flavor = null;
+  this.username = null;
   this.image = null;
   this.accountName = null;
   this.accountPass = null;
 
   this.load = function(other) {
     this.flavor = other.flavor || null;
+    this.username = other.username || null;
     this.image = other.image || null;
   };
 
   this.copy = function(other) {
     this.flavor = other.flavor || null;
+    this.username = other.username || null;
     this.image = other.image || null;
   };
 
@@ -723,6 +732,7 @@ function toCoreApiFormat(uiCluster) {
   function _Ec2() {
     this.type = null;
     this.ami = null;
+    this.username = null;
     this.region = null;
     this.price = null;
     this.vpc = null;
@@ -730,6 +740,7 @@ function toCoreApiFormat(uiCluster) {
     this.load = function(other) {
       this.type = other.type || null;
       this.ami = other.ami || null;
+      this.username = other.username || null;
       this.region = other.region || null;
       this.price = other.price || null;
       this.vpc = other.vpc || null;
@@ -740,19 +751,23 @@ function toCoreApiFormat(uiCluster) {
   function _Gce() {
     this.type = null;
     this.zone = null;
+    this.username = null;
     this.image = null;
     this.load = function(other) {
       this.type = other.type || null;
       this.zone = other.zone || null;
+      this.username = other.username || null;
       this.image = other.image || null;
     }
   }
 
   function _Nova(){
-    this.flavor = null;;
+    this.flavor = null;
+    this.username = null;
     this.image = null;
     this.load = function(other){
       this.flavor = other.flavor || null;
+      this.username = other.username || null;
       this.image = other.image || null;
     }
   }
