@@ -38,6 +38,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.IoUtils;
@@ -61,11 +62,13 @@ public class SshMachine implements MachineInterface, Runnable {
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
   private boolean stopping = false;
+  private boolean killing = false;
   private final SshShell shell;
   private Task activeTask;
   private boolean isSucceedTaskHistoryUpdated = false;
   private final List<String> succeedTasksHistory = new ArrayList<>();
   private static Confs confs = Confs.loadKaramelConfs();
+
   /**
    * This constructor is used for users with SSH keys protected by a password
    *
@@ -96,19 +99,31 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void pause() {
-    if (machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
+    if (anyFailure() && machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
       machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSING, null, null);
     }
   }
 
   public void resume() {
-    if (machineEntity.getTasksStatus() != MachineRuntime.TasksStatus.FAILED) {
+    if (!anyFailure()) {
       if (taskQueue.isEmpty()) {
         machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
       } else {
         machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
       }
     }
+  }
+
+  private boolean anyFailure() {
+    boolean anyfailure = false;
+    if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.FAILED) {
+      for (Task task : machineEntity.getTasks()) {
+        if (task.getStatus() == Task.Status.FAILED) {
+          anyfailure = true;
+        }
+      }
+    }
+    return anyfailure;
   }
 
   @Override
@@ -180,17 +195,63 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
+  public void killTaskSession(Task task) {
+    if (activeTask == task) {
+      logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
+      KillSessionTask killTask = new KillSessionTask();
+      killing = true;
+      runTask(killTask);
+    } else {
+      logger.warn(String.format("Request to kill '%s' on '%s' but the task is not ongoing now", task.getName(),
+          task.getMachine().getPublicIp()));
+    }
+  }
+
+  public void retryFailedTask(Task task) throws KaramelException {
+    if (task.getStatus() == Status.FAILED) {
+      logger.info(String.format("Retrying '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
+      machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
+      task.retried();
+      activeTask = task;
+      resume();
+    } else {
+      String msg = String.format("Impossible to retry '%s' on '%s' because the task is not failed", task.getName(),
+          task.getMachineId());
+      logger.error(msg);
+      throw new KaramelException(msg);
+    }
+  }
+
+  public void skipFailedTask(Task task) throws KaramelException {
+    if (task.getStatus() == Status.FAILED) {
+      logger.info(String.format("Skipping '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
+      machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.TASK_FAILED, task.getUuid()));
+      task.skipped();
+      if (activeTask == task) {
+        activeTask = null;
+      }
+      resume();
+    } else {
+      String msg = String.format("Impossible to skip '%s' on '%s' because the task is not failed", task.getName(),
+          task.getMachineId());
+      logger.error(msg);
+      throw new KaramelException(msg);
+    }
+  }
+
   private void runTask(Task task) {
     if (!isSucceedTaskHistoryUpdated) {
       loadSucceedListFromMachineToMemory();
       isSucceedTaskHistoryUpdated = true;
     }
     String skipConf = confs.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
-    if (skipConf != null && skipConf.equalsIgnoreCase("true") 
-        && task.isSkippableIfExists() && succeedTasksHistory.contains(task.getId())) {
-      task.skipped();
+    if (skipConf != null && skipConf.equalsIgnoreCase("true")
+        && task.isIdempotent() && succeedTasksHistory.contains(task.getId())) {
+      task.exists();
       logger.info(String.format("Task skipped due to idempotency '%s'", task.getId()));
-      activeTask = null;
+      if (!(task instanceof KillSessionTask)) {
+        activeTask = null;
+      }
     } else {
       try {
         task.started();
@@ -199,7 +260,7 @@ public class SshMachine implements MachineInterface, Runnable {
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
 
-            runSshCmd(cmd, task);
+            runSshCmd(cmd, task, false);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
@@ -207,8 +268,8 @@ public class SshMachine implements MachineInterface, Runnable {
               break;
             } else {
               try {
+                task.collectResults(this);
                 if (task instanceof RunRecipeTask) {
-                  task.collectResults(this);
                   // If this task is an experiment, try and download the experiment results
                   // In contrast with 'collectResults' - the results will not necessarly be json objects,
                   // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
@@ -225,9 +286,11 @@ public class SshMachine implements MachineInterface, Runnable {
           }
         }
         if (task.getStatus() == Status.ONGOING) {
-          task.succeed();
-          succeedTasksHistory.add(task.uniqueId());
-          activeTask = null;
+          if (!(task instanceof KillSessionTask)) {
+            task.succeed();
+            succeedTasksHistory.add(task.uniqueId());
+            activeTask = null;
+          }
         }
       } catch (Exception ex) {
         task.failed(ex.getMessage());
@@ -235,13 +298,13 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task) {
+  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
     Session session = null;
 
-    while (!stopping && !finished && numCmdRetries > 0) {
+    while (!stopping && !killing && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
         logger.info(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
@@ -251,6 +314,9 @@ public class SshMachine implements MachineInterface, Runnable {
         while (numSessionRetries > 0) {
           try {
             session = client.startSession();
+            if (task.isSudoTerminalReqd()) {
+              session.allocateDefaultPTY();
+            }
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
@@ -270,7 +336,7 @@ public class SshMachine implements MachineInterface, Runnable {
             try {
               Thread.sleep(timeBetweenRetries);
             } catch (InterruptedException ex3) {
-              if (!stopping) {
+              if (!stopping && !killing) {
                 logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
                     machineEntity.getId()));
               }
@@ -299,8 +365,13 @@ public class SshMachine implements MachineInterface, Runnable {
           SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
-          if (getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
+          if (!killing
+              && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.PURGING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
+          }
+
+          if (killing) {
+            logger.info(String.format("Killed '%s' on '%s' successfully...", task.getName(), machineEntity.getId()));
           }
         }
 
@@ -311,7 +382,7 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            if (!stopping) {
+            if (!stopping && !killing) {
               logger.warn(
                   String.format("%s: Interrupted waiting to retry a command. Continuing...", machineEntity.getId()));
             }
@@ -326,6 +397,7 @@ public class SshMachine implements MachineInterface, Runnable {
             logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
           }
         }
+        killing = false;
       }
     }
   }

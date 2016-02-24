@@ -6,17 +6,19 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is 
@@ -50,7 +52,7 @@ public class ClusterService {
   public Map<String, ClusterContext> getClusterContexts() {
     return clusterContexts;
   }
-  
+
   public synchronized void registerSudoAccountPassword(String password) {
     commonContext.setSudoAccountPassword(password);
   }
@@ -201,4 +203,7 @@ public class ClusterService {
     return validatedContext;
   }
 
+  public synchronized void registerNovaContext(NovaContext context) {
+    commonContext.setNovaContext(context);
+  }
 }

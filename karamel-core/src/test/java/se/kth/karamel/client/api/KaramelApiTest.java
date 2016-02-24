@@ -2,9 +2,6 @@ package se.kth.karamel.client.api;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import java.io.IOException;
-import java.util.ArrayList;
-import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -13,6 +10,12 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -193,9 +196,9 @@ public class KaramelApiTest {
 
 //   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "provision";
+    String clusterName = "flink";
     String ymlString = Resources.toString(Resources.getResource(
-        "se/kth/karamel/client/model/test-definitions/provision.yml"), Charsets.UTF_8);
+        "se/kth/karamel/client/model/test-definitions/flink_baremetal.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -291,4 +294,35 @@ public class KaramelApiTest {
     }
   }
 
+  //@Test
+  public void testNovaJSONconversion() throws KaramelException, IOException, InterruptedException {
+    //TODO FIX THIS TEST FOR EOF characters
+    //CARE WITH NEW LINE CHARACTERS FROM WINDOWS AND UNIX on the file!
+    String expectedString = Resources.toString(Resources.getResource("se/kth/hop/json/flink_nova.json"), Charsets.UTF_8);
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    System.out.println(expectedString);
+    System.out.println(json);
+    assertTrue(expectedString.equals(json));
+  }
+  //@Test
+  public void testNova() throws KaramelException, IOException, InterruptedException {
+    String clusterName = "flinknova";
+    String ymlString = Resources.toString(Resources.getResource("se/kth/hop/model/flink_nova.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    System.out.println(json);
+    /*SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);*/
+    /*NovaCredentials credentials = api.loadNovaCredentialsIfExist();*/
+
+   /* api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      System.out.println(api.processCommand("status").getResult());
+      Thread.currentThread().sleep(60000);
+    }*/
+  }
 }

@@ -13,8 +13,10 @@ package se.kth.karamel.backend.running.model.tasks;
  */
 public interface TaskCallback {
   public void queued();
-  public void skipped();
+  public void exists();
   public void started();
   public void succeed();
   public void failed(String reason);
+  public void skipped();
+  public void retried();
 }

@@ -4,19 +4,12 @@
  */
 package se.kth.karamel.backend.launcher.amazon;
 
-import se.kth.karamel.common.launcher.amazon.InstanceType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -37,16 +30,19 @@ import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
-import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
+
+import java.util.*;
 
 /**
  * @author kamal
@@ -57,6 +53,8 @@ public final class Ec2Launcher extends Launcher {
   public static boolean TESTING = true;
   public final Ec2Context context;
   public final SshKeyPair sshKeyPair;
+
+  Set<String> keys = new HashSet<>();
 
   public Ec2Launcher(Ec2Context context, SshKeyPair sshKeyPair) {
     this.context = context;
@@ -191,8 +189,6 @@ public final class Ec2Launcher extends Launcher {
       regions.add(ec2.getRegion());
     }
   }
-
-  Set<String> keys = new HashSet<>();
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
@@ -363,7 +359,7 @@ public final class Ec2Launcher extends Launcher {
         // timeTaken (#machines, #batchSize)
         // numSuccess, numFailed, numberToLaunch, InstanceType, **RequestLimitExceeded, **InsufficientInstanceCapacity,
         // RequestResourceCountExceeded, ResourceCountExceeded, InsufficientAddressCapacity**
-        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more 
+        // If your requests have been throttled, you'll get the following error: Client.RequestLimitExceeded. For more
         //information, see Query API Request Rate.
         //  http://docs.aws.amazon.com/AWSEC2/latest/APIReference/query-api-troubleshooting.html#api-request-rate
         // InvalidInstanceID.NotFound, InvalidGroup.NotFound -> eventual consistency

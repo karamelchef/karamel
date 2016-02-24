@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
@@ -32,15 +33,26 @@ public class AptGetEssentialsTask extends Task {
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
+    OsType osType = getMachine().getOsType();
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
+          "osfamily", osType.family.toString().toLowerCase(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }
+
+  @Override
+  public boolean isSudoTerminalReqd() {
+    OsType osType = getMachine().getOsType();
+    return (osType != null && osType.family == OsType.LinuxFamily.UBUNTU);
+  }
+  
+  
 
   public static String makeUniqueId(String machineId) {
     return "apt-get essentials on " + machineId;
@@ -54,6 +66,8 @@ public class AptGetEssentialsTask extends Task {
   @Override
   public Set<String> dagDependencies() {
     Set<String> deps = new HashSet<>();
+    String findOsId = FindOsTypeTask.makeUniqueId(getMachineId());
+    deps.add(findOsId);
     if (storagePreparation) {
       String uniqId = PrepareStoragesTask.makeUniqueId(getMachineId());
       deps.add(uniqId);

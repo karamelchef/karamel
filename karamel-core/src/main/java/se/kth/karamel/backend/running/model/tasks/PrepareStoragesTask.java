@@ -6,7 +6,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
@@ -23,10 +23,10 @@ import se.kth.karamel.common.util.Settings;
 public class PrepareStoragesTask extends Task {
 
   private final StorageDevice[] storageDevices;
-  
+
   public PrepareStoragesTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
       StorageDevice[] storageDevices) {
-    super("prepare storages", "prepare storages",false, machine, clusterStats, submitter);
+    super("prepare storages", "prepare storages", false, machine, clusterStats, submitter);
     this.storageDevices = storageDevices;
   }
 
@@ -37,11 +37,12 @@ public class PrepareStoragesTask extends Task {
       for (StorageDevice device : storageDevices) {
         tuple.append(String.format("'%s','%s' ", device.kernelAlias(), device.mountPoint()));
       }
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPET_PATH_PREPARE_STORAGE,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPET_PATH_PREPARE_STORAGE,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
-          "device_mountpoint_tuple", tuple.toString()
+          "device_mountpoint_tuple", tuple.toString(),
+          "pid_file", Settings.PID_FILE_NAME
       );
     }
     return commands;
@@ -49,7 +50,10 @@ public class PrepareStoragesTask extends Task {
 
   @Override
   public Set<String> dagDependencies() {
-    return Collections.EMPTY_SET;
+    Set<String> deps = new HashSet<>();
+    String findOsId = FindOsTypeTask.makeUniqueId(getMachineId());
+    deps.add(findOsId);
+    return deps;
   }
 
   public static String makeUniqueId(String machineId) {

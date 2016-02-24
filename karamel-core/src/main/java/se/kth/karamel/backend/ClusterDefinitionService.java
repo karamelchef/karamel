@@ -9,6 +9,25 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.yaml.snakeyaml.DumperOptions;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.scanner.ScannerException;
+import se.kth.karamel.common.clusterdef.Baremetal;
+import se.kth.karamel.common.clusterdef.Cookbook;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
+import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
+import se.kth.karamel.common.clusterdef.yaml.YamlPropertyRepresenter;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.FilesystemUtil;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,23 +35,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.scanner.ScannerException;
-import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
-import se.kth.karamel.common.clusterdef.Cookbook;
-import se.kth.karamel.common.clusterdef.Ec2;
-import se.kth.karamel.common.clusterdef.Gce;
-import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
-import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
-import se.kth.karamel.common.clusterdef.yaml.YamlPropertyRepresenter;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.util.FilesystemUtil;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -55,6 +57,7 @@ public class ClusterDefinitionService {
     yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Nova.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);

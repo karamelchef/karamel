@@ -1,8 +1,9 @@
 package se.kth.karamel.webservicemodel;
 
+import se.kth.karamel.backend.command.CommandResponse;
+
 import java.util.ArrayList;
 import java.util.List;
-import se.kth.karamel.backend.command.CommandResponse;
 
 /**
  * Created by babbarshaer on 2015-02-09.

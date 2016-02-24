@@ -2,14 +2,10 @@ package se.kth.karamel.client.api;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import org.apache.commons.io.FileUtils;
+import org.jclouds.ContextBuilder;
 import org.jclouds.domain.Credentials;
+import org.jclouds.openstack.nova.v2_0.NovaApiMetadata;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.Experiment;
@@ -25,33 +21,46 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
+import se.kth.karamel.backend.launcher.nova.NovaContext;
+import se.kth.karamel.backend.launcher.nova.NovaLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
+import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
 import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.ShellCommandSerializer;
-import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
 import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
 import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
 import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.VendorCookbookTask;
-import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
-import se.kth.karamel.common.util.Confs;
-import se.kth.karamel.common.util.Ec2Credentials;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.util.SshKeyPair;
-import se.kth.karamel.common.util.SshKeyService;
 import se.kth.karamel.common.cookbookmeta.Berksfile;
 import se.kth.karamel.common.cookbookmeta.DefaultRb;
 import se.kth.karamel.common.cookbookmeta.ExperimentRecipe;
 import se.kth.karamel.common.cookbookmeta.InstallRecipe;
 import se.kth.karamel.common.cookbookmeta.KaramelFile;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.NovaCredentials;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.common.util.SshKeyService;
+import se.kth.karamel.common.util.settings.NovaSetting;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 /**
  * Implementation of the Karamel Api for UI
@@ -141,6 +150,26 @@ public class KaramelApiImpl implements KaramelApi {
     } catch (Throwable ex) {
       throw new KaramelException(ex.getMessage());
     }
+    return true;
+  }
+
+  @Override
+  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    return NovaLauncher.readCredentials(confs);
+  }
+
+  @Override
+  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
+    NovaContext context = NovaLauncher.validateCredentials(credentials,
+                                                            ContextBuilder.newBuilder(new NovaApiMetadata()));
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter(), credentials.getAccountName());
+    confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
+    confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter(), credentials.getEndpoint());
+    confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
+    confs.writeKaramelConfs();
+    clusterService.registerNovaContext(context);
     return true;
   }
 

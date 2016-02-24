@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
@@ -27,11 +28,14 @@ public class InstallBerkshelfTask extends Task {
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
+    OsType osType = getMachine().getOsType();
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "osfamily", osType.family.toString().toLowerCase(),
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }
@@ -48,8 +52,10 @@ public class InstallBerkshelfTask extends Task {
   @Override
   public Set<String> dagDependencies() {
     Set<String> deps = new HashSet<>();
-    String id = AptGetEssentialsTask.makeUniqueId(getMachineId());
-    deps.add(id);
+    String aptget = AptGetEssentialsTask.makeUniqueId(getMachineId());
+    String findos = FindOsTypeTask.makeUniqueId(getMachineId());
+    deps.add(aptget);
+    deps.add(findos);
     return deps;
   }
 

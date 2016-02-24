@@ -5,9 +5,11 @@
  */
 package se.kth.karamel.backend.running.model;
 
+import se.kth.karamel.backend.launcher.OsType;
+import se.kth.karamel.backend.running.model.tasks.Task;
+
 import java.util.ArrayList;
 import java.util.List;
-import se.kth.karamel.backend.running.model.tasks.Task;
 
 /**
  *
@@ -35,6 +37,7 @@ public class MachineRuntime {
   private int sshPort;
   private String sshUser;
   private String machineType;
+  private OsType osType;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -54,6 +57,14 @@ public class MachineRuntime {
     this.vmId = vmId;
   }
 
+  public void setOsType(OsType osType) {
+    this.osType = osType;
+  }
+
+  public OsType getOsType() {
+    return osType;
+  }
+  
   public String getName() {
     return name;
   }
@@ -61,7 +72,7 @@ public class MachineRuntime {
   public void setName(String name) {
     this.name = name;
   }
-  
+
   public String getPublicIp() {
     return publicIp;
   }
@@ -105,7 +116,7 @@ public class MachineRuntime {
   public void setMachineType(String machineType) {
     this.machineType = machineType;
   }
-  
+
   public void addTask(Task task) {
     tasks.add(task);
   }
@@ -122,15 +133,15 @@ public class MachineRuntime {
     return tasksStatus;
   }
 
-  public synchronized  void setTasksStatus(TasksStatus tasksStatus, String taskId, String failureMessage) {
+  public synchronized void setTasksStatus(TasksStatus tasksStatus, String taskId, String failureMessage) {
     this.tasksStatus = tasksStatus;
-    if (tasksStatus == TasksStatus.FAILED)
+    if (tasksStatus == TasksStatus.FAILED) {
       group.getCluster().issueFailure(new Failure(Failure.Type.TASK_FAILED, taskId, failureMessage));
+    }
   }
 
   public String getId() {
     return publicIp;
   }
-  
-  
+
 }

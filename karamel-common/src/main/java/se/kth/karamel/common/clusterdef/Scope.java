@@ -17,6 +17,7 @@ public abstract class Scope {
   private Vagrant vagrant;
   private Baremetal baremetal;
   private Gce gce;
+  private Nova nova;
 
   public Scope() {
   }
@@ -26,6 +27,7 @@ public abstract class Scope {
     this.vagrant = scope.getVagrant();
     this.baremetal = scope.getBaremetal();
     this.gce = scope.getGce();
+    this.nova = scope.getNova();
   }
 
   public abstract Object getAttr(String key);
@@ -37,6 +39,8 @@ public abstract class Scope {
       return gce;
     } else if (vagrant != null) {
       return vagrant;
+    } else if(nova != null){
+      return nova;
     } else {
       return baremetal;
     }
@@ -74,6 +78,12 @@ public abstract class Scope {
     this.gce = gce;
   }
 
+  public Nova getNova(){return nova;}
+
+  public void setNova(Nova nova){
+    this.nova = nova;
+  }
+
   public void validate() throws ValidationException {
     if (ec2 != null) {
       ec2.validate();
@@ -83,6 +93,9 @@ public abstract class Scope {
     }
     if (vagrant != null) {
       vagrant.validate();
+    }
+    if(nova != null){
+      nova.validate();
     }
   }
 ;

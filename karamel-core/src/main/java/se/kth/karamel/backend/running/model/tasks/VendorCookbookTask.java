@@ -49,7 +49,7 @@ public class VendorCookbookTask extends Task {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
     if (commands == null) {
-      commands = ShellCommandBuilder.fileScript2Commands(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,
           "github_repo_name", githubRepoName,
           "cookbook_path", cookbookPath,
@@ -58,7 +58,8 @@ public class VendorCookbookTask extends Task {
           "vendor_subfolder", Settings.REMOTE_CB_VENDOR_SUBFOLDER,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
+          "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
+          "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
   }

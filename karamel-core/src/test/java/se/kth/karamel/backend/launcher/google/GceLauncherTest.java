@@ -1,12 +1,6 @@
 package se.kth.karamel.backend.launcher.google;
 
 import com.google.common.collect.ImmutableSet;
-import java.io.File;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.domain.Credentials;
 import org.jclouds.googlecomputeengine.domain.Firewall;
@@ -20,12 +14,19 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.util.GceSettings;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.util.GceSettings;
+import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.common.util.SshKeyPair;
+
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *

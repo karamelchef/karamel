@@ -18,12 +18,13 @@ import se.kth.karamel.common.util.IoUtils;
  */
 public class ShellCommandBuilder {
 
-  public static List<ShellCommand> fileScript2Commands(String filePath, String... pairs) throws IOException {
+  public static List<ShellCommand> fileScript2LinebyLineCommands(String filePath, String... pairs)
+      throws IOException {
     String script = IoUtils.readContentFromClasspath(filePath);
-    if (pairs.length > 0 ) {
-      for (int i = 0; i < pairs.length; i+=2) {
+    if (pairs.length > 0) {
+      for (int i = 0; i < pairs.length; i += 2) {
         String key = pairs[i];
-        String val = pairs[i+1];
+        String val = pairs[i + 1];
         script = script.replaceAll("%" + key + "%", val);
       }
     }
@@ -52,16 +53,19 @@ public class ShellCommandBuilder {
     return tasks;
   }
 
-  public static List<ShellCommand> makeSingleFileCommands(String fileName, String scriptFilePath) 
+  public static List<ShellCommand> makeSingleFileCommand(String filePath, String... pairs)
       throws IOException {
+    String script = IoUtils.readContentFromClasspath(filePath);
+    if (pairs.length > 0) {
+      for (int i = 0; i < pairs.length; i += 2) {
+        String key = pairs[i];
+        String val = pairs[i + 1];
+        script = script.replaceAll("%" + key + "%", val);
+      }
+    }
     List<ShellCommand> cmds = new ArrayList<>();
-    StringBuilder cmdBuf = new StringBuilder();
-    String fileContent = IoUtils.readContentFromClasspath(scriptFilePath);
-    cmdBuf.append("sudo cat > ").append(fileName).append(" <<- 'END_OF_FILE'").append("\n").append(fileContent).
-        append("\n").append("END_OF_FILE");
-    cmds.add(new ShellCommand(cmdBuf.toString()));
-    cmds.add(new ShellCommand("sudo chmod 777 " + fileName));
-    cmds.add(new ShellCommand("./" + fileName));
+    ShellCommand shellCommand = new ShellCommand(script);
+    cmds.add(shellCommand);
     return cmds;
   }
 

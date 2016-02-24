@@ -5,7 +5,7 @@
   <groupId>se.kth.karamel</groupId>
   <artifactId>karamel-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.2</version>
+  <version>0.3</version>
   <name>karamel-parent</name>
   <url>http://maven.apache.org</url>
 
@@ -22,68 +22,85 @@
     <karamel-version>0.2</karamel-version>
   </properties>
 
-  <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
-
-  <developers>
-    <developer>
-      <id>jdowling</id>
-      <name>Jim Dowling</name>
-      <email>jdowling&gt;sics.se</email>
-      <url>http://www.sics.se/node/1405</url>
-      <organization>Swedish Institute of Computer Science (SICS)</organization>
-      <organizationUrl>http://www.sics.se/</organizationUrl>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-    <developer>
-      <id>kamal</id>
-      <name>Kamal Hakimzadeh</name>
-      <email>kamal@kth.se</email>
-      <organization>KTH</organization>
-      <organizationUrl>http://www.kth.se/</organizationUrl>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-    <developer>
-      <id>abhi</id>
-      <name>Abhimanyu Babbar</name>
-      <email>babbar&gt;kth.se</email>
-      <organization>KTH</organization>
-      <organizationUrl>http://www.kth.se/</organizationUrl>
-      <roles>
-        <role>developer</role>
-      </roles>
-      <timezone>+1</timezone>
-    </developer>
-  </developers>
-  <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>se.kth.karamel</groupId>
-        <artifactId>karamel-common</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>se.kth</groupId>
-        <artifactId>karamel-core</artifactId>
-        <version>${project.version}</version>
-      </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-  </dependencyManagement>
 
+    <developers>
+        <developer>
+            <id>jdowling</id>
+            <name>Jim Dowling</name>
+            <email>jdowling&gt;sics.se</email>
+            <url>http://www.sics.se/node/1405</url>
+            <organization>Swedish Institute of Computer Science (SICS)</organization>
+            <organizationUrl>http://www.sics.se/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>kamal</id>
+            <name>Kamal Hakimzadeh</name>
+            <email>kamal@kth.se</email>
+            <organization>KTH</organization>
+            <organizationUrl>http://www.kth.se/</organizationUrl>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>abhi</id>
+            <name>Abhimanyu Babbar</name>
+            <email>babbar&gt;kth.se</email>
+            <organization>KTH</organization>
+            <organizationUrl>http://www.kth.se/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>alorlea</id>
+            <name>Alberto Lorente Leal</name>
+            <email>a.lorenteleal&gt;gmail.com</email>
+            <organization>Free contributor</organization>
+            <organizationUrl>http://alorlea.github.io/</organizationUrl>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>se.kth.karamel</groupId>
+                <artifactId>karamel-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>se.kth</groupId>
+                <artifactId>karamel-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
   <distributionManagement>
     <repository>
       <id>sics-release-repository</id>
@@ -124,7 +141,7 @@
           <logViolationsToConsole>true</logViolationsToConsole>
           <failsOnError>true</failsOnError>
           <consoleOutput>true</consoleOutput>
-        </configuration>	
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

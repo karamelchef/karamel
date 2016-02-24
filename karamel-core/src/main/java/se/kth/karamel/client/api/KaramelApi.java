@@ -5,15 +5,17 @@
  */
 package se.kth.karamel.client.api;
 
-import java.util.List;
 import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
-import se.kth.karamel.common.util.Ec2Credentials;
-import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.NovaCredentials;
+import se.kth.karamel.common.util.SshKeyPair;
+
+import java.util.List;
 
 /**
  * The main API of Karamel-Core for Karamel clients
@@ -293,4 +295,8 @@ public interface KaramelApi {
   public String loadGceCredentialsIfExist() throws KaramelException;
 
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
+
+  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
+
+  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
 }
