@@ -5,25 +5,16 @@
  */
 package se.kth.karamel.backend;
 
-import se.kth.karamel.backend.stats.ClusterStatistics;
-import se.kth.karamel.backend.launcher.Launcher;
 import com.google.gson.JsonObject;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import se.kth.autoscalar.AutoScalarAPI;
+import se.kth.autoscalar.AutoScalarImpl;
+import se.kth.elasticscalar.common.models.MachineModel;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
+import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
@@ -33,16 +24,20 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
-import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.common.stats.PhaseStat;
+import se.kth.karamel.backend.stats.ClusterStatistics;
 import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
+
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  *
@@ -52,7 +47,7 @@ public class ClusterManager implements Runnable {
 
   public static enum Command {
 
-    LAUNCH, PAUSE, RESUME, PURGE
+    LAUNCH, PAUSE, RESUME, PURGE, ADD_MACHINES, REMOVE_MACHINES
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -70,6 +65,8 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
+  private Queue autoScalingSuggestionsQueue = null;
+  AutoScalarAPI autoScalarAPI = new AutoScalarImpl();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -107,7 +104,7 @@ public class ClusterManager implements Runnable {
 
   public void enqueue(Command command) throws KaramelException {
     if (command != Command.PAUSE && command != Command.RESUME) {
-      if (!cmdQueue.offer(command)) {
+      if (!cmdQueue.offer(command)) {    //offer --> insert to the queue if there is space
         String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command,
             definition.getName());
         logger.error(msg);
@@ -305,7 +302,7 @@ public class ClusterManager implements Runnable {
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' PURGED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private void forkMachines() throws Exception {
+  private List<GroupRuntime> forkMachines() throws Exception {
     logger.info(String.format("Launching '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_MACHINES);
     runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, null));
@@ -333,6 +330,36 @@ public class ClusterManager implements Runnable {
       runtime.setPhase(ClusterRuntime.ClusterPhases.MACHINES_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
+    return groups;
+  }
+
+  private void initiateAutoScaling(GroupRuntime groupRuntime) {
+
+    if(autoScalingSuggestionsQueue == null) {
+      autoScalingSuggestionsQueue = autoScalarAPI.getSuggestionQueue();
+    }
+    //ArrayList<MachineModel> machinesForAutoScalar = new ArrayList<MachineModel>();
+    for (MachineRuntime machine : groupRuntime.getMachines()) {
+       //String groupId, String VMId, String sshKeyPath, String IP, String port, String userName
+      //TODO pass sshKeyPath location
+      MachineModel machineModel = autoScalarAPI.addMachineToGroup(groupRuntime.getId(), machine.getId(), null, machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
+      //machinesForAutoScalar.add(machineModel);
+    }
+  }
+
+  //TODO the method observing the suggestion queue should invoke this method
+  private void addMachineToAutoScalingGroup(MachineRuntime machine) {
+    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+    //TODO pass sshKeyPath location
+    MachineModel machineModel = autoScalarAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null, machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
+    //machinesForAutoScalar.add(machineModel);
+  }
+
+  //TODO the method observing the suggestion queue should invoke this method
+  private void removeMachineFormAutoScalingGroup(MachineModel machine) {
+    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+    //TODO pass sshKeyPath location
+    autoScalarAPI.removeMachineFromGroup(machine);
   }
 
   @Override
@@ -366,12 +393,21 @@ public class ClusterManager implements Runnable {
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               ClusterStatistics.startTimer();
-              forkMachines();
+              List<GroupRuntime> groupRuntimes = forkMachines();
               long duration = ClusterStatistics.stopTimer();
-              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              boolean isFailed = runtime.isFailed();
+              String status = isFailed ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
                   = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
+
+              if(!isFailed) {
+                for (GroupRuntime groupRuntime: groupRuntimes) {
+                  if(groupRuntime.isElasticScalingEnabled()) {
+                    initiateAutoScaling(groupRuntime);
+                  }
+                }
+              }
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
@@ -382,6 +418,12 @@ public class ClusterManager implements Runnable {
               PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), status, duration);
               stats.addPhase(phaseStat);
             }
+            break;
+          case ADD_MACHINES:
+            //call fork machines with specific machine type
+            break;
+          case REMOVE_MACHINES:
+            // stop machines
             break;
           case PURGE:
             ClusterStatistics.startTimer();

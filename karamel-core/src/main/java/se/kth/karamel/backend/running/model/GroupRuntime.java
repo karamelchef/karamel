@@ -5,9 +5,10 @@
  */
 package se.kth.karamel.backend.running.model;
 
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+
 import java.util.ArrayList;
 import java.util.List;
-import se.kth.karamel.common.clusterdef.json.JsonGroup;
 
 /**
  *
@@ -66,6 +67,10 @@ public class GroupRuntime {
   
   public ClusterRuntime getCluster() {
     return cluster;
+  }
+
+  public boolean isElasticScalingEnabled() {
+    return true;
   }
 
 }

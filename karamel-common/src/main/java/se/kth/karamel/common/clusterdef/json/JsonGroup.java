@@ -5,19 +5,15 @@
  */
 package se.kth.karamel.common.clusterdef.json;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.util.Settings;
+
+import java.util.*;
 
 /**
  *
