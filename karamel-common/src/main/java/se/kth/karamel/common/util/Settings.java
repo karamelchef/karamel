@@ -74,6 +74,7 @@ public class Settings {
   //-------------------------------------------Shell script templates---------------------------------------------------
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
+  public static final String SCRIPT_FIND_OSTYPE = SCRIPT_PATH_ROOT + "find_ostype.sc";
   public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPET_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
@@ -228,6 +229,7 @@ public class Settings {
   //-----------------------------------------Machine General------------------------------------------------------------
   public static final String TMP_FOLDER_NAME = "tmp";
   public static final String PID_FILE_NAME = "pid";
+  public static final String OSTYPE_FILE_NAME = "ostype";
   public static final String SYSTEM_TMP_FOLDER_PATH = "/" + TMP_FOLDER_NAME;
   public static final String SUCCEED_TASKLIST_FILENAME = "succeed_list";
 
@@ -269,6 +271,10 @@ public class Settings {
 
   public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
     return REMOTE_USER_HOME(sshUserName) + File.separator + SUCCEED_TASKLIST_FILENAME;
+  }
+  
+  public static String REMOTE_OSTYPE_PATH(String sshUserName) {
+    return REMOTE_USER_HOME(sshUserName) + File.separator + OSTYPE_FILE_NAME;
   }
 
   public static String REMOTE_PIDFILE_PATH(String sshUserName) {
@@ -359,7 +365,11 @@ public class Settings {
   public static String MACHINE_SUCCEEDTASKS_PATH(String clusterName, String machineIp) {
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + SUCCEED_TASKLIST_FILENAME;
   }
-
+  
+  public static String MACHINE_OSTYPE_PATH(String clusterName, String machineIp) {
+    return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + OSTYPE_FILE_NAME;
+  }
+  
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
     if (!recipeName.contains(COOKBOOK_DELIMITER)) {

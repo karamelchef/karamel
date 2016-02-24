@@ -261,8 +261,7 @@ public class SshMachine implements MachineInterface, Runnable {
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
 
-            boolean sudoTerminalReqd = task instanceof AptGetEssentialsTask && machineEntity.getSshUser() != "ubuntu";
-            runSshCmd(cmd, task, false, sudoTerminalReqd);
+            runSshCmd(cmd, task, false);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
@@ -270,8 +269,8 @@ public class SshMachine implements MachineInterface, Runnable {
               break;
             } else {
               try {
+                task.collectResults(this);
                 if (task instanceof RunRecipeTask) {
-                  task.collectResults(this);
                   // If this task is an experiment, try and download the experiment results
                   // In contrast with 'collectResults' - the results will not necessarly be json objects,
                   // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
@@ -300,7 +299,7 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
-  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand, boolean pseudoTerminal) {
+  private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
@@ -316,7 +315,7 @@ public class SshMachine implements MachineInterface, Runnable {
         while (numSessionRetries > 0) {
           try {
             session = client.startSession();
-            if (pseudoTerminal) {
+            if (task.isSudoTerminalReqd()) {
               session.allocateDefaultPTY();
             }
             numSessionRetries = -1;

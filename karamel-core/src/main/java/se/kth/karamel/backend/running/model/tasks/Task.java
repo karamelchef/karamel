@@ -174,7 +174,7 @@ public abstract class Task implements DagTask, TaskCallback {
     addStats();
     dagCallback.succeed();
   }
-  
+
   @Override
   public void failed(String reason) {
     this.status = Status.FAILED;
@@ -198,6 +198,11 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
+  }
+
+  public boolean isSudoTerminalReqd() {
+    //override it in the subclasses if needed
+    return false;
   }
 
   public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
@@ -226,5 +231,5 @@ public abstract class Task implements DagTask, TaskCallback {
   public void skip() throws KaramelException {
     submitter.skipMe(this);
   }
-  
+
 }

@@ -194,11 +194,11 @@ public class KaramelApiTest {
     }
   }
 
-//   @Test
+   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
-    String clusterName = "hopscentosbig";
+    String clusterName = "flink";
     String ymlString = Resources.toString(Resources.getResource(
-        "se/kth/karamel/client/model/test-definitions/hops-aws-centos.yml"), Charsets.UTF_8);
+        "se/kth/karamel/client/model/test-definitions/flink_baremetal.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
