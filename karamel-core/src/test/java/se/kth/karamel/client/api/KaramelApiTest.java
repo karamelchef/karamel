@@ -194,7 +194,7 @@ public class KaramelApiTest {
     }
   }
 
-   @Test
+//   @Test
   public void testStatus() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flink";
     String ymlString = Resources.toString(Resources.getResource(

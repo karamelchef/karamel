@@ -33,7 +33,7 @@ public class InstallBerkshelfTask extends Task {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "osfamily", osType.family.toString(),
+          "osfamily", osType.family.toString().toLowerCase(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
     }

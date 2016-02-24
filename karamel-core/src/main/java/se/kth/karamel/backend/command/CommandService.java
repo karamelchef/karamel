@@ -24,6 +24,7 @@ import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
+import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.machines.SshMachine;
@@ -834,11 +835,13 @@ public class CommandService {
   }
 
   private static String machinesTable(ArrayList<MachineRuntime> machines, boolean rowNumbering) {
-    String[] columnNames = {"Machine", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
+    String[] columnNames = {"OS Family", "Public IP", "Private IP", 
+      "SSH Port", "SSH User", "Life Status", "Task Status"};
     Object[][] data = new Object[machines.size()][columnNames.length];
     for (int i = 0; i < machines.size(); i++) {
       MachineRuntime machine = machines.get(i);
-      data[i][0] = machine.getName();
+      OsType osType = machine.getOsType();
+      data[i][0] = (osType == null) ? "?" : osType.family.toString();
       data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>" + machine.getPublicIp() + "</a>";
       data[i][2] = machine.getPrivateIp();
       data[i][3] = machine.getSshPort();

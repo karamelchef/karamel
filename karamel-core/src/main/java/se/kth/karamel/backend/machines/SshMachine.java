@@ -38,7 +38,6 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
-import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.common.util.Confs;

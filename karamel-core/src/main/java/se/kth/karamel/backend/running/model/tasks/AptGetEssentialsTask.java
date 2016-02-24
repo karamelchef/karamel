@@ -38,7 +38,7 @@ public class AptGetEssentialsTask extends Task {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", getSudoCommand(),
           "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
-          "osfamily", osType.family.toString(),
+          "osfamily", osType.family.toString().toLowerCase(),
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
