@@ -1,39 +1,8 @@
 echo $$ > %pid_file%; echo '#!/bin/bash
-UNAME=$(uname | tr \"[:upper:]\" \"[:lower:]\")
-# If Linux, try to determine specific distribution
-echo \"name: $UNAME\"
-if [ \"$UNAME\" == \"linux\" ]; then
-    # If available, use LSB to identify distribution
-    if [ -f /etc/lsb-release -o -d /etc/lsb-release.d ]; then
-        export DISTRO=$(lsb_release -i | cut -d: -f2 | sed s/'^\t'//)
-    # Otherwise, use release info file
-    else
-        export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v \"lsb\" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
-    fi
-fi
-echo \"distro: $DISTRO\"
-OS_TYPE=0
-echo $DISTRO | grep -iq centos
-if [ $? -eq 0 ] ; then
- OS_TYPE=1
-fi
-echo $DISTRO | grep -iq fedora
-if [ $? -eq 0 ] ; then
- OS_TYPE=1
-fi
-echo $DISTRO | grep -iq redhat
-if [ $? -eq 0 ] ; then
- OS_TYPE=1
-fi
-echo $DISTRO | grep -iq ubuntu
-if [ $? -eq 0 ] ; then
- OS_TYPE=2
-fi
-echo $DISTRO | grep -iq debian
-if [ $? -eq 0 ] ; then
- OS_TYPE=2
-fi
-if [ $OS_TYPE -eq 1 ] ; then
+if [ %osfamily% == "redhat" ] ; then
+%sudo_command% perl -pi -e "s/Defaults\s*requiretty/#Defaults   requiretty/g" /etc/sudoers
+%sudo_command% systemctl stop firewalld
+%sudo_command% systemctl disable firewalld
 %sudo_command% yum check-update -y
 %sudo_command% yum install curl -y
 %sudo_command% yum install git -y
@@ -42,7 +11,7 @@ if [ $OS_TYPE -eq 1 ] ; then
 git config --global user.name %github_username% 
 git config --global http.sslVerify false
 git config --global http.postBuffer 524288000
-elif [ $OS_TYPE -eq 2 ] ; then
+elif [ %osfamily% == "ubuntu" ] ; then
 %sudo_command% apt-get update -y
 %sudo_command% apt-get update -y
 %sudo_command% apt-get install -f -y --force-yes git 
@@ -51,8 +20,9 @@ elif [ $OS_TYPE -eq 2 ] ; then
 git config --global user.name %github_username%
 git config --global http.sslVerify false
 git config --global http.postBuffer 524288000
-echo \"Found ubuntu\"
-else # ubuntu
- echo \"Unrecognized version of linux. Not ubuntu or redhat family.\"
+else
+ echo "Unrecognized version of linux. Not ubuntu or redhat family."
+ exit 1
 fi
-' > build.sh ; chmod +x build.sh ; ./build.sh
+echo '%task_id%' >> ~/%succeedtasks_filepath%
+' > aptget.sh ; chmod +x aptget.sh ; ./aptget.sh

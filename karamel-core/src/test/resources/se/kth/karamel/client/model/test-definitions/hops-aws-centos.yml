@@ -1,0 +1,94 @@
+name: hopscentosbig
+
+ec2:
+    type: m3.xlarge
+    region: eu-west-1
+    ami: ami-399f3c4a
+    username: ec2-user
+
+cookbooks:
+  hops:
+    github: "hopshadoop/hops-hadoop-chef"
+    branch: "master"                                       
+  hadoop:
+    github: "hopshadoop/apache-hadoop-chef"
+    branch: "master"
+  hopsworks:                               
+    github: "hopshadoop/hopsworks-chef"
+    branch: "master"
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+  spark:
+    github: "hopshadoop/spark-chef"
+    branch: "hops"
+  flink:
+    github: "hopshadoop/flink-chef"
+    branch: "hops"
+  elastic:
+    github: "hopshadoop/elasticsearch-chef"
+    branch: "master"
+  zeppelin:
+    github: "hopshadoop/zeppelin-chef"
+    branch: "master"
+
+attrs:
+  mysql:
+    dir: /media/ephemeral0
+    run_as_user: mysql
+  hdfs:
+    user: glassfish
+  hadoop:
+    yarn:
+      user: glassfish
+      nm:
+        memory_mbs: 4500
+      vcores: 2
+    mr:
+      user: glassfish
+  hops:
+    dir: /media/ephemeral0
+    use_hopsworks: "true"
+  ndb:
+    dir: /media/ephemeral0
+    NoOfReplicas: 2
+    DataMemory: 200
+    IndexMemory: 30
+  spark:
+    dir: /media/ephemeral0
+    user: glassfish
+  glassfish:
+    user: glassfish
+  hopsworks:
+    twofactor_auth: "true"    
+  zeppelin:
+    dir: /media/ephemeral0
+
+groups:
+  hopsfsdns:
+    size: 2
+    recipes: 
+      - hops::dn
+      - hops::nm        
+  metanodes:
+    size: 2
+    recipes: 
+      - ndb::ndbd
+      - hops::ndb
+      - ndb::mysqld
+      - hops::nn        
+  elastic:
+    size: 1
+    recipes:
+      - elastic 
+  ui:
+     size: 1 
+     recipes: 
+       - hops::rm
+       - ndb::mysqld
+       - hops::ndb
+       - ndb::mgmd                                                          
+       - hops::jhs
+       - spark::yarn
+       - zeppelin
+       - hopsworks
