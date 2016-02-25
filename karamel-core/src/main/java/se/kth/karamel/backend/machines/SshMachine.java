@@ -276,8 +276,8 @@ public class SshMachine implements MachineInterface, Runnable {
               break;
             } else {
               try {
+                task.collectResults(this);
                 if (task instanceof RunRecipeTask) {
-                  task.collectResults(this);
                   // If this task is an experiment, try and download the experiment results
                   // In contrast with 'collectResults' - the results will not necessarly be json objects,
                   // they could be anything - but will be stored in a single file in /tmp/cookbook_recipe.out .
@@ -322,6 +322,9 @@ public class SshMachine implements MachineInterface, Runnable {
         while (numSessionRetries > 0) {
           try {
             session = client.startSession();
+            if (task.isSudoTerminalReqd()) {
+              session.allocateDefaultPTY();
+            }
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);

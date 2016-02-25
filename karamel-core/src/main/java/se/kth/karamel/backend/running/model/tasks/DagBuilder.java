@@ -319,6 +319,8 @@ public class DagBuilder {
     String vendorPath = UserClusterDataExtractor.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
+        FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
+        dag.addTask(findOs);
         Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
         boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true") 
             && (provider instanceof Ec2));

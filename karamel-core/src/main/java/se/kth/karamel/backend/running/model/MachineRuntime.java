@@ -7,6 +7,7 @@ package se.kth.karamel.backend.running.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.running.model.tasks.Task;
 
 /**
@@ -35,6 +36,7 @@ public class MachineRuntime {
   private int sshPort;
   private String sshUser;
   private String machineType;
+  private OsType osType;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -54,6 +56,14 @@ public class MachineRuntime {
     this.vmId = vmId;
   }
 
+  public void setOsType(OsType osType) {
+    this.osType = osType;
+  }
+
+  public OsType getOsType() {
+    return osType;
+  }
+  
   public String getName() {
     return name;
   }

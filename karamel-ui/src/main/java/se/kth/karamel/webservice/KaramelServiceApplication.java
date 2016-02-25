@@ -89,6 +89,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static final int PORT = 58931;
   private static ServerSocket s;
   private static boolean cli = false;
+  private static boolean headless = false;
 
   static {
 // Ensure a single instance of the app is running
@@ -112,6 +113,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         .withDescription("Karamel cluster definition in a YAML file")
         .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
+    options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
   }
 
   public static void create() {
@@ -183,6 +185,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
       if (line.hasOption("launch")) {
         cli = true;
+        headless = true;
+      }
+      if (line.hasOption("headless")) {
+        headless = true;
       }
 
       if (cli) {
@@ -343,7 +349,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
 
-    if (!cli) {
+    if (!headless) {
       if (SystemTray.isSupported()) {
         trayUi = new TrayUI(createImage("if.png", "tray icon"), getPort(environment));
       }

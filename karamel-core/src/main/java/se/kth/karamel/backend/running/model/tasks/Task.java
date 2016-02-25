@@ -210,6 +210,11 @@ public abstract class Task implements DagTask, TaskCallback {
     //override it in the subclasses if needed
   }
 
+  public boolean isSudoTerminalReqd() {
+    //override it in the subclasses if needed
+    return false;
+  }
+
   public void downloadExperimentResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
   }

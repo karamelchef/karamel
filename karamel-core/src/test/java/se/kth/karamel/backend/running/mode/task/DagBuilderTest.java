@@ -163,7 +163,8 @@ public class DagBuilderTest {
     dag.validate();
     System.out.println(dag.print());
 
-    Assert.assertTrue(dag.isRoot("apt-get essentials on namenodes1"));
+    Assert.assertTrue(dag.isRoot("find os-type on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on namenodes1", "apt-get essentials on namenodes1"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on namenodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1", "flink::install on namenodes1"));
@@ -172,7 +173,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "hadoop::nn on namenodes1"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "flink::install on namenodes1"));
 
-    Assert.assertTrue(dag.isRoot("apt-get essentials on datanodes1"));
+    Assert.assertTrue(dag.isRoot("find os-type on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes1", "apt-get essentials on datanodes1"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1", "flink::install on datanodes1"));
@@ -180,7 +182,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "hadoop::dn on datanodes1"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "flink::install on datanodes1"));
 
-    Assert.assertTrue(dag.isRoot("apt-get essentials on datanodes2"));
+    Assert.assertTrue(dag.isRoot("find os-type on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes2", "apt-get essentials on datanodes2"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes2", "make solo.rb on datanodes2"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes2", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2", "flink::install on datanodes2"));
@@ -234,8 +237,10 @@ public class DagBuilderTest {
     dag.validate();
     System.out.println(dag.print());
 
-    Assert.assertTrue(dag.isRoot("prepare storages on namenodes1"));
-//    Assert.assertTrue(dag.hasDependency("prepare storages on namenodes1", "apt-get essentials on namenodes1"));
+    Assert.assertTrue(dag.isRoot("find os-type on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on namenodes1", "prepare storages on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on namenodes1", "apt-get essentials on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("prepare storages on namenodes1", "apt-get essentials on namenodes1"));
     Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install berkshelf on namenodes1"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on namenodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1"));
@@ -245,8 +250,9 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "hadoop::nn on namenodes1"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on namenodes1", "flink::install on namenodes1"));
 
-    Assert.assertTrue(dag.isRoot("prepare storages on datanodes1"));
-    Assert.assertTrue(dag.hasDependency("prepare storages on datanodes1", "apt-get essentials on datanodes1"));
+    Assert.assertTrue(dag.isRoot("find os-type on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes1", "prepare storages on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes1", "apt-get essentials on datanodes1"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1", "flink::install on datanodes1"));
@@ -254,8 +260,9 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "hadoop::dn on datanodes1"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes1", "flink::install on datanodes1"));
 
-    Assert.assertTrue(dag.isRoot("prepare storages on datanodes2"));
-    Assert.assertTrue(dag.hasDependency("prepare storages on datanodes2", "apt-get essentials on datanodes2"));
+    Assert.assertTrue(dag.isRoot("find os-type on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes2", "prepare storages on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("find os-type on datanodes2", "apt-get essentials on datanodes2"));
     Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes2", "make solo.rb on datanodes2"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes2", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2", "flink::install on datanodes2"));
