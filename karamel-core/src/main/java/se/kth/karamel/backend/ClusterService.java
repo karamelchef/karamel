@@ -208,7 +208,7 @@ public class ClusterService {
             Thread.sleep(100);
           }
           String name = runtime.getName().toLowerCase();
-          logger.info(String.format("Cluster '%s' terminated, rmoving it from the list of running clusters",
+          logger.info(String.format("Cluster '%s' terminated, removing it from the list of running clusters",
               runtime.getName()));
           repository.remove(name);
         } catch (InterruptedException ex) {

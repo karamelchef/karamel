@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.backend;
 
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
@@ -57,7 +58,7 @@ public class ClusterManager implements Runnable {
 
     LAUNCH_CLUSTER, INTERRUPT_CLUSTER, TERMINATE_CLUSTER,
     SUBMIT_INSTALL_DAG, SUBMIT_PURGE_DAG, INTERRUPT_DAG, PAUSE_DAG, RESUME_DAG;
-    
+
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
@@ -110,29 +111,81 @@ public class ClusterManager implements Runnable {
     return runtime;
   }
 
+  /**
+   * Non-blocking way of controlling the cluster, the quick commands are served immediately while the time-consuming
+   * commands are queued to be served one by one. Commands have different level of priorities and the higher priority
+   * commands invalidated the lower-priority ones.
+   *
+   * Cluster-scope immediate: 
+   *   - INTERRUPT_CLUSTER 
+   * Cluster-scope long-running: 
+   *   - LAUNCH_CLUSTER 
+   *   - INTERRUPT_CLUSTER
+   * DAG-scope immediate: 
+   *   - INTERRUPT_DAG 
+   *   - PAUSE_DAG 
+   *   - RESUME_DAG 
+   * DAG-scope long-running: 
+   *   - SUBMIT_INSTALL_DAG 
+   *   - SUBMIT_PURGE_DAG
+   *
+   * @param command
+   * @throws KaramelException
+   */
   public void enqueue(Command command) throws KaramelException {
-    if (command != Command.PAUSE_DAG && command != Command.RESUME_DAG 
-        && command != Command.INTERRUPT_DAG && command != Command.INTERRUPT_CLUSTER) {
-      if (!cmdQueue.offer(command)) {
-        String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command,
-            definition.getName());
-        logger.error(msg);
-        throw new KaramelException(msg);
-      }
+    ArrayList<Command> clusterScopeQueuingCommands = Lists.newArrayList(
+        Command.LAUNCH_CLUSTER,
+        Command.TERMINATE_CLUSTER);
+
+    ArrayList<Command> dagScopeQueuingCommands = Lists.newArrayList(
+        Command.SUBMIT_INSTALL_DAG,
+        Command.SUBMIT_PURGE_DAG);
+
+    if (clusterScopeQueuingCommands.contains(command)) {
+      cmdQueue.removeAll(dagScopeQueuingCommands);
     }
 
-    if (command == Command.INTERRUPT_CLUSTER || 
-        (command == Command.INTERRUPT_DAG && runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG)) {
-      if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
-        logger.info(String.format("Forcing to interrupt ClusterManager of '%s'", definition.getName()));
-        clusterManagerFuture.cancel(true);
-      }
-    } else if (command == Command.PAUSE_DAG) {
-      pause();
-    } else if (command == Command.RESUME_DAG) {
-      resume();
+    switch (command) {
+      case LAUNCH_CLUSTER:
+        runtime.resolveFailures();
+        cmdQueue.offer(command);
+        break;
+      case INTERRUPT_CLUSTER:
+        interupt();
+        break;
+      case TERMINATE_CLUSTER:
+        runtime.resolveFailures();
+        cmdQueue.offer(command);
+        break;
+      case INTERRUPT_DAG:
+        cmdQueue.remove(Command.SUBMIT_INSTALL_DAG);
+        cmdQueue.remove(Command.SUBMIT_PURGE_DAG);
+        cmdQueue.remove(Command.PAUSE_DAG);
+        cmdQueue.remove(Command.RESUME_DAG);
+        if (runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG) {
+          interupt();
+        }
+        break;
+      case SUBMIT_INSTALL_DAG:
+        cmdQueue.offer(command);
+        break;
+      case SUBMIT_PURGE_DAG:
+        cmdQueue.offer(command);
+        break;
+      case PAUSE_DAG:
+        pause();
+        break;
+      case RESUME_DAG:
+        resume();
+        break;
     }
+  }
 
+  public void interupt() {
+    if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
+      logger.info(String.format("Forcing to interrupt ClusterManager of '%s'", definition.getName()));
+      clusterManagerFuture.cancel(true);
+    }
   }
 
   public void start() {
@@ -261,7 +314,7 @@ public class ClusterManager implements Runnable {
   private void runDag(boolean installDag) throws Exception {
     logger.info(String.format("Running the DAG for '%s' ...", definition.getName()));
     if (currentDag != null) {
-      logger.info(String.format("Terminating the previous DAG before running the new one for '%s' ...", 
+      logger.info(String.format("Terminating the previous DAG before running the new one for '%s' ...",
           definition.getName()));
       currentDag.termiante();
     }
@@ -273,11 +326,13 @@ public class ClusterManager implements Runnable {
     }
 
     try {
-      Map<String, JsonObject> chefJsons = ChefJsonGenerator.
-          generateClusterChefJsonsForInstallation(definition, runtime);
       if (installDag) {
+        Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+            generateClusterChefJsonsForInstallation(definition, runtime);
         currentDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
       } else {
+        Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+            generateClusterChefJsonsForPurge(definition, runtime);
         currentDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
       }
       currentDag.start();
