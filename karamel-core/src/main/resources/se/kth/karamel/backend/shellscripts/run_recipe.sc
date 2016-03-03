@@ -5,5 +5,5 @@ cat > %json_file_name%.json <<-'END_OF_FILE'
 %chef_json%
 END_OF_FILE
 %sudo_command% chef-solo -c solo.rb -j %json_file_name%.json 2>&1 | tee %log_file_name%.log 
-echo %task_id% >> %succeedtasks_filepath% 
+echo '%task_id%' >> ~/%succeedtasks_filepath%
 ' > %json_file_name%.sh ; chmod +x %json_file_name%.sh ; ./%json_file_name%.sh
