@@ -1,4 +1,5 @@
 echo $$ > %pid_file%; echo '#!/bin/bash
+set -eo pipefail
 if [ %osfamily% == "redhat" ] ; then
 rm chefdk-0.8.0-1.el6.x86_64.rpm -f && wget https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chefdk-0.8.0-1.el6.x86_64.rpm ; %sudo_command% yum install -y chefdk-0.8.0-1.el6.x86_64.rpm ; echo '%task_id%' >> %succeedtasks_filepath%
 
