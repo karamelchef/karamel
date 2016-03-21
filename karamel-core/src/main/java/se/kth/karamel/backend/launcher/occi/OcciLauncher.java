@@ -99,8 +99,8 @@ public final class OcciLauncher extends Launcher{
    * @return 
    */
   public static OcciCredentials readCredentials(Confs confs) {
-    String userCertificatePath = confs.getProperty("OCCI_USER_CERTIFICATE_PATH");
-    String systemCertDir = confs.getProperty("OCCI_CERTIFICATE_DIR");
+    String userCertificatePath = confs.getProperty("occi.user.certificate.path");
+    String systemCertDir = confs.getProperty("occi.certificate.dir");
     if (userCertificatePath == null || userCertificatePath.isEmpty()){
       userCertificatePath = Settings.OCCI_USER_CERTIFICATE_PATH;
     }

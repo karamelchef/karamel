@@ -158,8 +158,8 @@ public class KaramelApiImpl implements KaramelApi {
   public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws InvalidOcciCredentialsException {
     OcciContext context = OcciLauncher.validateCredentials(credentials);
     Confs confs = Confs.loadKaramelConfs();
-    confs.put("OCCI_USER_CERTIFICATE_PATH", credentials.getUserCertificatePath());
-    confs.put("OCCI_CERTIFICATE_DIR", credentials.getSystemCertDir());
+    confs.put("occi.user.certificate.path", credentials.getUserCertificatePath());
+    confs.put("occi.certificate.dir", credentials.getSystemCertDir());
     confs.writeKaramelConfs();
     clusterService.registerOcciContext(context);
     return true;
