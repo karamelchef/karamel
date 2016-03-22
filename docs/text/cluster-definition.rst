@@ -115,3 +115,39 @@ IP-Range
     ips: 
     - 192.168.33.12-192.168.33.14
     - 192.168.44.15
+
+OCCI
+----
+To deploy the cluster on OCCI compatible infrastructure you must provide following information via yaml file:
+- occiEndpoint - defines on which OCCI cluster will your virtual machines be created
+- occiImage - virtual machine template
+- occiImageSize - compute resource size (procesors & memory)
+- usename - account name with root privileges
+
+Furthermore you must have voms-client installed and configured. To connect to you organisations resorces generate proxy certificate via "$voms-proxy-init -voms <name of you virtual organisation> -rfc" and add path to proxy certificate via OCCI launch panel in web gui.
+
+.. code-block:: yaml
+
+  name: OcciAmbari
+    occi:
+      occiEndpoint: "https://carach5.ics.muni.cz:11443"
+      occiImage: "http://occi.carach5.ics.muni.cz/occi/infrastructure/os_tpl#uuid_egi_ubuntu_server_14_04_lts_fedcloud_warg_131"
+      occiImageSize: "http://fedcloud.egi.eu/occi/compute/flavour/1.0#mem_large"
+      usename: "ubuntu"
+
+  cookbooks:
+    ambari:
+      github: "jimdowling/ambari"
+      branch: "master"
+
+  groups:
+    server:
+      size: 1
+      recipes:
+          - ambari::server
+    agents:
+      size: 1
+      recipes:
+          - ambari::agent
+
+

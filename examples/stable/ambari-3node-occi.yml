@@ -1,0 +1,21 @@
+name: OcciAmbari
+occi:
+  occiEndpoint: "https://carach5.ics.muni.cz:11443"
+  occiImage: "http://occi.carach5.ics.muni.cz/occi/infrastructure/os_tpl#uuid_egi_ubuntu_server_14_04_lts_fedcloud_warg_131"
+  occiImageSize: "http://fedcloud.egi.eu/occi/compute/flavour/1.0#mem_large"
+  username: "ubuntu"
+
+cookbooks:
+  ambari:
+    github: "jimdowling/ambari"
+    branch: "master"
+
+groups:
+  server:
+    size: 1
+    recipes:
+        - ambari::server
+  agents:
+    size: 2
+    recipes:
+        - ambari::agent

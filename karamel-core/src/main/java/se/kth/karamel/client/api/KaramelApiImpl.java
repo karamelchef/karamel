@@ -23,6 +23,8 @@ import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.launcher.nova.NovaLauncher;
+import se.kth.karamel.backend.launcher.occi.OcciContext;
+import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -45,10 +47,12 @@ import se.kth.karamel.common.cookbookmeta.KaramelFile;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.exception.InvalidNovaCredentialsException;
+import se.kth.karamel.common.exception.InvalidOcciCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.NovaCredentials;
+import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.util.SshKeyService;
@@ -60,7 +64,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 
 /**
  * Implementation of the Karamel Api for UI
@@ -162,7 +165,7 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
     NovaContext context = NovaLauncher.validateCredentials(credentials,
-                                                            ContextBuilder.newBuilder(new NovaApiMetadata()));
+        ContextBuilder.newBuilder(new NovaApiMetadata()));
     Confs confs = Confs.loadKaramelConfs();
     confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter(), credentials.getAccountName());
     confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
@@ -170,6 +173,22 @@ public class KaramelApiImpl implements KaramelApi {
     confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
     confs.writeKaramelConfs();
     clusterService.registerNovaContext(context);
+    return true;
+  }
+
+  public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    return OcciLauncher.readCredentials(confs);
+  }
+
+  @Override
+  public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws InvalidOcciCredentialsException {
+    OcciContext context = OcciLauncher.validateCredentials(credentials);
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put("occi.user.certificate.path", credentials.getUserCertificatePath());
+    confs.put("occi.certificate.dir", credentials.getSystemCertDir());
+    confs.writeKaramelConfs();
+    clusterService.registerOcciContext(context);
     return true;
   }
 
