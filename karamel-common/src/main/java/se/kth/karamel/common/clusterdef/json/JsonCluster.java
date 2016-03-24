@@ -21,6 +21,10 @@ public class JsonCluster extends JsonScope {
 
   private String name;
 
+  private boolean useContainers;
+
+  private int hosts;
+
   private List<JsonGroup> groups = new ArrayList<>();
 
   public JsonCluster() {
@@ -29,6 +33,8 @@ public class JsonCluster extends JsonScope {
   public JsonCluster(YamlCluster cluster) throws KaramelException {
     super(cluster, cluster);
     this.name = cluster.getName();
+    this.useContainers = cluster.getUseContainers();
+    this.hosts = cluster.getHosts();
     Set<Map.Entry<String, YamlGroup>> entrySet = cluster.getGroups().entrySet();
     for (Map.Entry<String, YamlGroup> entry : entrySet) {
       String gName = entry.getKey();
@@ -55,4 +61,19 @@ public class JsonCluster extends JsonScope {
     this.groups = groups;
   }
 
+  public boolean getUseContainers() {
+    return useContainers;
+  }
+
+  public void setUseContainers(boolean useContainers) {
+    this.useContainers = useContainers;
+  }
+
+  public int getHosts() {
+    return hosts;
+  }
+
+  public void setHosts(int hosts) {
+    this.hosts = hosts;
+  }
 }

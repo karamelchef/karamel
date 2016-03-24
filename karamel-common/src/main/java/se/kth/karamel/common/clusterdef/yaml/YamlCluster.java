@@ -25,6 +25,8 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 public class YamlCluster extends YamlScope {
 
   private String name;
+  private boolean useContainers;
+  private int hosts;
   private Map<String, YamlGroup> groups = new HashMap<>();
   private final Map<String, Cookbook> cookbooks = new HashMap<>();
 
@@ -34,6 +36,8 @@ public class YamlCluster extends YamlScope {
   public YamlCluster(JsonCluster jsonCluster) throws MetadataParseException, KaramelException {
     super(jsonCluster);
     this.name = jsonCluster.getName();
+    this.useContainers = jsonCluster.getUseContainers();
+    this.hosts = jsonCluster.getHosts();
     List<JsonGroup> jsonGroups = jsonCluster.getGroups();
     List<JsonCookbook> allCbs = new ArrayList<>();
     for (JsonGroup jsonGroup : jsonGroups) {
@@ -81,4 +85,19 @@ public class YamlCluster extends YamlScope {
     throw new UnsupportedOperationException("Not supported yet."); 
   }
 
+  public boolean getUseContainers() {
+    return useContainers;
+  }
+
+  public void setUseContainers(boolean useContainers) {
+    this.useContainers = useContainers;
+  }
+
+  public int getHosts() {
+    return hosts;
+  }
+
+  public void setHosts(int hosts) {
+    this.hosts = hosts;
+  }
 }

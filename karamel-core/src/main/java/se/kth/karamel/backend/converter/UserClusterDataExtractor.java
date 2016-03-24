@@ -76,6 +76,9 @@ public class UserClusterDataExtractor {
 
   public static int totalMachines(JsonCluster cluster) {
     int total = 0;
+    if(cluster.getUseContainers()){
+      return cluster.getHosts();
+    }
     for (JsonGroup g : cluster.getGroups()) {
       total += g.getSize();
     }

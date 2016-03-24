@@ -1,6 +1,8 @@
 // ================================================  CLUSTER ======================================  //
 function Cluster() {
   this.name = null;
+  this.useContainers = false;
+  this.hosts = 0;
   this.cookbooks = [];
   this.groups = [];
   this.ec2 = null;
@@ -53,6 +55,8 @@ function Cluster() {
 
   this.load = function(other) {
     this.name = other.name;
+    this.useContainers = other.useContainers;
+    this.hosts = other.hosts;
     this.loadEc2(this, other["ec2"]);
     this.loadGce(this, other["gce"]);
     this.loadNova(this, other["nova"]);
@@ -64,6 +68,9 @@ function Cluster() {
 
   this.copy = function(other) {
     this.name = other.name;
+    this.useContainers = other.useContainers;
+    this.hosts = other.hosts;
+    
     if (other.ec2 !== null) {
       this.ec2 = new Ec2();
       this.ec2.copy(other.ec2);
@@ -646,6 +653,8 @@ function toCoreApiFormat(uiCluster) {
   function _Cluster() {
 
     this.name = null;
+    this.useContainers = false;
+    this.hosts = 0;
     this.cookbooks = null;
     this.groups = null;
     this.ec2 = null;
@@ -669,6 +678,8 @@ function toCoreApiFormat(uiCluster) {
 
     this.load = function(other) {
       this.name = other.name;
+      this.hosts = other.hosts;
+      this.useContainers = other.useContainers;
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);
       _addNova(this, other.nova);

@@ -48,6 +48,10 @@ public class DagBuilder {
     Dag dag = new Dag();
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag);
+    //TODO temporary return from here without adding installations
+    if (cluster.getUseContainers()){
+      return dag;
+    }
     cookbookLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
         allRecipeTasks, dag);
@@ -230,6 +234,11 @@ public class DagBuilder {
         dag.addTask(t1);
         dag.addTask(t2);
         dag.addTask(t3);
+
+        if(cluster.getUseContainers()){
+          DockerInstallTask dockerInstallTask = new DockerInstallTask(me, clusterStats, submitter);
+          dag.addTask(dockerInstallTask);
+        }
       }
     }
   }
