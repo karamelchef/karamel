@@ -1,6 +1,8 @@
 #include_attribute "hadoop"
 include_attribute "hops"
 
+default.hiway.test                                  = "value"
+
 #default[:hiway][:resolution]                       = "1024x768x32"
 default[:hiway][:release]                           = "false"
 default[:hiway][:user]                              = "hiway"

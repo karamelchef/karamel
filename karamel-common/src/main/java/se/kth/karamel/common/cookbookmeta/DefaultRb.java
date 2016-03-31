@@ -22,8 +22,10 @@ public final class DefaultRb {
 
   private final List<String> contentLines;
   public static String LINE_PATTERN = "^\\s*default\\s*(\\[:.*\\])+\\s*=\\s*.*\\s*$";
+  public static String LINE_PATTERN2 = "^\\s*default\\s*(\\..*)+\\s*=\\s*.*\\s*$";
   public static Pattern SIMPLE_VALUE_PATTERN = Pattern.compile("^((\".*\")|('.*')|(\\d*)|(\\[.*\\]))$");
   public static Pattern SKIP_VALUE_PATTERN = Pattern.compile("^.*\\[:.*\\].*$");
+  public static Pattern SKIP_VALUE_PATTERN2 = Pattern.compile("^.*\\..*$");
   public static Pattern ARRAY_VALUE_PATTERN = Pattern.compile("\\s*\\[(.*)\\]s*(,)?\\s*");
   public static Pattern ATTR_DEFAULT_ARRAY_ITEMS = Pattern.compile("[\\'|\\\"]([^\\'|\\\"]*)[\\'|\\\"]");
 
@@ -36,10 +38,11 @@ public final class DefaultRb {
 
   public void loadAttributes() {
     for (String line : contentLines) {
-      if (line.matches(LINE_PATTERN)) {
+      if (line.matches(LINE_PATTERN) || line.matches(LINE_PATTERN2)) {
         int indx = line.indexOf("=");
         String key = line.substring(0, indx - 1).trim().substring(9).replaceAll("\\[\\:", "/").
-            replaceAll("\\[\\'", "/").replaceAll("\\]", "").replaceAll("\\'", "").trim();
+            replaceAll("\\[\\'", "/").replaceAll("\\]", "").replaceAll("\\'", "").
+            replaceAll("\\.", "/").trim();
         String value = line.substring(indx + 1).trim();
         Matcher m0 = ARRAY_VALUE_PATTERN.matcher(value);
         Matcher m1 = SIMPLE_VALUE_PATTERN.matcher(value);

@@ -49,7 +49,7 @@ public class AptGetEssentialsTask extends Task {
   @Override
   public boolean isSudoTerminalReqd() {
     OsType osType = getMachine().getOsType();
-    return (osType != null && osType.family == OsType.LinuxFamily.UBUNTU);
+    return (osType != null && osType.family == OsType.LinuxFamily.REDHAT);
   }
   
   
