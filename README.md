@@ -1,4 +1,4 @@
-# Karamel - Reproducing Distributed Systems and Experiments on Cloud //test
+# Karamel - Reproducing Distributed Systems and Experiments on Cloud
 
 Website: http://www.karamel.io
 
