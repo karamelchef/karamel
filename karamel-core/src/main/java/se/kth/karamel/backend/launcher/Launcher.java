@@ -7,7 +7,7 @@ package se.kth.karamel.backend.launcher;
 
 import java.util.List;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -44,7 +44,7 @@ public abstract class Launcher {
    * @return 
    * @throws KaramelException 
    */
-  public abstract List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name) 
+  public abstract List<NodeRunTime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
       throws KaramelException;
 
 

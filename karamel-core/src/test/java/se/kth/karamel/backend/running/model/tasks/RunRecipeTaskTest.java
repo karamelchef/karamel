@@ -15,7 +15,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.stats.ClusterStats;
 
 public class RunRecipeTaskTest {
@@ -132,7 +133,7 @@ public class RunRecipeTaskTest {
 
     JsonElement obj = new JsonParser().parse(source);
     JsonElement param = new JsonParser().parse(dest);
-    MachineRuntime mr = new MachineRuntime(null);
+    NodeRunTime mr = new NodeRunTime(null);
     mr.setPublicIp("1111");
     ClusterStats clusterStats = new ClusterStats();
     RunRecipeTask instance = new RunRecipeTask(mr, clusterStats, "", "", null, "", "");

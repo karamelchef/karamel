@@ -25,7 +25,7 @@ public class GroupRuntime {
   private GroupPhase phase = GroupPhase.NONE;
   private String name;
   private String id;
-  private List<MachineRuntime> machines = new ArrayList<>();
+  private List<NodeRunTime> machines = new ArrayList<>();
 
   public GroupRuntime(ClusterRuntime cluster) {
     this.cluster = cluster;
@@ -36,11 +36,11 @@ public class GroupRuntime {
     this.name = definition.getName();
   }
 
-  public synchronized void setMachines(List<MachineRuntime> machines) {
+  public synchronized void setMachines(List<NodeRunTime> machines) {
     this.machines = machines;
   }
 
-  public List<MachineRuntime> getMachines() {
+  public List<NodeRunTime> getMachines() {
     return machines;
   }
 

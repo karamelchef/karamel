@@ -11,7 +11,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -51,9 +51,9 @@ public class UserClusterDataExtractor {
                   if (clusterEntity != null) {
                     GroupRuntime ge = findGroup(clusterEntity, jg.getName());
                     if (ge != null) {
-                      List<MachineRuntime> machines = ge.getMachines();
+                      List<NodeRunTime> machines = ge.getMachines();
                       if (machines != null) {
-                        for (MachineRuntime me : ge.getMachines()) {
+                        for (NodeRunTime me : ge.getMachines()) {
                           String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
                           builder.append(l).append("\n");
                         }

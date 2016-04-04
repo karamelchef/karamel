@@ -20,7 +20,7 @@ import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.backend.running.model.tasks.Task.Status;
@@ -54,7 +54,7 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private static final Logger logger = Logger.getLogger(SshMachine.class);
-  private final MachineRuntime machineEntity;
+  private final NodeRunTime machineEntity;
   private final String serverPubKey;
   private final String serverPrivateKey;
   private final String passphrase;
@@ -77,7 +77,7 @@ public class SshMachine implements MachineInterface, Runnable {
    * @param serverPrivateKey
    * @param passphrase
    */
-  public SshMachine(MachineRuntime machineEntity, String serverPubKey, String serverPrivateKey, String passphrase) {
+  public SshMachine(NodeRunTime machineEntity, String serverPubKey, String serverPrivateKey, String passphrase) {
     this.machineEntity = machineEntity;
     this.serverPubKey = serverPubKey;
     this.serverPrivateKey = serverPrivateKey;
@@ -86,7 +86,7 @@ public class SshMachine implements MachineInterface, Runnable {
         machineEntity.getSshUser(), passphrase, machineEntity.getSshPort());
   }
 
-  public MachineRuntime getMachineEntity() {
+  public NodeRunTime getMachineEntity() {
     return machineEntity;
   }
 
@@ -99,24 +99,24 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void pause() {
-    if (anyFailure() && machineEntity.getTasksStatus().ordinal() < MachineRuntime.TasksStatus.PAUSING.ordinal()) {
-      machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSING, null, null);
+    if (anyFailure() && machineEntity.getTasksStatus().ordinal() < NodeRunTime.TasksStatus.PAUSING.ordinal()) {
+      machineEntity.setTasksStatus(NodeRunTime.TasksStatus.PAUSING, null, null);
     }
   }
 
   public void resume() {
     if (!anyFailure()) {
       if (taskQueue.isEmpty()) {
-        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
+        machineEntity.setTasksStatus(NodeRunTime.TasksStatus.EMPTY, null, null);
       } else {
-        machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
+        machineEntity.setTasksStatus(NodeRunTime.TasksStatus.ONGOING, null, null);
       }
     }
   }
 
   private boolean anyFailure() {
     boolean anyfailure = false;
-    if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.FAILED) {
+    if (machineEntity.getTasksStatus() == NodeRunTime.TasksStatus.FAILED) {
       for (Task task : machineEntity.getTasks()) {
         if (task.getStatus() == Task.Status.FAILED) {
           anyfailure = true;
@@ -132,17 +132,17 @@ public class SshMachine implements MachineInterface, Runnable {
     try {
       while (!stopping) {
         try {
-          if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
-              && (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING
-              || machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.EMPTY)) {
+          if (machineEntity.getLifeStatus() == NodeRunTime.LifeStatus.CONNECTED
+              && (machineEntity.getTasksStatus() == NodeRunTime.TasksStatus.ONGOING
+              || machineEntity.getTasksStatus() == NodeRunTime.TasksStatus.EMPTY)) {
             try {
               if (activeTask == null) {
                 if (taskQueue.isEmpty()) {
-                  machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
+                  machineEntity.setTasksStatus(NodeRunTime.TasksStatus.EMPTY, null, null);
                 }
                 activeTask = taskQueue.take();
                 logger.debug(String.format("%s: Taking a new task from the queue.", machineEntity.getId()));
-                machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
+                machineEntity.setTasksStatus(NodeRunTime.TasksStatus.ONGOING, null, null);
               } else {
                 logger.debug(
                     String.format("%s: Retrying a task that didn't complete on last execution attempt.",
@@ -161,8 +161,8 @@ public class SshMachine implements MachineInterface, Runnable {
               }
             }
           } else {
-            if (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.PAUSING) {
-              machineEntity.setTasksStatus(MachineRuntime.TasksStatus.PAUSED, null, null);
+            if (machineEntity.getTasksStatus() == NodeRunTime.TasksStatus.PAUSING) {
+              machineEntity.setTasksStatus(NodeRunTime.TasksStatus.PAUSED, null, null);
             }
             try {
               Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
@@ -459,10 +459,10 @@ public class SshMachine implements MachineInterface, Runnable {
             machineEntity.getGroup().getCluster().resolveFailure(Failure.hash(Failure.Type.SSH_KEY_NOT_AUTH,
                 machineEntity.getPublicIp()));
             client.authPublickey(machineEntity.getSshUser(), keys);
-            machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
+            machineEntity.setLifeStatus(NodeRunTime.LifeStatus.CONNECTED);
             return;
           } else {
-            machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
+            machineEntity.setLifeStatus(NodeRunTime.LifeStatus.UNREACHABLE);
           }
 
           numRetries--;

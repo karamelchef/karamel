@@ -12,7 +12,7 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.util.Settings;
@@ -47,15 +47,15 @@ public class BaremetalLauncher extends Launcher {
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 
+  public List<NodeRunTime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
     logger.info(String.format("Provider of %s is baremetal, available machines expected.", groupName));
     GroupRuntime gr = UserClusterDataExtractor.findGroup(runtime, groupName);
     Baremetal baremetal = (Baremetal) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     String username = baremetal.getUsername();
-    List<MachineRuntime> machines = new ArrayList<>();
+    List<NodeRunTime> machines = new ArrayList<>();
     for (String ip : baremetal.retriveAllIps()) {
-      MachineRuntime machine = new MachineRuntime(gr);
+      NodeRunTime machine = new NodeRunTime(gr);
       machine.setMachineType("baremetal");
       machine.setName(ip);
       machine.setPrivateIp(ip);

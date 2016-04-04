@@ -25,7 +25,7 @@ import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.launcher.nova.NovaLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.backend.running.model.serializers.ClusterEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.DefaultTaskSerializer;
 import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
@@ -180,7 +180,7 @@ public class KaramelApiImpl implements KaramelApi {
     builder.disableHtmlEscaping();
     Gson gson = builder.
         registerTypeAdapter(ClusterRuntime.class, new ClusterEntitySerializer()).
-        registerTypeAdapter(MachineRuntime.class, new MachineEntitySerializer()).
+        registerTypeAdapter(NodeRunTime.class, new MachineEntitySerializer()).
         registerTypeAdapter(GroupRuntime.class, new GroupEntitySerializer()).
         registerTypeAdapter(ShellCommand.class, new ShellCommandSerializer()).
         registerTypeAdapter(RunRecipeTask.class, new DefaultTaskSerializer()).

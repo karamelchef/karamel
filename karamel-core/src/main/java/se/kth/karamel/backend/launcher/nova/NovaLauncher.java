@@ -23,7 +23,7 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
@@ -198,7 +198,7 @@ public final class NovaLauncher extends Launcher{
       group.getCluster().resolveFailures();
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Nova) {
-        for (MachineRuntime machine : group.getMachines()) {
+        for (NodeRunTime machine : group.getMachines()) {
           if (machine.getVmId() != null) {
             allNovaVmsIds.add(machine.getVmId());
           }
@@ -266,7 +266,7 @@ public final class NovaLauncher extends Launcher{
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
+  public List<NodeRunTime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
           throws KaramelException {
     Nova nova = (Nova) UserClusterDataExtractor.getGroupProvider(definition,name);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, name);
@@ -282,7 +282,7 @@ public final class NovaLauncher extends Launcher{
     return requestNodes(keypairName,groupRuntime,groupIds,Integer.valueOf(definedGroup.getSize()),nova);
   }
 
-  private List<MachineRuntime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
+  private List<NodeRunTime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
                                             Integer totalSize, Nova nova) throws KaramelException {
     String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(groupRuntime.getCluster().getName(),
             groupRuntime.getName());
@@ -359,10 +359,10 @@ public final class NovaLauncher extends Launcher{
         if (failedNodes.size() > 0) {
           cleanupFailedNodes(failedNodes);
         }
-        List<MachineRuntime> machines = new ArrayList<>();
+        List<NodeRunTime> machines = new ArrayList<>();
         for (NodeMetadata node : successfulNodes) {
           if (node != null) {
-            MachineRuntime machine = new MachineRuntime(groupRuntime);
+            NodeRunTime machine = new NodeRunTime(groupRuntime);
             ArrayList<String> privateIps = new ArrayList();
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());

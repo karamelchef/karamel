@@ -11,7 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.exception.InvalidCredentialsException;
@@ -74,9 +74,9 @@ public class GceLauncherTest {
   public void testForkMachines()
       throws InvalidCredentialsException, RunNodesException, URISyntaxException, ValidationException {
     int size = 1;
-    List<MachineRuntime> machines = forkMachines("c1", "g1", size, "europe-west1-b");
+    List<NodeRunTime> machines = forkMachines("c1", "g1", size, "europe-west1-b");
     assert machines.size() == size;
-    for (MachineRuntime machine : machines) {
+    for (NodeRunTime machine : machines) {
       assert machine.getId() != null && !machine.getId().isEmpty();
       assert machine.getName() != null && !machine.getName().isEmpty();
       assert machine.getPublicIp() != null && !machine.getPublicIp().isEmpty();
@@ -91,9 +91,9 @@ public class GceLauncherTest {
     String clusterName = "c1";
     String groupName = "g1";
     String zone = "europe-west1-b";
-    List<MachineRuntime> machines = forkMachines(clusterName, groupName, size, zone);
+    List<NodeRunTime> machines = forkMachines(clusterName, groupName, size, zone);
     List<String> vms = new ArrayList<>(machines.size());
-    for (MachineRuntime machine : machines) {
+    for (NodeRunTime machine : machines) {
       vms.add(machine.getName());
     }
     Map<String, List<String>> vmZone = new HashMap<>();
@@ -132,7 +132,7 @@ public class GceLauncherTest {
         && !fw.allowed().get(0).ports().isEmpty() && fw.allowed().get(0).ports().get(0).equalsIgnoreCase(p2);
   }
 
-  private List<MachineRuntime> forkMachines(String clusterName, String groupName, int size, String zone)
+  private List<NodeRunTime> forkMachines(String clusterName, String groupName, int size, String zone)
       throws InvalidCredentialsException, RunNodesException, ValidationException {
     SshKeyPair keypair = new SshKeyPair();
     //TODO: read the public key from the configured path.
@@ -151,7 +151,7 @@ public class GceLauncherTest {
     jsonGroup.setName(groupName);
     GroupRuntime group = new GroupRuntime(cluster, jsonGroup);
 
-    List<MachineRuntime> machines = launcher.forkMachines(group, size, gce);
+    List<NodeRunTime> machines = launcher.forkMachines(group, size, gce);
 
     return machines;
   }

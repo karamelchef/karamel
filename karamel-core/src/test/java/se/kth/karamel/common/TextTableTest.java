@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.common;
 
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.util.Settings;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -15,7 +16,6 @@ import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -31,12 +31,12 @@ public class TextTableTest {
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    List<MachineRuntime> machines = dummyRuntime.getGroups().get(1).getMachines();
+    List<NodeRunTime> machines = dummyRuntime.getGroups().get(1).getMachines();
     String[] columnNames = {"Machine", "Public IP", "Private IP", "SSH Port", "SSH User", "Life Status", "Task Status"};
 
     String[][] data = new String[machines.size()][columnNames.length];
     for (int i = 0; i < machines.size(); i++) {
-      MachineRuntime machine = machines.get(i);
+      NodeRunTime machine = machines.get(i);
       data[i][0] = machine.getName();
       data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>" + machine.getPublicIp() + "</a>";
       data[i][2] = machine.getPrivateIp();

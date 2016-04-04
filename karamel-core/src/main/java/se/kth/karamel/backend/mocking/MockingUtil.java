@@ -10,7 +10,7 @@ import java.util.List;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
@@ -42,12 +42,12 @@ public class MockingUtil {
       }
 
       JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, group.getName());
-      List<MachineRuntime> mcs = new ArrayList<>();
+      List<NodeRunTime> mcs = new ArrayList<>();
 //      String ippref = "192.168.0.";
       String ippref = group.getName();
       for (int i = 1; i <= definedGroup.getSize(); i++) {
         String name = group.getName() + "-" + i;
-        MachineRuntime ma = new MachineRuntime(group);
+        NodeRunTime ma = new NodeRunTime(group);
         ma.setMachineType(machineType);
         ma.setName(name);
         ma.setPublicIp(ippref + i);

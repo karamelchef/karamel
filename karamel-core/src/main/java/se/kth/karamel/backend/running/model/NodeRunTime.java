@@ -14,7 +14,7 @@ import se.kth.karamel.backend.running.model.tasks.Task;
  *
  * @author kamal
  */
-public class MachineRuntime {
+public class NodeRunTime {
 
   public static enum LifeStatus {
 
@@ -24,6 +24,11 @@ public class MachineRuntime {
   public static enum TasksStatus {
 
     ONGOING, FAILED, PAUSING, PAUSED, EMPTY
+  }
+
+  public static enum NodeType {
+
+    VM,CONTAINER
   }
 
   private final GroupRuntime group;
@@ -37,10 +42,11 @@ public class MachineRuntime {
   private String sshUser;
   private String machineType;
   private OsType osType;
+  private NodeType nodeType = NodeType.VM;
 
   private final List<Task> tasks = new ArrayList<>();
 
-  public MachineRuntime(GroupRuntime group) {
+  public NodeRunTime(GroupRuntime group) {
     this.group = group;
   }
 
@@ -141,6 +147,14 @@ public class MachineRuntime {
 
   public String getId() {
     return publicIp;
+  }
+
+  public NodeType getNodeType() {
+    return nodeType;
+  }
+
+  public void setNodeType(NodeType nodeType) {
+    this.nodeType = nodeType;
   }
 
 }

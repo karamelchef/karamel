@@ -12,7 +12,7 @@ import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
@@ -22,7 +22,7 @@ import se.kth.karamel.common.util.Settings;
  */
 public class InstallBerkshelfTask extends Task {
 
-  public InstallBerkshelfTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public InstallBerkshelfTask(NodeRunTime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     super("install berkshelf", "install berkshelf", true, machine, clusterStats, submitter);
   }
 

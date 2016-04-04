@@ -14,7 +14,7 @@ import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.IoUtils;
@@ -28,7 +28,7 @@ public class FindOsTypeTask extends Task {
 
   private static final Logger logger = Logger.getLogger(RunRecipeTask.class);
 
-  public FindOsTypeTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public FindOsTypeTask(NodeRunTime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     super("find os-type", "find os-type", false, machine, clusterStats, submitter);
   }
 

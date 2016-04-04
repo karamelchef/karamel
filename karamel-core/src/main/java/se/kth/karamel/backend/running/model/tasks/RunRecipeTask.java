@@ -25,7 +25,7 @@ import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
@@ -42,8 +42,8 @@ public class RunRecipeTask extends Task {
   private final String cookbookId;
   private final String cookbookName;
 
-  public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
-      TaskSubmitter submitter, String cookbookId, String cookbookName) {
+  public RunRecipeTask(NodeRunTime machine, ClusterStats clusterStats, String recipe, String json,
+                       TaskSubmitter submitter, String cookbookId, String cookbookName) {
     super(recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;

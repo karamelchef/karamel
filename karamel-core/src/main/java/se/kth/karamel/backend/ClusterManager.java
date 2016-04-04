@@ -20,7 +20,7 @@ import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.stats.ClusterStatistics;
 import se.kth.karamel.common.clusterdef.Baremetal;
@@ -64,6 +64,7 @@ public class ClusterManager implements Runnable {
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
+  private Dag containerHostConfigurationDag;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(1);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
@@ -254,6 +255,20 @@ public class ClusterManager implements Runnable {
     }
   }
 
+  private void forkContainers() throws InterruptedException {
+    //create necessary containers here
+    try {
+      containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor);
+      containerHostConfigurationDag.start();
+    } catch (KaramelException e) {
+      e.printStackTrace();
+    }
+    while (!containerHostConfigurationDag.isDone()){
+      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
+    }
+
+  }
+
   private void install() throws Exception {
     logger.info(String.format("Installing '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.INSTALLING);
@@ -323,7 +338,7 @@ public class ClusterManager implements Runnable {
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
         Launcher launcher = launchers.get(provider.getClass());
         try {
-          List<MachineRuntime> mcs = launcher.forkMachines(definition, runtime, group.getName());
+          List<NodeRunTime> mcs = launcher.forkMachines(definition, runtime, group.getName());
           group.setMachines(mcs);
           machinesMonitor.addMachines(mcs);
           group.setPhase(GroupRuntime.GroupPhase.MACHINES_FORKED);
@@ -337,6 +352,9 @@ public class ClusterManager implements Runnable {
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.MACHINES_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+    }
+    if (definition.getUseContainers()) {
+      forkContainers();
     }
   }
 

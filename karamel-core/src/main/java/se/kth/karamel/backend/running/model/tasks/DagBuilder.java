@@ -14,11 +14,11 @@ import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -57,6 +57,29 @@ public class DagBuilder {
         allRecipeTasks, dag);
     updateKaramelDependencies(allRecipeTasks, dag, rlts);
     return dag;
+  }
+
+  public static Dag getContainerSetupDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
+                                         TaskSubmitter submitter) throws KaramelException {
+    Dag dag = new Dag();
+
+
+    //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
+    String keyValueStoreIP = clusterEntity.getGroups().get(0).getMachines().get(0).getPrivateIp();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      for (NodeRunTime me : ge.getMachines()) {
+        FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
+        Task dockerInstallationTask = new DockerInstallTask(me, clusterStats, submitter,keyValueStoreIP);
+        try {
+          dag.addTask(dockerInstallationTask);
+          dag.addTask(findOs);
+        } catch (DagConstructionException e) {
+          throw new KaramelException("Error while configuring docker hosts", e);
+        }
+      }
+    }
+    return dag;
+
   }
 
   private static boolean updateKaramelDependencies(Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
@@ -107,7 +130,7 @@ public class DagBuilder {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
+      for (NodeRunTime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
           for (JsonRecipe rec : jc.getRecipes()) {
@@ -124,7 +147,7 @@ public class DagBuilder {
   /*
    * Makes sure recipe-task for machine exists both in the DAG and in the grouping map of recipes
    */
-  private static RunRecipeTask addRecipeTaskForMachineIntoRecipesMap(String recipeName, MachineRuntime machine,
+  private static RunRecipeTask addRecipeTaskForMachineIntoRecipesMap(String recipeName, NodeRunTime machine,
       ClusterStats clusterStats, Map<String, Map<String, Task>> map, JsonObject chefJson, TaskSubmitter submitter,
       String cookbookId, String cookbookName, Map<String, RunRecipeTask> allRecipeTasks, Dag dag)
       throws DagConstructionException {
@@ -142,7 +165,7 @@ public class DagBuilder {
   /*
    * Finds recipe task for machine if it has been already created otherwise makes a new one and adds it into the DAG
    */
-  private static RunRecipeTask makeRecipeTaskIfNotExist(String recipeName, MachineRuntime machine,
+  private static RunRecipeTask makeRecipeTaskIfNotExist(String recipeName, NodeRunTime machine,
       ClusterStats clusterStats, JsonObject chefJson,
       TaskSubmitter submitter, String cookbookId, String cookbookName, Map<String, RunRecipeTask> allRecipeTasks,
       Dag dag) throws DagConstructionException {
@@ -181,7 +204,7 @@ public class DagBuilder {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
+      for (NodeRunTime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
@@ -215,7 +238,7 @@ public class DagBuilder {
     String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
     String vendorPath = UserClusterDataExtractor.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
-      for (MachineRuntime me : ge.getMachines()) {
+      for (NodeRunTime me : ge.getMachines()) {
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
         dag.addTask(findOs);
         Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
@@ -235,10 +258,6 @@ public class DagBuilder {
         dag.addTask(t2);
         dag.addTask(t3);
 
-        if(cluster.getUseContainers()){
-          DockerInstallTask dockerInstallTask = new DockerInstallTask(me, clusterStats, submitter);
-          dag.addTask(dockerInstallTask);
-        }
       }
     }
   }

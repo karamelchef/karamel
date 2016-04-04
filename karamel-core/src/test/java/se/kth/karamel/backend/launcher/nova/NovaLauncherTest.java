@@ -29,7 +29,7 @@ import org.junit.Test;
 import org.mockito.Matchers;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
@@ -402,7 +402,7 @@ public class NovaLauncherTest {
     when(loginCredentials.getUser()).thenReturn("ubuntu");
 
     //testing method
-    List<MachineRuntime> forkedMachines =novaLauncher.forkMachines(cluster,clusterRuntime,groupName);
+    List<NodeRunTime> forkedMachines =novaLauncher.forkMachines(cluster,clusterRuntime,groupName);
 
     assertNotNull(forkedMachines);
     assertFalse(forkedMachines.isEmpty());

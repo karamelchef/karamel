@@ -15,7 +15,7 @@ import se.kth.karamel.backend.dag.DagTaskCallback;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.Failure;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.TaskStat;
@@ -37,7 +37,7 @@ public abstract class Task implements DagTask, TaskCallback {
   private final String id;
   private final String machineId;
   protected List<ShellCommand> commands;
-  private final MachineRuntime machine;
+  private final NodeRunTime machine;
   private final String uuid;
   private final boolean idempotent;
   private DagTaskCallback dagCallback;
@@ -47,8 +47,8 @@ public abstract class Task implements DagTask, TaskCallback {
   private long duration = 0;
   private boolean markSkip = false;
 
-  public Task(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats,
-      TaskSubmitter submitter) {
+  public Task(String name, String id, boolean idempotent, NodeRunTime machine, ClusterStats clusterStats,
+              TaskSubmitter submitter) {
     this.name = name;
     this.id = id;
     this.idempotent = idempotent;
@@ -113,7 +113,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public abstract String uniqueId();
 
-  public MachineRuntime getMachine() {
+  public NodeRunTime getMachine() {
     return machine;
   }
 
@@ -178,7 +178,7 @@ public abstract class Task implements DagTask, TaskCallback {
   @Override
   public void failed(String reason) {
     this.status = Status.FAILED;
-    machine.setTasksStatus(MachineRuntime.TasksStatus.FAILED, uuid, reason);
+    machine.setTasksStatus(NodeRunTime.TasksStatus.FAILED, uuid, reason);
     addStats();
     dagCallback.failed(reason);
   }

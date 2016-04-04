@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
@@ -58,8 +58,8 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     return null;
   }
 
-  public void addMachines(List<MachineRuntime> machineEntities) {
-    for (MachineRuntime machineEntity : machineEntities) {
+  public void addMachines(List<NodeRunTime> machineEntities) {
+    for (NodeRunTime machineEntity : machineEntities) {
       SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey(),
           keyPair.getPassphrase());
       machines.put(machineEntity.getId(), sshMachine);
@@ -146,7 +146,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
 
   @Override
   public void prepareToStart(Task task) throws KaramelException {
-    MachineRuntime machine = task.getMachine();
+    NodeRunTime machine = task.getMachine();
     machine.addTask(task);
   }
 

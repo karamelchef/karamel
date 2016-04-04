@@ -39,7 +39,7 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
@@ -158,7 +158,7 @@ public class GceLauncher extends Launcher {
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
+  public List<NodeRunTime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
     Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
@@ -167,8 +167,8 @@ public class GceLauncher extends Launcher {
     return forkMachines(group, definedGroup.getSize(), gce);
   }
 
-  public List<MachineRuntime> forkMachines(GroupRuntime group, int totalSize, Gce gce) {
-    List<MachineRuntime> machines = new ArrayList<>(totalSize);
+  public List<NodeRunTime> forkMachines(GroupRuntime group, int totalSize, Gce gce) {
+    List<NodeRunTime> machines = new ArrayList<>(totalSize);
     try {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
       URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
@@ -198,7 +198,7 @@ public class GceLauncher extends Launcher {
           // Username given for provider is used as SSH user for VMs. 
           metadata.put("sshKeys", gce.getUsername() + ":" + sshKeyPair.getPublicKey());
           metadataOperations.add(instanceApi.setMetadata(allVmNames.get(i), metadata));
-          MachineRuntime machine = new MachineRuntime(group);
+          NodeRunTime machine = new NodeRunTime(group);
           machine.setMachineType("gce/"+ gce.getZone() + "/" + gce.getType() + "/" + gce.getImage());
           machine.setVmId(vm.id());
           machine.setName(vm.name());
@@ -239,7 +239,7 @@ public class GceLauncher extends Launcher {
           vms = new LinkedList<>();
           vmZone.put(gce.getZone(), vms);
         }
-        for (MachineRuntime machine : group.getMachines()) {
+        for (NodeRunTime machine : group.getMachines()) {
           if (machine.getName() != null) {
             vms.add(machine.getName());
           }

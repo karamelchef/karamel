@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
@@ -62,7 +62,7 @@ public class ChefJsonGenerator {
       GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
 
-    for (MachineRuntime me : groupEntity.getMachines()) {
+    for (NodeRunTime me : groupEntity.getMachines()) {
       for (JsonRecipe recipe : cb.getRecipes()) {
         JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getCanonicalName());
         groupJsons.put(me.getId() + recipe.getCanonicalName(), clone);
@@ -74,7 +74,7 @@ public class ChefJsonGenerator {
     return groupJsons;
   }
 
-  public static JsonObject addMachineNRecipeToJson(JsonObject json, MachineRuntime me, String recipeName) {
+  public static JsonObject addMachineNRecipeToJson(JsonObject json, NodeRunTime me, String recipeName) {
     JsonObject clone = cloneJsonObject(json);
     addMachineIps(clone, me);
     addRunListForRecipe(clone, recipeName);
@@ -87,7 +87,7 @@ public class ChefJsonGenerator {
     chefJson.add(Settings.REMOTE_CHEFJSON_RUNLIST_TAG, jarr);
   }
 
-  public static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
+  public static void addMachineIps(JsonObject json, NodeRunTime machineEntity) {
     JsonArray ips = new JsonArray();
     ips.add(new JsonPrimitive(machineEntity.getPrivateIp()));
     json.add("private_ips", ips);
@@ -142,7 +142,7 @@ public class ChefJsonGenerator {
     Map<String, Set<String>> publicIps = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
-      for (MachineRuntime me : ge.getMachines()) {
+      for (NodeRunTime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
             if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {

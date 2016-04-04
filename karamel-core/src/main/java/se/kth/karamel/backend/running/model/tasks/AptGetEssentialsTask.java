@@ -13,7 +13,7 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
@@ -25,8 +25,8 @@ public class AptGetEssentialsTask extends Task {
 
   private final boolean storagePreparation;
 
-  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
-      boolean storagePreparation) {
+  public AptGetEssentialsTask(NodeRunTime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+                              boolean storagePreparation) {
     super("apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
     this.storagePreparation = storagePreparation;
   }

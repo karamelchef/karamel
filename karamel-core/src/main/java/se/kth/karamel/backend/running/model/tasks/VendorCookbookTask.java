@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
@@ -28,9 +28,10 @@ public class VendorCookbookTask extends Task {
   private final String subCookbookName;
   private final String branch;
 
-  public VendorCookbookTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter, 
-      String cookbookId, String cookbooksHome, String githubRepoUrl, String githubRepoName, String subCookbookName, 
-      String branch) {
+  public VendorCookbookTask(NodeRunTime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+                            String cookbookId, String cookbooksHome, String githubRepoUrl, String githubRepoName,
+                            String subCookbookName,
+                            String branch) {
     super("clone and vendor " + ((subCookbookName == null) ? githubRepoName : subCookbookName), 
         "clone and vendor " + cookbookId, true, machine, 
         clusterStats, submitter);

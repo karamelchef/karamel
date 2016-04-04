@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.launcher.amazon.StorageDevice;
 import se.kth.karamel.backend.machines.TaskSubmitter;
-import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
@@ -24,8 +24,8 @@ public class PrepareStoragesTask extends Task {
 
   private final StorageDevice[] storageDevices;
 
-  public PrepareStoragesTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
-      StorageDevice[] storageDevices) {
+  public PrepareStoragesTask(NodeRunTime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+                             StorageDevice[] storageDevices) {
     super("prepare storages", "prepare storages", false, machine, clusterStats, submitter);
     this.storageDevices = storageDevices;
   }

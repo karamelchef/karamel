@@ -34,7 +34,7 @@ import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.TextTable;
@@ -258,9 +258,9 @@ public class CommandService {
         addActiveClusterMenus(response);
         ClusterManager cluster = cluster(clusterNameInUserInput);
         ClusterRuntime clusterEntity = cluster.getRuntime();
-        ArrayList<MachineRuntime> machines = new ArrayList<>();
+        ArrayList<NodeRunTime> machines = new ArrayList<>();
         for (GroupRuntime group : clusterEntity.getGroups()) {
-          for (MachineRuntime machine : group.getMachines()) {
+          for (NodeRunTime machine : group.getMachines()) {
             machines.add(machine);
           }
         }
@@ -557,7 +557,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           ClusterRuntime clusterEntity = cluster.getRuntime();
           for (GroupRuntime group : clusterEntity.getGroups()) {
-            for (MachineRuntime machine : group.getMachines()) {
+            for (NodeRunTime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -585,7 +585,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           ClusterRuntime clusterEntity = cluster.getRuntime();
           for (GroupRuntime group : clusterEntity.getGroups()) {
-            for (MachineRuntime machine : group.getMachines()) {
+            for (NodeRunTime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -618,7 +618,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           ClusterRuntime clusterEntity = cluster.getRuntime();
           for (GroupRuntime group : clusterEntity.getGroups()) {
-            for (MachineRuntime machine : group.getMachines()) {
+            for (NodeRunTime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -651,7 +651,7 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           ClusterRuntime clusterEntity = cluster.getRuntime();
           for (GroupRuntime group : clusterEntity.getGroups()) {
-            for (MachineRuntime machine : group.getMachines()) {
+            for (NodeRunTime machine : group.getMachines()) {
               for (Task task : machine.getTasks()) {
                 if (task.getUuid().equals(taskuuid)) {
                   taskFound = true;
@@ -834,12 +834,12 @@ public class CommandService {
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);
   }
 
-  private static String machinesTable(ArrayList<MachineRuntime> machines, boolean rowNumbering) {
+  private static String machinesTable(ArrayList<NodeRunTime> machines, boolean rowNumbering) {
     String[] columnNames = {"OS Family", "Public IP", "Private IP", 
       "SSH Port", "SSH User", "Life Status", "Task Status"};
     Object[][] data = new Object[machines.size()][columnNames.length];
     for (int i = 0; i < machines.size(); i++) {
-      MachineRuntime machine = machines.get(i);
+      NodeRunTime machine = machines.get(i);
       OsType osType = machine.getOsType();
       data[i][0] = (osType == null) ? "?" : osType.family.toString();
       data[i][1] = "<a kref='shellconnect " + machine.getPublicIp() + "'>" + machine.getPublicIp() + "</a>";
@@ -892,8 +892,8 @@ public class CommandService {
   private static String machinesTasksTable(ClusterRuntime clusterEntity) {
     StringBuilder builder = new StringBuilder();
     for (GroupRuntime group : clusterEntity.getGroups()) {
-      for (MachineRuntime machine : group.getMachines()) {
-        ArrayList<MachineRuntime> machines = new ArrayList<>();
+      for (NodeRunTime machine : group.getMachines()) {
+        ArrayList<NodeRunTime> machines = new ArrayList<>();
         machines.add(machine);
         builder.append(machinesTable(machines, false));
         builder.append("\n");

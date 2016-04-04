@@ -4,6 +4,7 @@
  */
 package se.kth.karamel.backend.launcher.amazon;
 
+import se.kth.karamel.backend.running.model.NodeRunTime;
 import se.kth.karamel.common.launcher.amazon.InstanceType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -36,7 +37,6 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
-import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -195,7 +195,7 @@ public final class Ec2Launcher extends Launcher {
   }
 
   @Override
-  public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
+  public List<NodeRunTime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
     Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
@@ -211,12 +211,12 @@ public final class Ec2Launcher extends Launcher {
 
     int numForked = 0;
     final int numMachines = definedGroup.getSize();
-    List<MachineRuntime> allMachines = new ArrayList<>();
+    List<NodeRunTime> allMachines = new ArrayList<>();
     int requestSize = context.getVmBatchSize();
     try {
       while (numForked < numMachines) {
         int forkSize = Math.min(numMachines, requestSize);
-        List<MachineRuntime> machines = forkMachines(keypairname, group, gids, numForked, forkSize, ec2);
+        List<NodeRunTime> machines = forkMachines(keypairname, group, gids, numForked, forkSize, ec2);
         allMachines.addAll(machines);
         numForked += forkSize;
       }
@@ -227,7 +227,7 @@ public final class Ec2Launcher extends Launcher {
     return allMachines;
   }
 
-  public List<MachineRuntime> forkMachines(String keyPairName, GroupRuntime mainGroup,
+  public List<NodeRunTime> forkMachines(String keyPairName, GroupRuntime mainGroup,
       Set<String> securityGroupIds, int startCount, int numberToLaunch, Ec2 ec2) throws KaramelException {
     String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(mainGroup.getCluster().getName(), mainGroup.getName());
     List<String> allVmNames = Settings.AWS_UNIQUE_VM_NAMES(mainGroup.getCluster().getName(), mainGroup.getName(),
@@ -338,10 +338,10 @@ public final class Ec2Launcher extends Launcher {
         if (failedNodes.size() > 0) {
           cleanupFailedNodes(failedNodes);
         }
-        List<MachineRuntime> machines = new ArrayList<>();
+        List<NodeRunTime> machines = new ArrayList<>();
         for (NodeMetadata node : successfulNodes) {
           if (node != null) {
-            MachineRuntime machine = new MachineRuntime(mainGroup);
+            NodeRunTime machine = new NodeRunTime(mainGroup);
             ArrayList<String> privateIps = new ArrayList();
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());
@@ -464,7 +464,7 @@ public final class Ec2Launcher extends Launcher {
       group.getCluster().resolveFailures();
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2) {
-        for (MachineRuntime machine : group.getMachines()) {
+        for (NodeRunTime machine : group.getMachines()) {
           if (machine.getVmId() != null) {
             allEc2VmsIds.add(machine.getVmId());
           }
