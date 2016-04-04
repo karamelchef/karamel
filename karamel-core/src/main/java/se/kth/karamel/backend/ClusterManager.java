@@ -6,10 +6,22 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-import se.kth.autoscalar.AutoScalarAPI;
-import se.kth.autoscalar.AutoScalarImpl;
-import se.kth.elasticscalar.common.models.MachineModel;
+//import se.kth.autoscalar.AutoScalarAPI;
+//import se.kth.autoscalar.AutoScalarImpl;
+//import se.kth.elasticscalar.common.models.MachineModel;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -26,7 +38,11 @@ import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.backend.stats.ClusterStatistics;
-import se.kth.karamel.common.clusterdef.*;
+import se.kth.karamel.common.clusterdef.Baremetal;
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
+import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.exception.KaramelException;
@@ -34,8 +50,6 @@ import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
 
-import java.util.*;
-import java.util.concurrent.*;
 
 /**
  *
@@ -64,7 +78,7 @@ public class ClusterManager implements Runnable {
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
   private Queue autoScalingSuggestionsQueue = null;
-  AutoScalarAPI autoScalarAPI = new AutoScalarImpl();
+//  AutoScalarAPI autoScalarAPI = new AutoScalarImpl();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -328,7 +342,8 @@ public class ClusterManager implements Runnable {
 
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.MACHINES_FORKED);
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", 
+          definition.getName()));
     }
     return groups;
   }
@@ -336,13 +351,14 @@ public class ClusterManager implements Runnable {
   private void initiateAutoScaling(GroupRuntime groupRuntime) {
 
     if(autoScalingSuggestionsQueue == null) {
-      autoScalingSuggestionsQueue = autoScalarAPI.getSuggestionQueue();
+//      autoScalingSuggestionsQueue = autoScalarAPI.getSuggestionQueue();
     }
     //ArrayList<MachineModel> machinesForAutoScalar = new ArrayList<MachineModel>();
     for (MachineRuntime machine : groupRuntime.getMachines()) {
        //String groupId, String VMId, String sshKeyPath, String IP, String port, String userName
       //TODO pass sshKeyPath location
-      MachineModel machineModel = autoScalarAPI.addMachineToGroup(groupRuntime.getId(), machine.getId(), null, machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
+//      MachineModel machineModel = autoScalarAPI.addMachineToGroup(groupRuntime.getId(), machine.getId(), null, 
+      //machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
       //machinesForAutoScalar.add(machineModel);
     }
   }
@@ -351,16 +367,17 @@ public class ClusterManager implements Runnable {
   private void addMachineToAutoScalingGroup(MachineRuntime machine) {
     //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
     //TODO pass sshKeyPath location
-    MachineModel machineModel = autoScalarAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null, machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
+//    MachineModel machineModel = autoScalarAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null, 
+    //machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
     //machinesForAutoScalar.add(machineModel);
   }
 
   //TODO the method observing the suggestion queue should invoke this method
-  private void removeMachineFormAutoScalingGroup(MachineModel machine) {
-    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
-    //TODO pass sshKeyPath location
-    autoScalarAPI.removeMachineFromGroup(machine);
-  }
+//  private void removeMachineFormAutoScalingGroup(MachineModel machine) {
+//    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+//    //TODO pass sshKeyPath location
+//    autoScalarAPI.removeMachineFromGroup(machine);
+//  }
 
   @Override
   public void run() {

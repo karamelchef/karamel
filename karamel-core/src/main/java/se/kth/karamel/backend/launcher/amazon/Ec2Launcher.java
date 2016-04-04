@@ -10,6 +10,12 @@ import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -42,7 +48,6 @@ import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 
-import java.util.*;
 
 /**
  * @author kamal
