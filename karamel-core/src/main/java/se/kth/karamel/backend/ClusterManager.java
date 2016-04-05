@@ -258,7 +258,9 @@ public class ClusterManager implements Runnable {
   private void forkContainers() throws InterruptedException {
     //create necessary containers here
     try {
-      containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor);
+      //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
+      String keyValueStoreIP = runtime.getGroups().get(0).getMachines().get(0).getPrivateIp();
+      containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor,keyValueStoreIP);
       containerHostConfigurationDag.start();
     } catch (KaramelException e) {
       e.printStackTrace();
@@ -266,6 +268,7 @@ public class ClusterManager implements Runnable {
     while (!containerHostConfigurationDag.isDone()){
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
+
 
   }
 

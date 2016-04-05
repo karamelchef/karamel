@@ -85,6 +85,7 @@ public class Settings {
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
   public static final String SCRIPT_PATH_KILL_RUNNING_SESSION = SCRIPT_PATH_ROOT + "kill_current_session.sh";
   public static final String SCRIPT_PATH_DOCKER_INSTALL = SCRIPT_PATH_ROOT + "docker_install.sh";
+  public static final String SCRIPT_PATH_DOCKER_NETWORK_SETUP = SCRIPT_PATH_ROOT + "docker_host_network_setup.sh";
 
   //----------------------------------------Providers General-----------------------------------------------------------
   public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {

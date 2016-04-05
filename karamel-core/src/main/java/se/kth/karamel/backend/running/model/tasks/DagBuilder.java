@@ -60,19 +60,20 @@ public class DagBuilder {
   }
 
   public static Dag getContainerSetupDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-                                         TaskSubmitter submitter) throws KaramelException {
+                                         TaskSubmitter submitter,String keyValueStoreIp) throws KaramelException {
     Dag dag = new Dag();
 
-
-    //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
-    String keyValueStoreIP = clusterEntity.getGroups().get(0).getMachines().get(0).getPrivateIp();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (NodeRunTime me : ge.getMachines()) {
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
-        Task dockerInstallationTask = new DockerInstallTask(me, clusterStats, submitter,keyValueStoreIP);
+        Task dockerInstallationTask = new DockerInstallTask(me, clusterStats, submitter,keyValueStoreIp);
         try {
           dag.addTask(dockerInstallationTask);
           dag.addTask(findOs);
+          if(keyValueStoreIp.equals(me.getPrivateIp())){
+            Task dockerNetworkInstallationTask = new DockerNetworkSetupTask(me,clusterStats,submitter,keyValueStoreIp);
+            dag.addTask(dockerNetworkInstallationTask);
+          }
         } catch (DagConstructionException e) {
           throw new KaramelException("Error while configuring docker hosts", e);
         }
