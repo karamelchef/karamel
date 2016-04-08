@@ -75,18 +75,18 @@ public final class OcciLauncher extends Launcher{
       
     //basic path and file existence check
     File f = new File(context.getOcciCredentials().getUserCertificatePath());    
-    if((!f.exists() || f.isDirectory())){
-      logger.info(String.format("Cert does not exist in provided path" + 
+    if((!f.exists() || f.isDirectory())) {
+      logger.info(String.format("Certificate does not exist in provided path " + 
               context.getOcciCredentials().getUserCertificatePath()));
-      throw new InvalidOcciCredentialsException("Cert does not exist in provided path" + 
+      throw new InvalidOcciCredentialsException("Certificate does not exist in provided path " + 
               context.getOcciCredentials().getUserCertificatePath());  
     }
       
     f = new File(context.getOcciCredentials().getSystemCertDir());
     if ((!f.exists() || !f.isDirectory())) {
-      logger.info(String.format("Cert folder does not exist in provided path" + 
+      logger.info(String.format("Certificate folder does not exist in provided path " + 
               context.getOcciCredentials().getSystemCertDir()));
-      throw new InvalidOcciCredentialsException("Cert folder does not exist in provided path" + 
+      throw new InvalidOcciCredentialsException("Certificate folder does not exist in provided path " + 
               context.getOcciCredentials().getSystemCertDir());
     }
        
@@ -101,10 +101,10 @@ public final class OcciLauncher extends Launcher{
   public static OcciCredentials readCredentials(Confs confs) {
     String userCertificatePath = confs.getProperty("occi.user.certificate.path");
     String systemCertDir = confs.getProperty("occi.certificate.dir");
-    if (userCertificatePath == null || userCertificatePath.isEmpty()){
+    if (userCertificatePath == null || userCertificatePath.isEmpty()) {
       userCertificatePath = Settings.OCCI_USER_CERTIFICATE_PATH;
     }
-    if (systemCertDir == null || systemCertDir.isEmpty()){
+    if (systemCertDir == null || systemCertDir.isEmpty()) {
       systemCertDir = Settings.OCCI_CERTIFICATE_DIR;
     }
     
@@ -155,7 +155,7 @@ public final class OcciLauncher extends Launcher{
             }
           }
         }
-        catch(Throwable ex){
+        catch(Throwable ex) {
           logger.info(String.format(ex.toString()));
           throw new KaramelException("Occi Cleanup fail", ex);
         }
@@ -238,12 +238,12 @@ public final class OcciLauncher extends Launcher{
     //Get private and public IP addresses
     ArrayList<String> publicIps = new ArrayList();
     List<Entity> entities = client.describe(location);       
-    for (Entity entity : entities){
+    for (Entity entity : entities) {
       Resource resource = (Resource) entity;
       Set<Link> links = resource.getLinks(NetworkInterface.TERM_DEFAULT);
       for (Link link : links) {        
         String address = link.getValue(IPNetworkInterface.ADDRESS_ATTRIBUTE_NAME);
-        if (!InetAddress.getByName(address).isSiteLocalAddress()){
+        if (!InetAddress.getByName(address).isSiteLocalAddress()) {
           publicIps.add(address);
         }
       }
@@ -260,7 +260,6 @@ public final class OcciLauncher extends Launcher{
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
           throws KaramelException {
 
-    //Do the magic
     Occi occi = (Occi) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
     GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
@@ -290,7 +289,7 @@ public final class OcciLauncher extends Launcher{
       authentication.setCAPath(context.getOcciCredentials().getSystemCertDir());
       logger.info(String.format("Connecting to endpoint " + occi.getOcciEndpoint()));      
       Client client = new HTTPClient(URI.create(occi.getOcciEndpoint()), authentication);     
-      //connect client (might be useless)
+      //connect client
       client.connect();
       
       //FORK THE MACHINES IN GROUP
@@ -322,7 +321,7 @@ public final class OcciLauncher extends Launcher{
       }     
       return machines;
     }
-    catch(Throwable ex){
+    catch(Throwable ex) {
       logger.info(String.format(ex.toString()));
       throw new KaramelException("Occi ForkMachines ", ex);
     }

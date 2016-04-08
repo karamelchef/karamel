@@ -52,8 +52,6 @@ public class Occi extends Provider {
     return occi;
   }
 
-  
-  //TODO figure out what is this good for and finish it
   @Override
   public Occi applyParentScope(Provider parentScopeProvider) {
     Occi clone = cloneMe();

@@ -26,7 +26,7 @@ public class ValidateOcciCredentials extends AbstractCall {
 
   private static final Logger logger = Logger.getLogger(ValidateOcciCredentials.class);
 
-  public ValidateOcciCredentials(KaramelApi karamelApi){
+  public ValidateOcciCredentials(KaramelApi karamelApi) {
     super(karamelApi);
   }
 
@@ -51,10 +51,7 @@ public class ValidateOcciCredentials extends AbstractCall {
     } catch (KaramelException e) {
       response = buildExceptionResponse(e);
     }
-    
-    //stud
-    //response = Response.status(Response.Status.OK).
-    //           entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
+
     return response;
   }
 }

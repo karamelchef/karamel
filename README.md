@@ -18,7 +18,7 @@ We leverage Berkshelf to transparently download and install transitive cookbook 
 ---
 Cluster definition is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, name of the cluster must be unique in each Karamel-runtime.
 
-We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova), OCCI and bare-metal(baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a separate sections following. 
+We support five cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova), OCCI and bare-metal (baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a following separate section. 
 
  Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
 

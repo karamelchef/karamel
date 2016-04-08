@@ -41,9 +41,9 @@ public abstract class Scope {
       return gce;
     } else if (vagrant != null) {
       return vagrant;
-    } else if(nova != null){
+    } else if(nova != null) {
       return nova;
-    } else if(occi != null){
+    } else if(occi != null) {
       return occi;
     } else {
       return baremetal;
@@ -90,9 +90,9 @@ public abstract class Scope {
     this.occi = occi;
   }
 
-  public Nova getNova(){return nova;}
+  public Nova getNova() {return nova;}
 
-  public void setNova(Nova nova){
+  public void setNova(Nova nova) {
     this.nova = nova;
   }
 
@@ -106,10 +106,10 @@ public abstract class Scope {
     if (vagrant != null) {
       vagrant.validate();
     }
-    if(nova != null){
+    if(nova != null) {
       nova.validate();
     }
-    if(occi != null){
+    if(occi != null) {
       occi.validate();
     }
   }

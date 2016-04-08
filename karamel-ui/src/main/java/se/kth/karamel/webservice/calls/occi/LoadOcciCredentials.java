@@ -2,8 +2,6 @@ package se.kth.karamel.webservice.calls.occi;
 
 import org.apache.log4j.Logger;
 import se.kth.karamel.client.api.KaramelApi;
-//import se.kth.karamel.common.exception.KaramelException;
-//import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.webservice.calls.AbstractCall;
 import se.kth.karamel.webservicemodel.OcciJSON;
 
@@ -26,7 +24,7 @@ public class LoadOcciCredentials extends AbstractCall {
 
   private static final Logger logger = Logger.getLogger(LoadOcciCredentials.class);
 
-  public LoadOcciCredentials(KaramelApi karamelApi){
+  public LoadOcciCredentials(KaramelApi karamelApi) {
     super(karamelApi);
   }
 

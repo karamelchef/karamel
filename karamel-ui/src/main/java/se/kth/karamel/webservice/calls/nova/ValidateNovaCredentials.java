@@ -26,7 +26,7 @@ public class ValidateNovaCredentials extends AbstractCall {
 
   private static final Logger logger = Logger.getLogger(ValidateNovaCredentials.class);
 
-  public ValidateNovaCredentials(KaramelApi karamelApi){
+  public ValidateNovaCredentials(KaramelApi karamelApi) {
     super(karamelApi);
   }
 

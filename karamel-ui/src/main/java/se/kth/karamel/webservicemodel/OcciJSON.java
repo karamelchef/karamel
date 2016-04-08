@@ -6,7 +6,6 @@ package se.kth.karamel.webservicemodel;
 public class OcciJSON {
   private String userCertificatePath;
   private String systemCertDir;
-  //private String endpoint;
     
   public String getUserCertificatePath() {
     return userCertificatePath;
@@ -23,13 +22,5 @@ public class OcciJSON {
   public void setSystemCertDir(String systemCertDir) {
     this.systemCertDir = systemCertDir;
   }
-
-  /*public String getEndpoint() {
-    return endpoint;
-  }
-
-  public void setEndpoint(String endpoint) {
-    this.endpoint = endpoint;
-  }*/
 
 }
