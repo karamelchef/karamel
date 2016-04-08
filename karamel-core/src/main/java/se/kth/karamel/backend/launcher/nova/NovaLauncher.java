@@ -275,7 +275,7 @@ public final class NovaLauncher extends Launcher{
     groupIds.add(groupRuntime.getId());
 
     String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(), novaContext.getNovaCredentials().getRegion());
-    if(!keys.contains(keypairName)){
+    if(!keys.contains(keypairName)) {
       uploadSshPublicKey(keypairName,nova,true);
       keys.add(keypairName);
     }

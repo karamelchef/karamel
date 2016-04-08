@@ -14,6 +14,7 @@ angular.module('main.module')
         var data = {
           json: angular.toJson(coreFormatCluster)
         };
+        $log.info(data);
         coreService.startCluster(data)
           .success(function(data, status, headers, config) {
             $log.info("Connection Successful.");
@@ -301,10 +302,14 @@ angular.module('main.module')
         hasNova: function() {
           return ($rootScope.activeCluster && $rootScope.activeCluster.hasNova());
         },
+        hasOcci: function() {
+          return ($rootScope.activeCluster && $rootScope.activeCluster.hasOcci());
+        },
         hasProvider: function() {
           return ($rootScope.activeCluster &&
             ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() ||
-              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasNova()));
+              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasNova() ||
+              $rootScope.activeCluster.hasOcci()));
         },
         name: function() {
           return $rootScope.activeCluster.name;

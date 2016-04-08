@@ -9,3 +9,4 @@ release.properties
 *.iml
 *log*
 .idea/*
+/karamel-core/nbproject/
