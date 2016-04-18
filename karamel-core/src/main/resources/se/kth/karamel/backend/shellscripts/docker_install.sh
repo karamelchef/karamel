@@ -13,4 +13,5 @@ echo "ExecStart=/usr/bin/docker daemon -H fd:// --cluster-store=consul://%kv_sto
 sudo systemctl daemon-reload;
 sudo systemctl restart docker;
 sudo systemctl status docker;
-echo '%task_id%' > %succeedtasks_filepath%
+docker info
+echo '%task_id%' >> %succeedtasks_filepath%

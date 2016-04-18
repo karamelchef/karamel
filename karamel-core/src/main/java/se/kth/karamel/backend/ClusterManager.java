@@ -6,7 +6,9 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.JsonObject;
+import com.spotify.docker.client.DockerException;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.container.ContainerClusterManager;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -255,7 +257,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private void forkContainers() throws InterruptedException {
+  private void forkContainers() throws InterruptedException, KaramelException {
     //create necessary containers here
     try {
       //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
@@ -269,7 +271,19 @@ public class ClusterManager implements Runnable {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
+    ContainerClusterManager containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
+      machinesMonitor);
+    HashMap<String,ArrayList<NodeRunTime>>  containerRuntimeMap = null;
+    try {
+      containerRuntimeMap = containerClusterManager.StartContainers();
+    } catch (DockerException e) {
+      e.printStackTrace();
+    }
 
+    for (GroupRuntime group : getRuntime().getGroups()) {
+      group.setMachines(containerRuntimeMap.get(group.getName()));
+      machinesMonitor.addMachines(containerRuntimeMap.get(group.getName()));
+    }
   }
 
   private void install() throws Exception {

@@ -1,0 +1,119 @@
+package se.kth.karamel.backend.container;
+
+import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.DockerException;
+import com.spotify.docker.client.messages.AuthConfig;
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.PortBinding;
+import com.spotify.docker.client.messages.ContainerCreation;
+import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.backend.machines.TaskSubmitter;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.NodeRunTime;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.stats.ClusterStats;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created by shelan on 4/8/16.
+ */
+public class ContainerClusterManager {
+
+  HashMap<String, List<NodeRunTime>> containerHostMap = new HashMap<>();
+  HashMap<String, ArrayList<NodeRunTime>> containerGroupMap = new HashMap<>();
+  HashMap<String, DockerClient> dockerClientMap = new HashMap<>();
+  List<NodeRunTime> hostMachineRuntimes = new ArrayList<>();
+  ClusterRuntime runtime;
+  JsonCluster cluster;
+  ClusterStats clusterStats;
+  TaskSubmitter taskSubmitter;
+
+  public ContainerClusterManager(ClusterRuntime runtime, JsonCluster cluster, ClusterStats clusterstats,
+                                 TaskSubmitter taskSubmitter) {
+    this.runtime = runtime;
+    this.cluster = cluster;
+    this.taskSubmitter = taskSubmitter;
+    this.clusterStats = clusterstats;
+    init();
+  }
+
+  public HashMap<String, ArrayList<NodeRunTime>> StartContainers() throws KaramelException, InterruptedException,
+    DockerException {
+    int noOfContainers = 0;
+    for (JsonGroup jsonGroup : cluster.getGroups()) {
+      noOfContainers += jsonGroup.getSize();
+      containerGroupMap.put(jsonGroup.getName(), new ArrayList<NodeRunTime>());
+    }
+
+    List<NodeRunTime> machines = new ArrayList<>();
+
+    for (int i = 0; i < noOfContainers; i++) {
+      int position = i % hostMachineRuntimes.size();
+      ContainerTask containerTask = new ContainerTask();
+      NodeRunTime hostMachine = hostMachineRuntimes.get(position);
+
+      int sshPort = 11000 + i;
+      String publicIp = hostMachine.getPublicIp();
+
+      DockerClient client = dockerClientMap.get(publicIp);
+
+      client.pull("shelan/karamel-node", AuthConfig.builder().build());
+
+      final Map<String, List<PortBinding>> portBindings = new HashMap<>();
+      List<PortBinding> hostPorts = new ArrayList<PortBinding>();
+      hostPorts.add(PortBinding.of("0.0.0.0", sshPort));
+      portBindings.put("22", hostPorts);
+      HostConfig hostConfig = HostConfig.builder()
+        .networkMode("karamel")
+        .portBindings(portBindings)
+        .build();
+
+      ContainerConfig containerConfig = ContainerConfig.builder()
+        .image("shelan/karamel-node")
+        .hostConfig(hostConfig)
+        .exposedPorts("22")
+        .hostname("node"+i)
+        .build();
+
+
+      final ContainerCreation creation = client.createContainer(containerConfig);
+      final String id = creation.id();
+      client.startContainer(id);
+      String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
+
+      NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
+      containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
+      containerRuntime.setName(containerIp);
+      containerRuntime.setPrivateIp(containerIp);
+      containerRuntime.setPublicIp(publicIp);
+      containerRuntime.setSshPort(sshPort);
+      containerRuntime.setSshUser("vagrant");
+      machines.add(containerRuntime);
+      containerGroupMap.get(hostMachine.getGroup().getName()).add(containerRuntime);
+    }
+    return containerGroupMap;
+  }
+
+  private void init() {
+    for (GroupRuntime groupRuntime : runtime.getGroups()) {
+      this.hostMachineRuntimes.addAll(groupRuntime.getMachines());
+    }
+
+    for (NodeRunTime nodeRunTime : hostMachineRuntimes) {
+      String publicIp = nodeRunTime.getPublicIp();
+      containerHostMap.put(publicIp, new ArrayList<NodeRunTime>());
+      DockerClient docker = new DefaultDockerClient("http://" + nodeRunTime.getPublicIp() + ":2375");
+      dockerClientMap.put(publicIp, docker);
+    }
+  }
+
+}
