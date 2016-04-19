@@ -8,7 +8,6 @@ import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.HostConfig;
 import com.spotify.docker.client.messages.PortBinding;
 import com.spotify.docker.client.messages.ContainerCreation;
-import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
@@ -36,6 +35,7 @@ public class ContainerClusterManager {
   JsonCluster cluster;
   ClusterStats clusterStats;
   TaskSubmitter taskSubmitter;
+  int numOfContainers = 0;
 
   public ContainerClusterManager(ClusterRuntime runtime, JsonCluster cluster, ClusterStats clusterstats,
                                  TaskSubmitter taskSubmitter) {
@@ -48,15 +48,14 @@ public class ContainerClusterManager {
 
   public HashMap<String, ArrayList<NodeRunTime>> StartContainers() throws KaramelException, InterruptedException,
     DockerException {
-    int noOfContainers = 0;
     for (JsonGroup jsonGroup : cluster.getGroups()) {
-      noOfContainers += jsonGroup.getSize();
+      numOfContainers += jsonGroup.getSize();
       containerGroupMap.put(jsonGroup.getName(), new ArrayList<NodeRunTime>());
     }
 
     List<NodeRunTime> machines = new ArrayList<>();
 
-    for (int i = 0; i < noOfContainers; i++) {
+    for (int i = 0; i < numOfContainers; i++) {
       int position = i % hostMachineRuntimes.size();
       ContainerTask containerTask = new ContainerTask();
       NodeRunTime hostMachine = hostMachineRuntimes.get(position);
@@ -81,7 +80,7 @@ public class ContainerClusterManager {
         .image("shelan/karamel-node")
         .hostConfig(hostConfig)
         .exposedPorts("22")
-        .hostname("node"+i)
+        .hostname("node" + i)
         .build();
 
 
@@ -92,7 +91,8 @@ public class ContainerClusterManager {
 
       NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
       containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
-      containerRuntime.setName(containerIp);
+      containerRuntime.setMachineType(NodeRunTime.NodeType.CONTAINER.name());
+      containerRuntime.setName(id);
       containerRuntime.setPrivateIp(containerIp);
       containerRuntime.setPublicIp(publicIp);
       containerRuntime.setSshPort(sshPort);
@@ -114,6 +114,10 @@ public class ContainerClusterManager {
       DockerClient docker = new DefaultDockerClient("http://" + nodeRunTime.getPublicIp() + ":2375");
       dockerClientMap.put(publicIp, docker);
     }
+  }
+
+  public int getNOfContainers() {
+    return numOfContainers;
   }
 
 }

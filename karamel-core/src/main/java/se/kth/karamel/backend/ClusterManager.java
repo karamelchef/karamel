@@ -279,6 +279,7 @@ public class ClusterManager implements Runnable {
     } catch (DockerException e) {
       e.printStackTrace();
     }
+    machinesMonitor.reInitialize(containerClusterManager.getNOfContainers());
 
     for (GroupRuntime group : getRuntime().getGroups()) {
       group.setMachines(containerRuntimeMap.get(group.getName()));

@@ -67,6 +67,11 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
   }
 
+  public void reInitialize(int numOfMachines){
+    executor = Executors.newFixedThreadPool(numOfMachines);
+    machines.clear();
+  }
+
   public void resume() {
     if (paused) {
       logger.info("Sending resume signal to all machines");
