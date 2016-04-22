@@ -66,10 +66,10 @@ public class DagBuilder {
         try {
           dag.addTask(dockerInstallationTask);
           dag.addTask(findOs);
-          if(keyValueStoreIp.equals(me.getPrivateIp())){
+          /*if(keyValueStoreIp.equals(me.getPrivateIp())){
             Task dockerNetworkInstallationTask = new DockerNetworkSetupTask(me,clusterStats,submitter,keyValueStoreIp);
             dag.addTask(dockerNetworkInstallationTask);
-          }
+          }*/
         } catch (DagConstructionException e) {
           throw new KaramelException("Error while configuring docker hosts", e);
         }

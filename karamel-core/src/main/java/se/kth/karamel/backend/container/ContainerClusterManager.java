@@ -7,6 +7,8 @@ import com.spotify.docker.client.messages.AuthConfig;
 import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.HostConfig;
 import com.spotify.docker.client.messages.PortBinding;
+import com.spotify.docker.client.messages.NetworkConfig;
+import com.spotify.docker.client.messages.NetworkCreation;
 import com.spotify.docker.client.messages.ContainerCreation;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -57,7 +59,6 @@ public class ContainerClusterManager {
 
     for (int i = 0; i < numOfContainers; i++) {
       int position = i % hostMachineRuntimes.size();
-      ContainerTask containerTask = new ContainerTask();
       NodeRunTime hostMachine = hostMachineRuntimes.get(position);
 
       int sshPort = 11000 + i;
@@ -112,12 +113,55 @@ public class ContainerClusterManager {
       String publicIp = nodeRunTime.getPublicIp();
       containerHostMap.put(publicIp, new ArrayList<NodeRunTime>());
       DockerClient docker = new DefaultDockerClient("http://" + nodeRunTime.getPublicIp() + ":2375");
+      AuthConfig authConfig = AuthConfig.builder().serverAddress("https://index.docker.io/v1/").build();
+      try {
+        docker.auth(authConfig);
+      } catch (DockerException e) {
+        e.printStackTrace();
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
       dockerClientMap.put(publicIp, docker);
     }
   }
 
   public int getNOfContainers() {
     return numOfContainers;
+  }
+
+  public void setupNetworking(String kvStorePublicIP, String kvStorePrivateIP) throws DockerException,
+    InterruptedException {
+    DockerClient client = dockerClientMap.get(kvStorePublicIP);
+    client.pull("progrium/consul", AuthConfig.builder().build());
+
+    final Map<String, List<PortBinding>> portBindings = new HashMap<String, List<PortBinding>>();
+    List<PortBinding> hostPorts = new ArrayList<PortBinding>();
+    hostPorts.add(PortBinding.of("0.0.0.0", 8500));
+    portBindings.put("8500", hostPorts);
+    HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
+    ContainerConfig containerConfig = ContainerConfig.builder().image("progrium/consul")
+      .hostConfig(hostConfig)
+      .cmd("-server", "-bootstrap")
+      .exposedPorts("8500")
+      .build();
+
+    final ContainerCreation creation = client.createContainer(containerConfig);
+    final String id = creation.id();
+
+    client.startContainer(id);
+
+    //Ipam ipam = Ipam.builder().config("10.0.4.0/24","10.0.4.0/24","10.0.4.255").build();
+    NetworkConfig networkConfig = NetworkConfig.builder().driver("overlay").name("karamel").build();
+    NetworkCreation networkCreation = null;
+
+    while (networkCreation == null || !(networkCreation.id().length() > 0)) {
+      try {
+        networkCreation = client.createNetwork(networkConfig);
+      } catch (Exception e) {
+        Thread.sleep(1000);
+      }
+    }
+
   }
 
 }

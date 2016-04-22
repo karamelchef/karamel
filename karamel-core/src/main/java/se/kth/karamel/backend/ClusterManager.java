@@ -50,7 +50,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
  * @author kamal
  */
 public class ClusterManager implements Runnable {
@@ -115,7 +114,7 @@ public class ClusterManager implements Runnable {
     if (command != Command.PAUSE && command != Command.RESUME) {
       if (!cmdQueue.offer(command)) {
         String msg = String.format("Sorry!! have to reject '%s' for '%s', try later (._.)", command,
-            definition.getName());
+          definition.getName());
         logger.error(msg);
         throw new KaramelException(msg);
       }
@@ -158,7 +157,7 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  private void initLaunchers() throws KaramelException{
+  private void initLaunchers() throws KaramelException {
     for (JsonGroup group : definition.getGroups()) {
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
       Launcher launcher = launchers.get(provider.getClass());
@@ -169,8 +168,8 @@ public class ClusterManager implements Runnable {
           launcher = new BaremetalLauncher(clusterContext.getSshKeyPair());
         } else if (provider instanceof Gce) {
           launcher = new GceLauncher(clusterContext.getGceContext(), clusterContext.getSshKeyPair());
-        } else if (provider instanceof Nova){
-          launcher = new NovaLauncher(clusterContext.getNovaContext(),clusterContext.getSshKeyPair());
+        } else if (provider instanceof Nova) {
+          launcher = new NovaLauncher(clusterContext.getNovaContext(), clusterContext.getSshKeyPair());
         }
         launchers.put(provider.getClass(), launcher);
       }
@@ -229,7 +228,7 @@ public class ClusterManager implements Runnable {
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
       if (group.getPhase() == GroupRuntime.GroupPhase.PRECLEANED
-          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
+        || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
         runtime.resolveFailure(Failure.hash(Failure.Type.CREATING_SEC_GROUPS_FAILE, group.getName()));
         group.setPhase(GroupRuntime.GroupPhase.FORKING_GROUPS);
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
@@ -253,28 +252,33 @@ public class ClusterManager implements Runnable {
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.GROUPS_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' GROUPS_FORKED \\o/\\o/\\o/\\o/\\o/",
-          definition.getName()));
+        definition.getName()));
     }
   }
 
   private void forkContainers() throws InterruptedException, KaramelException {
     //create necessary containers here
+    String keyValueStorePrivateIP = "";
+    String keyValueStorePublicIp = "";
     try {
       //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
-      String keyValueStoreIP = runtime.getGroups().get(0).getMachines().get(0).getPrivateIp();
-      containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor,keyValueStoreIP);
+      keyValueStorePrivateIP = runtime.getGroups().get(0).getMachines().get(0).getPrivateIp();
+      keyValueStorePublicIp = runtime.getGroups().get(0).getMachines().get(0).getPublicIp();
+      containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor,
+        keyValueStorePrivateIP);
       containerHostConfigurationDag.start();
     } catch (KaramelException e) {
       e.printStackTrace();
     }
-    while (!containerHostConfigurationDag.isDone()){
+    while (!containerHostConfigurationDag.isDone()) {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
     ContainerClusterManager containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
       machinesMonitor);
-    HashMap<String,ArrayList<NodeRunTime>>  containerRuntimeMap = null;
+    HashMap<String, ArrayList<NodeRunTime>> containerRuntimeMap = null;
     try {
+      containerClusterManager.setupNetworking(keyValueStorePublicIp, keyValueStorePrivateIP);
       containerRuntimeMap = containerClusterManager.StartContainers();
     } catch (DockerException e) {
       e.printStackTrace();
@@ -350,7 +354,7 @@ public class ClusterManager implements Runnable {
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
       if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED
-          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
+        || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
         runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, group.getName()));
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
@@ -386,7 +390,7 @@ public class ClusterManager implements Runnable {
         switch (cmd) {
           case LAUNCH:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               clean(false);
               long duration = ClusterStatistics.stopTimer();
@@ -395,27 +399,27 @@ public class ClusterManager implements Runnable {
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkGroups();
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
+                = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkMachines();
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
+                = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.MACHINES_FORKED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               install();
               long duration = ClusterStatistics.stopTimer();
