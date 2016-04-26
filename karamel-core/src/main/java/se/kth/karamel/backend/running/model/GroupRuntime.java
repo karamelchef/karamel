@@ -5,10 +5,12 @@
  */
 package se.kth.karamel.backend.running.model;
 
+import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  *
@@ -27,6 +29,7 @@ public class GroupRuntime {
   private String name;
   private String id;
   private List<MachineRuntime> machines = new ArrayList<>();
+  private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
 
   public GroupRuntime(ClusterRuntime cluster) {
     this.cluster = cluster;
@@ -69,7 +72,15 @@ public class GroupRuntime {
     return cluster;
   }
 
+  public void setAutoScalingSuggestionsQueue(ArrayBlockingQueue<ScalingSuggestion> suggestionsQueue) {
+    this.autoScalingSuggestionsQueue = suggestionsQueue;
+  }
+  public ArrayBlockingQueue<ScalingSuggestion> getAutoScalingSuggestionsQueue() {
+    return autoScalingSuggestionsQueue;
+  }
+
   public boolean isElasticScalingEnabled() {
+    //TODO-AutoScaling implement method: have an attribute in yml file
     return true;
   }
 

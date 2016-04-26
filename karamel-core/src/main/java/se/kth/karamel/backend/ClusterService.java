@@ -195,6 +195,17 @@ public class ClusterService {
     t.start();
   }
 
+  public synchronized void scaleOutCluster(String clusterName) throws KaramelException {
+    String name = clusterName.toLowerCase();
+    logger.info(String.format("Auto-scalar asked for scale out '%s'", clusterName));
+    if (!repository.containsKey(name)) {
+      throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
+    }
+    ClusterManager cluster = repository.get(name);
+    checkContext(cluster.getDefinition());
+    cluster.enqueue(ClusterManager.Command.SCALE_OUT);
+  }
+
   private ClusterContext checkContext(JsonCluster definition) throws KaramelException {
     String name = definition.getName().toLowerCase();
     ClusterContext context = clusterContexts.get(name);

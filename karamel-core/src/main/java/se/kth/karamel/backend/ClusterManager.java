@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -19,9 +18,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-//import se.kth.autoscalar.AutoScalarAPI;
-//import se.kth.autoscalar.AutoScalarImpl;
-//import se.kth.elasticscalar.common.models.MachineModel;
+import se.kth.autoscalar.scaling.ScalingSuggestion;
+import se.kth.autoscalar.scaling.core.AutoScalarAPI;
+import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
+import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -59,12 +59,13 @@ public class ClusterManager implements Runnable {
 
   public static enum Command {
 
-    LAUNCH, PAUSE, RESUME, PURGE, ADD_MACHINES, REMOVE_MACHINES
+    LAUNCH, PAUSE, RESUME, PURGE, SCALE_OUT, SCALE_IN
   }
 
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
   private final JsonCluster definition;
   private final ClusterRuntime runtime;
+  private final AutoScalingHandler autoScalingHandler;
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
   private Dag installationDag;
@@ -77,8 +78,8 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
-  private Queue autoScalingSuggestionsQueue = null;
-//  AutoScalarAPI autoScalarAPI = new AutoScalarImpl();
+  //private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
+  AutoScalarAPI autoScalarAPI;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -91,6 +92,15 @@ public class ClusterManager implements Runnable {
     this.stats.setUserId(Settings.USER_NAME);
     this.stats.setStartTime(System.currentTimeMillis());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
+
+    //TODO-AutoScaling: initiate only if AS is enabled in the cluster
+    this.autoScalingHandler = new AutoScalingHandler(runtime.getGroups().size());
+    try {
+      autoScalarAPI = AutoScalarAPI.getInstance();
+    } catch (AutoScalarException e) {
+      logger.fatal("Error while initializing the AutoScalarAPI for group", e);
+    }
+
     initLaunchers();
   }
 
@@ -348,18 +358,37 @@ public class ClusterManager implements Runnable {
     return groups;
   }
 
-  private void initiateAutoScaling(GroupRuntime groupRuntime) {
+  private void addMachinesToGroup() {
 
-    if(autoScalingSuggestionsQueue == null) {
-//      autoScalingSuggestionsQueue = autoScalarAPI.getSuggestionQueue();
-    }
-    //ArrayList<MachineModel> machinesForAutoScalar = new ArrayList<MachineModel>();
-    for (MachineRuntime machine : groupRuntime.getMachines()) {
-       //String groupId, String VMId, String sshKeyPath, String IP, String port, String userName
-      //TODO pass sshKeyPath location
-//      MachineModel machineModel = autoScalarAPI.addMachineToGroup(groupRuntime.getId(), machine.getId(), null, 
-      //machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
-      //machinesForAutoScalar.add(machineModel);
+  }
+
+  private void initiateAutoScaling(final GroupRuntime groupRuntime) {
+    if (autoScalarAPI != null) {
+      try {
+        autoScalarAPI.startAutoScaling(groupRuntime.getId(), groupRuntime.getMachines().size());
+        //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+        final String groupId = groupRuntime.getId();
+
+        new Thread()
+        {
+          //set the suggestions queue in GroupRuntime and start handling auto-scaling suggestions
+          public void run() {
+            while (groupRuntime.getAutoScalingSuggestionsQueue() == null) {
+              ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = autoScalarAPI.getSuggestionQueue(groupId);
+              if (suggestionQueue != null) {
+                groupRuntime.setAutoScalingSuggestionsQueue(suggestionQueue);
+                autoScalingHandler.startHandlingGroup(groupRuntime);
+              }
+            }
+          }
+        }.start();
+
+      } catch (AutoScalarException e) {
+        logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
+      }
+    } else {
+      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". AutoScalarAPI has not been " +
+              "initialized");
     }
   }
 
@@ -418,6 +447,7 @@ public class ClusterManager implements Runnable {
                   = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
 
+              //if group is forked successfully, start auto-scaling in tha group
               if(!isFailed) {
                 for (GroupRuntime groupRuntime: groupRuntimes) {
                   if(groupRuntime.isElasticScalingEnabled()) {
@@ -436,10 +466,10 @@ public class ClusterManager implements Runnable {
               stats.addPhase(phaseStat);
             }
             break;
-          case ADD_MACHINES:
+          case SCALE_OUT:
             //call fork machines with specific machine type
             break;
-          case REMOVE_MACHINES:
+          case SCALE_IN:
             // stop machines
             break;
           case PURGE:
