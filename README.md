@@ -18,7 +18,7 @@ We leverage Berkshelf to transparently download and install transitive cookbook 
 ---
 Cluster definition is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, name of the cluster must be unique in each Karamel-runtime.
 
-We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova) and bare-metal(baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a separate sections following. 
+We support five cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova), OCCI and bare-metal (baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a following separate section. 
 
  Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.
 
@@ -141,6 +141,39 @@ baremetal:
    - 192.168.33.12-192.168.33.14
    - 192.168.44.15
 ```
+
+####OCCI
+To deploy the cluster on OCCI compatible infrastructure you must provide following information via yaml file:
+ - occiEndpoint - defines on which OCCI cluster will your virtual machines be created
+ - occiImage - virtual machine template
+ - occiImageSize - compute resource size (procesors & memory)
+ - usename - account name with root privileges
+
+   
+ ```yaml
+name: OcciAmbari
+occi:
+  occiEndpoint: "https://carach5.ics.muni.cz:11443"
+  occiImage: "http://occi.carach5.ics.muni.cz/occi/infrastructure/os_tpl#uuid_egi_ubuntu_server_14_04_lts_fedcloud_warg_131"
+  occiImageSize: "http://fedcloud.egi.eu/occi/compute/flavour/1.0#mem_large"
+  usename: "ubuntu"
+
+cookbooks:
+  ambari:
+    github: "jimdowling/ambari"
+    branch: "master"
+
+groups:
+  server:
+    size: 1
+    recipes:
+        - ambari::server
+  agents:
+    size: 1
+    recipes:
+        - ambari::agent
+```
+
 
 ###Web UI
 ---
