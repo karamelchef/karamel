@@ -36,6 +36,17 @@
       <version>3.7.0.201502260915-r</version>
     </dependency>
     <dependency>
+      <groupId>org.eclipse.jgit</groupId>
+      <artifactId>org.eclipse.jgit</artifactId>
+      <version>3.7.0.201502260915-r</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.eclipse.mylyn.github</groupId>
       <artifactId>org.eclipse.egit.github.core</artifactId>
       <version>2.1.5</version>
@@ -109,6 +120,11 @@
       <groupId>org.kohsuke</groupId>
       <artifactId>github-api</artifactId>
       <version>1.68</version>
+    </dependency>
+    <dependency>
+      <groupId>cz.cesnet.cloud</groupId>
+      <artifactId>jocci-api</artifactId>
+      <version>0.2.3</version>
     </dependency>
   </dependencies>
   <build>

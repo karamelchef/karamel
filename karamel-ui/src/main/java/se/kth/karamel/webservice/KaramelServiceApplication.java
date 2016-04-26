@@ -43,6 +43,8 @@ import se.kth.karamel.webservice.calls.github.RemoveRepository;
 import se.kth.karamel.webservice.calls.github.SetGithubCredentials;
 import se.kth.karamel.webservice.calls.nova.LoadNovaCredentials;
 import se.kth.karamel.webservice.calls.nova.ValidateNovaCredentials;
+import se.kth.karamel.webservice.calls.occi.LoadOcciCredentials;
+import se.kth.karamel.webservice.calls.occi.ValidateOcciCredentials;
 import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
@@ -346,6 +348,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     //Openstack nova
     environment.jersey().register(new LoadNovaCredentials(karamelApi));
     environment.jersey().register(new ValidateNovaCredentials(karamelApi));
+    
+    //occi
+    environment.jersey().register(new LoadOcciCredentials(karamelApi));
+    environment.jersey().register(new ValidateOcciCredentials(karamelApi));    
+    
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
 
