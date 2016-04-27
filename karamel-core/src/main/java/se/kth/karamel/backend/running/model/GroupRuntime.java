@@ -21,7 +21,7 @@ public class GroupRuntime {
   public static enum GroupPhase {
 
     NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, 
-    INSTALLING, INSTALLED, PURGING;
+    INSTALLING, INSTALLED, PURGING, SCALING_UP_MACHINES, SCALED_UP, SCALING_DOWN_MACHINES, SCALED_DOWN;
   }
 
   private final ClusterRuntime cluster;
@@ -80,7 +80,7 @@ public class GroupRuntime {
   }
 
   public boolean isElasticScalingEnabled() {
-    //TODO-AutoScaling implement method: have an attribute in yml file
+    //TODO-AS implement method: have an attribute in yml file
     return true;
   }
 

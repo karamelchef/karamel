@@ -196,7 +196,20 @@ public class ClusterService {
     t.start();
   }
 
-  public synchronized void scaleOutCluster(String clusterName) throws KaramelException {
+  public synchronized void scaleInClusterGroup(String clusterName, String groupId, String[] vmIdsToRemove)
+          throws KaramelException {
+    String standardClusterName = clusterName.toLowerCase();
+    logger.info(String.format("Auto-scalar asked for scale in groupId '%s' of cluster '%s'", groupId, clusterName));
+    if (!repository.containsKey(standardClusterName)) {
+      logger.error("Repository doesn't contain a cluster name: " + clusterName);
+      throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
+    }
+    ClusterManager clusterManager = repository.get(standardClusterName);
+    checkContext(clusterManager.getDefinition());
+    clusterManager.removeMachinesFromGroup(groupId, vmIdsToRemove);
+  }
+
+  public synchronized void scaleOutClusterGroup(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
     logger.info(String.format("Auto-scalar asked for scale out '%s'", clusterName));
     if (!repository.containsKey(name)) {

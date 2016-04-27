@@ -498,6 +498,7 @@ public final class Ec2Launcher extends Launcher {
     logger.info(String.format("Killing all machines in groups: %s", groupNames.toString()));
     context.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
     logger.info(String.format("All machines destroyed in all the security groups. :) "));
+    //TODO-AS are we just destroying security groups without checking whether there are any existing machines in group?
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
       String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
       for (SecurityGroup secgroup : context.getSecurityGroupApi().describeSecurityGroupsInRegion(gp.getValue())) {

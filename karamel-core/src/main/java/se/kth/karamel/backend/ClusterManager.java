@@ -7,10 +7,13 @@ package se.kth.karamel.backend;
 
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -95,7 +98,7 @@ public class ClusterManager implements Runnable {
     this.stats.setStartTime(System.currentTimeMillis());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
 
-    //TODO-AutoScaling: initiate only if AS is enabled in the cluster
+    //TODO-AS: initiate only if AS is enabled in the cluster
     this.autoScalingHandler = new AutoScalingHandler(runtime.getGroups().size());
     try {
       autoScalarAPI = AutoScalarAPI.getInstance();
@@ -360,6 +363,51 @@ public class ClusterManager implements Runnable {
           definition.getName()));
     }
     return groups;
+  }
+
+  public void removeMachinesFromGroup(String groupId, String[] vmIdsToRemove) {
+    for (GroupRuntime groupRuntime : runtime.getGroups()) {
+      if (groupRuntime.getId().equals(groupId)) {
+        //remove the machines with given IDs from group
+        Set<String> allEc2VmsIds = new HashSet<String>();
+        allEc2VmsIds.addAll(Arrays.asList(vmIdsToRemove));
+
+        logger.info(String.format("Removing machine with ID '%s' ...", allEc2VmsIds.toString()));
+        groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALING_DOWN_MACHINES);
+        boolean isSuccessful = false;
+
+        for (JsonGroup jsonGroup : definition.getGroups()) {
+          if (jsonGroup.getName().equals(groupId)) {
+            try {
+              ////TODO-AS complete logic
+              Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupId);
+              Launcher launcher = launchers.get(provider.getClass());
+
+              ////TODO-AS get the launcher like below when every launcher has the required method and
+              // can be accessed via interface
+              Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;
+              Map<String, String> groupRegion = new HashMap<>();
+              groupRegion.put(groupRuntime.getName(), ((Ec2) provider).getRegion());
+
+              //TODO-AS get unique EC2 Ids for vms
+              //testing by removing the first ID
+              List<String> vmNames = Settings.AWS_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
+                      groupRuntime.getName(), 1, 1);
+
+              ec2Launcher.cleanup(definition.getName(), allEc2VmsIds, null, groupRegion);
+              isSuccessful = true;
+            } catch (KaramelException e) {
+              logger.error("Error while removing the machines: " + allEc2VmsIds.toString() + " from group: " + groupId);
+            }
+            break;
+          }
+        }
+        if (isSuccessful) {
+          groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALED_DOWN);
+        }   //TODO-AS else part????
+        break;  //groupRuntime ID is unique in a cluster
+      }
+    }
   }
 
   private void addMachinesToGroup() {
