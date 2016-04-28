@@ -9,6 +9,7 @@ import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -29,7 +30,8 @@ public class GroupRuntime {
   private String name;
   private String id;
   private List<MachineRuntime> machines = new ArrayList<>();
-  private int maxIdNo = 0;
+  /*private List<String> uniqueMachineNames = new ArrayList<String>();
+  private int maxIdNo = 0;       //TODO-AS keep sorted idlist. so no need to bother*/
   private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
 
   public GroupRuntime(ClusterRuntime cluster) {
@@ -42,11 +44,27 @@ public class GroupRuntime {
   }
 
   public synchronized void setMachines(List<MachineRuntime> machines) {
-    this.machines = machines;
+    for (MachineRuntime machine : machines) {
+      addMachine(machine);
+    }
   }
 
   public List<MachineRuntime> getMachines() {
     return machines;
+  }
+
+  public synchronized void addMachine(MachineRuntime machineRuntime) {
+    this.machines.add(machineRuntime);
+    //this.uniqueMachineNames.add(machineRuntime.getUniqueName());
+  }
+  
+  public synchronized void removeMachineWithId(String id) {
+    for (Iterator<MachineRuntime> iterator = machines.iterator(); iterator.hasNext();) {
+      MachineRuntime machine = iterator.next();
+      if (machine.getId().equals(id)) {
+        iterator.remove();
+      }
+    }
   }
 
   public String getId() {
@@ -71,17 +89,6 @@ public class GroupRuntime {
   
   public ClusterRuntime getCluster() {
     return cluster;
-  }
-
-  public int getMaxIdNo() {
-    return maxIdNo;
-  }
-
-  public int setMaxIdNo(int maxIdNo) {
-    if (this.maxIdNo < maxIdNo) {
-      this.maxIdNo = maxIdNo;
-    }
-    return maxIdNo;
   }
 
   public void setAutoScalingSuggestionsQueue(ArrayBlockingQueue<ScalingSuggestion> suggestionsQueue) {

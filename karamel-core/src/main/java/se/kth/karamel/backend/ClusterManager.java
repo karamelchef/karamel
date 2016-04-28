@@ -21,6 +21,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import org.jclouds.compute.domain.NodeMetadata;
 import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
@@ -397,7 +398,13 @@ public class ClusterManager implements Runnable {
                 }
               }
 
-              ec2Launcher.cleanup(definition.getName(), allIdsToBeRemoved, vmNamesToBeRemoved, groupRegion);
+              Set<? extends NodeMetadata> destroyedNodes = ec2Launcher.removeMachinesFromGroup(groupRuntime,
+                      allIdsToBeRemoved, vmNamesToBeRemoved, groupId);
+
+              for (NodeMetadata destroyedNode : destroyedNodes) {
+                groupRuntime.removeMachineWithId(destroyedNode.getId());
+              }
+              //TODO-AS low priority: remove security groups when no nodes in group
               isSuccessful = true;
             } catch (KaramelException e) {
               logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: " +

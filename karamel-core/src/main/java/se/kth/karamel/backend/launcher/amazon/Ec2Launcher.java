@@ -58,6 +58,7 @@ public final class Ec2Launcher extends Launcher {
   public static boolean TESTING = true;
   public final Ec2Context context;
   public final SshKeyPair sshKeyPair;
+  private int predecessorNo = 0;
 
   Set<String> keys = new HashSet<>();
 
@@ -507,7 +508,6 @@ public final class Ec2Launcher extends Launcher {
           cleanupFailedNodes(failedNodes);
         }
         List<MachineRuntime> machines = new ArrayList<>();
-        int predecessorNo = 0;
         for (NodeMetadata node : successfulNodes) {
           if (node != null) {
             ///////creating machine runtime
@@ -527,7 +527,6 @@ public final class Ec2Launcher extends Launcher {
             machine.setSshUser(ec2.getUsername());
             machine.setUniqueName(Settings.AWS_UNIQUE_VM_NAME(mainGroup.getCluster().getName(), mainGroup.getName(),
                     predecessorNo));
-            mainGroup.setMaxIdNo(predecessorNo);
 
             machines.add(machine);
             predecessorNo++;
@@ -721,6 +720,25 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
+  public Set<? extends NodeMetadata> removeMachinesFromGroup(GroupRuntime groupRuntime, Set<String> vmIds,
+                                                             Set<String> vmNames, String groupId)
+          throws KaramelException {
+    if (context == null) {
+      throw new KaramelException("Register your valid credentials first :-| ");
+    }
+
+    if (sshKeyPair == null) {
+      throw new KaramelException("Choose your ssh keypair first :-| ");
+    }
+
+    String uniqueGrpName = Settings.AWS_UNIQUE_GROUP_NAME(groupRuntime.getCluster().getName(), groupId);
+    logger.info(String.format("Removing following machines with names: \n %s \nor inside group %s \nor with ids: "
+        + "%s", vmNames.toString(), uniqueGrpName, vmIds));
+    logger.info(String.format("Removing machines in group: %s", uniqueGrpName));
+    Set<? extends NodeMetadata> destroyedNodes = context.getComputeService().destroyNodesMatching(matchId(vmIds));
+    return destroyedNodes;
+  }
+
   public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names,
       final Set<String> groupNames) {
     return new Predicate<NodeMetadata>() {
@@ -736,6 +754,21 @@ public final class Ec2Launcher extends Launcher {
       @Override
       public String toString() {
         return "machines predicate";
+      }
+    };
+  }
+
+  public static Predicate<NodeMetadata> matchId(final Set<String> ids) {
+    return new Predicate<NodeMetadata>() {
+      @Override
+      public boolean apply(NodeMetadata nodeMetadata) {
+        String id = nodeMetadata.getId();
+        return (id != null && ids.contains(id));
+      }
+
+      @Override
+      public String toString() {
+        return "machines match ID";
       }
     };
   }
