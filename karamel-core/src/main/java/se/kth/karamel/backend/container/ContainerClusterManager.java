@@ -10,12 +10,18 @@ import com.spotify.docker.client.messages.PortBinding;
 import com.spotify.docker.client.messages.NetworkConfig;
 import com.spotify.docker.client.messages.NetworkCreation;
 import com.spotify.docker.client.messages.ContainerCreation;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.NodeRunTime;
+import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.MetadataRb;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 
@@ -58,6 +64,7 @@ public class ContainerClusterManager {
     List<NodeRunTime> machines = new ArrayList<>();
 
     for (int i = 0; i < numOfContainers; i++) {
+
       int position = i % hostMachineRuntimes.size();
       NodeRunTime hostMachine = hostMachineRuntimes.get(position);
 
@@ -72,20 +79,42 @@ public class ContainerClusterManager {
       List<PortBinding> hostPorts = new ArrayList<PortBinding>();
       hostPorts.add(PortBinding.of("0.0.0.0", sshPort));
       portBindings.put("22", hostPorts);
+
+      //TODO: exposing all the ports found in links in every container, We might not want to do that. and only need
+      // to expose relevant port for containers.
+      String[] clusterLinks = UserClusterDataExtractor.clusterLinks(cluster, runtime).split("\n");
+      List<String> ports = new ArrayList();
+
+      for (int j = 0; j < clusterLinks.length; j++) {
+        ports.add(clusterLinks[j].split("//")[1].split("/")[0].split(":")[1]);
+      }
+
+      for (String port : ports) {
+        List<PortBinding> randomHostPorts = new ArrayList<PortBinding>();
+        randomHostPorts.add(PortBinding.randomPort("0.0.0.0"));
+        portBindings.put(port, randomHostPorts);
+      }
+
+      //adding SSH port to expose
+      ports.add("22");
+
       HostConfig hostConfig = HostConfig.builder()
         .networkMode("karamel")
         .portBindings(portBindings)
         .build();
 
+      String[] exposedPorts = new String[ports.size()];
+      exposedPorts = ports.toArray(exposedPorts);
+
       ContainerConfig containerConfig = ContainerConfig.builder()
         .image("shelan/karamel-node")
         .hostConfig(hostConfig)
-        .exposedPorts("22")
+        .exposedPorts(exposedPorts)
         .hostname("node" + i)
         .build();
 
 
-      final ContainerCreation creation = client.createContainer(containerConfig);
+      final ContainerCreation creation = client.createContainer(containerConfig, "node" + i);
       final String id = creation.id();
       client.startContainer(id);
       String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
@@ -127,6 +156,19 @@ public class ContainerClusterManager {
 
   public int getNOfContainers() {
     return numOfContainers;
+  }
+
+  //TODO: this is the core logic to parse existing port should be removed if not used in future.
+  public void extractPorts() throws KaramelException {
+    for (JsonGroup jsonGroup : cluster.getGroups()) {
+      for (JsonCookbook jsonCookbook : jsonGroup.getCookbooks()) {
+        for (JsonRecipe jsonRecipe : jsonCookbook.getRecipes()) {
+          String cbid = jsonCookbook.getId();
+          KaramelizedCookbook cb = CookbookCache.get(cbid);
+          MetadataRb metadataRb = cb.getMetadataRb();
+        }
+      }
+    }
   }
 
   public void setupNetworking(String kvStorePublicIP, String kvStorePrivateIP) throws DockerException,
