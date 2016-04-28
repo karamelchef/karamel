@@ -29,6 +29,7 @@ public class GroupRuntime {
   private String name;
   private String id;
   private List<MachineRuntime> machines = new ArrayList<>();
+  private int maxIdNo = 0;
   private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
 
   public GroupRuntime(ClusterRuntime cluster) {
@@ -70,6 +71,17 @@ public class GroupRuntime {
   
   public ClusterRuntime getCluster() {
     return cluster;
+  }
+
+  public int getMaxIdNo() {
+    return maxIdNo;
+  }
+
+  public int setMaxIdNo(int maxIdNo) {
+    if (this.maxIdNo < maxIdNo) {
+      this.maxIdNo = maxIdNo;
+    }
+    return maxIdNo;
   }
 
   public void setAutoScalingSuggestionsQueue(ArrayBlockingQueue<ScalingSuggestion> suggestionsQueue) {

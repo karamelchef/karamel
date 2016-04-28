@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
+import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
@@ -369,10 +370,11 @@ public class ClusterManager implements Runnable {
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
       if (groupRuntime.getId().equals(groupId)) {
         //remove the machines with given IDs from group
-        Set<String> allEc2VmsIds = new HashSet<String>();
-        allEc2VmsIds.addAll(Arrays.asList(vmIdsToRemove));
+        Set<String> allIdsToBeRemoved = new HashSet<String>();
+        allIdsToBeRemoved.addAll(Arrays.asList(vmIdsToRemove));
 
-        logger.info(String.format("Removing machine with ID '%s' ...", allEc2VmsIds.toString()));
+        logger.info(String.format("Removing machine with ID '%s' ...", allIdsToBeRemoved.toString()));
+        runtime.resolveFailure(Failure.hash(Failure.Type.SCALE_DOWN_FAILURE, groupId));
         groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALING_DOWN_MACHINES);
         boolean isSuccessful = false;
 
@@ -388,16 +390,19 @@ public class ClusterManager implements Runnable {
               Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;
               Map<String, String> groupRegion = new HashMap<>();
               groupRegion.put(groupRuntime.getName(), ((Ec2) provider).getRegion());
+              Set<String> vmNamesToBeRemoved = new HashSet<>();
+              for (MachineRuntime machineRuntime : groupRuntime.getMachines()) {
+                if (allIdsToBeRemoved.contains(machineRuntime.getId())) {
+                  vmNamesToBeRemoved.add(machineRuntime.getUniqueName());
+                }
+              }
 
-              //TODO-AS get unique EC2 Ids for vms
-              //testing by removing the first ID
-              List<String> vmNames = Settings.AWS_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
-                      groupRuntime.getName(), 1, 1);
-
-              ec2Launcher.cleanup(definition.getName(), allEc2VmsIds, null, groupRegion);
+              ec2Launcher.cleanup(definition.getName(), allIdsToBeRemoved, vmNamesToBeRemoved, groupRegion);
               isSuccessful = true;
             } catch (KaramelException e) {
-              logger.error("Error while removing the machines: " + allEc2VmsIds.toString() + " from group: " + groupId);
+              logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: " +
+                      groupId);
+              runtime.issueFailure(new Failure(Failure.Type.SCALE_DOWN_FAILURE, groupId, e.getMessage()));
             }
             break;
           }
@@ -410,6 +415,35 @@ public class ClusterManager implements Runnable {
     }
   }
 
+  public void addMachinesToGroup(String groupId, MachineType[] machineTypes) {
+    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupId);
+    Launcher launcher = launchers.get(provider.getClass());
+    for (GroupRuntime groupRuntime : runtime.getGroups()) {
+      if (groupRuntime.getId().equals(groupId)) {
+        for (MachineType machineType : machineTypes) {
+          //1: general case is, one group can have members from different launchers
+          if ("EC2".equals(machineType.getLauncher())) {
+            //get EC2 launcher and invoke when 1. is supported
+            Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;   //TODO-AS add method to interface
+            ////////ec2Launcher.addMachineToGroup(definition, groupRuntime, groupId);
+          }
+        }
+        /*try {
+
+          List<MachineRuntime> mcs = launcher.forkMachines(definition, runtime, groupId);  implement this
+          groupRuntime.setMachines(mcs);
+          machinesMonitor.addMachines(mcs);
+          groupRuntime.setPhase(GroupRuntime.GroupPhase.MACHINES_FORKED);
+        } catch (Exception ex) {
+          runtime.issueFailure(new Failure(Failure.Type.SCALE_UP_FAILURE, groupRuntime.getName(), ex.getMessage()));
+          logger.error("Failed to scale up the group: " + groupId + " in cluster: " +
+                  groupRuntime.getCluster().getName());
+          throw ex;
+        }*/
+      }
+    }
+
+  }
   private void addMachinesToGroup() {
 
   }

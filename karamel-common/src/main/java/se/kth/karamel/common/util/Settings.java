@@ -144,6 +144,10 @@ public class Settings {
     return names;
   }
 
+  public static final String AWS_UNIQUE_VM_NAME(String clusterName, String groupName, int no) {
+    return AWS_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + no;
+  }
+
   public static final int AWS_VM_BATCH_SIZE() {
     Confs confs = Confs.loadKaramelConfs();
     int batchSize = Settings.AWS_BATCH_SIZE_DEFAULT;

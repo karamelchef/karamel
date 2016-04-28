@@ -38,6 +38,7 @@ public class MachineRuntime {
   private String sshUser;
   private String machineType;
   private OsType osType;
+  private String uniqueName;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -144,4 +145,11 @@ public class MachineRuntime {
     return publicIp;
   }
 
+  public String getUniqueName() {
+    return uniqueName;
+  }
+
+  public void setUniqueName(String uniqueName) {
+    this.uniqueName = uniqueName;
+  }
 }
