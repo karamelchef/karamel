@@ -32,6 +32,7 @@ public class InstallTablespoonAgent extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_TABLESPOON_AGENT,
+          "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME,
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
