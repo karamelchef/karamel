@@ -84,6 +84,8 @@ public class Settings {
   public static final String SCRIPT_PATH_MAKE_SOLO_RB = SCRIPT_PATH_ROOT + "make_solo_rb.sc";
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
   public static final String SCRIPT_PATH_KILL_RUNNING_SESSION = SCRIPT_PATH_ROOT + "kill_current_session.sh";
+  public static final String SCRIPT_PATH_INSTALL_COLLECTL = SCRIPT_PATH_ROOT + "install_collectl.sh";
+  public static final String SCRIPT_PATH_INSTALL_TABLESPOON_AGENT = SCRIPT_PATH_ROOT + "install_tablespoon_agent.sh";
 
   //----------------------------------------Providers General-----------------------------------------------------------
   public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {

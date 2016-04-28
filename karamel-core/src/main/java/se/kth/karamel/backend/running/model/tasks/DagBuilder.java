@@ -227,9 +227,13 @@ public class DagBuilder {
         AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
         InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
         MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+        InstallCollectlTask t4 = new InstallCollectlTask(me, clusterStats, submitter);
+        InstallTablespoonAgent t5 = new InstallTablespoonAgent(me, clusterStats, submitter);
         dag.addTask(t1);
         dag.addTask(t2);
         dag.addTask(t3);
+        dag.addTask(t4);
+        dag.addTask(t5);
       }
     }
   }

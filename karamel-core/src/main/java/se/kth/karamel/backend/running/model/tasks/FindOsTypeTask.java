@@ -26,7 +26,7 @@ import se.kth.karamel.common.util.Settings;
  */
 public class FindOsTypeTask extends Task {
 
-  private static final Logger logger = Logger.getLogger(RunRecipeTask.class);
+  private static final Logger logger = Logger.getLogger(FindOsTypeTask.class);
 
   public FindOsTypeTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     super("find os-type", "find os-type", false, machine, clusterStats, submitter);
@@ -76,7 +76,7 @@ public class FindOsTypeTask extends Task {
       content = content.trim().toLowerCase();
       if (content.isEmpty()) {
         throw new KaramelException(String.format("The OS-Type file for %s is empty", publicIp));
-      } 
+      }
       OsType osType = OsType.valuebyDestroString(content);
       getMachine().setOsType(osType);
     } catch (IOException ex) {
