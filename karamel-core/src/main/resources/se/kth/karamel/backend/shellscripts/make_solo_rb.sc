@@ -1,4 +1,5 @@
 echo $$ > %pid_file%; echo '#!/bin/bash
+set -eo pipefail
 %sudo_command% touch solo.rb
 %sudo_command% chmod 777 solo.rb
 cat > solo.rb <<-'END_OF_FILE'

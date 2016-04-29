@@ -1,4 +1,5 @@
 echo $$ > %pid_file%; echo '#!/bin/bash
+set -eo pipefail
 UNAME=$(uname | tr \"[:upper:]\" \"[:lower:]\")
 # If Linux, try to determine specific distribution
 echo \"name: $UNAME\"

@@ -1,11 +1,11 @@
-package se.kth.karamel.webservice.calls.nova;
+package se.kth.karamel.webservice.calls.occi;
 
 import org.apache.log4j.Logger;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.util.NovaCredentials;
+import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.webservice.calls.AbstractCall;
-import se.kth.karamel.webservicemodel.NovaJSON;
+import se.kth.karamel.webservicemodel.OcciJSON;
 import se.kth.karamel.webservicemodel.StatusResponseJSON;
 
 import javax.ws.rs.Consumes;
@@ -16,33 +16,31 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Created by alberto on 12/6/15.
+ * Created by Mamut on 2016-01-20.
  */
 
-@Path("/nova/validateCredentials")
+@Path("/occi/validateCredentials")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-public class ValidateNovaCredentials extends AbstractCall {
+public class ValidateOcciCredentials extends AbstractCall {
 
-  private static final Logger logger = Logger.getLogger(ValidateNovaCredentials.class);
+  private static final Logger logger = Logger.getLogger(ValidateOcciCredentials.class);
 
-  public ValidateNovaCredentials(KaramelApi karamelApi) {
+  public ValidateOcciCredentials(KaramelApi karamelApi) {
     super(karamelApi);
   }
 
   @PUT
-  public Response validateCredentials(NovaJSON providerJSON) {
+  public Response validateCredentials(OcciJSON providerJSON) {
 
     Response response = null;
-    logger.debug(" Received request to validate the nova credentials.");
+    logger.debug(" Received request to validate the occi credentials.");
 
     try {
-      NovaCredentials credentials = new NovaCredentials();
-      credentials.setAccountName(providerJSON.getAccountName());
-      credentials.setAccountPass(providerJSON.getAccountPass());
-      credentials.setEndpoint(providerJSON.getEndpoint());
-      credentials.setRegion(providerJSON.getRegion());
-      if (karamelApi.updateNovaCredentialsIfValid(credentials)) {
+      OcciCredentials credentials = new OcciCredentials();
+      credentials.setUserCertificatePath(providerJSON.getUserCertificatePath());
+      credentials.setSystemCertDir(providerJSON.getSystemCertDir());
+      if (karamelApi.updateOcciCredentialsIfValid(credentials)) {
         response = Response.status(Response.Status.OK).
                 entity(new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();
       } else {
@@ -53,6 +51,7 @@ public class ValidateNovaCredentials extends AbstractCall {
     } catch (KaramelException e) {
       response = buildExceptionResponse(e);
     }
+
     return response;
   }
 }

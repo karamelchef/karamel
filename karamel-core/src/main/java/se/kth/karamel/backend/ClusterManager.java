@@ -17,6 +17,7 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.launcher.nova.NovaLauncher;
+import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
@@ -28,6 +29,7 @@ import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.Nova;
+import se.kth.karamel.common.clusterdef.Occi;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
@@ -225,6 +227,8 @@ public class ClusterManager implements Runnable {
           launcher = new GceLauncher(clusterContext.getGceContext(), clusterContext.getSshKeyPair());
         } else if (provider instanceof Nova) {
           launcher = new NovaLauncher(clusterContext.getNovaContext(), clusterContext.getSshKeyPair());
+        } else if (provider instanceof Occi) {
+          launcher = new OcciLauncher(clusterContext.getOcciContext(), clusterContext.getSshKeyPair());
         }
         launchers.put(provider.getClass(), launcher);
       }

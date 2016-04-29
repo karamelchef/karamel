@@ -165,6 +165,15 @@ public class Settings {
   public static final String GCE_UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
   }
+  
+  //--------------------------------------OCCI Engine---------------------------------------------------------
+  public static final String OCCI_DEFAULT_USERNAME = "ubuntu";
+  public static final String  OCCI_DEFAULT_ENDPOINT = "https://carach5.ics.muni.cz:11443";
+  public static final String OCCI_DEFAULT_IMAGE = "uuid_training_ubuntu_server_12_04_lts_fedcloud_warg_122";
+  public static final String OCCI_DEFAULT_IMAGE_SIZE = "atlas";
+  public static final String OCCI_USER_CERTIFICATE_PATH = "/tmp/x509up_u1000";
+  public static final String  OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
+  public static final List<String> OCCI_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
 
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
   public static final String CB_DEFAULTRB_REL_URL = "/attributes/default.rb";

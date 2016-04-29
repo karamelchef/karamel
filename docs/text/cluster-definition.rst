@@ -3,7 +3,7 @@
 Cluster Definition
 ==================
 
-The cluster definition format is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, the name of each cluster must be unique.
+The cloud definition format is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, the name of each cluster must be unique.
 
 Currently We support four cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova) and bare-metal(baremetal). You can define a provider globally within a cluster definition file or you can define a different provider for each group in the cluster definition file. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can choose an entirely different cloud provider, defining a multi-cloud deployment. Settings and properties for each provider is introduced in later section. For a single cloud deployment, one often uses group-scope provider details to override the type of instance used for machines in the group. For example, one group of nodes may require lots of memory and processing power, while other nodes require less. For AWS, you would achive this by overriding the ``instanceType`` attribute.
 
@@ -115,3 +115,39 @@ IP-Range
     ips: 
     - 192.168.33.12-192.168.33.14
     - 192.168.44.15
+
+OCCI
+----
+To deploy the cluster on OCCI compatible infrastructure you must provide following information via yaml file:
+- occiEndpoint - defines on which OCCI cluster will your virtual machines be created
+- occiImage - virtual machine template
+- occiImageSize - compute resource size (procesors & memory)
+- usename - account name with root privileges
+
+Furthermore you must have voms-client installed and configured (https://italiangrid.github.io/voms/documentation/voms-clients-guide/3.0.3/). To connect to you organisation's resorces generate proxy certificate in shell via "voms-proxy-init -voms <name of you virtual organisation> -rfc" and add path to proxy certificate via OCCI launch panel in web gui.
+
+.. code-block:: yaml
+
+  name: OcciAmbari
+    occi:
+      occiEndpoint: "https://carach5.ics.muni.cz:11443"
+      occiImage: "http://occi.carach5.ics.muni.cz/occi/infrastructure/os_tpl#uuid_egi_ubuntu_server_14_04_lts_fedcloud_warg_131"
+      occiImageSize: "http://fedcloud.egi.eu/occi/compute/flavour/1.0#mem_large"
+      usename: "ubuntu"
+
+  cookbooks:
+    ambari:
+      github: "jimdowling/ambari"
+      branch: "master"
+
+  groups:
+    server:
+      size: 1
+      recipes:
+          - ambari::server
+    agents:
+      size: 1
+      recipes:
+          - ambari::agent
+
+
