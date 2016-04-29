@@ -140,6 +140,10 @@ public class DagTest {
         throw new UnsupportedOperationException("Not supported yet."); 
       }
 
+      @Override
+      public void terminate() {
+      }
+
     }
 
     Dag dag = new Dag();
@@ -207,6 +211,10 @@ public class DagTest {
       @Override
       public String asJson() {
         throw new UnsupportedOperationException("Not supported yet."); 
+      }
+
+      @Override
+      public void terminate() {
       }
     }
 
@@ -279,6 +287,10 @@ public class DagTest {
       @Override
       public String toString() {
         return id;
+      }
+
+      @Override
+      public void terminate() {
       }
     }
 

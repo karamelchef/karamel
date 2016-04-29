@@ -126,6 +126,10 @@ public class NodeRunTime {
     tasks.add(task);
   }
 
+  public void removeTask(Task task) {
+    tasks.remove(task);
+  }
+
   public LifeStatus getLifeStatus() {
     return lifeStatus;
   }

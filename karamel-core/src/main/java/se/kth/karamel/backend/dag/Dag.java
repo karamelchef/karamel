@@ -90,6 +90,12 @@ public class Dag {
     }
   }
 
+  public void termiante() {
+    for (DagNode node : findRootNodes()) {
+      node.terminate();
+    }
+  }
+
   public boolean isFailed() {
     for (DagNode node : allNodes.values()) {
       if (node.getStatus() == DagNode.Status.FAILED) {

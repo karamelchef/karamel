@@ -26,7 +26,7 @@ public class NovaContextTest {
     private KeyPairApi keyPairApi;
 
     @Before
-    public void setup(){
+    public void setup() {
         credentials = mock(NovaCredentials.class);
         builder = mock(ContextBuilder.class);
         serviceContext = mock(ComputeServiceContext.class);
@@ -61,13 +61,13 @@ public class NovaContextTest {
     }
 
     @Test
-    public void generateContextBuilder(){
+    public void generateContextBuilder() {
         ContextBuilder contextBuilder = NovaContext.buildContext(credentials);
         assertNotNull(contextBuilder);
     }
 
     @Test
-    public void sanityCheck(){
+    public void sanityCheck() {
         NovaContext novaContext = new NovaContext(credentials,builder);
         assertNotNull(novaContext.getComputeService());
         assertNotNull(novaContext.getNovaApi());

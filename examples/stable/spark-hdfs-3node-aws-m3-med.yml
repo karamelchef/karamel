@@ -4,10 +4,10 @@ ec2:
     region: eu-west-1
     
 cookbooks:                                                                      
-  hadoop: 
+  apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
-  spark: 
+  hadoop_spark: 
     github: "hopshadoop/spark-chef"
     branch: "master"
   hops: 
@@ -18,10 +18,10 @@ groups:
   namenodes:
     size: 1
     recipes: 
-        - hadoop::nn
-        - spark::master
+        - apache_hadoop::nn
+        - hadoop_spark::master
   datanodes:
     size: 2
     recipes: 
-        - hadoop::dn
-        - spark::worker
+        - apache_hadoop::dn
+        - hadoop_spark::worker

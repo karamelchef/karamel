@@ -14,9 +14,12 @@ angular.module('main.module')
         if (info.cluster.hasGce()) {
           map[info.cluster.gce.getMapKey()] = info.cluster.gce;
         }
-          if(info.cluster.hasNova()){
-              map[info.cluster.nova.getMapKey()] = info.cluster.nova;
-          }
+        if (info.cluster.hasNova()) {
+          map[info.cluster.nova.getMapKey()] = info.cluster.nova;
+        }
+        if (info.cluster.hasOcci()) {
+          map[info.cluster.occi.getMapKey()] = info.cluster.occi;
+        }
         map[info.cluster.sshKeyPair.getMapKey()] = info.cluster.sshKeyPair;
       }
 
