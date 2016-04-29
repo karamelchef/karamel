@@ -13,18 +13,9 @@ cookbooks:
   ndb:
     github: "hopshadoop/ndb-chef"
     branch: "master"
-  spark:
+  hadoop_spark:
     github: "hopshadoop/spark-chef"
     branch: "master"
-
-attrs:
-  hdfs:
-    user: glassfish
-  hadoop:
-    yarn: 
-        user: glassfish
-    mr: 
-        user: glassfish
 
 groups: 
   hopsworks:
@@ -40,5 +31,4 @@ groups:
         - hopsworks
         - ndb::ndbd
         - hops::nm
-        - hops::nm
-        - spark::yarn
+        - hadoop_spark::yarn

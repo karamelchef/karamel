@@ -7,7 +7,7 @@ cookbooks:
   hops: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
-  hadoop: 
+  apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
   hopsworks:                                                                     
@@ -33,7 +33,7 @@ attrs:
   hdfs:
     user: glassfish
     conf_dir: /mnt/hadoop/etc/hadoop
-  hadoop:
+  apache_hadoop:
     dir: /mnt
     yarn: 
         user: glassfish

@@ -153,7 +153,7 @@ public interface KaramelApi {
 
   /**
    * In case user wants to pause the running cluster for inspection reasons. It implies that machines won't receive any
-   * new ssh command form the karamel-core. User can either purge or resume a paused cluster.
+   * new ssh command form the karamel-core. User can either terminate or resume a paused cluster.
    *
    * @param clusterName
    * @throws KaramelException
@@ -175,7 +175,7 @@ public interface KaramelApi {
    * @param clusterName
    * @throws KaramelException
    */
-  public void purgeCluster(String clusterName) throws KaramelException;
+  public void terminateCluster(String clusterName) throws KaramelException;
 
   /**
    * Returns a json containing all groups, machines, their status, tasks/commands and their status.

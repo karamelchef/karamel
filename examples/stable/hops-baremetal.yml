@@ -6,6 +6,9 @@ cookbooks:
   hadoop: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
+  ndb: 
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
     
 groups: 
   hops:
@@ -20,5 +23,4 @@ groups:
         - hops::rm
         - hops::nn
         - hops::jhs                                                            
-        - hops::nm
         - hops::nm

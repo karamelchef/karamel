@@ -22,7 +22,7 @@ public class DagNode implements DagTaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
+    WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED, TERMINATED;
   }
   private static final Logger logger = Logger.getLogger(DagNode.class);
   private final String id;
@@ -198,6 +198,20 @@ public class DagNode implements DagTaskCallback {
     logger.debug(String.format("Skip '%s'", id));
     status = Status.SKIPPED;
     signalChildren();
+  }
+
+  public void terminate() {
+    if (status != Status.TERMINATED) {
+      for (DagNode succ : successors) {
+        succ.terminate();
+      }
+      task.terminate();
+    }
+  }
+
+  @Override
+  public void terminated() {
+    status = Status.TERMINATED;
   }
 
   private void signalChildren() {
