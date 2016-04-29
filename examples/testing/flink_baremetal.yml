@@ -3,7 +3,7 @@ baremetal:
     username: vagrant
     
 cookbooks:                                                                      
-  hadoop: 
+  apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
   flink: 
@@ -16,7 +16,7 @@ groups:
     baremetal:
         ip: 192.168.33.11
     recipes: 
-        - hadoop::nn
+        - apache_hadoop::nn
         - flink::jobmanager
         - flink::wordcount
   datanodes:
@@ -26,5 +26,5 @@ groups:
             - 192.168.33.12
             - 192.168.33.13
     recipes: 
-        - hadoop::dn
+        - apache_hadoop::dn
         - flink::taskmanager
