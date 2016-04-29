@@ -1,15 +1,16 @@
 name: spark
+
 ec2:
-    type: c4.large
-    region: eu-west-1
-    image: ami-47a23a30
-    vpc: vpc-f70ea392
-    subnet: subnet-e7830290
+  type: c4.large
+  region: eu-west-1
+  ami: ami-47a23a30
+  vpc: vpc-f70ea392
+  subnet: subnet-e7830290
 
 cookbooks:                                                                      
-  hadoop: 
+  apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-  spark: 
+  hadoop_spark: 
     github: "hopshadoop/spark-chef"
     branch: "master"
     
@@ -17,13 +18,13 @@ groups:
   namenodes:
     size: 1
     recipes: 
-        - hadoop::nn
-        - hadoop::rm
-        - hadoop::jhs
-        - spark::master
+      - apache_hadoop::nn
+      - apache_hadoop::rm
+      - apache_hadoop::jhs
+      - hadoop_spark::master
   datanodes:
     size: 2
     recipes: 
-        - hadoop::dn
-        - hadoop::nm
-        - spark::worker
+      - apache_hadoop::dn
+      - apache_hadoop::nm
+      - hadoop_spark::worker

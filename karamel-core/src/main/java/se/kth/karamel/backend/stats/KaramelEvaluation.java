@@ -59,8 +59,8 @@ public class KaramelEvaluation {
     ClusterRuntime clusterRuntime = ClusterService.getInstance().clusterStatus(clusterName);
     while (clusterRuntime.getPhase() != ClusterRuntime.ClusterPhases.NOT_STARTED || clusterRuntime.isFailed()) {
 
-      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.INSTALLED) {
-        api.processCommand("purge " + clusterName);
+      if (clusterRuntime.getPhase() == ClusterRuntime.ClusterPhases.DAG_DONE) {
+        api.processCommand("terminate " + clusterName);
       }
       logger.info(api.processCommand("status").getResult());
       Thread.sleep(30000);

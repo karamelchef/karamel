@@ -149,6 +149,12 @@ public class RunRecipeTask extends Task {
     return makeUniqueId(machineId, installName);
   }
 
+  public static String purgeRecipeIdFromAnotherRecipeName(String machineId, String recipe) {
+    String[] cmp = recipe.split(Settings.COOKBOOK_DELIMITER);
+    String purgeName = cmp[0] + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
+    return makeUniqueId(machineId, purgeName);
+  }
+
   public static String makeUniqueId(String machineId, String recipe) {
     return recipe + " on " + machineId;
   }
@@ -162,7 +168,8 @@ public class RunRecipeTask extends Task {
   public Set<String> dagDependencies() {
     Set<String> deps = new HashSet<>();
     String installId = installRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
-    if (uniqueId().equals(installId)) {
+    String purgeId = purgeRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
+    if (uniqueId().equals(installId) || uniqueId().equals(purgeId)) {
       String id = VendorCookbookTask.makeUniqueId(getMachineId(), cookbookId);
       deps.add(id);
     } else {
