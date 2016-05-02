@@ -5,13 +5,10 @@
  */
 package se.kth.karamel.backend.running.model;
 
-import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  *
@@ -30,9 +27,6 @@ public class GroupRuntime {
   private String name;
   private String id;
   private List<MachineRuntime> machines = new ArrayList<>();
-  /*private List<String> uniqueMachineNames = new ArrayList<String>();
-  private int maxIdNo = 0;       //TODO-AS keep sorted idlist. so no need to bother*/
-  private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
 
   public GroupRuntime(ClusterRuntime cluster) {
     this.cluster = cluster;
@@ -89,13 +83,6 @@ public class GroupRuntime {
   
   public ClusterRuntime getCluster() {
     return cluster;
-  }
-
-  public void setAutoScalingSuggestionsQueue(ArrayBlockingQueue<ScalingSuggestion> suggestionsQueue) {
-    this.autoScalingSuggestionsQueue = suggestionsQueue;
-  }
-  public ArrayBlockingQueue<ScalingSuggestion> getAutoScalingSuggestionsQueue() {
-    return autoScalingSuggestionsQueue;
   }
 
   public boolean isElasticScalingEnabled() {

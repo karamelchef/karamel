@@ -2,12 +2,16 @@ package se.kth.karamel.backend.autoscalar;
 
 import org.apache.log4j.Logger;
 import se.kth.autoscalar.scaling.ScalingSuggestion;
+import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -23,10 +27,13 @@ public class AutoScalingHandler {
   private ThreadPoolExecutor executor;
   private static final Logger logger = Logger.getLogger(AutoScalingHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
+  private static AutoScalarAPI autoScalarAPI;
+  private Map<String, ArrayBlockingQueue<ScalingSuggestion>> groupSuggestionsQueue =
+          new HashMap<String, ArrayBlockingQueue<ScalingSuggestion>>();
 
-  public AutoScalingHandler(int noOfGroupsInCluster) {
+  public AutoScalingHandler(int noOfGroupsInCluster, AutoScalarAPI autoScalarAPI) {
+    this.autoScalarAPI = autoScalarAPI;
     executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(noOfGroupsInCluster);
-
   }
 
   public synchronized void startHandlingGroup(GroupRuntime groupRuntime) {
@@ -37,10 +44,20 @@ public class AutoScalingHandler {
 
     private GroupRuntime groupRuntime;
     private boolean shouldAutoScale = false;
+    private ArrayBlockingQueue<ScalingSuggestion> suggestionsQueueOfGroup = null;
 
     public AutoScalingSuggestionExecutor(GroupRuntime groupRuntime) {
       this.groupRuntime = groupRuntime;
       this.shouldAutoScale = true;
+
+      while (this.suggestionsQueueOfGroup == null) {
+        ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = autoScalarAPI.getSuggestionQueue(groupRuntime.getId());
+        if (suggestionQueue != null) {
+          this.suggestionsQueueOfGroup = suggestionQueue;
+          logger.info(" ############### AS started, group: " + groupRuntime.getId() + "#################");
+          break;
+        }
+      }
     }
 
     @Override
@@ -48,7 +65,7 @@ public class AutoScalingHandler {
       while (shouldAutoScale) {
         //wait on queue, get suggestion and execute suggestion
         try {
-          ScalingSuggestion suggestion = groupRuntime.getAutoScalingSuggestionsQueue().take();
+          ScalingSuggestion suggestion = suggestionsQueueOfGroup.take();
           logger.info("########################## got suggestion: " + groupRuntime.getName() + " " +
                   suggestion.getScalingDirection().name() + " ######################################");
           switch (suggestion.getScalingDirection()) {
