@@ -36,17 +36,21 @@ public class AutoScalingHandler {
   class AutoScalingSuggestionExecutor implements Runnable {
 
     private GroupRuntime groupRuntime;
+    private boolean shouldAutoScale = false;
 
     public AutoScalingSuggestionExecutor(GroupRuntime groupRuntime) {
       this.groupRuntime = groupRuntime;
+      this.shouldAutoScale = true;
     }
 
     @Override
     public void run() {
-      while (true) {
+      while (shouldAutoScale) {
         //wait on queue, get suggestion and execute suggestion
         try {
           ScalingSuggestion suggestion = groupRuntime.getAutoScalingSuggestionsQueue().take();
+          logger.info("########################## got suggestion: " + groupRuntime.getName() + " " +
+                  suggestion.getScalingDirection().name() + " ######################################");
           switch (suggestion.getScalingDirection()) {
             case SCALE_IN:
               ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
@@ -67,8 +71,15 @@ public class AutoScalingHandler {
       }
     }
 
+    public void stopAutoScalingSuggestionExecution() {
+      this.shouldAutoScale = false;
+    }
+
     private void handleScaleInSuggestion(String[] vmIds) {
       try {
+        //TODO-AS temporary removing first Id
+        vmIds = new String[]{groupRuntime.getMachines().get(0).getId()};
+
         clusterService.scaleInClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), vmIds);
       } catch (KaramelException e) {
         logger.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
@@ -77,7 +88,12 @@ public class AutoScalingHandler {
     }
 
     private void handleScaleOutSuggestion(MachineType[] machineTypes) {
-
+      try {
+        clusterService.scaleOutClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), machineTypes);
+      } catch (KaramelException e) {
+        logger.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
+                groupRuntime.getCluster().getName());
+      }
     }
 
   }

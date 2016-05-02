@@ -16,6 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
 import org.jclouds.aws.ec2.compute.AWSEC2TemplateOptions;
@@ -31,6 +34,7 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
+import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -58,6 +62,7 @@ public final class Ec2Launcher extends Launcher {
   public static boolean TESTING = true;
   public final Ec2Context context;
   public final SshKeyPair sshKeyPair;
+  private final Lock predecessorNoLock = new ReentrantLock();
   private int predecessorNo = 0;
 
   Set<String> keys = new HashSet<>();
@@ -196,33 +201,176 @@ public final class Ec2Launcher extends Launcher {
     }
   }
 
-/*
 
-  public void addMachineToGroup(JsonCluster definition, GroupRuntime groupRuntime, String groupName,
-  MachineType machineType) throws KaramelException {
+  private String getUniqueVmName(String clusterName, String groupName) {
+    predecessorNoLock.lock();
+    String uniqueVmName = Settings.AWS_UNIQUE_VM_NAME(clusterName, groupName, predecessorNo);
+    predecessorNo ++;
+    predecessorNoLock.unlock();
+    return uniqueVmName;
+  }
 
-    if (!machineType.isValid()) {
-      logger.fatal("Cannot scale up the group: " + groupName + ". Machine type given to be added to the group is not " +
-              "valid");
-      return;
+  class SpawnMachineTask implements Runnable {
+
+    final GroupRuntime groupRuntime;
+    final MachineType machineType;
+    final String clusterName;
+    final String groupName;
+    Ec2 ec2;
+
+    public SpawnMachineTask(MachineType machineType, GroupRuntime groupRuntime, Ec2 defaultEc2) {
+      this.groupRuntime = groupRuntime;
+      this.machineType = machineType;
+      this.clusterName = groupRuntime.getCluster().getName();
+      this.groupName = groupRuntime.getName();
+      this.ec2 = defaultEc2;
     }
+
+    private void fillEc2Properties() {
+      String spotPriceString = machineType.getProperty(MachineType.Properties.BIDDING_PRICE.name());
+      if (spotPriceString != null) {
+        Float spotPrice = Float.valueOf(spotPriceString);
+        ec2.setPrice(spotPrice);
+      }
+      if (machineType.getProperty(MachineType.EC2Properties.REGION.name()) != null) {
+        ec2.setRegion(machineType.getProperty(MachineType.EC2Properties.REGION.name()));
+      }
+      if (machineType.getProperty(MachineType.EC2Properties.AMI.name()) != null) {
+        ec2.setAmi(machineType.getProperty(MachineType.EC2Properties.AMI.name()));
+      }
+      if (machineType.getProperty(MachineType.EC2Properties.SUBNET.name()) != null) {
+        ec2.setSubnet(machineType.getProperty(MachineType.EC2Properties.SUBNET.name()));
+      }
+      if (machineType.getProperty(MachineType.EC2Properties.VPC.name()) != null) {
+        ec2.setVpc(machineType.getProperty(MachineType.EC2Properties.VPC.name()));
+      }
+      if (machineType.getProperty(MachineType.EC2Properties.TYPE.name()) != null) {
+        ec2.setType(machineType.getProperty(MachineType.EC2Properties.TYPE.name()));
+      }
+    }
+
+    @Override
+    public void run() {
+      try {
+        if (!machineType.isValid()) {
+          logger.fatal("Cannot scale up the group: " + groupName + ". Machine type given to be added to the group is " +
+                  "not valid");
+          return;
+        }
+
+        fillEc2Properties();
+
+        final String keyPairName = Settings.AWS_KEYPAIR_NAME(clusterName, ec2.getRegion());
+        if (!keys.contains(keyPairName)) {
+          uploadSshPublicKey(keyPairName, ec2, true);
+          keys.add(keyPairName);
+        }
+
+        String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(clusterName, groupName);
+        String uniqueVmName = getUniqueVmName(clusterName, groupName);
+        List<String> uniqueNameList = new ArrayList<String>();
+        uniqueNameList.add(uniqueVmName);
+
+        AWSEC2TemplateOptions options = context.getComputeService().templateOptions().as(AWSEC2TemplateOptions.class);
+        if (machineType.isPreemptible() && ec2.getPrice() != null) {
+          options.spotPrice(ec2.getPrice());
+        }
+
+        Confs confs = Confs.loadKaramelConfs();
+        String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
+        if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
+          InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+          List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+          options.blockDeviceMappings(maps);
+        }
+
+        HashSet<String> securityGroupIds = new HashSet<>();
+        securityGroupIds.add(groupRuntime.getId());
+        int tries = 0, numSuccess = 0, numFailed = 0, requestSize = 1;
+        boolean succeed = false;
+        Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
+
+        while (!succeed && tries < Settings.AWS_RETRY_MAX) {
+
+          TemplateBuilder template = context.getComputeService().templateBuilder();
+          options.keyPair(keyPairName);
+          options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
+          options.nodeNames(uniqueNameList);
+          if (ec2.getSubnet() != null) {
+            options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
+          }
+          template.options(options);
+          template.os64Bit(true);
+          template.hardwareId(ec2.getType());
+          template.imageId(ec2.getRegion() + "/" + ec2.getAmi());
+          template.locationId(ec2.getRegion());
+          tries++;
+          Set<NodeMetadata> succ = new HashSet<>();
+          try {
+            succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
+            logger.info("Forking machine in group " + uniqueGroupName + " was successful for machine: " +
+                    getUniqueVmName(clusterName, groupName));
+            if (succ.size() == 1 ) {
+              succeed = true;
+              List<MachineRuntime> machines = new ArrayList<>();
+              for (NodeMetadata node : succ) {
+                if (node != null) {
+                  ///////creating machine runtime
+                  MachineRuntime machine = new MachineRuntime(groupRuntime);
+                  ArrayList<String> privateIps = new ArrayList();
+                  ArrayList<String> publicIps = new ArrayList();
+                  privateIps.addAll(node.getPrivateAddresses());
+                  publicIps.addAll(node.getPublicAddresses());
+                  machine.setMachineType("ec2/" + ec2.getRegion() + "/" + ec2.getType() + "/" + ec2.getAmi() + "/"
+                          + ec2.getVpc() + "/" + ec2.getPrice());
+                  machine.setVmId(node.getId());
+                  machine.setName(node.getName());
+                  // we check availability of ip addresses in the sanitycheck
+                  machine.setPrivateIp(privateIps.get(0));
+                  machine.setPublicIp(publicIps.get(0));
+                  machine.setSshPort(node.getLoginPort());
+                  machine.setSshUser(ec2.getUsername());
+                  machine.setUniqueName(uniqueVmName);
+
+                  machines.add(machine);
+                }
+              }
+              //TODO-AS set machines in GroupRuntime and Machine Monitor
+            }
+            long finishTime = System.currentTimeMillis();
+          } catch (RunNodesException ex) {
+            logger.warn("Error occured while spawining machine in group." , ex.fillInStackTrace());
+          } catch (AWSResponseException e) {
+            if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
+              throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either " +
+                      "decrease size of your cluster or increase the limitation of your account.", e);
+            } else if ("RequestLimitExceeded".equals(e.getError().getCode())) {
+              logger.warn("RequestLimitExceeded. Can recover from it by sleeping longer between requests.");
+            } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
+              logger.warn(
+                      "InsufficientInstanceCapacity. Can recover from it, by reducing the number of instances in the " +
+                              "request, or waiting for additional capacity to become available");
+            } else {
+              logger.error(e.getMessage(), e);
+            }
+          } catch (IllegalStateException ex) {
+            logger.error("", ex);
+            logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@",
+                    tries, uniqueGroupName, Settings.AWS_RETRY_INTERVAL), ex);
+          }
+        }
+
+      } catch (KaramelException e) {
+
+      }
+    }
+  }
+
+  public List<MachineRuntime> addMachinesToGroup(JsonCluster definition, final GroupRuntime groupRuntime,
+                                                 final String groupName, MachineType[] machineTypes) throws
+          KaramelException {
+
     Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
-    GroupRuntime group = UserClusterDataExtractor.findGroup(groupRuntime.getCluster(), groupName);
-    HashSet<String> gids = new HashSet<>();
-    gids.add(group.getId());
-
-    String keypairname = Settings.AWS_KEYPAIR_NAME(groupRuntime.getCluster().getName(), ec2.getRegion());
-    if (!keys.contains(keypairname)) {
-      uploadSshPublicKey(keypairname, ec2, true);
-      keys.add(keypairname);
-    }
-
-    String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(groupRuntime.getCluster().getName(),
-            groupRuntime.getName());
-    List<String> allVmNames = Settings.AWS_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(), groupRuntime.getName(),
-            startCount, numberToLaunch);
-
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -231,136 +379,162 @@ public final class Ec2Launcher extends Launcher {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     }
 
-    AWSEC2TemplateOptions options = context.getComputeService().templateOptions().as(AWSEC2TemplateOptions.class);
-    if (machineType.isPreemptible()) {
-      String spotPriceString = machineType.getProperty(MachineType.Properties.BIDDING_PRICE.name());
-      if (spotPriceString != null) {
-        Float spotPrice = Float.valueOf(spotPriceString);
-        options.spotPrice(spotPrice);
+   /* for (final MachineType machineType : machineTypes) {
+      new Thread(new SpawnMachineTask(machineType, groupRuntime, ec2)).start();
+    }*/
+    //TODO-AS return machine runtimes
+
+    List<MachineRuntime> allSpawnedMachines = new ArrayList<MachineRuntime>();
+    for (MachineType machineType : machineTypes) {
+      List<MachineRuntime> spawnedMachines = spawnMachine(machineType, groupRuntime, ec2);
+      if (spawnedMachines != null) {
+        allSpawnedMachines.addAll(spawnedMachines);
       }
     }
-
-    Confs confs = Confs.loadKaramelConfs();
-    String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
-    if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
-      InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
-      List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
-      options.blockDeviceMappings(maps);
-    }
-
-    boolean succeed = false;
-    int tries = 0;
-    Set<NodeMetadata> successfulNodes = Sets.newLinkedHashSet();
-    List<String> unforkedVmNames = new ArrayList<>();
-    List<String> toBeForkedVmNames;
-    unforkedVmNames.addAll(allVmNames);
-    Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
-
-    int numSuccess = 0, numFailed = 0;
-
-    while (!succeed && tries < Settings.AWS_RETRY_MAX) {
-      long startTime = System.currentTimeMillis();
-      int requestSize = numberToLaunch - successfulNodes.size();
-      if (requestSize > Settings.EC2_MAX_FORK_VMS_PER_REQUEST) {
-        requestSize = Settings.EC2_MAX_FORK_VMS_PER_REQUEST;
-        toBeForkedVmNames = unforkedVmNames.subList(0, Settings.EC2_MAX_FORK_VMS_PER_REQUEST);
-      } else {
-        toBeForkedVmNames = unforkedVmNames;
-      }
-      TemplateBuilder template = context.getComputeService().templateBuilder();
-      options.keyPair(keyPairName);
-      options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
-      options.nodeNames(toBeForkedVmNames);
-      if (ec2.getSubnet() != null) {
-        options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
-      }
-      template.options(options);
-      template.os64Bit(true);
-      template.hardwareId(ec2.getType());
-      template.imageId(ec2.getRegion() + "/" + ec2.getAmi());
-      template.locationId(ec2.getRegion());
-      tries++;
-      Set<NodeMetadata> succ = new HashSet<>();
-      try {
-        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
-                requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
-        succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
-        long finishTime = System.currentTimeMillis();
-        numSuccess += succ.size();
-      } catch (RunNodesException ex) {
-        addSuccessAndLostNodes(ex, succ, failedNodes);
-
-        numSuccess += succ.size();
-        numFailed += failedNodes.size();
-      } catch (AWSResponseException e) {
-        if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
-          throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either decrease "
-                  + "size of your cluster or increase the limitation of your account.", e);
-        } else if ("RequestLimitExceeded".equals(e.getError().getCode())) {
-          logger.warn("RequestLimitExceeded. Can recover from it by sleeping longer between requests.");
-        } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
-          logger.warn(
-                  "InsufficientInstanceCapacity. Can recover from it, by reducing the number of instances in the " +
-                  "request, or waiting for additional capacity to become available");
-        } else {
-          logger.error(e.getMessage(), e);
-        }
-      } catch (IllegalStateException ex) {
-        logger.error("", ex);
-        logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
-                uniqueGroupName, Settings.AWS_RETRY_INTERVAL), ex);
-      }
-
-      unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
-      successfulNodes.addAll(succ);
-      sanityCheckSuccessfulNodes(successfulNodes, failedNodes);
-      if (successfulNodes.size() < numberToLaunch) {
-        try {
-          succeed = false;
-          logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-                          + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
-                  failedNodes.size(),
-                  numberToLaunch, uniqueGroupName));
-          Thread.currentThread().sleep(Settings.AWS_RETRY_INTERVAL);
-        } catch (InterruptedException ex1) {
-          logger.error("", ex1);
-        }
-      } else {
-        succeed = true;
-        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
-                + "before we go on..", numberToLaunch, uniqueGroupName, failedNodes.size()));
-        if (failedNodes.size() > 0) {
-          cleanupFailedNodes(failedNodes);
-        }
-        List<MachineRuntime> machines = new ArrayList<>();
-        for (NodeMetadata node : successfulNodes) {
-          if (node != null) {
-            MachineRuntime machine = new MachineRuntime(mainGroup);
-            ArrayList<String> privateIps = new ArrayList();
-            ArrayList<String> publicIps = new ArrayList();
-            privateIps.addAll(node.getPrivateAddresses());
-            publicIps.addAll(node.getPublicAddresses());
-            machine.setMachineType("ec2/" + ec2.getRegion() + "/" + ec2.getType() + "/" + ec2.getAmi() + "/"
-                    + ec2.getVpc() + "/" + ec2.getPrice());
-            machine.setVmId(node.getId());
-            machine.setName(node.getName());
-            // we check availability of ip addresses in the sanitycheck
-            machine.setPrivateIp(privateIps.get(0));
-            machine.setPublicIp(publicIps.get(0));
-            machine.setSshPort(node.getLoginPort());
-            machine.setSshUser(ec2.getUsername());
-            machines.add(machine);
-          }
-        }
-
-        return machines;
-      }
-
-    }
-    // Report aggregrate results
-    throw new KaramelException(String.format("Couldn't fork machines for group'%s'", mainGroup.getName()));
+    return allSpawnedMachines;
   }
-*/
+
+  private Ec2 fillEc2Properties(Ec2 ec2, MachineType machineType) {
+    String spotPriceString = machineType.getProperty(MachineType.Properties.BIDDING_PRICE.name());
+    if (spotPriceString != null) {
+      Float spotPrice = Float.valueOf(spotPriceString);
+      ec2.setPrice(spotPrice);
+    }
+    if (machineType.getProperty(MachineType.EC2Properties.REGION.name()) != null) {
+      ec2.setRegion(machineType.getProperty(MachineType.EC2Properties.REGION.name()));
+    }
+    if (machineType.getProperty(MachineType.EC2Properties.AMI.name()) != null) {
+      ec2.setAmi(machineType.getProperty(MachineType.EC2Properties.AMI.name()));
+    }
+    if (machineType.getProperty(MachineType.EC2Properties.SUBNET.name()) != null) {
+      ec2.setSubnet(machineType.getProperty(MachineType.EC2Properties.SUBNET.name()));
+    }
+    if (machineType.getProperty(MachineType.EC2Properties.VPC.name()) != null) {
+      ec2.setVpc(machineType.getProperty(MachineType.EC2Properties.VPC.name()));
+    }
+    if (machineType.getProperty(MachineType.EC2Properties.TYPE.name()) != null) {
+      ec2.setType(machineType.getProperty(MachineType.EC2Properties.TYPE.name()));
+    }
+    return ec2;
+  }
+
+  private List<MachineRuntime> spawnMachine(MachineType machineType, GroupRuntime groupRuntime, Ec2 defaultEc2) {
+    try {
+      String groupName = groupRuntime.getName();
+      String clusterName = groupRuntime.getCluster().getName();
+      if (!machineType.isValid()) {
+        logger.fatal("Cannot scale up the group: " + groupName + ". Machine type given to be added to the group is " +
+                "not valid");
+        return null;
+      }
+
+      Ec2 ec2 = fillEc2Properties(defaultEc2, machineType);
+
+      final String keyPairName = Settings.AWS_KEYPAIR_NAME(clusterName, ec2.getRegion());
+      if (!keys.contains(keyPairName)) {
+        uploadSshPublicKey(keyPairName, ec2, true);
+        keys.add(keyPairName);
+      }
+
+      String uniqueGroupName = Settings.AWS_UNIQUE_GROUP_NAME(clusterName, groupName);
+      String uniqueVmName = getUniqueVmName(clusterName, groupName);
+      List<String> uniqueNameList = new ArrayList<String>();
+      uniqueNameList.add(uniqueVmName);
+
+      AWSEC2TemplateOptions options = context.getComputeService().templateOptions().as(AWSEC2TemplateOptions.class);
+      if (machineType.isPreemptible() && ec2.getPrice() != null) {
+        options.spotPrice(ec2.getPrice());
+      }
+
+      Confs confs = Confs.loadKaramelConfs();
+      String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
+      if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
+        InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+        List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+        options.blockDeviceMappings(maps);
+      }
+
+      HashSet<String> securityGroupIds = new HashSet<>();
+      securityGroupIds.add(groupRuntime.getId());
+      int tries = 0, requestSize = 1;
+      boolean succeed = false;
+      List<MachineRuntime> machines = new ArrayList<>();
+
+      while (!succeed && tries < Settings.AWS_RETRY_MAX) {
+
+        TemplateBuilder template = context.getComputeService().templateBuilder();
+        options.keyPair(keyPairName);
+        options.as(AWSEC2TemplateOptions.class).securityGroupIds(securityGroupIds);
+        options.nodeNames(uniqueNameList);
+        if (ec2.getSubnet() != null) {
+          options.as(AWSEC2TemplateOptions.class).subnetId(ec2.getSubnet());
+        }
+        template.options(options);
+        template.os64Bit(true);
+        template.hardwareId(ec2.getType());
+        template.imageId(ec2.getRegion() + "/" + ec2.getAmi());
+        template.locationId(ec2.getRegion());
+        tries++;
+        Set<NodeMetadata> succ = new HashSet<>();
+        try {
+          succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
+          logger.info("Forking machine in group " + uniqueGroupName + " was successful for machine: " +
+                  getUniqueVmName(clusterName, groupName));
+          if (succ.size() == 1 ) {
+            succeed = true;
+            for (NodeMetadata node : succ) {
+              if (node != null) {
+                ///////creating machine runtime
+                MachineRuntime machine = new MachineRuntime(groupRuntime);
+                ArrayList<String> privateIps = new ArrayList();
+                ArrayList<String> publicIps = new ArrayList();
+                privateIps.addAll(node.getPrivateAddresses());
+                publicIps.addAll(node.getPublicAddresses());
+                machine.setMachineType("ec2/" + ec2.getRegion() + "/" + ec2.getType() + "/" + ec2.getAmi() + "/"
+                        + ec2.getVpc() + "/" + ec2.getPrice());
+                machine.setVmId(node.getId());
+                machine.setName(node.getName());
+                // we check availability of ip addresses in the sanitycheck
+                machine.setPrivateIp(privateIps.get(0));
+                machine.setPublicIp(publicIps.get(0));
+                machine.setSshPort(node.getLoginPort());
+                machine.setSshUser(ec2.getUsername());
+                machine.setUniqueName(uniqueVmName);
+                machines.add(machine);
+              }
+            }
+          }
+          long finishTime = System.currentTimeMillis();
+          return machines;
+        } catch (RunNodesException ex) {
+          logger.warn("Error occured while spawining machine in group." , ex.fillInStackTrace());
+          throw new KaramelException("Error occored in spawning new node", ex);
+        } catch (AWSResponseException e) {
+          if ("InstanceLimitExceeded".equals(e.getError().getCode())) {
+            throw new KaramelException("It seems your ec2 account has instance limit.. if thats the case either " +
+                    "decrease size of your cluster or increase the limitation of your account.", e);
+          } else if ("RequestLimitExceeded".equals(e.getError().getCode())) {
+            logger.warn("RequestLimitExceeded. Can recover from it by sleeping longer between requests.");
+          } else if ("InsufficientInstanceCapacity".equals(e.getError().getCode())) {
+            logger.warn(
+                    "InsufficientInstanceCapacity. Can recover from it, by reducing the number of instances in the " +
+                            "request, or waiting for additional capacity to become available");
+          } else {
+            logger.error(e.getMessage(), e);
+          }
+          throw new KaramelException("Error occoured in spawining new machines", e);
+        } catch (IllegalStateException ex) {
+          logger.error("", ex);
+          logger.info(String.format("#%d Hurry up EC2!! I want machines for %s, will ask you again in %d ms :@", tries,
+                  uniqueGroupName, Settings.AWS_RETRY_INTERVAL), ex);
+          throw new KaramelException("Error occoured in spawining new machines", ex);
+        }
+      }
+    } catch (KaramelException e) {
+      return null;
+    }
+    return null;
+  }
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)

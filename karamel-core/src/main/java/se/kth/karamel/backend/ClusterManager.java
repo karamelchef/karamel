@@ -367,23 +367,24 @@ public class ClusterManager implements Runnable {
     return groups;
   }
 
-  public void removeMachinesFromGroup(String groupId, String[] vmIdsToRemove) {
+  public void removeMachinesFromGroup(String groupName, String[] vmIdsToRemove) {
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
-      if (groupRuntime.getId().equals(groupId)) {
+      if (groupRuntime.getName().equals(groupName)) {
         //remove the machines with given IDs from group
         Set<String> allIdsToBeRemoved = new HashSet<String>();
         allIdsToBeRemoved.addAll(Arrays.asList(vmIdsToRemove));
 
-        logger.info(String.format("Removing machine with ID '%s' ...", allIdsToBeRemoved.toString()));
-        runtime.resolveFailure(Failure.hash(Failure.Type.SCALE_DOWN_FAILURE, groupId));
+        logger.info(String.format("################## Going to remove machines with ID '%s' ########################",
+                allIdsToBeRemoved.toString()));
+        runtime.resolveFailure(Failure.hash(Failure.Type.SCALE_DOWN_FAILURE, groupName));
         groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALING_DOWN_MACHINES);
         boolean isSuccessful = false;
 
         for (JsonGroup jsonGroup : definition.getGroups()) {
-          if (jsonGroup.getName().equals(groupId)) {
+          if (jsonGroup.getName().equals(groupName)) {
             try {
               ////TODO-AS complete logic
-              Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupId);
+              Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
               Launcher launcher = launchers.get(provider.getClass());
 
               ////TODO-AS get the launcher like below when every launcher has the required method and
@@ -399,17 +400,20 @@ public class ClusterManager implements Runnable {
               }
 
               Set<? extends NodeMetadata> destroyedNodes = ec2Launcher.removeMachinesFromGroup(groupRuntime,
-                      allIdsToBeRemoved, vmNamesToBeRemoved, groupId);
+                      allIdsToBeRemoved, vmNamesToBeRemoved, groupName);
+              logger.info("################ wantedToRemove and removed: " + vmIdsToRemove.length + " & " +
+                      destroyedNodes.size() + "################");
 
               for (NodeMetadata destroyedNode : destroyedNodes) {
+                logger.info("####################### machine removed: " + destroyedNode.getId() + " ################");
                 groupRuntime.removeMachineWithId(destroyedNode.getId());
               }
               //TODO-AS low priority: remove security groups when no nodes in group
               isSuccessful = true;
             } catch (KaramelException e) {
               logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: " +
-                      groupId);
-              runtime.issueFailure(new Failure(Failure.Type.SCALE_DOWN_FAILURE, groupId, e.getMessage()));
+                      groupName);
+              runtime.issueFailure(new Failure(Failure.Type.SCALE_DOWN_FAILURE, groupName, e.getMessage()));
             }
             break;
           }
@@ -422,40 +426,38 @@ public class ClusterManager implements Runnable {
     }
   }
 
-  public void addMachinesToGroup(String groupId, MachineType[] machineTypes) {
-    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupId);
+  public void addMachinesToGroup(String groupName, MachineType[] machineTypes) {
+    logger.info(String.format("################## Going to add " + machineTypes.length + "########################"));
+    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
     Launcher launcher = launchers.get(provider.getClass());
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
-      if (groupRuntime.getId().equals(groupId)) {
-        for (MachineType machineType : machineTypes) {
-          //1: general case is, one group can have members from different launchers
-          if ("EC2".equals(machineType.getLauncher())) {
-            //get EC2 launcher and invoke when 1. is supported
-            Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;   //TODO-AS add method to interface
-            ////////ec2Launcher.addMachineToGroup(definition, groupRuntime, groupId);
+      if (groupRuntime.getName().equals(groupName)) {
+        //sending all suggestions to the provider since group can have one provider at the moment
+        if (launcher instanceof Ec2Launcher) {  //currently supported by ec2 launcher only
+          Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;   //TODO-AS add method to interface
+          try {
+            List<MachineRuntime> mcs = ec2Launcher.addMachinesToGroup(definition, groupRuntime, groupRuntime.getName(),
+                    machineTypes);
+            groupRuntime.setMachines(mcs);
+            machinesMonitor.addMachines(mcs);
+
+            logger.info("################ wantedToAdd and added: " + machineTypes.length + " & " +
+                    mcs.size() + "################");
+            if (machineTypes.length == mcs.size()) {
+              groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALED_UP);
+            }
+            break;
+          } catch (KaramelException e) {
+            throw new IllegalStateException(e);
           }
         }
-        /*try {
-
-          List<MachineRuntime> mcs = launcher.forkMachines(definition, runtime, groupId);  implement this
-          groupRuntime.setMachines(mcs);
-          machinesMonitor.addMachines(mcs);
-          groupRuntime.setPhase(GroupRuntime.GroupPhase.MACHINES_FORKED);
-        } catch (Exception ex) {
-          runtime.issueFailure(new Failure(Failure.Type.SCALE_UP_FAILURE, groupRuntime.getName(), ex.getMessage()));
-          logger.error("Failed to scale up the group: " + groupId + " in cluster: " +
-                  groupRuntime.getCluster().getName());
-          throw ex;
-        }*/
       }
     }
-
-  }
-  private void addMachinesToGroup() {
-
   }
 
-  private void initiateAutoScaling(final GroupRuntime groupRuntime) {
+  private void startAutoScaling(final GroupRuntime groupRuntime) {
+    logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName() +
+            "################################");
     if (autoScalarAPI != null) {
       try {
         autoScalarAPI.startAutoScaling(groupRuntime.getId(), groupRuntime.getMachines().size());
@@ -471,11 +473,12 @@ public class ClusterManager implements Runnable {
               if (suggestionQueue != null) {
                 groupRuntime.setAutoScalingSuggestionsQueue(suggestionQueue);
                 autoScalingHandler.startHandlingGroup(groupRuntime);
+                logger.info(" ############### AS started, group: " + groupId + "#################");
+                break;
               }
             }
           }
         }.start();
-
       } catch (AutoScalarException e) {
         logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
       }
@@ -544,7 +547,7 @@ public class ClusterManager implements Runnable {
               if(!isFailed) {
                 for (GroupRuntime groupRuntime: groupRuntimes) {
                   if(groupRuntime.isElasticScalingEnabled()) {
-                    initiateAutoScaling(groupRuntime);
+                    startAutoScaling(groupRuntime);
                   }
                 }
               }
@@ -558,12 +561,6 @@ public class ClusterManager implements Runnable {
               PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.INSTALLING.name(), status, duration);
               stats.addPhase(phaseStat);
             }
-            break;
-          case SCALE_OUT:
-            //call fork machines with specific machine type
-            break;
-          case SCALE_IN:
-            // stop machines
             break;
           case PURGE:
             ClusterStatistics.startTimer();
