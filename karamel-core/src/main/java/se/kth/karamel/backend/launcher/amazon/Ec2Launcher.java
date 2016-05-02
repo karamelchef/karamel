@@ -686,6 +686,7 @@ public final class Ec2Launcher extends Launcher {
           if (node != null) {
             ///////creating machine runtime
             MachineRuntime machine = new MachineRuntime(mainGroup);
+            machine.setForkingTime(System.currentTimeMillis());
             ArrayList<String> privateIps = new ArrayList();
             ArrayList<String> publicIps = new ArrayList();
             privateIps.addAll(node.getPrivateAddresses());

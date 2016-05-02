@@ -39,6 +39,7 @@ public class MachineRuntime {
   private String machineType;
   private OsType osType;
   private String uniqueName;
+  private Long forkingTime;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -156,4 +157,13 @@ public class MachineRuntime {
   public void setUniqueName(String uniqueName) {
     this.uniqueName = uniqueName;
   }
+
+  public Long getForkingTime() {
+    return forkingTime;
+  }
+
+  public void setForkingTime(long forkingTime) {
+    this.forkingTime = forkingTime;
+  }
+  
 }

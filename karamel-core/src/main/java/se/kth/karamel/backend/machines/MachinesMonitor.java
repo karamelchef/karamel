@@ -15,6 +15,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
 import se.kth.autoscalar.scaling.monitoring.MachineMonitoringEvent;
 import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
 import se.kth.karamel.backend.ClusterManager;
@@ -97,6 +98,32 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
   }
 
+  private void decomissionAndReportToAutoscalar(SshMachine machine) throws AutoScalarException {
+    MachineRuntime runtime = machine.getMachineRuntime();
+    Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
+    String gid = runtime.getGroup().getId();
+    MonitoringListener listener = autoscalerListenersMap.get(gid);
+    if (runtime.getLifeStatus() == MachineRuntime.LifeStatus.DECOMMISSIONINING) {
+      Future future = machine.getFuture();
+      future.cancel(true);
+      runtime.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONED);
+      activeMachines.remove(runtime.getId());
+      decomissionedMachines.put(runtime.getId(), machine);
+      listener.onStateChange(gid, new MachineMonitoringEvent(gid,
+          runtime.getId(), MachineMonitoringEvent.Status.KILLED));
+      //TODO: We must reheal all running DAGs here
+    } else if (runtime.getForkingTime() != null) {
+      long rentTime = System.currentTimeMillis() - runtime.getForkingTime();
+      long remainedBillingTime = rentTime % Settings.HOURE_IN_MS;
+      if (remainedBillingTime > Settings.MACHINE_BILLING_PERIOD_REPORT_MARGIN) {
+        MachineMonitoringEvent event = new MachineMonitoringEvent(gid, runtime.getId(), 
+            MachineMonitoringEvent.Status.AT_END_OF_BILLING_PERIOD);
+        event.setTimeRemaining(remainedBillingTime);
+        listener.onStateChange(gid, event);
+      }
+    }
+  }
+
   @Override
   public void run() {
     logger.info(String.format("Machines-Monitor started for '%s' d'-'", clusterName));
@@ -107,20 +134,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
           machine.ping();
-          MachineRuntime runtime = machine.getMachineRuntime();
-          if (runtime.getLifeStatus() == MachineRuntime.LifeStatus.DECOMMISSIONINING) {
-            Future future = machine.getFuture();
-            future.cancel(true);
-            runtime.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONED);
-            activeMachines.remove(runtime.getId());
-            decomissionedMachines.put(runtime.getId(), machine);
-            Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
-            String gid = runtime.getGroup().getId();
-            MonitoringListener listener = autoscalerListenersMap.get(gid);
-            listener.onStateChange(gid, new MachineMonitoringEvent(gid, 
-                runtime.getId(), MachineMonitoringEvent.Status.KILLED));
-            //TODO: We must reheal all running DAGs here
-          }
+          decomissionAndReportToAutoscalar(machine);
         }
 
         try {
