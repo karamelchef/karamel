@@ -26,6 +26,7 @@ import org.jclouds.compute.domain.NodeMetadata;
 import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
 import se.kth.autoscalar.scaling.models.MachineType;
+import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
 import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
@@ -88,6 +89,7 @@ public class ClusterManager implements Runnable {
   //private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
   private AutoScalarAPI autoScalarAPI;
   private AutoScalingHandler autoScalingHandler;
+  private Map<String, MonitoringListener> groupMonitoringListenerMap = new HashMap<String, MonitoringListener>();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -517,7 +519,9 @@ public class ClusterManager implements Runnable {
             "################################");
     if (autoScalarAPI != null) {
       try {
-        autoScalarAPI.startAutoScaling(groupRuntime.getId(), groupRuntime.getMachines().size());
+        MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
+                groupRuntime.getMachines().size());
+        groupMonitoringListenerMap.put(groupRuntime.getId(), listener);
         //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
         autoScalingHandler.startHandlingGroup(groupRuntime);
       } catch (AutoScalarException e) {
