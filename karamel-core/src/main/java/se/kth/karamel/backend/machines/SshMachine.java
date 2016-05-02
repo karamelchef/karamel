@@ -30,6 +30,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.Future;
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
@@ -68,7 +69,8 @@ public class SshMachine implements MachineInterface, Runnable {
   private boolean isSucceedTaskHistoryUpdated = false;
   private final List<String> succeedTasksHistory = new ArrayList<>();
   private static Confs confs = Confs.loadKaramelConfs();
-
+  private Future future = null;
+  
   /**
    * This constructor is used for users with SSH keys protected by a password
    *
@@ -86,7 +88,15 @@ public class SshMachine implements MachineInterface, Runnable {
         machineEntity.getSshUser(), passphrase, machineEntity.getSshPort());
   }
 
-  public MachineRuntime getMachineEntity() {
+  public void setFuture(Future future) {
+    this.future = future;
+  }
+
+  public Future getFuture() {
+    return future;
+  }
+
+  public MachineRuntime getMachineRuntime() {
     return machineEntity;
   }
 
@@ -374,7 +384,7 @@ public class SshMachine implements MachineInterface, Runnable {
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
           if (!killing
-              && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.TERMINATING) {
+              && getMachineRuntime().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.TERMINATING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
           }
 
@@ -469,8 +479,11 @@ public class SshMachine implements MachineInterface, Runnable {
             client.authPublickey(machineEntity.getSshUser(), keys);
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
             return;
-          } else {
+          } else if (System.currentTimeMillis() - lastHeartbeat < 
+              Settings.MACHINE_UNREACHABLE_DECOMMISSIONING_WAITING_TIME) {
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
+          } else {
+            machineEntity.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONINING);
           }
 
           numRetries--;

@@ -12,8 +12,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import se.kth.autoscalar.scaling.monitoring.MachineMonitoringEvent;
+import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
+import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.util.Settings;
@@ -28,20 +32,23 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
 
   private static final Logger logger = Logger.getLogger(MachinesMonitor.class);
   private final String clusterName;
-  private final Map<String, SshMachine> machines = new HashMap<>();
+  private final Map<String, SshMachine> activeMachines = new HashMap<>();
+  private final Map<String, SshMachine> decomissionedMachines = new HashMap<>();
   private boolean paused = false;
   ExecutorService executor;
   private final SshKeyPair keyPair;
   private boolean stopping = false;
+  private final ClusterManager clusterManager;
 
-  public MachinesMonitor(String clusterName, int numMachines, SshKeyPair keyPair) {
+  public MachinesMonitor(String clusterName, int numMachines, SshKeyPair keyPair, ClusterManager clusterManager) {
     this.keyPair = keyPair;
     this.clusterName = clusterName;
+    this.clusterManager = clusterManager;
     executor = Executors.newFixedThreadPool(numMachines);
   }
 
   public void setStopping(boolean stopping) {
-    for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+    for (Map.Entry<String, SshMachine> entry : activeMachines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
       sshMachine.setStopping(true);
     }
@@ -49,9 +56,9 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   }
 
   public SshMachine getMachine(String publicIp) {
-    for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+    for (Map.Entry<String, SshMachine> entry : activeMachines.entrySet()) {
       SshMachine sshMachine = entry.getValue();
-      if (sshMachine.getMachineEntity().getPublicIp().equals(publicIp)) {
+      if (sshMachine.getMachineRuntime().getPublicIp().equals(publicIp)) {
         return sshMachine;
       }
     }
@@ -62,15 +69,16 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     for (MachineRuntime machineEntity : machineEntities) {
       SshMachine sshMachine = new SshMachine(machineEntity, keyPair.getPublicKey(), keyPair.getPrivateKey(),
           keyPair.getPassphrase());
-      machines.put(machineEntity.getId(), sshMachine);
-      executor.execute(sshMachine);
+      activeMachines.put(machineEntity.getId(), sshMachine);
+      Future<?> machineFuture = executor.submit(sshMachine);
+      sshMachine.setFuture(machineFuture);
     }
   }
 
   public void resume() {
     if (paused) {
       logger.info("Sending resume signal to all machines");
-      for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+      for (Map.Entry<String, SshMachine> entry : activeMachines.entrySet()) {
         SshMachine sshMachine = entry.getValue();
         sshMachine.resume();
       }
@@ -81,7 +89,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   public void pause() {
     if (!paused) {
       logger.info("Sending pause signal to all machines");
-      for (Map.Entry<String, SshMachine> entry : machines.entrySet()) {
+      for (Map.Entry<String, SshMachine> entry : activeMachines.entrySet()) {
         SshMachine sshMachine = entry.getValue();
         sshMachine.pause();
       }
@@ -95,10 +103,24 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     while (true && !stopping) {
       try {
         Set<Map.Entry<String, SshMachine>> entrySet = new HashSet<>();
-        entrySet.addAll(machines.entrySet());
+        entrySet.addAll(activeMachines.entrySet());
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
           machine.ping();
+          MachineRuntime runtime = machine.getMachineRuntime();
+          if (runtime.getLifeStatus() == MachineRuntime.LifeStatus.DECOMMISSIONINING) {
+            Future future = machine.getFuture();
+            future.cancel(true);
+            runtime.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONED);
+            activeMachines.remove(runtime.getId());
+            decomissionedMachines.put(runtime.getId(), machine);
+            Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
+            String gid = runtime.getGroup().getId();
+            MonitoringListener listener = autoscalerListenersMap.get(gid);
+            listener.onStateChange(gid, new MachineMonitoringEvent(gid, 
+                runtime.getId(), MachineMonitoringEvent.Status.KILLED));
+            //TODO: We must reheal all running DAGs here
+          }
         }
 
         try {
@@ -128,16 +150,16 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   public void submitTask(Task task) throws KaramelException {
     logger.debug(String.format("Recieved '%s' from DAG", task.toString()));
     String machineName = task.getMachineId();
-    if (!machines.containsKey(machineName)) {
+    if (!activeMachines.containsKey(machineName)) {
       throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
     }
-    SshMachine machine = machines.get(machineName);
+    SshMachine machine = activeMachines.get(machineName);
     machine.enqueue(task);
     // TODO - check if there is a return value....
   }
 
   public void disconnect() throws KaramelException {
-    Set<Map.Entry<String, SshMachine>> entrySet = machines.entrySet();
+    Set<Map.Entry<String, SshMachine>> entrySet = activeMachines.entrySet();
     for (Map.Entry<String, SshMachine> entry : entrySet) {
       SshMachine machine = entry.getValue();
       machine.disconnect();
@@ -154,10 +176,10 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   public void terminate(Task task) throws KaramelException {
     logger.debug(String.format("Recieved '%s' from DAG to remove", task.toString()));
     String machineName = task.getMachineId();
-    if (!machines.containsKey(machineName)) {
+    if (!activeMachines.containsKey(machineName)) {
       throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
     }
-    SshMachine sshMachine = machines.get(machineName);
+    SshMachine sshMachine = activeMachines.get(machineName);
     sshMachine.remove(task);
     MachineRuntime machine = task.getMachine();
     machine.removeTask(task);
@@ -166,30 +188,30 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
   @Override
   public void killMe(Task task) throws KaramelException {
     String machineName = task.getMachineId();
-    if (!machines.containsKey(machineName)) {
+    if (!activeMachines.containsKey(machineName)) {
       throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
     }
-    SshMachine machine = machines.get(machineName);
+    SshMachine machine = activeMachines.get(machineName);
     machine.killTaskSession(task);
   }
 
   @Override
   public void retryMe(Task task) throws KaramelException {
     String machineName = task.getMachineId();
-    if (!machines.containsKey(machineName)) {
+    if (!activeMachines.containsKey(machineName)) {
       throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
     }
-    SshMachine machine = machines.get(machineName);
+    SshMachine machine = activeMachines.get(machineName);
     machine.retryFailedTask(task);
   }
 
   @Override
   public void skipMe(Task task) throws KaramelException {
     String machineName = task.getMachineId();
-    if (!machines.containsKey(machineName)) {
+    if (!activeMachines.containsKey(machineName)) {
       throw new KaramelException(String.format("Machine '%s' does not exist in manager", machineName));
     }
-    SshMachine machine = machines.get(machineName);
+    SshMachine machine = activeMachines.get(machineName);
     machine.skipFailedTask(task);
   }
 }

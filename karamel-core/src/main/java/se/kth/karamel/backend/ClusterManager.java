@@ -86,17 +86,16 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
-  //private ArrayBlockingQueue<ScalingSuggestion> autoScalingSuggestionsQueue = null;
   private AutoScalarAPI autoScalarAPI;
   private AutoScalingHandler autoScalingHandler;
-  private Map<String, MonitoringListener> groupMonitoringListenerMap = new HashMap<String, MonitoringListener>();
+  private final Map<String, MonitoringListener> autoscalerListenersMap = new HashMap<>();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterRuntime(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
-    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
+    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair(), this);
     String yaml = ClusterDefinitionService.jsonToYaml(definition);
     this.stats.setDefinition(yaml);
     this.stats.setUserId(Settings.USER_NAME);
@@ -133,6 +132,10 @@ public class ClusterManager implements Runnable {
     return runtime;
   }
 
+  public Map<String, MonitoringListener> getAutoscalerListenersMap() {
+    return autoscalerListenersMap;
+  }
+  
   /**
    * Non-blocking way of controlling the cluster, the quick commands are served immediately while the time-consuming
    * commands are queued to be served one by one. Commands have different level of priorities and the higher priority
@@ -522,7 +525,7 @@ public class ClusterManager implements Runnable {
       try {
         MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
                 groupRuntime.getMachines().size());
-        groupMonitoringListenerMap.put(groupRuntime.getId(), listener);
+        autoscalerListenersMap.put(groupRuntime.getId(), listener);
         //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
         autoScalingHandler.startHandlingGroup(groupRuntime);
       } catch (AutoScalarException e) {

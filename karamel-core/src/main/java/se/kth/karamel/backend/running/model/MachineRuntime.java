@@ -19,7 +19,7 @@ public class MachineRuntime {
 
   public static enum LifeStatus {
 
-    FORKED, CONNECTED, UNREACHABLE, DESTROYED
+    FORKED, CONNECTED, UNREACHABLE, DECOMMISSIONINING, DECOMMISSIONED
   }
 
   public static enum TasksStatus {
