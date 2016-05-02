@@ -87,7 +87,7 @@ public class Settings {
   public static final String SCRIPT_PATH_KILL_RUNNING_SESSION = SCRIPT_PATH_ROOT + "kill_current_session.sh";
   public static final String SCRIPT_PATH_INSTALL_COLLECTL = SCRIPT_PATH_ROOT + "install_collectl.sh";
   public static final String SCRIPT_PATH_INSTALL_TABLESPOON_AGENT = SCRIPT_PATH_ROOT + "install_tablespoon_agent.sh";
-
+  public static final String SCRIPT_PATH_START_TABLESPOON_AGENT = SCRIPT_PATH_ROOT + "start_tablespoon_agent.sh";
   //----------------------------------------Providers General-----------------------------------------------------------
   public static final String UNIQUE_GROUP_NAME(String provider, String clusterName, String groupName) {
     return (provider + USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();

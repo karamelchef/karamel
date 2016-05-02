@@ -6,9 +6,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
@@ -18,20 +16,20 @@ import se.kth.karamel.common.util.Settings;
 
 /**
  *
- * @author kamal
+ * @author henke
  */
-public class InstallCollectlTask extends Task {
+public class StartTablespoonTask extends TablespoonTask {
   
-  private static final Logger logger = Logger.getLogger(InstallCollectlTask.class);
+  private static final Logger logger = Logger.getLogger(StartTablespoonTask.class);
   
-  public InstallCollectlTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("install collectl", "install collectl", true, machine, clusterStats, submitter);
+  public StartTablespoonTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("start tablespoon", "start tablespoon", true, machine, clusterStats, submitter);
   }
   
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_COLLECTL,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_START_TABLESPOON_AGENT,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME,
           "task_id", getId(),
@@ -41,7 +39,7 @@ public class InstallCollectlTask extends Task {
   }
   
   public static String makeUniqueId(String machineId) {
-    return "install collectl on " + machineId;
+    return "start tablespoon on " + machineId;
   }
   
   @Override
@@ -49,11 +47,5 @@ public class InstallCollectlTask extends Task {
     return makeUniqueId(super.getMachineId());
   }
   
-  @Override
-  public Set<String> dagDependencies() {
-    Set<String> deps = new HashSet<>();
-    String aptget = AptGetEssentialsTask.makeUniqueId(getMachineId());
-    deps.add(aptget);
-    return deps;
-  }
+  
 }
