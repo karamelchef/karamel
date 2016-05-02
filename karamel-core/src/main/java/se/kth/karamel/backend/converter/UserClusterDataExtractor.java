@@ -53,6 +53,11 @@ public class UserClusterDataExtractor {
                     if (ge != null) {
                       List<NodeRunTime> machines = ge.getMachines();
                       if (machines != null) {
+                        //TODO this is a temporary fix to get links from metadata file
+                        if(cluster.getUseContainers()){
+                          // Since we have not forked machines there is no way to get the IP address at the moment.
+                          builder.append(link).append("\n");
+                        }
                         for (NodeRunTime me : ge.getMachines()) {
                           String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
                           builder.append(l).append("\n");
@@ -76,11 +81,12 @@ public class UserClusterDataExtractor {
 
   public static int totalMachines(JsonCluster cluster) {
     int total = 0;
-    if(cluster.getUseContainers()){
-      return cluster.getHosts();
-    }
     for (JsonGroup g : cluster.getGroups()) {
       total += g.getSize();
+    }
+    //If this is a container setup total machines will be host machines + containers
+    if(cluster.getUseContainers()){
+      return cluster.getHosts() + total;
     }
     return total;
   }

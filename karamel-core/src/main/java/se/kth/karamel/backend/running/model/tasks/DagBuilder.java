@@ -60,9 +60,12 @@ public class DagBuilder {
     Dag dag = new Dag();
 
     for (GroupRuntime ge : clusterEntity.getGroups()) {
+      if (!Settings.CONTAINER_HOST_GROUP.equals(ge.getName())) {
+        continue;
+      }
       for (NodeRunTime me : ge.getMachines()) {
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
-        Task dockerInstallationTask = new DockerInstallTask(me, clusterStats, submitter,keyValueStoreIp);
+        Task dockerInstallationTask = new DockerInstallTask(me, clusterStats, submitter, keyValueStoreIp);
         try {
           dag.addTask(dockerInstallationTask);
           dag.addTask(findOs);
@@ -239,7 +242,7 @@ public class DagBuilder {
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
         dag.addTask(findOs);
         Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
-        boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true") 
+        boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true")
             && (provider instanceof Ec2));
         if (storagePreparation) {
           String model = ((Ec2) provider).getType();
@@ -248,12 +251,19 @@ public class DagBuilder {
               = new PrepareStoragesTask(me, clusterStats, submitter, instanceType.getStorageDevices());
           dag.addTask(st);
         }
-        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
-        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
-        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
-        dag.addTask(t1);
-        dag.addTask(t2);
-        dag.addTask(t3);
+        //Let's skip doing these if we are in a container environment
+        if (!cluster.getUseContainers()) {
+          AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
+          InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
+          MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+          dag.addTask(t1);
+          dag.addTask(t2);
+          dag.addTask(t3);
+        }else{
+          MakeSoloRbContainerTask makeSoloRbContainerTask = new MakeSoloRbContainerTask(me, vendorPath, clusterStats,
+            submitter);
+          dag.addTask(makeSoloRbContainerTask);
+        }
 
       }
     }

@@ -28,7 +28,7 @@ public class ClusterDefinitionValidator {
 
     for (JsonGroup group : cluster.getGroups()) {
       Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, group.getName());
-      if (provider instanceof Baremetal) {
+      if (provider instanceof Baremetal && !cluster.getUseContainers()) {
         Baremetal baremetal = (Baremetal) provider;
         int s1 = baremetal.retriveAllIps().size();
         if (s1 != group.getSize()) {

@@ -14,4 +14,6 @@ sudo systemctl daemon-reload;
 sudo systemctl restart docker;
 sudo systemctl status docker;
 docker info
+docker stop $(docker ps -a -q)
+docker rm $(docker ps -a -q)
 echo '%task_id%' >> %succeedtasks_filepath%

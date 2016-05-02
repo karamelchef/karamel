@@ -33,6 +33,7 @@ import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.ValidationException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
@@ -79,6 +80,9 @@ public class ClusterManager implements Runnable {
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
+    if(definition.getUseContainers()){
+      populateHostGroups();
+    }
     this.runtime = new ClusterRuntime(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
@@ -227,6 +231,10 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailures();
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
+      // If this is a container setup delay forking groups for installations.
+      if(definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())){
+        continue;
+      }
       if (group.getPhase() == GroupRuntime.GroupPhase.PRECLEANED
         || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
         runtime.resolveFailure(Failure.hash(Failure.Type.CREATING_SEC_GROUPS_FAILE, group.getName()));
@@ -261,9 +269,16 @@ public class ClusterManager implements Runnable {
     String keyValueStorePrivateIP = "";
     String keyValueStorePublicIp = "";
     try {
-      //TODO: temporarily choosing the IP for the keyvalue store from 1st group's first machine. change appropriately
-      keyValueStorePrivateIP = runtime.getGroups().get(0).getMachines().get(0).getPrivateIp();
-      keyValueStorePublicIp = runtime.getGroups().get(0).getMachines().get(0).getPublicIp();
+      //TODO: temporarily choosing the IP for the keyvalue store randomly, change appropriately
+      GroupRuntime hostGroupRuntime = null;
+      for (GroupRuntime groupRuntime : runtime.getGroups()) {
+        if (Settings.CONTAINER_HOST_GROUP.equals(groupRuntime.getName())) {
+          hostGroupRuntime = groupRuntime;
+        }
+      }
+
+      keyValueStorePrivateIP = hostGroupRuntime.getMachines().get(0).getPrivateIp();
+      keyValueStorePublicIp = hostGroupRuntime.getMachines().get(0).getPublicIp();
       containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor,
         keyValueStorePrivateIP);
       containerHostConfigurationDag.start();
@@ -281,13 +296,15 @@ public class ClusterManager implements Runnable {
       containerClusterManager.setupNetworking(keyValueStorePublicIp, keyValueStorePrivateIP);
       containerRuntimeMap = containerClusterManager.StartContainers();
     } catch (DockerException e) {
-      e.printStackTrace();
+      logger.error("Error while starting containers :" + e.getMessage(), e);
     }
-    machinesMonitor.reInitialize(containerClusterManager.getNOfContainers());
+  //  machinesMonitor.reInitialize(containerClusterManager.getNOfContainers());
 
     for (GroupRuntime group : getRuntime().getGroups()) {
-      group.setMachines(containerRuntimeMap.get(group.getName()));
-      machinesMonitor.addMachines(containerRuntimeMap.get(group.getName()));
+      if (containerRuntimeMap.keySet().contains(group.getName())) {
+        group.setMachines(containerRuntimeMap.get(group.getName()));
+        machinesMonitor.addMachines(containerRuntimeMap.get(group.getName()));
+      }
     }
   }
 
@@ -353,6 +370,10 @@ public class ClusterManager implements Runnable {
     runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, null));
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
+      //If this is a container setup forking containers will be handled separately. fork only docker hosts
+      if(definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())){
+        continue;
+      }
       if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED
         || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
@@ -378,6 +399,23 @@ public class ClusterManager implements Runnable {
     if (definition.getUseContainers()) {
       forkContainers();
     }
+  }
+
+  private void populateHostGroups() {
+    JsonGroup hostGroup = new JsonGroup();
+    hostGroup.setEc2(definition.getEc2());
+    hostGroup.setGce(definition.getGce());
+    hostGroup.setNova(definition.getNova());
+    hostGroup.setBaremetal(definition.getBaremetal());
+    hostGroup.setSize(definition.getHosts());
+    try {
+      hostGroup.setName(Settings.CONTAINER_HOST_GROUP);
+    } catch (ValidationException e) {
+      logger.error("Error while creating container host Groups", e);
+    }
+
+    definition.getGroups().add(hostGroup);
+
   }
 
   @Override

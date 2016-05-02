@@ -27,6 +27,9 @@ public class Settings {
 
   private static final Logger logger = Logger.getLogger(Settings.class);
 
+  //Container
+  public static final String CONTAINER_HOST_GROUP = "containerhostgroup";
+
   //test
   public static boolean CB_CLASSPATH_MODE = false;
   // files

@@ -146,6 +146,9 @@ public class NodeRunTime {
   }
 
   public String getId() {
+    if(NodeType.CONTAINER.equals(getNodeType())){
+      return getVmId();
+    }
     return publicIp;
   }
 

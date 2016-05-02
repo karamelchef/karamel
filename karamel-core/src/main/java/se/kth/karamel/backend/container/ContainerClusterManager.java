@@ -10,6 +10,7 @@ import com.spotify.docker.client.messages.PortBinding;
 import com.spotify.docker.client.messages.NetworkConfig;
 import com.spotify.docker.client.messages.NetworkCreation;
 import com.spotify.docker.client.messages.ContainerCreation;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -24,26 +25,45 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.MetadataRb;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Settings;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by shelan on 4/8/16.
- */
+
 public class ContainerClusterManager {
 
-  HashMap<String, List<NodeRunTime>> containerHostMap = new HashMap<>();
-  HashMap<String, ArrayList<NodeRunTime>> containerGroupMap = new HashMap<>();
-  HashMap<String, DockerClient> dockerClientMap = new HashMap<>();
-  List<NodeRunTime> hostMachineRuntimes = new ArrayList<>();
-  ClusterRuntime runtime;
-  JsonCluster cluster;
-  ClusterStats clusterStats;
-  TaskSubmitter taskSubmitter;
-  int numOfContainers = 0;
+  private static final Logger logger = Logger.getLogger(ContainerClusterManager.class);
+
+  private HashMap<String, List<NodeRunTime>> containerHostMap = new HashMap<>();
+
+  /**
+   * Mapping for Containers and for Groups
+   */
+  private HashMap<String, ArrayList<NodeRunTime>> containerGroupMap = new HashMap<>();
+
+  /**
+   * List of Docker Clients
+   */
+  private HashMap<String, DockerClient> dockerClientMap = new HashMap<>();
+
+  /**
+   * List of Docker Host Machines
+   */
+  private List<NodeRunTime> hostMachineRuntimes = new ArrayList<>();
+
+  /**
+   * This maintains the list of Group runtimes dedicated to containers. In this list Container Host Group
+   * is filtered out
+   */
+  List<GroupRuntime> containerGroupRuntimes = new ArrayList<>();
+  private ClusterRuntime runtime;
+  private JsonCluster cluster;
+  private ClusterStats clusterStats;
+  private TaskSubmitter taskSubmitter;
+  private int numOfContainers = 0;
 
   public ContainerClusterManager(ClusterRuntime runtime, JsonCluster cluster, ClusterStats clusterstats,
                                  TaskSubmitter taskSubmitter) {
@@ -57,85 +77,99 @@ public class ContainerClusterManager {
   public HashMap<String, ArrayList<NodeRunTime>> StartContainers() throws KaramelException, InterruptedException,
     DockerException {
     for (JsonGroup jsonGroup : cluster.getGroups()) {
-      numOfContainers += jsonGroup.getSize();
-      containerGroupMap.put(jsonGroup.getName(), new ArrayList<NodeRunTime>());
+      if (!Settings.CONTAINER_HOST_GROUP.equals(jsonGroup.getName())) {
+        numOfContainers += jsonGroup.getSize();
+        containerGroupMap.put(jsonGroup.getName(), new ArrayList<NodeRunTime>());
+      }
     }
 
     List<NodeRunTime> machines = new ArrayList<>();
 
-    for (int i = 0; i < numOfContainers; i++) {
+    int containerOffset = 0;
 
-      int position = i % hostMachineRuntimes.size();
-      NodeRunTime hostMachine = hostMachineRuntimes.get(position);
+    for (String groupName : containerGroupMap.keySet()) {
+      JsonGroup group = UserClusterDataExtractor.findGroup(cluster, groupName);
 
-      int sshPort = 11000 + i;
-      String publicIp = hostMachine.getPublicIp();
+      for (int i = 0; i < group.getSize(); i++) {
 
-      DockerClient client = dockerClientMap.get(publicIp);
+        int position = containerOffset % hostMachineRuntimes.size();
+        NodeRunTime hostMachine = hostMachineRuntimes.get(position);
 
-      client.pull("shelan/karamel-node", AuthConfig.builder().build());
+        int sshPort = 11000 + containerOffset;
+        String publicIp = hostMachine.getPublicIp();
 
-      final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-      List<PortBinding> hostPorts = new ArrayList<PortBinding>();
-      hostPorts.add(PortBinding.of("0.0.0.0", sshPort));
-      portBindings.put("22", hostPorts);
+        DockerClient client = dockerClientMap.get(publicIp);
 
-      //TODO: exposing all the ports found in links in every container, We might not want to do that. and only need
-      // to expose relevant port for containers.
-      String[] clusterLinks = UserClusterDataExtractor.clusterLinks(cluster, runtime).split("\n");
-      List<String> ports = new ArrayList();
+        client.pull("shelan/karamel-node:v2.0.0", AuthConfig.builder().build());
 
-      for (int j = 0; j < clusterLinks.length; j++) {
-        ports.add(clusterLinks[j].split("//")[1].split("/")[0].split(":")[1]);
+        final Map<String, List<PortBinding>> portBindings = new HashMap<>();
+        List<PortBinding> hostPorts = new ArrayList<>();
+        hostPorts.add(PortBinding.of("0.0.0.0", sshPort));
+        portBindings.put("22", hostPorts);
+
+        //TODO: exposing all the ports found in links in every container, We might not want to do that. and only need
+        // to expose relevant port for containers.
+        String[] clusterLinks = UserClusterDataExtractor.clusterLinks(cluster, runtime).split("\n");
+        List<String> ports = new ArrayList();
+
+        for (int j = 0; j < clusterLinks.length; j++) {
+          ports.add(clusterLinks[j].split("//")[1].split("/")[0].split(":")[1]);
+        }
+
+        for (String port : ports) {
+          List<PortBinding> randomHostPorts = new ArrayList<PortBinding>();
+          randomHostPorts.add(PortBinding.randomPort("0.0.0.0"));
+          portBindings.put(port, randomHostPorts);
+        }
+
+        //adding SSH port to expose
+        ports.add("22");
+
+        HostConfig hostConfig = HostConfig.builder()
+          .networkMode("karamel")
+          .portBindings(portBindings)
+          .build();
+
+        String[] exposedPorts = new String[ports.size()];
+        exposedPorts = ports.toArray(exposedPorts);
+
+        ContainerConfig containerConfig = ContainerConfig.builder()
+          .image("shelan/karamel-node:v2.0.0")
+          .hostConfig(hostConfig)
+          .exposedPorts(exposedPorts)
+          .hostname("node" + containerOffset)
+          .build();
+
+
+        final ContainerCreation creation = client.createContainer(containerConfig, "node" + containerOffset);
+        final String id = creation.id();
+        client.startContainer(id);
+        String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
+
+        NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
+        containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
+        containerRuntime.setMachineType(NodeRunTime.NodeType.CONTAINER.name());
+        containerRuntime.setName(id);
+        containerRuntime.setVmId(id);
+        containerRuntime.setPrivateIp(containerIp);
+        containerRuntime.setPublicIp(publicIp);
+        containerRuntime.setSshPort(sshPort);
+        containerRuntime.setSshUser("vagrant");
+        machines.add(containerRuntime);
+        containerGroupMap.get(groupName).add(containerRuntime);
+
+        containerOffset++;
       }
-
-      for (String port : ports) {
-        List<PortBinding> randomHostPorts = new ArrayList<PortBinding>();
-        randomHostPorts.add(PortBinding.randomPort("0.0.0.0"));
-        portBindings.put(port, randomHostPorts);
-      }
-
-      //adding SSH port to expose
-      ports.add("22");
-
-      HostConfig hostConfig = HostConfig.builder()
-        .networkMode("karamel")
-        .portBindings(portBindings)
-        .build();
-
-      String[] exposedPorts = new String[ports.size()];
-      exposedPorts = ports.toArray(exposedPorts);
-
-      ContainerConfig containerConfig = ContainerConfig.builder()
-        .image("shelan/karamel-node")
-        .hostConfig(hostConfig)
-        .exposedPorts(exposedPorts)
-        .hostname("node" + i)
-        .build();
-
-
-      final ContainerCreation creation = client.createContainer(containerConfig, "node" + i);
-      final String id = creation.id();
-      client.startContainer(id);
-      String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
-
-      NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
-      containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
-      containerRuntime.setMachineType(NodeRunTime.NodeType.CONTAINER.name());
-      containerRuntime.setName(id);
-      containerRuntime.setPrivateIp(containerIp);
-      containerRuntime.setPublicIp(publicIp);
-      containerRuntime.setSshPort(sshPort);
-      containerRuntime.setSshUser("vagrant");
-      machines.add(containerRuntime);
-      containerGroupMap.get(hostMachine.getGroup().getName()).add(containerRuntime);
     }
     return containerGroupMap;
   }
 
   private void init() {
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
-      this.hostMachineRuntimes.addAll(groupRuntime.getMachines());
+      if (Settings.CONTAINER_HOST_GROUP.equals(groupRuntime.getName())) {
+        // this is the host group lets add all the machines to the host machines list
+        this.hostMachineRuntimes.addAll(groupRuntime.getMachines());
+      }
     }
 
     for (NodeRunTime nodeRunTime : hostMachineRuntimes) {
@@ -146,9 +180,9 @@ public class ContainerClusterManager {
       try {
         docker.auth(authConfig);
       } catch (DockerException e) {
-        e.printStackTrace();
+        logger.error("Error while initializing docker clients", e);
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        logger.error("Interrupted while initializing docker clients", e);
       }
       dockerClientMap.put(publicIp, docker);
     }
@@ -174,14 +208,14 @@ public class ContainerClusterManager {
   public void setupNetworking(String kvStorePublicIP, String kvStorePrivateIP) throws DockerException,
     InterruptedException {
     DockerClient client = dockerClientMap.get(kvStorePublicIP);
-    client.pull("progrium/consul", AuthConfig.builder().build());
+    client.pull("progrium/consul:latest", AuthConfig.builder().build());
 
     final Map<String, List<PortBinding>> portBindings = new HashMap<String, List<PortBinding>>();
     List<PortBinding> hostPorts = new ArrayList<PortBinding>();
     hostPorts.add(PortBinding.of("0.0.0.0", 8500));
     portBindings.put("8500", hostPorts);
     HostConfig hostConfig = HostConfig.builder().portBindings(portBindings).build();
-    ContainerConfig containerConfig = ContainerConfig.builder().image("progrium/consul")
+    ContainerConfig containerConfig = ContainerConfig.builder().image("progrium/consul:latest")
       .hostConfig(hostConfig)
       .cmd("-server", "-bootstrap")
       .exposedPorts("8500")
@@ -199,7 +233,7 @@ public class ContainerClusterManager {
     while (networkCreation == null || !(networkCreation.id().length() > 0)) {
       try {
         networkCreation = client.createNetwork(networkConfig);
-      } catch (Exception e) {
+      } catch (Exception e){
         Thread.sleep(1000);
       }
     }
