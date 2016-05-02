@@ -16,7 +16,7 @@ Don't forget to issue 'save' command after you finish to edit your yaml, all the
 in the .karamel folder under your user's home folder.
 
 
-Click on the action "status" below to see the cluster progress or "purge" to terminate the cluster.
+Click on the action "status" below to see the cluster progress or "terminate" to terminate the cluster.
 Running clusters:
 
 %CLUSTERS_TABLE%

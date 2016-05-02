@@ -29,7 +29,7 @@ detail   <cluster_name> : detail json of the cluster
 groups   <cluster_name> : groups' summary
 machines <cluster_name> : machines' summary
 tasks    <cluster_name> : installation tasks on each machine
-purge    <cluster_name> : kills all vms, security groups
+terminate    <cluster_name> : kills all vms, security groups
 --------------------------------------------------------------------------------
                     ACTIVE SHELL COMMANDS
 --------------------------------------------------------------------------------

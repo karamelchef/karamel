@@ -169,11 +169,28 @@ public class CommandService {
         renderer = CommandResponse.Renderer.YAML;
         result = ClusterDefinitionService.loadYaml(clusterName);
       }
-
-      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
+      String clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "install");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.pauseCluster(clusterNameInUserInput);
+        clusterService.submitInstallationDag(clusterNameInUserInput);
+        successMessage = clusterNameInUserInput + " was scheduled for installing, "
+            + "it might take some time please be patient!";
+        nextCmd = "status " + clusterNameInUserInput;
+      }
+
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "purge");
+      if (!found && clusterNameInUserInput != null) {
+        found = true;
+        clusterService.submitPurgeDag(clusterNameInUserInput);
+        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+            + "it might take some time please be patient!";
+        nextCmd = "status " + clusterNameInUserInput;
+      }
+
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "pause");
+      if (!found && clusterNameInUserInput != null) {
+        found = true;
+        clusterService.pauseDag(clusterNameInUserInput);
         successMessage = clusterNameInUserInput + " was scheduled for pausing, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
@@ -182,17 +199,17 @@ public class CommandService {
       clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "resume");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.resumeCluster(clusterNameInUserInput);
+        clusterService.resumeDag(clusterNameInUserInput);
         successMessage = clusterNameInUserInput + " was scheduled for resuming, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
 
-      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "purge");
+      clusterNameInUserInput = getClusterNameIfRunningAndMatchesForCommand(cmd, "terminate");
       if (!found && clusterNameInUserInput != null) {
         found = true;
-        clusterService.purgeCluster(clusterNameInUserInput);
-        successMessage = clusterNameInUserInput + " was scheduled for purging, "
+        clusterService.terminateCluster(clusterNameInUserInput);
+        successMessage = clusterNameInUserInput + " was scheduled for terminating, "
             + "it might take some time please be patient!";
         nextCmd = "status " + clusterNameInUserInput;
       }
@@ -400,7 +417,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         ClusterManager cluster = cluster(clusterName);
-        if (cluster == null || cluster.getInstallationDag() == null) {
+        if (cluster == null || cluster.getCurrentDag() == null) {
           TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
 
             @Override
@@ -424,18 +441,23 @@ public class CommandService {
             @Override
             public void skipMe(Task task) throws KaramelException {
             }
+
+            @Override
+            public void terminate(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+              generateClusterChefJsonsForInstallation(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
           installationDag.validate();
           result = installationDag.print();
         } else {
-          result = cluster.getInstallationDag().print();
+          result = cluster.getCurrentDag().print();
           addActiveClusterMenus(response);
           nextCmd = cmd;
         }
@@ -449,7 +471,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         ClusterManager cluster = cluster(clusterName);
-        if (cluster == null || cluster.getInstallationDag() == null) {
+        if (cluster == null || cluster.getCurrentDag() == null) {
           TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
 
             @Override
@@ -472,11 +494,16 @@ public class CommandService {
             @Override
             public void skipMe(Task task) throws KaramelException {
             }
+
+            @Override
+            public void terminate(Task task) throws KaramelException {
+            }
           };
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
           ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(json);
-          Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(json, dummyRuntime);
+          Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+              generateClusterChefJsonsForInstallation(json, dummyRuntime);
           ClusterStats clusterStats = new ClusterStats();
           Dag installationDag = DagBuilder.getInstallationDag(json, dummyRuntime, clusterStats, dummyTaskSubmitter,
               chefJsons);
@@ -486,7 +513,7 @@ public class CommandService {
             addActiveClusterMenus(response);
           }
         } else {
-          result = cluster.getInstallationDag().asJson();
+          result = cluster.getCurrentDag().asJson();
           addActiveClusterMenus(response);
           nextCmd = cmd;
         }
@@ -518,7 +545,7 @@ public class CommandService {
         found = true;
         String clusterName = matcher.group(1);
         if (cluster(clusterName) != null) {
-          throw new KaramelException(String.format("%s is already running, purge it first!!", clusterName));
+          throw new KaramelException(String.format("%s is already running, terminate it first!!", clusterName));
         } else {
           String yaml = ClusterDefinitionService.loadYaml(clusterName);
           String json = ClusterDefinitionService.yamlToJson(yaml);
@@ -762,8 +789,8 @@ public class CommandService {
       data[i][2] = cluster.getRuntime().isFailed() + "/" + cluster.getRuntime().isPaused();
       data[i][3] = "<a kref='status " + name + "'>status</a> <a kref='tdag " + name + "'>tdag</a> <a kref='vdag "
           + name + "'>vdag</a> <a kref='groups " + name + "'>groups</a> <a kref='machines "
-          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='purge "
-          + name + "'>purge</a> <a kref='links " + name + "'>services</a> <a kref='yaml "
+          + name + "'>machines</a> <a kref='tasks " + name + "'>tasks</a> <a kref='terminate "
+          + name + "'>terminate</a> <a kref='links " + name + "'>services</a> <a kref='yaml "
           + name + "'>yaml</a> <a kref='cost " + name + "'>cost</a>";
       i++;
     }
@@ -919,13 +946,19 @@ public class CommandService {
     response.addMenuItem("Orchestration DAG", "vdag " + clusterName);
     response.addMenuItem("Quick Links", "links " + clusterName);
     response.addMenuItem("Statistics", "stats " + clusterName);
-    if (clusterEntity.isPaused()) {
-      response.addMenuItem("Resume", "resume");
-    } else {
-      response.addMenuItem("Pause", "pause");
+    if (clusterEntity.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
+        || clusterEntity.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal()) {
+      response.addMenuItem("Install", "install");
+      response.addMenuItem("Purge", "purge");
     }
-    response.addMenuItem("Purge", "purge");
-
+    if (clusterEntity.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG) {
+      if (clusterEntity.isPaused()) {
+        response.addMenuItem("Resume", "resume");
+      } else {
+        response.addMenuItem("Pause", "pause");
+      }
+    }
+    response.addMenuItem("Terminate", "terminate");
   }
 
   private static String getClusterNameIfRunningAndMatchesForCommand(String userinput, String cmd)
@@ -939,8 +972,8 @@ public class CommandService {
           ClusterManager cluster = cluster(chosenCluster());
           clusterName = cluster.getDefinition().getName();
         } else {
-          throw new KaramelException("No cluster has been chosen yet! When you purge a cluster it is removed from the "
-              + "context.");
+          throw new KaramelException("No cluster has been chosen yet! When you terminate a cluster it is removed "
+              + "from the context.");
         }
       } else {
         clusterName = matcher.group(2);

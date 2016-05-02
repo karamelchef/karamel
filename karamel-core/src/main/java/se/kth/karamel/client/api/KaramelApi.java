@@ -12,6 +12,7 @@ import se.kth.karamel.backend.github.OrgItem;
 import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
+import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.common.util.NovaCredentials;
 import se.kth.karamel.common.util.SshKeyPair;
 
@@ -152,7 +153,7 @@ public interface KaramelApi {
 
   /**
    * In case user wants to pause the running cluster for inspection reasons. It implies that machines won't receive any
-   * new ssh command form the karamel-core. User can either purge or resume a paused cluster.
+   * new ssh command form the karamel-core. User can either terminate or resume a paused cluster.
    *
    * @param clusterName
    * @throws KaramelException
@@ -174,7 +175,7 @@ public interface KaramelApi {
    * @param clusterName
    * @throws KaramelException
    */
-  public void purgeCluster(String clusterName) throws KaramelException;
+  public void terminateCluster(String clusterName) throws KaramelException;
 
   /**
    * Returns a json containing all groups, machines, their status, tasks/commands and their status.
@@ -299,4 +300,8 @@ public interface KaramelApi {
   public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
 
   public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+
+  public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
+
+  public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
 }

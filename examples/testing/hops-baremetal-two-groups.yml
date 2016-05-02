@@ -6,10 +6,14 @@ cookbooks:
   hadoop: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
+  ndb: 
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
     
 groups: 
 groups: 
   datanodes:
+    size: 2
     baremetal:
         ip: 192.168.0.3
         ip: 192.168.0.4	
