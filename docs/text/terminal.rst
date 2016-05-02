@@ -126,6 +126,6 @@ Pause/Resume
 ````````````
 A cluster may pause running either because the user's order or when a failure happens. It is a good way if user wants to change something or if he wants to avoid running the entire cluster for some reason. In that case when you click on the "Pause" button it takes some time until all machines finish their current running task and go into the paused mode. When cluster is paused, a resume button will appear which proceeds running the cluster again.
 
-Purge
+Terminate
 `````
-Purge is a button to destroy and release all the resources both on Clouds and Karamel-runtime, destroying any virtual machines created. It is recommended to use the purge function via Karamel to clean-up resources rather than doing so manually - Karamel makes sure all ssh connections, local threads, virtual machines and security groups are released completely. 
+Terminate is a button to destroy and release all the resources both on Clouds and Karamel-runtime, destroying any virtual machines created. It is recommended to use the terminate function via Karamel to clean-up resources rather than doing so manually - Karamel makes sure all ssh connections, local threads, virtual machines and security groups are released completely. 

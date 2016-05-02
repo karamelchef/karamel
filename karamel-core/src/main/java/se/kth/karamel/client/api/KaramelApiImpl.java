@@ -215,16 +215,16 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void pauseCluster(String clusterName) throws KaramelException {
-    clusterService.pauseCluster(clusterName);
+    clusterService.pauseDag(clusterName);
   }
 
   @Override
   public void resumeCluster(String clusterName) throws KaramelException {
-    clusterService.resumeCluster(clusterName);
+    clusterService.resumeDag(clusterName);
   }
 
   @Override
-  public void purgeCluster(String clusterName) throws KaramelException {
+  public void terminateCluster(String clusterName) throws KaramelException {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 

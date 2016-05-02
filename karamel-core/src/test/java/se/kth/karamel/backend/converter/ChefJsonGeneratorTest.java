@@ -24,8 +24,8 @@ import se.kth.karamel.common.util.Settings;
  */
 public class ChefJsonGeneratorTest {
 
-  @Test
-  public void testGenerateClusterChefJsons() throws KaramelException {
+    @Test
+  public void testGenerateClusterChefJsonsForPurge() throws KaramelException {
     Settings.CB_CLASSPATH_MODE = true; 
     String jsonString = "  {\"name\":\"MySqlCluster\","
         + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
@@ -51,7 +51,44 @@ public class ChefJsonGeneratorTest {
       }
     }
     ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(definition, clusterRuntime);
+    Assert.assertEquals(3, chefJsons.size());
+    Assert.assertNotNull(chefJsons.get("datanodes1ndb::purge"));
+    Assert.assertNotNull(chefJsons.get("datanodes2ndb::purge"));
+    Assert.assertNotNull(chefJsons.get("mgmnodes1ndb::purge"));
+    JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::purge");
+    String st = jsonObject.toString();
+    Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));
+  }
+
+  @Test
+  public void testGenerateClusterChefJsonsForInstallation() throws KaramelException {
+    Settings.CB_CLASSPATH_MODE = true; 
+    String jsonString = "  {\"name\":\"MySqlCluster\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{\"ndb/DataMemory\":"
+        + "\"111\"}}],\"groups\":[{\"name\":\"datanodes\","
+        + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},"
+        + "\"recipes\":[{\"name\":\"ndb::ndbd\"}]}],\"size\":2,\"provider\":null},{\"name\":\"mgmnodes\",\"cookbooks\":"
+        + "[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
+        + "\"attrs\":{},\"recipes\":"
+        + "[{\"name\":\"ndb::mgmd\"},{\"name\":\"ndb::mysqld\"},{\"name\":\"ndb::memcached\"}]}],\"size\":"
+        + "1,\"provider\":null}],\"ec2\":{\"type\":\"m3.medium\",\"ami\":null,\"region\":\"eu-west-1\",\"price\":"
+        + "null,\"vpc\":null,\"subnet\":null}}";
+    //Workaround for https://github.com/karamelchef/karamel/issues/28
+    String yaml = ClusterDefinitionService.jsonToYaml(jsonString);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(yaml);
+//    JsonCluster definition = ClusterDefinitionService.jsonToJsonObject(jsonString);
+    List<JsonCookbook> cookbooks = definition.getCookbooks();
+    JsonCookbook ndb = null;
+    for (JsonCookbook jc : cookbooks) {
+      if (jc.getName().equals("ndb")) {
+        ndb = jc;
+      }
+    }
+    ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, clusterRuntime);
     JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));
@@ -84,7 +121,7 @@ public class ChefJsonGeneratorTest {
       }
     }
     ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, clusterRuntime);
     JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"1C==\""));
@@ -109,7 +146,7 @@ public class ChefJsonGeneratorTest {
     String yaml = ClusterDefinitionService.jsonToYaml(jsonString);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(yaml);
     ClusterRuntime clusterRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, clusterRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, clusterRuntime);
     JsonObject jsonObject = chefJsons.get("mgmnodes1ndb::mgmd");
     String st = jsonObject.toString();
     Assert.assertTrue(st.contains("\"DataMemory\":\"111\""));

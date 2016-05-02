@@ -33,7 +33,7 @@ import se.kth.karamel.common.util.Confs;
 public class DagBuilderTest {
 
   @Test
-  public void testHubshubDag() throws IOException, KaramelException {
+  public void testHopsworksInstallationDag() throws IOException, KaramelException {
     TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
 
       @Override
@@ -57,15 +57,62 @@ public class DagBuilderTest {
       @Override
       public void skipMe(Task task) throws KaramelException {
       }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
     };
 
     Settings.CB_CLASSPATH_MODE = true;
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
+    dag.validate();
+    System.out.println(dag.print());
+//    dag.start();
+  }
+
+  @Test
+  public void testHopsworksPurgingDag() throws IOException, KaramelException {
+    TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+      @Override
+      public void submitTask(Task task) throws KaramelException {
+        System.out.println(task.uniqueId());
+        task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void retryMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void skipMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
+    };
+
+    Settings.CB_CLASSPATH_MODE = true;
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/hopsworks.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForPurge(definition, dummyRuntime);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getPurgingDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
     System.out.println(dag.print());
 //    dag.start();
@@ -96,17 +143,21 @@ public class DagBuilderTest {
       @Override
       public void skipMe(Task task) throws KaramelException {
       }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
     };
 
     Settings.CB_CLASSPATH_MODE = true;
     Confs confs = new Confs();
     confs.put(Settings.PREPARE_STORAGES_KEY, "false");
     Confs.setMemConfs(confs);
-    
+
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();
@@ -140,7 +191,7 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "hadoop::dn on datanodes2"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "flink::install on datanodes2"));
   }
-  
+
   @Test
   public void testFlinkDagPrepStorage() throws IOException, KaramelException {
     TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
@@ -166,17 +217,21 @@ public class DagBuilderTest {
       @Override
       public void skipMe(Task task) throws KaramelException {
       }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
     };
 
     Settings.CB_CLASSPATH_MODE = true;
     Confs confs = new Confs();
     confs.put(Settings.PREPARE_STORAGES_KEY, "true");
     Confs.setMemConfs(confs);
-    
+
     String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
-    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsons(definition, dummyRuntime);
+    Map<String, JsonObject> chefJsons = ChefJsonGenerator.generateClusterChefJsonsForInstallation(definition, dummyRuntime);
     ClusterStats clusterStats = new ClusterStats();
     Dag dag = DagBuilder.getInstallationDag(definition, dummyRuntime, clusterStats, dummyTaskSubmitter, chefJsons);
     dag.validate();

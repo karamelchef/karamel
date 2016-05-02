@@ -18,6 +18,8 @@ public interface DagTask {
 
   public void prepareToStart();
 
+  public void terminate();
+  
   public void submit(DagTaskCallback callback);
 
   public Set<String> dagDependencies();
