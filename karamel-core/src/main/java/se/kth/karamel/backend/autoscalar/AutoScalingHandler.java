@@ -17,7 +17,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created with IntelliJ IDEA.
- *
+ * Each cluster will be handled by one AutoScalingHandler
  * @author Ashansa Perera
  * @version $Id$
  * @since 1.0
@@ -28,16 +28,39 @@ public class AutoScalingHandler {
   private static final Logger logger = Logger.getLogger(AutoScalingHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
   private static AutoScalarAPI autoScalarAPI;
-  private Map<String, ArrayBlockingQueue<ScalingSuggestion>> groupSuggestionsQueue =
-          new HashMap<String, ArrayBlockingQueue<ScalingSuggestion>>();
+  private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
+          new HashMap<String, AutoScalingSuggestionExecutor>();
+  private boolean isAutoScalingActive = false;
 
   public AutoScalingHandler(int noOfGroupsInCluster, AutoScalarAPI autoScalarAPI) {
     this.autoScalarAPI = autoScalarAPI;
-    executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(noOfGroupsInCluster);
+    this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(noOfGroupsInCluster);
+    this.isAutoScalingActive = true;
   }
 
   public synchronized void startHandlingGroup(GroupRuntime groupRuntime) {
-    executor.execute(new AutoScalingSuggestionExecutor(groupRuntime));
+    if (isAutoScalingActive) {
+      AutoScalingSuggestionExecutor suggestionExecutor = new AutoScalingSuggestionExecutor(groupRuntime);
+      groupExecutorMap.put(groupRuntime.getId(), suggestionExecutor);
+      executor.execute(suggestionExecutor);
+    } else {
+      logger.error("Cannot start handling auto-scaling in group. Auto-scaling is set to " + isAutoScalingActive);
+    }
+  }
+
+  public synchronized void stopHandlingGroup(String groupId) {
+    AutoScalingSuggestionExecutor suggestionExecutor = groupExecutorMap.get(groupId);
+    groupExecutorMap.remove(groupId);
+    suggestionExecutor.stopAutoScalingSuggestionExecution();
+  }
+
+  public void stopHandlingCluster() {
+    isAutoScalingActive = false;
+    for (Map.Entry<String, AutoScalingSuggestionExecutor> executorEntry : groupExecutorMap.entrySet()) {
+      groupExecutorMap.remove(executorEntry.getKey());
+      executorEntry.getValue().stopAutoScalingSuggestionExecution();
+    }
+    executor.shutdown();  //already submitted tasked will be completed before shutting down
   }
 
   class AutoScalingSuggestionExecutor implements Runnable {

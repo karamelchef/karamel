@@ -391,6 +391,7 @@ public class ClusterManager implements Runnable {
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
     KandyRestClient.pushClusterStats(definition.getName(), stats);
+    autoScalingHandler.stopHandlingCluster();
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' TERMINATED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
@@ -531,6 +532,10 @@ public class ClusterManager implements Runnable {
       logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". AutoScalarAPI has not been " +
               "initialized");
     }
+  }
+
+  private void stopAutoScalingGroup(String groupId) {
+    autoScalingHandler.stopHandlingGroup(groupId);
   }
 
   //TODO the method observing the suggestion queue should invoke this method
