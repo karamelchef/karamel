@@ -382,7 +382,6 @@ public final class Ec2Launcher extends Launcher {
    /* for (final MachineType machineType : machineTypes) {
       new Thread(new SpawnMachineTask(machineType, groupRuntime, ec2)).start();
     }*/
-    //TODO-AS return machine runtimes
 
     List<MachineRuntime> allSpawnedMachines = new ArrayList<MachineRuntime>();
     for (MachineType machineType : machineTypes) {

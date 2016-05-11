@@ -457,7 +457,7 @@ public class ClusterManager implements Runnable {
               groupRegion.put(groupRuntime.getName(), ((Ec2) provider).getRegion());
               Set<String> vmNamesToBeRemoved = new HashSet<>();
               for (MachineRuntime machineRuntime : groupRuntime.getMachines()) {
-                if (allIdsToBeRemoved.contains(machineRuntime.getId())) {
+                if (allIdsToBeRemoved.contains(machineRuntime.getVmId())) {
                   vmNamesToBeRemoved.add(machineRuntime.getUniqueName());
                 }
               }

@@ -118,7 +118,7 @@ public class AutoScalingHandler {
     private void handleScaleInSuggestion(String[] vmIds) {
       try {
         //TODO-AS temporary removing first Id
-        vmIds = new String[]{groupRuntime.getMachines().get(0).getId()};
+        vmIds = new String[]{groupRuntime.getMachines().get(0).getVmId()};
 
         clusterService.scaleInClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), vmIds);
       } catch (KaramelException e) {

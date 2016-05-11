@@ -55,7 +55,7 @@ public class GroupRuntime {
   public synchronized void removeMachineWithId(String id) {
     for (Iterator<MachineRuntime> iterator = machines.iterator(); iterator.hasNext();) {
       MachineRuntime machine = iterator.next();
-      if (machine.getId().equals(id)) {
+      if (machine.getVmId().equals(id)) {
         iterator.remove();
       }
     }
