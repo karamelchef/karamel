@@ -25,9 +25,12 @@ import org.apache.log4j.Logger;
 import org.jclouds.compute.domain.NodeMetadata;
 import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
+import se.kth.autoscalar.scaling.group.Group;
 import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
+import se.kth.autoscalar.scaling.rules.Rule;
 import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
+import se.kth.karamel.backend.autoscalar.rules.RuleLoader;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -524,21 +527,48 @@ public class ClusterManager implements Runnable {
     if (autoScalarAPI != null) {
       try {
         //TODO-AS create rules and add it to AS
-       /* Rule[] rules = RuleLoader.getRulesOfGroup(groupRuntime.getCluster().getName(),
-                groupRuntime.getName());*/
+        Rule[] rules = RuleLoader.getRulesOfGroup(groupRuntime.getCluster().getName(),
+                groupRuntime.getName());
+        String[] addedRules = addASRulesForGroup(groupRuntime.getId(), rules);
+        if (addedRules.length > 0) {
+          //TODO-AS get params req to createGroup through the yml
+          Map<Group.ResourceRequirement, Integer> minReq = new HashMap<Group.ResourceRequirement, Integer>();
+          minReq.put(Group.ResourceRequirement.NUMBER_OF_VCPUS, 1);
+          minReq.put(Group.ResourceRequirement.RAM, 2);
+          minReq.put(Group.ResourceRequirement.STORAGE, 50);
 
-        MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
-                groupRuntime.getMachines().size());
-        autoscalerListenersMap.put(groupRuntime.getId(), listener);
-        //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
-        autoScalingHandler.startHandlingGroup(groupRuntime);
+          autoScalarAPI.createGroup(groupRuntime.getId(), 1, 3, 120, 120, addedRules, minReq, 80);
+
+          MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
+                  groupRuntime.getMachines().size());
+          autoscalerListenersMap.put(groupRuntime.getId(), listener);
+          //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+          autoScalingHandler.startHandlingGroup(groupRuntime);
+        }
       } catch (AutoScalarException e) {
         logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
+      } catch (KaramelException e) {
+        logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
       }
     } else {
       logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". AutoScalarAPI has not been " +
               "initialized");
     }
+  }
+
+  private String[] addASRulesForGroup(String groupId, Rule[] rules) {
+    ArrayList<String> addedRules = new ArrayList<String>();
+    for (Rule rule : rules) {
+      try {
+        autoScalarAPI.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
+                rule.getOperationAction());
+        autoScalarAPI.addRuleToGroup(rule.getRuleName(), groupId);
+        addedRules.add(rule.getRuleName());
+      } catch (AutoScalarException e) {
+        logger.error("Failed to add rule with name: " + rule.getRuleName());
+      }
+    }
+    return addedRules.toArray(new String[addedRules.size()]);
   }
 
   private void stopAutoScalingGroup(String groupId) {
