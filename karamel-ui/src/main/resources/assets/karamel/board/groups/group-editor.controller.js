@@ -12,6 +12,7 @@ angular.module('main.module')
         if (groupInfo !== null) {
           $scope.name = groupInfo.name;
           $scope.size = groupInfo.size;
+          $scope.autoScalingEnabled = groupInfo.autoScalingEnabled;
         }
         else {
           $scope.size = 0;
@@ -23,7 +24,7 @@ angular.module('main.module')
         if (!this.nodeGroupForm.$valid) {
           return false;
         }
-        $modalInstance.close({name: $scope.name, size: $scope.size});
+        $modalInstance.close({name: $scope.name, size: $scope.size, autoScalingEnabled: $scope.autoScalingEnabled});
       };
 
       $scope.close = function() {

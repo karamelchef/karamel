@@ -26,6 +26,7 @@ public class GroupRuntime {
   private GroupPhase phase = GroupPhase.NONE;
   private String name;
   private String id;
+  private boolean autoScalingEnabled;
   private List<MachineRuntime> machines = new ArrayList<>();
 
   public GroupRuntime(ClusterRuntime cluster) {
@@ -35,6 +36,7 @@ public class GroupRuntime {
   public GroupRuntime(ClusterRuntime cluster, JsonGroup definition) {
     this.cluster = cluster;
     this.name = definition.getName();
+    this.autoScalingEnabled = definition.getAutoScalingEnabled();
   }
 
   public synchronized void setMachines(List<MachineRuntime> machines) {
@@ -85,9 +87,8 @@ public class GroupRuntime {
     return cluster;
   }
 
-  public boolean isElasticScalingEnabled() {
-    //TODO-AS implement method: have an attribute in yml file
-    return true;
+  public boolean isAutoScalingEnabled() {
+    return autoScalingEnabled;
   }
 
 }

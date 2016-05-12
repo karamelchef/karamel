@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import se.kth.autoscalar.scaling.ScalingSuggestion;
 import se.kth.autoscalar.scaling.core.AutoScalarAPI;
 import se.kth.autoscalar.scaling.models.MachineType;
+//import se.kth.autoscalar.scaling.rules.Rule;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.common.exception.KaramelException;
@@ -62,6 +63,14 @@ public class AutoScalingHandler {
     }
     executor.shutdown();  //already submitted tasked will be completed before shutting down
   }
+
+ /* public Rule[] getAutoScalingRules(ClusterASRules.RuleModel[] ruleModels) {
+    ArrayList<Rule> rules = new ArrayList<Rule>();
+    for (ClusterASRules.RuleModel ruleModel : ruleModels) {
+      //TODO-AS fill Rule objects
+    }
+    return rules.toArray(new Rule[rules.size()]);
+  }*/
 
   class AutoScalingSuggestionExecutor implements Runnable {
 

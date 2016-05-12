@@ -523,6 +523,10 @@ public class ClusterManager implements Runnable {
             "################################");
     if (autoScalarAPI != null) {
       try {
+        //TODO-AS create rules and add it to AS
+       /* Rule[] rules = RuleLoader.getRulesOfGroup(groupRuntime.getCluster().getName(),
+                groupRuntime.getName());*/
+
         MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
                 groupRuntime.getMachines().size());
         autoscalerListenersMap.put(groupRuntime.getId(), listener);
@@ -599,7 +603,7 @@ public class ClusterManager implements Runnable {
               //if group is forked successfully, start auto-scaling in tha group
               if(!isFailed) {
                 for (GroupRuntime groupRuntime: groupRuntimes) {
-                  if(groupRuntime.isElasticScalingEnabled()) {
+                  if(groupRuntime.isAutoScalingEnabled()) {
                     startAutoScaling(groupRuntime);
                   }
                 }
