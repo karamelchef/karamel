@@ -7,6 +7,7 @@ sudo apt-get -y install docker-engine;
 sudo usermod -a -G docker $USER;
 sudo rm -rf /etc/systemd/system/docker.service.d/;
 sudo mkdir -p /etc/systemd/system/docker.service.d/;
+sudo mkdir /var/repository
 echo "[Service]"  | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
 echo "ExecStart="  | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
 echo "ExecStart=/usr/bin/docker daemon -H fd:// --cluster-store=consul://%kv_store_ip%:8500 --cluster-advertise=%host_ip%:2375 -H=tcp://0.0.0.0:2375 -H=unix:///var/run/docker.sock" | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;

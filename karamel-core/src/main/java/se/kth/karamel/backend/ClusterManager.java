@@ -81,6 +81,7 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
+  private ContainerClusterManager containerClusterManager;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -317,6 +318,9 @@ public class ClusterManager implements Runnable {
   }
 
   private void forkContainers() throws InterruptedException, KaramelException {
+
+    runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_CONTAINERS);
+    ClusterStatistics.startTimer();
     //create necessary containers here
     String keyValueStorePrivateIP = "";
     String keyValueStorePublicIp = "";
@@ -341,10 +345,10 @@ public class ClusterManager implements Runnable {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
-    ContainerClusterManager containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
-        machinesMonitor);
     HashMap<String, ArrayList<NodeRunTime>> containerRuntimeMap = null;
     try {
+      containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
+        machinesMonitor);
       containerClusterManager.setupNetworking(keyValueStorePublicIp, keyValueStorePrivateIP);
       containerRuntimeMap = containerClusterManager.StartContainers();
     } catch (DockerException e) {
@@ -358,6 +362,12 @@ public class ClusterManager implements Runnable {
         machinesMonitor.addMachines(containerRuntimeMap.get(group.getName()));
       }
     }
+
+    long duration = ClusterStatistics.stopTimer();
+    PhaseStat phaseStat
+      = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_CONTAINERS.name(), "SUCCESS", duration);
+    stats.addPhase(phaseStat);
+    runtime.setPhase(ClusterRuntime.ClusterPhases.CONTAINERS_FORKED);
   }
 
   private void runDag(boolean installDag) throws Exception {
@@ -460,9 +470,6 @@ public class ClusterManager implements Runnable {
       runtime.setPhase(ClusterRuntime.ClusterPhases.MACHINES_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
-    if (definition.getUseContainers()) {
-      forkContainers();
-    }
   }
 
   private void populateHostGroups() {
@@ -519,6 +526,11 @@ public class ClusterManager implements Runnable {
               PhaseStat phaseStat
                   = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
+
+              //forking containers if it is container runtime.
+              if (definition.getUseContainers()) {
+                forkContainers();
+              }
             }
             break;
 

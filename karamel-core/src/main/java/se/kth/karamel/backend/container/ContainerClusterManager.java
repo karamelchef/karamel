@@ -37,7 +37,7 @@ public class ContainerClusterManager {
 
   private static final Logger logger = Logger.getLogger(ContainerClusterManager.class);
 
-  private HashMap<String, List<NodeRunTime>> containerHostMap = new HashMap<>();
+  private HashMap<String, List<String>> containerHostMap = new HashMap<>();
 
   /**
    * Mapping for Containers and for Groups
@@ -100,8 +100,6 @@ public class ContainerClusterManager {
 
         DockerClient client = dockerClientMap.get(publicIp);
 
-        client.pull("shelan/karamel-node:v2.0.0", AuthConfig.builder().build());
-
         final Map<String, List<PortBinding>> portBindings = new HashMap<>();
         List<PortBinding> hostPorts = new ArrayList<>();
         hostPorts.add(PortBinding.of("0.0.0.0", sshPort));
@@ -128,13 +126,14 @@ public class ContainerClusterManager {
         HostConfig hostConfig = HostConfig.builder()
           .networkMode("karamel")
           .portBindings(portBindings)
+          .binds("/var/repository:/tmp/binary")
           .build();
 
         String[] exposedPorts = new String[ports.size()];
         exposedPorts = ports.toArray(exposedPorts);
 
         ContainerConfig containerConfig = ContainerConfig.builder()
-          .image("shelan/karamel-node:v2.0.0")
+          .image("shelan/karamel-node:v3.0.0")
           .hostConfig(hostConfig)
           .exposedPorts(exposedPorts)
           .hostname("node" + containerOffset)
@@ -157,6 +156,7 @@ public class ContainerClusterManager {
         containerRuntime.setSshUser("vagrant");
         machines.add(containerRuntime);
         containerGroupMap.get(groupName).add(containerRuntime);
+        containerHostMap.get(publicIp).add(id);
 
         containerOffset++;
       }
@@ -174,11 +174,14 @@ public class ContainerClusterManager {
 
     for (NodeRunTime nodeRunTime : hostMachineRuntimes) {
       String publicIp = nodeRunTime.getPublicIp();
-      containerHostMap.put(publicIp, new ArrayList<NodeRunTime>());
+      containerHostMap.put(publicIp, new ArrayList<String>());
       DockerClient docker = new DefaultDockerClient("http://" + nodeRunTime.getPublicIp() + ":2375");
       AuthConfig authConfig = AuthConfig.builder().serverAddress("https://index.docker.io/v1/").build();
       try {
         docker.auth(authConfig);
+        //pulling all the required images here.
+        docker.pull("shelan/karamel-node:v3.0.0", AuthConfig.builder().build());
+        docker.pull("progrium/consul:latest", AuthConfig.builder().build());
       } catch (DockerException e) {
         logger.error("Error while initializing docker clients", e);
       } catch (InterruptedException e) {
@@ -208,7 +211,6 @@ public class ContainerClusterManager {
   public void setupNetworking(String kvStorePublicIP, String kvStorePrivateIP) throws DockerException,
     InterruptedException {
     DockerClient client = dockerClientMap.get(kvStorePublicIP);
-    client.pull("progrium/consul:latest", AuthConfig.builder().build());
 
     final Map<String, List<PortBinding>> portBindings = new HashMap<String, List<PortBinding>>();
     List<PortBinding> hostPorts = new ArrayList<PortBinding>();
@@ -233,11 +235,9 @@ public class ContainerClusterManager {
     while (networkCreation == null || !(networkCreation.id().length() > 0)) {
       try {
         networkCreation = client.createNetwork(networkConfig);
-      } catch (Exception e){
+      } catch (Exception e) {
         Thread.sleep(1000);
       }
     }
-
   }
-
 }
