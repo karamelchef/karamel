@@ -15,16 +15,16 @@ import java.util.Map;
  * @version $Id$
  * @since 1.0
  */
-public class ClusterASRules {
+public class ClusterGroupRulesBk {
 
   private String clusterName;
   private Map<String, ArrayList<RuleModel>> ruleGroups = new HashMap<String, ArrayList<RuleModel>>();
 
   private Map<String, ArrayList<Rule>> ruleMapping = new HashMap<String, ArrayList<Rule>>();
   //private HashMap<String, HashMap<String,RuleModel>> ruleGroups = new HashMap<String, HashMap<String, RuleModel>>();
-  //new Yaml(new Constructor(ClusterASRules.class)).load(Files.toString(new File(
+  //new Yaml(new Constructor(ClusterGroupRules.class)).load(Files.toString(new File(
   // "/Users/ashansa/HS/thesis/karamel-source/karamel-core/test.yml"), Charsets.UTF_8))
-  public ClusterASRules() {
+  public ClusterGroupRulesBk() {
   }
 
   public String getClusterName() {
@@ -54,7 +54,7 @@ public class ClusterASRules {
   }
 
   /**
-   * This will replace the rules in the map with the newly given rule list
+   * This will replace the ruleModels in the map with the newly given rule list
    * @param groupName
    * @param ruleModels
    */
@@ -66,7 +66,7 @@ public class ClusterASRules {
         continue;
       } else {
         try {
-          rules.add(RuleMapper.getAutoScalingRule(model));
+          rules.add(Mapper.getAutoScalingRule(model));
         } catch (KaramelException e) {
           //TODO-AS check whether we can log error
         }

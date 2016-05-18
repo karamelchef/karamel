@@ -30,6 +30,8 @@ import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
 import se.kth.autoscalar.scaling.rules.Rule;
 import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
+import se.kth.karamel.backend.autoscalar.rules.GroupModel;
+import se.kth.karamel.backend.autoscalar.rules.Mapper;
 import se.kth.karamel.backend.autoscalar.rules.RuleLoader;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
@@ -91,7 +93,7 @@ public class ClusterManager implements Runnable {
   private final ClusterStats stats = new ClusterStats();
   private AutoScalarAPI autoScalarAPI;
   private AutoScalingHandler autoScalingHandler;
-  private final Map<String, MonitoringListener> autoscalerListenersMap = new HashMap<>();
+  private final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -527,17 +529,16 @@ public class ClusterManager implements Runnable {
     if (autoScalarAPI != null) {
       try {
         //TODO-AS create rules and add it to AS
-        Rule[] rules = RuleLoader.getRulesOfGroup(groupRuntime.getCluster().getName(),
-                groupRuntime.getName());
+        GroupModel groupModel = RuleLoader.getGroupModel(groupRuntime.getCluster().getName(), groupRuntime.getName());
+        Rule[] rules = groupModel.getRules();
         String[] addedRules = addASRulesForGroup(groupRuntime.getId(), rules);
         if (addedRules.length > 0) {
           //TODO-AS get params req to createGroup through the yml
-          Map<Group.ResourceRequirement, Integer> minReq = new HashMap<Group.ResourceRequirement, Integer>();
-          minReq.put(Group.ResourceRequirement.NUMBER_OF_VCPUS, 1);
-          minReq.put(Group.ResourceRequirement.RAM, 2);
-          minReq.put(Group.ResourceRequirement.STORAGE, 50);
+          Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
 
-          autoScalarAPI.createGroup(groupRuntime.getId(), 1, 3, 120, 120, addedRules, minReq, 80);
+          autoScalarAPI.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
+                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+                  groupModel.getReliabilityReq());
 
           MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
                   groupRuntime.getMachines().size());
@@ -569,6 +570,11 @@ public class ClusterManager implements Runnable {
       }
     }
     return addedRules.toArray(new String[addedRules.size()]);
+  }
+
+  private void getMinReqMap(HashMap<String, Integer> minReq) {
+    HashMap<Group.ResourceRequirement, Integer> asGroupReq = new HashMap<>();
+
   }
 
   private void stopAutoScalingGroup(String groupId) {

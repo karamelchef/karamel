@@ -64,14 +64,6 @@ public class AutoScalingHandler {
     executor.shutdown();  //already submitted tasked will be completed before shutting down
   }
 
- /* public Rule[] getAutoScalingRules(ClusterASRules.RuleModel[] ruleModels) {
-    ArrayList<Rule> rules = new ArrayList<Rule>();
-    for (ClusterASRules.RuleModel ruleModel : ruleModels) {
-      //TODO-AS fill Rule objects
-    }
-    return rules.toArray(new Rule[rules.size()]);
-  }*/
-
   class AutoScalingSuggestionExecutor implements Runnable {
 
     private GroupRuntime groupRuntime;
@@ -126,7 +118,7 @@ public class AutoScalingHandler {
 
     private void handleScaleInSuggestion(String[] vmIds) {
       try {
-        //TODO-AS temporary removing first Id
+        //TODO-AS temporary removing first Id -remove passing ids
         vmIds = new String[]{groupRuntime.getMachines().get(0).getVmId()};
 
         clusterService.scaleInClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), vmIds);

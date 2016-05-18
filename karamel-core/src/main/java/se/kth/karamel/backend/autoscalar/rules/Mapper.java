@@ -1,8 +1,12 @@
 package se.kth.karamel.backend.autoscalar.rules;
 
+import se.kth.autoscalar.scaling.group.Group;
 import se.kth.autoscalar.scaling.monitoring.RuleSupport;
 import se.kth.autoscalar.scaling.rules.Rule;
 import se.kth.karamel.common.exception.KaramelException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,12 +15,16 @@ import se.kth.karamel.common.exception.KaramelException;
  * @version $Id$
  * @since 1.0
  */
-public class RuleMapper {
+public class Mapper {
 
   private static final String GREATER_THAN = ">";
   private static final String GREATER_THAN_OR_EQUAL = ">=";
   private static final String LESS_THAN = "<";
   private static final String LESS_THAN_OR_EQUAL = "<=";
+
+  private static final String NUMBER_OF_VCPUS = "vcpus";
+  private static final String RAM = "RAM";
+  private static final String STORAGE = "storage";
 
   public static Rule getAutoScalingRule(RuleModel ruleModel) throws KaramelException {
     String ruleName = ruleModel.getRuleName();
@@ -59,6 +67,29 @@ public class RuleMapper {
       return RuleSupport.Comparator.LESS_THAN_OR_EQUAL.name();
     else
       return comparator;
+  }
+
+  public static HashMap<Group.ResourceRequirement, Integer> getASMinReqMap(HashMap<String, Integer> srcMap) {
+    HashMap<Group.ResourceRequirement, Integer> minReq = new HashMap<>();
+
+    for (Map.Entry<String, Integer> entry : srcMap.entrySet()) {
+      String resourceTypeString = getASResourceReqString(entry.getKey());
+      if (resourceTypeString != null) {
+        minReq.put(Group.ResourceRequirement.valueOf(resourceTypeString), entry.getValue());
+      }
+    }
+    return minReq;
+  }
+
+  private static String getASResourceReqString(String resourceType) {
+    if (NUMBER_OF_VCPUS.equals(resourceType))
+      return Group.ResourceRequirement.NUMBER_OF_VCPUS.name();
+    else if (RAM.equals(resourceType))
+      return Group.ResourceRequirement.RAM.name();
+    else if (STORAGE.equals(resourceType))
+      return Group.ResourceRequirement.STORAGE.name();
+    else
+      return null;
   }
 
 }
