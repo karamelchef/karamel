@@ -16,6 +16,14 @@ import se.kth.karamel.backend.running.model.tasks.Task;
  */
 public class NodeRunTime {
 
+  public String getContainerId() {
+    return containerId;
+  }
+
+  public void setContainerId(String containerId) {
+    this.containerId = containerId;
+  }
+
   public static enum LifeStatus {
 
     FORKED, CONNECTED, UNREACHABLE, DESTROYED
@@ -34,6 +42,7 @@ public class NodeRunTime {
   private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.EMPTY;
+  private String containerId;
   private String name;
   private String vmId;
   private String privateIp;
@@ -151,7 +160,7 @@ public class NodeRunTime {
 
   public String getId() {
     if(NodeType.CONTAINER.equals(getNodeType())){
-      return getVmId();
+      return getContainerId();
     }
     return publicIp;
   }

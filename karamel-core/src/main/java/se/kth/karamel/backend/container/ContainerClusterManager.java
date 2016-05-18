@@ -74,7 +74,7 @@ public class ContainerClusterManager {
     init();
   }
 
-  public HashMap<String, ArrayList<NodeRunTime>> StartContainers() throws KaramelException, InterruptedException,
+  public HashMap<String, ArrayList<NodeRunTime>> startContainers() throws KaramelException, InterruptedException,
     DockerException {
     for (JsonGroup jsonGroup : cluster.getGroups()) {
       if (!Settings.CONTAINER_HOST_GROUP.equals(jsonGroup.getName())) {
@@ -132,15 +132,17 @@ public class ContainerClusterManager {
         String[] exposedPorts = new String[ports.size()];
         exposedPorts = ports.toArray(exposedPorts);
 
+        String containerName = "node" + containerOffset;
+
         ContainerConfig containerConfig = ContainerConfig.builder()
           .image("shelan/karamel-node:v3.0.0")
           .hostConfig(hostConfig)
           .exposedPorts(exposedPorts)
-          .hostname("node" + containerOffset)
+          .hostname(containerName)
           .build();
 
 
-        final ContainerCreation creation = client.createContainer(containerConfig, "node" + containerOffset);
+        final ContainerCreation creation = client.createContainer(containerConfig, containerName);
         final String id = creation.id();
         client.startContainer(id);
         String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
@@ -148,15 +150,16 @@ public class ContainerClusterManager {
         NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
         containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
         containerRuntime.setMachineType(NodeRunTime.NodeType.CONTAINER.name());
-        containerRuntime.setName(id);
-        containerRuntime.setVmId(id);
+        containerRuntime.setName(containerName);
+        containerRuntime.setVmId(containerName);
+        containerRuntime.setContainerId(containerName);
         containerRuntime.setPrivateIp(containerIp);
         containerRuntime.setPublicIp(publicIp);
         containerRuntime.setSshPort(sshPort);
         containerRuntime.setSshUser("vagrant");
         machines.add(containerRuntime);
         containerGroupMap.get(groupName).add(containerRuntime);
-        containerHostMap.get(publicIp).add(id);
+        containerHostMap.get(publicIp).add(containerName);
 
         containerOffset++;
       }
@@ -181,7 +184,6 @@ public class ContainerClusterManager {
         docker.auth(authConfig);
         //pulling all the required images here.
         docker.pull("shelan/karamel-node:v3.0.0", AuthConfig.builder().build());
-        docker.pull("progrium/consul:latest", AuthConfig.builder().build());
       } catch (DockerException e) {
         logger.error("Error while initializing docker clients", e);
       } catch (InterruptedException e) {
@@ -212,6 +214,7 @@ public class ContainerClusterManager {
     InterruptedException {
     DockerClient client = dockerClientMap.get(kvStorePublicIP);
 
+    client.pull("progrium/consul:latest", AuthConfig.builder().build());
     final Map<String, List<PortBinding>> portBindings = new HashMap<String, List<PortBinding>>();
     List<PortBinding> hostPorts = new ArrayList<PortBinding>();
     hostPorts.add(PortBinding.of("0.0.0.0", 8500));
@@ -237,6 +240,27 @@ public class ContainerClusterManager {
         networkCreation = client.createNetwork(networkConfig);
       } catch (Exception e) {
         Thread.sleep(1000);
+      }
+    }
+  }
+
+  public HashMap<String, ArrayList<NodeRunTime>> restartContainers() throws KaramelException, DockerException,
+    InterruptedException {
+    destroyContainers();
+    return startContainers();
+
+  }
+
+  private void destroyContainers()  throws InterruptedException {
+    for (String ip : containerHostMap.keySet()) {
+      DockerClient client = dockerClientMap.get(ip);
+      for (String containerName : containerHostMap.get(ip)) {
+        try {
+          client.killContainer(containerName);
+          client.removeContainer(containerName);
+        }catch (DockerException e){
+          logger.error("error while stopping container "+containerName, e);
+        }
       }
     }
   }

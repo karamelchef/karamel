@@ -86,7 +86,7 @@ public class ClusterManager implements Runnable {
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
-    if(definition.getUseContainers()){
+    if (definition.getUseContainers()) {
       populateHostGroups();
     }
     this.runtime = new ClusterRuntime(definition);
@@ -124,7 +124,7 @@ public class ClusterManager implements Runnable {
    * Non-blocking way of controlling the cluster, the quick commands are served immediately while the time-consuming
    * commands are queued to be served one by one. Commands have different level of priorities and the higher priority
    * commands invalidated the lower-priority ones.
-   *
+   * <p>
    * Cluster-scope immediate: - INTERRUPT_CLUSTER Cluster-scope long-running: - LAUNCH_CLUSTER - INTERRUPT_CLUSTER
    * DAG-scope immediate: - INTERRUPT_DAG - PAUSE_DAG - RESUME_DAG DAG-scope long-running: - SUBMIT_INSTALL_DAG -
    * SUBMIT_PURGE_DAG
@@ -134,12 +134,12 @@ public class ClusterManager implements Runnable {
    */
   public void enqueue(Command command) throws KaramelException {
     ArrayList<Command> clusterScopeQueuingCommands = Lists.newArrayList(
-        Command.LAUNCH_CLUSTER,
-        Command.TERMINATE_CLUSTER);
+      Command.LAUNCH_CLUSTER,
+      Command.TERMINATE_CLUSTER);
 
     ArrayList<Command> dagScopeQueuingCommands = Lists.newArrayList(
-        Command.SUBMIT_INSTALL_DAG,
-        Command.SUBMIT_PURGE_DAG);
+      Command.SUBMIT_INSTALL_DAG,
+      Command.SUBMIT_PURGE_DAG);
 
     if (clusterScopeQueuingCommands.contains(command)) {
       cmdQueue.removeAll(dagScopeQueuingCommands);
@@ -285,11 +285,11 @@ public class ClusterManager implements Runnable {
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
       // If this is a container setup delay forking groups for installations.
-      if(definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())){
+      if (definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())) {
         continue;
       }
       if (group.getPhase() == GroupRuntime.GroupPhase.PRECLEANED
-          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
+        || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
         runtime.resolveFailure(Failure.hash(Failure.Type.CREATING_SEC_GROUPS_FAILE, group.getName()));
         group.setPhase(GroupRuntime.GroupPhase.FORKING_GROUPS);
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
@@ -313,7 +313,7 @@ public class ClusterManager implements Runnable {
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.GROUPS_FORKED);
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' GROUPS_FORKED \\o/\\o/\\o/\\o/\\o/",
-          definition.getName()));
+        definition.getName()));
     }
   }
 
@@ -336,7 +336,7 @@ public class ClusterManager implements Runnable {
       keyValueStorePrivateIP = hostGroupRuntime.getMachines().get(0).getPrivateIp();
       keyValueStorePublicIp = hostGroupRuntime.getMachines().get(0).getPublicIp();
       containerHostConfigurationDag = DagBuilder.getContainerSetupDag(runtime, stats, machinesMonitor,
-          keyValueStorePrivateIP);
+        keyValueStorePrivateIP);
       containerHostConfigurationDag.start();
     } catch (KaramelException e) {
       e.printStackTrace();
@@ -350,11 +350,11 @@ public class ClusterManager implements Runnable {
       containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
         machinesMonitor);
       containerClusterManager.setupNetworking(keyValueStorePublicIp, keyValueStorePrivateIP);
-      containerRuntimeMap = containerClusterManager.StartContainers();
+      containerRuntimeMap = containerClusterManager.startContainers();
     } catch (DockerException e) {
       logger.error("Error while starting containers :" + e.getMessage(), e);
     }
-  //  machinesMonitor.reInitialize(containerClusterManager.getNOfContainers());
+    //  machinesMonitor.reInitialize(containerClusterManager.getNOfContainers());
 
     for (GroupRuntime group : getRuntime().getGroups()) {
       if (containerRuntimeMap.keySet().contains(group.getName())) {
@@ -370,11 +370,29 @@ public class ClusterManager implements Runnable {
     runtime.setPhase(ClusterRuntime.ClusterPhases.CONTAINERS_FORKED);
   }
 
+  private void restartContainers() {
+    try {
+      HashMap<String, ArrayList<NodeRunTime>> containerRuntimeMap = containerClusterManager.restartContainers();
+      for (GroupRuntime group : getRuntime().getGroups()) {
+        if (containerRuntimeMap.keySet().contains(group.getName())) {
+          group.setMachines(containerRuntimeMap.get(group.getName()));
+          machinesMonitor.addMachines(containerRuntimeMap.get(group.getName()));
+        }
+      }
+    } catch (KaramelException e) {
+      logger.error("Error while purging containers ", e);
+    } catch (DockerException e) {
+      logger.error("Docker failed to remove containers ", e);
+    } catch (InterruptedException e) {
+      logger.error("Interrupted while removing containers ", e);
+    }
+  }
+
   private void runDag(boolean installDag) throws Exception {
     logger.info(String.format("Running the DAG for '%s' ...", definition.getName()));
     if (currentDag != null) {
       logger.info(String.format("Terminating the previous DAG before running the new one for '%s' ...",
-          definition.getName()));
+        definition.getName()));
       currentDag.termiante();
     }
     runtime.setPhase(ClusterRuntime.ClusterPhases.RUNNING_DAG);
@@ -387,11 +405,11 @@ public class ClusterManager implements Runnable {
     try {
       if (installDag) {
         Map<String, JsonObject> chefJsons = ChefJsonGenerator.
-            generateClusterChefJsonsForInstallation(definition, runtime);
+          generateClusterChefJsonsForInstallation(definition, runtime);
         currentDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
       } else {
         Map<String, JsonObject> chefJsons = ChefJsonGenerator.
-            generateClusterChefJsonsForPurge(definition, runtime);
+          generateClusterChefJsonsForPurge(definition, runtime);
         currentDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
       }
       currentDag.start();
@@ -445,11 +463,11 @@ public class ClusterManager implements Runnable {
     List<GroupRuntime> groups = runtime.getGroups();
     for (GroupRuntime group : groups) {
       //If this is a container setup forking containers will be handled separately. fork only docker hosts
-      if(definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())){
+      if (definition.getUseContainers() && !Settings.CONTAINER_HOST_GROUP.equals(group.getName())) {
         continue;
       }
       if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED
-          || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
+        || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
         runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, group.getName()));
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
@@ -499,7 +517,7 @@ public class ClusterManager implements Runnable {
         switch (cmd) {
           case LAUNCH_CLUSTER:
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.NOT_STARTED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANING && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               clean(false);
               long duration = ClusterStatistics.stopTimer();
@@ -508,23 +526,23 @@ public class ClusterManager implements Runnable {
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.PRECLEANED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_GROUPS && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkGroups();
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
+                = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_GROUPS.name(), status, duration);
               stats.addPhase(phaseStat);
             }
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
-                || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
+              || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               ClusterStatistics.startTimer();
               forkMachines();
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
-                  = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
+                = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
 
               //forking containers if it is container runtime.
@@ -536,7 +554,7 @@ public class ClusterManager implements Runnable {
 
           case SUBMIT_INSTALL_DAG:
             if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
-                && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
+              && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
               ClusterStatistics.startTimer();
               runDag(true);
               long duration = ClusterStatistics.stopTimer();
@@ -547,9 +565,14 @@ public class ClusterManager implements Runnable {
             break;
           case SUBMIT_PURGE_DAG:
             if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
-                && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
+              && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
               ClusterStatistics.startTimer();
-              runDag(false);
+              if (definition.getUseContainers()) {
+                containerClusterManager.restartContainers();
+                runDag(true);
+              } else {
+                runDag(false);
+              }
               long duration = ClusterStatistics.stopTimer();
               String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name(), status, duration);
