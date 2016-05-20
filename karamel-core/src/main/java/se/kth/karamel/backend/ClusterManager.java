@@ -319,8 +319,6 @@ public class ClusterManager implements Runnable {
 
   private void forkContainers() throws InterruptedException, KaramelException {
 
-    runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_CONTAINERS);
-    ClusterStatistics.startTimer();
     //create necessary containers here
     String keyValueStorePrivateIP = "";
     String keyValueStorePublicIp = "";
@@ -345,11 +343,35 @@ public class ClusterManager implements Runnable {
       Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
     }
 
+
     HashMap<String, ArrayList<NodeRunTime>> containerRuntimeMap = null;
     try {
       containerClusterManager = new ContainerClusterManager(runtime, definition, stats,
         machinesMonitor);
+
+      runtime.setPhase(ClusterRuntime.ClusterPhases.DOWNLOAD_CONTAINER_IMAGE);
+      ClusterStatistics.startTimer();
+      containerClusterManager.init();
+      long downloadDuration = ClusterStatistics.stopTimer();
+      PhaseStat downloadphaseStat
+        = new PhaseStat(ClusterRuntime.ClusterPhases.DOWNLOAD_CONTAINER_IMAGE.name(), "SUCCESS", downloadDuration);
+      stats.addPhase(downloadphaseStat);
+      runtime.setPhase(ClusterRuntime.ClusterPhases.DOWNLOAD_CONTAINER_IMAGE);
+
+      // Setting up container networking
+      runtime.setPhase(ClusterRuntime.ClusterPhases.SETUP_CONTAINER_NETWORKING);
+      ClusterStatistics.startTimer();
       containerClusterManager.setupNetworking(keyValueStorePublicIp, keyValueStorePrivateIP);
+      long duration = ClusterStatistics.stopTimer();
+      PhaseStat phaseStat
+        = new PhaseStat(ClusterRuntime.ClusterPhases.SETUP_CONTAINER_NETWORKING.name(), "SUCCESS", duration);
+      stats.addPhase(phaseStat);
+      runtime.setPhase(ClusterRuntime.ClusterPhases.SETUP_CONTAINER_NETWORKING);
+
+      // Starting containers
+      runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_CONTAINERS);
+      ClusterStatistics.startTimer();
+
       containerRuntimeMap = containerClusterManager.startContainers();
     } catch (DockerException e) {
       logger.error("Error while starting containers :" + e.getMessage(), e);

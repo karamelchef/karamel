@@ -71,7 +71,6 @@ public class ContainerClusterManager {
     this.cluster = cluster;
     this.taskSubmitter = taskSubmitter;
     this.clusterStats = clusterstats;
-    init();
   }
 
   public HashMap<String, ArrayList<NodeRunTime>> startContainers() throws KaramelException, InterruptedException,
@@ -167,7 +166,7 @@ public class ContainerClusterManager {
     return containerGroupMap;
   }
 
-  private void init() {
+  public void init() {
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
       if (Settings.CONTAINER_HOST_GROUP.equals(groupRuntime.getName())) {
         // this is the host group lets add all the machines to the host machines list
