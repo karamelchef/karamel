@@ -30,5 +30,7 @@ else
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
  exit 1
 fi
+# temporary fix to java buffer overflow.
+echo "127.0.0.1 "`hostname` | %sudo_command% tee /etc/hosts
 echo '%task_id%' >> ~/%succeedtasks_filepath%
 ' > berks-install.sh ; chmod +x berks-install.sh ; ./berks-install.sh
