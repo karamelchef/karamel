@@ -141,10 +141,39 @@ public class ContainerClusterManager {
           .build();
 
 
-        final ContainerCreation creation = client.createContainer(containerConfig, containerName);
-        final String id = creation.id();
-        client.startContainer(id);
-        String containerIp = client.inspectContainer(id).networkSettings().networks().get("karamel").ipAddress();
+        // Retry mechanism
+        boolean succeded = false;
+        String containerId = "";
+        while (!succeded) {
+          try {
+            final ContainerCreation creation = client.createContainer(containerConfig, containerName);
+            containerId = creation.id();
+
+          } catch (Exception e) {
+            logger.error(e);
+            logger.info("Retrying forking containers");
+            Thread.sleep(200);
+            continue;
+          }
+          succeded = true;
+        }
+
+        // Retry mecahnism
+        succeded = false;
+        String containerIp = "";
+        while (!succeded) {
+          try {
+            client.startContainer(containerId);
+            containerIp = client.inspectContainer(containerId).networkSettings().networks().get("karamel")
+              .ipAddress();
+          } catch (Exception e) {
+            logger.error(e);
+            logger.info("Retrying forking containers");
+            Thread.sleep(200);
+            continue;
+          }
+          succeded = true;
+        }
 
         NodeRunTime containerRuntime = new NodeRunTime(hostMachine.getGroup());
         containerRuntime.setNodeType(NodeRunTime.NodeType.CONTAINER);
@@ -177,7 +206,11 @@ public class ContainerClusterManager {
     for (NodeRunTime nodeRunTime : hostMachineRuntimes) {
       String publicIp = nodeRunTime.getPublicIp();
       containerHostMap.put(publicIp, new ArrayList<String>());
-      DockerClient docker = new DefaultDockerClient("http://" + nodeRunTime.getPublicIp() + ":2375");
+
+      DockerClient docker = DefaultDockerClient.builder().uri("http://" + nodeRunTime.getPublicIp() + ":2375")
+        .readTimeoutMillis(90000)
+        .connectTimeoutMillis(90000)
+        .build();
       AuthConfig authConfig = AuthConfig.builder().serverAddress("https://index.docker.io/v1/").build();
       try {
         docker.auth(authConfig);
@@ -250,15 +283,15 @@ public class ContainerClusterManager {
 
   }
 
-  private void destroyContainers()  throws InterruptedException {
+  private void destroyContainers() throws InterruptedException {
     for (String ip : containerHostMap.keySet()) {
       DockerClient client = dockerClientMap.get(ip);
       for (String containerName : containerHostMap.get(ip)) {
         try {
           client.killContainer(containerName);
           client.removeContainer(containerName);
-        }catch (DockerException e){
-          logger.error("error while stopping container "+containerName, e);
+        } catch (DockerException e) {
+          logger.error("error while stopping container " + containerName, e);
         }
       }
     }
