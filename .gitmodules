@@ -1,3 +1,6 @@
 [submodule "auto-scalar"]
 	path = auto-scalar
 	url = https://github.com/ashansa/auto-scalar
+[submodule "tablespoon"]
+	path = tablespoon
+	url = https://github.com/hwesterb/tablespoon
