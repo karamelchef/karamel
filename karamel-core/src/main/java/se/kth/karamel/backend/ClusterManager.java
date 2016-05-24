@@ -350,6 +350,7 @@ public class ClusterManager implements Runnable {
 
     try {
       if (installDag) {
+        //TODO-AS generate chefJson only for current group
         Map<String, JsonObject> chefJsons = ChefJsonGenerator.
             generateClusterChefJsonsForInstallation(definition, runtime);
         currentDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);

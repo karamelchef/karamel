@@ -142,7 +142,7 @@ public class Settings {
 
   public static final List<String> AWS_UNIQUE_VM_NAMES(String clusterName, String groupName, int startCount, int size) {
     List<String> names = new ArrayList<>();
-    for (int i = startCount; i <= size; i++) {
+    for (int i = startCount; i < size; i++) {
       names.add(AWS_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
     }
     return names;

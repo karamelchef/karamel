@@ -241,8 +241,8 @@ public class ClusterService {
   public synchronized void scaleOutClusterGroup(String clusterName, String groupName, MachineType[] machineTypes)
           throws KaramelException {
     String name = clusterName.toLowerCase();
-    logger.info(String.format("########### Auto-scalar asked for scale in groupId '%s' of cluster '%s' ###############",
-            groupName, clusterName));
+    logger.info(String.format("########### Auto-scalar asked for scale out groupId '%s' of cluster '%s' " +
+            "###############", groupName, clusterName));
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }

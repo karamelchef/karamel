@@ -210,7 +210,7 @@ public final class Ec2Launcher extends Launcher {
     return uniqueVmName;
   }
 
-  class SpawnMachineTask implements Runnable {
+  /*class SpawnMachineTask implements Runnable {
 
     final GroupRuntime groupRuntime;
     final MachineType machineType;
@@ -309,7 +309,7 @@ public final class Ec2Launcher extends Launcher {
           try {
             succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
             logger.info("Forking machine in group " + uniqueGroupName + " was successful for machine: " +
-                    getUniqueVmName(clusterName, groupName));
+                    uniqueVmName);
             if (succ.size() == 1 ) {
               succeed = true;
               List<MachineRuntime> machines = new ArrayList<>();
@@ -364,7 +364,7 @@ public final class Ec2Launcher extends Launcher {
 
       }
     }
-  }
+  }*/
 
   public List<MachineRuntime> addMachinesToGroup(JsonCluster definition, final GroupRuntime groupRuntime,
                                                  final String groupName, MachineType[] machineTypes) throws
@@ -427,7 +427,8 @@ public final class Ec2Launcher extends Launcher {
         return null;
       }
 
-      Ec2 ec2 = fillEc2Properties(defaultEc2, machineType);
+      Ec2 ec2 = defaultEc2;
+      //Ec2 ec2 = fillEc2Properties(defaultEc2, machineType);
 
       final String keyPairName = Settings.AWS_KEYPAIR_NAME(clusterName, ec2.getRegion());
       if (!keys.contains(keyPairName)) {
@@ -478,7 +479,7 @@ public final class Ec2Launcher extends Launcher {
         try {
           succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
           logger.info("Forking machine in group " + uniqueGroupName + " was successful for machine: " +
-                  getUniqueVmName(clusterName, groupName));
+                  uniqueVmName);
           if (succ.size() == 1 ) {
             succeed = true;
             for (NodeMetadata node : succ) {

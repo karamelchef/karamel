@@ -103,23 +103,25 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
     String gid = runtime.getGroup().getId();
     MonitoringListener listener = autoscalerListenersMap.get(gid);
-    if (runtime.getLifeStatus() == MachineRuntime.LifeStatus.DECOMMISSIONINING) {
-      Future future = machine.getFuture();
-      future.cancel(true);
-      runtime.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONED);
-      activeMachines.remove(runtime.getId());
-      decomissionedMachines.put(runtime.getId(), machine);
-      listener.onStateChange(gid, new MachineMonitoringEvent(gid,
-          runtime.getId(), MachineMonitoringEvent.Status.KILLED));
-      //TODO: We must reheal all running DAGs here
-    } else if (runtime.getForkingTime() != null) {
-      long rentTime = System.currentTimeMillis() - runtime.getForkingTime();
-      long remainedBillingTime = rentTime % Settings.HOURE_IN_MS;
-      if (remainedBillingTime > Settings.MACHINE_BILLING_PERIOD_REPORT_MARGIN) {
-        MachineMonitoringEvent event = new MachineMonitoringEvent(gid, runtime.getId(), 
-            MachineMonitoringEvent.Status.AT_END_OF_BILLING_PERIOD);
-        event.setTimeRemaining(remainedBillingTime);
-        listener.onStateChange(gid, event);
+    if (listener != null) {
+      if (runtime.getLifeStatus() == MachineRuntime.LifeStatus.DECOMMISSIONINING) {
+        Future future = machine.getFuture();
+        future.cancel(true);
+        runtime.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONED);
+        activeMachines.remove(runtime.getId());
+        decomissionedMachines.put(runtime.getId(), machine);
+        listener.onStateChange(gid, new MachineMonitoringEvent(gid,
+            runtime.getId(), MachineMonitoringEvent.Status.KILLED));
+        //TODO: We must reheal all running DAGs here
+      } else if (runtime.getForkingTime() != null) {
+        long rentTime = System.currentTimeMillis() - runtime.getForkingTime();
+        long remainedBillingTime = Settings.HOURE_IN_MS - rentTime;
+        if (remainedBillingTime <= Settings.MACHINE_BILLING_PERIOD_REPORT_MARGIN) {
+          MachineMonitoringEvent event = new MachineMonitoringEvent(gid, runtime.getId(),
+              MachineMonitoringEvent.Status.AT_END_OF_BILLING_PERIOD);
+          event.setTimeRemaining(remainedBillingTime);
+          listener.onStateChange(gid, event);
+        }
       }
     }
   }
@@ -134,9 +136,9 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
           machine.ping();
-          if (machine.getMachineRuntime().getGroup().isAutoScalingEnabled()) {
+          /*if (machine.getMachineRuntime().getGroup().isAutoScalingEnabled()) {
             decomissionAndReportToAutoscalar(machine);
-          }
+          }*/
         }
 
         try {
