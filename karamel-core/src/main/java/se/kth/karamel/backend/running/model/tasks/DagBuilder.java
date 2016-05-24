@@ -102,7 +102,7 @@ public class DagBuilder {
   }
   
   public static Dag getInstallMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-          TaskSubmitter submitter) throws KaramelException {
+      TaskSubmitter submitter) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
@@ -116,7 +116,7 @@ public class DagBuilder {
   }
   
   public static Dag getStartMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-          TaskSubmitter submitter) throws KaramelException {
+      TaskSubmitter submitter) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
@@ -127,29 +127,17 @@ public class DagBuilder {
     return dag;
   }
   
-//    public static Dag getStopMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-//            TaskSubmitter submitter) throws KaramelException {
-//        Dag dag = new Dag();
-//        for (GroupRuntime ge : clusterEntity.getGroups()) {
-//            for (MachineRuntime me : ge.getMachines()) {
-//                StartTablespoonTask t = new StartTablespoonTask(me, clusterStats, submitter);
-//                dag.addTask(t);
-//            }
-//        }
-//        return dag;
-//    }
-//
-//    public static Dag getReconfigureMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-//            TaskSubmitter submitter) throws KaramelException {
-//        Dag dag = new Dag();
-//        for (GroupRuntime ge : clusterEntity.getGroups()) {
-//            for (MachineRuntime me : ge.getMachines()) {
-//                StartTablespoonTask t = new StartTablespoonTask(me, clusterStats, submitter);
-//                dag.addTask(t);
-//            }
-//        }
-//        return dag;
-//    }
+  public static Dag getTopicMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
+      TaskSubmitter submitter, String json) throws KaramelException {
+    Dag dag = new Dag();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      for (MachineRuntime me : ge.getMachines()) {
+        TopicTablespoonTask t = new TopicTablespoonTask(me, clusterStats, submitter, json);
+        dag.addTask(t);
+      }
+    }
+    return dag;
+  }
   
   private static boolean updateKaramelDependencies(Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
           Map<String, Map<String, Task>> rlts) throws KaramelException {
