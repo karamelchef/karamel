@@ -46,6 +46,7 @@ public class Settings {
   public static final int DAY_IN_MIN = 24 * 60;
   public static final int SEC_IN_MS = 1000;
   public static final int MIN_IN_MS = 60 * SEC_IN_MS;
+  public static final int HOURE_IN_MS = 60 * MIN_IN_MS;
   public static final String IP_REGEX = "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       + "\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
       + "\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)"
@@ -57,6 +58,8 @@ public class Settings {
   public static final int CLUSTER_FAILURE_DETECTION_INTERVAL = 5000;
   public static final int CLUSTER_STAT_REPORT_INTERVAL = Settings.MIN_IN_MS;
   public static final int MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS = 100;
+  public static final int MACHINE_UNREACHABLE_DECOMMISSIONING_WAITING_TIME = MIN_IN_MS;
+  public static final int MACHINE_BILLING_PERIOD_REPORT_MARGIN = 10 * MIN_IN_MS;
   public static final int MACHINES_TASKQUEUE_SIZE = 100;
   public static final int SSH_CONNECTION_TIMEOUT = DAY_IN_MS;
   public static final int SSH_SESSION_TIMEOUT = DAY_IN_MS;
@@ -141,10 +144,14 @@ public class Settings {
 
   public static final List<String> AWS_UNIQUE_VM_NAMES(String clusterName, String groupName, int startCount, int size) {
     List<String> names = new ArrayList<>();
-    for (int i = startCount; i <= size; i++) {
+    for (int i = startCount; i < size; i++) {
       names.add(AWS_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
     }
     return names;
+  }
+
+  public static final String AWS_UNIQUE_VM_NAME(String clusterName, String groupName, int no) {
+    return AWS_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + no;
   }
 
   public static final int AWS_VM_BATCH_SIZE() {
@@ -306,6 +313,7 @@ public class Settings {
   public static final String TEST_CB_ROOT_FOLDER = "testgithub";
   public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
   public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
+  public static final String RULES_PATH = KARAMEL_ROOT_PATH + File.separator + "rules";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";

@@ -104,7 +104,7 @@ Each Node of the DAG represents a task that must be run on a certain machine. No
      Orchestration DAG
 
 
-The Orchestration DAG is not only useful to visualize the cluster progress but can also help in debugging the level of parallelization in the installation graph. If some tasks are acting as global barriers during installation, they can be quickly identified by inspecting the DAG and seeing the nodes with lots of incoming edges and some outgoing edges. As have local orchestration rules in their Karamelfiles, the DAG is built from the set of Karamelfiles. It is not easy to manually traverse the DAG, given a set of Karamelfiles, but the visual DAG enables easier inspection of the global order of installation of tasks.
+The Orchestration DAG is not only useful to visualize the cluster progress but can also help in debugging the level of parallelization in the installation graph. If some tasks are acting as global barriers during installation, they can be quickly identified by inspecting the DAG and seeing the nodes with lots of incoming edges and some outgoing edges. As have local orchestration ruleModels in their Karamelfiles, the DAG is built from the set of Karamelfiles. It is not easy to manually traverse the DAG, given a set of Karamelfiles, but the visual DAG enables easier inspection of the global order of installation of tasks.
 
 Quick Links
 ```````````

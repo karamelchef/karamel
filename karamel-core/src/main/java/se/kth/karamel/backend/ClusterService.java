@@ -6,19 +6,21 @@
 package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.log4j.Logger;
+import se.kth.autoscalar.scaling.models.MachineType;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is
@@ -219,6 +221,35 @@ public class ClusterService {
       }
     };
     t.start();
+  }
+
+  public synchronized void scaleInClusterGroup(String clusterName, String groupName, String[] vmIdsToRemove)
+          throws KaramelException {
+    String standardClusterName = clusterName.toLowerCase();
+    logger.info(String.format("########### Auto-scalar asked for scale in groupId '%s' of cluster '%s' ###############",
+            groupName, clusterName));
+    if (!repository.containsKey(standardClusterName)) {
+      logger.error("Repository doesn't contain a cluster name: " + clusterName);
+      throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
+    }
+    ClusterManager clusterManager = repository.get(standardClusterName);
+    checkContext(clusterManager.getDefinition());
+    logger.info("################ going to remove " + vmIdsToRemove.length + " machines ################");
+    clusterManager.removeMachinesFromGroup(groupName, vmIdsToRemove);
+  }
+
+  public synchronized void scaleOutClusterGroup(String clusterName, String groupName, MachineType[] machineTypes)
+          throws KaramelException {
+    String name = clusterName.toLowerCase();
+    logger.info(String.format("########### Auto-scalar asked for scale out groupId '%s' of cluster '%s' " +
+            "###############", groupName, clusterName));
+    if (!repository.containsKey(name)) {
+      throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
+    }
+    ClusterManager clusterManager = repository.get(name);
+    checkContext(clusterManager.getDefinition());
+    logger.info("################ going to add " + machineTypes.length + " machines ################");
+    clusterManager.addMachinesToGroup(groupName, machineTypes);
   }
 
   private ClusterContext checkContext(JsonCluster definition) throws KaramelException {

@@ -1,0 +1,3 @@
+[submodule "auto-scalar"]
+	path = auto-scalar
+	url = https://github.com/ashansa/auto-scalar

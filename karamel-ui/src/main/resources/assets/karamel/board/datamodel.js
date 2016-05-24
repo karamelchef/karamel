@@ -585,6 +585,7 @@ function Group() {
   this.provider = "";
   this.attrs = [];
   this.size = 0;
+  this.autoScalingEnabled = false;
   this.ec2 = {};
   this.gce = {};
   this.nova = {};
@@ -600,6 +601,7 @@ function Group() {
   this.load = function(group) {
     this.name = group.name;
     this.size = group.size;
+    this.autoScalingEnabled = group.autoScalingEnabled;
     this.ec2 = group.ec2;
     this.gce = group.gce;
     this.nova = group.nova;
@@ -614,6 +616,7 @@ function Group() {
     this.provider = other.provider;
     this.attrs = other.attrs;
     this.size = other.size;
+    this.autoScalingEnabled = group.autoScalingEnabled;
     this.ec2 = other.ec2;
     this.gce = other.gce;
     this.nova = other.nova;
@@ -759,6 +762,7 @@ function toCoreApiFormat(uiCluster) {
     this.name = null;
     this.cookbooks = null;
     this.size = null;
+    this.autoScalingEnabled = null;
     this.ec2 = null;
     this.gce = null;
     this.nova = null;
@@ -773,6 +777,7 @@ function toCoreApiFormat(uiCluster) {
     this.load = function(other) {
       this.name = other.name;
       this.size = other.size;
+      this.autoScalingEnabled = other.autoScalingEnabled;
       _addCookbooks(this, other.cookbooks);
       _addEc2(this, other.ec2);
       _addGce(this, other.gce);

@@ -5,10 +5,11 @@
  */
 package se.kth.karamel.backend.running.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.running.model.tasks.Task;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -18,7 +19,7 @@ public class MachineRuntime {
 
   public static enum LifeStatus {
 
-    FORKED, CONNECTED, UNREACHABLE, DESTROYED
+    FORKED, CONNECTED, UNREACHABLE, DECOMMISSIONINING, DECOMMISSIONED
   }
 
   public static enum TasksStatus {
@@ -37,6 +38,8 @@ public class MachineRuntime {
   private String sshUser;
   private String machineType;
   private OsType osType;
+  private String uniqueName;
+  private Long forkingTime;
 
   private final List<Task> tasks = new ArrayList<>();
 
@@ -147,4 +150,20 @@ public class MachineRuntime {
     return publicIp;
   }
 
+  public String getUniqueName() {
+    return uniqueName;
+  }
+
+  public void setUniqueName(String uniqueName) {
+    this.uniqueName = uniqueName;
+  }
+
+  public Long getForkingTime() {
+    return forkingTime;
+  }
+
+  public void setForkingTime(long forkingTime) {
+    this.forkingTime = forkingTime;
+  }
+  
 }

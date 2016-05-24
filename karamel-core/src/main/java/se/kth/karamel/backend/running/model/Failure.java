@@ -12,9 +12,8 @@ package se.kth.karamel.backend.running.model;
 public class Failure {
 
   public static enum Type {
-
     TASK_FAILED, CLEANUP_FAILE, CREATING_SEC_GROUPS_FAILE, DAG_FAILURE, 
-    FORK_MACHINE_FAILURE, SSH_KEY_NOT_AUTH;
+    FORK_MACHINE_FAILURE, SSH_KEY_NOT_AUTH, SCALE_UP_FAILURE, SCALE_DOWN_FAILURE;
   }
 
   private Type type;

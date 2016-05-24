@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.clusterdef.Baremetal;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
+import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.common.util.Settings;
+
 
 /**
  *
@@ -27,6 +28,7 @@ public class JsonGroup extends JsonScope {
 
   private String name;
   private int size;
+  private boolean autoScalingEnabled;
 
   public JsonGroup() {
   }
@@ -35,6 +37,7 @@ public class JsonGroup extends JsonScope {
     super(cluster, group);
     setName(name);
     this.size = group.getSize();
+    this.autoScalingEnabled = group.getAutoScalingEnabled();
     List<String> recipes = group.getRecipes();
     for (String rec : recipes) {
       String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
@@ -100,6 +103,14 @@ public class JsonGroup extends JsonScope {
 
   public int getSize() {
     return size;
+  }
+
+  public void setAutoScalingEnabled(boolean autoScalingEnabled) {
+    this.autoScalingEnabled = autoScalingEnabled;
+  }
+
+  public boolean getAutoScalingEnabled() {
+    return autoScalingEnabled;
   }
 
   public void setSize(int size) {

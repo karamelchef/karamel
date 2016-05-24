@@ -7,7 +7,32 @@ package se.kth.karamel.backend;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
+import org.jclouds.compute.domain.NodeMetadata;
+import se.kth.autoscalar.scaling.core.AutoScalarAPI;
+import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
+import se.kth.autoscalar.scaling.group.Group;
+import se.kth.autoscalar.scaling.models.MachineType;
+import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
+import se.kth.autoscalar.scaling.rules.Rule;
+import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
+import se.kth.karamel.backend.autoscalar.rules.GroupModel;
+import se.kth.karamel.backend.autoscalar.rules.Mapper;
+import se.kth.karamel.backend.autoscalar.rules.RuleLoader;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -38,18 +63,6 @@ import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 /**
  *
  * @author kamal
@@ -59,7 +72,7 @@ public class ClusterManager implements Runnable {
   public static enum Command {
 
     LAUNCH_CLUSTER, INTERRUPT_CLUSTER, TERMINATE_CLUSTER,
-    SUBMIT_INSTALL_DAG, SUBMIT_PURGE_DAG, INTERRUPT_DAG, PAUSE_DAG, RESUME_DAG;
+    SUBMIT_INSTALL_DAG, SUBMIT_PURGE_DAG, INTERRUPT_DAG, PAUSE_DAG, RESUME_DAG, SCALE_OUT, SCALE_IN;
 
   }
 
@@ -78,18 +91,29 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
+  private AutoScalarAPI autoScalarAPI;
+  private AutoScalingHandler autoScalingHandler;
+  private final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterRuntime(definition);
     int totalMachines = UserClusterDataExtractor.totalMachines(definition);
-    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair());
+    machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair(), this);
     String yaml = ClusterDefinitionService.jsonToYaml(definition);
     this.stats.setDefinition(yaml);
     this.stats.setUserId(Settings.USER_NAME);
     this.stats.setStartTime(System.currentTimeMillis());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
+
+    try {
+      //TODO-AS: initiate only if AS is enabled in the cluster
+      autoScalarAPI = AutoScalarAPI.getInstance();
+      this.autoScalingHandler = new AutoScalingHandler(runtime.getGroups().size(), autoScalarAPI);
+    } catch (AutoScalarException e) {
+      logger.fatal("Error while initializing the AutoScalarAPI for group", e);
+    }
     initLaunchers();
   }
 
@@ -113,23 +137,18 @@ public class ClusterManager implements Runnable {
     return runtime;
   }
 
+  public Map<String, MonitoringListener> getAutoscalerListenersMap() {
+    return autoscalerListenersMap;
+  }
+  
   /**
    * Non-blocking way of controlling the cluster, the quick commands are served immediately while the time-consuming
    * commands are queued to be served one by one. Commands have different level of priorities and the higher priority
    * commands invalidated the lower-priority ones.
    *
-   * Cluster-scope immediate: 
-   *   - INTERRUPT_CLUSTER 
-   * Cluster-scope long-running: 
-   *   - LAUNCH_CLUSTER 
-   *   - INTERRUPT_CLUSTER
-   * DAG-scope immediate: 
-   *   - INTERRUPT_DAG 
-   *   - PAUSE_DAG 
-   *   - RESUME_DAG 
-   * DAG-scope long-running: 
-   *   - SUBMIT_INSTALL_DAG 
-   *   - SUBMIT_PURGE_DAG
+   * Cluster-scope immediate: - INTERRUPT_CLUSTER Cluster-scope long-running: - LAUNCH_CLUSTER - INTERRUPT_CLUSTER
+   * DAG-scope immediate: - INTERRUPT_DAG - PAUSE_DAG - RESUME_DAG DAG-scope long-running: - SUBMIT_INSTALL_DAG -
+   * SUBMIT_PURGE_DAG
    *
    * @param command
    * @throws KaramelException
@@ -331,6 +350,7 @@ public class ClusterManager implements Runnable {
 
     try {
       if (installDag) {
+        //TODO-AS generate chefJson only for current group
         Map<String, JsonObject> chefJsons = ChefJsonGenerator.
             generateClusterChefJsonsForInstallation(definition, runtime);
         currentDag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
@@ -380,10 +400,11 @@ public class ClusterManager implements Runnable {
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
     KandyRestClient.pushClusterStats(definition.getName(), stats);
+    autoScalingHandler.stopHandlingCluster();
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' TERMINATED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
-  private void forkMachines() throws Exception {
+  private List<GroupRuntime> forkMachines() throws Exception {
     logger.info(String.format("Launching '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_MACHINES);
     runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, null));
@@ -409,9 +430,173 @@ public class ClusterManager implements Runnable {
 
     if (!runtime.isFailed()) {
       runtime.setPhase(ClusterRuntime.ClusterPhases.MACHINES_FORKED);
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' MACHINES_FORKED \\o/\\o/\\o/\\o/\\o/",
+          definition.getName()));
+    }
+    return groups;
+  }
+
+  public void removeMachinesFromGroup(String groupName, String[] vmIdsToRemove) {
+    for (GroupRuntime groupRuntime : runtime.getGroups()) {
+      if (groupRuntime.getName().equals(groupName)) {
+        //remove the machines with given IDs from group
+        Set<String> allIdsToBeRemoved = new HashSet<String>();
+        allIdsToBeRemoved.addAll(Arrays.asList(vmIdsToRemove));
+
+        logger.info(String.format("################## Going to remove machines with ID '%s' ########################",
+                allIdsToBeRemoved.toString()));
+        runtime.resolveFailure(Failure.hash(Failure.Type.SCALE_DOWN_FAILURE, groupName));
+        groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALING_DOWN_MACHINES);
+        boolean isSuccessful = false;
+
+        for (JsonGroup jsonGroup : definition.getGroups()) {
+          if (jsonGroup.getName().equals(groupName)) {
+            try {
+              ////TODO-AS complete logic
+              Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+              Launcher launcher = launchers.get(provider.getClass());
+
+              ////TODO-AS get the launcher like below when every launcher has the required method and
+              // can be accessed via interface
+              Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;
+              Map<String, String> groupRegion = new HashMap<>();
+              groupRegion.put(groupRuntime.getName(), ((Ec2) provider).getRegion());
+              Set<String> vmNamesToBeRemoved = new HashSet<>();
+              for (MachineRuntime machineRuntime : groupRuntime.getMachines()) {
+                if (allIdsToBeRemoved.contains(machineRuntime.getVmId())) {
+                  vmNamesToBeRemoved.add(machineRuntime.getUniqueName());
+                }
+              }
+
+              Set<? extends NodeMetadata> destroyedNodes = ec2Launcher.removeMachinesFromGroup(groupRuntime,
+                      allIdsToBeRemoved, vmNamesToBeRemoved, groupName);
+              logger.info("################ wantedToRemove and removed: " + vmIdsToRemove.length + " & " +
+                      destroyedNodes.size() + "################");
+
+              for (NodeMetadata destroyedNode : destroyedNodes) {
+                logger.info("####################### machine removed: " + destroyedNode.getId() + " ################");
+                groupRuntime.removeMachineWithId(destroyedNode.getId());
+              }
+              //TODO-AS low priority: remove security groups when no nodes in group
+              isSuccessful = true;
+            } catch (KaramelException e) {
+              logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: " +
+                      groupName);
+              runtime.issueFailure(new Failure(Failure.Type.SCALE_DOWN_FAILURE, groupName, e.getMessage()));
+            }
+            break;
+          }
+        }
+        if (isSuccessful) {
+          groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALED_DOWN);
+        }   //TODO-AS else part????
+        break;  //groupRuntime ID is unique in a cluster
+      }
     }
   }
+
+  public void addMachinesToGroup(String groupName, MachineType[] machineTypes) {
+    logger.info(String.format("################## Going to add " + machineTypes.length + "########################"));
+    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    Launcher launcher = launchers.get(provider.getClass());
+    for (GroupRuntime groupRuntime : runtime.getGroups()) {
+      if (groupRuntime.getName().equals(groupName)) {
+        //sending all suggestions to the provider since group can have one provider at the moment
+        if (launcher instanceof Ec2Launcher) {  //currently supported by ec2 launcher only
+          Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;   //TODO-AS add method to interface
+          try {
+            List<MachineRuntime> mcs = ec2Launcher.addMachinesToGroup(definition, groupRuntime, groupRuntime.getName(),
+                    machineTypes);
+            groupRuntime.setMachines(mcs);
+            machinesMonitor.addMachines(mcs);
+
+            logger.info("################ wantedToAdd and added: " + machineTypes.length + " & " +
+                    mcs.size() + "################");
+            if (machineTypes.length == mcs.size()) {
+              groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALED_UP);
+            }
+            break;
+          } catch (KaramelException e) {
+            throw new IllegalStateException(e);
+          }
+        }
+      }
+    }
+  }
+
+  private void startAutoScaling(final GroupRuntime groupRuntime) {
+    logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName() +
+            "################################");
+    if (autoScalarAPI != null) {
+      try {
+        //TODO-AS create rules and add it to AS
+        GroupModel groupModel = RuleLoader.getGroupModel(groupRuntime.getCluster().getName(), groupRuntime.getName());
+        Rule[] rules = groupModel.getRules();
+        String[] addedRules = addASRulesForGroup(groupRuntime.getId(), rules);
+        if (addedRules.length > 0) {
+          //TODO-AS get params req to createGroup through the yml
+          Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
+
+          autoScalarAPI.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
+                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+                  groupModel.getReliabilityReq());
+
+          MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
+                  groupRuntime.getMachines().size());
+          autoscalerListenersMap.put(groupRuntime.getId(), listener);
+          //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+          autoScalingHandler.startHandlingGroup(groupRuntime);
+        }
+      } catch (AutoScalarException e) {
+        logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
+      } catch (KaramelException e) {
+        logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
+      }
+    } else {
+      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". AutoScalarAPI has not been " +
+              "initialized");
+    }
+  }
+
+  private String[] addASRulesForGroup(String groupId, Rule[] rules) {
+    ArrayList<String> addedRules = new ArrayList<String>();
+    for (Rule rule : rules) {
+      try {
+        autoScalarAPI.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
+                rule.getOperationAction());
+        autoScalarAPI.addRuleToGroup(rule.getRuleName(), groupId);
+        addedRules.add(rule.getRuleName());
+      } catch (AutoScalarException e) {
+        logger.error("Failed to add rule with name: " + rule.getRuleName());
+      }
+    }
+    return addedRules.toArray(new String[addedRules.size()]);
+  }
+
+  private void getMinReqMap(HashMap<String, Integer> minReq) {
+    HashMap<Group.ResourceRequirement, Integer> asGroupReq = new HashMap<>();
+
+  }
+
+  private void stopAutoScalingGroup(String groupId) {
+    autoScalingHandler.stopHandlingGroup(groupId);
+  }
+
+  //TODO the method observing the suggestion queue should invoke this method
+  private void addMachineToAutoScalingGroup(MachineRuntime machine) {
+    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+    //TODO pass sshKeyPath location
+//    MachineModel machineModel = autoScalarAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null, 
+    //machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
+    //machinesForAutoScalar.add(machineModel);
+  }
+
+  //TODO the method observing the suggestion queue should invoke this method
+//  private void removeMachineFormAutoScalingGroup(MachineModel machine) {
+//    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
+//    //TODO pass sshKeyPath location
+//    autoScalarAPI.removeMachineFromGroup(machine);
+//  }
 
   @Override
   public void run() {
@@ -444,12 +629,22 @@ public class ClusterManager implements Runnable {
             if (runtime.getPhase() == ClusterRuntime.ClusterPhases.GROUPS_FORKED
                 || (runtime.getPhase() == ClusterRuntime.ClusterPhases.FORKING_MACHINES && runtime.isFailed())) {
               ClusterStatistics.startTimer();
-              forkMachines();
+              List<GroupRuntime> groupRuntimes = forkMachines();
               long duration = ClusterStatistics.stopTimer();
-              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              boolean isFailed = runtime.isFailed();
+              String status = isFailed ? "FAILED" : "SUCCEED";
               PhaseStat phaseStat
                   = new PhaseStat(ClusterRuntime.ClusterPhases.FORKING_MACHINES.name(), status, duration);
               stats.addPhase(phaseStat);
+
+              //if group is forked successfully, start auto-scaling in tha group
+              if(!isFailed) {
+                for (GroupRuntime groupRuntime: groupRuntimes) {
+                  if(groupRuntime.isAutoScalingEnabled()) {
+                    startAutoScaling(groupRuntime);
+                  }
+                }
+              }
             }
             break;
           case SUBMIT_INSTALL_DAG:

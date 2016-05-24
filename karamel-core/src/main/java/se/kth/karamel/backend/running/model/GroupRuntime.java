@@ -5,9 +5,10 @@
  */
 package se.kth.karamel.backend.running.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -18,13 +19,14 @@ public class GroupRuntime {
   public static enum GroupPhase {
 
     NONE, PRECLEANING, PRECLEANED, FORKING_GROUPS, GROUPS_FORKED, FORKING_MACHINES, MACHINES_FORKED, 
-    RUNNING_DAG, DAG_DONE, TERMINATING;
+    RUNNING_DAG, DAG_DONE, TERMINATING, SCALING_UP_MACHINES, SCALED_UP, SCALING_DOWN_MACHINES, SCALED_DOWN;
   }
 
   private final ClusterRuntime cluster;
   private GroupPhase phase = GroupPhase.NONE;
   private String name;
   private String id;
+  private boolean autoScalingEnabled;
   private List<MachineRuntime> machines = new ArrayList<>();
 
   public GroupRuntime(ClusterRuntime cluster) {
@@ -34,14 +36,31 @@ public class GroupRuntime {
   public GroupRuntime(ClusterRuntime cluster, JsonGroup definition) {
     this.cluster = cluster;
     this.name = definition.getName();
+    this.autoScalingEnabled = definition.getAutoScalingEnabled();
   }
 
   public synchronized void setMachines(List<MachineRuntime> machines) {
-    this.machines = machines;
+    for (MachineRuntime machine : machines) {
+      addMachine(machine);
+    }
   }
 
   public List<MachineRuntime> getMachines() {
     return machines;
+  }
+
+  public synchronized void addMachine(MachineRuntime machineRuntime) {
+    this.machines.add(machineRuntime);
+    //this.uniqueMachineNames.add(machineRuntime.getUniqueName());
+  }
+  
+  public synchronized void removeMachineWithId(String id) {
+    for (Iterator<MachineRuntime> iterator = machines.iterator(); iterator.hasNext();) {
+      MachineRuntime machine = iterator.next();
+      if (machine.getVmId().equals(id)) {
+        iterator.remove();
+      }
+    }
   }
 
   public String getId() {
@@ -66,6 +85,10 @@ public class GroupRuntime {
   
   public ClusterRuntime getCluster() {
     return cluster;
+  }
+
+  public boolean isAutoScalingEnabled() {
+    return autoScalingEnabled;
   }
 
 }

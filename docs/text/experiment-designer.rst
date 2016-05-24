@@ -68,16 +68,16 @@ At this point you land into the programming section of your experiment. The defa
      Experiment bash script.
 
 
-Define orchestration rules for experiment
+Define orchestration ruleModels for experiment
 `````````````````````````````````````````
 Placing your experiment in the right order in the cluster orchestration is a very essential part of your experiment design. Click the ``advanced`` checkbox, write in the line-separated Cookbook::recipe_name that your experiment requires have finished before the experiment will start. If your experiment is dependent on other cookbooks (for recipes or parameters), you must enter the relative GitHub name for the cookbook and the version/branch in line-separated format in the second text-area.
 
   .. figure:: ../imgs/exp7.png
-     :alt: Orchestration rules for new cluster.
+     :alt: Orchestration ruleModels for new cluster.
      :scale: 100
      :figclass: align-center	  
 
-     Orchestration rules for new cluster.
+     Orchestration ruleModels for new cluster.
 
 Push your experiment into Github
 ````````````````````````````````

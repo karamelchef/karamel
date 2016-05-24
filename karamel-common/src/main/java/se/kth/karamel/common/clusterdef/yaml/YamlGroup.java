@@ -19,6 +19,7 @@ import se.kth.karamel.common.exception.ValidationException;
 public class YamlGroup extends YamlScope {
 
   private int size;
+  private boolean autoScalingEnabled;
   private final List<String> recipes = new ArrayList<>();
 
   public YamlGroup() {
@@ -28,6 +29,7 @@ public class YamlGroup extends YamlScope {
     super(jsonGroup);
     this.size = jsonGroup.getSize();
     recipes.addAll(jsonGroup.flattenRecipes());
+    this.autoScalingEnabled = jsonGroup.getAutoScalingEnabled();
   }
 
   public int getSize() {
@@ -36,6 +38,14 @@ public class YamlGroup extends YamlScope {
 
   public void setSize(int size) {
     this.size = size;
+  }
+
+  public void setAutoScalingEnabled(boolean autoScalingEnabled) {
+    this.autoScalingEnabled = autoScalingEnabled;
+  }
+
+  public boolean getAutoScalingEnabled() {
+    return autoScalingEnabled;
   }
 
   public List<String> getRecipes() {

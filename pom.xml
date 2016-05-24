@@ -11,6 +11,7 @@
 
   <!-- Modules in the Project.-->
   <modules>
+    <module>auto-scalar</module>
     <module>karamel-ui</module>
     <module>karamel-core</module>
     <module>karamel-common</module>
