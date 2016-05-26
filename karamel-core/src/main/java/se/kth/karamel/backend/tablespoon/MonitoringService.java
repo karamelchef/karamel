@@ -44,19 +44,19 @@ public class MonitoringService implements AgentBroadcaster {
     Dag dag = DagBuilder.getStartMonitoringDag(clusterEntity, clusterStats, mm);
   }
   
-  public void topic(ArrayList<String> machines, String json) throws BroadcastException {
+  public void topic(ArrayList<String> machines, String json, String topicId, int version) throws BroadcastException {
     Dag dag;
     try {
-      dag =  DagBuilder.getTopicMonitoringDag(clusterEntity, clusterStats, mm, json);
+      dag =  DagBuilder.getTopicMonitoringDag(clusterEntity, clusterStats, mm, json, topicId, version);
     } catch (KaramelException ex) {
       throw new BroadcastException(ex.getMessage());
     }
   }
   
   @Override
-  public void sendToMachines(ArrayList<String> machines, String json)
+  public void sendToMachines(ArrayList<String> machines, String json, String topicId, int version)
       throws BroadcastException {
-    topic(machines, json);
+    topic(machines, json, topicId, version);
   }
   
   

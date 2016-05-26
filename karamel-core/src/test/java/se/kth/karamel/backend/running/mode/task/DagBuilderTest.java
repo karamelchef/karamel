@@ -30,7 +30,7 @@ import se.kth.karamel.common.util.Confs;
  *
  * @author kamal
  */
-  public class DagBuilderTest {
+public class DagBuilderTest {
 
   @Test
   public void testHopsworksInstallationDag() throws IOException, KaramelException {
@@ -287,4 +287,129 @@ import se.kth.karamel.common.util.Confs;
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "hadoop::dn on datanodes2"));
     Assert.assertTrue(dag.hasDependency("hadoop::install on datanodes2", "flink::install on datanodes2"));
   }
+
+  @Test
+  public void testTablespoonInstallationDag() throws IOException, KaramelException {
+    TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+      @Override
+      public void submitTask(Task task) throws KaramelException {
+        System.out.println(task.uniqueId());
+        task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void retryMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void skipMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
+    };
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getInstallMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    System.out.println(dag.print());
+
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install collectl on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("install collectl on namenodes1", "install tablespoon agent on namenodes1"));
+  }
+
+  @Test
+  public void testTablespoonStartDag() throws IOException, KaramelException {
+    TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+      @Override
+      public void submitTask(Task task) throws KaramelException {
+        System.out.println(task.uniqueId());
+        task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void retryMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void skipMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
+    };
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    ClusterStats clusterStats = new ClusterStats();
+    Dag dag = DagBuilder.getStartMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    System.out.println(dag.print());
+
+    Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "start tablespoon on namenodes1"));
+  }
+  
+  @Test
+  public void testTablespoonTopicDag() throws IOException, KaramelException {
+    TaskSubmitter dummyTaskSubmitter = new TaskSubmitter() {
+
+      @Override
+      public void submitTask(Task task) throws KaramelException {
+        System.out.println(task.uniqueId());
+        task.succeed();
+      }
+
+      @Override
+      public void prepareToStart(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void killMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void retryMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void skipMe(Task task) throws KaramelException {
+      }
+
+      @Override
+      public void terminate(Task task) throws KaramelException {
+      }
+    };
+    String ymlString = Resources.toString(Resources.getResource("se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    ClusterStats clusterStats = new ClusterStats();
+    String json = "{example: json}";
+    String uniqueId = "123456789";
+    int version = 1;
+    Dag dag = DagBuilder.getTopicMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId, version);
+    System.out.println(dag.print());
+
+    Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));
+  }
+  
 }
