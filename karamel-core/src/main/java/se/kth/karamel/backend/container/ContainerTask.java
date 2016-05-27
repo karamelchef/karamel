@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by shelan on 4/11/16.
  */
-public class ContainerTask {
+public class ContainerTask implements Runnable {
 
   private String task;
   private List<String> hostList = new ArrayList<>();
@@ -26,5 +26,10 @@ public class ContainerTask {
 
   public void setHostList(List<String> hostList) {
     this.hostList = hostList;
+  }
+
+  @Override
+  public void run() {
+
   }
 }

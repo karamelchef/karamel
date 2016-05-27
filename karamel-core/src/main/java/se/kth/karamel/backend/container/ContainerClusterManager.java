@@ -11,6 +11,7 @@ import com.spotify.docker.client.messages.NetworkConfig;
 import com.spotify.docker.client.messages.NetworkCreation;
 import com.spotify.docker.client.messages.ContainerCreation;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.container.task.DownloadImageTask;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -31,6 +32,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class ContainerClusterManager {
@@ -59,6 +63,12 @@ public class ContainerClusterManager {
    * is filtered out
    */
   List<GroupRuntime> containerGroupRuntimes = new ArrayList<>();
+
+  /**
+   * Thread group for executor service
+   */
+  private ExecutorService workerPool = Executors.newCachedThreadPool();
+
   private ClusterRuntime runtime;
   private JsonCluster cluster;
   private ClusterStats clusterStats;
@@ -138,6 +148,8 @@ public class ContainerClusterManager {
           .hostConfig(hostConfig)
           .exposedPorts(exposedPorts)
           .hostname(containerName)
+          //TODO : This is a hardcoded value specific to hadoop server directory
+          .volumes("/srv")
           .build();
 
 
@@ -203,6 +215,8 @@ public class ContainerClusterManager {
       }
     }
 
+    CountDownLatch countDown = new CountDownLatch(hostMachineRuntimes.size());
+
     for (NodeRunTime nodeRunTime : hostMachineRuntimes) {
       String publicIp = nodeRunTime.getPublicIp();
       containerHostMap.put(publicIp, new ArrayList<String>());
@@ -215,7 +229,9 @@ public class ContainerClusterManager {
       try {
         docker.auth(authConfig);
         //pulling all the required images here.
-        docker.pull("shelan/karamel-node:v3.0.0", AuthConfig.builder().build());
+        DownloadImageTask downloadImageTask = new DownloadImageTask(docker, countDown);
+        workerPool.submit(downloadImageTask);
+
       } catch (DockerException e) {
         logger.error("Error while initializing docker clients", e);
       } catch (InterruptedException e) {
@@ -223,6 +239,12 @@ public class ContainerClusterManager {
       }
       dockerClientMap.put(publicIp, docker);
     }
+    try {
+      countDown.await();
+    } catch (InterruptedException e) {
+      logger.error("Interrupred", e);
+    }
+    logger.info("Downloaded images for docker hosts");
   }
 
   public int getNOfContainers() {
