@@ -131,11 +131,11 @@ public class DagBuilder {
   }
 
   public static Dag getTopicMonitoringDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter, String json, String topicId, int version) throws KaramelException {
+      TaskSubmitter submitter, String json, String topicId) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        TopicTablespoonTask t = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId, version);
+        TopicTablespoonTask t = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId);
         dag.addTask(t);
       }
     }

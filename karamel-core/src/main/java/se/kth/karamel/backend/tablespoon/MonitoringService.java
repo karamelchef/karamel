@@ -1,6 +1,6 @@
 package se.kth.karamel.backend.tablespoon;
 
-import java.util.ArrayList;
+import java.util.Set;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -44,19 +44,19 @@ public class MonitoringService implements AgentBroadcaster {
     Dag dag = DagBuilder.getStartMonitoringDag(clusterEntity, clusterStats, mm);
   }
   
-  public void topic(ArrayList<String> machines, String json, String topicId, int version) throws BroadcastException {
+  public void topic(Set<String> machines, String json, String topicId) throws BroadcastException {
     Dag dag;
     try {
-      dag =  DagBuilder.getTopicMonitoringDag(clusterEntity, clusterStats, mm, json, topicId, version);
+      dag =  DagBuilder.getTopicMonitoringDag(clusterEntity, clusterStats, mm, json, topicId);
     } catch (KaramelException ex) {
       throw new BroadcastException(ex.getMessage());
     }
   }
   
   @Override
-  public void sendToMachines(ArrayList<String> machines, String json, String topicId, int version)
+  public void sendToMachines(Set<String> machines, String json, String topicId)
       throws BroadcastException {
-    topic(machines, json, topicId, version);
+    topic(machines, json, topicId);
   }
   
   

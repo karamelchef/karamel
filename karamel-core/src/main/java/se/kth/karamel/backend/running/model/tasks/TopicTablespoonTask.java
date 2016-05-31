@@ -25,10 +25,10 @@ public class TopicTablespoonTask extends TablespoonTask {
   private final String filename;
   
   public TopicTablespoonTask(MachineRuntime machine, ClusterStats clusterStats, 
-      TaskSubmitter submitter, String json, String topicId, int version) {
+      TaskSubmitter submitter, String json, String topicId) {
     super("start tablespoon", "start tablespoon", true, machine, clusterStats, submitter);
     this.json = json;
-    this.filename = topicId + "_" + version;
+    this.filename = topicId + ".json";
   }
   
   @Override
