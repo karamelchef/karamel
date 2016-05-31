@@ -46,7 +46,7 @@ import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.exception.InvalidEc2CredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.launcher.amazon.InstanceType;
+import se.kth.karamel.common.launcher.aws.InstanceType;
 import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.Settings;

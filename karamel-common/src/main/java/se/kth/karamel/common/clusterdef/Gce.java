@@ -1,6 +1,6 @@
 package se.kth.karamel.common.clusterdef;
 
-import se.kth.karamel.common.util.GceSettings;
+import se.kth.karamel.common.launcher.gce.GceSettings;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.ValidationException;
 

@@ -17,7 +17,7 @@ import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.exception.InvalidCredentialsException;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.util.GceSettings;
+import se.kth.karamel.common.launcher.gce.GceSettings;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 

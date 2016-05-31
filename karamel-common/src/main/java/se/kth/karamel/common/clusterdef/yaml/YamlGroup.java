@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.cookbookmeta.PredefinedStacks;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
 
@@ -21,6 +22,7 @@ public class YamlGroup extends YamlScope {
   private int size;
   private boolean autoScalingEnabled;
   private final List<String> recipes = new ArrayList<>();
+  private final List<String> stacks = new ArrayList<>();
 
   public YamlGroup() {
   }
@@ -48,6 +50,20 @@ public class YamlGroup extends YamlScope {
     return autoScalingEnabled;
   }
 
+  public List<String> getStacks() {
+    return stacks;
+  }
+
+  public void setStacks(List<String> stacks) {
+    for (String stack : stacks) {
+      setStack(stack);
+    }
+  }
+
+  public void setStack(String stack) {
+    this.stacks.add(stack);
+  }
+
   public List<String> getRecipes() {
     return recipes;
   }
@@ -68,9 +84,23 @@ public class YamlGroup extends YamlScope {
     Baremetal baremetal = getBaremetal();
     if (baremetal != null) {
       int s1 = baremetal.retriveAllIps().size();
-      if (s1 != size)
+      if (s1 != size) {
         throw new ValidationException(
             String.format("Number of ip addresses is not equal to the group size %d != %d", s1, size));
+      }
+    }
+
+    for (String name : stacks) {
+      boolean found = false;
+      for (PredefinedStacks stack : PredefinedStacks.values()) {
+        if (name.equalsIgnoreCase(stack.getStackName())) {
+          found = true;
+        }
+      }
+
+      if (!found) {
+        throw new ValidationException("The stack '%s' is not found in the predefined stacks");
+      }
     }
   }
 

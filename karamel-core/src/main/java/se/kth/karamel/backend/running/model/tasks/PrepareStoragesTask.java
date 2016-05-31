@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
-import se.kth.karamel.common.launcher.amazon.StorageDevice;
+import se.kth.karamel.common.launcher.aws.StorageDevice;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;

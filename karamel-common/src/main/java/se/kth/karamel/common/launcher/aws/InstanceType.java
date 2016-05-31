@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.karamel.common.launcher.amazon;
+package se.kth.karamel.common.launcher.aws;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package se.kth.karamel.common.util;
+package se.kth.karamel.common.launcher.gce;
 
 import se.kth.karamel.common.exception.UnsupportedImageType;
 
