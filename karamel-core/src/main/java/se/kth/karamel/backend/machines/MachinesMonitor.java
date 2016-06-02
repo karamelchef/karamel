@@ -15,9 +15,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
-import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
-import se.kth.autoscalar.scaling.monitoring.MachineMonitoringEvent;
-import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
+import se.kth.honeytap.scaling.exceptions.HoneyTapException;
+import se.kth.honeytap.scaling.monitoring.MachineMonitoringEvent;
+import se.kth.honeytap.scaling.monitoring.MonitoringListener;
 import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.Task;
@@ -98,7 +98,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     }
   }
 
-  private void decomissionAndReportToAutoscalar(SshMachine machine) throws AutoScalarException {
+  private void decomissionAndReportToAutoscalar(SshMachine machine) throws HoneyTapException {
     MachineRuntime runtime = machine.getMachineRuntime();
     Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
     String gid = runtime.getGroup().getId();

@@ -1,10 +1,10 @@
-package se.kth.karamel.backend.autoscalar;
+package se.kth.karamel.backend.honeytap;
 
 import org.apache.log4j.Logger;
-import se.kth.autoscalar.scaling.ScalingSuggestion;
-import se.kth.autoscalar.scaling.core.AutoScalarAPI;
-import se.kth.autoscalar.scaling.models.MachineType;
-//import se.kth.autoscalar.scaling.rules.Rule;
+import se.kth.honeytap.scaling.ScalingSuggestion;
+import se.kth.honeytap.scaling.core.HoneyTapAPI;
+import se.kth.honeytap.scaling.models.MachineType;
+//import se.kth.honeytap.scaling.rules.Rule;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.common.exception.KaramelException;
@@ -18,22 +18,22 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Created with IntelliJ IDEA.
- * Each cluster will be handled by one AutoScalingHandler
+ * Each cluster will be handled by one HoneyTapHandler
  * @author Ashansa Perera
  * @version $Id$
  * @since 1.0
  */
-public class AutoScalingHandler {
+public class HoneyTapHandler {
 
   private ThreadPoolExecutor executor;
-  private static final Logger logger = Logger.getLogger(AutoScalingHandler.class);
+  private static final Logger logger = Logger.getLogger(HoneyTapHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
-  private static AutoScalarAPI autoScalarAPI;
+  private static HoneyTapAPI autoScalarAPI;
   private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
           new HashMap<String, AutoScalingSuggestionExecutor>();
   private boolean isAutoScalingActive = false;
 
-  public AutoScalingHandler(int noOfGroupsInCluster, AutoScalarAPI autoScalarAPI) {
+  public HoneyTapHandler(int noOfGroupsInCluster, HoneyTapAPI autoScalarAPI) {
     this.autoScalarAPI = autoScalarAPI;
     this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(noOfGroupsInCluster);
     this.isAutoScalingActive = true;
@@ -100,6 +100,10 @@ public class AutoScalingHandler {
             case SCALE_OUT:
               ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
               handleScaleOutSuggestion(scaleOutMachines.toArray(new MachineType[scaleOutMachines.size()]));
+              break;
+            case TMP_SCALEIN:
+              ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
+              handleScaleInSuggestion(toRemove.toArray(new String[toRemove.size()]));
               break;
             default:
               logger.warn("Handle scaling has not been implemented for the scaling direction: " +

@@ -1,10 +1,10 @@
-package se.kth.karamel.backend.autoscalar.rules;
+package se.kth.karamel.backend.honeytap.rules;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
-import se.kth.autoscalar.scaling.rules.Rule;
+import se.kth.honeytap.scaling.rules.Rule;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Settings;
 

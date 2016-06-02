@@ -23,16 +23,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.jclouds.compute.domain.NodeMetadata;
-import se.kth.autoscalar.scaling.core.AutoScalarAPI;
-import se.kth.autoscalar.scaling.exceptions.AutoScalarException;
-import se.kth.autoscalar.scaling.group.Group;
-import se.kth.autoscalar.scaling.models.MachineType;
-import se.kth.autoscalar.scaling.monitoring.MonitoringListener;
-import se.kth.autoscalar.scaling.rules.Rule;
-import se.kth.karamel.backend.autoscalar.AutoScalingHandler;
-import se.kth.karamel.backend.autoscalar.rules.GroupModel;
-import se.kth.karamel.backend.autoscalar.rules.Mapper;
-import se.kth.karamel.backend.autoscalar.rules.RuleLoader;
+import se.kth.honeytap.scaling.core.HoneyTapAPI;
+import se.kth.honeytap.scaling.exceptions.HoneyTapException;
+import se.kth.honeytap.scaling.group.Group;
+import se.kth.honeytap.scaling.models.MachineType;
+import se.kth.honeytap.scaling.monitoring.MonitoringListener;
+import se.kth.honeytap.scaling.rules.Rule;
+import se.kth.karamel.backend.honeytap.HoneyTapHandler;
+import se.kth.karamel.backend.honeytap.rules.GroupModel;
+import se.kth.karamel.backend.honeytap.rules.Mapper;
+import se.kth.karamel.backend.honeytap.rules.RuleLoader;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
@@ -91,8 +91,8 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterStatusFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
-  private AutoScalarAPI autoScalarAPI;
-  private AutoScalingHandler autoScalingHandler;
+  private HoneyTapAPI autoScalarAPI;
+  private HoneyTapHandler honeyTapHandler;
   private final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
@@ -109,10 +109,10 @@ public class ClusterManager implements Runnable {
 
     try {
       //TODO-AS: initiate only if AS is enabled in the cluster
-      autoScalarAPI = AutoScalarAPI.getInstance();
-      this.autoScalingHandler = new AutoScalingHandler(runtime.getGroups().size(), autoScalarAPI);
-    } catch (AutoScalarException e) {
-      logger.fatal("Error while initializing the AutoScalarAPI for group", e);
+      autoScalarAPI = HoneyTapAPI.getInstance();
+      this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), autoScalarAPI);
+    } catch (HoneyTapException e) {
+      logger.fatal("Error while initializing the HoneyTapAPI for group", e);
     }
     initLaunchers();
   }
@@ -400,7 +400,7 @@ public class ClusterManager implements Runnable {
     stop();
     runtime.setPhase(ClusterRuntime.ClusterPhases.NOT_STARTED);
     KandyRestClient.pushClusterStats(definition.getName(), stats);
-    autoScalingHandler.stopHandlingCluster();
+    honeyTapHandler.stopHandlingCluster();
     logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' TERMINATED \\o/\\o/\\o/\\o/\\o/", definition.getName()));
   }
 
@@ -545,15 +545,15 @@ public class ClusterManager implements Runnable {
                   groupRuntime.getMachines().size());
           autoscalerListenersMap.put(groupRuntime.getId(), listener);
           //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
-          autoScalingHandler.startHandlingGroup(groupRuntime);
+          honeyTapHandler.startHandlingGroup(groupRuntime);
         }
-      } catch (AutoScalarException e) {
+      } catch (HoneyTapException e) {
         logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
       } catch (KaramelException e) {
         logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
       }
     } else {
-      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". AutoScalarAPI has not been " +
+      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been " +
               "initialized");
     }
   }
@@ -566,7 +566,7 @@ public class ClusterManager implements Runnable {
                 rule.getOperationAction());
         autoScalarAPI.addRuleToGroup(rule.getRuleName(), groupId);
         addedRules.add(rule.getRuleName());
-      } catch (AutoScalarException e) {
+      } catch (HoneyTapException e) {
         logger.error("Failed to add rule with name: " + rule.getRuleName());
       }
     }
@@ -579,7 +579,7 @@ public class ClusterManager implements Runnable {
   }
 
   private void stopAutoScalingGroup(String groupId) {
-    autoScalingHandler.stopHandlingGroup(groupId);
+    honeyTapHandler.stopHandlingGroup(groupId);
   }
 
   //TODO the method observing the suggestion queue should invoke this method
