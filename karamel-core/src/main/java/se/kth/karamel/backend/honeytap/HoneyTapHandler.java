@@ -1,6 +1,7 @@
 package se.kth.karamel.backend.honeytap;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import se.kth.honeytap.scaling.ScalingSuggestion;
 import se.kth.honeytap.scaling.core.HoneyTapAPI;
 import se.kth.honeytap.scaling.exceptions.HoneyTapException;
@@ -33,7 +34,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class HoneyTapHandler {
 
   private ThreadPoolExecutor executor;
-  private static final Logger logger = Logger.getLogger(HoneyTapHandler.class);
+  Log log = LogFactory.getLog(HoneyTapHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
   private static HoneyTapAPI honeyTapAPI;
   private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
@@ -56,7 +57,7 @@ public class HoneyTapHandler {
       groupExecutorMap.put(groupRuntime.getId(), suggestionExecutor);
       executor.execute(suggestionExecutor);
     } else {
-      logger.error("Cannot start handling auto-scaling in group. Auto-scaling is set to " + isAutoScalingActive);
+      log.error("Cannot start handling auto-scaling in group. Auto-scaling is set to " + isAutoScalingActive);
     }
   }
 
@@ -89,7 +90,7 @@ public class HoneyTapHandler {
         ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = honeyTapAPI.getSuggestionQueue(groupRuntime.getId());
         if (suggestionQueue != null) {
           this.suggestionsQueueOfGroup = suggestionQueue;
-          logger.info(" ############### AS suggestion queue recieved, group: " + groupRuntime.getId() +
+          log.info(" ############### AS suggestion queue recieved, group: " + groupRuntime.getId() +
                   "#################");
           break;
         }
@@ -105,7 +106,7 @@ public class HoneyTapHandler {
           //TODO-AS this is temporary code for simulation:isSimulation. After that only the logic
                                                                                 // in else part should be there
           if (isSimulation) {
-            logger.info("##################### SIMULATION scaling suggestions #############");
+            log.info("##################### SIMULATION scaling suggestions #############");
             switch (suggestion.getScalingDirection()) {
               case SCALE_IN:
                 resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
@@ -114,6 +115,8 @@ public class HoneyTapHandler {
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupRuntime.getId(), machineId);
                 }
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
+                        System.currentTimeMillis());
                 break;
               case SCALE_OUT:
                 resetVmInfoAtMonitor(groupRuntime.getId());
@@ -124,11 +127,13 @@ public class HoneyTapHandler {
                   addVmIdToMonitorSimulation(groupRuntime.getId(), String.valueOf(UUID.randomUUID()),
                           machine.getProperty(MachineType.Properties.TYPE.name()));
                 }
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
+                        System.currentTimeMillis());
                 break;
               case TMP_SCALEIN:
                 resetVmInfoAtMonitor(groupRuntime.getId());
                 int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
-                ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllVmIds(
+                ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(
                         groupRuntime.getId())));
                 Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
                 for (int i = 0; i < noOfMachinesToRemove; ++i) {
@@ -137,14 +142,16 @@ public class HoneyTapHandler {
                   allVms.remove(vmIdToRemove);
                   removeVmIdfromMonitorSimulation(groupRuntime.getId(), vmIdToRemove);
                 }
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
+                        System.currentTimeMillis());
                 break;
               default:
-                logger.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: " +
+                log.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: " +
                         suggestion.getScalingDirection().name());
                 break;
             }
           } else {
-            logger.info("########################## NON simulation got suggestion: " + groupRuntime.getName() + " " +
+            log.info("########################## NON simulation got suggestion: " + groupRuntime.getName() + " " +
                     suggestion.getScalingDirection().name() + " ######################################");
             switch (suggestion.getScalingDirection()) {
               case SCALE_IN:
@@ -163,13 +170,13 @@ public class HoneyTapHandler {
                 resetVmInfoAtMonitor(groupRuntime.getId());
                 break;
               default:
-                logger.warn("Handle scaling has not been implemented for the scaling direction: " +
+                log.warn("Handle scaling has not been implemented for the scaling direction: " +
                         suggestion.getScalingDirection().name());
                 break;
             }
           }
         } catch (InterruptedException e) {
-          logger.error("Error while taking the auto-scaling suggestion in group: " + groupRuntime.getId());
+          log.error("Error while taking the auto-scaling suggestion in group: " + groupRuntime.getId());
         }
       }
     }
@@ -185,7 +192,7 @@ public class HoneyTapHandler {
 
         clusterService.scaleInClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), vmIds);
       } catch (KaramelException e) {
-        logger.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
+        log.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
                 groupRuntime.getCluster().getName());
       }
     }
@@ -194,7 +201,7 @@ public class HoneyTapHandler {
       try {
         clusterService.scaleOutClusterGroup(groupRuntime.getCluster().getName(), groupRuntime.getName(), machineTypes);
       } catch (KaramelException e) {
-        logger.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
+        log.error("Failed to scale in the group: " + groupRuntime.getName() + " of cluster: " +
                 groupRuntime.getCluster().getName());
       }
     }
