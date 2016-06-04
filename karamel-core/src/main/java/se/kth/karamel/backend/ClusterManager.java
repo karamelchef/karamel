@@ -586,7 +586,7 @@ public class ClusterManager implements Runnable {
   private void addMachineToAutoScalingGroup(MachineRuntime machine) {
     //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
     //TODO pass sshKeyPath location
-//    MachineModel machineModel = autoScalarAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null, 
+//    MachineModel machineModel = honeyTapAPI.addMachineToGroup(machine.getGroup().getId(), machine.getId(), null,
     //machine.getPublicIp(), machine.getSshPort(), machine.getSshUser());
     //machinesForAutoScalar.add(machineModel);
   }
@@ -595,7 +595,7 @@ public class ClusterManager implements Runnable {
 //  private void removeMachineFormAutoScalingGroup(MachineModel machine) {
 //    //String keypairname = Settings.AWS_KEYPAIR_NAME(runtime.getName(), ec2.getRegion());
 //    //TODO pass sshKeyPath location
-//    autoScalarAPI.removeMachineFromGroup(machine);
+//    honeyTapAPI.removeMachineFromGroup(machine);
 //  }
 
   @Override
@@ -641,6 +641,8 @@ public class ClusterManager implements Runnable {
               if(!isFailed) {
                 for (GroupRuntime groupRuntime: groupRuntimes) {
                   if(groupRuntime.isAutoScalingEnabled()) {
+                    /*check whether i can start autoscaling when load the def file
+                            (just for simulation. So no interruption from karamel and no actual machine spawining)*/
                     startAutoScaling(groupRuntime);
                   }
                 }
