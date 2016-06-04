@@ -13,6 +13,7 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.launcher.amazon.InstanceType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class HoneyTapHandler {
   private ThreadPoolExecutor executor;
   private static final Logger logger = Logger.getLogger(HoneyTapHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
-  private static HoneyTapAPI autoScalarAPI;
+  private static HoneyTapAPI honeyTapAPI;
   private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
           new HashMap<String, AutoScalingSuggestionExecutor>();
   private boolean isAutoScalingActive = false;
@@ -43,8 +44,8 @@ public class HoneyTapHandler {
   boolean isSimulation = true;
   long scaleOutDelay = 1000 * 60; // 1 min
 
-  public HoneyTapHandler(int noOfGroupsInCluster, HoneyTapAPI autoScalarAPI) {
-    this.autoScalarAPI = autoScalarAPI;
+  public HoneyTapHandler(int noOfGroupsInCluster, HoneyTapAPI honeyTapAPI) {
+    this.honeyTapAPI = honeyTapAPI;
     this.executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(noOfGroupsInCluster);
     this.isAutoScalingActive = true;
   }
@@ -85,10 +86,11 @@ public class HoneyTapHandler {
       this.shouldAutoScale = true;
 
       while (this.suggestionsQueueOfGroup == null) {
-        ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = autoScalarAPI.getSuggestionQueue(groupRuntime.getId());
+        ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = honeyTapAPI.getSuggestionQueue(groupRuntime.getId());
         if (suggestionQueue != null) {
           this.suggestionsQueueOfGroup = suggestionQueue;
-          logger.info(" ############### AS started, group: " + groupRuntime.getId() + "#################");
+          logger.info(" ############### AS suggestion queue recieved, group: " + groupRuntime.getId() +
+                  "#################");
           break;
         }
       }
@@ -125,10 +127,15 @@ public class HoneyTapHandler {
                 break;
               case TMP_SCALEIN:
                 resetVmInfoAtMonitor(groupRuntime.getId());
-                ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
+                int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
+                ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllVmIds(
+                        groupRuntime.getId())));
                 Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
-                for (String machineId : toRemove) {
-                  removeVmIdfromMonitorSimulation(groupRuntime.getId(), machineId);
+                for (int i = 0; i < noOfMachinesToRemove; ++i) {
+                  int removeIndex = new Random().nextInt(allVms.size());
+                  String vmIdToRemove = allVms.get(removeIndex);
+                  allVms.remove(vmIdToRemove);
+                  removeVmIdfromMonitorSimulation(groupRuntime.getId(), vmIdToRemove);
                 }
                 break;
               default:
