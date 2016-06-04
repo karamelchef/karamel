@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,6 +38,10 @@ public class HoneyTapHandler {
   private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
           new HashMap<String, AutoScalingSuggestionExecutor>();
   private boolean isAutoScalingActive = false;
+
+  //for simulation
+  boolean isSimulation = true;
+  long scaleOutDelay = 1000 * 60; // 1 min
 
   public HoneyTapHandler(int noOfGroupsInCluster, HoneyTapAPI autoScalarAPI) {
     this.autoScalarAPI = autoScalarAPI;
@@ -94,28 +100,66 @@ public class HoneyTapHandler {
         //wait on queue, get suggestion and execute suggestion
         try {
           ScalingSuggestion suggestion = suggestionsQueueOfGroup.take();
-          logger.info("########################## got suggestion: " + groupRuntime.getName() + " " +
-                  suggestion.getScalingDirection().name() + " ######################################");
-          switch (suggestion.getScalingDirection()) {
-            case SCALE_IN:
-              ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
-              handleScaleInSuggestion(machinesToRemove.toArray(new String[machinesToRemove.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
-              break;
-            case SCALE_OUT:
-              ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
-              handleScaleOutSuggestion(scaleOutMachines.toArray(new MachineType[scaleOutMachines.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
-              break;
-            case TMP_SCALEIN:
-              ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
-              handleScaleInSuggestion(toRemove.toArray(new String[toRemove.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
-              break;
-            default:
-              logger.warn("Handle scaling has not been implemented for the scaling direction: " +
-                      suggestion.getScalingDirection().name());
-              break;
+          //TODO-AS this is temporary code for simulation:isSimulation. After that only the logic
+                                                                                // in else part should be there
+          if (isSimulation) {
+            logger.info("##################### SIMULATION scaling suggestions #############");
+            switch (suggestion.getScalingDirection()) {
+              case SCALE_IN:
+                resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
+                ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
+                Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
+                for (String machineId : machinesToRemove) {
+                  removeVmIdfromMonitorSimulation(groupRuntime.getId(), machineId);
+                }
+                break;
+              case SCALE_OUT:
+                resetVmInfoAtMonitor(groupRuntime.getId());
+                ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
+                Thread.sleep(scaleOutDelay + new Random().nextInt(20 * 1000));  //1 min + making a random addition
+                                                                                          // upto 20seconds
+                for (MachineType machine : scaleOutMachines) {
+                  addVmIdToMonitorSimulation(groupRuntime.getId(), String.valueOf(UUID.randomUUID()),
+                          machine.getProperty(MachineType.Properties.TYPE.name()));
+                }
+                break;
+              case TMP_SCALEIN:
+                resetVmInfoAtMonitor(groupRuntime.getId());
+                ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
+                Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
+                for (String machineId : toRemove) {
+                  removeVmIdfromMonitorSimulation(groupRuntime.getId(), machineId);
+                }
+                break;
+              default:
+                logger.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: " +
+                        suggestion.getScalingDirection().name());
+                break;
+            }
+          } else {
+            logger.info("########################## NON simulation got suggestion: " + groupRuntime.getName() + " " +
+                    suggestion.getScalingDirection().name() + " ######################################");
+            switch (suggestion.getScalingDirection()) {
+              case SCALE_IN:
+                ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
+                handleScaleInSuggestion(machinesToRemove.toArray(new String[machinesToRemove.size()]));
+                resetVmInfoAtMonitor(groupRuntime.getId());
+                break;
+              case SCALE_OUT:
+                ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
+                handleScaleOutSuggestion(scaleOutMachines.toArray(new MachineType[scaleOutMachines.size()]));
+                resetVmInfoAtMonitor(groupRuntime.getId());
+                break;
+              case TMP_SCALEIN:
+                ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
+                handleScaleInSuggestion(toRemove.toArray(new String[toRemove.size()]));
+                resetVmInfoAtMonitor(groupRuntime.getId());
+                break;
+              default:
+                logger.warn("Handle scaling has not been implemented for the scaling direction: " +
+                        suggestion.getScalingDirection().name());
+                break;
+            }
           }
         } catch (InterruptedException e) {
           logger.error("Error while taking the auto-scaling suggestion in group: " + groupRuntime.getId());
@@ -166,5 +210,22 @@ public class HoneyTapHandler {
       }
     }
 
+    private void addVmIdToMonitorSimulation(String groupId, String vmId, String machineType) {
+      try {
+        InstanceType instanceType = InstanceType.valueByModel(machineType);
+        HoneyTapAPI.getInstance().addSimulatedVmInfo(groupId, vmId, instanceType.numVCpu, instanceType.memInGig,
+                instanceType.numDisks, instanceType.diskSize);
+      } catch (HoneyTapException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+
+    private void removeVmIdfromMonitorSimulation(String groupId, String vmId) {
+      try {
+        HoneyTapAPI.getInstance().removeSimulatedVmInfo(groupId, vmId);
+      } catch (HoneyTapException e) {
+        throw new IllegalStateException(e);
+      }
+    }
   }
 }
