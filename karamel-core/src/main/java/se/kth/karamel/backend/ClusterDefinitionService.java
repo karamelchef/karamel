@@ -176,12 +176,18 @@ public class ClusterDefinitionService {
 
   public static String yamlToJson(String yaml) throws KaramelException {
     JsonCluster jsonObj = yamlToJsonObject(yaml);
-    for (JsonGroup group : jsonObj.getGroups()) {
-      if (group.getAutoScalingEnabled()) {
-        startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
-                jsonObj.getGroups().size(), jsonObj.getName());
+    final JsonCluster obj = jsonObj;
+    new Thread() {
+      public void run() {
+        for (JsonGroup group : obj.getGroups()) {
+          if (group.getAutoScalingEnabled()) {
+            startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
+                    obj.getGroups().size(), obj.getName());
+          }
+        }
       }
-    }
+    }.start();
+
     return serializeJson(jsonObj);
   }
 
