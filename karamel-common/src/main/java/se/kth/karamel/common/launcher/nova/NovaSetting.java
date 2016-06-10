@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.util.Settings;
 
 /**
  * Created by Alberto on 2015-05-14.
