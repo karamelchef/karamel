@@ -11,7 +11,6 @@ import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.launcher.amazon.InstanceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import se.kth.karamel.common.launcher.aws.InstanceType;
 
 /**
  * Created with IntelliJ IDEA.

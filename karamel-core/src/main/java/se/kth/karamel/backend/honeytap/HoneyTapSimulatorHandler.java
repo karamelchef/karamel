@@ -7,7 +7,6 @@ import se.kth.honeytap.scaling.core.HoneyTapAPI;
 import se.kth.honeytap.scaling.exceptions.HoneyTapException;
 import se.kth.honeytap.scaling.models.MachineType;
 import se.kth.karamel.backend.ClusterService;
-import se.kth.karamel.common.launcher.amazon.InstanceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import se.kth.karamel.common.launcher.aws.InstanceType;
 
 //import se.kth.honeytap.scaling.rules.Rule;
 
