@@ -9,11 +9,22 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.scanner.ScannerException;
+import se.kth.honeytap.scaling.core.HoneyTapAPI;
+import se.kth.honeytap.scaling.exceptions.HoneyTapException;
+import se.kth.honeytap.scaling.group.Group;
+import se.kth.honeytap.scaling.monitoring.MonitoringListener;
+import se.kth.honeytap.scaling.rules.Rule;
+import se.kth.karamel.backend.honeytap.HoneyTapSimulatorHandler;
+import se.kth.karamel.backend.honeytap.rules.GroupModel;
+import se.kth.karamel.backend.honeytap.rules.Mapper;
+import se.kth.karamel.backend.honeytap.rules.RuleLoader;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -21,6 +32,7 @@ import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.Occi;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlPropertyRepresenter;
@@ -34,8 +46,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -161,7 +176,99 @@ public class ClusterDefinitionService {
 
   public static String yamlToJson(String yaml) throws KaramelException {
     JsonCluster jsonObj = yamlToJsonObject(yaml);
+    final JsonCluster obj = jsonObj;
+    new Thread() {
+      public void run() {
+        for (JsonGroup group : obj.getGroups()) {
+          if (group.getAutoScalingEnabled()) {
+            startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
+                    obj.getGroups().size(), obj.getName());
+          }
+        }
+      }
+    }.start();
+
     return serializeJson(jsonObj);
+  }
+
+  private static HoneyTapAPI honeyTapAPI;
+  private static HoneyTapSimulatorHandler honeyTapSimulatorHandler;
+  private static Log log = LogFactory.getLog(ClusterDefinitionService.class);
+  private static final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
+  static boolean asInitSuccessful = false;
+
+  private static void initAutoScaling(int noOfGroups) {
+    try {
+      if (honeyTapAPI == null) {
+        honeyTapAPI = HoneyTapAPI.getInstance();
+      }
+      if (honeyTapAPI != null && honeyTapSimulatorHandler == null) {
+        honeyTapSimulatorHandler = new HoneyTapSimulatorHandler(noOfGroups, honeyTapAPI);
+      } else {
+        log.error("Could not initiate auto scaling handler");
+      }
+
+      if (honeyTapAPI != null && honeyTapSimulatorHandler != null) {
+        asInitSuccessful = true;
+      }
+    } catch (HoneyTapException e) {
+      log.fatal("Error while initializing the HoneyTapAPI for group", e);
+      return;
+    }
+  }
+
+  private static void startAutoScalingGroup(String groupName, String groupId, int initialNoOfMachines, int noOfGroups,
+                                String clusterName) {
+    log.info("################################ going to start auto scaling for group: " + groupName +
+            "################################");
+
+    if (!asInitSuccessful) {
+      initAutoScaling(noOfGroups);
+    }
+
+    if (honeyTapAPI != null) {
+      try {
+        //TODO-AS create rules and add it to AS
+        GroupModel groupModel = RuleLoader.getGroupModel(clusterName, groupName);
+        Rule[] rules = groupModel.getRules();
+        String[] addedRules = addASRulesForGroup(groupId, rules);
+        if (addedRules.length > 0) {
+          //TODO-AS get params req to createGroup through the yml
+          Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
+
+          honeyTapAPI.createGroup(groupId, groupModel.getMinInstances(), groupModel.getMaxInstances(),
+                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+                  groupModel.getReliabilityReq());
+
+          MonitoringListener listener = honeyTapAPI.startAutoScaling(groupId, initialNoOfMachines);
+          autoscalerListenersMap.put(groupId, listener);
+          //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+          honeyTapSimulatorHandler.startHandlingGroup(groupId);
+        }
+      } catch (HoneyTapException e) {
+        log.error("Error while initiating auto-scaling for group: " + groupId, e);
+      } catch (KaramelException e) {
+        log.error("Error while retrieving rules for the group: " + groupName, e);
+      }
+    } else {
+      log.error("Cannot initiate auto-scaling for group " + groupId + ". HoneyTapAPI has not been " +
+              "initialized");
+    }
+  }
+
+  private static String[] addASRulesForGroup(String groupId, Rule[] rules) {
+    ArrayList<String> addedRules = new ArrayList<String>();
+    for (Rule rule : rules) {
+      try {
+        honeyTapAPI.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
+                rule.getOperationAction());
+        honeyTapAPI.addRuleToGroup(rule.getRuleName(), groupId);
+        addedRules.add(rule.getRuleName());
+      } catch (HoneyTapException e) {
+        log.error("Failed to add rule with name: " + rule.getRuleName());
+      }
+    }
+    return addedRules.toArray(new String[addedRules.size()]);
   }
 
   public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {

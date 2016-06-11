@@ -1,6 +1,6 @@
-package se.kth.karamel.backend.autoscalar.rules;
+package se.kth.karamel.backend.honeytap.rules;
 
-import se.kth.autoscalar.scaling.rules.Rule;
+import se.kth.honeytap.scaling.rules.Rule;
 import se.kth.karamel.common.exception.KaramelException;
 
 import java.util.ArrayList;

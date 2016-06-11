@@ -34,7 +34,7 @@ import org.jclouds.ec2.features.SecurityGroupApi;
 import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
-import se.kth.autoscalar.scaling.models.MachineType;
+import se.kth.honeytap.scaling.models.MachineType;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;

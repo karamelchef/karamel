@@ -405,8 +405,7 @@ public class DagBuilderTest {
     ClusterStats clusterStats = new ClusterStats();
     String json = "{example: json}";
     String uniqueId = "123456789";
-    int version = 1;
-    Dag dag = DagBuilder.getTopicMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId, version);
+    Dag dag = DagBuilder.getTopicMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId);
     System.out.println(dag.print());
 
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));

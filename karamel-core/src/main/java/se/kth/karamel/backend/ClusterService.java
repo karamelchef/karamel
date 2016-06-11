@@ -7,7 +7,7 @@ package se.kth.karamel.backend;
 
 import com.google.gson.Gson;
 import org.apache.log4j.Logger;
-import se.kth.autoscalar.scaling.models.MachineType;
+import se.kth.honeytap.scaling.models.MachineType;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;

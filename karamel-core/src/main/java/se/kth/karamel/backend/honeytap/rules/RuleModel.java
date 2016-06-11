@@ -1,4 +1,4 @@
-package se.kth.karamel.backend.autoscalar.rules;
+package se.kth.karamel.backend.honeytap.rules;
 
 /**
  * Created with IntelliJ IDEA.
