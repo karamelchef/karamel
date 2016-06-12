@@ -1,0 +1,3 @@
+dependencies:
+  - recipe: tablespoon-riemann::dash
+  - recipe: tablespoon-riemann::server
