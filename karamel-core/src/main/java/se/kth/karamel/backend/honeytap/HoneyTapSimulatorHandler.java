@@ -4,7 +4,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import se.kth.honeytap.scaling.ScalingSuggestion;
 import se.kth.honeytap.scaling.core.HoneyTapAPI;
-import se.kth.honeytap.scaling.exceptions.HoneyTapException;
 import se.kth.honeytap.scaling.models.MachineType;
 import se.kth.karamel.backend.ClusterService;
 
@@ -20,10 +19,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import se.kth.karamel.common.launcher.aws.InstanceType;
 
 //import se.kth.honeytap.scaling.rules.Rule;
-
 /**
- * Created with IntelliJ IDEA.
- * Each cluster will be handled by one HoneyTapHandler
+ * Created with IntelliJ IDEA. Each cluster will be handled by one HoneyTapHandler
+ *
  * @author Ashansa Perera
  * @version $Id$
  * @since 1.0
@@ -33,9 +31,9 @@ public class HoneyTapSimulatorHandler {
   private ThreadPoolExecutor executor;
   Log log = LogFactory.getLog(HoneyTapSimulatorHandler.class);
   private static final ClusterService clusterService = ClusterService.getInstance();
-  private static HoneyTapAPI honeyTapAPI;
-  private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap =
-          new HashMap<String, AutoScalingSuggestionExecutor>();
+  private HoneyTapAPI honeyTapAPI;
+  private Map<String, AutoScalingSuggestionExecutor> groupExecutorMap
+      = new HashMap<String, AutoScalingSuggestionExecutor>();
   private boolean isAutoScalingActive = false;
 
   //for simulation
@@ -86,8 +84,8 @@ public class HoneyTapSimulatorHandler {
         ArrayBlockingQueue<ScalingSuggestion> suggestionQueue = honeyTapAPI.getSuggestionQueue(groupId);
         if (suggestionQueue != null) {
           this.suggestionsQueueOfGroup = suggestionQueue;
-          log.info(" ############### AS suggestion queue recieved, group: " + groupId +
-                  "#################");
+          log.info(" ############### AS suggestion queue recieved, group: " + groupId
+              + "#################");
           break;
         }
       }
@@ -100,7 +98,7 @@ public class HoneyTapSimulatorHandler {
         try {
           ScalingSuggestion suggestion = suggestionsQueueOfGroup.take();
           //TODO-AS this is temporary code for simulation:isSimulation. After that only the logic
-                                                                                // in else part should be there
+          // in else part should be there
           if (isSimulation) {
             log.info("##################### SIMULATION scaling suggestions #############");
             switch (suggestion.getScalingDirection()) {
@@ -112,20 +110,20 @@ public class HoneyTapSimulatorHandler {
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
-                        System.currentTimeMillis());
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
+                    + System.currentTimeMillis());
                 break;
               case SCALE_OUT:
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
                 ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
                 Thread.sleep(scaleOutDelay + new Random().nextInt(20 * 1000));  //1 min + making a random addition
-                                                                                          // upto 20seconds
+                // upto 20seconds
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
-                          machine.getProperty(MachineType.Properties.TYPE.name()));
+                      machine.getProperty(MachineType.Properties.TYPE.name()));
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
-                        System.currentTimeMillis());
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
+                    + System.currentTimeMillis());
                 break;
               case TMP_SCALEIN:
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
@@ -138,12 +136,12 @@ public class HoneyTapSimulatorHandler {
                   allVms.remove(vmIdToRemove);
                   removeVmIdfromMonitorSimulation(groupId, vmIdToRemove);
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " +
-                        System.currentTimeMillis());
+                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
+                    + System.currentTimeMillis());
                 break;
               default:
-                log.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: " +
-                        suggestion.getScalingDirection().name());
+                log.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: "
+                    + suggestion.getScalingDirection().name());
                 break;
             }
           }
@@ -158,21 +156,13 @@ public class HoneyTapSimulatorHandler {
     }
 
     private void addVmIdToMonitorSimulation(String groupId, String vmId, String machineType) {
-      try {
-        InstanceType instanceType = InstanceType.valueByModel(machineType);
-        HoneyTapAPI.getInstance().addSimulatedVmInfo(groupId, vmId, instanceType.numVCpu, instanceType.memInGig,
-                instanceType.numDisks, instanceType.diskSize);
-      } catch (HoneyTapException e) {
-        throw new IllegalStateException(e);
-      }
+      InstanceType instanceType = InstanceType.valueByModel(machineType);
+      honeyTapAPI.addSimulatedVmInfo(groupId, vmId, instanceType.numVCpu, instanceType.memInGig,
+          instanceType.numDisks, instanceType.diskSize);
     }
 
     private void removeVmIdfromMonitorSimulation(String groupId, String vmId) {
-      try {
-        HoneyTapAPI.getInstance().removeSimulatedVmInfo(groupId, vmId);
-      } catch (HoneyTapException e) {
-        throw new IllegalStateException(e);
-      }
+      honeyTapAPI.removeSimulatedVmInfo(groupId, vmId);
     }
   }
 }

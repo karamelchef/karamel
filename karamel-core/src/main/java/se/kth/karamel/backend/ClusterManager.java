@@ -149,7 +149,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   }
 
   private void setupHoneytap() throws HoneyTapException {
-    honeytapApi = HoneyTapAPI.getInstance();
+    honeytapApi = new HoneyTapAPI();
     this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
   }
 
@@ -170,8 +170,9 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
    * @throws BroadcastException
    */
   @Override
-  public void sendToMachines(Set<String> machines, String json, String topicId) throws BroadcastException {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public void sendToMachines(Set<String> machines, String json, String topicId) 
+      throws BroadcastException {
+    throw new UnsupportedOperationException("Not supported yet."); 
   }
 
   /**
