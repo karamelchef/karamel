@@ -12,7 +12,7 @@
   <!-- Modules in the Project.-->
   <modules>
     <module>tablespoon</module>
-    <module>auto-scalar</module>
+    <module>honeytap</module>
     <module>karamel-ui</module>
     <module>karamel-core</module>
     <module>karamel-common</module>
