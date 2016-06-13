@@ -230,6 +230,7 @@ public class HoneyTapHandler {
         InstanceType instanceType = InstanceType.valueByModel(machineType);
         HoneyTapAPI.getInstance().addSimulatedVmInfo(groupId, vmId, instanceType.numVCpu, instanceType.memInGig,
                 instanceType.numDisks, instanceType.diskSize);
+        log.info("************** adding machine: type, id ***************************: " + machineType + ", " + vmId);
       } catch (HoneyTapException e) {
         throw new IllegalStateException(e);
       }
@@ -238,6 +239,7 @@ public class HoneyTapHandler {
     private void removeVmIdfromMonitorSimulation(String groupId, String vmId) {
       try {
         HoneyTapAPI.getInstance().removeSimulatedVmInfo(groupId, vmId);
+        log.info("************** removing machine: id ***************************: " + vmId);
       } catch (HoneyTapException e) {
         throw new IllegalStateException(e);
       }
