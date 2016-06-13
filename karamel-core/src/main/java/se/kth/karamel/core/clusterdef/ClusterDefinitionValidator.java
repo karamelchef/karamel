@@ -27,7 +27,7 @@ public class ClusterDefinitionValidator {
   public static void validate(JsonCluster cluster) throws ValidationException {
     cluster.validate();
 
-    boolean autoascalingenabled = false;
+    boolean autoscale = false;
     String tablespoonSeverGroup = null;
 
     for (JsonGroup group : cluster.getGroups()) {
@@ -40,7 +40,7 @@ public class ClusterDefinitionValidator {
               String.format("Number of ip addresses is not equal to the group size %d != %d", s1, group.getSize()));
         }
       }
-      autoascalingenabled |= group.getAutoScalingEnabled();
+      autoscale |= group.isAutoScale();
       for (JsonCookbook jc : group.getCookbooks()) {
         ArrayList<JsonRecipe> recs = Lists.newArrayList(jc.getRecipes());
         for (int i = 0; i < recs.size(); i++) {
@@ -66,7 +66,7 @@ public class ClusterDefinitionValidator {
       }
     }
 
-    if (autoascalingenabled && tablespoonSeverGroup == null) {
+    if (autoscale && tablespoonSeverGroup == null) {
       throw new InconsistentDeploymentException(
           "To enable autoscaling you must locate tablespoon-riemann::server in a group");
     }

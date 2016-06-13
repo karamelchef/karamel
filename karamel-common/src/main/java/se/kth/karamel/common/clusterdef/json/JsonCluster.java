@@ -57,7 +57,7 @@ public class JsonCluster extends JsonScope {
   
   public boolean isAutoscale() {
     for (JsonGroup jg : groups) {
-      if (jg.getAutoScalingEnabled())
+      if (jg.isAutoScale())
         return true;
     }
     return false;

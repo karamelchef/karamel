@@ -136,9 +136,6 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
         for (Map.Entry<String, SshMachine> entry : entrySet) {
           SshMachine machine = entry.getValue();
           machine.ping();
-          /*if (machine.getMachineRuntime().getGroup().isAutoScalingEnabled()) {
-            decomissionAndReportToAutoscalar(machine);
-          }*/
         }
 
         try {

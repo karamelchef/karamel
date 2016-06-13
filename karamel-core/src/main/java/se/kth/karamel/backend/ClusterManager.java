@@ -682,7 +682,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
               //if group is forked successfully, start auto-scaling in tha group
               if (!isFailed) {
                 for (GroupRuntime groupRuntime : groupRuntimes) {
-                  if (groupRuntime.isAutoScalingEnabled()) {
+                  JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupRuntime.getName());
+                  if (jg.isAutoScale()) {
                     /*check whether i can start autoscaling when load the def file
                      (just for simulation. So no interruption from karamel and no actual machine spawining)*/
                     startAutoScaling(groupRuntime);

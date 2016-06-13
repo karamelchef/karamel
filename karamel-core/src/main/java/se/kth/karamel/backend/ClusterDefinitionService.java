@@ -180,7 +180,7 @@ public class ClusterDefinitionService {
     new Thread() {
       public void run() {
         for (JsonGroup group : obj.getGroups()) {
-          if (group.getAutoScalingEnabled()) {
+          if (group.isAutoScale()) {
             startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
                     obj.getGroups().size(), obj.getName());
           }

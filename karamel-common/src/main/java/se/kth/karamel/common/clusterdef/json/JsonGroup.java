@@ -28,7 +28,7 @@ public class JsonGroup extends JsonScope {
 
   private String name;
   private int size;
-  private boolean autoScalingEnabled;
+  private boolean autoscale;
 
   public JsonGroup() {
   }
@@ -37,7 +37,7 @@ public class JsonGroup extends JsonScope {
     super(cluster, group);
     setName(name);
     this.size = group.getSize();
-    this.autoScalingEnabled = group.getAutoScalingEnabled();
+    this.autoscale = group.isAutoscale();
     List<String> recipes = group.getRecipes();
     for (String rec : recipes) {
       String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
@@ -105,12 +105,12 @@ public class JsonGroup extends JsonScope {
     return size;
   }
 
-  public void setAutoScalingEnabled(boolean autoScalingEnabled) {
-    this.autoScalingEnabled = autoScalingEnabled;
+  public void setAutoScalingEnabled(boolean autoscale) {
+    this.autoscale = autoscale;
   }
 
-  public boolean getAutoScalingEnabled() {
-    return autoScalingEnabled;
+  public boolean isAutoScale() {
+    return autoscale;
   }
 
   public void setSize(int size) {
