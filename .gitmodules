@@ -1,6 +1,6 @@
-[submodule "auto-scalar"]
-	path = auto-scalar
-	url = https://github.com/ashansa/auto-scalar
+[submodule "honeytap"]
+	path = honeytap
+	url = git@github.com:ashansa/honeytap.git
 [submodule "tablespoon"]
 	path = tablespoon
 	url = https://github.com/hwesterb/tablespoon

@@ -200,7 +200,7 @@ public class ClusterDefinitionService {
   private static void initAutoScaling(int noOfGroups) {
     try {
       if (honeyTapAPI == null) {
-        honeyTapAPI = HoneyTapAPI.getInstance();
+        honeyTapAPI = new HoneyTapAPI();
       }
       if (honeyTapAPI != null && honeyTapSimulatorHandler == null) {
         honeyTapSimulatorHandler = new HoneyTapSimulatorHandler(noOfGroups, honeyTapAPI);

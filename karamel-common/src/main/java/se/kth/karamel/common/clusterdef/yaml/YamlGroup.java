@@ -68,10 +68,10 @@ public class YamlGroup extends YamlScope {
     Baremetal baremetal = getBaremetal();
     if (baremetal != null) {
       int s1 = baremetal.retriveAllIps().size();
-      if (s1 != size)
+      if (s1 != size) {
         throw new ValidationException(
             String.format("Number of ip addresses is not equal to the group size %d != %d", s1, size));
+      }
     }
   }
-
 }

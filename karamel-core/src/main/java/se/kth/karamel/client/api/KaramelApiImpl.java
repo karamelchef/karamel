@@ -56,7 +56,7 @@ import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.util.SshKeyService;
-import se.kth.karamel.common.util.settings.NovaSetting;
+import se.kth.karamel.common.launcher.nova.NovaSetting;
 
 import java.io.File;
 import java.io.IOException;

@@ -34,7 +34,7 @@ import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.NovaCredentials;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
-import se.kth.karamel.common.util.settings.NovaSetting;
+import se.kth.karamel.common.launcher.nova.NovaSetting;
 
 import java.util.ArrayList;
 import java.util.HashMap;

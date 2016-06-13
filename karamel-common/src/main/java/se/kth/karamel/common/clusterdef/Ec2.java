@@ -7,7 +7,7 @@ package se.kth.karamel.common.clusterdef;
 
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.launcher.amazon.Region;
+import se.kth.karamel.common.launcher.aws.Region;
 
 /**
  *

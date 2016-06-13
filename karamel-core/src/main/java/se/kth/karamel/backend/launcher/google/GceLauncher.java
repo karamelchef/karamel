@@ -44,7 +44,7 @@ import se.kth.karamel.common.clusterdef.Gce;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.util.GceSettings;
+import se.kth.karamel.common.launcher.gce.GceSettings;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.exception.InvalidCredentialsException;

@@ -1,7 +1,7 @@
 package se.kth.karamel.common.clusterdef;
 
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.util.settings.NovaSetting;
+import se.kth.karamel.common.launcher.nova.NovaSetting;
 
 /**
  * Created by alberto on 2015-05-14.

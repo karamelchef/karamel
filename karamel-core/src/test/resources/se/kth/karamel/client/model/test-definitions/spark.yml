@@ -2,7 +2,7 @@ name: spark
 ec2:
     type: m3.medium
     region: eu-west-1
-
+    
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
@@ -11,13 +11,21 @@ cookbooks:
     branch: "master"
 
 groups: 
+  tablespoon:
+    baremetal: 
+      ip: 89.1.2.34
   namenodes:
+    autoscalingenabled: true
     size: 1
     recipes: 
         - hadoop::nn
         - hadoop::rm
         - hadoop::jhs
         - spark::master
+    attrs:
+      hadoop:
+        nn:
+          port
   datanodes:
     size: 2
     recipes: 

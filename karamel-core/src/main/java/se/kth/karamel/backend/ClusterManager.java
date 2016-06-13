@@ -62,12 +62,19 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
+import se.kth.tablespoon.client.api.TablespoonApi;
+import se.kth.tablespoon.client.broadcasting.AgentBroadcaster;
+import se.kth.tablespoon.client.broadcasting.AgentBroadcasterAssistant;
+import se.kth.tablespoon.client.broadcasting.BroadcastException;
+import se.kth.tablespoon.client.broadcasting.RiemannSubscriberBroadcaster;
+import se.kth.tablespoon.client.general.Groups;
+import se.kth.tablespoon.client.topics.TopicStorage;
 
 /**
  *
  * @author kamal
  */
-public class ClusterManager implements Runnable {
+public class ClusterManager implements Runnable, AgentBroadcaster {
 
   public static enum Command {
 
@@ -89,11 +96,19 @@ public class ClusterManager implements Runnable {
   private Future<?> clusterManagerFuture = null;
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
+  private Future<?> tablespoonBroadcasterFuture = null;
+  private Future<?> tablespoonBroadcasterAssistantFuture = null;
   private boolean stopping = false;
   private final ClusterStats stats = new ClusterStats();
-  private HoneyTapAPI autoScalarAPI;
+  private HoneyTapAPI honeytapApi;
   private HoneyTapHandler honeyTapHandler;
-  private final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
+  private final Map<String, MonitoringListener> honeytapListenersMap = new HashMap<>();
+  private final Groups tablespoonGroups = new Groups();
+  private String tablespoonServerHost;
+  private int tablespoonServerPort;
+  private RiemannSubscriberBroadcaster tablespoonBroadcaster;
+  private AgentBroadcasterAssistant tablespoonBroadcasterAssistant;
+  private TablespoonApi tablespoonApi;
 
   public ClusterManager(JsonCluster definition, ClusterContext clusterContext) throws KaramelException {
     this.clusterContext = clusterContext;
@@ -106,14 +121,6 @@ public class ClusterManager implements Runnable {
     this.stats.setUserId(Settings.USER_NAME);
     this.stats.setStartTime(System.currentTimeMillis());
     clusterStatusMonitor = new ClusterStatusMonitor(machinesMonitor, definition, runtime, stats);
-
-    try {
-      //TODO-AS: initiate only if AS is enabled in the cluster
-      autoScalarAPI = HoneyTapAPI.getInstance();
-      this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), autoScalarAPI);
-    } catch (HoneyTapException e) {
-      logger.fatal("Error while initializing the HoneyTapAPI for group", e);
-    }
     initLaunchers();
   }
 
@@ -137,10 +144,37 @@ public class ClusterManager implements Runnable {
     return runtime;
   }
 
-  public Map<String, MonitoringListener> getAutoscalerListenersMap() {
-    return autoscalerListenersMap;
+  public Map<String, MonitoringListener> honeytapListenersMap() {
+    return honeytapListenersMap;
   }
-  
+
+  private void setupHoneytap() throws HoneyTapException {
+    honeytapApi = new HoneyTapAPI();
+    this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
+  }
+
+  private void setupTablespoon() {
+    TopicStorage storage = new TopicStorage(tablespoonGroups);
+    tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
+    tablespoonBroadcaster
+        = new RiemannSubscriberBroadcaster(tablespoonServerHost, tablespoonServerPort, storage);
+    tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonBroadcaster);
+  }
+
+  /**
+   * Broadcaster for the TableSpoon
+   *
+   * @param machines
+   * @param json
+   * @param topicId
+   * @throws BroadcastException
+   */
+  @Override
+  public void sendToMachines(Set<String> machines, String json, String topicId) 
+      throws BroadcastException {
+    throw new UnsupportedOperationException("Not supported yet."); 
+  }
+
   /**
    * Non-blocking way of controlling the cluster, the quick commands are served immediately while the time-consuming
    * commands are queued to be served one by one. Commands have different level of priorities and the higher priority
@@ -214,9 +248,18 @@ public class ClusterManager implements Runnable {
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
+    if (definition.isAutoscale()) {
+      tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
+      tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
+    }
   }
 
   public void stop() throws InterruptedException {
+    if (definition.isAutoscale() && tablespoonBroadcasterFuture != null && !tablespoonBroadcasterFuture.isCancelled()) {
+      logger.info(String.format("Terminating tablespoon of '%s'", definition.getName()));
+      tablespoonBroadcasterFuture.cancel(true);
+      tablespoonBroadcasterAssistantFuture.cancel(true);
+    }
     machinesMonitor.setStopping(true);
     if (machinesMonitorFuture != null && !machinesMonitorFuture.isCancelled()) {
       logger.info(String.format("Terminating machines monitor of '%s'", definition.getName()));
@@ -444,7 +487,7 @@ public class ClusterManager implements Runnable {
         allIdsToBeRemoved.addAll(Arrays.asList(vmIdsToRemove));
 
         logger.info(String.format("################## Going to remove machines with ID '%s' ########################",
-                allIdsToBeRemoved.toString()));
+            allIdsToBeRemoved.toString()));
         runtime.resolveFailure(Failure.hash(Failure.Type.SCALE_DOWN_FAILURE, groupName));
         groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALING_DOWN_MACHINES);
         boolean isSuccessful = false;
@@ -469,9 +512,9 @@ public class ClusterManager implements Runnable {
               }
 
               Set<? extends NodeMetadata> destroyedNodes = ec2Launcher.removeMachinesFromGroup(groupRuntime,
-                      allIdsToBeRemoved, vmNamesToBeRemoved, groupName);
-              logger.info("################ wantedToRemove and removed: " + vmIdsToRemove.length + " & " +
-                      destroyedNodes.size() + "################");
+                  allIdsToBeRemoved, vmNamesToBeRemoved, groupName);
+              logger.info("################ wantedToRemove and removed: " + vmIdsToRemove.length + " & "
+                  + destroyedNodes.size() + "################");
 
               for (NodeMetadata destroyedNode : destroyedNodes) {
                 logger.info("####################### machine removed: " + destroyedNode.getId() + " ################");
@@ -480,8 +523,8 @@ public class ClusterManager implements Runnable {
               //TODO-AS low priority: remove security groups when no nodes in group
               isSuccessful = true;
             } catch (KaramelException e) {
-              logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: " +
-                      groupName);
+              logger.error("Error while removing the machines: " + allIdsToBeRemoved.toString() + " from group: "
+                  + groupName);
               runtime.issueFailure(new Failure(Failure.Type.SCALE_DOWN_FAILURE, groupName, e.getMessage()));
             }
             break;
@@ -506,12 +549,12 @@ public class ClusterManager implements Runnable {
           Ec2Launcher ec2Launcher = (Ec2Launcher) launcher;   //TODO-AS add method to interface
           try {
             List<MachineRuntime> mcs = ec2Launcher.addMachinesToGroup(definition, groupRuntime, groupRuntime.getName(),
-                    machineTypes);
+                machineTypes);
             groupRuntime.setMachines(mcs);
             machinesMonitor.addMachines(mcs);
 
-            logger.info("################ wantedToAdd and added: " + machineTypes.length + " & " +
-                    mcs.size() + "################");
+            logger.info("################ wantedToAdd and added: " + machineTypes.length + " & "
+                + mcs.size() + "################");
             if (machineTypes.length == mcs.size()) {
               groupRuntime.setPhase(GroupRuntime.GroupPhase.SCALED_UP);
             }
@@ -525,9 +568,9 @@ public class ClusterManager implements Runnable {
   }
 
   private void startAutoScaling(final GroupRuntime groupRuntime) {
-    logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName() +
-            "################################");
-    if (autoScalarAPI != null) {
+    logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName()
+        + "################################");
+    if (honeytapApi != null) {
       try {
         //TODO-AS create rules and add it to AS
         GroupModel groupModel = RuleLoader.getGroupModel(groupRuntime.getCluster().getName(), groupRuntime.getName());
@@ -537,13 +580,13 @@ public class ClusterManager implements Runnable {
           //TODO-AS get params req to createGroup through the yml
           Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
 
-          autoScalarAPI.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
-                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
-                  groupModel.getReliabilityReq());
+          honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
+              groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+              groupModel.getReliabilityReq());
 
-          MonitoringListener listener = autoScalarAPI.startAutoScaling(groupRuntime.getId(),
-                  groupRuntime.getMachines().size());
-          autoscalerListenersMap.put(groupRuntime.getId(), listener);
+          MonitoringListener listener = honeytapApi.startAutoScaling(groupRuntime.getId(),
+              groupRuntime.getMachines().size());
+          honeytapListenersMap.put(groupRuntime.getId(), listener);
           //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
           honeyTapHandler.startHandlingGroup(groupRuntime);
         }
@@ -553,8 +596,8 @@ public class ClusterManager implements Runnable {
         logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
       }
     } else {
-      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been " +
-              "initialized");
+      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been "
+          + "initialized");
     }
   }
 
@@ -562,9 +605,9 @@ public class ClusterManager implements Runnable {
     ArrayList<String> addedRules = new ArrayList<String>();
     for (Rule rule : rules) {
       try {
-        autoScalarAPI.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
-                rule.getOperationAction());
-        autoScalarAPI.addRuleToGroup(rule.getRuleName(), groupId);
+        honeytapApi.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
+            rule.getOperationAction());
+        honeytapApi.addRuleToGroup(rule.getRuleName(), groupId);
         addedRules.add(rule.getRuleName());
       } catch (HoneyTapException e) {
         logger.error("Failed to add rule with name: " + rule.getRuleName());
@@ -597,7 +640,6 @@ public class ClusterManager implements Runnable {
 //    //TODO pass sshKeyPath location
 //    honeyTapAPI.removeMachineFromGroup(machine);
 //  }
-
   @Override
   public void run() {
     logger.info(String.format("Cluster-Manager started for '%s' d'-'", definition.getName()));
@@ -638,11 +680,11 @@ public class ClusterManager implements Runnable {
               stats.addPhase(phaseStat);
 
               //if group is forked successfully, start auto-scaling in tha group
-              if(!isFailed) {
-                for (GroupRuntime groupRuntime: groupRuntimes) {
-                  if(groupRuntime.isAutoScalingEnabled()) {
+              if (!isFailed) {
+                for (GroupRuntime groupRuntime : groupRuntimes) {
+                  if (groupRuntime.isAutoScalingEnabled()) {
                     /*check whether i can start autoscaling when load the def file
-                            (just for simulation. So no interruption from karamel and no actual machine spawining)*/
+                     (just for simulation. So no interruption from karamel and no actual machine spawining)*/
                     startAutoScaling(groupRuntime);
                   }
                 }

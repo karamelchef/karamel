@@ -1,4 +1,4 @@
-package se.kth.karamel.common.util.settings;
+package se.kth.karamel.common.launcher.nova;
 
 
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import se.kth.karamel.common.util.Settings;
 
 /**
  * Created by Alberto on 2015-05-14.
@@ -44,11 +45,11 @@ public enum NovaSetting {
   }
 
   public static final String NOVA_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
-    return (SystemSetting.USER_NAME.getParameter() + "-" + clusterName + "-" + groupName).toLowerCase();
+    return (Settings.USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
   }
 
   public static final String NOVA_KEYPAIR_NAME(String clusterName, String region) {
-    return (SystemSetting.USER_NAME.getParameter() + "-" + clusterName).toLowerCase();
+    return (Settings.USER_NAME + "-" + clusterName).toLowerCase();
   }
 
   public static final String NOVA_UNIQUE_GROUP_DESCRIPTION(String clusterName, String groupName) {

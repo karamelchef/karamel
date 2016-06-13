@@ -27,7 +27,7 @@
   <dependencies>
     <dependency>
       <groupId>se.kth.honeytap</groupId>
-      <artifactId>scaling</artifactId>
+      <artifactId>honeytap-scaling</artifactId>
       <version>1.0-SNAPSHOT</version>
     </dependency>
     <dependency>

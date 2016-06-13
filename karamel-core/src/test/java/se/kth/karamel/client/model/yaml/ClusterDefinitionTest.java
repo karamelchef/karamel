@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
+import se.kth.karamel.common.exception.InconsistentDeploymentException;
 
 /**
  *
@@ -201,6 +202,27 @@ public class ClusterDefinitionTest {
   public void testDuplciateRecipeInAGroup() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations2.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
+  }
+
+  @Test(expected = InconsistentDeploymentException.class)
+  public void testMorethanOneTablespoonServer() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations3.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
+  }
+
+  @Test(expected = InconsistentDeploymentException.class)
+  public void testBigGroupTablespoonServer() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations4.yml");
+    ClusterDefinitionService.yamlToJson(yaml);
+  }
+
+  @Test(expected = InconsistentDeploymentException.class)
+  public void testNoTablespoonServerWhenAutoscaling() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = true;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations5.yml");
     ClusterDefinitionService.yamlToJson(yaml);
   }
 

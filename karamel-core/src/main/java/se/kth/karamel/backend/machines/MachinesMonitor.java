@@ -100,7 +100,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
 
   private void decomissionAndReportToAutoscalar(SshMachine machine) throws HoneyTapException {
     MachineRuntime runtime = machine.getMachineRuntime();
-    Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.getAutoscalerListenersMap();
+    Map<String, MonitoringListener> autoscalerListenersMap = clusterManager.honeytapListenersMap();
     String gid = runtime.getGroup().getId();
     MonitoringListener listener = autoscalerListenersMap.get(gid);
     if (listener != null) {
