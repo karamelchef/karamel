@@ -9,7 +9,7 @@ cookbooks:
   java:
     branch: master
     github: my-experiments/java
-  tablespoon-riemann:
+  tablespoon_riemann:
     branch: master
     github: karamel-lab/tablespoon-riemann
 attrs:
@@ -32,4 +32,4 @@ groups:
     - apache_hadoop::rm
     - apache_hadoop::dn
     - apache_hadoop::nm
-    - tablespoon-riemann::server
+    - tablespoon_riemann::server
