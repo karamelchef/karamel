@@ -1,0 +1,32 @@
+name: hadoop
+ec2:
+  region: eu-west-1
+  type: m3.medium
+cookbooks:
+  apache_hadoop:
+    branch: master
+    github: my-experiments/apache-hadoop-chef
+  java:
+    branch: master
+    github: my-experiments/java
+attrs:
+  apache_hadoop:
+    mr:
+      user: ubuntu
+    hdfs:
+      user: ubuntu
+    yarn:
+      user: ubuntu
+  java:
+    jdk_version: '8'
+groups:
+  mgr:
+    size: 1
+    autoScalingEnabled: 'true'
+    recipes:
+    - java::default
+    - apache_hadoop::nn
+    - apache_hadoop::rm
+    - apache_hadoop::dn
+    - apache_hadoop::nm
+    - tablespoon-riemann::server
