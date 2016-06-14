@@ -9,6 +9,9 @@ cookbooks:
   java:
     branch: master
     github: my-experiments/java
+  tablespoon-riemann:
+    branch: master
+    github: karamel-lab/tablespoon-riemann
 attrs:
   apache_hadoop:
     mr:
@@ -22,7 +25,7 @@ attrs:
 groups:
   mgr:
     size: 1
-    autoScalingEnabled: 'true'
+    autoscale: 'true'
     recipes:
     - java::default
     - apache_hadoop::nn
