@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.Endpoint;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.client.api.CookbookCache;
@@ -50,6 +51,7 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.MetadataRb;
 import se.kth.karamel.common.cookbookmeta.Recipe;
 import se.kth.karamel.common.exception.InconsistentDeploymentException;
+import se.kth.karamel.common.exception.TablespoonNotfoundException;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -179,7 +181,6 @@ public class ClusterDefinitionService {
     return serializeJson(jsonObj);
   }
 
-
   public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
     GsonBuilder builder = new GsonBuilder();
     builder.disableHtmlEscaping();
@@ -201,7 +202,7 @@ public class ClusterDefinitionService {
         int s1 = baremetal.retriveAllIps().size();
         if (s1 != group.getSize()) {
           throw new ValidationException(
-                  String.format("Number of ip addresses is not equal to the group size %d != %d", s1, group.getSize()));
+              String.format("Number of ip addresses is not equal to the group size %d != %d", s1, group.getSize()));
         }
       }
       autoscale |= group.isAutoScale();
@@ -212,18 +213,18 @@ public class ClusterDefinitionService {
           for (int j = i + 1; j < recs.size(); j++) {
             if (recName.equals(recs.get(j).getCanonicalName())) {
               throw new ValidationException(String.format("More than one %s in the group %s",
-                      recs.get(i).getCanonicalName(), group.getName()));
+                  recs.get(i).getCanonicalName(), group.getName()));
             }
           }
-          if (recName.equals("tablespoon-riemann::server")) {
+          if (recName.equals(Settings.TABLESPOON_RIEMANN_RECIPE_NAME)) {
             if (tablespoonSeverGroup == null && group.getSize() == 1) {
               tablespoonSeverGroup = group.getName();
             } else if (tablespoonSeverGroup != null) {
-              throw new InconsistentDeploymentException("Assigning tablespoon-riemann::server in more than one group "
-                      + "is not consistent");
+              throw new InconsistentDeploymentException(String.format("Assigning %s in more than one group "
+                  + "is not consistent", Settings.TABLESPOON_RIEMANN_RECIPE_NAME));
             } else if (tablespoonSeverGroup == null && group.getSize() > 1) {
-              throw new InconsistentDeploymentException("Assigning tablespoon-riemann::server into a group with more "
-                      + "than one machine is not consistent");
+              throw new InconsistentDeploymentException(String.format("Assigning %s into a group with more "
+                  + "than one machine is not consistent", Settings.TABLESPOON_RIEMANN_RECIPE_NAME));
             }
           }
         }
@@ -232,7 +233,8 @@ public class ClusterDefinitionService {
 
     if (autoscale && tablespoonSeverGroup == null) {
       throw new InconsistentDeploymentException(
-              "To enable autoscaling you must locate tablespoon-riemann::server in a group");
+          String.format("To enable autoscaling you must locate %s in a group",
+              Settings.TABLESPOON_RIEMANN_RECIPE_NAME));
     }
 
   }
@@ -330,7 +332,7 @@ public class ClusterDefinitionService {
           cookbookPath += Settings.SLASH + urls.cookbookRelPath;
         }
         paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
-                + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+            + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
       }
     }
     Object[] arr = paths.toArray();
@@ -358,13 +360,53 @@ public class ClusterDefinitionService {
     return false;
   }
 
-  public static boolean hasTablespoon(JsonCluster cluster) {
-    for (JsonGroup jg : cluster.getGroups()) {
-      if (jg.isAutoScale()) {
-        return true;
+  public static Endpoint tablespoonRiemannEndpoint(JsonCluster cluster, ClusterRuntime runtime)
+      throws TablespoonNotfoundException, InconsistentDeploymentException {
+    String tablespoonSeverGroup = null;
+
+    for (JsonGroup group : cluster.getGroups()) {
+      for (JsonCookbook jc : group.getCookbooks()) {
+        ArrayList<JsonRecipe> recs = Lists.newArrayList(jc.getRecipes());
+        for (int i = 0; i < recs.size(); i++) {
+          String recName = recs.get(i).getCanonicalName();
+          if (recName.equals(Settings.TABLESPOON_RIEMANN_RECIPE_NAME)) {
+            if (tablespoonSeverGroup == null && group.getSize() == 1) {
+              tablespoonSeverGroup = group.getName();
+            }
+          }
+        }
       }
     }
-    return false;
+
+    if (tablespoonSeverGroup == null) {
+      throw new TablespoonNotfoundException(
+          String.format("Recipe %s was not found in any group", Settings.TABLESPOON_RIEMANN_RECIPE_NAME));
+    }
+    GroupRuntime group = findGroup(runtime, tablespoonSeverGroup);
+    if (group.getMachines().size() != 1) {
+      throw new InconsistentDeploymentException(
+          String.format("number of machines for %s has to be exatly 1.", Settings.TABLESPOON_RIEMANN_RECIPE_NAME));
+    }
+    Endpoint endpoint = new Endpoint(group.getMachines().get(0).getPublicIp(), 5555);
+    return endpoint;
   }
 
+  public static String tablespoonGroupName(JsonCluster cluster) {
+    String tablespoonSeverGroup = null;
+
+    for (JsonGroup group : cluster.getGroups()) {
+      for (JsonCookbook jc : group.getCookbooks()) {
+        ArrayList<JsonRecipe> recs = Lists.newArrayList(jc.getRecipes());
+        for (int i = 0; i < recs.size(); i++) {
+          String recName = recs.get(i).getCanonicalName();
+          if (recName.equals(Settings.TABLESPOON_RIEMANN_RECIPE_NAME)) {
+            if (tablespoonSeverGroup == null && group.getSize() == 1) {
+              tablespoonSeverGroup = group.getName();
+            }
+          }
+        }
+      }
+    }
+    return tablespoonSeverGroup;
+  }
 }

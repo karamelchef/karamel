@@ -3,7 +3,7 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package se.kth.karamel.backend.running.model.tasks;
+package se.kth.karamel.backend.running.model.tasks.tablespoon;
 
 
 import java.util.HashSet;
@@ -11,6 +11,8 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.tasks.InstallTablespoonAgent;
+import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.stats.ClusterStats;
 
 /**

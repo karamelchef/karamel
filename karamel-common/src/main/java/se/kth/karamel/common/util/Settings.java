@@ -301,6 +301,10 @@ public class Settings {
   public static String REMOTE_PIDFILE_PATH(String sshUserName) {
     return REMOTE_USER_HOME(sshUserName) + File.separator + PID_FILE_NAME;
   }
+  
+  //------------------------------------------Special Stack-------------------------------------------------------------
+  public static final String TABLESPOON_RIEMANN_RECIPE_NAME = "riemann::server";
+  public static final String TABLESPOON_RIEMANN_PORT_VARNAME = "riemann/server/port";
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");
