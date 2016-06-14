@@ -16,7 +16,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.SshKeyPair;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 
 import java.io.File;
 import java.util.HashMap;
@@ -124,7 +123,7 @@ public class ClusterService {
   public synchronized void startCluster(String json) throws KaramelException {
     Gson gson = new Gson();
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
-    ClusterDefinitionValidator.validate(jsonCluster);
+    ClusterDefinitionService.validate(jsonCluster);
     String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
     //We have to do it again otherwise the global scope attributes get lost
     //for more info refer to https://github.com/karamelchef/karamel/issues/28

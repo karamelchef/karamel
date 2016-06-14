@@ -34,7 +34,6 @@ import se.kth.karamel.backend.honeytap.rules.GroupModel;
 import se.kth.karamel.backend.honeytap.rules.Mapper;
 import se.kth.karamel.backend.honeytap.rules.RuleLoader;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.Launcher;
@@ -114,7 +113,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     this.clusterContext = clusterContext;
     this.definition = definition;
     this.runtime = new ClusterRuntime(definition);
-    int totalMachines = UserClusterDataExtractor.totalMachines(definition);
+    int totalMachines = ClusterDefinitionService.totalMachines(definition);
     machinesMonitor = new MachinesMonitor(definition.getName(), totalMachines, clusterContext.getSshKeyPair(), this);
     String yaml = ClusterDefinitionService.jsonToYaml(definition);
     this.stats.setDefinition(yaml);
@@ -248,14 +247,15 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
-    if (definition.isAutoscale()) {
+    if (ClusterDefinitionService.hasHoneyTap(definition)) {
       tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
       tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
     }
   }
 
   public void stop() throws InterruptedException {
-    if (definition.isAutoscale() && tablespoonBroadcasterFuture != null && !tablespoonBroadcasterFuture.isCancelled()) {
+    if (ClusterDefinitionService.hasHoneyTap(definition) 
+        && tablespoonBroadcasterFuture != null && !tablespoonBroadcasterFuture.isCancelled()) {
       logger.info(String.format("Terminating tablespoon of '%s'", definition.getName()));
       tablespoonBroadcasterFuture.cancel(true);
       tablespoonBroadcasterAssistantFuture.cancel(true);
@@ -278,7 +278,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
 
   private void initLaunchers() throws KaramelException {
     for (JsonGroup group : definition.getGroups()) {
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       Launcher launcher = launchers.get(provider.getClass());
       if (launcher == null) {
         if (provider instanceof Ec2) {
@@ -313,7 +313,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
         group.setPhase(GroupRuntime.GroupPhase.PRECLEANING);
       }
       group.getCluster().resolveFailures();
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       ec2GroupEntities.add(group);
     }
     try {
@@ -352,7 +352,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
           || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_GROUPS)) {
         runtime.resolveFailure(Failure.hash(Failure.Type.CREATING_SEC_GROUPS_FAILE, group.getName()));
         group.setPhase(GroupRuntime.GroupPhase.FORKING_GROUPS);
-        Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+        Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
         Launcher launcher = launchers.get(provider.getClass());
         try {
           String groupId = launcher.forkGroup(definition, runtime, group.getName());
@@ -457,7 +457,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
           || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
         runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, group.getName()));
-        Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+        Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
         Launcher launcher = launchers.get(provider.getClass());
         try {
           List<MachineRuntime> mcs = launcher.forkMachines(definition, runtime, group.getName());
@@ -496,7 +496,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
           if (jsonGroup.getName().equals(groupName)) {
             try {
               ////TODO-AS complete logic
-              Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+              Provider provider = ClusterDefinitionService.getGroupProvider(definition, groupName);
               Launcher launcher = launchers.get(provider.getClass());
 
               ////TODO-AS get the launcher like below when every launcher has the required method and
@@ -540,7 +540,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
 
   public void addMachinesToGroup(String groupName, MachineType[] machineTypes) {
     logger.info(String.format("################## Going to add " + machineTypes.length + "########################"));
-    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    Provider provider = ClusterDefinitionService.getGroupProvider(definition, groupName);
     Launcher launcher = launchers.get(provider.getClass());
     for (GroupRuntime groupRuntime : runtime.getGroups()) {
       if (groupRuntime.getName().equals(groupName)) {
@@ -682,7 +682,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
               //if group is forked successfully, start auto-scaling in tha group
               if (!isFailed) {
                 for (GroupRuntime groupRuntime : groupRuntimes) {
-                  JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupRuntime.getName());
+                  JsonGroup jg = ClusterDefinitionService.findGroup(definition, groupRuntime.getName());
                   if (jg.isAutoScale()) {
                     /*check whether i can start autoscaling when load the def file
                      (just for simulation. So no interruption from karamel and no actual machine spawining)*/

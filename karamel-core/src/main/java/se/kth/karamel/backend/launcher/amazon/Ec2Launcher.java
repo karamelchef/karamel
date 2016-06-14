@@ -35,7 +35,7 @@ import org.jclouds.net.domain.IpPermission;
 import org.jclouds.net.domain.IpProtocol;
 import org.jclouds.rest.AuthorizationException;
 import se.kth.honeytap.scaling.models.MachineType;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
@@ -110,8 +110,8 @@ public final class Ec2Launcher extends Launcher {
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
-    JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
-    Provider provider = UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    JsonGroup jg = ClusterDefinitionService.findGroup(definition, groupName);
+    Provider provider = ClusterDefinitionService.getGroupProvider(definition, groupName);
     Ec2 ec2 = (Ec2) provider;
     Set<String> ports = new HashSet<>();
     ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
@@ -370,7 +370,7 @@ public final class Ec2Launcher extends Launcher {
                                                  final String groupName, MachineType[] machineTypes) throws
           KaramelException {
 
-    Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    Ec2 ec2 = (Ec2) ClusterDefinitionService.getGroupProvider(definition, groupName);
     if (context == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     }
@@ -540,9 +540,9 @@ public final class Ec2Launcher extends Launcher {
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
     //should get this info
-    Ec2 ec2 = (Ec2) UserClusterDataExtractor.getGroupProvider(definition, groupName);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
-    GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
+    Ec2 ec2 = (Ec2) ClusterDefinitionService.getGroupProvider(definition, groupName);
+    JsonGroup definedGroup = ClusterDefinitionService.findGroup(definition, groupName);
+    GroupRuntime group = ClusterDefinitionService.findGroup(runtime, groupName);
     HashSet<String> gids = new HashSet<>();
     gids.add(group.getId());
 
@@ -816,14 +816,14 @@ public final class Ec2Launcher extends Launcher {
     Map<String, String> groupRegion = new HashMap<>();
     for (GroupRuntime group : groups) {
       group.getCluster().resolveFailures();
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2) {
         for (MachineRuntime machine : group.getMachines()) {
           if (machine.getVmId() != null) {
             allEc2VmsIds.add(machine.getVmId());
           }
         }
-        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
+        JsonGroup jg = ClusterDefinitionService.findGroup(definition, group.getName());
         /*List<String> vmNames = Settings.AWS_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
             1, jg.getSize());*/
         List<String> vmNames = new ArrayList<String>();

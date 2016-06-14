@@ -6,6 +6,7 @@
 package se.kth.karamel.backend;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -39,7 +40,6 @@ import se.kth.karamel.common.clusterdef.yaml.YamlPropertyRepresenter;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.FilesystemUtil;
 import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,7 +50,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.GroupRuntime;
+import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.client.api.CookbookCache;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.cookbookmeta.CookbookUrls;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.MetadataRb;
+import se.kth.karamel.common.cookbookmeta.Recipe;
+import se.kth.karamel.common.exception.InconsistentDeploymentException;
+import se.kth.karamel.common.exception.ValidationException;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -160,7 +174,7 @@ public class ClusterDefinitionService {
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = yamlToYamlObject(yaml);
     JsonCluster jsonCluster = new JsonCluster(cluster);
-    ClusterDefinitionValidator.validate(jsonCluster);
+    validate(jsonCluster);
     return jsonCluster;
   }
 
@@ -182,7 +196,7 @@ public class ClusterDefinitionService {
         for (JsonGroup group : obj.getGroups()) {
           if (group.isAutoScale()) {
             startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
-                    obj.getGroups().size(), obj.getName());
+                obj.getGroups().size(), obj.getName());
           }
         }
       }
@@ -194,7 +208,7 @@ public class ClusterDefinitionService {
   private static HoneyTapAPI honeyTapAPI;
   private static HoneyTapSimulatorHandler honeyTapSimulatorHandler;
   private static Log log = LogFactory.getLog(ClusterDefinitionService.class);
-  private static final Map<String,   MonitoringListener> autoscalerListenersMap = new HashMap<>();
+  private static final Map<String, MonitoringListener> autoscalerListenersMap = new HashMap<>();
   static boolean asInitSuccessful = false;
 
   private static void initAutoScaling(int noOfGroups) {
@@ -218,9 +232,9 @@ public class ClusterDefinitionService {
   }
 
   private static void startAutoScalingGroup(String groupName, String groupId, int initialNoOfMachines, int noOfGroups,
-                                String clusterName) {
-    log.info("################################ going to start auto scaling for group: " + groupName +
-            "################################");
+      String clusterName) {
+    log.info("################################ going to start auto scaling for group: " + groupName
+        + "################################");
 
     if (!asInitSuccessful) {
       initAutoScaling(noOfGroups);
@@ -237,8 +251,8 @@ public class ClusterDefinitionService {
           Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
 
           honeyTapAPI.createGroup(groupId, groupModel.getMinInstances(), groupModel.getMaxInstances(),
-                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
-                  groupModel.getReliabilityReq());
+              groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+              groupModel.getReliabilityReq());
 
           MonitoringListener listener = honeyTapAPI.startAutoScaling(groupId, initialNoOfMachines);
           autoscalerListenersMap.put(groupId, listener);
@@ -251,8 +265,8 @@ public class ClusterDefinitionService {
         log.error("Error while retrieving rules for the group: " + groupName, e);
       }
     } else {
-      log.error("Cannot initiate auto-scaling for group " + groupId + ". HoneyTapAPI has not been " +
-              "initialized");
+      log.error("Cannot initiate auto-scaling for group " + groupId + ". HoneyTapAPI has not been "
+          + "initialized");
     }
   }
 
@@ -261,7 +275,7 @@ public class ClusterDefinitionService {
     for (Rule rule : rules) {
       try {
         honeyTapAPI.createRule(rule.getRuleName(), rule.getResourceType(), rule.getComparator(), rule.getThreshold(),
-                rule.getOperationAction());
+            rule.getOperationAction());
         honeyTapAPI.addRuleToGroup(rule.getRuleName(), groupId);
         addedRules.add(rule.getRuleName());
       } catch (HoneyTapException e) {
@@ -278,4 +292,184 @@ public class ClusterDefinitionService {
     String json = gson.toJson(jsonCluster);
     return json;
   }
+
+  public static void validate(JsonCluster cluster) throws ValidationException {
+    cluster.validate();
+
+    boolean autoscale = false;
+    String tablespoonSeverGroup = null;
+
+    for (JsonGroup group : cluster.getGroups()) {
+      Provider provider = getGroupProvider(cluster, group.getName());
+      if (provider instanceof Baremetal) {
+        Baremetal baremetal = (Baremetal) provider;
+        int s1 = baremetal.retriveAllIps().size();
+        if (s1 != group.getSize()) {
+          throw new ValidationException(
+              String.format("Number of ip addresses is not equal to the group size %d != %d", s1, group.getSize()));
+        }
+      }
+      autoscale |= group.isAutoScale();
+      for (JsonCookbook jc : group.getCookbooks()) {
+        ArrayList<JsonRecipe> recs = Lists.newArrayList(jc.getRecipes());
+        for (int i = 0; i < recs.size(); i++) {
+          String recName = recs.get(i).getCanonicalName();
+          for (int j = i + 1; j < recs.size(); j++) {
+            if (recName.equals(recs.get(j).getCanonicalName())) {
+              throw new ValidationException(
+                  String.format("More than one %s in the group %s", recs.get(i).getCanonicalName(), group.getName()));
+            }
+          }
+          if (recName.equals("tablespoon-riemann::server")) {
+            if (tablespoonSeverGroup == null && group.getSize() == 1) {
+              tablespoonSeverGroup = group.getName();
+            } else if (tablespoonSeverGroup != null) {
+              throw new InconsistentDeploymentException("Assigning tablespoon-riemann::server in more than one group "
+                  + "is not consistent");
+            } else if (tablespoonSeverGroup == null && group.getSize() > 1) {
+              throw new InconsistentDeploymentException("Assigning tablespoon-riemann::server into a group with more "
+                  + "than one machine is not consistent");
+            }
+          }
+        }
+      }
+    }
+
+    if (autoscale && tablespoonSeverGroup == null) {
+      throw new InconsistentDeploymentException(
+          "To enable autoscaling you must locate tablespoon-riemann::server in a group");
+    }
+
+  }
+
+  public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
+    StringBuilder builder = new StringBuilder();
+    for (JsonGroup jg : cluster.getGroups()) {
+      for (JsonCookbook jc : jg.getCookbooks()) {
+        for (JsonRecipe rec : jc.getRecipes()) {
+          String cbid = jc.getId();
+          KaramelizedCookbook cb = CookbookCache.get(cbid);
+          MetadataRb metadataRb = cb.getMetadataRb();
+          List<Recipe> recipes = metadataRb.getRecipes();
+          for (Recipe recipe : recipes) {
+            if (recipe.getCanonicalName().equalsIgnoreCase(rec.getCanonicalName())) {
+              Set<String> links = recipe.getLinks();
+              for (String link : links) {
+                if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
+                  if (clusterEntity != null) {
+                    GroupRuntime ge = findGroup(clusterEntity, jg.getName());
+                    if (ge != null) {
+                      List<MachineRuntime> machines = ge.getMachines();
+                      if (machines != null) {
+                        for (MachineRuntime me : ge.getMachines()) {
+                          String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
+                          builder.append(l).append("\n");
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  builder.append(link).append("\n");
+                }
+
+              }
+
+            }
+          }
+        }
+      }
+    }
+    return builder.toString();
+  }
+
+  public static int totalMachines(JsonCluster cluster) {
+    int total = 0;
+    for (JsonGroup g : cluster.getGroups()) {
+      total += g.getSize();
+    }
+    return total;
+  }
+
+  public static JsonGroup findGroup(JsonCluster cluster, String groupName) {
+    for (JsonGroup g : cluster.getGroups()) {
+      if (g.getName().equals(groupName)) {
+        return g;
+      }
+    }
+    return null;
+  }
+
+  public static GroupRuntime findGroup(ClusterRuntime clusterEntity, String groupName) {
+    for (GroupRuntime g : clusterEntity.getGroups()) {
+      if (g.getName().equals(groupName)) {
+        return g;
+      }
+    }
+    return null;
+  }
+
+  public static Provider getGroupProvider(JsonCluster cluster, String groupName) {
+    JsonGroup group = findGroup(cluster, groupName);
+    Provider groupScopeProvider = group.getProvider();
+    Provider clusterScopeProvider = cluster.getProvider();
+    Provider provider = null;
+    if (groupScopeProvider == null && clusterScopeProvider == null) {
+      provider = Ec2.makeDefault();
+    } else if (groupScopeProvider == null && clusterScopeProvider != null) {
+      provider = (Provider) clusterScopeProvider.cloneMe();
+      provider = provider.applyDefaults();
+    } else if (groupScopeProvider != null && clusterScopeProvider != null) {
+      provider = groupScopeProvider.applyParentScope(clusterScopeProvider);
+      provider = provider.applyDefaults();
+    }
+    return provider;
+  }
+
+  public static String makeVendorPath(JsonCluster cluster) throws KaramelException {
+    Set<String> paths = new HashSet<>();
+    for (JsonGroup gr : cluster.getGroups()) {
+      for (JsonCookbook cb : gr.getCookbooks()) {
+        CookbookUrls urls = cb.getKaramelizedCookbook().getUrls();
+        String cookbookPath = urls.repoName;
+        if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
+          cookbookPath += Settings.SLASH + urls.cookbookRelPath;
+        }
+        paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
+            + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+      }
+    }
+    Object[] arr = paths.toArray();
+    StringBuilder buffer = new StringBuilder();
+    for (int i = 0; i < arr.length; i++) {
+      if (i > 0) {
+        buffer.append("\n");
+      }
+      buffer.append("\"");
+      buffer.append(arr[i]);
+      buffer.append("\"");
+      if (i < paths.size() - 1) {
+        buffer.append(",");
+      }
+    }
+    return buffer.toString();
+  }
+
+  public static boolean hasHoneyTap(JsonCluster cluster) {
+    for (JsonGroup jg : cluster.getGroups()) {
+      if (jg.isAutoScale()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public static boolean hasTablespoon(JsonCluster cluster) {
+    for (JsonGroup jg : cluster.getGroups()) {
+      if (jg.isAutoScale()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
 }

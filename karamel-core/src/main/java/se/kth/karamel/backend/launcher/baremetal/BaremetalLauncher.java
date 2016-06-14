@@ -8,7 +8,7 @@ package se.kth.karamel.backend.launcher.baremetal;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
@@ -50,8 +50,8 @@ public class BaremetalLauncher extends Launcher {
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 
       throws KaramelException {
     logger.info(String.format("Provider of %s is baremetal, available machines expected.", groupName));
-    GroupRuntime gr = UserClusterDataExtractor.findGroup(runtime, groupName);
-    Baremetal baremetal = (Baremetal) UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    GroupRuntime gr = ClusterDefinitionService.findGroup(runtime, groupName);
+    Baremetal baremetal = (Baremetal) ClusterDefinitionService.getGroupProvider(definition, groupName);
     String username = baremetal.getUsername();
     List<MachineRuntime> machines = new ArrayList<>();
     for (String ip : baremetal.retriveAllIps()) {
