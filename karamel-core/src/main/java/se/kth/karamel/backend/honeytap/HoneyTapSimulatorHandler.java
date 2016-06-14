@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import se.kth.honeytap.scaling.ScalingSuggestion;
 import se.kth.honeytap.scaling.core.HoneyTapAPI;
 import se.kth.honeytap.scaling.models.MachineType;
+import se.kth.honeytap.stat.StatManager;
 import se.kth.karamel.backend.ClusterService;
 
 import java.util.ArrayList;
@@ -108,9 +109,10 @@ public class HoneyTapSimulatorHandler {
                 Thread.sleep(new Random().nextInt(15 * 1000) + 5 * 1000);  // delay upto 5 - 20 seconds
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
+                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machineId);
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
-                    + System.currentTimeMillis());
+                /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed " +
+                        /////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
                 break;
               case SCALE_OUT:
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
@@ -121,9 +123,11 @@ public class HoneyTapSimulatorHandler {
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
                       machine.getProperty(MachineType.Properties.TYPE.name()));
+                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machine.getProperty(
+                          MachineType.Properties.TYPE.name()));
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
-                    + System.currentTimeMillis());
+                /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed " +
+                        //////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
                 break;
               case TMP_SCALEIN:
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
@@ -135,9 +139,10 @@ public class HoneyTapSimulatorHandler {
                   String vmIdToRemove = allVms.get(removeIndex);
                   allVms.remove(vmIdToRemove);
                   removeVmIdfromMonitorSimulation(groupId, vmIdToRemove);
+                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, vmIdToRemove);
                 }
-                log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed @@@@@@@@@@@@@@@@@@@@@@@@@@@@@ "
-                    + System.currentTimeMillis());
+                ///////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed " +
+                        ///////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
                 break;
               default:
                 log.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: "
