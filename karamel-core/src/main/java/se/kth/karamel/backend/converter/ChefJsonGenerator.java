@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -49,7 +50,7 @@ public class ChefJsonGenerator {
     JsonObject root = new JsonObject();
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
-      JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
+      JsonGroup jsonGroup = ClusterDefinitionService.findGroup(definition, groupEntity.getName());
       //Adding all attribtues to all chef-jsons
       for (JsonCookbook cb : jsonGroup.getCookbooks()) {
         addCookbookAttributes(cb, clone);
@@ -82,7 +83,7 @@ public class ChefJsonGenerator {
     aggregateIpAddresses(root, definition, clusterEntity);
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
-      JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
+      JsonGroup jsonGroup = ClusterDefinitionService.findGroup(definition, groupEntity.getName());
       //Adding all attribtues to all chef-jsons
       for (JsonCookbook cb : jsonGroup.getCookbooks()) {
         addCookbookAttributes(cb, clone);
@@ -233,7 +234,7 @@ public class ChefJsonGenerator {
     Map<String, Set<String>> privateIps = new HashMap<>();
     Map<String, Set<String>> publicIps = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
-      JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
+      JsonGroup jg = ClusterDefinitionService.findGroup(definition, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {

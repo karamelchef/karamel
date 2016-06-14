@@ -35,7 +35,7 @@ import org.jclouds.googlecomputeengine.features.OperationApi;
 import org.jclouds.googlecomputeengine.features.RouteApi;
 import org.jclouds.googlecomputeengine.options.FirewallOptions;
 import org.jclouds.rest.AuthorizationException;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
@@ -108,7 +108,7 @@ public class GceLauncher extends Launcher {
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
-    JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
+    JsonGroup jg = ClusterDefinitionService.findGroup(definition, groupName);
     Set<String> ports = new HashSet<>();
     ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
     // TODO: assign arbitrary ip range.
@@ -160,9 +160,9 @@ public class GceLauncher extends Launcher {
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
       throws KaramelException {
-    Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
-    GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
+    Gce gce = (Gce) ClusterDefinitionService.getGroupProvider(definition, groupName);
+    JsonGroup definedGroup = ClusterDefinitionService.findGroup(definition, groupName);
+    GroupRuntime group = ClusterDefinitionService.findGroup(runtime, groupName);
 
     return forkMachines(group, definedGroup.getSize(), gce);
   }
@@ -229,7 +229,7 @@ public class GceLauncher extends Launcher {
     Set<String> networks = new HashSet<>();
     for (GroupRuntime group : groups) {
       group.getCluster().resolveFailures();
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       if (provider instanceof Gce) {
         networks.add(group.getName());
         Gce gce = (Gce) provider;

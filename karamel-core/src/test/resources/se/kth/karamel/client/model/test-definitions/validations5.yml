@@ -24,6 +24,6 @@ groups:
         - hopsworks
   db:
     size: 2 
-    autoScalingEnabled: true
+    autoscale: true
     recipes:                                                                    
         - ndb::mysqld

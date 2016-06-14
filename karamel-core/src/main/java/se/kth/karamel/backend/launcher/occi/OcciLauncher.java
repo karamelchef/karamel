@@ -32,7 +32,7 @@ import se.kth.karamel.common.util.SshKeyPair;
 import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.clusterdef.Occi;
@@ -124,7 +124,7 @@ public final class OcciLauncher extends Launcher{
 
     for (GroupRuntime group : groups) {
       group.getCluster().resolveFailures();
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       Occi occi = (Occi) provider;
       if (provider instanceof Occi) {
         //List all VM ids - compute resource URIs
@@ -260,9 +260,9 @@ public final class OcciLauncher extends Launcher{
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName)
           throws KaramelException {
 
-    Occi occi = (Occi) UserClusterDataExtractor.getGroupProvider(definition, groupName);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, groupName);
-    GroupRuntime group = UserClusterDataExtractor.findGroup(runtime, groupName);
+    Occi occi = (Occi) ClusterDefinitionService.getGroupProvider(definition, groupName);
+    JsonGroup definedGroup = ClusterDefinitionService.findGroup(definition, groupName);
+    GroupRuntime group = ClusterDefinitionService.findGroup(runtime, groupName);
     
     //log details
     logger.info(String.format("Occi ForkMachines  ..."));

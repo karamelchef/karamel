@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.backend;
 
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
@@ -92,7 +91,7 @@ public class ClusterContext {
     context.mergeContext(commonContext);
 
     for (JsonGroup group : definition.getGroups()) {
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       if (provider instanceof Ec2 && context.getEc2Context() == null) {
         throw new KaramelException("No valid Ec2 credentials registered :-|");
       } else if (provider instanceof Gce && context.getGceContext() == null) {

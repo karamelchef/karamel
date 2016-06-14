@@ -19,7 +19,6 @@ import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
 import org.jclouds.rest.AuthorizationException;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
@@ -42,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import se.kth.karamel.backend.ClusterDefinitionService;
 
 
 /**
@@ -196,14 +196,14 @@ public final class NovaLauncher extends Launcher{
     Map<String, String> groupRegion = new HashMap<>();
     for (GroupRuntime group : groups) {
       group.getCluster().resolveFailures();
-      Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      Provider provider = ClusterDefinitionService.getGroupProvider(definition, group.getName());
       if (provider instanceof Nova) {
         for (MachineRuntime machine : group.getMachines()) {
           if (machine.getVmId() != null) {
             allNovaVmsIds.add(machine.getVmId());
           }
         }
-        JsonGroup jg = UserClusterDataExtractor.findGroup(definition, group.getName());
+        JsonGroup jg = ClusterDefinitionService.findGroup(definition, group.getName());
         List<String> vmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
                 jg.getSize());
         allNovaVms.addAll(vmNames);
@@ -256,8 +256,8 @@ public final class NovaLauncher extends Launcher{
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
-    JsonGroup jg = UserClusterDataExtractor.findGroup(definition,name);
-    Provider provider = UserClusterDataExtractor.getGroupProvider(definition,name);
+    JsonGroup jg = ClusterDefinitionService.findGroup(definition,name);
+    Provider provider = ClusterDefinitionService.getGroupProvider(definition,name);
     Nova nova = (Nova) provider;
     Set<String> ports = new HashSet<>();
     ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
@@ -268,9 +268,9 @@ public final class NovaLauncher extends Launcher{
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
           throws KaramelException {
-    Nova nova = (Nova) UserClusterDataExtractor.getGroupProvider(definition,name);
-    JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, name);
-    GroupRuntime groupRuntime = UserClusterDataExtractor.findGroup(runtime,name);
+    Nova nova = (Nova) ClusterDefinitionService.getGroupProvider(definition,name);
+    JsonGroup definedGroup = ClusterDefinitionService.findGroup(definition, name);
+    GroupRuntime groupRuntime = ClusterDefinitionService.findGroup(runtime,name);
     Set<String> groupIds = new HashSet<>();
     groupIds.add(groupRuntime.getId());
 

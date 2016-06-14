@@ -21,7 +21,6 @@ import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.OsType;
@@ -97,11 +96,11 @@ public class CommandService {
       ClusterManager cluster = cluster(context);
       String hyperLinks;
       if (cluster != null) {
-        hyperLinks = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+        hyperLinks = ClusterDefinitionService.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
       } else {
         String yml = ClusterDefinitionService.loadYaml(context);
         JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
-        hyperLinks = UserClusterDataExtractor.clusterLinks(json, null);
+        hyperLinks = ClusterDefinitionService.clusterLinks(json, null);
       }
       result = result.replace(HYPERLINKS_PLH, hyperLinks);
       nextCmd = "running";
@@ -528,12 +527,12 @@ public class CommandService {
         String clusterName = matcher.group(1);
         ClusterManager cluster = cluster(clusterName);
         if (cluster != null) {
-          result = UserClusterDataExtractor.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
+          result = ClusterDefinitionService.clusterLinks(cluster.getDefinition(), cluster.getRuntime());
           addActiveClusterMenus(response);
         } else {
           String yml = ClusterDefinitionService.loadYaml(clusterName);
           JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yml);
-          result = UserClusterDataExtractor.clusterLinks(json, null);
+          result = ClusterDefinitionService.clusterLinks(json, null);
         }
 
         renderer = CommandResponse.Renderer.INFO;
