@@ -5,6 +5,9 @@
  */
 package se.kth.karamel.backend.running.model.tasks;
 
+import se.kth.karamel.backend.running.model.tasks.tablespoon.StopTablespoonTask;
+import se.kth.karamel.backend.running.model.tasks.tablespoon.TopicTablespoonTask;
+import se.kth.karamel.backend.running.model.tasks.tablespoon.StartTablespoonTask;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;

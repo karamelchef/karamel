@@ -3,7 +3,7 @@
 * To change this template file, choose Tools | Templates
 * and open the template in the editor.
 */
-package se.kth.karamel.backend.running.model.tasks;
+package se.kth.karamel.backend.running.model.tasks.tablespoon;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 

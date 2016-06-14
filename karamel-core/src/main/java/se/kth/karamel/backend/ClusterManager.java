@@ -44,6 +44,7 @@ import se.kth.karamel.backend.launcher.nova.NovaLauncher;
 import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
+import se.kth.karamel.backend.running.model.Endpoint;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -57,7 +58,9 @@ import se.kth.karamel.common.clusterdef.Occi;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
+import se.kth.karamel.common.exception.InconsistentDeploymentException;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.exception.TablespoonNotfoundException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
@@ -77,7 +80,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
 
   public static enum Command {
 
-    LAUNCH_CLUSTER, INTERRUPT_CLUSTER, TERMINATE_CLUSTER,
+    LAUNCH_CLUSTER, INTERRUPT_CLUSTER, TERMINATE_CLUSTER, LAUNCH_TABLESPOON, LAUNCH_HONEYTAP,
     SUBMIT_INSTALL_DAG, SUBMIT_PURGE_DAG, INTERRUPT_DAG, PAUSE_DAG, RESUME_DAG, SCALE_OUT, SCALE_IN;
 
   }
@@ -103,8 +106,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   private HoneyTapHandler honeyTapHandler;
   private final Map<String, MonitoringListener> honeytapListenersMap = new HashMap<>();
   private final Groups tablespoonGroups = new Groups();
-  private String tablespoonServerHost;
-  private int tablespoonServerPort;
+  private Endpoint tablespoonRiemannEndpoint;
   private RiemannSubscriberBroadcaster tablespoonBroadcaster;
   private AgentBroadcasterAssistant tablespoonBroadcasterAssistant;
   private TablespoonApi tablespoonApi;
@@ -147,16 +149,32 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     return honeytapListenersMap;
   }
 
-  private void setupHoneytap() throws HoneyTapException {
-    honeytapApi = new HoneyTapAPI();
-    this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
+  private void launchHoneytapIfEnabled() throws HoneyTapException {
+    if (ClusterDefinitionService.hasHoneyTap(definition)) {
+      logger.info("Launching honeytap for " + definition.getName());
+      honeytapApi = new HoneyTapAPI();
+      this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
+    } else {
+      logger.info("Honeytap is off for " + definition.getName());
+    }
   }
 
-  private void setupTablespoon() {
+  private void launchTablespoonIfEnabled() {
+    try {
+      tablespoonRiemannEndpoint = ClusterDefinitionService.tablespoonRiemannEndpoint(definition, runtime);
+    } catch (TablespoonNotfoundException e) {
+      logger.info("Tablespoon is off.");
+      return;
+    } catch (InconsistentDeploymentException e) {
+      logger.error("Cannot run tablespoon", e);
+      return;
+    }
+    logger.info("Launching tablespoon for " + definition.getName());
     TopicStorage storage = new TopicStorage(tablespoonGroups);
     tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
     tablespoonBroadcaster
-        = new RiemannSubscriberBroadcaster(tablespoonServerHost, tablespoonServerPort, storage);
+        = new RiemannSubscriberBroadcaster(tablespoonRiemannEndpoint.getIp(),
+            tablespoonRiemannEndpoint.getPort(), storage);
     tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonBroadcaster);
   }
 
@@ -169,9 +187,9 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
    * @throws BroadcastException
    */
   @Override
-  public void sendToMachines(Set<String> machines, String json, String topicId) 
+  public void sendToMachines(Set<String> machines, String json, String topicId)
       throws BroadcastException {
-    throw new UnsupportedOperationException("Not supported yet."); 
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   /**
@@ -254,7 +272,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   }
 
   public void stop() throws InterruptedException {
-    if (ClusterDefinitionService.hasHoneyTap(definition) 
+    if (ClusterDefinitionService.hasHoneyTap(definition)
         && tablespoonBroadcasterFuture != null && !tablespoonBroadcasterFuture.isCancelled()) {
       logger.info(String.format("Terminating tablespoon of '%s'", definition.getName()));
       tablespoonBroadcasterFuture.cancel(true);
@@ -413,6 +431,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     }
 
     if (!runtime.isFailed()) {
+      launchTablespoonIfEnabled();
+      launchHoneytapIfEnabled();
       runtime.setPhase(ClusterRuntime.ClusterPhases.DAG_DONE);
       for (GroupRuntime group : groups) {
         group.setPhase(GroupRuntime.GroupPhase.DAG_DONE);
@@ -740,5 +760,5 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       }
     }
   }
-
+        
 }
