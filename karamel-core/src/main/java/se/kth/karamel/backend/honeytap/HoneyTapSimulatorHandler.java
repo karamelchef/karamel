@@ -117,7 +117,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
                 ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
                 Thread.
-                    sleep((scaleOutDelay + new Random().nextInt(20 * 1000)) / 60);  //1 min + making a random addition
+                    sleep((scaleOutDelay + new Random().nextInt(20 * 1000)));  //1 min + making a random addition
                 // upto 20seconds
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
@@ -130,7 +130,7 @@ public class HoneyTapSimulatorHandler {
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
                 int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
                 ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
-                Thread.sleep(new Random().nextInt(20 * 1000 / 60));  // delay upto 20 seconds
+                Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
                 for (int i = 0; i < noOfMachinesToRemove; ++i) {
                   int removeIndex = new Random().nextInt(allVms.size());
                   String vmIdToRemove = allVms.get(removeIndex);
