@@ -38,7 +38,6 @@ public class HoneyTapSimulatorHandler {
 
   //for simulation
   boolean isSimulation = true;
-  long scaleOutDelay = 1000 * 60; // 1 min
 
   public HoneyTapSimulatorHandler(int noOfGroupsInCluster, HoneyTapAPI honeyTapAPI) {
     this.honeyTapAPI = honeyTapAPI;
@@ -106,7 +105,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
                 //remove above line in all cases only if we can start without spawining machines????
                 ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
-                Thread.sleep(new Random().nextInt(20 * 1000 / 60));  // delay upto 20 seconds
+                Thread.sleep(new Random().nextInt(15 * 1000) + 5 * 1000);  // delay upto 5 - 20 seconds
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
                 }
@@ -117,7 +116,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
                 ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
                 Thread.
-                    sleep((scaleOutDelay + new Random().nextInt(20 * 1000)));  //1 min + making a random addition
+                    sleep((1000 * 60 + new Random().nextInt(60 * 1000)));  //1 min - 2 min
                 // upto 20seconds
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
@@ -130,7 +129,7 @@ public class HoneyTapSimulatorHandler {
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
                 int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
                 ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
-                Thread.sleep(new Random().nextInt(20 * 1000));  // delay upto 20 seconds
+                Thread.sleep(new Random().nextInt(15 * 1000) + 5 * 1000);  // delay upto 5 - 20 seconds
                 for (int i = 0; i < noOfMachinesToRemove; ++i) {
                   int removeIndex = new Random().nextInt(allVms.size());
                   String vmIdToRemove = allVms.get(removeIndex);
