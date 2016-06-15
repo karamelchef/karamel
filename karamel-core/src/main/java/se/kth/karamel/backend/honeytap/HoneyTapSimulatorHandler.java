@@ -106,7 +106,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
                 //remove above line in all cases only if we can start without spawining machines????
                 ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
-                Thread.sleep(new Random().nextInt(15 * 1000) + 5 * 1000);  // delay upto 5 - 20 seconds
+                Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
                   StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machineId);
@@ -118,7 +118,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
                 ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
                 Thread.
-                    sleep((1000 * 60 + new Random().nextInt(60 * 1000)));  //1 min - 2 min
+                    sleep((1000 * 60 + new Random().nextInt(30 * 1000)));  //1 min - 1 1/2 min
                 // upto 20seconds
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
@@ -133,7 +133,7 @@ public class HoneyTapSimulatorHandler {
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
                 int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
                 ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
-                Thread.sleep(new Random().nextInt(15 * 1000) + 5 * 1000);  // delay upto 5 - 20 seconds
+                Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
                 for (int i = 0; i < noOfMachinesToRemove; ++i) {
                   int removeIndex = new Random().nextInt(allVms.size());
                   String vmIdToRemove = allVms.get(removeIndex);
