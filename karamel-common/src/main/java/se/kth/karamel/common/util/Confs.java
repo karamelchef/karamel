@@ -61,7 +61,16 @@ public class Confs<K extends String, V extends String> extends Properties {
       }
       File file = new File(folder, Settings.KARAMEL_CONF_NAME);
       out = new FileOutputStream(file);
-      store(out, "Karamel configurations");
+      Properties p = new Properties();
+      for (String key : this.stringPropertyNames()) {
+        String value = this.getProperty(key);
+        if (value.contains(Settings.USER_HOME)) {
+          p.put(key, value.replace(Settings.USER_HOME, Settings.PLACEHOLDER_HOME));
+        } else {
+          p.put(key, value);
+        }
+      }
+      p.store(out, "Karamel configurations");
 
       if (System.getProperty("os.name").toLowerCase().indexOf("win") == -1) {
         Set<PosixFilePermission> perms = new HashSet<>();
@@ -113,6 +122,12 @@ public class Confs<K extends String, V extends String> extends Properties {
       }
       FileInputStream fis = new FileInputStream(file);
       prop.load(fis);
+      for (String key : prop.stringPropertyNames()) {
+        String value = prop.getProperty(key);
+        if (value.contains(Settings.PLACEHOLDER_HOME)) {
+          prop.put(key, value.replace(Settings.PLACEHOLDER_HOME, Settings.USER_HOME));
+        }
+      }
     } catch (IOException e) {
       logger.warn(String.format("Couldn't find karamel conf file in '%s'", folder));
     }

@@ -1,0 +1,16 @@
+name: tablespoon
+baremetal:
+    username: vagrant
+    
+cookbooks:                                                                      
+  riemann: 
+    github: "karamel-lab/tablespoon-riemann-chef"
+    branch: "master"
+    
+groups: 
+  nn:
+    size: 1
+    baremetal:
+        ip: 192.168.33.11
+    recipes: 
+        - riemann::server
