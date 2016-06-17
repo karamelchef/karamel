@@ -106,7 +106,8 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
                 //remove above line in all cases only if we can start without spawining machines????
                 ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
-                Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                Thread.sleep(8 * 1000);
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
                   StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machineId);
@@ -133,7 +134,8 @@ public class HoneyTapSimulatorHandler {
                 /////resetVmInfoAtMonitor(groupRuntime.getId());
                 int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
                 ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
-                Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                Thread.sleep(8 * 1000);
                 for (int i = 0; i < noOfMachinesToRemove; ++i) {
                   int removeIndex = new Random().nextInt(allVms.size());
                   String vmIdToRemove = allVms.get(removeIndex);
