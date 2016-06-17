@@ -110,7 +110,7 @@ public class HoneyTapSimulatorHandler {
                 Thread.sleep(8 * 1000);
                 for (String machineId : machinesToRemove) {
                   removeVmIdfromMonitorSimulation(groupId, machineId);
-                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machineId);
+                  StatManager.setMachineAllocation(System.currentTimeMillis(), -1, machineId);
                 }
                 /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed " +
                         /////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
@@ -141,7 +141,7 @@ public class HoneyTapSimulatorHandler {
                   String vmIdToRemove = allVms.get(removeIndex);
                   allVms.remove(vmIdToRemove);
                   removeVmIdfromMonitorSimulation(groupId, vmIdToRemove);
-                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, vmIdToRemove);
+                  StatManager.setMachineAllocation(System.currentTimeMillis(), -1, vmIdToRemove);
                 }
                 ///////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed " +
                         ///////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
