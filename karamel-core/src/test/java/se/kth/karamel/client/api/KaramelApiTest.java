@@ -305,6 +305,7 @@ public class KaramelApiTest {
     System.out.println(json);
     assertTrue(expectedString.equals(json));
   }
+
   //@Test
   public void testNova() throws KaramelException, IOException, InterruptedException {
     String clusterName = "flinknova";
@@ -312,17 +313,40 @@ public class KaramelApiTest {
     String json = api.yamlToJson(ymlString);
     System.out.println(json);
     /*SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+     if (sshKeys == null) {
+     sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+     }
+     api.registerSshKeys(sshKeys);*/
+    /*NovaCredentials credentials = api.loadNovaCredentialsIfExist();*/
+
+    /* api.startCluster(json);
+     long ms1 = System.currentTimeMillis();
+     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+     System.out.println(api.processCommand("status").getResult());
+     Thread.currentThread().sleep(60000);
+     }*/
+  }
+
+  @Test
+  public void testTablespoonStartup() throws IOException, KaramelException, InterruptedException {
+    String clusterName = "tablespoon";
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/tablespoon.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
-    api.registerSshKeys(sshKeys);*/
-    /*NovaCredentials credentials = api.loadNovaCredentialsIfExist();*/
-
-   /* api.startCluster(json);
+    api.registerSshKeys(sshKeys);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    api.startCluster(json);
     long ms1 = System.currentTimeMillis();
+    int mins = 0;
     while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+      mins++;
       System.out.println(api.processCommand("status").getResult());
       Thread.currentThread().sleep(60000);
-    }*/
+    }
   }
 }
