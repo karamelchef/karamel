@@ -162,7 +162,6 @@ public class ClusterDefinitionService {
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = yamlToYamlObject(yaml);
     JsonCluster jsonCluster = new JsonCluster(cluster);
-    ////validate(jsonCluster);
     return jsonCluster;
   }
 
