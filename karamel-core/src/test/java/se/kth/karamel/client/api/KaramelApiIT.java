@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
  * @author kamal
  */
 //@Ignore
-public class KaramelApiTest {
+public class KaramelApiIT {
 
   KaramelApi api = new KaramelApiImpl();
 
