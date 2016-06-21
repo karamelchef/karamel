@@ -46,9 +46,10 @@ cookbooks:
 
 attrs:
   hops:
+    dir: "/mnt"    
     use_hopsworks: "true"
   apache_hadoop:
-    dir: "/mnt"
+    dir: "/mnt"    
     hdfs:
         user: glassfish
     yarn: 
@@ -65,6 +66,10 @@ attrs:
     dir: "/mnt"
   mysql:
     dir: "/mnt"
+  hopsworks:
+    dir: "/mnt"    
+    master:
+      password: "changeit"
   zeppelin:
     user: glassfish
     dir: "/mnt"
