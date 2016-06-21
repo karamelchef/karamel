@@ -96,55 +96,82 @@ public class HoneyTapSimulatorHandler {
       while (shouldAutoScale) {
         //wait on queue, get suggestion and execute suggestion
         try {
-          ScalingSuggestion suggestion = suggestionsQueueOfGroup.take();
+          final ScalingSuggestion suggestion = suggestionsQueueOfGroup.take();
           //TODO-AS this is temporary code for simulation:isSimulation. After that only the logic
           // in else part should be there
           if (isSimulation) {
             log.info("##################### SIMULATION scaling suggestions #############");
             switch (suggestion.getScalingDirection()) {
               case SCALE_IN:
-                ////resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
-                //remove above line in all cases only if we can start without spawining machines????
-                ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
-                /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
-                Thread.sleep(8 * 1000);
-                for (String machineId : machinesToRemove) {
-                  removeVmIdfromMonitorSimulation(groupId, machineId);
-                  StatManager.setMachineAllocation(System.currentTimeMillis(), -1, machineId);
-                }
-                /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed " +
-                        /////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+
+                new Thread() {
+                  public void run() {
+                    ////resetVmInfoAtMonitor(groupRuntime.getId());  //setting actual running vms
+                    //remove above line in all cases only if we can start without spawining machines????
+                    ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
+                    /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                    try {
+                      Thread.sleep(8 * 1000);
+                    } catch (InterruptedException e) {
+                      throw new IllegalStateException(e);
+                    }
+                    for (String machineId : machinesToRemove) {
+                      removeVmIdfromMonitorSimulation(groupId, machineId);
+                      StatManager.setMachineAllocation(System.currentTimeMillis(), -1, machineId);
+                    }
+                    /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-in suggestion executed " +
+                    /////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+                  }
+                }.start();
+
                 break;
               case SCALE_OUT:
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
-                ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
-                Thread.
-                    sleep((1000 * 90));  //1 min - 1 1/2 min
-                // upto 20seconds
-                for (MachineType machine : scaleOutMachines) {
-                  addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
-                      machine.getProperty(MachineType.Properties.TYPE.name()));
-                  StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machine.getProperty(
-                          MachineType.Properties.TYPE.name()));
-                }
-                /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed " +
-                        //////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+                new Thread() {
+                  public void run() {
+                    ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
+                    try {
+                      Thread.sleep((1000 * 90));  //1 min - 1 1/2 min
+                    } catch (InterruptedException e) {
+                      throw new IllegalStateException(e);
+                    }
+                    // upto 20seconds
+                    for (MachineType machine : scaleOutMachines) {
+                      addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
+                              machine.getProperty(MachineType.Properties.TYPE.name()));
+                      StatManager.setMachineAllocation(System.currentTimeMillis(), 1, machine.getProperty(
+                              MachineType.Properties.TYPE.name()));
+                    }
+                    /////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scale-out suggestion executed " +
+                    //////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+                  }
+                }.start();
+
                 break;
               case TMP_SCALEIN:
-                /////resetVmInfoAtMonitor(groupRuntime.getId());
-                int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
-                ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
-                /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
-                Thread.sleep(8 * 1000);
-                for (int i = 0; i < noOfMachinesToRemove; ++i) {
-                  int removeIndex = new Random().nextInt(allVms.size());
-                  String vmIdToRemove = allVms.get(removeIndex);
-                  allVms.remove(vmIdToRemove);
-                  removeVmIdfromMonitorSimulation(groupId, vmIdToRemove);
-                  StatManager.setMachineAllocation(System.currentTimeMillis(), -1, vmIdToRemove);
-                }
-                ///////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed " +
-                        ///////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+                new Thread() {
+                  public void run() {
+                    /////resetVmInfoAtMonitor(groupRuntime.getId());
+                    int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
+                    ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
+                    /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
+                    try {
+                      Thread.sleep(8 * 1000);
+                    } catch (InterruptedException e) {
+                      throw new IllegalStateException(e);
+                    }
+                    for (int i = 0; i < noOfMachinesToRemove; ++i) {
+                      int removeIndex = new Random().nextInt(allVms.size());
+                      String vmIdToRemove = allVms.get(removeIndex);
+                      allVms.remove(vmIdToRemove);
+                      removeVmIdfromMonitorSimulation(groupId, vmIdToRemove);
+                      StatManager.setMachineAllocation(System.currentTimeMillis(), -1, vmIdToRemove);
+                    }
+                    ///////////log.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ scalein-tmp suggestion executed " +
+                    ///////////"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + System.currentTimeMillis());
+                  }
+                }.start();
+
                 break;
               default:
                 log.warn("SIMULATION: Handle scaling has not been implemented for the scaling direction: "
