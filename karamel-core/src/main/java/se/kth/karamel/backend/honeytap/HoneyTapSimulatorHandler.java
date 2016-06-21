@@ -119,7 +119,7 @@ public class HoneyTapSimulatorHandler {
                 ////resetVmInfoAtMonitor(groupRuntime.getId());
                 ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
                 Thread.
-                    sleep((1000 * 60 + new Random().nextInt(30 * 1000)));  //1 min - 1 1/2 min
+                    sleep((1000 * 90));  //1 min - 1 1/2 min
                 // upto 20seconds
                 for (MachineType machine : scaleOutMachines) {
                   addVmIdToMonitorSimulation(groupId, String.valueOf(UUID.randomUUID()),
