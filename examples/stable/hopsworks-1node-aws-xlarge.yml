@@ -21,10 +21,10 @@ cookbooks:
     branch: "master"
   hadoop_spark:
     github: "hopshadoop/spark-chef"
-    branch: "hops"
+    branch: "master"
   flink:
     github: "hopshadoop/flink-chef"
-    branch: "hops"
+    branch: "master"
   elastic:
     github: "hopshadoop/elasticsearch-chef"
     branch: "master"
@@ -47,7 +47,7 @@ cookbooks:
 attrs:
   hops:
     use_hopsworks: "true"
-  hadoop:
+  apache_hadoop:
     dir: "/mnt"
     hdfs:
         user: glassfish
@@ -68,8 +68,6 @@ attrs:
   zeppelin:
     user: glassfish
     dir: "/mnt"
-  livy:
-    user: glassfish
 
 groups: 
   hopsworks:

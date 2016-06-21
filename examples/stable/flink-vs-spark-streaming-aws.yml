@@ -2,7 +2,7 @@ name: StreamingShootoutFlinkSpark
 ec2:
     type: m3.large
     region: eu-west-1
-    
+    	
 cookbooks:                                                                      
   hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
@@ -25,17 +25,17 @@ cookbooks:
 
 attrs:
   java:
-    jdk_version: "8"
+    jdk_version: 8
   flink:
-    user: "ubuntu"
+    user: ubuntu
     mode: streaming
     jobmanager:
-       heap_mbs: '512'
+       heap_mbs: 512
     taskmanager:
-       heap_mbs: '1024'
+       heap_mbs: 1024
   hadoop_spark:
-    user: "ubuntu"
-    executor_memory: '1024m'
+    user: ubuntu
+    executor_memory: 1024m
   apache_hadoop:
     version: 2.7.1
     hdfs: 
@@ -45,7 +45,7 @@ groups:
   mgr:
     size: 1
     recipes:
-        - hadoop::nn
+        - apache_hadoop::nn
         - hadoop_spark::master
         - flink::jobmanager
         - streamingbenchmarks
@@ -53,7 +53,7 @@ groups:
   workers:
     size: 2
     recipes:
-        - hadoop::dn	
+        - apache_hadoop::dn	
         - flink::taskmanager
         - hadoop_spark::worker
         - kzookeeper
