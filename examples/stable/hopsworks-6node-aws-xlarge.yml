@@ -4,6 +4,9 @@ ec2:
     region: eu-west-1
 
 cookbooks:                                                                      
+  kagent: 
+    github: "karamelchef/kagent-chef"
+    branch: "master"
   apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
@@ -37,8 +40,13 @@ cookbooks:
   epipe: 
     github: "hopshadoop/epipe-chef"
     branch: "master"
+  livy: 
+    github: "hopshadoop/livy-chef"
+    branch: "master"
 
 attrs:
+  hops:
+    use_hopsworks: "true"
   hadoop:
     dir: "/mnt"
     hdfs:
@@ -60,23 +68,39 @@ attrs:
   zeppelin:
     user: glassfish
     dir: "/mnt"
+  livy:
+    user: glassfish
+
 groups: 
-  hopsworks:
-    size: 1 
-    recipes:                                                                    
-        - ndb::mysqld                                                       
-        - ndb::ndbd
-        - ndb::mgmd
+  data:
+    size:  4
+    recipes: 
+        - kagent
         - hops::ndb
-        - hops::rm
-        - hops::nn
         - hops::dn
         - hops::nm
+  meta:
+    size: 1
+    recipes: 
+        - kagent
+        - hops::ndb
+        - ndb::ndbd
+        - hops::rm
+        - hops::nn
+        - kzookeeper
+        - kkafka
+        - epipe
+        - elastic
+  hopsworks:
+    size: 1 
+    recipes: 
+        - kagent
+        - ndb::ndbd
+        - ndb::mgmd
+        - ndb::mysqld                                                       
+        - hops::ndb
         - hadoop_spark::yarn
         - flink::yarn
-        - elastic
+        - livy
         - zeppelin
-	- kzookeeper
-	- kkafka
-	- epipe
         - hopsworks
