@@ -10,7 +10,7 @@ sudo mkdir -p /etc/systemd/system/docker.service.d/;
 sudo mkdir /var/repository
 echo "[Service]"  | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
 echo "ExecStart="  | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
-echo "ExecStart=/usr/bin/docker daemon -H fd:// --cluster-store=consul://%kv_store_ip%:8500 --cluster-advertise=%host_ip%:2375 -H=tcp://0.0.0.0:2375 -H=unix:///var/run/docker.sock" | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
+echo "ExecStart=/usr/bin/docker daemon -H fd:// -g /mnt --cluster-store=consul://%kv_store_ip%:8500 --cluster-advertise=%host_ip%:2375 -H=tcp://0.0.0.0:2375 -H=unix:///var/run/docker.sock" | sudo tee --append /etc/systemd/system/docker.service.d/docker.conf;
 sudo systemctl daemon-reload;
 sudo systemctl restart docker;
 sudo systemctl status docker;

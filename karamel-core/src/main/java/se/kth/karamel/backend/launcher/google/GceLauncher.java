@@ -172,7 +172,7 @@ public class GceLauncher extends Launcher {
     try {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
       URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
-      URI imageType = GceSettings.buildImageUri(gce.getImage());
+      URI imageType = GceSettings.buildImageUri(gce.getImage(),context.getProjectName());
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
       String uniqeGroupName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);

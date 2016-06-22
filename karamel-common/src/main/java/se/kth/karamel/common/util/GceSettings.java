@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
- *
  * @author Hooman
  */
 public class GceSettings {
@@ -81,7 +80,8 @@ public class GceSettings {
         projectName, networkName));
   }
 
-  public static URI buildImageUri(String imageName) throws URISyntaxException, UnsupportedImageType {
+  public static URI buildImageUri(String imageName, String projectName) throws URISyntaxException,
+    UnsupportedImageType {
     ImageType type;
     if (imageName.contains("ubuntu")) {
       type = ImageType.ubuntu;
@@ -98,9 +98,12 @@ public class GceSettings {
     } else if (imageName.contains("suse")) {
       type = ImageType.suse;
     } else {
-      throw new UnsupportedImageType(String.format("No image type is found for image %s", imageName));
+      //throw new UnsupportedImageType(String.format("No image type is found for image %s", imageName));
+      //For private images
+      return new URI(String.format("projects/%s/global/images/%s",
+        projectName, imageName));
     }
     return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s",
-        type.toString(), imageName));
+      type.toString(), imageName));
   }
 }

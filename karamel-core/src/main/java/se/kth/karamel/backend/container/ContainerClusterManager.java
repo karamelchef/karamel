@@ -116,11 +116,14 @@ public class ContainerClusterManager {
 
         //TODO: exposing all the ports found in links in every container, We might not want to do that. and only need
         // to expose relevant port for containers.
-        String[] clusterLinks = UserClusterDataExtractor.clusterLinks(cluster, runtime).split("\n");
         List<String> ports = new ArrayList();
 
-        for (int j = 0; j < clusterLinks.length; j++) {
-          ports.add(clusterLinks[j].split("//")[1].split("/")[0].split(":")[1]);
+        if (!UserClusterDataExtractor.clusterLinks(cluster, runtime).isEmpty()) {
+          String[] clusterLinks = UserClusterDataExtractor.clusterLinks(cluster, runtime).split("\n");
+
+          for (int j = 0; j < clusterLinks.length; j++) {
+            ports.add(clusterLinks[j].split("//")[1].split("/")[0].split(":")[1]);
+          }
         }
 
         for (String port : ports) {
