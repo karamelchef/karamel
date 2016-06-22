@@ -153,7 +153,8 @@ public class HoneyTapSimulatorHandler {
                   public void run() {
                     /////resetVmInfoAtMonitor(groupRuntime.getId());
                     int noOfMachinesToRemove = Math.abs(suggestion.getScaleInNumber());
-                    ArrayList<String> allVms = new ArrayList<>(Arrays.asList(honeyTapAPI.getAllSimulatedVmIds(groupId)));
+                    ArrayList<String> allVms = new ArrayList<>(Arrays.asList(
+                            honeyTapAPI.getAllSimulatedVmIds(groupId)));
                     /////Thread.sleep(new Random().nextInt(10 * 1000) + 5 * 1000);  // delay upto 5 - 15 seconds
                     try {
                       Thread.sleep(8 * 1000);
