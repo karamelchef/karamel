@@ -67,9 +67,8 @@ attrs:
   mysql:
     dir: "/mnt"
   hopsworks:
-    dir: "/mnt"    
     master:
-      password: "changeit"
+       password: "adminpw"
   zeppelin:
     user: glassfish
     dir: "/mnt"
