@@ -105,11 +105,11 @@ public class JsonGroup extends JsonScope {
     return size;
   }
 
-  public void setAutoScalingEnabled(boolean autoscale) {
+  public void setAutoscale(boolean autoscale) {
     this.autoscale = autoscale;
   }
 
-  public boolean getAutoScalingEnabled() {
+  public boolean getAutoscale() {
     return autoscale;
   }
 

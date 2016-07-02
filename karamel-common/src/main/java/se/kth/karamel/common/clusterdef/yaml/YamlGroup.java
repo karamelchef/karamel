@@ -44,6 +44,10 @@ public class YamlGroup extends YamlScope {
     this.autoscale = autoscale;
   }
 
+  public void getAutoscale(boolean autoscale) {
+    this.autoscale = autoscale;
+  }
+
   public boolean isAutoscale() {
     return autoscale;
   }
