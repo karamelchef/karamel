@@ -36,7 +36,7 @@ public class SimulatorRunner {
       String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/backend/honeytap/simulator/hadoop.yml");
       JsonCluster cluster = ClusterDefinitionService.yamlToJsonObject(yaml);
       for (JsonGroup group : cluster.getGroups()) {
-        if (group.getAutoScalingEnabled()) {
+        if (group.getAutoscale()) {
           startAutoScalingGroup(group.getName(), UUID.randomUUID().toString(), 1,
                   cluster.getGroups().size(), cluster.getName());
         }
