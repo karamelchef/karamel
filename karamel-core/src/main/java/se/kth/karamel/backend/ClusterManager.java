@@ -49,6 +49,7 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.DagBuilder;
+import se.kth.karamel.backend.running.model.tasks.tablespoon.TopicTablespoonTask;
 import se.kth.karamel.backend.stats.ClusterStatistics;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -182,13 +183,36 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
    * Broadcaster for the TableSpoon
    *
    * @param machines
-   * @param json
+   * @param topicJson
    * @param topicId
    * @throws BroadcastException
    */
   @Override
-  public void sendToMachines(Set<String> machines, String json, String topicId)
+  public void sendToMachines(Set<String> machines, String topicJson, String topicId)
       throws BroadcastException {
+    //submit the DAG here
+    List<GroupRuntime> groupRuntimes = runtime.getGroups();
+    MachineRuntime machineRuntime;
+
+    for (String machine : machines) {
+      try {
+        machineRuntime = null;   //TODO identify MachineRuntime and assign here
+        TopicTablespoonTask topicTablespoonTask = new TopicTablespoonTask(machineRuntime, stats, machinesMonitor,
+                topicJson, topicId);
+        Dag dag = DagBuilder.getTopicMonitoringDag(runtime, stats, machinesMonitor, topicJson, topicId);
+      } catch (KaramelException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+    /*   DagBuilderTest code
+    String ymlString = Resources.toString(Resources.getResource("
+                            se/kth/karamel/client/model/test-definitions/flink.yml"), Charsets.UTF_8);
+    JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
+    ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
+    ClusterStats clusterStats = new ClusterStats();
+    String json = "{example: json}";
+    String uniqueId = "123456789";
+    Dag dag = DagBuilder.getTopicMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId);*/
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
