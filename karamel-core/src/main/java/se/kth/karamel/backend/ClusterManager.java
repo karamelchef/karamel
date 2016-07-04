@@ -152,7 +152,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   private void launchHoneytapIfEnabled() throws HoneyTapException {
     if (ClusterDefinitionService.hasHoneyTap(definition)) {
       logger.info("Launching honeytap for " + definition.getName());
-      honeytapApi = new HoneyTapAPI();
+      honeytapApi = new HoneyTapAPI(tablespoonApi);
       this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
     } else {
       logger.info("Honeytap is off for " + definition.getName());
