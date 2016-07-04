@@ -12,9 +12,9 @@ cookbooks:
     github: "testorg/testrepo"
     cookbook: "cookbooks/hopshadoop/ndb-chef"
     branch: "master"
-  tablespoon-riemann:
+  riemann:
     github: "testorg/testrepo"
-    cookbook: "cookbooks/tablespoon-riemann"
+    cookbook: "cookbooks/riemann-chef"
     branch: "master"
 
 groups: 
@@ -26,4 +26,4 @@ groups:
     size: 2 
     recipes:                                                                    
         - ndb::mysqld
-        - tablespoon-riemann::server
+        - riemann::server
