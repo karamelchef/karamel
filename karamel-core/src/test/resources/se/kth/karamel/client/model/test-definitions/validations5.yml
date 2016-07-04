@@ -12,9 +12,9 @@ cookbooks:
     github: "testorg/testrepo"
     cookbook: "cookbooks/hopshadoop/ndb-chef"
     branch: "master"
-  tablespoon-riemann:
+  riemann:
     github: "testorg/testrepo"
-    cookbook: "cookbooks/tablespoon-riemann"
+    cookbook: "cookbooks/riemann-chef"
     branch: "master"
 
 groups: 

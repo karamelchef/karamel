@@ -194,35 +194,40 @@ public class ClusterDefinitionTest {
   public void testInvalidGroupSizeForBaremetal() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations.yml");
-    ClusterDefinitionService.yamlToJson(yaml);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterDefinitionService.validate(json);
   }
 
   @Test(expected = ValidationException.class)
   public void testDuplciateRecipeInAGroup() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations2.yml");
-    ClusterDefinitionService.yamlToJson(yaml);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterDefinitionService.validate(json);
   }
 
   @Test(expected = InconsistentDeploymentException.class)
   public void testMorethanOneTablespoonServer() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations3.yml");
-    ClusterDefinitionService.yamlToJson(yaml);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterDefinitionService.validate(json);
   }
 
   @Test(expected = InconsistentDeploymentException.class)
   public void testBigGroupTablespoonServer() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations4.yml");
-    ClusterDefinitionService.yamlToJson(yaml);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterDefinitionService.validate(json);
   }
 
   @Test(expected = InconsistentDeploymentException.class)
   public void testNoTablespoonServerWhenAutoscaling() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = true;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/validations5.yml");
-    ClusterDefinitionService.yamlToJson(yaml);
+    JsonCluster json = ClusterDefinitionService.yamlToJsonObject(yaml);
+    ClusterDefinitionService.validate(json);
   }
 
   @Test
