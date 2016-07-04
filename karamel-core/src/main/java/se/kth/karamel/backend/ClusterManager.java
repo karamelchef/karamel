@@ -155,6 +155,13 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       logger.info("Launching honeytap for " + definition.getName());
       honeytapApi = new HoneyTapAPI(tablespoonApi);
       this.honeyTapHandler = new HoneyTapHandler(runtime.getGroups().size(), honeytapApi);
+
+      for (GroupRuntime groupRuntime : runtime.getGroups()) {
+        JsonGroup jg = ClusterDefinitionService.findGroup(definition, groupRuntime.getName());
+        if (jg.isAutoScale()) {
+          startAutoScaling(groupRuntime);
+        }
+      }
     } else {
       logger.info("Honeytap is off for " + definition.getName());
     }
@@ -177,6 +184,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
         = new RiemannSubscriberBroadcaster(tablespoonRiemannEndpoint.getIp(),
             tablespoonRiemannEndpoint.getPort(), storage);
     tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonBroadcaster);
+    tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
+    tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
   }
 
   /**
@@ -289,10 +298,6 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
-    /*if (ClusterDefinitionService.hasHoneyTap(definition)) {
-      tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
-      tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
-    }*/
   }
 
   public void stop() throws InterruptedException {
@@ -613,53 +618,43 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
 
   private void startAutoScaling(final GroupRuntime groupRuntime) {
 
-    new Thread() {
-      public void run() {
-        logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName()
-                + "################################");
-        ///////temp call until calling from DAG
+   /* new Thread() {
+      public void run() {*/
+    logger.info("################################ going to start auto scaling for group: " + groupRuntime.getName()
+            + "################################");
 
-        try {
-          if (honeytapApi == null) {
-            launchHoneytapIfEnabled();
-          }
-        } catch (HoneyTapException e) {
-          throw new IllegalStateException(e);
+    if (honeytapApi != null) {
+      try {
+        //TODO-AS create rules and add it to AS
+        GroupModel groupModel = RuleLoader.getGroupModel(groupRuntime.getCluster().getName(),
+                groupRuntime.getName());
+        Rule[] rules = groupModel.getRules();
+        String[] addedRules = addASRulesForGroup(groupRuntime.getId(), rules);
+        if (addedRules.length > 0) {
+          //TODO-AS get params req to createGroup through the yml
+          Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
+
+          honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
+                  groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
+                  groupModel.getReliabilityReq());
+
+          MonitoringListener listener = honeytapApi.startAutoScaling(groupRuntime.getId(),
+                  groupRuntime.getMachines().size());
+          honeytapListenersMap.put(groupRuntime.getId(), listener);
+          //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+          honeyTapHandler.startHandlingGroup(groupRuntime);
         }
-        ////////
-
-        if (honeytapApi != null) {
-          try {
-            //TODO-AS create rules and add it to AS
-            GroupModel groupModel = RuleLoader.getGroupModel(groupRuntime.getCluster().getName(),
-                    groupRuntime.getName());
-            Rule[] rules = groupModel.getRules();
-            String[] addedRules = addASRulesForGroup(groupRuntime.getId(), rules);
-            if (addedRules.length > 0) {
-              //TODO-AS get params req to createGroup through the yml
-              Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
-
-              honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
-                      groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
-                      groupModel.getReliabilityReq());
-
-              MonitoringListener listener = honeytapApi.startAutoScaling(groupRuntime.getId(),
-                      groupRuntime.getMachines().size());
-              honeytapListenersMap.put(groupRuntime.getId(), listener);
-              //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
-              honeyTapHandler.startHandlingGroup(groupRuntime);
-            }
-          } catch (HoneyTapException e) {
-            logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
-          } catch (KaramelException e) {
-            logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
-          }
-        } else {
-          logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been "
-                  + "initialized");
-        }
+      } catch (HoneyTapException e) {
+        logger.error("Error while initiating auto-scaling for group: " + groupRuntime.getId(), e);
+      } catch (KaramelException e) {
+        logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
       }
-    }.start();
+    } else {
+      logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been "
+              + "initialized");
+    }
+     /* }
+    }.start();*/
   }
 
   private String[] addASRulesForGroup(String groupId, Rule[] rules) {
@@ -741,16 +736,16 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
               stats.addPhase(phaseStat);
 
               //if group is forked successfully, start auto-scaling in tha group
-              if (!isFailed) {
+              /*if (!isFailed) {
                 for (GroupRuntime groupRuntime : groupRuntimes) {
                   JsonGroup jg = ClusterDefinitionService.findGroup(definition, groupRuntime.getName());
                   if (jg.isAutoScale()) {
-                    /*check whether i can start autoscaling when load the def file
-                     (just for simulation. So no interruption from karamel and no actual machine spawining)*/
+                    *//*check whether i can start autoscaling when load the def file
+                     (just for simulation. So no interruption from karamel and no actual machine spawining)*//*
                     startAutoScaling(groupRuntime);
                   }
                 }
-              }
+              }*/
             }
             break;
           case SUBMIT_INSTALL_DAG:
