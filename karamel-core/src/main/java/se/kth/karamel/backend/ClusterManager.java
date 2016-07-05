@@ -171,14 +171,15 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
                 //TODO-AS get params req to createGroup through the yml
                 Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
 
-                honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), groupModel.getMaxInstances(),
-                    groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), addedRules, minReq,
-                    groupModel.getReliabilityReq());
+                honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), 
+                    groupModel.getMaxInstances(), groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), 
+                    addedRules, minReq, groupModel.getReliabilityReq());
 
                 MonitoringListener listener = honeytapApi.startAutoScaling(groupRuntime.getId(),
                     groupRuntime.getMachines().size());
                 honeytapListenersMap.put(groupRuntime.getId(), listener);
-                //auto scalar will invoke monitoring component and subscribe for interested events to give AS suggestions
+                //auto scalar will invoke monitoring component and 
+                // subscribe for interested events to give AS suggestions
                 honeyTapHandler.startHandlingGroup(groupRuntime);
               }
             } catch (HoneyTapException e) {
@@ -187,8 +188,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
               logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
             }
           } else {
-            logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + ". HoneyTapAPI has not been "
-                + "initialized");
+            logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + 
+                ". HoneyTapAPI has not been initialized");
           }
         }
       }
@@ -216,7 +217,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonBroadcaster);
     tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
     tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
-    Dag dag = DagBuilder.getStartMonitoringDag(runtime, stats, machinesMonitor);
+    Dag dag = DagBuilder.getStartTablespoonDag(runtime, stats, machinesMonitor);
     runDag(dag);
   }
 
@@ -232,7 +233,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   public void sendToMachines(Set<String> machines, String topicJson, String topicId)
       throws BroadcastException {
     try {
-      Dag dag = DagBuilder.getTopicMonitoringDag(runtime, stats, machinesMonitor, topicJson, topicId);
+      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, topicJson, topicId);
       runDag(dag);
     } catch (Exception e) {
       throw new BroadcastException("Karamel failed to submit the DAG for topic " + topicId);

@@ -322,9 +322,8 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     ClusterStats clusterStats = new ClusterStats();
-    Dag dag = DagBuilder.getInstallMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
-    System.out.println(dag.print());
-
+    Dag dag = DagBuilder.getInstallTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    dag.validate();
     Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install collectl on namenodes1"));
     Assert.assertTrue(dag.hasDependency("install collectl on namenodes1", "install tablespoon agent on namenodes1"));
   }
@@ -363,9 +362,8 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     ClusterStats clusterStats = new ClusterStats();
-    Dag dag = DagBuilder.getStartMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
-    System.out.println(dag.print());
-
+    Dag dag = DagBuilder.getStartTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "start tablespoon on namenodes1"));
   }
   
@@ -405,9 +403,8 @@ public class DagBuilderTest {
     ClusterStats clusterStats = new ClusterStats();
     String json = "{example: json}";
     String uniqueId = "123456789";
-    Dag dag = DagBuilder.getTopicMonitoringDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId);
-    System.out.println(dag.print());
-
+    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId);
+    dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));
   }
   

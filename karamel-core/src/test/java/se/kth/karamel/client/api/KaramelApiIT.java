@@ -328,10 +328,10 @@ public class KaramelApiIT {
   }
 
   @Test
-  public void testTablespoonStartup() throws IOException, KaramelException, InterruptedException {
-    String clusterName = "tablespoon";
+  public void testTablespoon() throws IOException, KaramelException, InterruptedException {
+    String clusterName = "sparkwithtablespoon";
     String ymlString = Resources.toString(Resources.getResource(
-        "se/kth/karamel/client/model/test-definitions/tablespoon.yml"), Charsets.UTF_8);
+        "se/kth/karamel/client/model/test-definitions/spark-tablespoon.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {
@@ -343,10 +343,10 @@ public class KaramelApiIT {
     api.startCluster(json);
     long ms1 = System.currentTimeMillis();
     int mins = 0;
-    while (ms1 + 24 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+    while (ms1 + Settings.DAY_IN_MS > System.currentTimeMillis()) {
       mins++;
       System.out.println(api.processCommand("status").getResult());
-      Thread.currentThread().sleep(60000);
+      Thread.currentThread().sleep(Settings.SEC_IN_MS * 10);
     }
   }
 }

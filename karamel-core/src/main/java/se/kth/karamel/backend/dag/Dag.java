@@ -32,6 +32,12 @@ public class Dag {
     allNodes.put(nodeId, new DagNode(nodeId));
   }
 
+  public void addTasks(DagTask... taks) throws DagConstructionException {
+    for (DagTask dagTask : taks) {
+      addTask(dagTask);
+    }
+  }
+  
   public void addTask(DagTask task) throws DagConstructionException {
     logger.debug("Adding task: " + task.dagNodeId());
     DagNode node = null;
