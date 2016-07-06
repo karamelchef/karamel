@@ -6,9 +6,11 @@
 package se.kth.karamel.backend.running.mode.task;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import com.google.gson.JsonObject;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
@@ -403,7 +405,8 @@ public class DagBuilderTest {
     ClusterStats clusterStats = new ClusterStats();
     String json = "{example: json}";
     String uniqueId = "123456789";
-    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter, json, uniqueId);
+    HashSet<String> vmids = Sets.newHashSet("namenodes1", "datanodes1", "datanodes2");
+    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter,vmids, json, uniqueId);
     dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));
   }

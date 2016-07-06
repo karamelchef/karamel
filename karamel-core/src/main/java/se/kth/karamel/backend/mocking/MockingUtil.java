@@ -53,6 +53,7 @@ public class MockingUtil {
         ma.setPublicIp(ippref + i);
         ma.setPrivateIp(ippref + i);
         ma.setSshUser("ubuntu");
+        ma.setVmId(ippref + i);
         mcs.add(ma);
       }
       group.setMachines(mcs);
