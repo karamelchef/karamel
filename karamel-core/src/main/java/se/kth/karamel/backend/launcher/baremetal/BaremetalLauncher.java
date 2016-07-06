@@ -62,6 +62,7 @@ public class BaremetalLauncher extends Launcher {
       machine.setPublicIp(ip);
       machine.setSshPort(Settings.BAREMETAL_DEFAULT_SSH_PORT);
       machine.setSshUser(username);
+      machine.setVmId(ip);
       machines.add(machine);
     }
     return machines;

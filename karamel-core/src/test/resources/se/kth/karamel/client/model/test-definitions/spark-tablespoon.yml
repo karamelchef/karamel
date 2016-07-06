@@ -17,8 +17,6 @@ cookbooks:
     branch: "master"
 
 attrs:
-  java:
-    jdk_version: "8"
   hadoop_spark:
     user: "vagrant"
     executor_memory: '1024m'
@@ -29,7 +27,6 @@ groups:
         ip: 192.168.33.11
     size: 1
     recipes:
-        - java    
         - apache_hadoop::nn
         - apache_hadoop::rm
         - hadoop_spark::master
@@ -40,7 +37,6 @@ groups:
         ips: 
             - 192.168.33.12
     recipes:
-        - java
         - apache_hadoop::dn
         - apache_hadoop::nm
         - hadoop_spark::worker

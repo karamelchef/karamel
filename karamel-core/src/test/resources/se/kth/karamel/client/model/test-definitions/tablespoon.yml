@@ -14,3 +14,4 @@ groups:
         ip: 192.168.33.11
     recipes: 
         - riemann::server
+        - riemann::dash

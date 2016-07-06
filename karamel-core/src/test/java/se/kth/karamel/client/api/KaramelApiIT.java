@@ -329,9 +329,9 @@ public class KaramelApiIT {
 
   @Test
   public void testTablespoon() throws IOException, KaramelException, InterruptedException {
-    String clusterName = "sparkwithtablespoon";
+    String clusterName = "tablespoon";
     String ymlString = Resources.toString(Resources.getResource(
-        "se/kth/karamel/client/model/test-definitions/spark-tablespoon.yml"), Charsets.UTF_8);
+        "se/kth/karamel/client/model/test-definitions/tablespoon.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {

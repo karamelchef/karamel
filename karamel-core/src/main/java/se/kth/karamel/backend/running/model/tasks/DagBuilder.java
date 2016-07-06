@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
@@ -47,9 +48,8 @@ public class DagBuilder {
   private static final Logger logger = Logger.getLogger(DagBuilder.class);
 
   /**
-   * 1. Machine-level tasks such as: - AptGetEssential - PrepareStorage -
-   * InstallBerkshelf - MakeSoloRb 2.Cookbook-level tasks such as: -
-   * CloneAndVendorCookbook - RunRecipeTask for purge
+   * 1. Machine-level tasks such as: - AptGetEssential - PrepareStorage - InstallBerkshelf - MakeSoloRb 2.Cookbook-level
+   * tasks such as: - CloneAndVendorCookbook - RunRecipeTask for purge
    *
    * @param cluster
    * @param clusterEntity
@@ -69,11 +69,9 @@ public class DagBuilder {
   }
 
   /**
-   * 1. Machine-level tasks such as: - AptGetEssential - PrepareStorage -
-   * InstallBerkshelf - MakeSoloRb 2.Cookbook-level tasks such as: -
-   * CloneAndVendorCookbook - RunRecipeTask for Install 3.Recipe-level tasks
-   * such as: - RunRecipe tasks for all recipes except install 4.Applies
-   * dependencies that are defined in the Karamelfile
+   * 1. Machine-level tasks such as: - AptGetEssential - PrepareStorage - InstallBerkshelf - MakeSoloRb 2.Cookbook-level
+   * tasks such as: - CloneAndVendorCookbook - RunRecipeTask for Install 3.Recipe-level tasks such as: - RunRecipe tasks
+   * for all recipes except install 4.Applies dependencies that are defined in the Karamelfile
    *
    * @param cluster
    * @param clusterEntity
@@ -143,16 +141,18 @@ public class DagBuilder {
   }
 
   public static Dag getCreateTablespoonTopicDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter, String json, String topicId) throws KaramelException {
+      TaskSubmitter submitter, Set<String> vmIds, String json, String topicId) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
-        AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
-        InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
-        TopicTablespoonTask t5 = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId);
-        dag.addTasks(t1, t2, t3, t4, t5);
+        if (vmIds.contains(me.getVmId())) {
+          FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
+          AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
+          InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
+          InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
+          TopicTablespoonTask t5 = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId);
+          dag.addTasks(t1, t2, t3, t4, t5);
+        }
       }
     }
     return dag;
@@ -186,10 +186,9 @@ public class DagBuilder {
   }
 
   /**
-   * Creates all recipe tasks for cluster and groups them by recipe-name. In
-   * other words, by having a recipe-name such as hadoop::dn you fetch all the
-   * tasks in the cluster that are running hadoop::dn. recipeName ->
-   * taskid(recipe + machineid) -> task
+   * Creates all recipe tasks for cluster and groups them by recipe-name. In other words, by having a recipe-name such
+   * as hadoop::dn you fetch all the tasks in the cluster that are running hadoop::dn. recipeName -> taskid(recipe +
+   * machineid) -> task
    *
    * @param cluster
    * @param clusterEntity
@@ -357,9 +356,8 @@ public class DagBuilder {
   }
 
   /**
-   * Tasks that are machine specific, specifically those that are run in the
-   * very start preparation phase. For example: - AptGetEssential -
-   * PrepareStorage - InstallBerkshelf - MakeSoloRb
+   * Tasks that are machine specific, specifically those that are run in the very start preparation phase. For example:
+   * - AptGetEssential - PrepareStorage - InstallBerkshelf - MakeSoloRb
    *
    * @param cluster
    * @param clusterEntity

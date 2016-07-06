@@ -171,8 +171,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
                 //TODO-AS get params req to createGroup through the yml
                 Map<Group.ResourceRequirement, Integer> minReq = Mapper.getASMinReqMap(groupModel.getMinReq());
 
-                honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(), 
-                    groupModel.getMaxInstances(), groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(), 
+                honeytapApi.createGroup(groupRuntime.getId(), groupModel.getMinInstances(),
+                    groupModel.getMaxInstances(), groupModel.getCoolingTimeOut(), groupModel.getCoolingTimeIn(),
                     addedRules, minReq, groupModel.getReliabilityReq());
 
                 MonitoringListener listener = honeytapApi.startAutoScaling(groupRuntime.getId(),
@@ -188,8 +188,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
               logger.error("Error while retrieving rules for the group: " + groupRuntime.getName(), e);
             }
           } else {
-            logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId() + 
-                ". HoneyTapAPI has not been initialized");
+            logger.error("Cannot initiate auto-scaling for group " + groupRuntime.getId()
+                + ". HoneyTapAPI has not been initialized");
           }
         }
       }
@@ -209,6 +209,13 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       return;
     }
     logger.info("Launching tablespoon for " + definition.getName());
+    for (GroupRuntime group : runtime.getGroups()) {
+      se.kth.tablespoon.client.general.Group tsg = new se.kth.tablespoon.client.general.Group(group.getId());
+      for (MachineRuntime machine : group.getMachines()) {
+        tsg.addMachine(machine.getVmId());
+      }
+      tablespoonGroups.add(tsg);
+    }
     TopicStorage storage = new TopicStorage(tablespoonGroups);
     tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
     tablespoonBroadcaster
@@ -224,16 +231,16 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   /**
    * Broadcaster for the TableSpoon
    *
-   * @param machines
+   * @param vmIds
    * @param topicJson
    * @param topicId
    * @throws BroadcastException
    */
   @Override
-  public void sendToMachines(Set<String> machines, String topicJson, String topicId)
+  public void sendToMachines(Set<String> vmIds, String topicJson, String topicId)
       throws BroadcastException {
     try {
-      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, topicJson, topicId);
+      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId);
       runDag(dag);
     } catch (Exception e) {
       throw new BroadcastException("Karamel failed to submit the DAG for topic " + topicId);
