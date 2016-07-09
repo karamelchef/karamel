@@ -93,6 +93,19 @@ public class DagBuilder {
     return dag;
   }
 
+  public static Dag getInstallationDagForMachine(JsonCluster cluster, ClusterRuntime clusterEntity,
+       ClusterStats clusterStats, TaskSubmitter submitter, Map<String, JsonObject> chefJsons, String groupId,
+       String machineId) throws KaramelException {
+    Dag dag = new Dag();
+    Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
+    machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag);
+    cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
+    Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
+        allRecipeTasks, dag, groupId, machineId);
+    updateKaramelDependencies(allRecipeTasks, dag, rlts);
+    return dag;
+  }
+
   public static Dag getInstallTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter) throws KaramelException {
     Dag dag = new Dag();
@@ -215,6 +228,32 @@ public class DagBuilder {
                 urls.id, jc.getName(), allRecipeTasks, dag);
           }
         }
+      }
+    }
+    return map;
+  }
+
+  public static Map<String, Map<String, Task>> recipeLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity,
+      ClusterStats clusterStats, Map<String, JsonObject> chefJsons, TaskSubmitter submitter,
+      Map<String, RunRecipeTask> allRecipeTasks, Dag dag, String groupId, String machineId) throws KaramelException {
+    Map<String, Map<String, Task>> map = new HashMap<>();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      if (ge.getId().equals(groupId)) {
+        JsonGroup jg = ClusterDefinitionService.findGroup(cluster, ge.getName());
+        for (MachineRuntime me : ge.getMachines()) {
+          if (me.getVmId().equals(machineId)) {
+            for (JsonCookbook jc : jg.getCookbooks()) {
+              CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
+              for (JsonRecipe rec : jc.getRecipes()) {
+                JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
+                addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, clusterStats, map, json1, submitter,
+                    urls.id, jc.getName(), allRecipeTasks, dag);
+              }
+            }
+            break;
+          }
+        }
+        break;
       }
     }
     return map;

@@ -629,6 +629,18 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
             groupRuntime.setMachines(mcs);
             machinesMonitor.addMachines(mcs);
 
+            Map<String, JsonObject> chefJsons = ChefJsonGenerator.
+                    generateClusterChefJsonsForInstallation(definition, runtime);
+            for (MachineRuntime machineRuntime : mcs) {
+              try {
+                Dag dag = DagBuilder.getInstallationDagForMachine(definition, runtime, stats, machinesMonitor,
+                        chefJsons, groupRuntime.getId(), machineRuntime.getVmId());
+                runDag(dag);
+              } catch (Exception e) {
+                throw new IllegalStateException(e);
+              }
+            }
+
             logger.info("################ wantedToAdd and added: " + machineTypes.length + " & "
                 + mcs.size() + "################");
             if (machineTypes.length == mcs.size()) {
