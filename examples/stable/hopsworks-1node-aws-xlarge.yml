@@ -86,7 +86,9 @@ groups:
         - hops::nn
         - hops::dn
         - hops::nm
+        - hops::jhs
         - hadoop_spark::yarn
+        - hadoop_spark::historyserver
         - flink::yarn
         - elastic
         - livy
