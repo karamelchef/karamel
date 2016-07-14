@@ -107,7 +107,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   private final Map<String, MonitoringListener> honeytapListenersMap = new HashMap<>();
   private final Groups tablespoonGroups = new Groups();
   private Endpoint tablespoonRiemannEndpoint;
-  private RiemannSubscriberBroadcaster tablespoonBroadcaster;
+  private RiemannSubscriberBroadcaster tablespoonSubscriberBroadcaster;
   private AgentBroadcasterAssistant tablespoonBroadcasterAssistant;
   private TablespoonApi tablespoonApi;
 
@@ -218,18 +218,19 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     }
     TopicStorage storage = new TopicStorage(tablespoonGroups);
     tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
-    tablespoonBroadcaster
+    tablespoonBroadcasterAssistant.registerBroadcaster(this);
+    tablespoonSubscriberBroadcaster
         = new RiemannSubscriberBroadcaster(tablespoonRiemannEndpoint.getIp(),
             tablespoonRiemannEndpoint.getPort(), storage);
-    tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonBroadcaster);
-    tablespoonBroadcasterFuture = tpool.submit(tablespoonBroadcaster);
+    tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonSubscriberBroadcaster);
+    tablespoonBroadcasterFuture = tpool.submit(tablespoonSubscriberBroadcaster);
     tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
     Dag dag = DagBuilder.getStartTablespoonDag(runtime, stats, machinesMonitor);
     runDag(dag);
   }
 
   /**
-   * Broadcaster for the TableSpoon
+   * Broadcaster for tablespoon
    *
    * @param vmIds
    * @param topicJson
@@ -316,7 +317,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   }
 
   public void start() {
-    tpool = Executors.newFixedThreadPool(3);
+    tpool = Executors.newFixedThreadPool(5);
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
