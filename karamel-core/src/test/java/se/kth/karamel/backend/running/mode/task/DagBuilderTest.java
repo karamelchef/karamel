@@ -27,6 +27,7 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Confs;
+import se.kth.tablespoon.client.broadcasting.AgentBroadcasterAssistant;
 
 /**
  *
@@ -324,7 +325,8 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     ClusterStats clusterStats = new ClusterStats();
-    Dag dag = DagBuilder.getInstallTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    String tsConfig = "empty";
+    Dag dag = DagBuilder.getInstallTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter, tsConfig);
     dag.validate();
     Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install collectl on namenodes1"));
     Assert.assertTrue(dag.hasDependency("install collectl on namenodes1", "install tablespoon agent on namenodes1"));
@@ -364,7 +366,8 @@ public class DagBuilderTest {
     JsonCluster definition = ClusterDefinitionService.yamlToJsonObject(ymlString);
     ClusterRuntime dummyRuntime = MockingUtil.dummyRuntime(definition);
     ClusterStats clusterStats = new ClusterStats();
-    Dag dag = DagBuilder.getStartTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter);
+    String tsConfig = "empty";
+    Dag dag = DagBuilder.getStartTablespoonDag(dummyRuntime, clusterStats, dummyTaskSubmitter, tsConfig);
     dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "start tablespoon on namenodes1"));
   }
@@ -405,8 +408,9 @@ public class DagBuilderTest {
     ClusterStats clusterStats = new ClusterStats();
     String json = "{example: json}";
     String uniqueId = "123456789";
+    String tsConfig = "empty";
     HashSet<String> vmids = Sets.newHashSet("namenodes1", "datanodes1", "datanodes2");
-    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter,vmids, json, uniqueId);
+    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter,vmids, json, uniqueId, tsConfig);
     dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));
   }

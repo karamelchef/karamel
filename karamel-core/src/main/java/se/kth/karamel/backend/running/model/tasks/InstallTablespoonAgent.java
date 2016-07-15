@@ -23,9 +23,12 @@ import se.kth.karamel.common.util.Settings;
 public class InstallTablespoonAgent extends Task {
 
   private static final Logger logger = Logger.getLogger(InstallTablespoonAgent.class);
+  private String config;
 
-  public InstallTablespoonAgent(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public InstallTablespoonAgent(MachineRuntime machine, ClusterStats clusterStats,
+                                TaskSubmitter submitter, String config) {
     super("install tablespoon agent", "install tablespoon agent", true, machine, clusterStats, submitter);
+    this.config = config;
   }
 
   @Override
@@ -34,6 +37,7 @@ public class InstallTablespoonAgent extends Task {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_TABLESPOON_AGENT,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME,
+          "ts_config", config,
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME);
     }

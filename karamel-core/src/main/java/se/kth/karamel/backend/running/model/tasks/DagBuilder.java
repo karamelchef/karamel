@@ -107,14 +107,14 @@ public class DagBuilder {
   }
 
   public static Dag getInstallTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter) throws KaramelException {
+      TaskSubmitter submitter, String tsConfig) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
         AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
         InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
         dag.addTasks(t1, t2, t3, t4);
       }
     }
@@ -122,14 +122,14 @@ public class DagBuilder {
   }
 
   public static Dag getStartTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter) throws KaramelException {
+      TaskSubmitter submitter, String tsConfig) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
         AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
         InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
         StartTablespoonTask t5 = new StartTablespoonTask(me, clusterStats, submitter);
         dag.addTasks(t1, t2, t3, t4, t5);
       }
@@ -138,14 +138,14 @@ public class DagBuilder {
   }
 
   public static Dag getStopTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter) throws KaramelException {
+      TaskSubmitter submitter, String tsConfig) throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
         AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
         InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
         StopTablespoonTask t5 = new StopTablespoonTask(me, clusterStats, submitter);
         dag.addTasks(t1, t2, t3, t4, t5);
       }
@@ -154,7 +154,8 @@ public class DagBuilder {
   }
 
   public static Dag getCreateTablespoonTopicDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter, Set<String> vmIds, String json, String topicId) throws KaramelException {
+      TaskSubmitter submitter, Set<String> vmIds, String json, String topicId, String tsConfig)
+      throws KaramelException {
     Dag dag = new Dag();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
@@ -162,7 +163,7 @@ public class DagBuilder {
           FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
           AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
           InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-          InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter);
+          InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
           TopicTablespoonTask t5 = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId);
           dag.addTasks(t1, t2, t3, t4, t5);
         }

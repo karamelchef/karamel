@@ -3,4 +3,4 @@ echo $$ > %pid_file%; echo '#!/bin/bash
 %file_content%
 EOF
 echo '%task_id%' >> %succeedtasks_filepath%
-' > agent-topic.sh ; chmod +x agent-topic.sh ; ./agent-topic.sh
+' > %file_name%.sh ; chmod +x %file_name%.sh ; %sudo_command% ./%file_name%.sh

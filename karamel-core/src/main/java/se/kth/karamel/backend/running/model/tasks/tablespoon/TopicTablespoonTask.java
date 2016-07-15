@@ -15,10 +15,6 @@ import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
-/**
- *
- * @author henke
- */
 public class TopicTablespoonTask extends TablespoonTask {
   
   private static final Logger logger = Logger.getLogger(TopicTablespoonTask.class);
@@ -27,9 +23,10 @@ public class TopicTablespoonTask extends TablespoonTask {
   
   public TopicTablespoonTask(MachineRuntime machine, ClusterStats clusterStats, 
       TaskSubmitter submitter, String json, String topicId) {
-    super("start tablespoon", "start tablespoon", true, machine, clusterStats, submitter);
+    super("submit topic to tablespoon-agent", "submit topic to tablespoon-agent",
+            true, machine, clusterStats, submitter);
     this.json = json;
-    this.filename = topicId + ".json";
+    this.filename = topicId;
   }
   
   @Override
