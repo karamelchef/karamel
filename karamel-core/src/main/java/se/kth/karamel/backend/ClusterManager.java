@@ -225,7 +225,9 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonSubscriberBroadcaster);
     tablespoonBroadcasterFuture = tpool.submit(tablespoonSubscriberBroadcaster);
     tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
-    Dag dag = DagBuilder.getStartTablespoonDag(runtime, stats, machinesMonitor);
+    Dag dag = DagBuilder.getStartTablespoonDag(runtime, stats, machinesMonitor,
+            tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
+            tablespoonRiemannEndpoint.getPort()));
     runDag(dag);
   }
 
@@ -241,7 +243,10 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   public void sendToMachines(Set<String> vmIds, String topicJson, String topicId)
       throws BroadcastException {
     try {
-      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId);
+      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId,
+              tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
+              tablespoonRiemannEndpoint.getPort()));
+      logger.info("Tablespoon topic DAG was created for " + topicId);
       runDag(dag);
     } catch (Exception e) {
       throw new BroadcastException("Karamel failed to submit the DAG for topic " + topicId);
@@ -317,7 +322,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   }
 
   public void start() {
-    tpool = Executors.newFixedThreadPool(5);
+    tpool = Executors.newFixedThreadPool(10);
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
