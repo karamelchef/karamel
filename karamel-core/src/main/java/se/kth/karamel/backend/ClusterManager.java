@@ -639,6 +639,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
                     generateClusterChefJsonsForInstallation(definition, runtime);
             for (MachineRuntime machineRuntime : mcs) {
               try {
+                //check the dag, it is running the dag for previous machine again and does not run the new one
                 Dag dag = DagBuilder.getInstallationDagForMachine(definition, runtime, stats, machinesMonitor,
                         chefJsons, groupRuntime.getId(), machineRuntime.getVmId());
                 runDag(dag);
