@@ -98,8 +98,9 @@ public class DagBuilder {
        String machineId) throws KaramelException {
     Dag dag = new Dag();
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
-    machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag);
-    cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
+    machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag, groupId, machineId);
+    cookbookLevelInstallationTasksForMachine(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks,
+            dag, groupId, machineId);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
         allRecipeTasks, dag, groupId, machineId);
     updateKaramelDependencies(allRecipeTasks, dag, rlts);
@@ -395,6 +396,45 @@ public class DagBuilder {
     return map;
   }
 
+  public static Map<String, Map<String, Task>> cookbookLevelInstallationTasksForMachine(JsonCluster cluster,
+      ClusterRuntime clusterEntity, ClusterStats clusterStats, Map<String, JsonObject> chefJsons,
+      TaskSubmitter submitter, Map<String, RunRecipeTask> allRecipeTasks, Dag dag, String groupId, String machineId)
+          throws KaramelException {
+    Map<String, Map<String, Task>> map = new HashMap<>();
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      if (ge.getId().equals(groupId)) {
+        JsonGroup jg = ClusterDefinitionService.findGroup(cluster, ge.getName());
+        for (MachineRuntime me : ge.getMachines()) {
+          if (me.getVmId().equals(machineId)) {
+            Map<String, Task> map1 = new HashMap<>();
+            for (JsonCookbook jc : jg.getCookbooks()) {
+              CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
+              VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
+                      Settings.REMOTE_CB_VENDOR_PATH,
+                      urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
+              dag.addTask(t1);
+              map1.put(t1.uniqueId(), t1);
+              String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+              JsonObject json = chefJsons.get(me.getId() + recipeName);
+              RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats,
+                      json, submitter, urls.id, jc.getName(),
+                      allRecipeTasks, dag);
+              map1.put(t2.uniqueId(), t2);
+            }
+            logger.debug(String.format("Cookbook-level tasks for the machine '%s' in the group '%s' are: %s",
+                    me.getPublicIp(), ge.getName(), map1.keySet()));
+            if (map.get(me.getId()) != null) {
+              map.get(me.getId()).putAll(map1);
+            } else {
+              map.put(me.getId(), map1);
+            }
+          }
+        }
+      }
+    }
+    return map;
+  }
+
   /**
    * Tasks that are machine specific, specifically those that are run in the very start preparation phase. For example:
    * - AptGetEssential - PrepareStorage - InstallBerkshelf - MakeSoloRb
@@ -432,6 +472,40 @@ public class DagBuilder {
         dag.addTask(t1);
         dag.addTask(t2);
         dag.addTask(t3);
+      }
+    }
+  }
+
+  public static void machinePreparationTasks(JsonCluster cluster, ClusterRuntime clusterEntity,
+      ClusterStats clusterStats, TaskSubmitter submitter, Dag dag, String groupId, String machineId)
+          throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
+    String vendorPath = ClusterDefinitionService.makeVendorPath(cluster);
+    for (GroupRuntime ge : clusterEntity.getGroups()) {
+      if (ge.getId().equals(groupId)) {
+        for (MachineRuntime me : ge.getMachines()) {
+          if (me.getVmId().equals(machineId)) {
+            FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
+            dag.addTask(findOs);
+            Provider provider = ClusterDefinitionService.getGroupProvider(cluster, ge.getName());
+            boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true")
+                    && (provider instanceof Ec2));
+            if (storagePreparation) {
+              String model = ((Ec2) provider).getType();
+              InstanceType instanceType = InstanceType.valueByModel(model);
+              PrepareStoragesTask st
+                      = new PrepareStoragesTask(me, clusterStats, submitter, instanceType.getStorageDevices());
+              dag.addTask(st);
+            }
+            AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
+            InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
+            MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+            dag.addTask(t1);
+            dag.addTask(t2);
+            dag.addTask(t3);
+          }
+        }
       }
     }
   }
