@@ -13,9 +13,14 @@ import se.kth.karamel.common.util.SshKeyPair;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.junit.Assert;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import se.kth.honeytap.scaling.exceptions.DBConnectionFailureException;
+import se.kth.honeytap.scaling.utils.DBUtil;
 
 /**
  *
@@ -327,11 +332,34 @@ public class KaramelApiIT {
      }*/
   }
 
-  @Test
+//  @Test
   public void testTablespoon() throws IOException, KaramelException, InterruptedException {
     String clusterName = "tablespoon";
     String ymlString = Resources.toString(Resources.getResource(
         "se/kth/karamel/client/model/test-definitions/tablespoon.yml"), Charsets.UTF_8);
+    String json = api.yamlToJson(ymlString);
+    SshKeyPair sshKeys = api.loadSshKeysIfExist("");
+    if (sshKeys == null) {
+      sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
+    }
+    api.registerSshKeys(sshKeys);
+    Ec2Credentials credentials = api.loadEc2CredentialsIfExist();
+    api.updateEc2CredentialsIfValid(credentials);
+    api.startCluster(json);
+    long ms1 = System.currentTimeMillis();
+    int mins = 0;
+    while (ms1 + Settings.DAY_IN_MS > System.currentTimeMillis()) {
+      mins++;
+      System.out.println(api.processCommand("status").getResult());
+      Thread.currentThread().sleep(Settings.SEC_IN_MS * 10);
+    }
+  }
+  
+    @Test
+  public void testHoneytapIntegration() throws IOException, KaramelException, InterruptedException {
+    String clusterName = "honeytap";
+    String ymlString = Resources.toString(Resources.getResource(
+        "se/kth/karamel/client/model/test-definitions/honeytap.yml"), Charsets.UTF_8);
     String json = api.yamlToJson(ymlString);
     SshKeyPair sshKeys = api.loadSshKeysIfExist("");
     if (sshKeys == null) {

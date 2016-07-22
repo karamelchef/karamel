@@ -13,5 +13,5 @@ if [ \"$UNAME\" == \"linux\" ]; then
     fi
 fi
 echo "$DISTRO" > %ostype_filename%
-cd ~ && echo '%task_id%' > %succeedtasks_filepath%
+cd ~ && echo '%task_id%' >> %succeedtasks_filepath%
 ' > %ostype_filename%.sh ; chmod +x %ostype_filename%.sh ; ./%ostype_filename%.sh

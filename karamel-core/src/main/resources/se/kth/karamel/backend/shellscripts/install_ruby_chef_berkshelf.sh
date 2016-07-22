@@ -30,5 +30,5 @@ else
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
  exit 1
 fi
-echo '%task_id%' >> ~/%succeedtasks_filepath%
+echo '%task_id%' >> %succeedtasks_filepath%
 ' > berks-install.sh ; chmod +x berks-install.sh ; ./berks-install.sh
