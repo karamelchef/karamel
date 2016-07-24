@@ -330,7 +330,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   }
 
   public void start() {
-    tpool = Executors.newFixedThreadPool(10);
+    tpool = Executors.newCachedThreadPool();
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
