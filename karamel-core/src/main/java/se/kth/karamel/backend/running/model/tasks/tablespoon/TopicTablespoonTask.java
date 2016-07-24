@@ -21,10 +21,10 @@ public class TopicTablespoonTask extends TablespoonTask {
   private final String json;
   private final String filename;
   
-  public TopicTablespoonTask(MachineRuntime machine, ClusterStats clusterStats, 
+  public TopicTablespoonTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, 
       TaskSubmitter submitter, String json, String topicId) {
-    super("submit topic to tablespoon-agent", "submit topic to tablespoon-agent",
-            true, machine, clusterStats, submitter);
+    super(dagName, "submit topic to tablespoon-agent", "submit topic to tablespoon-agent",
+            false, machine, clusterStats, submitter);
     this.json = json;
     this.filename = topicId;
   }

@@ -24,8 +24,9 @@ public class InstallCollectlTask extends Task {
   
   private static final Logger logger = Logger.getLogger(InstallCollectlTask.class);
   
-  public InstallCollectlTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("install collectl", "install collectl", true, machine, clusterStats, submitter);
+  public InstallCollectlTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, 
+      TaskSubmitter submitter) {
+    super(dagName, "install collectl", "install collectl", true, machine, clusterStats, submitter);
   }
   
   @Override

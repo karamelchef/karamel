@@ -23,8 +23,9 @@ public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
+  public MakeSoloRbTask(String dagName, MachineRuntime machine, String vendorPath, ClusterStats clusterStats, 
+      TaskSubmitter submitter) {
+    super(dagName, "make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
   }
 

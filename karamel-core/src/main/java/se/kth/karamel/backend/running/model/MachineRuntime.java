@@ -66,7 +66,7 @@ public class MachineRuntime {
   public OsType getOsType() {
     return osType;
   }
-  
+
   public String getName() {
     return name;
   }
@@ -107,7 +107,7 @@ public class MachineRuntime {
     this.sshUser = sshUser;
   }
 
-  public List<Task> getTasks() {
+  public synchronized List<Task> getTasks() {
     return tasks;
   }
 
@@ -119,11 +119,11 @@ public class MachineRuntime {
     this.machineType = machineType;
   }
 
-  public void addTask(Task task) {
+  public synchronized void addTask(Task task) {
     tasks.add(task);
   }
 
-  public void removeTask(Task task) {
+  public synchronized void removeTask(Task task) {
     tasks.remove(task);
   }
 
@@ -165,5 +165,28 @@ public class MachineRuntime {
   public void setForkingTime(long forkingTime) {
     this.forkingTime = forkingTime;
   }
-  
+
+  public synchronized void reOrder(Task task) {
+    int pos = 0;
+    tasks.remove(task);
+    for (int i = 0; i < tasks.size(); i++) {
+      Task cur = tasks.get(i);
+      if (cur.getStatus() == Task.Status.WAITING && task.getStatus() == Task.Status.READY) {
+        pos = i;
+        break;
+      } else if ((cur.getStatus() == Task.Status.WAITING || cur.getStatus() == Task.Status.READY) 
+          && task.getStatus() == Task.Status.ONGOING) {
+        pos = i;
+        break;
+      } else if ((cur.getStatus() == Task.Status.WAITING || cur.getStatus() == Task.Status.READY) 
+          && task.getStatus() == Task.Status.EXIST) {
+        pos = i;
+        break;
+      } else {
+        pos = i + 1;
+      }
+    }
+    tasks.add(pos, task);
+  }
+
 }

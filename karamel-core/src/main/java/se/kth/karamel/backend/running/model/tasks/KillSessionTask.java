@@ -17,8 +17,8 @@ import se.kth.karamel.common.util.Settings;
  */
 public class KillSessionTask extends Task {
 
-  public KillSessionTask() {
-    super("kill session", "kill session", false, null, null, null);
+  public KillSessionTask(String dagName) {
+    super(dagName, "kill session", "kill session", false, null, null, null);
   }
 
   @Override

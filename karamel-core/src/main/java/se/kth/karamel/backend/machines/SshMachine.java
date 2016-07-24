@@ -216,7 +216,7 @@ public class SshMachine implements MachineInterface, Runnable {
   public void killTaskSession(Task task) {
     if (activeTask == task) {
       logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
-      KillSessionTask killTask = new KillSessionTask();
+      KillSessionTask killTask = new KillSessionTask("no dag");
       killing = true;
       runTask(killTask);
     } else {
@@ -306,7 +306,7 @@ public class SshMachine implements MachineInterface, Runnable {
         if (task.getStatus() == Status.ONGOING) {
           if (!(task instanceof KillSessionTask)) {
             task.succeed();
-            succeedTasksHistory.add(task.uniqueId());
+            succeedTasksHistory.add(task.getId());
             activeTask = null;
           }
         }
@@ -435,7 +435,7 @@ public class SshMachine implements MachineInterface, Runnable {
     };
   }
 
-  private void connect() throws KaramelException {
+  private synchronized void connect() throws KaramelException {
     if (client == null || !client.isConnected()) {
       isSucceedTaskHistoryUpdated = false;
       try {

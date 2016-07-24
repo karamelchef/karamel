@@ -408,4 +408,18 @@ public class ClusterDefinitionService {
     }
     return tablespoonSeverGroup;
   }
+
+  public static MachineRuntime findMachine(ClusterRuntime cluster, String groupId, String vmId) 
+      throws KaramelException {
+    for (GroupRuntime ge : cluster.getGroups()) {
+      if (ge.getId().equals(groupId)) {
+        for (MachineRuntime me : ge.getMachines()) {
+          if (me.getVmId().equals(vmId)) {
+            return me;
+          }
+        }
+      }
+    }
+    throw new KaramelException(String.format("VmId %s not found in group %s", vmId, groupId));
+  }
 }

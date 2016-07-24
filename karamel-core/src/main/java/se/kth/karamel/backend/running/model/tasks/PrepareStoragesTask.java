@@ -24,9 +24,9 @@ public class PrepareStoragesTask extends Task {
 
   private final StorageDevice[] storageDevices;
 
-  public PrepareStoragesTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
+  public PrepareStoragesTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
       StorageDevice[] storageDevices) {
-    super("prepare storages", "prepare storages", false, machine, clusterStats, submitter);
+    super(dagName, "prepare storages", "prepare storages", false, machine, clusterStats, submitter);
     this.storageDevices = storageDevices;
   }
 

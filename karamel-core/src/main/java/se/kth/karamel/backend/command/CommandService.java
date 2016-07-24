@@ -828,12 +828,13 @@ public class CommandService {
   }
 
   private static String tasksTable(List<Task> tasks, boolean rowNumbering) {
-    String[] columnNames = {"Task", "Status", "Actions", "Duration(ms)"};
+    String[] columnNames = {"DAG", "Task", "Status", "Actions", "Duration(ms)"};
     Object[][] data = new Object[tasks.size()][columnNames.length];
     for (int i = 0; i < tasks.size(); i++) {
       Task task = tasks.get(i);
-      data[i][0] = task.getName();
-      data[i][1] = task.getStatus();
+      data[i][0] = task.getDagName();
+      data[i][1] = task.getName();
+      data[i][2] = task.getStatus();
       String uuid = task.getUuid();
       String actions = "";
       if (task.getStatus().ordinal() == Task.Status.ONGOING.ordinal()) {
@@ -849,12 +850,12 @@ public class CommandService {
         actions += "  <a kref='log " + uuid + "'>log</a>";
       }
 
-      data[i][2] = actions;
+      data[i][3] = actions;
 
       if (task.getDuration() > 0) {
-        data[i][3] = task.getDuration();
+        data[i][4] = task.getDuration();
       } else {
-        data[i][3] = "";
+        data[i][4] = "";
       }
     }
     return TextTable.makeTable(columnNames, 1, data, rowNumbering);

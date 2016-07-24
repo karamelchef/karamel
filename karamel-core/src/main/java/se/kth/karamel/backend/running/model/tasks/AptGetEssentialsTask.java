@@ -25,9 +25,9 @@ public class AptGetEssentialsTask extends Task {
 
   private final boolean storagePreparation;
 
-  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
-      boolean storagePreparation) {
-    super("apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
+  public AptGetEssentialsTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter
+      , boolean storagePreparation) {
+    super(dagName, "apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
     this.storagePreparation = storagePreparation;
   }
 

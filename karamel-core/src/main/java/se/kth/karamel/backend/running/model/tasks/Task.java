@@ -33,6 +33,7 @@ public abstract class Task implements DagTask, TaskCallback {
     WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
   }
   private Status status = Status.WAITING;
+  private final String dagName;
   private final String name;
   private final String id;
   private final String machineId;
@@ -47,8 +48,10 @@ public abstract class Task implements DagTask, TaskCallback {
   private long duration = 0;
   private boolean markSkip = false;
 
-  public Task(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats,
+  public Task(String dagName, String name, String id, boolean idempotent, MachineRuntime machine,
+      ClusterStats clusterStats,
       TaskSubmitter submitter) {
+    this.dagName = dagName;
     this.name = name;
     this.id = id;
     this.idempotent = idempotent;
@@ -57,6 +60,10 @@ public abstract class Task implements DagTask, TaskCallback {
     this.uuid = UUID.randomUUID().toString();
     this.clusterStats = clusterStats;
     this.submitter = submitter;
+  }
+
+  public String getDagName() {
+    return dagName;
   }
 
   public void setDuration(long duration) {
@@ -162,18 +169,21 @@ public abstract class Task implements DagTask, TaskCallback {
   @Override
   public void queued() {
     status = Status.READY;
+    machine.reOrder(this);
     dagCallback.queued();
   }
 
   @Override
   public void exists() {
     status = Status.EXIST;
+    machine.reOrder(this);
     dagCallback.exists();
   }
 
   @Override
   public void started() {
     status = Status.ONGOING;
+    machine.reOrder(this);
     startTime = System.currentTimeMillis();
     dagCallback.started();
   }

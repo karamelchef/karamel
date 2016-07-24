@@ -22,8 +22,9 @@ import se.kth.karamel.common.util.Settings;
  */
 public class InstallBerkshelfTask extends Task {
 
-  public InstallBerkshelfTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("install berkshelf", "install berkshelf", true, machine, clusterStats, submitter);
+  public InstallBerkshelfTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, 
+      TaskSubmitter submitter) {
+    super(dagName, "install berkshelf", "install berkshelf", true, machine, clusterStats, submitter);
   }
 
   @Override

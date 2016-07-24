@@ -42,9 +42,9 @@ public class RunRecipeTask extends Task {
   private final String cookbookId;
   private final String cookbookName;
 
-  public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
+  public RunRecipeTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
       TaskSubmitter submitter, String cookbookId, String cookbookName) {
-    super(recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
+    super(dagName, recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
     this.cookbookId = cookbookId;

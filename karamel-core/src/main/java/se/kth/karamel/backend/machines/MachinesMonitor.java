@@ -45,7 +45,7 @@ public class MachinesMonitor implements TaskSubmitter, Runnable {
     this.keyPair = keyPair;
     this.clusterName = clusterName;
     this.clusterManager = clusterManager;
-    executor = Executors.newFixedThreadPool(numMachines);
+    executor = Executors.newCachedThreadPool();
   }
 
   public void setStopping(boolean stopping) {

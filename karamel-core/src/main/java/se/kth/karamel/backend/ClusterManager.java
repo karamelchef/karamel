@@ -90,11 +90,13 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   private final ClusterRuntime runtime;
   private final MachinesMonitor machinesMonitor;
   private final ClusterStatusMonitor clusterStatusMonitor;
+  private final BlockingQueue<Dag> dagQueue = new ArrayBlockingQueue<>(100);
   private Dag currentDag;
   private final BlockingQueue<Command> cmdQueue = new ArrayBlockingQueue<>(2);
   ExecutorService tpool;
   private final ClusterContext clusterContext;
   private Map<Class, Launcher> launchers = new HashMap<>();
+  private Future<?> dagRunnerFuture = null;
   private Future<?> clusterManagerFuture = null;
   private Future<?> machinesMonitorFuture = null;
   private Future<?> clusterStatusFuture = null;
@@ -226,9 +228,12 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     tablespoonBroadcasterFuture = tpool.submit(tablespoonSubscriberBroadcaster);
     tablespoonBroadcasterAssistantFuture = tpool.submit(tablespoonBroadcasterAssistant);
     Dag dag = DagBuilder.getStartTablespoonDag(runtime, stats, machinesMonitor,
-            tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
+        tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
             tablespoonRiemannEndpoint.getPort()));
-    runDag(dag);
+    synchronized (dag) {
+      dagQueue.add(dag);
+      dag.wait();
+    }
   }
 
   /**
@@ -244,10 +249,10 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       throws BroadcastException {
     try {
       Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId,
-              tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
+          tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
               tablespoonRiemannEndpoint.getPort()));
       logger.info("Tablespoon topic DAG was created for " + topicId);
-      runDag(dag);
+      dagQueue.add(dag);
     } catch (Exception e) {
       throw new BroadcastException("Karamel failed to submit the DAG for topic " + topicId);
     }
@@ -326,6 +331,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     clusterManagerFuture = tpool.submit(this);
     machinesMonitorFuture = tpool.submit(machinesMonitor);
     clusterStatusFuture = tpool.submit(clusterStatusMonitor);
+    dagRunnerFuture = tpool.submit(dagRunner);
   }
 
   public void stop() throws InterruptedException {
@@ -344,6 +350,10 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     if (clusterStatusFuture != null && !clusterStatusFuture.isCancelled()) {
       logger.info(String.format("Terminating cluster status monitor of '%s'", definition.getName()));
       clusterStatusFuture.cancel(true);
+    }
+    if (dagRunnerFuture != null && !dagRunnerFuture.isCancelled()) {
+      logger.info(String.format("Terminating dag runner of '%s'", definition.getName()));
+      dagRunnerFuture.cancel(true);
     }
     if (clusterManagerFuture != null && !clusterManagerFuture.isCancelled()) {
       logger.info(String.format("Terminating cluster manager of '%s'", definition.getName()));
@@ -456,7 +466,10 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.
         generateClusterChefJsonsForInstallation(definition, runtime);
     Dag dag = DagBuilder.getInstallationDag(definition, runtime, stats, machinesMonitor, chefJsons);
-    runDag(dag);
+    synchronized (dag) {
+      dagQueue.add(dag);
+      dag.wait();
+    }
     launchTablespoonIfEnabled();
     launchHoneytapIfEnabled();
   }
@@ -465,43 +478,61 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     Map<String, JsonObject> chefJsons = ChefJsonGenerator.
         generateClusterChefJsonsForPurge(definition, runtime);
     Dag dag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
-    runDag(dag);
+    synchronized (dag) {
+      dagQueue.add(dag);
+      dag.wait();
+    }
   }
 
-  private void runDag(Dag dag) throws Exception {
-    logger.info(String.format("Running the DAG for '%s' ...", definition.getName()));
-    if (currentDag != null) {
-      logger.info(String.format("Terminating the previous DAG before running the new one for '%s' ...",
-          definition.getName()));
-      currentDag.termiante();
-    }
-    runtime.setPhase(ClusterRuntime.ClusterPhases.RUNNING_DAG);
-    runtime.resolveFailure(Failure.hash(Failure.Type.DAG_FAILURE, null));
-    List<GroupRuntime> groups = runtime.getGroups();
-    for (GroupRuntime group : groups) {
-      group.setPhase(GroupRuntime.GroupPhase.RUNNING_DAG);
-    }
+  Thread dagRunner = new Thread() {
+    @Override
+    public void run() {
+      while (true) {
+        try {
+          currentDag = dagQueue.take();
+          synchronized (currentDag) {
+            logger.info(String.format("Start running '%s' DAG for '%s' ...", currentDag.getName(),
+                definition.getName()));
+            runtime.setPhase(ClusterRuntime.ClusterPhases.RUNNING_DAG);
+            runtime.resolveFailure(Failure.hash(Failure.Type.DAG_FAILURE, null));
+            List<GroupRuntime> groups = runtime.getGroups();
+            for (GroupRuntime group : groups) {
+              group.setPhase(GroupRuntime.GroupPhase.RUNNING_DAG);
+            }
 
-    try {
-      currentDag = dag;
-      currentDag.start();
-    } catch (Exception ex) {
-      runtime.issueFailure(new Failure(Failure.Type.DAG_FAILURE, ex.getMessage()));
-      throw ex;
-    }
+            try {
+              ClusterStatistics.startTimer();
+              currentDag.start();
+            } catch (Exception ex) {
+              logger.error(ex);
+              runtime.issueFailure(new Failure(Failure.Type.DAG_FAILURE, ex.getMessage()));
+            }
 
-    while (runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG && !currentDag.isDone()) {
-      Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
-    }
-
-    if (!runtime.isFailed()) {
-      runtime.setPhase(ClusterRuntime.ClusterPhases.DAG_DONE);
-      for (GroupRuntime group : groups) {
-        group.setPhase(GroupRuntime.GroupPhase.DAG_DONE);
+            while (runtime.getPhase() == ClusterRuntime.ClusterPhases.RUNNING_DAG && !currentDag.isDone()) {
+              Thread.sleep(Settings.CLUSTER_STATUS_CHECKING_INTERVAL);
+            }
+            if (!runtime.isFailed()) {
+              runtime.setPhase(ClusterRuntime.ClusterPhases.DAG_DONE);
+              for (GroupRuntime group : groups) {
+                group.setPhase(GroupRuntime.GroupPhase.DAG_DONE);
+              }
+              logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' DAG IS DONE \\o/\\o/\\o/\\o/\\o/",
+                  definition.getName()));
+              currentDag.notifyAll();
+              long duration = ClusterStatistics.stopTimer();
+              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
+              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name() + " (" + 
+                  currentDag.getName() + ")", status, duration);
+              stats.addPhase(phaseStat);
+            }
+          }
+        } catch (Exception e) {
+          logger.error(e);
+        }
       }
-      logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' DAG IS DONE \\o/\\o/\\o/\\o/\\o/", definition.getName()));
     }
-  }
+
+  };
 
   private void pause() {
     logger.info(String.format("Pausing '%s'", definition.getName()));
@@ -636,13 +667,15 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
             machinesMonitor.addMachines(mcs);
 
             Map<String, JsonObject> chefJsons = ChefJsonGenerator.
-                    generateClusterChefJsonsForInstallation(definition, runtime);
+                generateClusterChefJsonsForInstallation(definition, runtime);
             for (MachineRuntime machineRuntime : mcs) {
               try {
                 //check the dag, it is running the dag for previous machine again and does not run the new one
-                Dag dag = DagBuilder.getInstallationDagForMachine(definition, runtime, stats, machinesMonitor,
-                        chefJsons, groupRuntime.getId(), machineRuntime.getVmId());
-                runDag(dag);
+                Dag dag = DagBuilder.getJoinDagForMachine(definition, runtime, stats, machinesMonitor,
+                    chefJsons, groupRuntime.getId(), machineRuntime.getVmId(),
+                    tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
+                        tablespoonRiemannEndpoint.getPort()));
+                dagQueue.add(dag);
               } catch (Exception e) {
                 throw new IllegalStateException(e);
               }
@@ -720,23 +753,13 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
           case SUBMIT_INSTALL_DAG:
             if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
                 && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
-              ClusterStatistics.startTimer();
               install();
-              long duration = ClusterStatistics.stopTimer();
-              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
-              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name(), status, duration);
-              stats.addPhase(phaseStat);
             }
             break;
           case SUBMIT_PURGE_DAG:
             if (runtime.getPhase().ordinal() >= ClusterRuntime.ClusterPhases.MACHINES_FORKED.ordinal()
                 && (runtime.getPhase().ordinal() <= ClusterRuntime.ClusterPhases.DAG_DONE.ordinal())) {
-              ClusterStatistics.startTimer();
               purge();
-              long duration = ClusterStatistics.stopTimer();
-              String status = runtime.isFailed() ? "FAILED" : "SUCCEED";
-              PhaseStat phaseStat = new PhaseStat(ClusterRuntime.ClusterPhases.RUNNING_DAG.name(), status, duration);
-              stats.addPhase(phaseStat);
             }
             break;
           case TERMINATE_CLUSTER:

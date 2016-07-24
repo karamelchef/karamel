@@ -61,7 +61,7 @@ public class DagBuilder {
    */
   public static Dag getPurgingDag(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Map<String, JsonObject> chefJsons) throws KaramelException {
-    Dag dag = new Dag();
+    Dag dag = new Dag("purge");
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag);
     cookbookLevelPurgingTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
@@ -83,7 +83,7 @@ public class DagBuilder {
    */
   public static Dag getInstallationDag(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Map<String, JsonObject> chefJsons) throws KaramelException {
-    Dag dag = new Dag();
+    Dag dag = new Dag("install");
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag);
     cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag);
@@ -93,14 +93,20 @@ public class DagBuilder {
     return dag;
   }
 
-  public static Dag getInstallationDagForMachine(JsonCluster cluster, ClusterRuntime clusterEntity,
-       ClusterStats clusterStats, TaskSubmitter submitter, Map<String, JsonObject> chefJsons, String groupId,
-       String machineId) throws KaramelException {
-    Dag dag = new Dag();
+  public static Dag getJoinDagForMachine(JsonCluster cluster, ClusterRuntime clusterEntity,
+      ClusterStats clusterStats, TaskSubmitter submitter, Map<String, JsonObject> chefJsons, String groupId,
+      String machineId, String tsConfig) throws KaramelException {
+    String dagName = "join node";
+    MachineRuntime me =  ClusterDefinitionService.findMachine(clusterEntity, groupId, machineId);
+    Dag dag = new Dag(dagName);
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     machinePreparationTasks(cluster, clusterEntity, clusterStats, submitter, dag, groupId, machineId);
     cookbookLevelInstallationTasksForMachine(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks,
-            dag, groupId, machineId);
+        dag, groupId, machineId);
+    InstallCollectlTask t1 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
+    InstallTablespoonAgent t2 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
+    StartTablespoonTask t3 = new StartTablespoonTask(dagName, me, clusterStats, submitter);
+    dag.addTasks(t1, t2, t3);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
         allRecipeTasks, dag, groupId, machineId);
     updateKaramelDependencies(allRecipeTasks, dag, rlts);
@@ -109,13 +115,14 @@ public class DagBuilder {
 
   public static Dag getInstallTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, String tsConfig) throws KaramelException {
-    Dag dag = new Dag();
+    String dagName = "install tablespoon";
+    Dag dag = new Dag(dagName);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
-        AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
-        InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
+        FindOsTypeTask t1 = new FindOsTypeTask(dagName, me, clusterStats, submitter);
+        AptGetEssentialsTask t2 = new AptGetEssentialsTask(dagName, me, clusterStats, submitter, false);
+        InstallCollectlTask t3 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
         dag.addTasks(t1, t2, t3, t4);
       }
     }
@@ -124,14 +131,15 @@ public class DagBuilder {
 
   public static Dag getStartTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, String tsConfig) throws KaramelException {
-    Dag dag = new Dag();
+    String dagName = "tablespoon start";
+    Dag dag = new Dag(dagName);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
-        AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
-        InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
-        StartTablespoonTask t5 = new StartTablespoonTask(me, clusterStats, submitter);
+        FindOsTypeTask t1 = new FindOsTypeTask(dagName, me, clusterStats, submitter);
+        AptGetEssentialsTask t2 = new AptGetEssentialsTask(dagName, me, clusterStats, submitter, false);
+        InstallCollectlTask t3 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
+        StartTablespoonTask t5 = new StartTablespoonTask(dagName, me, clusterStats, submitter);
         dag.addTasks(t1, t2, t3, t4, t5);
       }
     }
@@ -140,14 +148,15 @@ public class DagBuilder {
 
   public static Dag getStopTablespoonDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, String tsConfig) throws KaramelException {
-    Dag dag = new Dag();
+    String dagName = "launch tablespoon";
+    Dag dag = new Dag(dagName);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
-        AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
-        InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-        InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
-        StopTablespoonTask t5 = new StopTablespoonTask(me, clusterStats, submitter);
+        FindOsTypeTask t1 = new FindOsTypeTask(dagName, me, clusterStats, submitter);
+        AptGetEssentialsTask t2 = new AptGetEssentialsTask(dagName, me, clusterStats, submitter, false);
+        InstallCollectlTask t3 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
+        InstallTablespoonAgent t4 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
+        StopTablespoonTask t5 = new StopTablespoonTask(dagName, me, clusterStats, submitter);
         dag.addTasks(t1, t2, t3, t4, t5);
       }
     }
@@ -157,15 +166,16 @@ public class DagBuilder {
   public static Dag getCreateTablespoonTopicDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Set<String> vmIds, String json, String topicId, String tsConfig)
       throws KaramelException {
-    Dag dag = new Dag();
+    String dagName = "topic tablespoon";
+    Dag dag = new Dag(dagName);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         if (vmIds.contains(me.getVmId())) {
-          FindOsTypeTask t1 = new FindOsTypeTask(me, clusterStats, submitter);
-          AptGetEssentialsTask t2 = new AptGetEssentialsTask(me, clusterStats, submitter, false);
-          InstallCollectlTask t3 = new InstallCollectlTask(me, clusterStats, submitter);
-          InstallTablespoonAgent t4 = new InstallTablespoonAgent(me, clusterStats, submitter, tsConfig);
-          TopicTablespoonTask t5 = new TopicTablespoonTask(me, clusterStats, submitter, json, topicId);
+          FindOsTypeTask t1 = new FindOsTypeTask(dagName, me, clusterStats, submitter);
+          AptGetEssentialsTask t2 = new AptGetEssentialsTask(dagName, me, clusterStats, submitter, false);
+          InstallCollectlTask t3 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
+          InstallTablespoonAgent t4 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
+          TopicTablespoonTask t5 = new TopicTablespoonTask(dagName, me, clusterStats, submitter, json, topicId);
           dag.addTasks(t1, t2, t3, t4, t5);
         }
       }
@@ -295,7 +305,8 @@ public class DagBuilder {
       Gson gson = builder.setPrettyPrinting().create();
       String jsonString = gson.toJson(chefJson);
       runRecipeTask
-          = new RunRecipeTask(machine, clusterStats, recipeName, jsonString, submitter, cookbookId, cookbookName);
+          = new RunRecipeTask(dag.getName(), machine, clusterStats, recipeName, jsonString, submitter, cookbookId,
+              cookbookName);
       dag.addTask(runRecipeTask);
     }
     allRecipeTasks.put(recId, runRecipeTask);
@@ -325,7 +336,7 @@ public class DagBuilder {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
+          VendorCookbookTask t1 = new VendorCookbookTask(dag.getName(), me, clusterStats, submitter, urls.id,
               Settings.REMOTE_CB_VENDOR_PATH,
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
           dag.addTask(t1);
@@ -372,7 +383,7 @@ public class DagBuilder {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
           CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
+          VendorCookbookTask t1 = new VendorCookbookTask(dag.getName(), me, clusterStats, submitter, urls.id,
               Settings.REMOTE_CB_VENDOR_PATH,
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
           dag.addTask(t1);
@@ -399,7 +410,7 @@ public class DagBuilder {
   public static Map<String, Map<String, Task>> cookbookLevelInstallationTasksForMachine(JsonCluster cluster,
       ClusterRuntime clusterEntity, ClusterStats clusterStats, Map<String, JsonObject> chefJsons,
       TaskSubmitter submitter, Map<String, RunRecipeTask> allRecipeTasks, Dag dag, String groupId, String machineId)
-          throws KaramelException {
+      throws KaramelException {
     Map<String, Map<String, Task>> map = new HashMap<>();
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       if (ge.getId().equals(groupId)) {
@@ -409,20 +420,20 @@ public class DagBuilder {
             Map<String, Task> map1 = new HashMap<>();
             for (JsonCookbook jc : jg.getCookbooks()) {
               CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
-              VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
-                      Settings.REMOTE_CB_VENDOR_PATH,
-                      urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
+              VendorCookbookTask t1 = new VendorCookbookTask(dag.getName(), me, clusterStats, submitter, urls.id,
+                  Settings.REMOTE_CB_VENDOR_PATH,
+                  urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
               dag.addTask(t1);
               map1.put(t1.uniqueId(), t1);
               String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
               JsonObject json = chefJsons.get(me.getId() + recipeName);
               RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats,
-                      json, submitter, urls.id, jc.getName(),
-                      allRecipeTasks, dag);
+                  json, submitter, urls.id, jc.getName(),
+                  allRecipeTasks, dag);
               map1.put(t2.uniqueId(), t2);
             }
             logger.debug(String.format("Cookbook-level tasks for the machine '%s' in the group '%s' are: %s",
-                    me.getPublicIp(), ge.getName(), map1.keySet()));
+                me.getPublicIp(), ge.getName(), map1.keySet()));
             if (map.get(me.getId()) != null) {
               map.get(me.getId()).putAll(map1);
             } else {
@@ -454,7 +465,7 @@ public class DagBuilder {
     String vendorPath = ClusterDefinitionService.makeVendorPath(cluster);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
-        FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
+        FindOsTypeTask findOs = new FindOsTypeTask(dag.getName(), me, clusterStats, submitter);
         dag.addTask(findOs);
         Provider provider = ClusterDefinitionService.getGroupProvider(cluster, ge.getName());
         boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true")
@@ -463,12 +474,13 @@ public class DagBuilder {
           String model = ((Ec2) provider).getType();
           InstanceType instanceType = InstanceType.valueByModel(model);
           PrepareStoragesTask st
-              = new PrepareStoragesTask(me, clusterStats, submitter, instanceType.getStorageDevices());
+              = new PrepareStoragesTask(dag.getName(), me, clusterStats, submitter, instanceType.getStorageDevices());
           dag.addTask(st);
         }
-        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
-        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
-        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+        AptGetEssentialsTask t1 = new AptGetEssentialsTask(dag.getName(), me, clusterStats, submitter,
+            storagePreparation);
+        InstallBerkshelfTask t2 = new InstallBerkshelfTask(dag.getName(), me, clusterStats, submitter);
+        MakeSoloRbTask t3 = new MakeSoloRbTask(dag.getName(), me, vendorPath, clusterStats, submitter);
         dag.addTask(t1);
         dag.addTask(t2);
         dag.addTask(t3);
@@ -478,7 +490,7 @@ public class DagBuilder {
 
   public static void machinePreparationTasks(JsonCluster cluster, ClusterRuntime clusterEntity,
       ClusterStats clusterStats, TaskSubmitter submitter, Dag dag, String groupId, String machineId)
-          throws KaramelException {
+      throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
     String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
     String vendorPath = ClusterDefinitionService.makeVendorPath(cluster);
@@ -486,21 +498,23 @@ public class DagBuilder {
       if (ge.getId().equals(groupId)) {
         for (MachineRuntime me : ge.getMachines()) {
           if (me.getVmId().equals(machineId)) {
-            FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
+            FindOsTypeTask findOs = new FindOsTypeTask(dag.getName(), me, clusterStats, submitter);
             dag.addTask(findOs);
             Provider provider = ClusterDefinitionService.getGroupProvider(cluster, ge.getName());
             boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true")
-                    && (provider instanceof Ec2));
+                && (provider instanceof Ec2));
             if (storagePreparation) {
               String model = ((Ec2) provider).getType();
               InstanceType instanceType = InstanceType.valueByModel(model);
               PrepareStoragesTask st
-                      = new PrepareStoragesTask(me, clusterStats, submitter, instanceType.getStorageDevices());
+                  = new PrepareStoragesTask(dag.getName(), me, clusterStats, submitter,
+                      instanceType.getStorageDevices());
               dag.addTask(st);
             }
-            AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
-            InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
-            MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+            AptGetEssentialsTask t1 = new AptGetEssentialsTask(dag.getName(), me, clusterStats, submitter,
+                storagePreparation);
+            InstallBerkshelfTask t2 = new InstallBerkshelfTask(dag.getName(), me, clusterStats, submitter);
+            MakeSoloRbTask t3 = new MakeSoloRbTask(dag.getName(), me, vendorPath, clusterStats, submitter);
             dag.addTask(t1);
             dag.addTask(t2);
             dag.addTask(t3);

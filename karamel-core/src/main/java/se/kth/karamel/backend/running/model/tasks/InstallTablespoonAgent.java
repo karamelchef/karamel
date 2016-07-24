@@ -25,9 +25,9 @@ public class InstallTablespoonAgent extends Task {
   private static final Logger logger = Logger.getLogger(InstallTablespoonAgent.class);
   private String config;
 
-  public InstallTablespoonAgent(MachineRuntime machine, ClusterStats clusterStats,
+  public InstallTablespoonAgent(String dagName, MachineRuntime machine, ClusterStats clusterStats,
                                 TaskSubmitter submitter, String config) {
-    super("install tablespoon agent", "install tablespoon agent", true, machine, clusterStats, submitter);
+    super(dagName, "install tablespoon agent", "install tablespoon agent", true, machine, clusterStats, submitter);
     this.config = config;
   }
 

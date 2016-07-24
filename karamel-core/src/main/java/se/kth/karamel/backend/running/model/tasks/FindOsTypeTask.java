@@ -28,8 +28,8 @@ public class FindOsTypeTask extends Task {
 
   private static final Logger logger = Logger.getLogger(FindOsTypeTask.class);
 
-  public FindOsTypeTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("find os-type", "find os-type", false, machine, clusterStats, submitter);
+  public FindOsTypeTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super(dagName, "find os-type", "find os-type", true, machine, clusterStats, submitter);
   }
 
   @Override

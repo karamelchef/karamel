@@ -23,6 +23,15 @@ public class Dag {
 
   private static final Logger logger = Logger.getLogger(Dag.class);
   private final Map<String, DagNode> allNodes = new HashMap<>();
+  private final String name;
+
+  public Dag(String name) {
+    this.name = name;
+  }
+
+  public String getName() {
+    return name;
+  }
 
   public void addNode(String nodeId) throws DagConstructionException {
     if (allNodes.containsKey(nodeId)) {

@@ -23,9 +23,9 @@ public abstract class TablespoonTask extends Task {
   
   private static final Logger logger = Logger.getLogger(TablespoonTask.class);
   
-  public TablespoonTask(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats,
-      TaskSubmitter submitter) {
-    super(name, id, idempotent, machine, clusterStats, submitter);
+  public TablespoonTask(String dagName, String name, String id, boolean idempotent, MachineRuntime machine, 
+      ClusterStats clusterStats, TaskSubmitter submitter) {
+    super(dagName, name, id, idempotent, machine, clusterStats, submitter);
   }
   
   @Override

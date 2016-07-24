@@ -23,8 +23,9 @@ public class StartTablespoonTask extends TablespoonTask {
   
   private static final Logger logger = Logger.getLogger(StartTablespoonTask.class);
   
-  public StartTablespoonTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("start tablespoon", "start tablespoon", true, machine, clusterStats, submitter);
+  public StartTablespoonTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, 
+      TaskSubmitter submitter) {
+    super(dagName, "start tablespoon", "start tablespoon", true, machine, clusterStats, submitter);
   }
   
   @Override

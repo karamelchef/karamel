@@ -21,7 +21,7 @@ public class DagTest {
 
   @Test
   public void testCycle() throws DagConstructionException {
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("11");
     dag.addDependency("12", "121");
     dag.addDependency("13", "131");
@@ -41,7 +41,7 @@ public class DagTest {
 
   @Test
   public void testPrint() throws DagConstructionException {
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("task1");
     dag.addDependency("task2", "task21");
     dag.addDependency("task3", "task31");
@@ -53,7 +53,7 @@ public class DagTest {
 
   @Test
   public void testCycleOnRealData() throws DagConstructionException {
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("apt-get essentials on hopsworks1");
     dag.addNode("apt-get essentials on ndb1");
     dag.addNode("apt-get essentials on ndb2");
@@ -146,7 +146,7 @@ public class DagTest {
 
     }
 
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("task1");
     dag.addDependency("task2", "task21");
     dag.addDependency("task3", "task31");
@@ -218,7 +218,7 @@ public class DagTest {
       }
     }
 
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("task1");
     dag.addDependency("task2", "task21");
     dag.addDependency("task3", "task31");
@@ -294,7 +294,7 @@ public class DagTest {
       }
     }
 
-    Dag dag = new Dag();
+    Dag dag = new Dag("");
     dag.addNode("task1");
     dag.addDependency("task2", "task21");
     dag.addDependency("task3", "task31");

@@ -135,7 +135,7 @@ public class RunRecipeTaskTest {
     MachineRuntime mr = new MachineRuntime(null);
     mr.setPublicIp("1111");
     ClusterStats clusterStats = new ClusterStats();
-    RunRecipeTask instance = new RunRecipeTask(mr, clusterStats, "", "", null, "", "");
+    RunRecipeTask instance = new RunRecipeTask("test dag", mr, clusterStats, "", "", null, "", "");
     JsonObject result = instance.merge(obj.getAsJsonObject(), param.getAsJsonObject());
     String modifiedJson = new Gson().toJson(result);
     System.out.println(modifiedJson);
