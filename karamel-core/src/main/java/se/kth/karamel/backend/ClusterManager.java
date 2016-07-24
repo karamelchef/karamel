@@ -70,6 +70,7 @@ import se.kth.tablespoon.client.broadcasting.AgentBroadcasterAssistant;
 import se.kth.tablespoon.client.broadcasting.BroadcastException;
 import se.kth.tablespoon.client.broadcasting.RiemannSubscriberBroadcaster;
 import se.kth.tablespoon.client.general.Groups;
+import se.kth.tablespoon.client.topics.Topic;
 import se.kth.tablespoon.client.topics.TopicStorage;
 
 /**
@@ -199,6 +200,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       logger.info("Honeytap is off for " + definition.getName());
     }
   }
+  TopicStorage storage;
 
   private void launchTablespoonIfEnabled() throws Exception {
     try {
@@ -218,7 +220,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       }
       tablespoonGroups.add(tsg);
     }
-    TopicStorage storage = new TopicStorage(tablespoonGroups);
+    storage = new TopicStorage(tablespoonGroups);
     tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
     tablespoonBroadcasterAssistant.registerBroadcaster(this);
     tablespoonSubscriberBroadcaster
@@ -248,6 +250,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   public void sendToMachines(Set<String> vmIds, String topicJson, String topicId)
       throws BroadcastException {
     try {
+      //   getCreateTablespoonTopicDag
       Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId,
           tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
               tablespoonRiemannEndpoint.getPort()));
@@ -676,6 +679,12 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
                     tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
                         tablespoonRiemannEndpoint.getPort()));
                 dagQueue.add(dag);
+                //should submit topics
+                for (Topic topic : storage.getTopics()) {
+                  Set machine = new HashSet<String>();
+                  machine.add(machineRuntime.getVmId());
+                  sendToMachines(machine, topic.getJson(), topic.getUniqueId());
+                }
               } catch (Exception e) {
                 throw new IllegalStateException(e);
               }
