@@ -251,7 +251,8 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
       throws BroadcastException {
     try {
       //   getCreateTablespoonTopicDag
-      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topicId,
+      Topic topic = storage.get(topicId);
+      Dag dag = DagBuilder.getCreateTablespoonTopicDag(runtime, stats, machinesMonitor, vmIds, topicJson, topic,
           tablespoonBroadcasterAssistant.getAgentConfig(tablespoonRiemannEndpoint.getIp(),
               tablespoonRiemannEndpoint.getPort()));
       logger.info("Tablespoon topic DAG was created for " + topicId);

@@ -28,6 +28,10 @@ import se.kth.karamel.backend.mocking.MockingUtil;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Confs;
 import se.kth.tablespoon.client.broadcasting.AgentBroadcasterAssistant;
+import se.kth.tablespoon.client.events.EventType;
+import se.kth.tablespoon.client.general.Group;
+import se.kth.tablespoon.client.topics.GroupTopic;
+import se.kth.tablespoon.client.topics.Topic;
 
 /**
  *
@@ -409,8 +413,10 @@ public class DagBuilderTest {
     String json = "{example: json}";
     String uniqueId = "123456789";
     String tsConfig = "empty";
+    Group g = new Group("gid");
+    GroupTopic topic = new GroupTopic(0, 0, uniqueId, EventType.REGULAR, 0, g);
     HashSet<String> vmids = Sets.newHashSet("namenodes1", "datanodes1", "datanodes2");
-    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter,vmids, json, uniqueId, tsConfig);
+    Dag dag = DagBuilder.getCreateTablespoonTopicDag(dummyRuntime, clusterStats, dummyTaskSubmitter,vmids, json, topic, tsConfig);
     dag.validate();
     Assert.assertTrue(dag.hasDependency("install tablespoon agent on namenodes1", "update tablespoon topic on namenodes1"));
   }

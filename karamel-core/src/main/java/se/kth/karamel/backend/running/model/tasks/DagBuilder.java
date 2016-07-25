@@ -38,6 +38,7 @@ import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
 import se.kth.karamel.common.util.Confs;
+import se.kth.tablespoon.client.topics.Topic;
 
 /**
  *
@@ -164,9 +165,9 @@ public class DagBuilder {
   }
 
   public static Dag getCreateTablespoonTopicDag(ClusterRuntime clusterEntity, ClusterStats clusterStats,
-      TaskSubmitter submitter, Set<String> vmIds, String json, String topicId, String tsConfig)
+      TaskSubmitter submitter, Set<String> vmIds, String json, Topic topic, String tsConfig)
       throws KaramelException {
-    String dagName = "topic tablespoon";
+    String dagName = String.format("tablespoon topic (%s)", topic.toString());
     Dag dag = new Dag(dagName);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
@@ -175,7 +176,8 @@ public class DagBuilder {
           AptGetEssentialsTask t2 = new AptGetEssentialsTask(dagName, me, clusterStats, submitter, false);
           InstallCollectlTask t3 = new InstallCollectlTask(dagName, me, clusterStats, submitter);
           InstallTablespoonAgent t4 = new InstallTablespoonAgent(dagName, me, clusterStats, submitter, tsConfig);
-          TopicTablespoonTask t5 = new TopicTablespoonTask(dagName, me, clusterStats, submitter, json, topicId);
+          TopicTablespoonTask t5 = new TopicTablespoonTask(dagName, me, clusterStats, submitter, json, 
+              topic.getUniqueId());
           dag.addTasks(t1, t2, t3, t4, t5);
         }
       }
