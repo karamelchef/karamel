@@ -70,7 +70,7 @@ public class SshMachine implements MachineInterface, Runnable {
   private final List<String> succeedTasksHistory = new ArrayList<>();
   private static Confs confs = Confs.loadKaramelConfs();
   private Future future = null;
-  
+
   /**
    * This constructor is used for users with SSH keys protected by a password
    *
@@ -479,8 +479,8 @@ public class SshMachine implements MachineInterface, Runnable {
             client.authPublickey(machineEntity.getSshUser(), keys);
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.CONNECTED);
             return;
-          } else if (System.currentTimeMillis() - lastHeartbeat < 
-              Settings.MACHINE_UNREACHABLE_DECOMMISSIONING_WAITING_TIME) {
+          } else if (System.currentTimeMillis() - lastHeartbeat
+              < Settings.MACHINE_UNREACHABLE_DECOMMISSIONING_WAITING_TIME) {
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.UNREACHABLE);
           } else {
             machineEntity.setLifeStatus(MachineRuntime.LifeStatus.DECOMMISSIONINING);
@@ -561,9 +561,11 @@ public class SshMachine implements MachineInterface, Runnable {
     try {
       downloadRemoteFile(remoteSucceedPath, localSucceedPath, true);
     } catch (IOException ex) {
-      logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()));
+      logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()), ex);
+      logger.debug("Cloudn't download the succeed-list file", ex);
       //remote file does not exists
     } catch (KaramelException ex) {
+      logger.debug("Cloudn't download the succeed-list file", ex);
       //shoudn't throw this because I am deleting the local file already here
     } finally {
       try {
@@ -572,6 +574,7 @@ public class SshMachine implements MachineInterface, Runnable {
         succeedTasksHistory.clear();
         succeedTasksHistory.addAll(Arrays.asList(items));
       } catch (IOException ex) {
+        logger.debug("Cloudn't read the local succeed-list file", ex);
         //local file does not exists, list is considered to be empty
         succeedTasksHistory.clear();
       }
@@ -595,7 +598,34 @@ public class SshMachine implements MachineInterface, Runnable {
             machineEntity.getId(), localFilePath));
       }
     }
-    // If the file doesn't exist, it should quickly throw an IOException
-    scp.download(remoteFilePath, localFilePath);
+    
+    int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
+    int numSessionRetries = Settings.SSH_SESSION_RETRY_NUM;
+    while (numSessionRetries > 0) {
+      try {
+        scp.download(remoteFilePath, localFilePath);
+        numSessionRetries = -1;
+      } catch (ConnectionException | TransportException ex) {
+        logger.warn(String.format("%s: Couldn't start ssh session to download '%s', will retry",
+            machineEntity.getId(), remoteFilePath), ex);
+        numSessionRetries--;
+        if (numSessionRetries == -1) {
+          logger.error(String.format("%s: Exhasuted retrying to start a ssh session to download '%s'",
+              machineEntity.getId(), remoteFilePath));
+          return;
+        }
+
+        try {
+          Thread.sleep(timeBetweenRetries);
+        } catch (InterruptedException ex3) {
+          if (!stopping && !killing) {
+            logger.warn(String.format("%s: Interrupted while waiting to start ssh session to download '%s'. "
+                + "Continuing...",
+                machineEntity.getId(), remoteFilePath));
+          }
+        }
+      }
+    }
+
   }
 }

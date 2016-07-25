@@ -68,7 +68,7 @@ import se.kth.tablespoon.client.api.TablespoonApi;
 import se.kth.tablespoon.client.broadcasting.AgentBroadcaster;
 import se.kth.tablespoon.client.broadcasting.AgentBroadcasterAssistant;
 import se.kth.tablespoon.client.broadcasting.BroadcastException;
-import se.kth.tablespoon.client.broadcasting.RiemannSubscriberBroadcaster;
+import se.kth.tablespoon.client.broadcasting.RiemannTopicsMonitor;
 import se.kth.tablespoon.client.general.Groups;
 import se.kth.tablespoon.client.topics.Topic;
 import se.kth.tablespoon.client.topics.TopicStorage;
@@ -110,7 +110,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
   private final Map<String, MonitoringListener> honeytapListenersMap = new HashMap<>();
   private final Groups tablespoonGroups = new Groups();
   private Endpoint tablespoonRiemannEndpoint;
-  private RiemannSubscriberBroadcaster tablespoonSubscriberBroadcaster;
+  private RiemannTopicsMonitor tablespoonSubscriberBroadcaster;
   private AgentBroadcasterAssistant tablespoonBroadcasterAssistant;
   private TablespoonApi tablespoonApi;
 
@@ -224,7 +224,7 @@ public class ClusterManager implements Runnable, AgentBroadcaster {
     tablespoonBroadcasterAssistant = new AgentBroadcasterAssistant(storage);
     tablespoonBroadcasterAssistant.registerBroadcaster(this);
     tablespoonSubscriberBroadcaster
-        = new RiemannSubscriberBroadcaster(tablespoonRiemannEndpoint.getIp(),
+        = new RiemannTopicsMonitor(tablespoonRiemannEndpoint.getIp(),
             tablespoonRiemannEndpoint.getPort(), storage);
     tablespoonApi = new TablespoonApi(storage, tablespoonGroups, tablespoonSubscriberBroadcaster);
     tablespoonBroadcasterFuture = tpool.submit(tablespoonSubscriberBroadcaster);

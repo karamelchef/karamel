@@ -31,15 +31,9 @@ groups:
     autoscale: false
     recipes:
         - java    
-        - apache_hadoop::nn
-        - apache_hadoop::rm
-        - hadoop_spark::master
         - riemann::server
   worker:
     size: 1
     autoscale: true
     recipes:
         - java
-        - apache_hadoop::dn
-        - apache_hadoop::nm
-        - hadoop_spark::worker
