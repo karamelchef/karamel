@@ -13,14 +13,9 @@ import se.kth.karamel.common.util.SshKeyPair;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.Assert;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import se.kth.honeytap.scaling.exceptions.DBConnectionFailureException;
-import se.kth.honeytap.scaling.utils.DBUtil;
 
 /**
  *
