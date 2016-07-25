@@ -104,17 +104,17 @@ public class HoneyTapHandler {
             case SCALE_IN:
               ArrayList<String> machinesToRemove = suggestion.getScaleInSuggestions();
               handleScaleInSuggestion(machinesToRemove.toArray(new String[machinesToRemove.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
+              ///////resetVmInfoAtMonitor(groupRuntime.getId());
               break;
             case SCALE_OUT:
               ArrayList<MachineType> scaleOutMachines = suggestion.getScaleOutSuggestions();
               handleScaleOutSuggestion(scaleOutMachines.toArray(new MachineType[scaleOutMachines.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
+              ///////resetVmInfoAtMonitor(groupRuntime.getId());
               break;
             case TMP_SCALEIN:
               ArrayList<String> toRemove = suggestion.getScaleInSuggestions();
               handleScaleInSuggestion(toRemove.toArray(new String[toRemove.size()]));
-              resetVmInfoAtMonitor(groupRuntime.getId());
+              /////////resetVmInfoAtMonitor(groupRuntime.getId());
               break;
             default:
               log.warn("Handle scaling has not been implemented for the scaling direction: "
