@@ -43,6 +43,9 @@ cookbooks:
   livy: 
     github: "hopshadoop/livy-chef"
     branch: "master"
+  drelephant: 
+    github: "hopshadoop/dr-elephant-chef"
+    branch: "master"
 
 attrs:
   hops:
@@ -59,6 +62,8 @@ attrs:
   hadoop_spark:
     user: glassfish
     dir: "/mnt"    
+  ntp:
+    install: "true"
   flink:
     user: glassfish
     dir: "/mnt"    
@@ -95,5 +100,6 @@ groups:
         - zeppelin
         - kzookeeper
         - kkafka
+        - drelephant
         - epipe
         - hopsworks

@@ -2,8 +2,11 @@ name: hopsBareMetalSingleNode
 baremetal:
     username: vagrant
     
-cookbooks:                                                                      
-  hadoop: 
+cookbooks:                                                                     
+  kagent: 
+    github: "karamelchef/kagent-chef"
+    branch: "master"
+  hops: 
     github: "hopshadoop/hops-hadoop-chef"
     branch: "master"
   ndb: 
@@ -11,16 +14,18 @@ cookbooks:
     branch: "master"
     
 groups: 
-  hops:
+  singlenode:
     size: 1 
     baremetal:
         ip: 192.168.0.3
     recipes:                                                                    
+        - kagent::install
         - ndb::mgmd
         - ndb::ndbd
         - ndb::mysqld                                                       
         - hops::ndb
         - hops::rm
         - hops::nn
-        - hops::jhs                                                            
+        - hops::dn
         - hops::nm
+        - hops::jhs                                                            
