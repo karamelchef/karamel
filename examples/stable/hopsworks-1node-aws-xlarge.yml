@@ -4,6 +4,9 @@ ec2:
     region: eu-west-1
 
 cookbooks:                                                                      
+  kagent: 
+    github: "karamelchef/kagent-chef"
+    branch: "master"
   apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
     branch: "master"
@@ -18,10 +21,10 @@ cookbooks:
     branch: "master"
   hadoop_spark:
     github: "hopshadoop/spark-chef"
-    branch: "hops"
+    branch: "master"
   flink:
     github: "hopshadoop/flink-chef"
-    branch: "hops"
+    branch: "master"
   elastic:
     github: "hopshadoop/elasticsearch-chef"
     branch: "master"
@@ -37,10 +40,19 @@ cookbooks:
   epipe: 
     github: "hopshadoop/epipe-chef"
     branch: "master"
+  livy: 
+    github: "hopshadoop/livy-chef"
+    branch: "master"
+  drelephant: 
+    github: "hopshadoop/dr-elephant-chef"
+    branch: "master"
 
 attrs:
-  hadoop:
-    dir: "/mnt"
+  hops:
+    dir: "/mnt"    
+    use_hopsworks: "true"
+  apache_hadoop:
+    dir: "/mnt"    
     hdfs:
         user: glassfish
     yarn: 
@@ -50,6 +62,8 @@ attrs:
   hadoop_spark:
     user: glassfish
     dir: "/mnt"    
+  ntp:
+    install: "true"
   flink:
     user: glassfish
     dir: "/mnt"    
@@ -57,26 +71,35 @@ attrs:
     dir: "/mnt"
   mysql:
     dir: "/mnt"
+  hopsworks:
+    master:
+       password: "adminpw"
   zeppelin:
     user: glassfish
     dir: "/mnt"
+
 groups: 
   hopsworks:
     size: 1 
-    recipes:                                                                    
-        - ndb::mysqld                                                       
-        - ndb::ndbd
+    recipes: 
+        - kagent
         - ndb::mgmd
+        - ndb::ndbd
+        - ndb::mysqld                                                       
         - hops::ndb
         - hops::rm
         - hops::nn
         - hops::dn
         - hops::nm
+        - hops::jhs
         - hadoop_spark::yarn
+        - hadoop_spark::historyserver
         - flink::yarn
         - elastic
+        - livy
         - zeppelin
-	- kzookeeper
-	- kkafka
-	- epipe
+        - kzookeeper
+        - kkafka
+        - drelephant
+        - epipe
         - hopsworks
