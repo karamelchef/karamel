@@ -138,7 +138,7 @@ public class ContainerClusterManager {
         HostConfig hostConfig = HostConfig.builder()
           .networkMode("karamel")
           .portBindings(portBindings)
-          .binds("/var/repository:/tmp/binary")
+          .binds("/var/repository:/tmp")
           .build();
 
         String[] exposedPorts = new String[ports.size()];
