@@ -1,0 +1,39 @@
+name: MySqlCluster
+ec2:
+  ami: ami-efb29698
+  region: eu-west-1
+  subnet: subnet-6ce7b209
+  type: c3.8xlarge
+  vpc: vpc-13fb6176
+cookbooks:
+  ndb:
+    branch: master
+    github: hopshadoop/ndb-chef
+attrs:
+  ndb:
+    ThreadConfig: main={count=1,cpubind=0},io={count=1,cpubind=1},rep={count=1,cpubind=2},recv={count=4,cpubind=3-6},send={count=4,cpubind=7-10},ldm={count=12,cpubind=11-22},tc={count=8,cpubind=23-30}
+    NoOfFragmentLogParts: '12'
+    DataMemory: '1000'
+    IndexMemory: '200'
+    NoOfReplicas: '2'
+    dir: "/mnt"
+
+cookbooks:                                                                      
+  ndb:
+    github: "hopshadoop/ndb-chef"
+    branch: "master"
+    
+groups: 
+  datanodes:
+    size: 2
+    recipes: 
+        - ndb::ndbd
+  mgmnodes:
+    size: 1 
+    recipes: 
+        - ndb::mysqld
+        - ndb::memcached
+        - ndb::mgmd
+        - ndb::bench
+
+
