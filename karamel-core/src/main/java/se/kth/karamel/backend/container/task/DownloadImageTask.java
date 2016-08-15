@@ -23,7 +23,7 @@ public class DownloadImageTask implements Runnable {
   @Override
   public void run() {
     try {
-      client.pull("shelan/karamel-node:v3.0.0", AuthConfig.builder().build());
+      client.pull("shelan/karamel-node:v4.0.0", AuthConfig.builder().build());
     } catch (DockerException e) {
       logger.error("Error while downloading docker container", e);
     } catch (InterruptedException e) {

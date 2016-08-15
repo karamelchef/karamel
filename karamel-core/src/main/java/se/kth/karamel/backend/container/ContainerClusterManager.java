@@ -138,7 +138,7 @@ public class ContainerClusterManager {
         HostConfig hostConfig = HostConfig.builder()
           .networkMode("karamel")
           .portBindings(portBindings)
-          .binds("/var/repository:/tmp")
+          .binds("/var/repository:/tmp/binary")
           .build();
 
         String[] exposedPorts = new String[ports.size()];
@@ -147,7 +147,7 @@ public class ContainerClusterManager {
         String containerName = "node" + containerOffset;
 
         ContainerConfig containerConfig = ContainerConfig.builder()
-          .image("shelan/karamel-node:v3.0.0")
+          .image("shelan/karamel-node:v4.0.0")
           .hostConfig(hostConfig)
           .exposedPorts(exposedPorts)
           .hostname(containerName)

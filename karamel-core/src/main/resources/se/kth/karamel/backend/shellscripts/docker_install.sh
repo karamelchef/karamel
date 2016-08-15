@@ -3,6 +3,7 @@ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58
 sudo sh -c 'echo "deb https://apt.dockerproject.org/repo ubuntu-wily main" > /etc/apt/sources.list.d/docker.list';
 sudo apt-get update;
 sudo apt-get -y install linux-image-extra-$(uname -r);
+sudo rm -rf /mnt/network
 sudo apt-get -y install docker-engine;
 sudo usermod -a -G docker $USER;
 sudo rm -rf /etc/systemd/system/docker.service.d/;
