@@ -7,4 +7,4 @@ echo $$ > %pid_file%; echo '#!/bin/bash
 %ts_config%
 EOF
 echo '%task_id%' >> %succeedtasks_filepath%
-' > agent-install.sh ; chmod +x agent-install.sh ; %sudo_command% ./agent-install.sh
+' > tablespoon-agent-install.sh ; chmod +x tablespoon-agent-install.sh ; %sudo_command% ./tablespoon-agent-install.sh

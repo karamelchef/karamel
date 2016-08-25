@@ -5,35 +5,26 @@ ec2:
     region: eu-west-1
     
 cookbooks:                                                                      
-  apache_hadoop: 
-    github: "my-experiments/apache-hadoop-chef"
-    branch: "master"
-  hadoop_spark: 
-    github: "my-experiments/spark-chef"
+  riemann:
+    github: "karamel-lab/riemann-chef"
     branch: "master"
   java: 
     github: "my-experiments/java"
     branch: "master"
-  riemann:
-    github: "karamel-lab/riemann-chef"
-    branch: "master"
-
+    
 attrs:
   java:
     jdk_version: "8"
-  hadoop_spark:
-    user: "ubuntu"
-    executor_memory: '1024m'
     
 groups:
   mgr:
     size: 1
     autoscale: false
-    recipes:
-        - java    
+    recipes:  
         - riemann::server
+        - java
   worker:
     size: 1
     autoscale: true
-    recipes:
+    recipes:  
         - java
