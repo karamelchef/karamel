@@ -10,8 +10,9 @@ echo "version is: $version"
 dist=karamel-$version
 certs_dir=/home/$USER/Dropbox/karamel/certs
 
+cd ..
 mvn clean package
-cd target
+cd karamel-ui/target
 
 #create linux archive
 cp -r appassembler/* $dist/
@@ -27,13 +28,13 @@ cp -r appassembler/conf/* ${dist}-jar/
 cp ../README.jar ${dist}-jar/README.txt 
 zip -r ${dist}-jar.zip $dist-jar
 
-scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
-scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
+ scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
+ scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 
 echo "Now building windows distribution"
-cd ..
+cd ../..
 mvn -Dwin clean package
-cd target
+cd karamel-ui/target
 
 #
 # Instructions for signing the .exe were taken from here:
