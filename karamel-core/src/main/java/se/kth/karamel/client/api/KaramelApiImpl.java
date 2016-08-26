@@ -88,10 +88,14 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
+    Set<String> urls = new HashSet<>();
+    urls.add(cookbookUrl);
     if (refresh) {
-      KaramelizedCookbook cb = CookbookCache.load(cookbookUrl);
+      CookbookCache.prepareNewParallel(urls);
+      KaramelizedCookbook cb = CookbookCache.get(cookbookUrl);
       return cb.getInfoJson();
     } else {
+      CookbookCache.prepareParallel(urls);
       KaramelizedCookbook cb = CookbookCache.get(cookbookUrl);
       return cb.getInfoJson();
     }
@@ -345,8 +349,8 @@ public class KaramelApiImpl implements KaramelApi {
       if (!f.exists()) {
         throw new KaramelException("Remote repository already exists. Load the experiment if it already exists.");
       }
-    } else {
-      // no repo on GitHub. Should not exist a local directory with same repo name.
+    } else // no repo on GitHub. Should not exist a local directory with same repo name.
+    {
       if (f.exists()) {
         throw new KaramelException("The remote repo does not exist, however a conflicting local directory was found. "
             + "Remove the local directory in ~/.karamel/cookbook_designer first, then save again.");

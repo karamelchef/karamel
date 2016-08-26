@@ -36,6 +36,14 @@ public class UserClusterDataExtractor {
 
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
+    HashSet<String> cbids = new HashSet<>();
+    for (JsonGroup jg : cluster.getGroups()) {
+      for (JsonCookbook jc : jg.getCookbooks()) {
+        String cbid = jc.getId();
+        cbids.add(cbid);
+        CookbookCache.prepareParallel(cbids);
+      }
+    }
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {

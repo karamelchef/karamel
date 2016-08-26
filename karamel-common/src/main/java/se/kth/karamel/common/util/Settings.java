@@ -130,7 +130,7 @@ public class Settings {
   public static final int AWS_RETRY_MAX = 300;
 
   public static final String AWS_KEYPAIR_NAME(String clusterName, String region) {
-    return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_Address).toLowerCase();
+    return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_ADDRESS).toLowerCase();
   }
 
   public static final String AWS_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
@@ -294,7 +294,7 @@ public class Settings {
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");
   public static final String OS_NAME = System.getProperty("os.name");
-  public static final String IP_Address = loadIpAddress();
+  public static final String IP_ADDRESS = loadIpAddress();
   public static final boolean IS_UNIX_OS = OS_NAME.toLowerCase().contains("mac")
       || OS_NAME.toLowerCase().contains("linux");
   public static final String DEFAULT_PUBKEY_PATH = IS_UNIX_OS ? USER_HOME + "/.ssh/id_rsa.pub" : null;

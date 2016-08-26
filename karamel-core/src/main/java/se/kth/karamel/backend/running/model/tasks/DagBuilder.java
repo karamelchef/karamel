@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
@@ -104,6 +105,11 @@ public class DagBuilder {
   private static boolean updateKaramelDependencies(Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
       Map<String, Map<String, Task>> rlts) throws KaramelException {
     boolean newDepFound = false;
+    HashSet<String> cbids = new HashSet<>();
+    for (RunRecipeTask task : allRecipeTasks.values()) {
+      cbids.add(task.getCookbookId());
+      CookbookCache.prepareParallel(cbids);
+    }
     for (RunRecipeTask task : allRecipeTasks.values()) {
       String tid = task.uniqueId();
       KaramelizedCookbook kcb = CookbookCache.get(task.getCookbookId());

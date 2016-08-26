@@ -21,12 +21,13 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  *
  * @author kamal
  */
-public class TestKaramelizedCookbook {
+public class KaramelizedCookbookTest {
 
   @Test
   public void testLoadingClasspathCookbook() throws ValidationException {
@@ -60,8 +61,8 @@ public class TestKaramelizedCookbook {
   @Test
   public void testLoadDependencies() throws CookbookUrlException, IOException {
     Settings.CB_CLASSPATH_MODE = true;
-    List<String> list = IoUtils.readLinesFromClasspath("testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Berksfile");
-    Berksfile berksfile = new Berksfile(list);
+    String content = IoUtils.readContentFromClasspath("testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Berksfile");
+    Berksfile berksfile = new Berksfile(content);
   }
 
   @Test

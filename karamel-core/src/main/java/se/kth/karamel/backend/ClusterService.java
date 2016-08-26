@@ -9,6 +9,8 @@ import com.google.gson.Gson;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
@@ -32,6 +34,8 @@ public class ClusterService {
   private static final Logger logger = Logger.getLogger(ClusterService.class);
 
   private static final ClusterService instance = new ClusterService();
+  
+  public static ExecutorService SHARED_GLOBAL_TP = Executors.newFixedThreadPool(50);
 
   private final ClusterContext commonContext = new ClusterContext();
   private final Map<String, ClusterManager> repository = new HashMap<>();

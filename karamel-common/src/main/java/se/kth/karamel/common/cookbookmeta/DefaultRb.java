@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import se.kth.karamel.common.exception.CookbookUrlException;
+import se.kth.karamel.common.util.StringUtils;
 
 /**
  * Represents attributes/default.rb file in cookbook
@@ -31,8 +32,8 @@ public final class DefaultRb {
 
   private final Map<String, Object> kv = new HashMap<>();
 
-  public DefaultRb(List<String> contentLines) throws CookbookUrlException {
-    this.contentLines = contentLines;
+  public DefaultRb(String content) throws CookbookUrlException {
+    this.contentLines = StringUtils.toLines(content);
     loadAttributes();
   }
 
