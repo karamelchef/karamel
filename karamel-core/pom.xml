@@ -8,7 +8,7 @@
     <version>0.3</version>
   </parent>
 
-  <groupId>se.kth</groupId>
+  <groupId>se.kth.karamel</groupId>
   <artifactId>karamel-core</artifactId>
   <packaging>jar</packaging>
 
@@ -99,7 +99,6 @@
     <dependency>
       <groupId>se.kth.karamel</groupId>
       <artifactId>karamel-common</artifactId>
-      <version>0.3</version>
     </dependency>
     <dependency>
       <groupId>org.kohsuke</groupId>
