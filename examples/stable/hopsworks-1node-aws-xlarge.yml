@@ -63,6 +63,8 @@ attrs:
   hadoop_spark:
     user: glassfish
     dir: "/srv"    
+  drelephant:
+    user: glassfish
   ntp:
     install: "true"
   flink:
