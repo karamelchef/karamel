@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
+import se.kth.karamel.common.util.StringUtils;
 
 /**
  *
@@ -39,8 +40,8 @@ public class Berksfile {
       "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)'");
   public static Set<String> validUrls = new HashSet<>();
 
-  public Berksfile(List<String> fileLines) throws CookbookUrlException {
-    this.fileLines = fileLines;
+  public Berksfile(String content) throws CookbookUrlException {
+    this.fileLines = StringUtils.toLines(content);
     loadDependencies();
     validateGithubUrls();
   }
@@ -52,7 +53,7 @@ public class Berksfile {
   public Map<String, String> getBranches() {
     return branches;
   }
-  
+
   private void loadDependencies() {
     for (String line : fileLines) {
       boolean found = false;
@@ -134,7 +135,7 @@ public class Berksfile {
   public String toString() {
     StringBuilder sb = new StringBuilder();
     boolean skipLines = true;
-    
+
     // append all lines that appear after 'metadata' in the Berksfile template
     for (String s : fileLines) {
       if (!skipLines) {
@@ -147,5 +148,4 @@ public class Berksfile {
     return sb.toString();
   }
 
-  
 }

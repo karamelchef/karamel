@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package se.kth.karamel.backend.running.mode.task;
+package se.kth.karamel.backend.running.model.tasks;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Sets;

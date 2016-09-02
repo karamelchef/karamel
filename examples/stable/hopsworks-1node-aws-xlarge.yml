@@ -2,45 +2,58 @@ name: HopsWorksOneNodeAws
 ec2:
     type: m3.xlarge
     region: eu-west-1
+    ami: ami-efb29698
 
 cookbooks:                                                                      
+  kagent: 
+    github: "karamelchef/kagent-chef"
+    branch: "v0.1"
   apache_hadoop: 
     github: "hopshadoop/apache-hadoop-chef"
-    branch: "master"
+    branch: "v2.4.0"
   hops: 
     github: "hopshadoop/hops-hadoop-chef"
-    branch: "master"
+    branch: "v2.4.0"
   hopsworks:                                                                     
     github: "hopshadoop/hopsworks-chef"
     branch: "master"  
   ndb:
     github: "hopshadoop/ndb-chef"
-    branch: "master"
+    branch: "v7.5.3"
   hadoop_spark:
     github: "hopshadoop/spark-chef"
-    branch: "hops"
+    branch: "v1.6.1"
   flink:
     github: "hopshadoop/flink-chef"
-    branch: "hops"
+    branch: "v1.0.3"
   elastic:
     github: "hopshadoop/elasticsearch-chef"
-    branch: "master"
+    branch: "v2.1.2"
   zeppelin:
     github: "hopshadoop/zeppelin-chef"
-    branch: "master"
+    branch: "v0.6.0"
   kzookeeper: 
     github: "hopshadoop/kzookeeper"
-    branch: "master"
+    branch: "v3.4.7"
   kkafka: 
     github: "hopshadoop/kafka-cookbook"
-    branch: "master"
+    branch: "v0.10.0.0"
   epipe: 
     github: "hopshadoop/epipe-chef"
-    branch: "master"
+    branch: "v0.2.2"
+  livy: 
+    github: "hopshadoop/livy-chef"
+    branch: "v0.3.0"
+  drelephant: 
+    github: "hopshadoop/dr-elephant-chef"
+    branch: "v2.0.3"
 
 attrs:
-  hadoop:
-    dir: "/mnt"
+  hops:
+    dir: "/mnt"    
+    use_hopsworks: "true"
+  apache_hadoop:
+    dir: "/mnt"    
     hdfs:
         user: glassfish
     yarn: 
@@ -49,7 +62,11 @@ attrs:
         user: glassfish
   hadoop_spark:
     user: glassfish
-    dir: "/mnt"    
+    dir: "/srv"    
+  drelephant:
+    user: glassfish
+  ntp:
+    install: "true"
   flink:
     user: glassfish
     dir: "/mnt"    
@@ -57,26 +74,37 @@ attrs:
     dir: "/mnt"
   mysql:
     dir: "/mnt"
+  hopsworks:
+    master:
+       password: "adminpw"
   zeppelin:
     user: glassfish
     dir: "/mnt"
+  kagent:
+    enabled: "true"
+
 groups: 
   hopsworks:
     size: 1 
-    recipes:                                                                    
-        - ndb::mysqld                                                       
-        - ndb::ndbd
+    recipes: 
+        - kagent
         - ndb::mgmd
+        - ndb::ndbd
+        - ndb::mysqld                                                       
         - hops::ndb
         - hops::rm
         - hops::nn
         - hops::dn
         - hops::nm
+        - hops::jhs
         - hadoop_spark::yarn
+        - hadoop_spark::historyserver
         - flink::yarn
         - elastic
+        - livy
         - zeppelin
-	- kzookeeper
-	- kkafka
-	- epipe
+        - kzookeeper
+        - kkafka
+        - drelephant
+        - epipe
         - hopsworks

@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -server src/main/config/dropwizard.yml</exec.args>
+                <exec.args>-classpath %classpath ${packageClassName} -server src/main/config/dropwizard.yml</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -server src/main/config/dropwizard.yml</exec.args>
+                <exec.args>-classpath %classpath ${packageClassName} -server src/main/config/dropwizard.yml</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

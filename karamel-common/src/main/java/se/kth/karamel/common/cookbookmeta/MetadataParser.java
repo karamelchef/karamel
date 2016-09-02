@@ -26,7 +26,7 @@ public class MetadataParser {
   public static Pattern DESC = Pattern.compile("description\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
   public static Pattern VERSION = Pattern.compile("version\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*");
   public static Pattern RECIPE = Pattern.compile(
-      "recipe\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(\\,\\s*[\\\"|\\'](.+)[\\\"|\\'])+");
+      "recipe\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(\\,\\s*[\\\"|\\'](.*)[\\\"|\\'])+");
   public static Pattern ATTR = Pattern.compile("attribute\\s*[\\\"|\\'](.+)[\\\"|\\']\\s*(,)?\\s*");
   public static Pattern ATTR_DISP_NAME
       = Pattern.compile("\\s*:display_name\\s*=>\\s*[\\\"|\\'](.+)[\\\"|\\']s*(,)?\\s*");

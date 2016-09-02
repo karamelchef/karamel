@@ -26,8 +26,8 @@
 
             <label class="control-label">{{attr.name}}</label><label class="control-label" ng-show="attr.type === 'array'"> []</label>
             <div ng-switch="attr.type">
-              <input ng-switch-when="array" class="form-control" ng-model="attr.value" ng-list/>
-              <input ng-switch-default class="form-control" ng-model="attr.value"/>
+              <input ng-switch-when="array" class="form-control" ng-model="attr.value" tooltip="{{attr.description}}"  ng-list/>
+              <input ng-switch-default class="form-control" ng-model="attr.value" tooltip="{{attr.description}}"/>
             </div>
           </div>
 
@@ -43,8 +43,8 @@
 
               <label class="control-label">{{attr.name}}</label><label class="control-label" ng-show="attr.type === 'array'"> []</label>
               <div ng-switch="attr.type">
-                <input ng-switch-when="array" class="form-control" ng-model="attr.value" ng-list/>
-                <input ng-switch-default class="form-control" ng-model="attr.value"/>
+                <input ng-switch-when="array" class="form-control" ng-model="attr.value" tooltip="{{attr.description}}" ng-list/>
+                <input ng-switch-default class="form-control" ng-model="attr.value" tooltip="{{attr.description}}"/>
               </div>
 
             </div>

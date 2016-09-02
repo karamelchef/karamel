@@ -8,10 +8,10 @@ version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/
 echo "version is: $version"
 
 dist=karamel-$version
-certs_dir=/home/$USER/Dropbox/karamel/certs
 
+cd ..
 mvn clean package
-cd target
+cd karamel-ui/target
 
 #create linux archive
 cp -r appassembler/* $dist/
@@ -31,16 +31,11 @@ scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/file
 scp ${dist}-jar.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
 
 echo "Now building windows distribution"
-cd ..
+cd ../..
 mvn -Dwin clean package
-cd target
+cd karamel-ui/target
 
-#
-# Instructions for signing the .exe were taken from here:
-# http://development.adaptris.net/users/lchan/blog/2013/06/07/signing-windows-installers-on-linux/
-#
-osslsigncode -spc ${certs_dir}/authenticode.spc -key ${certs_dir}/authenticode.key -t http://timestamp.verisign.com/scripts/timstamp.dll -in karamel.exe -out karamel-signed.exe
-mv karamel-signed.exe $dist/karamel.exe
+mv karamel.exe $dist/karamel.exe
 #create windows archive
 cp ../README.windows $dist/README.txt
 zip -r ${dist}.zip $dist
@@ -48,6 +43,5 @@ zip -r ${dist}.zip $dist
 mv ${dist} ${dist}-windows
 
 scp ${dist}.zip glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
-cd ..
 
 echo "finished releasing karamel"

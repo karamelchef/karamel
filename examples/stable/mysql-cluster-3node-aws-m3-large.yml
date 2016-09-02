@@ -1,7 +1,21 @@
 name: MySqlCluster
 ec2:
-    type: m3.large
-    region: eu-west-1
+  ami: ami-efb29698
+  region: eu-west-1
+  subnet: subnet-6ce7b209
+  type: c3.8xlarge
+  vpc: vpc-13fb6176
+cookbooks:
+  ndb:
+    branch: master
+    github: hopshadoop/ndb-chef
+attrs:
+  ndb:
+    DataMemory: '1000'
+    IndexMemory: '200'
+    NoOfReplicas: '2'
+    dir: "/mnt"
+    MaxNoOfExecutionThreads: '8'
 
 cookbooks:                                                                      
   ndb:

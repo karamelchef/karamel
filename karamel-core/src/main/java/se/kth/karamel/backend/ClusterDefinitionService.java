@@ -240,6 +240,14 @@ public class ClusterDefinitionService {
 
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
+    HashSet<String> cbids = new HashSet<>();
+    for (JsonGroup jg : cluster.getGroups()) {
+      for (JsonCookbook jc : jg.getCookbooks()) {
+        String cbid = jc.getId();
+        cbids.add(cbid);
+        CookbookCache.prepareParallel(cbids);
+      }
+    }
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {
@@ -409,7 +417,7 @@ public class ClusterDefinitionService {
     return tablespoonSeverGroup;
   }
 
-  public static MachineRuntime findMachine(ClusterRuntime cluster, String groupId, String vmId) 
+  public static MachineRuntime findMachine(ClusterRuntime cluster, String groupId, String vmId)
       throws KaramelException {
     for (GroupRuntime ge : cluster.getGroups()) {
       if (ge.getId().equals(groupId)) {

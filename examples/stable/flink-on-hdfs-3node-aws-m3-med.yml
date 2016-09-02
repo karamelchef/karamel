@@ -11,12 +11,23 @@ cookbooks:
     github: "hopshadoop/flink-chef"
     branch: "master"
     
+attrs:
+  java:
+    jdk_version: 8
+  flink:
+    user: ubuntu
+  apache_hadoop:
+    version: 2.7.1
+    hdfs: 
+      user: ubuntu
+
 groups: 
   namenodes:
     size: 1
     recipes: 
         - apache_hadoop::nn
         - flink::jobmanager
+        - flink::wordcount
   datanodes:
     size: 2
     recipes: 
