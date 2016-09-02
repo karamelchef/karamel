@@ -10,6 +10,18 @@ echo "version is: $version"
 dist=karamel-$version
 
 cd ..
+
+#initing sub-modules
+git submodule update --init
+
+cd honeytap
+git checkout master
+cd..
+
+cd tablespoon
+git checkout master
+cd..
+
 mvn clean package
 cd karamel-ui/target
 
