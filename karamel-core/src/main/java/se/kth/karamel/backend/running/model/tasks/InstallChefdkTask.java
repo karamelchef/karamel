@@ -14,23 +14,27 @@ import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
+import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.Settings;
 
 /**
  *
  * @author kamal
  */
-public class InstallBerkshelfTask extends Task {
+public class InstallChefdkTask extends Task {
 
-  public InstallBerkshelfTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
-    super("install berkshelf", "install berkshelf", true, machine, clusterStats, submitter);
+  public InstallChefdkTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
+    super("install chefdk", "install chefdk", true, machine, clusterStats, submitter);
   }
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     OsType osType = getMachine().getOsType();
     if (commands == null) {
-      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF,
+      Confs confs = Confs.loadKaramelConfs();
+      String chefdkVersion = confs.getProperty(Settings.CHEFDK_VERSION_KEY);
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_CHEFDK,
+          "chefdk_version", chefdkVersion,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "osfamily", osType.family.toString().toLowerCase(),
@@ -41,7 +45,7 @@ public class InstallBerkshelfTask extends Task {
   }
 
   public static String makeUniqueId(String machineId) {
-    return "install berkshelf on " + machineId;
+    return "install chefdk on " + machineId;
   }
 
   @Override

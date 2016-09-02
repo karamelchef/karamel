@@ -130,6 +130,7 @@ public class Confs<K extends String, V extends String> extends Properties {
     String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE_KEY);
     String prepareStorage = prop.getProperty(Settings.PREPARE_STORAGES_KEY);
     String skipExistingTasks = prop.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
+    String chefdkVersion = prop.getProperty(Settings.CHEFDK_VERSION_KEY);
     if ((pubKeyPath == null || priKeyPath == null)) {
       if (Settings.DEFAULT_PRIKEY_PATH != null) {
         pubKeyPath = Settings.DEFAULT_PUBKEY_PATH;
@@ -146,6 +147,9 @@ public class Confs<K extends String, V extends String> extends Properties {
     }
     if (skipExistingTasks == null) {
       prop.put(Settings.SKIP_EXISTINGTASKS_KEY, Settings.SKIP_EXISTINGTASKS_DEFAULT);
+    }
+    if (chefdkVersion == null) {
+      prop.put(Settings.CHEFDK_VERSION_KEY, Settings.CHEFDK_VERSION_DEFAULT);
     }
     return prop;
   }
