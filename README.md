@@ -182,9 +182,30 @@ Karamel provides a web-ui, built on AngularJS.
 
 ###Developers Guide
 ---
-We have organized our code into two main projects, _karamel-core_ and _karamel-ui_. The core is our engine for launching, installing and monitoring clusters. The UI is a standalone web application containing several designers and visualizers. There is a REST-API in between the UI and the core.
+Karmel code is organized into three main projects(_karamel-common_, _karamel-core_ and _karamel-ui_) and some sub-moduels(_tablespoon_ and _honeytap_). The common contains our common data structures that are used by other modules like _Kandy_. The core is our engine for launching, installing and monitoring clusters. The UI is a standalone web application containing several designers and visualizers. There is a REST-API in between the UI and the core.
 
 The core and REST-API are programmed in Java 7, and the UI is programmed in <a href="https://angularjs.org/">Angular JS<a>.  
+
+####Clone karamel with submodules & build
+Because our submodules reside in independent git repos, when you clone our git repo, you have to take the following extra steps to bring the sub-modules into your filesystem. 
+```{r, engine='sh'}
+git clone https://github.com/karamelchef/karamel
+cd karamel
+
+
+git submodule update --init
+
+cd honeytap
+git checkout master
+cd..
+
+cd tablespoon
+git checkout master
+cd..
+
+mvn clean package
+
+```
 
 ####Code quality 
 1. Testability and mockability: Write your code in a way that you test each unit separately. Split concerns into different modules that you can mock one when testing the other. We use JUnit-4 for unit testing and <a href="http://mockito.org/">mockito</a> for mocking. 
