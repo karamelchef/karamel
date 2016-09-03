@@ -64,6 +64,7 @@ attrs:
     user: glassfish
     dir: "/srv"    
   drelephant:
+    dir: "/mnt"
     user: glassfish
   ntp:
     install: "true"
@@ -77,6 +78,12 @@ attrs:
   hopsworks:
     master:
        password: "adminpw"
+  elastic:
+    dir: "/mnt"
+  kkafka:
+    dir: "/mnt"
+  kzookeeper:
+    dir: "/mnt"
   zeppelin:
     user: glassfish
     dir: "/mnt"
