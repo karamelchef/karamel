@@ -78,12 +78,6 @@ attrs:
   hopsworks:
     master:
        password: "adminpw"
-  elastic:
-    dir: "/mnt"
-  kkafka:
-    dir: "/mnt"
-  kzookeeper:
-    dir: "/mnt"
   zeppelin:
     user: glassfish
     dir: "/mnt"
