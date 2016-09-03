@@ -338,7 +338,7 @@ public class DagBuilder {
           dag.addTask(st);
         }
         AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
-        InstallChefdkTask t2 = new InstallChefdkTask(me, clusterStats, submitter);
+        InstallBerkshelfTask t2 = new InstallBerkshelfTask(me, clusterStats, submitter);
         MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
         dag.addTask(t1);
         dag.addTask(t2);

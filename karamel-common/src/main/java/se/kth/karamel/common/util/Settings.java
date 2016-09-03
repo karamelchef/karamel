@@ -66,8 +66,6 @@ public class Settings {
   public static final int SSH_CMD_RETRY_INTERVALS = 3 * SEC_IN_MS;
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
-  public static final String CHEFDK_VERSION_KEY = "chefdk.version";
-  public static final String CHEFDK_VERSION_DEFAULT = "0.17.17";
 
   //-----------------------------------------------JCLOUDS--------------------------------------------------------------
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -81,9 +79,9 @@ public class Settings {
   public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPET_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
-  public static final String SCRIPT_NAME_INSTALL_CHEFDK = "install_chefdk.sh";
-  public static final String SCRIPT_PATH_INSTALL_CHEFDK = SCRIPT_PATH_ROOT
-      + SCRIPT_NAME_INSTALL_CHEFDK;
+  public static final String SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF = "install_ruby_chef_berkshelf.sh";
+  public static final String SCRIPT_PATH_INSTALL_RUBY_CHEF_BERKSHELF = SCRIPT_PATH_ROOT
+      + SCRIPT_NAME_INSTALL_RUBY_CHEF_BERKSHELF;
   public static final String SCRIPT_PATH_MAKE_SOLO_RB = SCRIPT_PATH_ROOT + "make_solo_rb.sc";
   public static final String SCRIPT_PATH_RUN_RECIPE = SCRIPT_PATH_ROOT + "run_recipe.sc";
   public static final String SCRIPT_PATH_KILL_RUNNING_SESSION = SCRIPT_PATH_ROOT + "kill_current_session.sh";

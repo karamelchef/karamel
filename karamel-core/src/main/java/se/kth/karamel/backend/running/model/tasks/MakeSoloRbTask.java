@@ -51,7 +51,7 @@ public class MakeSoloRbTask extends Task {
   @Override
   public Set<String> dagDependencies() {
     Set<String> deps = new HashSet<>();
-    String id = InstallChefdkTask.makeUniqueId(getMachineId());
+    String id = InstallBerkshelfTask.makeUniqueId(getMachineId());
     deps.add(id);
     return deps;
   }
