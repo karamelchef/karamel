@@ -308,22 +308,6 @@
                         </configuration>            
                     </execution>
                     <execution>
-                        <id>copy-examples-windows</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target/karamel-${project.version}/examples</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>${basedir}/../examples/</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>              
-                        </configuration>            
-                    </execution>
-                    <execution>
                         <id>libs-windows</id>
                         <phase>package</phase>
                         <goals>
@@ -338,22 +322,6 @@
                                 </resource>
                             </resources>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-examples-linux</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${basedir}/target/appassembler/examples</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../examples/</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>              
-                        </configuration>            
                     </execution>
                 </executions>
             </plugin>
