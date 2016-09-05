@@ -19,7 +19,10 @@ echo "version is: $version"
 dist=karamel-$version
 
 cd ..
-mvn clean package
+mvn clean package -DskipTests
+cd ../karamel-examples
+git pull
+cd ../karamel
 cd karamel-ui/target
 
 #create linux archive
