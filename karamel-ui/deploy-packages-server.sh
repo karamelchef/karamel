@@ -12,7 +12,7 @@ if [ ! -d ../../karamel-examples ] ; then
 fi
 
 # This reads the pom.xml file in the current directory, and extracts the first version element in the xml version element.
-version=`grep -o -a -m 1 -h -r "version>.*</version" pom.xml | head -1 | sed "s/version//g" | sed "s/>//" | sed "s/<\///g"`
+version=`grep -o -a -m 1 -h -r "karamel.version>.*</karamel.version" ../pom.xml | head -1 | sed "s/karamel.version//g" | sed "s/>//" | sed "s/<\///g"`
 
 echo "version is: $version"
 
