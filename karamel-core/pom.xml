@@ -15,9 +15,6 @@
   <name>karamel-core</name>
   <url>http://maven.apache.org</url>
 
-  <properties>
-    <jclouds.version>1.9.0</jclouds.version>
-  </properties>
   <repositories>
     <repository>
       <id>d-maven</id>
