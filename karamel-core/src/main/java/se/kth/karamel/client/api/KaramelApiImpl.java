@@ -34,7 +34,7 @@ import se.kth.karamel.backend.running.model.serializers.GroupEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.MachineEntitySerializer;
 import se.kth.karamel.backend.running.model.serializers.ShellCommandSerializer;
 import se.kth.karamel.backend.running.model.tasks.AptGetEssentialsTask;
-import se.kth.karamel.backend.running.model.tasks.InstallBerkshelfTask;
+import se.kth.karamel.backend.running.model.tasks.InstallChefdkTask;
 import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
@@ -210,7 +210,7 @@ public class KaramelApiImpl implements KaramelApi {
         registerTypeAdapter(MakeSoloRbTask.class, new DefaultTaskSerializer()).
         registerTypeAdapter(VendorCookbookTask.class, new DefaultTaskSerializer()).
         registerTypeAdapter(AptGetEssentialsTask.class, new DefaultTaskSerializer()).
-        registerTypeAdapter(InstallBerkshelfTask.class, new DefaultTaskSerializer()).
+        registerTypeAdapter(InstallChefdkTask.class, new DefaultTaskSerializer()).
         setPrettyPrinting().
         create();
     String json = gson.toJson(clusterManager);

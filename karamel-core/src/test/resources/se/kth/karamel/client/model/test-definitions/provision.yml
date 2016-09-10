@@ -1,9 +1,11 @@
 name: provision
 
-ec2:
-  region: eu-west-1
-  type: i2.4xlarge
+baremetal:
+  username: vagrant
+
   
 groups: 
   nodes:
     size: 1
+    baremetal:
+      ip: 192.168.33.11
