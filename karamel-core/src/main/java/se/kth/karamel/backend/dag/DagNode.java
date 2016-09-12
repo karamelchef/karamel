@@ -240,7 +240,7 @@ public class DagNode implements DagTaskCallback {
 
   @Override
   public void failed(String reason) {
-    logger.error(String.format("Failed '%s', DAG is stuck here :(", id));
+    logger.error(String.format("Failed '%s' because '%s', DAG is stuck here :(", id, reason));
     status = Status.FAILED;
   }
 

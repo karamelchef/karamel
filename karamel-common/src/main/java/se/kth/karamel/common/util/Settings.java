@@ -276,19 +276,19 @@ public class Settings {
   }
 
   public static String REMOTE_USER_HOME(String sshUserName) {
-    return REMOTE_HOME_ROOT + File.separator + sshUserName;
+    return REMOTE_HOME_ROOT + "/" + sshUserName;
   }
 
   public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + File.separator + SUCCEED_TASKLIST_FILENAME;
+    return REMOTE_USER_HOME(sshUserName) + "/" + SUCCEED_TASKLIST_FILENAME;
   }
   
   public static String REMOTE_OSTYPE_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + File.separator + OSTYPE_FILE_NAME;
+    return REMOTE_USER_HOME(sshUserName) + "/"+ OSTYPE_FILE_NAME;
   }
 
   public static String REMOTE_PIDFILE_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + File.separator + PID_FILE_NAME;
+    return REMOTE_USER_HOME(sshUserName) + "/" + PID_FILE_NAME;
   }
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
