@@ -248,8 +248,11 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void runTask(Task task) {
+    logger.debug("start running " + task.getId());
     if (!isSucceedTaskHistoryUpdated) {
+      logger.debug("updating the task history");
       loadSucceedListFromMachineToMemory();
+      logger.debug("the taks history was updated");
       isSucceedTaskHistoryUpdated = true;
     }
     String skipConf = confs.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
@@ -261,13 +264,14 @@ public class SshMachine implements MachineInterface, Runnable {
         activeTask = null;
       }
     } else {
+      logger.debug(String.format("task '%s' was not found in the task history, running it", task.getId()));
       try {
         task.started();
         List<ShellCommand> commands = task.getCommands();
-
+        logger.debug(String.format("task %s has %d commands to run", task.getId(), commands.size()));
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
-
+            logger.debug(String.format("command to run %s", cmd.getCmdStr()));
             runSshCmd(cmd, task, false);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
@@ -291,6 +295,8 @@ public class SshMachine implements MachineInterface, Runnable {
                 task.failed(ex.getMessage());
               }
             }
+          } else {
+            logger.debug(String.format("skiping this command, status is %s", cmd.getStatus().toString()));
           }
         }
         if (task.getStatus() == Status.ONGOING) {
@@ -301,12 +307,14 @@ public class SshMachine implements MachineInterface, Runnable {
           }
         }
       } catch (Exception ex) {
+        logger.debug(String.format("failing the task because of the exception %s", ex.getMessage()), ex);
         task.failed(ex.getMessage());
       }
     }
   }
 
   private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
+    logger.debug(String.format("recieved a command to run '%s'", shellCommand.getCmdStr()));
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
     int timeBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
     boolean finished = false;
