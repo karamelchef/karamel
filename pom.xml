@@ -5,7 +5,7 @@
   <groupId>se.kth.karamel</groupId>
   <artifactId>karamel-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.3</version>
+  <version>${karamel.version}</version>
   <name>karamel-parent</name>
   <url>http://maven.apache.org</url>
 
@@ -19,9 +19,11 @@
   </modules>
 
   <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jclouds.version>1.9.2</jclouds.version>
     <java.compiler.version>1.7</java.compiler.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <karamel-version>0.2</karamel-version>
+    <karamel.version>0.3</karamel.version>
   </properties>
 
   <dependencies>
@@ -56,7 +58,7 @@
     <developer>
       <id>kamal</id>
       <name>Kamal Hakimzadeh</name>
-      <email>kamal@kth.se</email>
+      <email>kamal2&gt;kth.se</email>
       <organization>KTH</organization>
       <organizationUrl>http://www.kth.se/</organizationUrl>
       <roles>

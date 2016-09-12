@@ -34,11 +34,14 @@ public class AptGetEssentialsTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     OsType osType = getMachine().getOsType();
+    String sudocommand = getSudoCommand();
+    String githuuser = ClusterService.getInstance().getCommonContext().getGithubUsername();
+    String osfamily = osType.family.toString().toLowerCase();
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
-          "sudo_command", getSudoCommand(),
-          "github_username", ClusterService.getInstance().getCommonContext().getGithubUsername(),
-          "osfamily", osType.family.toString().toLowerCase(),
+          "sudo_command", sudocommand,
+          "github_username", githuuser,
+          "osfamily", osfamily,
           "task_id", getId(),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
