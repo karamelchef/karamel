@@ -15,16 +15,16 @@ echo '%task_id%' >> %succeedtasks_filepath%
 
 elif [ %osfamily% == "ubuntu" ] ; then
 
-if [ -f chefdk_0.15.16-1_amd64.deb ] ; then
-  checksum=`sha256sum chefdk_0.15.16-1_amd64.deb | grep -o '^\S\+'`
-  if [ "$checksum" != "8ea5ee9f79efb3618305d101af5ec01a10c11cc57a6b9ff776f21d62d305d3e8" ] ; then
-      rm -f chefdk_0.15.16-1_amd64.deb
-      wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.15.16-1_amd64.deb
+if [ -f chefdk_0.12.0-1_amd64.deb ] ; then
+  checksum=`sha256sum chefdk_0.12.0-1_amd64.deb | grep -o '^\S\+'`
+  if [ "$checksum" != "6fcb4529f99c212241c45a3e1d024cc1519f5b63e53fc1194b5276f1d8695aaa" ] ; then
+      rm -f chefdk_0.12.0-1_amd64.deb
+      wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.12.0-1_amd64.deb
   fi
 else
-   wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.15.16-1_amd64.deb
+   wget https://packages.chef.io/stable/ubuntu/12.04/chefdk_0.12.0-1_amd64.deb
 fi
-%sudo_command% dpkg -i chefdk_0.15.16-1_amd64.deb && echo '%task_id%' >> %succeedtasks_filepath%
+%sudo_command% dpkg -i chefdk_0.12.0-1_amd64.deb && echo '%task_id%' >> %succeedtasks_filepath%
 echo \"Found ubuntu\"
 else 
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
