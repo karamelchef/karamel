@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
  *
@@ -27,14 +27,17 @@ public class JsonCookbook {
   Set<JsonRecipe> recipes = new HashSet<>();
   @JsonIgnore
   KaramelizedCookbook karamelizedCookbook;
-
+  @JsonIgnore
+  CookbookCache cache; 
+  
   public JsonCookbook() {
   }
 
-  public JsonCookbook(String id, String alias, Map<String, Object> attrs) {
+  public JsonCookbook(String id, String alias, Map<String, Object> attrs, CookbookCache cache) {
     this.id = id;
     this.alias = alias;
     this.attrs = attrs;
+    this.cache = cache;
   }
 
   public String getName() throws KaramelException {
@@ -75,7 +78,7 @@ public class JsonCookbook {
 
   public KaramelizedCookbook getKaramelizedCookbook() throws KaramelException {
     if (karamelizedCookbook == null) {
-      karamelizedCookbook = CookbookCache.get(id);
+      karamelizedCookbook = cache.get(id);
     }
     return karamelizedCookbook;
   }

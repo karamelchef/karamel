@@ -36,6 +36,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import se.kth.karamel.client.api.CookbookCacheIml;
+import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -44,6 +46,8 @@ import java.util.List;
  */
 public class ClusterDefinitionService {
 
+  public static CookbookCache cache = new CookbookCacheIml();
+  
   public static String jsonToYaml(JsonCluster jsonCluster) throws KaramelException {
     YamlCluster yamlCluster = new YamlCluster(jsonCluster);
     DumperOptions options = new DumperOptions();
@@ -144,7 +148,7 @@ public class ClusterDefinitionService {
 
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
     YamlCluster cluster = yamlToYamlObject(yaml);
-    JsonCluster jsonCluster = new JsonCluster(cluster);
+    JsonCluster jsonCluster = new JsonCluster(cluster, cache);
     ClusterDefinitionValidator.validate(jsonCluster);
     return jsonCluster;
   }

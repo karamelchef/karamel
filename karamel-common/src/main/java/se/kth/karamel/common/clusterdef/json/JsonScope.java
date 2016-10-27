@@ -27,31 +27,28 @@ import se.kth.karamel.common.cookbookmeta.CookbookCache;
 public class JsonScope extends Scope {
 
   private final List<JsonCookbook> cookbooks = new ArrayList<>();
-
+  
   public JsonScope() {
   }
 
-  public JsonScope(YamlCluster cluster, YamlScope scope) throws KaramelException {
+  public JsonScope(YamlCluster cluster, YamlScope scope, CookbookCache cache) throws KaramelException {
     super(scope);
     Map<String, Object> usedAttrs = cluster.flattenAttrs();
+    List<KaramelizedCookbook> allCookbooks = cache.loadAllKaramelizedCookbooks(cluster);
     Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
     //filtering invalid(not defined in metadata.rb) attributes from yaml model
-    for (Map.Entry<String, Cookbook> entry : cks) {
-      String cbAlias = entry.getKey();
-      Cookbook cb = entry.getValue();
-
-      KaramelizedCookbook metadata = CookbookCache.get(cb.getUrls().id);
-      List<Attribute> allValidAttrs = metadata.getMetadataRb().getAttributes();
+    for (KaramelizedCookbook kcb : allCookbooks) {
+      List<Attribute> allValidAttrs = kcb.getMetadataRb().getAttributes();
       Map<String, Object> validUsedAttrs = new HashMap<>();
       for (Attribute att : allValidAttrs) {
         if (usedAttrs.containsKey(att.getName())) {
           validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
         }
       }
-      JsonCookbook jck = new JsonCookbook(cb.getUrls().id, cbAlias, validUsedAttrs);
+      JsonCookbook jck = new JsonCookbook(kcb.getUrls().id, kcb.getMetadataRb().getName(), validUsedAttrs, cache);
       cookbooks.add(jck);
     }
-
+    
     Map<String, Object> invalidAttrs = new HashMap<>();
     invalidAttrs.putAll(usedAttrs);
     for (JsonCookbook jc : cookbooks) {

@@ -9,10 +9,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
@@ -20,6 +20,7 @@ import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
@@ -34,6 +35,8 @@ public class UserClusterDataExtractor {
 
   private static final Logger logger = Logger.getLogger(UserClusterDataExtractor.class);
 
+  private static final CookbookCache cookbookCache = ClusterDefinitionService.cache;
+  
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
     HashSet<String> cbids = new HashSet<>();
@@ -41,14 +44,14 @@ public class UserClusterDataExtractor {
       for (JsonCookbook jc : jg.getCookbooks()) {
         String cbid = jc.getId();
         cbids.add(cbid);
-        CookbookCache.prepareParallel(cbids);
+        cookbookCache.prepareParallel(cbids);
       }
     }
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {
           String cbid = jc.getId();
-          KaramelizedCookbook cb = CookbookCache.get(cbid);
+          KaramelizedCookbook cb = cookbookCache.get(cbid);
           MetadataRb metadataRb = cb.getMetadataRb();
           List<Recipe> recipes = metadataRb.getRecipes();
           for (Recipe recipe : recipes) {

@@ -3,34 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 /**
  * It caches cookbooks' metadata that being read from Github
  */
 package se.kth.karamel.common.cookbookmeta;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
+import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
  *
  * @author kamal
  */
-public class CookbookCache {
+public interface CookbookCache {
+
+  public KaramelizedCookbook readNew(String cookbookUrl) throws KaramelException;
+
+  public KaramelizedCookbook get(String cookbookUrl) throws KaramelException;
+
+  public void prepareParallel(Set<String> cookbookUrls) throws KaramelException;
+
+  public void prepareNewParallel(Set<String> cookbookUrls) throws KaramelException;
   
-  public static Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
-  
-  public static KaramelizedCookbook load(String cookbookUrl) throws KaramelException {
-    KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl, false);
-    cookbooks.put(cookbookUrl, cookbook);
-    return cookbook;
-  }
-  
-  public static KaramelizedCookbook get(String cookbookUrl) throws KaramelException {
-    KaramelizedCookbook cb = cookbooks.get(cookbookUrl);
-    if (cb == null)
-      cb = load(cookbookUrl);
-    return cb;
-  }
+  public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(YamlCluster cluster) throws KaramelException;
 }

@@ -34,6 +34,7 @@ public class DagNode implements DagTaskCallback {
   private DagTask task;
   private Status status = Status.WAITING;
   private int indention = 1;
+  private String label;
 
   public DagNode(String id) {
     this.id = id;
@@ -50,6 +51,10 @@ public class DagNode implements DagTaskCallback {
 
   public Status getStatus() {
     return status;
+  }
+
+  public void setLabel(String label) {
+    this.label = label;
   }
 
   public void setTask(DagTask task) throws DagConstructionException {
@@ -133,16 +138,17 @@ public class DagNode implements DagTaskCallback {
   }
 
   public String printBfs(String prob, String pref, int indention) {
+    String printStat = (label != null) ? label : status.toString();
     if (this.indention > indention || probs.contains(prob)) {
 //      logger.debug(String.format("Prob: %s has already visited %s", prob, id));
-      return pref + "$" + id + "(" + status.toString() + ")";
+      return pref + "$" + id + "(" + printStat + ")";
     } else {
 //      logger.debug(String.format("Prob: %s is visiting %s", prob, id));
     }
     probs.add(prob);
 
     StringBuilder builder = new StringBuilder();
-    builder.append(pref).append("").append(id).append("(").append(status.toString()).append(")");
+    builder.append(pref).append("").append(id).append("(").append(printStat).append(")");
     for (DagNode newTask : successors) {
       builder.append("\n").append(newTask.printBfs(prob, pref + " " + indention + "|", indention + 1));
     }
