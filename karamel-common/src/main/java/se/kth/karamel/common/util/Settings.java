@@ -67,7 +67,7 @@ public class Settings {
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
   public static final String CHEFDK_VERSION_KEY = "chefdk.version";
-  public static final String CHEFDK_VERSION_DEFAULT = "0.8.0";
+  public static final String CHEFDK_VERSION_DEFAULT = "0.16.28";
 
   //-----------------------------------------------JCLOUDS--------------------------------------------------------------
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -232,7 +232,7 @@ public class Settings {
   public static final Pattern REPO_WITH_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)\\/tree\\/([^\\/]*)");
   public static final Pattern REPO_NO_BRANCH_PATTERN = Pattern.compile("([^\\/]*)\\/([^\\/]*)");
   public static final Pattern GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN = Pattern.compile(
-      CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_SUBCOOKBOOK_PATTERN.pattern() + DOLLAR);
+      CARET + GITHUB_BASE_URL_PATTERN + "\\/" + REPO_WITH_SUBCOOKBOOK_PATTERN.pattern() + DOLLAR);
   public static final Pattern GITHUB_REPO_WITH_BRANCH_PATTERN = Pattern.compile(
       CARET + GITHUB_BASE_URL_PATTERN + SLASH + REPO_WITH_BRANCH_PATTERN.pattern() + DOLLAR);
   public static final Pattern GITHUB_REPO_NO_BRANCH_PATTERN = Pattern.compile(

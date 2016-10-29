@@ -5,10 +5,12 @@
  */
 package se.kth.karamel.common.cookbookmeta;
 
+import java.util.regex.Matcher;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
+import static se.kth.karamel.common.util.Settings.GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN;
 
 /**
  *
@@ -465,6 +467,61 @@ public class CookbookUrlsTest {
     CookbookUrls urls1 = builder1.url("testorg/testrepo").
         branchOrVersion("master").cookbookRelPath("cookbooks/testcb").build();
     assertEquals(id, urls1.id);
+    assertEquals(cookbookUrl, urls1.cookbookUrl);
+    assertEquals(repoUrl, urls1.repoUrl);
+    assertEquals(cookbookRawUrl, urls1.cookbookRawUrl);
+    assertEquals(metadataFile, urls1.metadataFile);
+    assertEquals(attFile, urls1.attrFile);
+    assertEquals(karamelFile, urls1.karamelFile);
+    assertEquals(berksFile, urls1.berksFile);
+    assertEquals(orgRepo, urls1.orgRepo);
+    assertEquals(repo, urls1.repoName);
+    assertEquals(branch, urls1.branch);
+  }
+  @Test
+  public void testBuildByIdForValidUrlsWithVersionInClasspath() throws CookbookUrlException {
+    String id = "https://github.com/testorg/testrepo/tree/master";
+    String cookbookUrl = "testgithub/testorg/testrepo";
+    String repoUrl = "testgithub/testorg/testrepo";
+    String cookbookRawUrl = "testgithub/testorg/testrepo/master";
+    String metadataFile = "testgithub/testorg/testrepo/master/metadata.rb";
+    String attFile = "testgithub/testorg/testrepo/master/attributes/default.rb";
+    String karamelFile = "testgithub/testorg/testrepo/master/Karamelfile";
+    String berksFile = "testgithub/testorg/testrepo/master/Berksfile";
+    String orgRepo = "testorg/testrepo";
+    String repo = "testrepo";
+    String branch = "master";
+    Settings.CB_CLASSPATH_MODE = true;
+    CookbookUrls.Builder builder1 = new CookbookUrls.Builder();
+    CookbookUrls urls1 = builder1.buildById(id);
+    assertEquals(cookbookUrl, urls1.cookbookUrl);
+    assertEquals(repoUrl, urls1.repoUrl);
+    assertEquals(cookbookRawUrl, urls1.cookbookRawUrl);
+    assertEquals(metadataFile, urls1.metadataFile);
+    assertEquals(attFile, urls1.attrFile);
+    assertEquals(karamelFile, urls1.karamelFile);
+    assertEquals(berksFile, urls1.berksFile);
+    assertEquals(orgRepo, urls1.orgRepo);
+    assertEquals(repo, urls1.repoName);
+    assertEquals(branch, urls1.branch);
+  }
+  
+  @Test
+  public void testBuildByIdValidUrlsWithVersionAndRekativeCookbookInClasspath() throws CookbookUrlException {
+    String id = "https://github.com/testorg/testrepo/tree/master/cookbooks/testcb";
+    String cookbookUrl = "testgithub/testorg/testrepo/cookbooks/testcb";
+    String repoUrl = "testgithub/testorg/testrepo";
+    String cookbookRawUrl = "testgithub/testorg/testrepo/master/cookbooks/testcb";
+    String metadataFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/metadata.rb";
+    String attFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/attributes/default.rb";
+    String karamelFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/Karamelfile";
+    String berksFile = "testgithub/testorg/testrepo/master/cookbooks/testcb/Berksfile";
+    String orgRepo = "testorg/testrepo";
+    String repo = "testrepo";
+    String branch = "master";
+    Settings.CB_CLASSPATH_MODE = true;
+    CookbookUrls.Builder builder1 = new CookbookUrls.Builder();
+    CookbookUrls urls1 = builder1.buildById(id);
     assertEquals(cookbookUrl, urls1.cookbookUrl);
     assertEquals(repoUrl, urls1.repoUrl);
     assertEquals(cookbookRawUrl, urls1.cookbookRawUrl);

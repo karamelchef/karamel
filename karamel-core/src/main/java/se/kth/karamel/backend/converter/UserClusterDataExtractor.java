@@ -36,7 +36,7 @@ public class UserClusterDataExtractor {
   private static final Logger logger = Logger.getLogger(UserClusterDataExtractor.class);
 
   private static final CookbookCache cookbookCache = ClusterDefinitionService.CACHE;
-  
+
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
     HashSet<String> cbids = new HashSet<>();
@@ -128,18 +128,17 @@ public class UserClusterDataExtractor {
     return provider;
   }
 
-  public static String makeVendorPath(JsonCluster cluster) throws KaramelException {
+  public static String makeVendorPath(List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
     Set<String> paths = new HashSet<>();
-    for (JsonGroup gr : cluster.getGroups()) {
-      for (JsonCookbook cb : gr.getCookbooks()) {
-        CookbookUrls urls = cb.getUrls();
-        String cookbookPath = urls.repoName;
-        if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
-          cookbookPath += Settings.SLASH + urls.cookbookRelPath;
-        }
-        paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
-            + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+    for (KaramelizedCookbook kcb : rootCookbooks) {
+      CookbookUrls urls = kcb.getUrls();
+      String cookbookPath = urls.repoName;
+      if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
+        cookbookPath += Settings.SLASH + urls.cookbookRelPath;
       }
+      paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
+          + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+
     }
     Object[] arr = paths.toArray();
     StringBuilder buffer = new StringBuilder();
