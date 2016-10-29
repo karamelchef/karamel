@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
-import org.junit.Ignore;
-import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
  *
@@ -251,7 +249,7 @@ public class ClusterDefinitionTest {
     assertEquals("flink", cookbooks.get(1).getName());
   }
 
-  @Test
+//  @Test
   public void testCompactClusterDefinition() throws IOException, KaramelException {
     Settings.CB_CLASSPATH_MODE = false;
     String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/hopsworks_compact.yml");

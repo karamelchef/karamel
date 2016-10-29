@@ -29,6 +29,7 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -149,11 +150,15 @@ public class CookbookCacheIml implements CookbookCache {
       String id = node.getId();
       boolean found = false;
       for (KaramelizedCookbook kcb : kcbs) {
-        if (kcb.getUrls().id.equals(id))
+        if (kcb.getUrls().id.equals(id)) {
           roots.add(kcb);
+          found = true;
+          break;
+        }
       }
       if (!found) {
-        throw new NoKaramelizedCookbookException("A root cookbook is not loaded/karamelized " + id);
+        throw new NoKaramelizedCookbookException("Could not load a root cookbook, "
+            + "make sure it is correctly karamelized " + id);
       }
     }
     return roots;
@@ -183,7 +188,7 @@ public class CookbookCacheIml implements CookbookCache {
     return loadAllKaramelizedCookbooks(cluster.getName(), toLoad, new Dag());
   }
 
-  private List<KaramelizedCookbook> loadAllKaramelizedCookbooks(String clusterName, Set<String> toLoad, Dag dag) 
+  private List<KaramelizedCookbook> loadAllKaramelizedCookbooks(String clusterName, Set<String> toLoad, Dag dag)
       throws KaramelException {
     Set<String> loaded = new HashSet<>();
     List<KaramelizedCookbook> all = new ArrayList<>();
@@ -201,26 +206,30 @@ public class CookbookCacheIml implements CookbookCache {
           dag.updateLabel(tl, "OK");
         }
       }
-      loaded.addAll(toLoad);
-      loaded.removeAll(problematics);
-      toLoad.clear();
-
-      for (String cbid : loaded) {
+      toLoad.removeAll(problematics);
+      Set<String> depsToLoad = new HashSet();
+      for (String cbid : toLoad) {
         KaramelizedCookbook kc = get(cbid);
         all.add(kc);
-        Map<String, Cookbook> deps = kc.getBerksFile().getDeps();
-        for (Cookbook cb : deps.values()) {
-          String depId = cb.getUrls().id;
-          dag.addDependency(cbid, depId);
-          if (!loaded.contains(depId) && !problematics.contains(depId)) {
-            toLoad.add(depId);
+        if (!Settings.CB_CLASSPATH_MODE) {
+          Map<String, Cookbook> deps = kc.getBerksFile().getDeps();
+          for (Cookbook cb : deps.values()) {
+            String depId = cb.getUrls().id;
+            dag.addDependency(cbid, depId);
+            if (!loaded.contains(depId) && !problematics.contains(depId)) {
+              depsToLoad.add(depId);
+            }
           }
         }
       }
+      loaded.addAll(toLoad);
+      toLoad.clear();
+      toLoad.addAll(depsToLoad);
+
     }
-    logger.info("################## COOKBOOK TRANSIENT DEPENDENCIES ############");
+    logger.info(String.format("################## COOKBOOK TRANSIENT DEPENDENCIES FOR %s ############", clusterName));
     logger.info(dag.print());
-    logger.info("###############################################################");
+    logger.info("############################################################################");
     return all;
   }
 }

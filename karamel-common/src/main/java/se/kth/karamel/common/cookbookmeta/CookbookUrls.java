@@ -103,8 +103,8 @@ public class CookbookUrls {
       return this;
     }
 
-    public CookbookUrls buildById(String url) throws CookbookUrlException {
-      if (url.isEmpty()) {
+    public CookbookUrls buildById(String id) throws CookbookUrlException {
+      if (id.isEmpty()) {
         throw new CookbookUrlException("Cookbook id is empty.");
       }
       this.id = id.trim();
@@ -115,7 +115,7 @@ public class CookbookUrls {
     public CookbookUrls build() throws CookbookUrlException {
       if (id != null) {
         //id based data extraction
-        Matcher matcher = REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(id);
+        Matcher matcher = GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(id);
         if (matcher.matches()) {
           org = matcher.group(1);
           repo = matcher.group(2);
