@@ -9,9 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.Scope;
 import se.kth.karamel.common.cookbookmeta.Attribute;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
@@ -27,15 +25,15 @@ import se.kth.karamel.common.cookbookmeta.CookbookCache;
 public class JsonScope extends Scope {
 
   private final List<JsonCookbook> cookbooks = new ArrayList<>();
+  public static CookbookCache CACHE;
   
   public JsonScope() {
   }
 
-  public JsonScope(YamlCluster cluster, YamlScope scope, CookbookCache cache) throws KaramelException {
+  public JsonScope(YamlCluster cluster, YamlScope scope) throws KaramelException {
     super(scope);
     Map<String, Object> usedAttrs = cluster.flattenAttrs();
-    List<KaramelizedCookbook> allCookbooks = cache.loadAllKaramelizedCookbooks(cluster);
-    Set<Map.Entry<String, Cookbook>> cks = cluster.getCookbooks().entrySet();
+    List<KaramelizedCookbook> allCookbooks = CACHE.loadAllKaramelizedCookbooks(cluster);
     //filtering invalid(not defined in metadata.rb) attributes from yaml model
     for (KaramelizedCookbook kcb : allCookbooks) {
       List<Attribute> allValidAttrs = kcb.getMetadataRb().getAttributes();
@@ -45,7 +43,8 @@ public class JsonScope extends Scope {
           validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
         }
       }
-      JsonCookbook jck = new JsonCookbook(kcb.getUrls().id, kcb.getMetadataRb().getName(), validUsedAttrs, cache);
+      JsonCookbook jck = new JsonCookbook(kcb.getUrls().id, kcb.getMetadataRb().getName(), 
+          kcb.getMetadataRb().getName(), validUsedAttrs);
       cookbooks.add(jck);
     }
     

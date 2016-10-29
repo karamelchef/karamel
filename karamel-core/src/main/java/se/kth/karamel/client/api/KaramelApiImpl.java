@@ -91,7 +91,7 @@ public class KaramelApiImpl implements KaramelApi {
   public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
     Set<String> urls = new HashSet<>();
     urls.add(cookbookUrl);
-    CookbookCache cache = ClusterDefinitionService.cache;
+    CookbookCache cache = ClusterDefinitionService.CACHE;
     if (refresh) {
       cache.prepareNewParallel(urls);
       KaramelizedCookbook cb = cache.get(cookbookUrl);

@@ -35,7 +35,7 @@ public class UserClusterDataExtractor {
 
   private static final Logger logger = Logger.getLogger(UserClusterDataExtractor.class);
 
-  private static final CookbookCache cookbookCache = ClusterDefinitionService.cache;
+  private static final CookbookCache cookbookCache = ClusterDefinitionService.CACHE;
   
   public static String clusterLinks(JsonCluster cluster, ClusterRuntime clusterEntity) throws KaramelException {
     StringBuilder builder = new StringBuilder();
@@ -132,7 +132,7 @@ public class UserClusterDataExtractor {
     Set<String> paths = new HashSet<>();
     for (JsonGroup gr : cluster.getGroups()) {
       for (JsonCookbook cb : gr.getCookbooks()) {
-        CookbookUrls urls = cb.getKaramelizedCookbook().getUrls();
+        CookbookUrls urls = cb.getUrls();
         String cookbookPath = urls.repoName;
         if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
           cookbookPath += Settings.SLASH + urls.cookbookRelPath;

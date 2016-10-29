@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -27,14 +26,14 @@ public class JsonCluster extends JsonScope {
   public JsonCluster() {
   }
 
-  public JsonCluster(YamlCluster cluster, CookbookCache cache) throws KaramelException {
-    super(cluster, cluster, cache);
+  public JsonCluster(YamlCluster cluster) throws KaramelException {
+    super(cluster, cluster);
     this.name = cluster.getName();
     Set<Map.Entry<String, YamlGroup>> entrySet = cluster.getGroups().entrySet();
     for (Map.Entry<String, YamlGroup> entry : entrySet) {
       String gName = entry.getKey();
       YamlGroup group = entry.getValue();
-      JsonGroup jsonGroup = new JsonGroup(cluster, group, gName, cache);
+      JsonGroup jsonGroup = new JsonGroup(cluster, group, gName);
       this.groups.add(jsonGroup);
     }
 

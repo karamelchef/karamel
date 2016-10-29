@@ -17,7 +17,11 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.backend.dag.DagNode;
 import se.kth.karamel.common.clusterdef.Cookbook;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonCookbook;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.exception.KaramelException;
@@ -31,12 +35,12 @@ import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
  * @author kamal
  */
 public class CookbookCacheIml implements CookbookCache {
-  
+
   private static final Logger logger = Logger.getLogger(CookbookCacheIml.class);
-  
+
   public Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
   public Set<String> problematics = new HashSet<>();
-  
+
   @Override
   public KaramelizedCookbook readNew(String cookbookUrl) throws KaramelException {
     if (problematics.contains(cookbookUrl)) {
@@ -52,7 +56,7 @@ public class CookbookCacheIml implements CookbookCache {
           String.format("Cookbook should problem in the metadata '%s'", cookbookUrl), e);
     }
   }
-  
+
   @Override
   public KaramelizedCookbook get(String cookbookUrl) throws KaramelException {
     if (!problematics.contains(cookbookUrl)) {
@@ -65,7 +69,7 @@ public class CookbookCacheIml implements CookbookCache {
       throw new NoKaramelizedCookbookException(String.format("Cookbook has problem in the metadata '%s'", cookbookUrl));
     }
   }
-  
+
   @Override
   public synchronized void prepareParallel(Set<String> urlsToPrepare) throws KaramelException {
     Set<String> allUrls = new HashSet<>();
@@ -81,7 +85,6 @@ public class CookbookCacheIml implements CookbookCache {
       }
     }
     Map<String, String> contents = IoUtils.readContentParallel(allUrls, ClusterService.SHARED_GLOBAL_TP);
-    System.out.println(contents.size());
     for (String cookbookUrl : urlsToPrepare) {
       KaramelizedCookbook cb = cookbooks.get(cookbookUrl);
       if (cb == null) {
@@ -100,7 +103,7 @@ public class CookbookCacheIml implements CookbookCache {
       }
     }
   }
-  
+
   @Override
   public void prepareNewParallel(Set<String> cookbookUrls) throws KaramelException {
     Set<String> allUrls = new HashSet<>();
@@ -126,22 +129,69 @@ public class CookbookCacheIml implements CookbookCache {
       }
     }
   }
-  
+
+  @Override
+  public List<KaramelizedCookbook> loadRootKaramelizedCookbooks(JsonCluster jsonCluster) throws KaramelException {
+    List<JsonGroup> jsonGroups = jsonCluster.getGroups();
+    Set<String> toLoad = new HashSet<>();
+    for (JsonGroup jsonGroup : jsonGroups) {
+      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
+        toLoad.add(cb.getId());
+      }
+    }
+    for (JsonCookbook cb : jsonCluster.getCookbooks()) {
+      toLoad.add(cb.getId());
+    }
+    Dag dag = new Dag();
+    List<KaramelizedCookbook> kcbs = loadAllKaramelizedCookbooks(jsonCluster.getName(), toLoad, dag);
+    List<KaramelizedCookbook> roots = new ArrayList<>();
+    for (DagNode node : dag.findRootNodes()) {
+      String id = node.getId();
+      boolean found = false;
+      for (KaramelizedCookbook kcb : kcbs) {
+        if (kcb.getUrls().id.equals(id))
+          roots.add(kcb);
+      }
+      if (!found) {
+        throw new NoKaramelizedCookbookException("A root cookbook is not loaded/karamelized " + id);
+      }
+    }
+    return roots;
+  }
+
+  @Override
+  public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(JsonCluster jsonCluster) throws KaramelException {
+    List<JsonGroup> jsonGroups = jsonCluster.getGroups();
+    Set<String> toLoad = new HashSet<>();
+    for (JsonGroup jsonGroup : jsonGroups) {
+      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
+        toLoad.add(cb.getId());
+      }
+    }
+    for (JsonCookbook cb : jsonCluster.getCookbooks()) {
+      toLoad.add(cb.getId());
+    }
+    return loadAllKaramelizedCookbooks(jsonCluster.getName(), toLoad, new Dag());
+  }
+
   @Override
   public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(YamlCluster cluster) throws KaramelException {
     Set<String> toLoad = new HashSet<>();
-    Dag dag = new Dag();
-    
     for (Cookbook cb : cluster.getCookbooks().values()) {
       toLoad.add(cb.getUrls().id);
     }
+    return loadAllKaramelizedCookbooks(cluster.getName(), toLoad, new Dag());
+  }
+
+  private List<KaramelizedCookbook> loadAllKaramelizedCookbooks(String clusterName, Set<String> toLoad, Dag dag) 
+      throws KaramelException {
     Set<String> loaded = new HashSet<>();
     List<KaramelizedCookbook> all = new ArrayList<>();
-    
+
     int level = 0;
-    
+
     while (!toLoad.isEmpty()) {
-      logger.info(String.format("%d-level cookbooks for %s is %d", level++, cluster.getName(), toLoad.size()));
+      logger.info(String.format("%d-level cookbooks for %s is %d", level++, clusterName, toLoad.size()));
       prepareParallel(toLoad);
       for (String tl : toLoad) {
         dag.addNode(tl);
@@ -154,7 +204,7 @@ public class CookbookCacheIml implements CookbookCache {
       loaded.addAll(toLoad);
       loaded.removeAll(problematics);
       toLoad.clear();
-      
+
       for (String cbid : loaded) {
         KaramelizedCookbook kc = get(cbid);
         all.add(kc);
@@ -168,7 +218,9 @@ public class CookbookCacheIml implements CookbookCache {
         }
       }
     }
-    System.out.println(dag.print());
+    logger.info("################## COOKBOOK TRANSIENT DEPENDENCIES ############");
+    logger.info(dag.print());
+    logger.info("###############################################################");
     return all;
   }
 }

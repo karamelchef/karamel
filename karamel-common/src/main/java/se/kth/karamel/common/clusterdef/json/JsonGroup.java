@@ -17,7 +17,6 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.RecipeNotfoundException;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
-import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -32,8 +31,8 @@ public class JsonGroup extends JsonScope {
   public JsonGroup() {
   }
 
-  public JsonGroup(YamlCluster cluster, YamlGroup group, String name, CookbookCache cache) throws KaramelException {
-    super(cluster, group, cache);
+  public JsonGroup(YamlCluster cluster, YamlGroup group, String name) throws KaramelException {
+    super(cluster, group);
     setName(name);
     this.size = group.getSize();
     List<String> recipes = group.getRecipes();

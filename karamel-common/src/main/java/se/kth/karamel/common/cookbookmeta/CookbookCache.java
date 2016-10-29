@@ -10,6 +10,7 @@ package se.kth.karamel.common.cookbookmeta;
 
 import java.util.List;
 import java.util.Set;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -26,6 +27,11 @@ public interface CookbookCache {
   public void prepareParallel(Set<String> cookbookUrls) throws KaramelException;
 
   public void prepareNewParallel(Set<String> cookbookUrls) throws KaramelException;
+
+  public List<KaramelizedCookbook> loadRootKaramelizedCookbooks(JsonCluster cluster) throws KaramelException;
   
   public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(YamlCluster cluster) throws KaramelException;
+
+  public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(JsonCluster cluster) throws KaramelException;
+  
 }

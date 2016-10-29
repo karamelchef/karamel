@@ -22,7 +22,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.client.api.CookbookCacheIml;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
@@ -99,7 +98,7 @@ public class DagBuilder {
     for (RunRecipeTask task : allRecipeTasks.values()) {
       cbids.add(task.getCookbookId());
     }
-    CookbookCache cache =  ClusterDefinitionService.cache;
+    CookbookCache cache =  ClusterDefinitionService.CACHE;
     cache.prepareParallel(cbids);
     for (RunRecipeTask task : allRecipeTasks.values()) {
       String tid = task.uniqueId();
@@ -148,11 +147,10 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
           for (JsonRecipe rec : jc.getRecipes()) {
             JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
             addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, clusterStats, map, json1, submitter,
-                urls.id, jc.getName(), allRecipeTasks, dag);
+                jc.getId(), jc.getName(), allRecipeTasks, dag);
           }
         }
       }
@@ -223,7 +221,7 @@ public class DagBuilder {
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
+          CookbookUrls urls = jc.getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
               Settings.REMOTE_CB_VENDOR_PATH,
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
@@ -270,7 +268,7 @@ public class DagBuilder {
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
         for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getKaramelizedCookbook().getUrls();
+          CookbookUrls urls = jc.getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
               Settings.REMOTE_CB_VENDOR_PATH,
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
