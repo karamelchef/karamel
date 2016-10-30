@@ -11,8 +11,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 
 /**
  *
@@ -22,23 +22,25 @@ public class JsonCookbook {
 
   String id;
   String alias;
+  String name;
   //values of attrs could be string or array of string 
   Map<String, Object> attrs = new HashMap<>();
   Set<JsonRecipe> recipes = new HashSet<>();
   @JsonIgnore
   KaramelizedCookbook karamelizedCookbook;
-
+  
   public JsonCookbook() {
   }
 
-  public JsonCookbook(String id, String alias, Map<String, Object> attrs) {
+  public JsonCookbook(String id, String alias, String name, Map<String, Object> attrs) {
     this.id = id;
     this.alias = alias;
+    this.name = name;
     this.attrs = attrs;
   }
 
   public String getName() throws KaramelException {
-    return getKaramelizedCookbook().getMetadataRb().getName();
+    return name;
   }
 
   public String getId() {
@@ -73,11 +75,10 @@ public class JsonCookbook {
     this.recipes = recipes;
   }
 
-  public KaramelizedCookbook getKaramelizedCookbook() throws KaramelException {
-    if (karamelizedCookbook == null) {
-      karamelizedCookbook = CookbookCache.get(id);
-    }
-    return karamelizedCookbook;
+  public CookbookUrls getUrls() throws KaramelException {
+    CookbookUrls.Builder builder = new CookbookUrls.Builder();
+    CookbookUrls urls = builder.buildById(id);
+    return urls;
   }
 
 }

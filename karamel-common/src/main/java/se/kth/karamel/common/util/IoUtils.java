@@ -11,12 +11,16 @@ import com.google.common.io.Resources;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 /**
  *
@@ -24,7 +28,7 @@ import java.util.concurrent.ExecutorService;
  */
 public class IoUtils {
 
-  static class Worker extends Thread {
+  static class Worker implements Runnable {
 
     ConcurrentHashMap<String, String> map;
     String url;
@@ -67,15 +71,18 @@ public class IoUtils {
   public static Map<String, String> readContentParallel(Set<String> paths, ExecutorService tp) {
     ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
     Set<Worker> workers = new HashSet<>();
+    Collection<Future<?>> futures = new LinkedList<>();
+
     for (String path : paths) {
       Worker worker = new Worker(map, path);
       workers.add(worker);
-      tp.execute(worker);
+      futures.add(tp.submit(worker));
     }
-    for (Worker worker : workers) {
+    for (Future<?> future : futures) {
       try {
-        worker.join();
+        future.get();
       } catch (InterruptedException ex) {
+      } catch (ExecutionException ex) {
       }
     }
     return map;

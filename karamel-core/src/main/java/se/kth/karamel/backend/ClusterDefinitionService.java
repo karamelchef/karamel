@@ -42,7 +42,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Endpoint;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.client.api.CookbookCache;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonRecipe;
@@ -53,6 +52,9 @@ import se.kth.karamel.common.cookbookmeta.Recipe;
 import se.kth.karamel.common.exception.InconsistentDeploymentException;
 import se.kth.karamel.common.exception.TablespoonNotfoundException;
 import se.kth.karamel.common.exception.ValidationException;
+import se.kth.karamel.client.api.CookbookCacheIml;
+import se.kth.karamel.common.clusterdef.json.JsonScope;
+import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -60,6 +62,13 @@ import se.kth.karamel.common.exception.ValidationException;
  * @author kamal
  */
 public class ClusterDefinitionService {
+
+  public static final CookbookCache CACHE = new CookbookCacheIml();
+
+  static {
+    JsonScope.CACHE = CACHE;
+    YamlCluster.CACHE = CACHE;
+  }
 
   public static String jsonToYaml(JsonCluster jsonCluster) throws KaramelException {
     YamlCluster yamlCluster = new YamlCluster(jsonCluster);
@@ -71,15 +80,24 @@ public class ClusterDefinitionService {
     options.setPrettyFlow(true);
     options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
     YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
-    yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Nova.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Occi.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(YamlCluster.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Ec2.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Baremetal.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Gce.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Nova.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Occi.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Cookbook.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(YamlGroup.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(HashSet.class, Tag.MAP);
     Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
     String content = yaml.dump(yamlCluster);
     return content;
@@ -149,13 +167,15 @@ public class ClusterDefinitionService {
 
   public static String jsonToYaml(String json) throws KaramelException {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
+    );
     return jsonToYaml(jsonCluster);
   }
 
   public static JsonCluster jsonToJsonObject(String json) throws KaramelException {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
+    );
     return jsonCluster;
   }
 
@@ -165,9 +185,11 @@ public class ClusterDefinitionService {
     return jsonCluster;
   }
 
-  public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {
+  public static YamlCluster
+      yamlToYamlObject(String ymlString) throws KaramelException {
     try {
-      Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
+      Yaml yaml = new Yaml(new Constructor(YamlCluster.class
+      ));
       Object document = yaml.load(ymlString);
       return ((YamlCluster) document);
     } catch (ScannerException ex) {
@@ -245,14 +267,14 @@ public class ClusterDefinitionService {
       for (JsonCookbook jc : jg.getCookbooks()) {
         String cbid = jc.getId();
         cbids.add(cbid);
-        CookbookCache.prepareParallel(cbids);
+        CACHE.prepareParallel(cbids);
       }
     }
     for (JsonGroup jg : cluster.getGroups()) {
       for (JsonCookbook jc : jg.getCookbooks()) {
         for (JsonRecipe rec : jc.getRecipes()) {
           String cbid = jc.getId();
-          KaramelizedCookbook cb = CookbookCache.get(cbid);
+          KaramelizedCookbook cb = CACHE.get(cbid);
           MetadataRb metadataRb = cb.getMetadataRb();
           List<Recipe> recipes = metadataRb.getRecipes();
           for (Recipe recipe : recipes) {
@@ -329,18 +351,17 @@ public class ClusterDefinitionService {
     return provider;
   }
 
-  public static String makeVendorPath(JsonCluster cluster) throws KaramelException {
+  public static String makeVendorPath(List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
     Set<String> paths = new HashSet<>();
-    for (JsonGroup gr : cluster.getGroups()) {
-      for (JsonCookbook cb : gr.getCookbooks()) {
-        CookbookUrls urls = cb.getKaramelizedCookbook().getUrls();
-        String cookbookPath = urls.repoName;
-        if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
-          cookbookPath += Settings.SLASH + urls.cookbookRelPath;
-        }
-        paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
-            + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+    for (KaramelizedCookbook kcb : rootCookbooks) {
+      CookbookUrls urls = kcb.getUrls();
+      String cookbookPath = urls.repoName;
+      if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
+        cookbookPath += Settings.SLASH + urls.cookbookRelPath;
       }
+      paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
+          + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
+
     }
     Object[] arr = paths.toArray();
     StringBuilder buffer = new StringBuilder();

@@ -26,6 +26,7 @@ import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
@@ -41,14 +42,16 @@ public class RunRecipeTask extends Task {
   private String json;
   private final String cookbookId;
   private final String cookbookName;
+  private final List<KaramelizedCookbook> rookCookbooks;
 
   public RunRecipeTask(String dagName, MachineRuntime machine, ClusterStats clusterStats, String recipe, String json, 
-      TaskSubmitter submitter, String cookbookId, String cookbookName) {
+      TaskSubmitter submitter, String cookbookId, String cookbookName, List<KaramelizedCookbook> rookCookbooks) {
     super(dagName, recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
     this.cookbookId = cookbookId;
     this.cookbookName = cookbookName;
+    this.rookCookbooks = rookCookbooks;
   }
 
   /**
@@ -170,8 +173,10 @@ public class RunRecipeTask extends Task {
     String installId = installRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
     String purgeId = purgeRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
     if (uniqueId().equals(installId) || uniqueId().equals(purgeId)) {
-      String id = VendorCookbookTask.makeUniqueId(getMachineId(), cookbookId);
-      deps.add(id);
+      for (KaramelizedCookbook kcb : rookCookbooks) {
+        String id = VendorCookbookTask.makeUniqueId(getMachineId(), kcb.getUrls().id);
+        deps.add(id);
+      }
     } else {
       deps.add(installId);
     }

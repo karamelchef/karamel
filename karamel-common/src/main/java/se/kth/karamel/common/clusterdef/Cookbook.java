@@ -5,8 +5,8 @@
  */
 package se.kth.karamel.common.clusterdef;
 
-import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
+import se.kth.karamel.common.exception.CookbookUrlException;
 
 /**
  *
@@ -61,7 +61,7 @@ public class Cookbook {
     this.cookbook = cookbook;
   }
   
-  public CookbookUrls getUrls() throws KaramelException {
+  public CookbookUrls getUrls() throws CookbookUrlException {
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
     builder.url(github);
     if (branch != null)

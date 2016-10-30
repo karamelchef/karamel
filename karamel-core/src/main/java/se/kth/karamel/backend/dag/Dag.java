@@ -1,4 +1,4 @@
- /*
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -33,12 +33,10 @@ public class Dag {
     return name;
   }
 
-  public void addNode(String nodeId) throws DagConstructionException {
-    if (allNodes.containsKey(nodeId)) {
-      throw new DagConstructionException(String.format("Node '%s' has been created once", nodeId));
+  public void addNode(String nodeId) {
+    if (!allNodes.containsKey(nodeId)) {
+      allNodes.put(nodeId, new DagNode(nodeId));
     }
-
-    allNodes.put(nodeId, new DagNode(nodeId));
   }
 
   public void addTasks(DagTask... taks) throws DagConstructionException {
@@ -91,6 +89,16 @@ public class Dag {
       allNodes.put(next, nextNode);
     }
     return firstNode.addSuccessor(nextNode);
+  }
+
+  public void updateLabel(String nodeId, String label) throws DagConstructionException {
+    DagNode node = allNodes.get(nodeId);
+    if (node != null) {
+      node.setLabel(label);
+    } else {
+      throw new DagConstructionException(
+          String.format("Node '%s' does not exist in the dag to update its label to '%s'", nodeId, label));
+    }
   }
 
   public void start() throws DagConstructionException {

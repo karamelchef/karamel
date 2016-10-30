@@ -137,9 +137,9 @@ public class ClusterDefinitionTest {
     Map<String, Cookbook> cookbooks = cluster.getCookbooks();
     assertTrue(cookbooks.containsKey("kagent"));
     Cookbook cookbook = cookbooks.get("kagent");
-    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, "kagent", new HashMap<String, Object>());
-    assertEquals("testorg/testrepo", jc.getKaramelizedCookbook().getUrls().orgRepo);
-    assertEquals("cookbooks/kagent-chef", jc.getKaramelizedCookbook().getUrls().cookbookRelPath);
+    JsonCookbook jc = new JsonCookbook(cookbook.getUrls().id, "kagent", "kagent", new HashMap<String, Object>());
+    assertEquals("testorg/testrepo", jc.getUrls().orgRepo);
+    assertEquals("cookbooks/kagent-chef", jc.getUrls().cookbookRelPath);
   }
 
   @Test
@@ -273,5 +273,13 @@ public class ClusterDefinitionTest {
     List<JsonCookbook> cookbooks = jsonCluster.getCookbooks();
     assertEquals(2, cookbooks.size());
     assertEquals("flink", cookbooks.get(1).getName());
+  }
+
+//  @Test
+  public void testCompactClusterDefinition() throws IOException, KaramelException {
+    Settings.CB_CLASSPATH_MODE = false;
+    String yaml = IoUtils.readContentFromClasspath("se/kth/karamel/client/model/test-definitions/hopsworks_compact.yml");
+    String json = ClusterDefinitionService.yamlToJson(yaml);
+    System.out.println(json);
   }
 }

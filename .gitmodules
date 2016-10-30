@@ -1,6 +1,6 @@
 [submodule "honeytap"]
 	path = honeytap
-	url = git@github.com:ashansa/honeytap.git
+	url = git@github.com:karamelchef/honeytap.git
 [submodule "tablespoon"]
 	path = tablespoon
-	url = https://github.com/hwesterb/tablespoon
+	url = git@github.com:karamelchef/tablespoon.git

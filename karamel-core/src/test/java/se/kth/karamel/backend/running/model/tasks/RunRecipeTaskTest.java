@@ -9,6 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import java.util.Collections;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -135,7 +136,7 @@ public class RunRecipeTaskTest {
     MachineRuntime mr = new MachineRuntime(null);
     mr.setPublicIp("1111");
     ClusterStats clusterStats = new ClusterStats();
-    RunRecipeTask instance = new RunRecipeTask("test dag", mr, clusterStats, "", "", null, "", "");
+    RunRecipeTask instance = new RunRecipeTask("test dag", mr, clusterStats, "", "", null, "", "", Collections.EMPTY_LIST);
     JsonObject result = instance.merge(obj.getAsJsonObject(), param.getAsJsonObject());
     String modifiedJson = new Gson().toJson(result);
     System.out.println(modifiedJson);

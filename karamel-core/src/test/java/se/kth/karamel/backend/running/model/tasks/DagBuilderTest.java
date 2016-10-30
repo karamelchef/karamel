@@ -19,8 +19,6 @@ import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
-import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.backend.running.model.tasks.DagBuilder;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
@@ -174,8 +172,9 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("find os-type on namenodes1", "apt-get essentials on namenodes1"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install collectl on namenodes1"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on namenodes1", "install tablespoon agent on namenodes1"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install berkshelf on namenodes1"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install chefdk on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on namenodes1", "make solo.rb on namenodes1"));
+
     Assert.assertTrue(dag.hasDependency("make solo.rb on namenodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1", "flink::install on namenodes1"));
     Assert.assertTrue(dag.hasDependency("flink::install on namenodes1", "flink::jobmanager on namenodes1"));
@@ -187,8 +186,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("find os-type on datanodes1", "apt-get essentials on datanodes1"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install collectl on datanodes1"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on datanodes1", "install tablespoon agent on datanodes1"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install berkshelf on datanodes1"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install chefdk on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on datanodes1", "make solo.rb on datanodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1", "flink::install on datanodes1"));
     Assert.assertTrue(dag.hasDependency("flink::install on datanodes1", "flink::taskmanager on datanodes1"));
@@ -199,8 +198,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("find os-type on datanodes2", "apt-get essentials on datanodes2"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install collectl on datanodes2"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on datanodes2", "install tablespoon agent on datanodes2"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install berkshelf on datanodes2"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes2", "make solo.rb on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install chefdk on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on datanodes2", "make solo.rb on datanodes2"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes2", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2", "flink::install on datanodes2"));
     Assert.assertTrue(dag.hasDependency("flink::install on datanodes2", "flink::taskmanager on datanodes2"));
@@ -259,8 +258,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("prepare storages on namenodes1", "apt-get essentials on namenodes1"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install collectl on namenodes1"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on namenodes1", "install tablespoon agent on namenodes1"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install berkshelf on namenodes1"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on namenodes1", "make solo.rb on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on namenodes1", "install chefdk on namenodes1"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on namenodes1", "make solo.rb on namenodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on namenodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on namenodes1", "flink::install on namenodes1"));
     Assert.assertTrue(dag.hasDependency("flink::install on namenodes1", "flink::jobmanager on namenodes1"));
@@ -273,8 +272,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("find os-type on datanodes1", "apt-get essentials on datanodes1"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install collectl on datanodes1"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on datanodes1", "install tablespoon agent on datanodes1"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install berkshelf on datanodes1"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes1", "make solo.rb on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes1", "install chefdk on datanodes1"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on datanodes1", "make solo.rb on datanodes1"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes1", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes1", "flink::install on datanodes1"));
     Assert.assertTrue(dag.hasDependency("flink::install on datanodes1", "flink::taskmanager on datanodes1"));
@@ -286,8 +285,8 @@ public class DagBuilderTest {
     Assert.assertTrue(dag.hasDependency("find os-type on datanodes2", "apt-get essentials on datanodes2"));
 //    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install collectl on datanodes2"));
 //    Assert.assertTrue(dag.hasDependency("install collectl on datanodes2", "install tablespoon agent on datanodes2"));
-    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install berkshelf on datanodes2"));
-    Assert.assertTrue(dag.hasDependency("install berkshelf on datanodes2", "make solo.rb on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("apt-get essentials on datanodes2", "install chefdk on datanodes2"));
+    Assert.assertTrue(dag.hasDependency("install chefdk on datanodes2", "make solo.rb on datanodes2"));
     Assert.assertTrue(dag.hasDependency("make solo.rb on datanodes2", "clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2"));
     Assert.assertTrue(dag.hasDependency("clone and vendor https://github.com/testorg/testrepo/tree/master/cookbooks/flink-chef on datanodes2", "flink::install on datanodes2"));
     Assert.assertTrue(dag.hasDependency("flink::install on datanodes2", "flink::taskmanager on datanodes2"));

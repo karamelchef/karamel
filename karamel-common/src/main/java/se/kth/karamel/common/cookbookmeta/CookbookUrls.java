@@ -103,8 +103,8 @@ public class CookbookUrls {
       return this;
     }
 
-    public CookbookUrls buildById(String url) throws CookbookUrlException {
-      if (url.isEmpty()) {
+    public CookbookUrls buildById(String id) throws CookbookUrlException {
+      if (id.isEmpty()) {
         throw new CookbookUrlException("Cookbook id is empty.");
       }
       this.id = id.trim();
@@ -115,13 +115,28 @@ public class CookbookUrls {
     public CookbookUrls build() throws CookbookUrlException {
       if (id != null) {
         //id based data extraction
-        Matcher matcher = REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(id);
+        boolean found = false;
+        Matcher matcher = GITHUB_REPO_WITH_SUBCOOKBOOK_PATTERN.matcher(id);
         if (matcher.matches()) {
           org = matcher.group(1);
           repo = matcher.group(2);
           branch = matcher.group(3);
           cookbookRelPath = matcher.group(4);
-        } else {
+          found = true;
+        }
+
+        if (!found) {
+          matcher = GITHUB_REPO_WITH_BRANCH_PATTERN.matcher(id);
+          if (matcher.matches()) {
+            org = matcher.group(1);
+            repo = matcher.group(2);
+            branch = matcher.group(3);
+            found = true;
+          }
+
+        }
+
+        if (!found) {
           throw new CookbookUrlException(String.format("'%s' is not a valid cookbook id, it must be the following "
               + "format: \n'http(s)://github.com/<org>/<repo>/tree/<branch or version>/<cookbook-relative-path>'", id));
         }

@@ -24,9 +24,9 @@ import se.kth.karamel.common.util.Settings;
  */
 public class ChefJsonGeneratorTest {
 
-    @Test
+  @Test
   public void testGenerateClusterChefJsonsForPurge() throws KaramelException {
-    Settings.CB_CLASSPATH_MODE = true; 
+    Settings.CB_CLASSPATH_MODE = true;
     String jsonString = "  {\"name\":\"MySqlCluster\","
         + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
         + "\"attrs\":{\"ndb/DataMemory\":"
@@ -63,7 +63,7 @@ public class ChefJsonGeneratorTest {
 
   @Test
   public void testGenerateClusterChefJsonsForInstallation() throws KaramelException {
-    Settings.CB_CLASSPATH_MODE = true; 
+    Settings.CB_CLASSPATH_MODE = true;
     String jsonString = "  {\"name\":\"MySqlCluster\","
         + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
         + "\"attrs\":{\"ndb/DataMemory\":"
@@ -96,7 +96,7 @@ public class ChefJsonGeneratorTest {
 
   @Test
   public void testEncodingInAttributes() throws KaramelException {
-    Settings.CB_CLASSPATH_MODE = true; 
+    Settings.CB_CLASSPATH_MODE = true;
     //Related to https://github.com/karamelchef/karamel/issues/72
     String jsonString = "  {\"name\":\"MySqlCluster\","
         + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
@@ -129,7 +129,7 @@ public class ChefJsonGeneratorTest {
 
   @Test
   public void testArrayAttribtuesInChefJsons() throws KaramelException {
-    Settings.CB_CLASSPATH_MODE = true; 
+    Settings.CB_CLASSPATH_MODE = true;
     String jsonString = "  {\"name\":\"MySqlCluster\","
         + "\"cookbooks\":[{\"id\":\"https://github.com/testorg/testrepo/tree/master/cookbooks/hopshadoop/ndb-chef\","
         + "\"attrs\":{\"ndb/DataMemory\":"

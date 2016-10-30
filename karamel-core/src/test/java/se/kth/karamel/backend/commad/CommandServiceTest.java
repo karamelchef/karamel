@@ -6,6 +6,8 @@
 package se.kth.karamel.backend.commad;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterDefinitionService;
@@ -14,6 +16,7 @@ import se.kth.karamel.backend.command.CommandService;
 import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
+import static se.kth.karamel.common.util.Settings.REPO_WITH_SUBCOOKBOOK_PATTERN;
 
 /**
  *
