@@ -15,6 +15,7 @@ import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
 import se.kth.karamel.common.exception.RecipeParseException;
 import se.kth.karamel.common.exception.ValidationException;
 
@@ -44,18 +45,24 @@ public class KaramelizedCookbook {
    * @throws CookbookUrlException
    * @throws MetadataParseException
    * @throws se.kth.karamel.common.exception.ValidationException
+   * @throws se.kth.karamel.common.exception.NoKaramelizedCookbookException
    */
   public KaramelizedCookbook(String homeUrl, boolean local) throws CookbookUrlException, MetadataParseException,
-      ValidationException {
+      ValidationException, NoKaramelizedCookbookException {
     if (local) {
       Settings.USE_CLONED_REPO_FILES = true;
     }
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
     this.urls = builder.url(homeUrl).build();
+    String karamelFileC;
+    try {
+      karamelFileC = IoUtils.readContent(urls.karamelFile);
+    } catch (IOException e) {
+      throw new NoKaramelizedCookbookException(e);
+    }
     try {
       String defaultRbC = IoUtils.readContent(urls.attrFile);
       String metadataRbC = IoUtils.readContent(urls.metadataFile);
-      String karamelFileC = IoUtils.readContent(urls.karamelFile);
       String berksfileC = IoUtils.readContent(urls.berksFile);
       this.defaultRb = new DefaultRb(defaultRbC);
       this.metadataRb = MetadataParser.parse(metadataRbC);

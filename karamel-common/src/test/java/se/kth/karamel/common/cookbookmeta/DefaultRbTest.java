@@ -11,6 +11,7 @@ import org.junit.Test;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
+import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -20,7 +21,7 @@ import se.kth.karamel.common.exception.ValidationException;
 public class DefaultRbTest {
 
   @Test
-  public void testLoadAttributes() throws CookbookUrlException, MetadataParseException, ValidationException {
+  public void testLoadAttributes() throws CookbookUrlException, MetadataParseException, ValidationException, NoKaramelizedCookbookException {
     Settings.CB_CLASSPATH_MODE = true;
     KaramelizedCookbook cb = new KaramelizedCookbook("testorg/testrepo/tree/master/cookbooks/biobankcloud/hiway-chef", false);
     DefaultRb defaultRb = cb.getDefaultRb();

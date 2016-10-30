@@ -36,6 +36,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import se.kth.karamel.client.api.CookbookCacheIml;
+import se.kth.karamel.common.clusterdef.json.JsonScope;
+import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
  * Stores/reads cluster definitions from Karamel home folder, does conversions between yaml and json definitions.
@@ -43,6 +46,13 @@ import java.util.List;
  * @author kamal
  */
 public class ClusterDefinitionService {
+
+  public static final CookbookCache CACHE = new CookbookCacheIml();
+
+  static {
+    JsonScope.CACHE = CACHE;
+    YamlCluster.CACHE = CACHE;
+  }
 
   public static String jsonToYaml(JsonCluster jsonCluster) throws KaramelException {
     YamlCluster yamlCluster = new YamlCluster(jsonCluster);
@@ -54,15 +64,24 @@ public class ClusterDefinitionService {
     options.setPrettyFlow(true);
     options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
     YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
-    yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Nova.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Occi.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
-    yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(YamlCluster.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Ec2.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Baremetal.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Gce.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Nova.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Occi.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(Cookbook.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(YamlGroup.class, Tag.MAP);
+    yamlPropertyRepresenter
+        .addClassTag(HashSet.class, Tag.MAP);
     Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
     String content = yaml.dump(yamlCluster);
     return content;
@@ -132,13 +151,15 @@ public class ClusterDefinitionService {
 
   public static String jsonToYaml(String json) throws KaramelException {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
+    );
     return jsonToYaml(jsonCluster);
   }
 
   public static JsonCluster jsonToJsonObject(String json) throws KaramelException {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
+    );
     return jsonCluster;
   }
 
@@ -149,9 +170,11 @@ public class ClusterDefinitionService {
     return jsonCluster;
   }
 
-  public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {
+  public static YamlCluster
+      yamlToYamlObject(String ymlString) throws KaramelException {
     try {
-      Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
+      Yaml yaml = new Yaml(new Constructor(YamlCluster.class
+      ));
       Object document = yaml.load(ymlString);
       return ((YamlCluster) document);
     } catch (ScannerException ex) {

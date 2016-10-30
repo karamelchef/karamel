@@ -1,0 +1,74 @@
+name: HopsWorksOneNodeBaremetal
+baremetal:
+    username: vagrant
+
+cookbooks:                                                                      
+  hopsworks:                                                                     
+    github: "hopshadoop/hopsworks-chef"
+    branch: "master"  
+
+attrs:
+  hops:
+    dir: "/mnt"    
+    use_hopsworks: "true"
+  apache_hadoop:
+    dir: "/mnt"    
+    hdfs:
+        user: glassfish
+    yarn: 
+        user: glassfish
+    mr: 
+        user: glassfish
+  hadoop_spark:
+    user: glassfish
+    dir: "/srv"    
+  drelephant:
+    dir: "/mnt"
+    user: glassfish
+  ntp:
+    install: "true"
+  flink:
+    user: glassfish
+    dir: "/mnt"    
+  ndb:
+    dir: "/mnt"
+  mysql:
+    dir: "/mnt"
+  hopsworks:
+    master:
+       password: "adminpw"
+  zeppelin:
+    user: glassfish
+    dir: "/mnt"
+  kagent:
+    enabled: "true"
+
+groups: 
+  hopsworks:
+    size: 1 
+    baremetal:
+        ip: 192.168.33.11
+    recipes: 
+        - kagent
+        - ndb::mgmd
+        - ndb::ndbd
+        - ndb::mysqld                                                       
+        - hops::ndb
+        - hops::rm
+        - hops::nn
+        - hops::dn
+        - hops::nm
+        - hops::jhs
+        - hadoop_spark::yarn
+        - hadoop_spark::historyserver
+        - flink::yarn
+        - elastic
+        - livy
+        - zeppelin
+        - kzookeeper
+        - kkafka
+        - drelephant
+        - epipe
+        - hopsworks
+        - kibana
+        - hopsmonitor

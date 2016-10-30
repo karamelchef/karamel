@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.util.StringUtils;
@@ -28,16 +29,11 @@ public class Berksfile {
 
   private static final Logger logger = Logger.getLogger(Berksfile.class);
   private final List<String> fileLines;
-  private final Map<String, String> deps = new HashMap<>();
-  private final Map<String, String> branches = new HashMap<>();
-  public static Pattern LINE_PATTERN_WITH_TAG = Pattern.compile(
-      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*tag\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_WITH_VERSION = Pattern.compile(
-      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*version\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_WITH_BRANCH = Pattern.compile(
-      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)',\\s*branch\\s*:\\s*'([^,^'^\"]*)'");
-  public static Pattern LINE_PATTERN_BASIC = Pattern.compile(
-      "cookbook\\s*'([^,^'^\"]*)'\\s*,\\s*github\\s*:\\s*'([^,^'^\"]*)'");
+  private final Map<String, Cookbook> deps = new HashMap<>();
+  public static Pattern LINE_PATTERN = Pattern.compile(
+      "^cookbook\\s*(\\'[^,^'^\\\"]+\\'|\\\"[^,^'^\\\"]+\\\")\\s*,"
+      + "\\s*github\\s*:\\s*(\\'[^,^'^\\\"]+\\'|\\\"[^,^'^\\\"]+\\\")\\s*"
+      + "(,\\s*(branch|tag|version)\\s*:\\s*(\\'[^,^'^\\\"]+\\'|\\\"[^,^'^\\\"]+\\\")\\s*)?$");
   public static Set<String> validUrls = new HashSet<>();
 
   public Berksfile(String content) throws CookbookUrlException {
@@ -46,53 +42,33 @@ public class Berksfile {
     validateGithubUrls();
   }
 
-  public Map<String, String> getDeps() {
+  public Map<String, Cookbook> getDeps() {
     return deps;
-  }
-
-  public Map<String, String> getBranches() {
-    return branches;
   }
 
   private void loadDependencies() {
     for (String line : fileLines) {
-      boolean found = false;
       String cbName = null;
       String cbUrl = null;
       String branch = null;
-      Matcher matcher = LINE_PATTERN_WITH_TAG.matcher(line);
-      if (!found && matcher.matches()) {
-        found = true;
-        cbName = matcher.group(1);
-        cbUrl = matcher.group(2);
-        branch = matcher.group(3);
-      }
-      matcher = LINE_PATTERN_WITH_BRANCH.matcher(line);
+      Matcher matcher = LINE_PATTERN.matcher(line);
       if (matcher.matches()) {
-        found = true;
         cbName = matcher.group(1);
+        cbName = cbName.replaceAll("'|\"", "");
         cbUrl = matcher.group(2);
-        branch = matcher.group(3);
-      }
-      matcher = LINE_PATTERN_WITH_VERSION.matcher(line);
-      if (matcher.matches()) {
-        found = true;
-        cbName = matcher.group(1);
-        cbUrl = matcher.group(2);
-        branch = matcher.group(3);
-      }
-      matcher = LINE_PATTERN_BASIC.matcher(line);
-      if (matcher.matches()) {
-        found = true;
-        cbName = matcher.group(1);
-        cbUrl = matcher.group(2);
-        branch = Settings.GITHUB_DEFAULT_BRANCH;
+        cbUrl = cbUrl.replaceAll("'|\"", "");
+        if (matcher.group(3) != null) {
+          branch = matcher.group(5);
+          branch = branch.replaceAll("'|\"", "");
+        } else {
+          branch = Settings.GITHUB_DEFAULT_BRANCH;
+        }
+        Cookbook cb = new Cookbook();
+        cb.setGithub(cbUrl);
+        cb.setBranch(branch);
+        deps.put(cbName, cb);
       }
 
-      if (found) {
-        deps.put(cbName, cbUrl);
-        branches.put(cbName, branch);
-      }
     }
   }
 
@@ -102,13 +78,10 @@ public class Berksfile {
       return;
     }
 
-    for (Map.Entry<String, String> entry : deps.entrySet()) {
+    for (Map.Entry<String, Cookbook> entry : deps.entrySet()) {
       String name = entry.getKey();
-      String address = entry.getValue();
-      String branch = branches.get(name);
-      CookbookUrls.Builder builder = new CookbookUrls.Builder();
-      CookbookUrls urls = builder.url(address).branchOrVersion(branch).build();
-      String homeUrl = urls.cookbookUrl;
+      Cookbook cb = entry.getValue();
+      String homeUrl = cb.getUrls().cookbookUrl;
       String errorMsg = String.format("Cookbook-dependency '%s' doesn't refer to a valid url in Berksfile", name);
       try {
         if (validUrls.contains(homeUrl)) {
