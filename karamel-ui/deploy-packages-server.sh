@@ -39,7 +39,7 @@ mv $dist ${dist}-linux
 mkdir ${dist}-jar
 cp karamel-ui-${version}-shaded.jar ${dist}-jar/karamel-ui-${version}.jar
 cp -r appassembler/conf/* ${dist}-jar/ 
-cp ../README.jar ${dist}-jar/README.txt 
+cp ../README.linux ${dist}-jar/README.txt 
 mkdir ${dist}-jar/examples
 cd ../../../karamel-examples
 git checkout-index -a -f --prefix=../karamel/karamel-ui/target/${dist}-jar/examples/
