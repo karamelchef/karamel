@@ -86,6 +86,7 @@ public final class NovaLauncher extends Launcher{
     String accessKey = confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter());
     String endpoint = confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter());
     String novaRegion = confs.getProperty(NovaSetting.NOVA_REGION.getParameter());
+    String novaNetworkId = confs.getProperty(NovaSetting.NOVA_NETWORKID.getParameter());
     NovaCredentials novaCredentials = null;
     if (accountId != null && !accountId.isEmpty() && accessKey != null && !accessKey.isEmpty()
             && endpoint != null && !endpoint.isEmpty() && novaRegion != null && !novaRegion.isEmpty()) {
@@ -94,6 +95,7 @@ public final class NovaLauncher extends Launcher{
       novaCredentials.setAccountPass(accessKey);
       novaCredentials.setEndpoint(endpoint);
       novaCredentials.setRegion(novaRegion);
+      novaCredentials.setNetworkId(novaNetworkId);
     }
     return novaCredentials;
   }
@@ -313,7 +315,8 @@ public final class NovaLauncher extends Launcher{
       NovaTemplateOptions options = templateOptions.as(NovaTemplateOptions.class)
               .keyPairName(keypairName)
               .autoAssignFloatingIp(true)
-              .nodeNames(toBeForkedVmNames);
+              .nodeNames(toBeForkedVmNames)
+              .networks(novaContext.getNovaCredentials().getNetworkId());
 
       template.options(options);
       template.os64Bit(true);

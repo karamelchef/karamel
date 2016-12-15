@@ -416,6 +416,7 @@ function Nova() {
   this.flavor = null;
   this.username = null;
   this.image = null;
+  this.networkId = null;
   this.accountName = null;
   this.accountPass = null;
 
@@ -423,12 +424,14 @@ function Nova() {
     this.flavor = other.flavor || null;
     this.username = other.username || null;
     this.image = other.image || null;
+    this.networkId = other.networkId || null;
   };
 
   this.copy = function(other) {
     this.flavor = other.flavor || null;
     this.username = other.username || null;
     this.image = other.image || null;
+    this.networkId = other.networkId || null;
   };
 
   this.addAccountDetails = function(other) {

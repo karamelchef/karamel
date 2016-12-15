@@ -39,7 +39,8 @@ public class LoadNovaCredentials extends AbstractCall {
       provider.setAccountPass((credentials == null) ? "" : credentials.getAccountPass());
       provider.setEndpoint((credentials == null) ? "" : credentials.getEndpoint());
       provider.setRegion((credentials == null) ? "" : credentials.getRegion());
-
+      provider.setNetworkId((credentials == null) ? "" : credentials.getNetworkId());
+      
       response = Response.status(Response.Status.OK).entity(provider).build();
     } catch (KaramelException e) {
       response = buildExceptionResponse(e);;

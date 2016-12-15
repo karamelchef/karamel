@@ -8,6 +8,7 @@ public class NovaJSON {
   private String accountPass;
   private String endpoint;
   private String region;
+  private String networkId;
 
   public String getAccountName() {
     return accountName;
@@ -39,5 +40,13 @@ public class NovaJSON {
 
   public void setRegion(String region) {
     this.region = region;
+  }
+  
+  public String getNetworkId() {
+    return networkId;
+  }
+
+  public void setNetworkId(String networkId) {
+    this.networkId = networkId;
   }
 }

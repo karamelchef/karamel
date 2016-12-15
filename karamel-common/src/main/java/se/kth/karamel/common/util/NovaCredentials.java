@@ -9,7 +9,16 @@ public class NovaCredentials {
   private String accountPass;
   private String endpoint;
   private String region;
+  private String networkId;
 
+  public String getNetworkId() {
+    return networkId;
+  }
+
+  public void setNetworkId(String id) {
+    this.networkId = id;
+  }
+  
   public String getRegion() {
     return region;
   }

@@ -20,6 +20,7 @@ public enum NovaSetting {
   NOVA_ACCOUNT_ID_KEY("nova.account.id"),
   NOVA_ACCOUNT_ENDPOINT("nova.account.endpoint"),
   NOVA_REGION("nova.region"),
+  NOVA_NETWORKID("nova.networkid"),
   NOVA_ACCESSKEY_KEY("nova.access.key"),
   NOVA_KEYPAIR_NAME_KEY("nova.keypair.name"),
   NOVA_RETRY_INTERVAL("5000"),
