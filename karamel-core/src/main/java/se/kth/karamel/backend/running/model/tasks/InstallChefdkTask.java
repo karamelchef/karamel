@@ -38,6 +38,7 @@ public class InstallChefdkTask extends Task {
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "osfamily", osType.family.toString().toLowerCase(),
+          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
     }

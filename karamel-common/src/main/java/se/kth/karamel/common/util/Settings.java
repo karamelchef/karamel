@@ -167,14 +167,14 @@ public class Settings {
   public static final String GCE_UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
     return (networkName + "-" + protocol + port).toLowerCase();
   }
-  
+
   //--------------------------------------OCCI Engine---------------------------------------------------------
   public static final String OCCI_DEFAULT_USERNAME = "ubuntu";
-  public static final String  OCCI_DEFAULT_ENDPOINT = "https://carach5.ics.muni.cz:11443";
+  public static final String OCCI_DEFAULT_ENDPOINT = "https://carach5.ics.muni.cz:11443";
   public static final String OCCI_DEFAULT_IMAGE = "uuid_training_ubuntu_server_12_04_lts_fedcloud_warg_122";
   public static final String OCCI_DEFAULT_IMAGE_SIZE = "atlas";
   public static final String OCCI_USER_CERTIFICATE_PATH = "/tmp/x509up_u1000";
-  public static final String  OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
+  public static final String OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
   public static final List<String> OCCI_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
 
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
@@ -253,6 +253,7 @@ public class Settings {
   public final static String REMOTE_CHEFJSON_PRIVATEIPS_TAG = "private_ips";
   public final static String REMOTE_CHEFJSON_PUBLICIPS_TAG = "public_ips";
   public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
+  public static final String REMOTE_WORKING_DIR = ".karamel";
 
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
@@ -281,16 +282,20 @@ public class Settings {
     return REMOTE_HOME_ROOT + "/" + sshUserName;
   }
 
-  public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + "/" + SUCCEED_TASKLIST_FILENAME;
+  public static String REMOTE_WORKING_DIR(String sshUserName) {
+    return REMOTE_USER_HOME(sshUserName) + "/" + REMOTE_WORKING_DIR;
   }
-  
+
+  public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
+    return REMOTE_WORKING_DIR(sshUserName) + "/" + SUCCEED_TASKLIST_FILENAME;
+  }
+
   public static String REMOTE_OSTYPE_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + "/"+ OSTYPE_FILE_NAME;
+    return REMOTE_WORKING_DIR(sshUserName) + "/" + OSTYPE_FILE_NAME;
   }
 
   public static String REMOTE_PIDFILE_PATH(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + "/" + PID_FILE_NAME;
+    return REMOTE_WORKING_DIR(sshUserName) + "/" + PID_FILE_NAME;
   }
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
@@ -377,11 +382,11 @@ public class Settings {
   public static String MACHINE_SUCCEEDTASKS_PATH(String clusterName, String machineIp) {
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + SUCCEED_TASKLIST_FILENAME;
   }
-  
+
   public static String MACHINE_OSTYPE_PATH(String clusterName, String machineIp) {
     return MACHINE_TEMP_FOLDER(clusterName, machineIp) + File.separator + OSTYPE_FILE_NAME;
   }
-  
+
   public static String RECIPE_RESULT_LOCAL_PATH(String recipeName, String clusterName, String machineIp) {
     String recName;
     if (!recipeName.contains(COOKBOOK_DELIMITER)) {

@@ -36,6 +36,7 @@ public abstract class Task implements DagTask, TaskCallback {
   private final String name;
   private final String id;
   private final String machineId;
+  private final String sshUser;
   protected List<ShellCommand> commands;
   private final MachineRuntime machine;
   private final String uuid;
@@ -53,6 +54,7 @@ public abstract class Task implements DagTask, TaskCallback {
     this.id = id;
     this.idempotent = idempotent;
     this.machineId = machine.getId();
+    this.sshUser = machine.getSshUser();
     this.machine = machine;
     this.uuid = UUID.randomUUID().toString();
     this.clusterStats = clusterStats;
@@ -75,6 +77,10 @@ public abstract class Task implements DagTask, TaskCallback {
     return machineId;
   }
 
+  public String getSshUser() {
+    return sshUser;
+  }
+  
   public String getName() {
     return name;
   }

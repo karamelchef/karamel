@@ -1,4 +1,4 @@
-echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 set -eo pipefail
 UNAME=$(uname | tr \"[:upper:]\" \"[:lower:]\")
 # If Linux, try to determine specific distribution
@@ -13,5 +13,5 @@ if [ \"$UNAME\" == \"linux\" ]; then
     fi
 fi
 echo "$DISTRO" > %ostype_filename%
-cd ~ && echo '%task_id%' > %succeedtasks_filepath%
+echo '%task_id%' > %succeedtasks_filepath%
 ' > %ostype_filename%.sh ; chmod +x %ostype_filename%.sh ; ./%ostype_filename%.sh

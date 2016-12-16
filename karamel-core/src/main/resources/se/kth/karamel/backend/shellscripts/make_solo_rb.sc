@@ -1,4 +1,4 @@
-echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 set -eo pipefail
 %sudo_command% touch solo.rb
 %sudo_command% chmod 777 solo.rb

@@ -32,6 +32,7 @@ public class MakeSoloRbTask extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
+          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),
           "cookbooks_path", vendorPath,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME);

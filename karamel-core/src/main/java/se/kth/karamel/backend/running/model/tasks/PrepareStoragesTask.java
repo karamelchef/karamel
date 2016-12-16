@@ -40,6 +40,7 @@ public class PrepareStoragesTask extends Task {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPET_PATH_PREPARE_STORAGE,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
+          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),          
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "device_mountpoint_tuple", tuple.toString(),
           "pid_file", Settings.PID_FILE_NAME

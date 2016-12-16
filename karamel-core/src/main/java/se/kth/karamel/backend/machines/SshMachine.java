@@ -206,7 +206,7 @@ public class SshMachine implements MachineInterface, Runnable {
   public void killTaskSession(Task task) {
     if (activeTask == task) {
       logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
-      KillSessionTask killTask = new KillSessionTask();
+      KillSessionTask killTask = new KillSessionTask(machineEntity);
       killing = true;
       runTask(killTask);
     } else {

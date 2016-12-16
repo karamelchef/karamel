@@ -1,4 +1,4 @@
-echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
 if [ %osfamily% == "redhat" ] ; then
   chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
@@ -26,5 +26,5 @@ else
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
  exit 1
 fi
-echo '%task_id%' >> ~/%succeedtasks_filepath%
+echo '%task_id%' >> %succeedtasks_filepath%
 ' > install-chefdk.sh ; chmod +x install-chefdk.sh ; ./install-chefdk.sh

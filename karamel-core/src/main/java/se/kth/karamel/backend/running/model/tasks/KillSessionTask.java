@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.util.Settings;
 
 /**
@@ -17,8 +18,8 @@ import se.kth.karamel.common.util.Settings;
  */
 public class KillSessionTask extends Task {
 
-  public KillSessionTask() {
-    super("kill session", "kill session", false, null, null, null);
+  public KillSessionTask(MachineRuntime machine) {
+    super("kill session", "kill session", false, machine, null, null);
   }
 
   @Override
@@ -26,6 +27,7 @@ public class KillSessionTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_KILL_RUNNING_SESSION,
           "sudo_command", getSudoCommand(),
+          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),
           "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
