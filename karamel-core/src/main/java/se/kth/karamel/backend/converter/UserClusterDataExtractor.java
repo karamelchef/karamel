@@ -128,17 +128,12 @@ public class UserClusterDataExtractor {
     return provider;
   }
 
-  public static String makeVendorPath(List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
+  public static String makeVendorPath(String sshUser, List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
     Set<String> paths = new HashSet<>();
     for (KaramelizedCookbook kcb : rootCookbooks) {
       CookbookUrls urls = kcb.getUrls();
       String cookbookPath = urls.repoName;
-      if (urls.cookbookRelPath != null && !urls.cookbookRelPath.isEmpty()) {
-        cookbookPath += Settings.SLASH + urls.cookbookRelPath;
-      }
-      paths.add(Settings.REMOTE_CB_VENDOR_PATH + Settings.SLASH + cookbookPath + Settings.SLASH
-          + Settings.REMOTE_CB_VENDOR_SUBFOLDER);
-
+      paths.add(Settings.REMOTE_COOKBOOK_VENDOR_PATH(sshUser, cookbookPath));
     }
     Object[] arr = paths.toArray();
     StringBuilder buffer = new StringBuilder();

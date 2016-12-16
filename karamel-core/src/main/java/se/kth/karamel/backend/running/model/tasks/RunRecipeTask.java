@@ -119,7 +119,7 @@ public class RunRecipeTask extends Task {
           "log_file_name", jsonFileName,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),
+          "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
     }

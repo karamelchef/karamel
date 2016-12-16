@@ -55,10 +55,10 @@ public class VendorCookbookTask extends Task {
           "cookbook_path", cookbookPath,
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
-          "vendor_subfolder", Settings.REMOTE_CB_VENDOR_SUBFOLDER,
+          "vendor_path", Settings.REMOTE_COOKBOOK_VENDOR_PATH(getSshUser(), githubRepoName),
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
-          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),          
+          "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),          
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);
     }

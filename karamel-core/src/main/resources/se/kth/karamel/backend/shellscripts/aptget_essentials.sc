@@ -1,4 +1,4 @@
-mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 if [ %osfamily% == "redhat" ] ; then
 %sudo_command% perl -pi -e "s/Defaults\s*requiretty/#Defaults   requiretty/g" /etc/sudoers
 %sudo_command% systemctl stop firewalld

@@ -27,7 +27,7 @@ public class KillSessionTask extends Task {
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_KILL_RUNNING_SESSION,
           "sudo_command", getSudoCommand(),
-          "working_dir_path", Settings.REMOTE_WORKING_DIR(getSshUser()),
+          "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;

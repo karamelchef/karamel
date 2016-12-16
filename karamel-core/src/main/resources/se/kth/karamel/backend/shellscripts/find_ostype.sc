@@ -1,4 +1,4 @@
-mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 set -eo pipefail
 UNAME=$(uname | tr \"[:upper:]\" \"[:lower:]\")
 # If Linux, try to determine specific distribution

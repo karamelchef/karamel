@@ -235,7 +235,7 @@ public class DagBuilder {
         for (KaramelizedCookbook rcb : rootCookbooks) {
           CookbookUrls urls = rcb.getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
-              Settings.REMOTE_CB_VENDOR_PATH,
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()),
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
@@ -286,7 +286,7 @@ public class DagBuilder {
         for (KaramelizedCookbook rcb : rootCookbooks) {
           CookbookUrls urls = rcb.getUrls();
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
-              Settings.REMOTE_CB_VENDOR_PATH,
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()),
               urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
@@ -327,9 +327,9 @@ public class DagBuilder {
       TaskSubmitter submitter, Dag dag, List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
     String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
-    String vendorPath = UserClusterDataExtractor.makeVendorPath(rootCookbooks);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
+        String vendorPath = UserClusterDataExtractor.makeVendorPath(me.getSshUser(), rootCookbooks);
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
         dag.addTask(findOs);
         Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());

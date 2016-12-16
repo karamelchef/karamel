@@ -1,4 +1,4 @@
-mkdir -p %working_dir_path% ; cd %working_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
+mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
 for i in %device_mountpoint_tuple% ; do 
 

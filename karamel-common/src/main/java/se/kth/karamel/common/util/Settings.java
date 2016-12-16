@@ -246,15 +246,15 @@ public class Settings {
   public static final String SUCCEED_TASKLIST_FILENAME = "succeed_list";
 
   //--------------------------------Target Macines----------------------------------------------------------------------
-  public static final String REMOTE_CB_VENDOR_PATH = "/tmp/cookbooks";
+  public static final String REMOTE_COOKBOOKS_DIR_NAME = "cookbooks";
   public static final String REMOTE_HOME_ROOT = "/home";
-  public static final String REMOTE_CB_VENDOR_SUBFOLDER = "berks-cookbooks";
   public static final String REMOTE_CB_FS_PATH_DELIMITER = "__";
   public final static String REMOTE_CHEFJSON_PRIVATEIPS_TAG = "private_ips";
   public final static String REMOTE_CHEFJSON_PUBLICIPS_TAG = "public_ips";
   public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
-  public static final String REMOTE_WORKING_DIR = ".karamel";
-
+  public static final String REMOTE_WORKING_DIR_NAME = ".karamel";
+  public static final String REMOTE_INSTALL_DIR_NAME = "install";
+  
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
     if (!recipeName.contains(COOKBOOK_DELIMITER)) {
@@ -278,24 +278,36 @@ public class Settings {
     return Settings.SYSTEM_TMP_FOLDER_PATH + "/" + recName.replace(COOKBOOK_DELIMITER, "_");
   }
 
-  public static String REMOTE_USER_HOME(String sshUserName) {
+  public static String REMOTE_USER_HOME_PATH(String sshUserName) {
     return REMOTE_HOME_ROOT + "/" + sshUserName;
   }
 
-  public static String REMOTE_WORKING_DIR(String sshUserName) {
-    return REMOTE_USER_HOME(sshUserName) + "/" + REMOTE_WORKING_DIR;
+  public static String REMOTE_WORKING_DIR_PATH(String sshUserName) {
+    return REMOTE_USER_HOME_PATH(sshUserName) + "/" + REMOTE_WORKING_DIR_NAME;
+  }
+  
+  public static String REMOTE_INSTALL_DIR_PATH(String sshUserName) {
+    return REMOTE_WORKING_DIR_PATH(sshUserName) + "/" + REMOTE_INSTALL_DIR_NAME;
+  }
+
+  public static String REMOTE_COOKBOOKS_PATH(String sshUserName) {
+    return REMOTE_WORKING_DIR_PATH(sshUserName) + "/" + REMOTE_COOKBOOKS_DIR_NAME;
+  }
+  
+  public static String REMOTE_COOKBOOK_VENDOR_PATH(String sshUserName, String repoName) {
+    return REMOTE_COOKBOOKS_PATH(sshUserName) + "/" + repoName + "_vendor";
   }
 
   public static String REMOTE_SUCCEEDTASKS_PATH(String sshUserName) {
-    return REMOTE_WORKING_DIR(sshUserName) + "/" + SUCCEED_TASKLIST_FILENAME;
+    return REMOTE_INSTALL_DIR_PATH(sshUserName) + "/" + SUCCEED_TASKLIST_FILENAME;
   }
 
   public static String REMOTE_OSTYPE_PATH(String sshUserName) {
-    return REMOTE_WORKING_DIR(sshUserName) + "/" + OSTYPE_FILE_NAME;
+    return REMOTE_INSTALL_DIR_PATH(sshUserName) + "/" + OSTYPE_FILE_NAME;
   }
 
   public static String REMOTE_PIDFILE_PATH(String sshUserName) {
-    return REMOTE_WORKING_DIR(sshUserName) + "/" + PID_FILE_NAME;
+    return REMOTE_INSTALL_DIR_PATH(sshUserName) + "/" + PID_FILE_NAME;
   }
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
