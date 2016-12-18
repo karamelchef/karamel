@@ -23,6 +23,7 @@ import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
 import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.calls.definition.FetchCookbook;
@@ -198,7 +199,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
         String jsonTxt = karamelApi.yamlToJson(yamlTxt);
         
-        karamelApi.loadSshKeysIfExist();
+        SshKeyPair pair = karamelApi.loadSshKeysIfExist();
+        karamelApi.registerSshKeys(pair);
         
         karamelApi.startCluster(jsonTxt);
 
