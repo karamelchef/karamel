@@ -23,7 +23,6 @@ import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
 import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.calls.definition.FetchCookbook;
@@ -60,7 +59,6 @@ import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.SystemTray;
 import java.io.BufferedReader;
-import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -77,7 +75,7 @@ import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
-      KaramelServiceApplication.class);
+    KaramelServiceApplication.class);
 
   private static KaramelApi karamelApi;
 
@@ -107,13 +105,13 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
-        .hasArg()
-        .withDescription("Dropwizard configuration in a YAML file")
-        .create("server"));
+      .hasArg()
+      .withDescription("Dropwizard configuration in a YAML file")
+      .create("server"));
     options.addOption(OptionBuilder.withArgName("yamlFile")
-        .hasArg()
-        .withDescription("Karamel cluster definition in a YAML file")
-        .create("launch"));
+      .hasArg()
+      .withDescription("Karamel cluster definition in a YAML file")
+      .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
   }
@@ -196,59 +194,24 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       if (cli) {
         // Try to open and read the yaml file. 
         // Print error msg if invalid file or invalid YAML.
-        try {
-          yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
-          YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
-          String jsonTxt = karamelApi.yamlToJson(yamlTxt);
-          boolean valid = false;
-          Ec2Credentials credentials = karamelApi.loadEc2CredentialsIfExist();
+        yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
+        YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
+        String jsonTxt = karamelApi.yamlToJson(yamlTxt);
+        boolean valid = false;
+        karamelApi.startCluster(jsonTxt);
 
-          Console c = null;
-          if (credentials == null) {
-            c = System.console();
-            if (c == null) {
-              System.err.println("No console available.");
-              System.exit(1);
-            }
-          }
-          String ec2AccountId = null;
-          String ec2AccessKey = null;
-          while (!valid) {
-            if (ec2AccountId == null || ec2AccountId.isEmpty()) {
-              ec2AccountId = c.readLine("Enter your Ec2 Access Key:");
-            }
-            if (ec2AccessKey == null || ec2AccessKey.isEmpty()) {
-              char[] secretKeyChars = c.readPassword("Enter your Ec2 Secret Key:");
-              ec2AccessKey = new String(secretKeyChars);
-            }
-            credentials = new Ec2Credentials();
-            credentials.setAccessKey(ec2AccountId);
-            credentials.setSecretKey(ec2AccessKey);
-            valid = karamelApi.updateEc2CredentialsIfValid(credentials);
-            if (!valid) {
-              logger.info("Invalid Ec2 Credentials. Try again.");
-              ec2AccountId = null;
-              ec2AccessKey = null;
-            }
-          }
-          karamelApi.startCluster(jsonTxt);
-
-          long ms1 = System.currentTimeMillis();
-          while (ms1 + 6000000 > System.currentTimeMillis()) {
-            String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
-            logger.debug(clusterStatus);
-            Thread.currentThread().sleep(30000);
-          }
-        } catch (KaramelException e) {
-          System.err.println("Inalid yaml file; " + e.getMessage());
-          System.exit(-1);
-        } catch (IOException e) {
-          System.err.println("Could not find or parse yaml file.");
-          System.exit(-1);
+        long ms1 = System.currentTimeMillis();
+        while (ms1 + 6000000 > System.currentTimeMillis()) {
+          String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
+          logger.debug(clusterStatus);
+          Thread.currentThread().sleep(30000);
         }
       }
     } catch (ParseException e) {
       usage(-1);
+    } catch (KaramelException e) {
+      System.err.println("Inalid yaml file; " + e.getMessage());
+      System.exit(-2);
     }
 
     if (!cli) {
@@ -291,21 +254,21 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class
     ), true, "/*");
     filter.setInitParameter(
-        "allowedOrigins", "*"); // allowed origins comma separated
+      "allowedOrigins", "*"); // allowed origins comma separated
     filter.setInitParameter(
-        "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+      "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
     filter.setInitParameter(
-        "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
+      "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
     filter.setInitParameter(
-        "preflightMaxAge", "5184000"); // 2 months
+      "preflightMaxAge", "5184000"); // 2 months
     filter.setInitParameter(
-        "allowCredentials", "true");
+      "allowCredentials", "true");
 
     environment.jersey()
-        .setUrlPattern("/api/*");
+      .setUrlPattern("/api/*");
 
     environment.healthChecks()
-        .register("template", healthCheck);
+      .register("template", healthCheck);
 
     //definitions
     environment.jersey().register(new YamlToJson(karamelApi));
@@ -348,11 +311,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     //Openstack nova
     environment.jersey().register(new LoadNovaCredentials(karamelApi));
     environment.jersey().register(new ValidateNovaCredentials(karamelApi));
-    
+
     //occi
     environment.jersey().register(new LoadOcciCredentials(karamelApi));
-    environment.jersey().register(new ValidateOcciCredentials(karamelApi));    
-    
+    environment.jersey().register(new ValidateOcciCredentials(karamelApi));
+
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);
 
@@ -418,7 +381,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     } else {
       System.err.println("Brower UI could not be launched using Java's Desktop library. "
-          + "Are you running a window manager?");
+        + "Are you running a window manager?");
       System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
       System.err.println("Retrying to launch the browser now using a different method.");
       BareBonesBrowserLaunch.openURL(uri.toASCIIString());
