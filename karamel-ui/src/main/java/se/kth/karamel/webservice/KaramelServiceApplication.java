@@ -197,7 +197,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
         YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
         String jsonTxt = karamelApi.yamlToJson(yamlTxt);
-        boolean valid = false;
+        
+        karamelApi.loadSshKeysIfExist();
+        
         karamelApi.startCluster(jsonTxt);
 
         long ms1 = System.currentTimeMillis();
