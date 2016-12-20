@@ -199,7 +199,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
         String jsonTxt = karamelApi.yamlToJson(yamlTxt);
         
-        SshKeyPair pair = karamelApi.loadSshKeysIfExist();
+        SshKeyPair pair = new SshKeyPair();
+        pair.setPrivateKeyPath("/home/vagrant/.ssh/id_rsa");
+        pair.setPublicKeyPath("/home/vagrant/.ssh/id_rsa.pub");
+//      SshKeyPair pair = karamelApi.loadSshKeysIfExist();
+
         karamelApi.registerSshKeys(pair);
         
         karamelApi.startCluster(jsonTxt);

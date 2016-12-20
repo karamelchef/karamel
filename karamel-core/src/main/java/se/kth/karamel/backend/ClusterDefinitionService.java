@@ -65,23 +65,23 @@ public class ClusterDefinitionService {
     options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
     YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
     yamlPropertyRepresenter
-        .addClassTag(YamlCluster.class, Tag.MAP);
+      .addClassTag(YamlCluster.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Ec2.class, Tag.MAP);
+      .addClassTag(Ec2.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Baremetal.class, Tag.MAP);
+      .addClassTag(Baremetal.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Gce.class, Tag.MAP);
+      .addClassTag(Gce.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Nova.class, Tag.MAP);
+      .addClassTag(Nova.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Occi.class, Tag.MAP);
+      .addClassTag(Occi.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(Cookbook.class, Tag.MAP);
+      .addClassTag(Cookbook.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(YamlGroup.class, Tag.MAP);
+      .addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter
-        .addClassTag(HashSet.class, Tag.MAP);
+      .addClassTag(HashSet.class, Tag.MAP);
     Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
     String content = yaml.dump(yamlCluster);
     return content;
@@ -170,11 +170,9 @@ public class ClusterDefinitionService {
     return jsonCluster;
   }
 
-  public static YamlCluster
-      yamlToYamlObject(String ymlString) throws KaramelException {
+  public static YamlCluster yamlToYamlObject(String ymlString) throws KaramelException {
     try {
-      Yaml yaml = new Yaml(new Constructor(YamlCluster.class
-      ));
+      Yaml yaml = new Yaml(new Constructor(YamlCluster.class));
       Object document = yaml.load(ymlString);
       return ((YamlCluster) document);
     } catch (ScannerException ex) {
