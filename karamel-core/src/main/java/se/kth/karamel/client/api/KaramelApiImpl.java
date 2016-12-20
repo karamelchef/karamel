@@ -177,6 +177,7 @@ public class KaramelApiImpl implements KaramelApi {
     confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
     confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter(), credentials.getEndpoint());
     confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
+    confs.put(NovaSetting.NOVA_NETWORKID.getParameter(), credentials.getNetworkId());
     confs.writeKaramelConfs();
     clusterService.registerNovaContext(context);
     return true;

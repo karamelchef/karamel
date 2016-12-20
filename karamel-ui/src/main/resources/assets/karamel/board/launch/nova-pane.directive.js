@@ -83,6 +83,7 @@ angular.module('main.module')
                                     scope.account.accountPass = data.accountPass;
                                     scope.account.region = data.region;
                                     scope.account.endpoint = data.endpoint;
+                                    scope.account.networkId = data.networkId;
                                     _updateState('specialWarn', scope.nova);
                                     scope.validateNovaCredentials();
                                 })
@@ -101,7 +102,8 @@ angular.module('main.module')
                 scope.validateNovaCredentials = function() {
 
                     if (scope.account.accountName != null && scope.account.accountPass != null
-                    && scope.account.endpoint != null && scope.account.region != null) {
+                    && scope.account.endpoint != null && scope.account.region != null
+                    && scope.account.networkId != null) {
                         coreService.validateNovaCredentials(scope.account)
                             .success(function(data) {
                                 _updateState('success', scope.nova);
