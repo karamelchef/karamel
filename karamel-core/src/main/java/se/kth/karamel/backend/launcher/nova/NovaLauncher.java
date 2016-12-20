@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 
+
 /**
  * Created by Alberto on 2015-05-16.
  */
@@ -312,11 +313,14 @@ public final class NovaLauncher extends Launcher{
       }
       TemplateBuilder template = novaContext.getComputeService().templateBuilder();
       TemplateOptions templateOptions = novaContext.getComputeService().templateOptions().securityGroups(groupIds);
+      logger.info("novaContext.getNovaCredentials().getNetworkId() = " 
+                  + novaContext.getNovaCredentials().getNetworkId());
       NovaTemplateOptions options = templateOptions.as(NovaTemplateOptions.class)
               .keyPairName(keypairName)
               .autoAssignFloatingIp(true)
               .nodeNames(toBeForkedVmNames)
-              .networks(novaContext.getNovaCredentials().getNetworkId());
+              .networks("d5465024-4d06-44b2-acba-43c1363762fd");
+      //      .networks(novaContext.getNovaCredentials().getNetworkId());
 
       template.options(options);
       template.os64Bit(true);
