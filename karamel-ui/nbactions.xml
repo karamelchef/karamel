@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath ${packageClassName} -server src/main/config/dropwizard.yml</exec.args>
+                <exec.args>-classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -nosudopasswd -launch /home/jdowling/NetBeansProjects/karamel-chef/localhost.yml -server /home/jdowling/NetBeansProjects/karamel/karamel-ui/target/appassembler/conf/dropwizard.yml</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -server src/main/config/dropwizard.yml</exec.args>
+                <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -nosudopasswd -launch /home/jdowling/NetBeansProjects/karamel-chef/localhost.yml -server /home/jdowling/NetBeansProjects/karamel/karamel-ui/target/appassembler/conf/dropwizard.yml</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath ${packageClassName} -server src/main/config/dropwizard.yml</exec.args>
+                <exec.args>-classpath %classpath se.kth.karamel.webservice.KaramelServiceApplication -nosudopasswd -launch /home/jdowling/NetBeansProjects/karamel-chef/localhost.yml -server /home/jdowling/NetBeansProjects/karamel/karamel-ui/target/appassembler/conf/dropwizard.yml</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

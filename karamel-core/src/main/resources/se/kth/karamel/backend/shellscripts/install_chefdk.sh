@@ -1,6 +1,6 @@
-set -e; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
+set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
-set -e
+set -eo pipefail
 if [ %osfamily% == "redhat" ] ; then
   chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 

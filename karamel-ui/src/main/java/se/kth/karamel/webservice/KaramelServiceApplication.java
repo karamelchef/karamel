@@ -6,6 +6,24 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.jetty.MutableServletContextHandler;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.awt.SystemTray;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.util.EnumSet;
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+import javax.swing.ImageIcon;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -21,6 +39,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
+import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.SshKeyPair;
@@ -53,26 +72,6 @@ import se.kth.karamel.webservice.calls.system.ExitKaramel;
 import se.kth.karamel.webservice.calls.system.PingServer;
 import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.FilterRegistration;
-import javax.swing.ImageIcon;
-import java.awt.Desktop;
-import java.awt.Image;
-import java.awt.SystemTray;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
-import java.util.EnumSet;
-
-import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
-
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
@@ -91,6 +90,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static ServerSocket s;
   private static boolean cli = false;
   private static boolean headless = false;
+  private static boolean noSudoPasswd = false;
 
   static {
 // Ensure a single instance of the app is running
@@ -115,6 +115,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
+    options.addOption("nosudopasswd", false, "No sudo password is needed");
   }
 
   public static void create() {
@@ -191,27 +192,46 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       if (line.hasOption("headless")) {
         headless = true;
       }
+      if (line.hasOption("nosudopasswd")) {
+        noSudoPasswd = true;
+      }
 
       if (cli) {
+
+        String sudoPasswd = "";
+        if (!noSudoPasswd) {
+          Console c = null;
+          c = System.console();
+          if (c == null) {
+            System.err.println("No console available.");
+            System.exit(1);
+          }
+          sudoPasswd = c.readLine("Enter your sudo password (just press 'enter' if you don't have one):");
+        }
+        new KaramelServiceApplication().run(modifiedArgs);
+        Thread.currentThread().sleep(2000);
+
         // Try to open and read the yaml file. 
         // Print error msg if invalid file or invalid YAML.
         yamlTxt = CookbookScaffolder.readFile(line.getOptionValue("launch"));
         YamlCluster cluster = ClusterDefinitionService.yamlToYamlObject(yamlTxt);
         String jsonTxt = karamelApi.yamlToJson(yamlTxt);
-        
-        SshKeyPair pair = new SshKeyPair();
-        pair.setPrivateKeyPath("/home/vagrant/.ssh/id_rsa");
-        pair.setPublicKeyPath("/home/vagrant/.ssh/id_rsa.pub");
-//      SshKeyPair pair = karamelApi.loadSshKeysIfExist();
+
+        if (!noSudoPasswd && sudoPasswd.isEmpty() == false) {
+          karamelApi.registerSudoPassword(sudoPasswd);
+        }
+
+        SshKeyPair pair = karamelApi.loadSshKeysIfExist();
 
         karamelApi.registerSshKeys(pair);
-        
+
         karamelApi.startCluster(jsonTxt);
 
         long ms1 = System.currentTimeMillis();
-        while (ms1 + 6000000 > System.currentTimeMillis()) {
-          String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
-          logger.debug(clusterStatus);
+        while (ms1 + 60000000 > System.currentTimeMillis()) {
+//          String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
+//          logger.debug(clusterStatus);
+
           Thread.currentThread().sleep(30000);
         }
       }
