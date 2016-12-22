@@ -36,6 +36,7 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.backend.ClusterDefinitionService;
+import se.kth.karamel.backend.ClusterManager;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
@@ -198,6 +199,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
       if (cli) {
 
+        ClusterManager.EXIT_ON_COMPLETION  = true;
         String sudoPasswd = "";
         if (!noSudoPasswd) {
           Console c = null;

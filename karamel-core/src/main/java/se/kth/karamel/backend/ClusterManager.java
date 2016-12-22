@@ -63,6 +63,7 @@ public class ClusterManager implements Runnable {
 
   }
 
+  public static boolean EXIT_ON_COMPLETION = false;
   private static final Logger logger = Logger.getLogger(ClusterManager.class);
   private final JsonCluster definition;
   private final ClusterRuntime runtime;
@@ -355,6 +356,10 @@ public class ClusterManager implements Runnable {
         group.setPhase(GroupRuntime.GroupPhase.DAG_DONE);
       }
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' DAG IS DONE \\o/\\o/\\o/\\o/\\o/", definition.getName()));
+      
+      if (ClusterManager.EXIT_ON_COMPLETION) {
+        System.exit(0);
+      }
     }
   }
 
