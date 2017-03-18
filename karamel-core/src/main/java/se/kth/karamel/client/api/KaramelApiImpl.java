@@ -285,7 +285,6 @@ public class KaramelApiImpl implements KaramelApi {
     Confs confs = Confs.loadKaramelConfs();
     saveSshConfs(keypair, confs);
     confs.writeKaramelConfs();
-//    keypair = SshKeyService.loadSshKeys(confs);
     keypair = SshKeyService.loadSshKeys(keypair.getPublicKeyPath(), keypair.getPrivateKeyPath(),
         keypair.getPassphrase());
     clusterService.registerSshKeyPair(keypair);

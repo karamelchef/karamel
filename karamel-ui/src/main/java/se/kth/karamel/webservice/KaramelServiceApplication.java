@@ -116,7 +116,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
-    options.addOption("nosudopasswd", false, "No sudo password is needed");
+    options.addOption("passwd", false, "Sudo password");
   }
 
   public static void create() {
@@ -169,6 +169,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     // These args are sent to the Dropwizard app (thread)
     String[] modifiedArgs = new String[2];
     modifiedArgs[0] = "server";
+    String sudoPasswd = "";
 
     karamelApi = new KaramelApiImpl();
 
@@ -193,23 +194,24 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       if (line.hasOption("headless")) {
         headless = true;
       }
-      if (line.hasOption("nosudopasswd")) {
+      if (line.hasOption("passwd")) {
+        sudoPasswd = line.getOptionValue("passwd");        
+      } else {
         noSudoPasswd = true;
       }
 
       if (cli) {
 
         ClusterManager.EXIT_ON_COMPLETION  = true;
-        String sudoPasswd = "";
-        if (!noSudoPasswd) {
-          Console c = null;
-          c = System.console();
-          if (c == null) {
-            System.err.println("No console available.");
-            System.exit(1);
-          }
-          sudoPasswd = c.readLine("Enter your sudo password (just press 'enter' if you don't have one):");
-        }
+//        if (!noSudoPasswd) {
+//          Console c = null;
+//          c = System.console();
+//          if (c == null) {
+//            System.err.println("No console available.");
+//            System.exit(1);
+//          }
+//          sudoPasswd = c.readLine("Enter your sudo password (just press 'enter' if you don't have one):");
+//        }
         new KaramelServiceApplication().run(modifiedArgs);
         Thread.currentThread().sleep(2000);
 
