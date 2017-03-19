@@ -16,7 +16,16 @@ public class SshKeyPair {
   private String privateKey;
   private String publicKey;
   private String passphrase;
+  private boolean needsPassword;
 
+  public boolean isNeedsPassword() {
+    return needsPassword;
+  }
+
+  public void setNeedsPassword(boolean needsPassword) {
+    this.needsPassword = needsPassword;
+  }
+  
   public String getPassphrase() {
     return (passphrase != null && passphrase.isEmpty()) ? null : passphrase;
   }

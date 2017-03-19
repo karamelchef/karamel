@@ -21,6 +21,7 @@ import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.common.util.SshKeyService;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is
@@ -95,6 +96,14 @@ public class ClusterService {
     if (privKey.exists() == false) {
       throw new KaramelException("Could not find private key: " + sshKeyPair.getPrivateKeyPath());
     }
+    sshKeyPair.setNeedsPassword(SshKeyService.checkIfPasswordNeeded(sshKeyPair));
+//    boolean needsPassword = SshKeyService.checkIfPasswordNeeded(sshKeyPair);
+//    if (needsPassword) {
+//      if (sshKeyPair.getPassphrase() == null || sshKeyPair.getPassphrase().isEmpty()) {
+//        throw new KaramelException("The passphrase needs to be entered for the OpenSshKey.");
+//      }
+//      sshKeyPair.setNeedsPassword(true);
+//    }
 
     commonContext.setSshKeyPair(sshKeyPair);
   }
