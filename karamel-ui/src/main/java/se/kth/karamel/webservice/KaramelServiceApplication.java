@@ -115,7 +115,11 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
-    options.addOption("passwd", false, "Sudo password");
+//    options.addOption("passwd", false, "Sudo password");
+    options.addOption(OptionBuilder.withArgName("sudoPassword")
+      .hasArg()
+      .withDescription("Sudo password")
+      .create("passwd"));
   }
 
   public static void create() {

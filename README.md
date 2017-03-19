@@ -217,12 +217,14 @@ You need to have 32-bit libraries to build the windows exe from Linux, as the la
 ```{r, engine='sh'}
 sudo apt-get install gcc binutils-mingw-w64-x86-64 -y
 # Then replace 32-bit libraries with their 64-bit equivalents
-cd /home/ubuntu/.m2/repository/net/sf/launch4j/launch4j/3.8.0/launch4j-3.8.0-workdir-linux/bin
+cd /home/$USER/.m2/repository/net/sf/launch4j/launch4j/3.9/launch4j-3.9.0-workdir-linux/bin
 rm ld windres
-ln -s /usr/bin/x86_64-w64-mingw32-ld ./ld
-ln -s /usr/bin/x86_64-w64-mingw32-windres ./windres
+cp /usr/bin/x86_64-w64-mingw32-ld ./ld
+cp /usr/bin/x86_64-w64-mingw32-windres ./windres
 ```
 Then run maven with the -Pwin to run the plugin:
 ```{r, engine='sh'}
 mvn -Dwin package
 ```
+# Launch4j linux 64 bug report:
+# https://github.com/lukaszlenart/launch4j-maven-plugin/issues/29
