@@ -3,7 +3,6 @@ angular.module('main.module')
           function ($log, coreService, alertService) {
             return{
               restrict: 'E',
-//            transclude: true,
               require: "^launchTabs",
               scope: {
                 title: '@',
@@ -39,8 +38,6 @@ angular.module('main.module')
                   scp.sudoAccount = {
                     password: null
                   };
-//                  scp.sudoPasswordEnabled = false;
-//                  scp.sshPassphraseEnabled = false;
                   scp.repeatSshPwd = "";
                   scp.currentState = scp.availableStates.initialWarn;
                   scp.sshKeyObj = scp.credentialsHolderMap[scp.mapKey];
@@ -75,7 +72,6 @@ angular.module('main.module')
                 }
 
                 scope.baremetal = function () {
-//                  return scope.mapKey === "ssh";
                   return scope.isBaremetal;
                 };
 
@@ -153,18 +149,14 @@ angular.module('main.module')
                       return true;
                     }
                     if (scope.repeatSshPwd !== scope.sshKeyPair.passphrase) {
-//                  if (repeatIt !== scope.sshKeyPair.passphrase) {
                       scope.currentState = scope.availableStates.passwordNeeded;
                       return false;
                     }
                   }
-//                  scope.currentState = scope.availableStates.success;
-//                  scope.registerKeys(repeatIt);
                   scope.registerKeys();
                   return true;
                 };
 
-//                scope.registerKeys = function (repeatIt) {
                 scope.registerKeys = function () {
                     coreService.registerSshKeys(scope.sshKeyPair)
                             .success(function (data) {
@@ -172,13 +164,10 @@ angular.module('main.module')
                               scope.sshKeyPair.pubKeyPath = data.publicKeyPath;
                               scope.sshKeyPair.privKeyPath = data.privateKeyPath;
                               _updateState('success', scope.sshKeyObj);
-//                              scope.sshPassphraseEnabled = true;
                             })
                             .error(function (data) {
                               $log.info("Couldn't register ssh-keys yet");
                               _updateState('userWarn', scope.sshKeyObj);
-//                              scope.sshPassphraseEnabled = false;
-//                              alertService.addAlert({type: 'danger', msg: data.reason});
                             });
                 };
 

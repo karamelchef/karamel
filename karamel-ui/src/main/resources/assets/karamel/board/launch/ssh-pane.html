@@ -26,13 +26,6 @@
       <input type="password" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" name="keyPassphrase" 
              required="true" ng-model="sshKeyPair.passphrase" placeholder="Password for ssh key" tabindex="4" ng-change="matchSshKeyPasswords()">
     </div>
-    <!--      <div class="col-md-1">
-            <span ng-show="sshPassphraseEnabled" class="glyphicon glyphicon-ok ng-hide" style="color:green; margin-top: 5px; margin-right: 5px"></span>
-            <span ng-show="!sshPassphraseEnabled" class="glyphicon glyphicon-remove" style="color: maroon; margin-top: 5px; margin-right:5px"></span>        
-          </div>      -->
-<!--    <div class="col-md-5" style="text-align: right;" ng-show="!matchSshKeyPasswords()">
-      Passwords don't match.
-    </div>-->
   </div>
   <div class="form-group row row-same-height" ng-if="needsPassword">
     <label for="keyPassphraseTwo" class="control-label col-xs-3" style="text-align: left;">Repeat password:</label>
@@ -40,18 +33,6 @@
       <input type="password" class="form-control ng-pristine ng-untouched ng-invalid ng-invalid-required" name="keyPassphraseTwo" 
              required="true" ng-model="inRead" placeholder="Repeat Password" tabindex="5" ng-change="setRepeatSshpassphrase(inRead)">
     </div>
-<!--          <div class="col-md-3">
-            No password needed:
-      <input type="checkbox" name="noSshKeyphraseNeeded" ng-model="noSshKeyphraseNeeded" tabindex="3"/>
-          </div>-->
-<!--          <div class="col-md-3">
-            <button type="button" class="btn btn-success pull-right" ng-click="registerKeys()" tabindex="6">Validate</button>
-          </div>-->
-
-<!--    <div class="col-md-3" style="text-align: right;" 
-         ng-show="sshKeyPair.passphrase !== null && sshKeyPair.passphrase.length > 0">
-      <span class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>        
-    </div>-->
   </div>
 
   
@@ -86,9 +67,6 @@
       <span ng-show="!(sudoAccount.password !== null && sudoAccount.password.length > 0) && repeatSudoPassword === sudoAccount.password" 
             class="glyphicon glyphicon-ok" style="color:green; margin-top: 5px; margin-right: 5px"></span>
     </div>      
-<!--    <div class="col-xs-2">
-      <button type="button" class="btn btn-primary pull-right" ng-click="registerSudoPassword()" tabindex="9">Enter</button>
-    </div>-->
   </div>        
 
 
