@@ -79,7 +79,7 @@ public class KandyRestClient {
       String json = stats.toJsonAndMarkNotUpdated();
       ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
       if (response.getStatus() >= 300) {
-        logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
+        logger.debug(String.format("Kandy server couldn't store the cluster stats because '%s'",
             response.getStatusInfo().getReasonPhrase()));
       } else {
         String id = response.getEntity(String.class);

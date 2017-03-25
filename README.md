@@ -217,7 +217,7 @@ You need to have 32-bit libraries to build the windows exe from Linux, as the la
 ```{r, engine='sh'}
 sudo apt-get install gcc binutils-mingw-w64-x86-64 -y
 # Then replace 32-bit libraries with their 64-bit equivalents
-cd /home/$USER/.m2/repository/net/sf/launch4j/launch4j/3.9/launch4j-3.9.0-workdir-linux/bin
+cd /home/$USER/.m2/repository/net/sf/launch4j/launch4j/3.9/launch4j-3.9-workdir-linux/bin
 rm ld windres
 cp /usr/bin/x86_64-w64-mingw32-ld ./ld
 cp /usr/bin/x86_64-w64-mingw32-windres ./windres
