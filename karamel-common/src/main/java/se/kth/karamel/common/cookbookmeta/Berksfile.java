@@ -74,7 +74,7 @@ public class Berksfile {
 
   private void validateGithubUrls() throws CookbookUrlException {
     if (Settings.CB_CLASSPATH_MODE) {
-      logger.info("Skip cookbook dependency check in the classpath mode");
+      logger.debug("Skip cookbook dependency check in the classpath mode");
       return;
     }
 

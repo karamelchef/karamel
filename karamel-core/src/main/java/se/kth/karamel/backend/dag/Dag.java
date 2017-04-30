@@ -88,7 +88,7 @@ public class Dag {
 
   public void start() throws DagConstructionException {
     validate();
-    logger.info("Dag is starting: \n" + print());
+    logger.debug("Dag is starting: \n" + print());
     String prob = UUID.randomUUID().toString();
     for (DagNode node : findRootNodes()) {
       node.prepareToStart(prob);

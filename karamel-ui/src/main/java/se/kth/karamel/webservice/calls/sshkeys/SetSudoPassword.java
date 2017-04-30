@@ -33,7 +33,7 @@ public class SetSudoPassword extends AbstractCall {
   @PUT
   public Response sudoPassword(SudoPasswordJSON sudoPwd) {
     Response response = null;
-    logger.info(" Received request to set sudo password....");
+    logger.debug(" Received request to set sudo password....");
     try {
       karamelApi.registerSudoPassword(sudoPwd.getPassword());
       response = Response.status(Response.Status.OK).

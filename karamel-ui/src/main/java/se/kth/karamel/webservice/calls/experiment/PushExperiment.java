@@ -33,7 +33,7 @@ public class PushExperiment extends AbstractCall {
   @PUT
   public Response pushExperiment(Experiment experiment) {
     Response response = null;
-    logger.info(" Received request to set github credentials.... ");
+    logger.debug(" Received request to set github credentials.... ");
     try {
       karamelApi.commitAndPushExperiment(experiment);
       response = Response.status(Response.Status.OK).

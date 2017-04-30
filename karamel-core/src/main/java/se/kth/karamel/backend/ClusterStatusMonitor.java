@@ -42,7 +42,7 @@ public class ClusterStatusMonitor implements Runnable {
 
   @Override
   public void run() {
-    logger.info(String.format("Cluster-StatusMonitor started for '%s' d'-'", definition.getName()));
+    logger.debug(String.format("Cluster-StatusMonitor started for '%s' d'-'", definition.getName()));
     while (true && !stopping) {
       try {
         if (clusterEntity.isFailed()) {
@@ -61,7 +61,7 @@ public class ClusterStatusMonitor implements Runnable {
           Thread.sleep(Settings.CLUSTER_FAILURE_DETECTION_INTERVAL);
         } catch (InterruptedException ex) {
           if (stopping) {
-            logger.info(String.format("Cluster-StatusMonitor stoped for '%s' d'-'", definition.getName()));
+            logger.info(String.format("Cluster-StatusMonitor stopped for '%s' d'-'", definition.getName()));
             return;
           } else {
             String message = String.format("ClusterMonitor for '%s' interrupted while it hasn't received stopping "

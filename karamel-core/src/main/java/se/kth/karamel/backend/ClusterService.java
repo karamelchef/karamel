@@ -141,7 +141,7 @@ public class ClusterService {
     //for more info refer to https://github.com/karamelchef/karamel/issues/28
     jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
     ClusterDefinitionService.saveYaml(yml);
-    logger.info(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
+    logger.debug(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
     String clusterName = jsonCluster.getName();
     String name = clusterName.toLowerCase();
     if (repository.containsKey(name)) {
@@ -158,7 +158,7 @@ public class ClusterService {
 
   public synchronized void submitInstallationDag(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
-    logger.info(String.format("User asked for installing '%s'", clusterName));
+    logger.info(String.format("User asked to install '%s'", clusterName));
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }

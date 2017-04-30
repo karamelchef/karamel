@@ -37,19 +37,19 @@ public class BaremetalLauncher extends Launcher {
 
   @Override
   public void cleanup(JsonCluster definition, ClusterRuntime runtime) throws KaramelException {
-    logger.info("It is baremetal, cleanup is skipped.");
+    logger.debug("It is baremetal, cleanup is skipped.");
   }
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
-    logger.info(String.format("Provider of %s is baremetal, fork-group is skipped.", groupName));
+    logger.debug(String.format("Provider of %s is baremetal, fork-group is skipped.", groupName));
     return groupName;
   }
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String groupName) 
       throws KaramelException {
-    logger.info(String.format("Provider of %s is baremetal, available machines expected.", groupName));
+    logger.debug(String.format("Provider of %s is baremetal, available machines expected.", groupName));
     GroupRuntime gr = UserClusterDataExtractor.findGroup(runtime, groupName);
     Baremetal baremetal = (Baremetal) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     String username = baremetal.getUsername();

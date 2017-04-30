@@ -228,7 +228,7 @@ public class RunRecipeTask extends Task {
     try {
       sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
     } catch (IOException ex) {
-      logger.info(String.format("Cannot find experiment results for download for %s on %s", getRecipeCanonicalName(),
+      logger.debug(String.format("Cannot find experiment results for download for %s on %s", getRecipeCanonicalName(),
           getMachine().getPublicIp()));
       return;
     }

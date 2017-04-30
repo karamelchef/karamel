@@ -34,7 +34,7 @@ public class RemoveRepository extends AbstractCall {
   public Response removeRepository(@FormParam("org") String org, @FormParam("repo") String repo,
       @FormParam("local") boolean local, @FormParam("remote") boolean remote) {
     Response response = null;
-    logger.info(" Received request to set github credentials.... ");
+    logger.debug(" Received request to set github credentials.... ");
     try {
       karamelApi.removeRepo(org, repo, local, remote);
       response = Response.status(Response.Status.OK).

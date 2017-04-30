@@ -34,7 +34,7 @@ public class RemoveFileFromExperiment extends AbstractCall {
       @FormParam("filename") String filename) {
     Response response = null;
     try {
-      logger.info(" Received request to set github credentials.... ");
+      logger.debug(" Received request to set github credentials.... ");
       karamelApi.removeFileFromExperiment(org, repo, filename);
       response = Response.status(Response.Status.OK).entity(
           new StatusResponseJSON(StatusResponseJSON.SUCCESS_STRING, "success")).build();

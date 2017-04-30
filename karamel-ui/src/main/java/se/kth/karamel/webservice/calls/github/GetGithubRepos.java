@@ -34,7 +34,7 @@ public class GetGithubRepos extends AbstractCall {
   @POST
   public Response getGithubRepos(@FormParam("org") String org) {
     Response response = null;
-    logger.info(" Received request to set github credentials.... ");
+    logger.debug(" Received request to set github credentials.... ");
     try {
       List<RepoItem> repos = karamelApi.listGithubRepos(org);
       response = Response.status(Response.Status.OK).
