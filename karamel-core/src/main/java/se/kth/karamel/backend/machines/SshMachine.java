@@ -128,7 +128,7 @@ public class SshMachine implements MachineInterface, Runnable {
 
   @Override
   public void run() {
-    logger.info(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
+    logger.debug(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
     try {
       while (!stopping) {
         try {
@@ -152,7 +152,7 @@ public class SshMachine implements MachineInterface, Runnable {
               runTask(activeTask);
             } catch (InterruptedException ex) {
               if (stopping) {
-                logger.info(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
+                logger.debug(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
                 return;
               } else {
                 logger.error(
@@ -323,7 +323,8 @@ public class SshMachine implements MachineInterface, Runnable {
     while (!stopping && !killing && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
-        logger.info(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
+        logger.info(String.format("%s: Running task: %s", machineEntity.getId(), task.getName()));
+        logger.debug(String.format("%s: running: %s", machineEntity.getId(), shellCommand.getCmdStr()));
 
         //there is no harm of retrying to start session several times for running a command
         int numSessionRetries = Settings.SSH_SESSION_RETRY_NUM;
@@ -544,7 +545,7 @@ public class SshMachine implements MachineInterface, Runnable {
   //ssh machine maintains the list of succeed tasks synced with the remote machine, it downloads it just if the ssh 
   //connection is lost
   private void loadSucceedListFromMachineToMemory() {
-    logger.info(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
+    logger.debug(String.format("Loading succeeded tasklist from %s", machineEntity.getPublicIp()));
     String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
     String remoteSucceedPath = Settings.REMOTE_SUCCEEDTASKS_PATH(machineEntity.getSshUser());
     String localSucceedPath = Settings.MACHINE_SUCCEEDTASKS_PATH(clusterName, machineEntity.getPublicIp());
@@ -556,7 +557,7 @@ public class SshMachine implements MachineInterface, Runnable {
     try {
       downloadRemoteFile(remoteSucceedPath, localSucceedPath, true);
     } catch (IOException ex) {
-      logger.info(String.format("Succeeded tasklist not exist on %s", machineEntity.getPublicIp()));
+      logger.info(String.format("Succeeded tasklist does not exist on %s", machineEntity.getPublicIp()));
       //remote file does not exists
     } catch (KaramelException ex) {
       //shoudn't throw this because I am deleting the local file already here

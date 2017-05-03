@@ -124,7 +124,7 @@ public class KaramelizedCookbook {
           try {
             configFileContents = IoUtils.readContent(configFileUrl);
           } catch (IOException ex) {
-            logger.info("Not found in this cookbook: " + urls.recipesHome + experimentFilename, ex);
+            logger.debug("Not found in this cookbook: " + urls.recipesHome + experimentFilename, ex);
           }
         }
 

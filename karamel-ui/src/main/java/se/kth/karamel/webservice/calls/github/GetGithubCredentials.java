@@ -30,7 +30,7 @@ public class GetGithubCredentials extends AbstractCall {
   @GET
   public Response getGithubCredentials() {
     Response response = null;
-    logger.info(" Received request to get github credentials.... ");
+    logger.debug(" Received request to get github credentials.... ");
     try {
       GithubUser credentials = karamelApi.loadGithubCredentials();
       response = Response.status(Response.Status.OK).

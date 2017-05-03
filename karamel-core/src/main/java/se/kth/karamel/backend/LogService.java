@@ -29,7 +29,7 @@ public class LogService {
   private static final Logger logger = Logger.getLogger(LogService.class);
 
   public static void cleanup(String clusterName) {
-    logger.info(String.format("Trashing old logs of '%s'", clusterName));
+    logger.debug(String.format("Trashing old logs of '%s'", clusterName));
     String path = Settings.CLUSTER_LOG_FOLDER(clusterName);
     try {
       FilesystemUtil.deleteRecursive(path);

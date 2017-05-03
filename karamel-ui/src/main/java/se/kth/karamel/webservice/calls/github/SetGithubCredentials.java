@@ -33,7 +33,7 @@ public class SetGithubCredentials extends AbstractCall {
   @POST
   public Response setGithubCredentials(@FormParam("user") String user, @FormParam("password") String password) {
     Response response = null;
-    logger.info(" Received request to set github credentials.... ");
+    logger.debug(" Received request to set github credentials.... ");
     try {
       GithubUser githubUser = karamelApi.registerGithubAccount(user, password);
 

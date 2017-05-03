@@ -31,7 +31,7 @@ public class GetGithubOrgs extends AbstractCall {
   @POST
   public Response getGithubOrgs() {
     Response response = null;
-    logger.info(" Received request to set github credentials.... ");
+    logger.debug(" Received request to set github credentials.... ");
     try {
       List<OrgItem> orgs = karamelApi.listGithubOrganizations();
       response = Response.status(Response.Status.OK).

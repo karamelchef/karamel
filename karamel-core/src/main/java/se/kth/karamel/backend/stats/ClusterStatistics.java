@@ -24,7 +24,7 @@ public class ClusterStatistics {
 
   public static void addTimeStat(String key, long time) {
     timeStats.put(key, time);
-    logger.info(String.format("%s time: %d", key, time));
+    logger.debug(String.format("%s time: %d", key, time));
     try {
       if (fileName != null) {
         if (writer == null) {

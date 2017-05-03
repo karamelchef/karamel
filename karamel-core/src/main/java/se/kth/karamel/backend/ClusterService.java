@@ -21,6 +21,7 @@ import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.common.util.SshKeyService;
 
 /**
  * Keeps repository of running clusters with a unique name for each. Privacy sensitive data such as credentials is
@@ -95,6 +96,14 @@ public class ClusterService {
     if (privKey.exists() == false) {
       throw new KaramelException("Could not find private key: " + sshKeyPair.getPrivateKeyPath());
     }
+    sshKeyPair.setNeedsPassword(SshKeyService.checkIfPasswordNeeded(sshKeyPair));
+//    boolean needsPassword = SshKeyService.checkIfPasswordNeeded(sshKeyPair);
+//    if (needsPassword) {
+//      if (sshKeyPair.getPassphrase() == null || sshKeyPair.getPassphrase().isEmpty()) {
+//        throw new KaramelException("The passphrase needs to be entered for the OpenSshKey.");
+//      }
+//      sshKeyPair.setNeedsPassword(true);
+//    }
 
     commonContext.setSshKeyPair(sshKeyPair);
   }
@@ -132,7 +141,7 @@ public class ClusterService {
     //for more info refer to https://github.com/karamelchef/karamel/issues/28
     jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
     ClusterDefinitionService.saveYaml(yml);
-    logger.info(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
+    logger.debug(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
     String clusterName = jsonCluster.getName();
     String name = clusterName.toLowerCase();
     if (repository.containsKey(name)) {
@@ -149,7 +158,7 @@ public class ClusterService {
 
   public synchronized void submitInstallationDag(String clusterName) throws KaramelException {
     String name = clusterName.toLowerCase();
-    logger.info(String.format("User asked for installing '%s'", clusterName));
+    logger.info(String.format("User asked to install '%s'", clusterName));
     if (!repository.containsKey(name)) {
       throw new KaramelException(String.format("Repository doesn't contain a cluster name '%s'", clusterName));
     }

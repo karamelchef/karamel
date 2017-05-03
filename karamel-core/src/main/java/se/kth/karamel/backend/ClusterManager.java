@@ -282,7 +282,7 @@ public class ClusterManager implements Runnable {
   }
 
   private void forkGroups() throws InterruptedException {
-    logger.info(String.format("Froking groups '%s' ...", definition.getName()));
+    logger.info(String.format("Forking groups '%s' ...", definition.getName()));
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_GROUPS);
     runtime.resolveFailures();
     List<GroupRuntime> groups = runtime.getGroups();

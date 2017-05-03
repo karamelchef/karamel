@@ -79,7 +79,7 @@ public class KandyRestClient {
       String json = stats.toJsonAndMarkNotUpdated();
       ClientResponse response = storeService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, json);
       if (response.getStatus() >= 300) {
-        logger.error(String.format("Kandy server couldn't store the cluster stats because '%s'",
+        logger.debug(String.format("Kandy server couldn't store the cluster stats because '%s'",
             response.getStatusInfo().getReasonPhrase()));
       } else {
         String id = response.getEntity(String.class);
@@ -115,7 +115,7 @@ public class KandyRestClient {
       checkResources();
       ClientResponse response = costService.type(MediaType.TEXT_PLAIN).post(ClientResponse.class, clusterDef);
       if (response.getStatus() >= 300) {
-        logger.error(String.format("Kandy server couldn't return the cluster cost because '%s'",
+        logger.debug(String.format("Kandy server couldn't return the cluster cost because '%s'",
             response.getStatusInfo().getReasonPhrase()));
       } else {
         String cost = response.getEntity(String.class);
