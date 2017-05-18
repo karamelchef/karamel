@@ -107,7 +107,8 @@ public class DagNode implements DagTaskCallback {
 
   public void detectCylcles(String prob, List<DagNode> ancestors) throws DagConstructionException {
     if (ancestors.contains(this)) {
-      String message = "ERROR in YAML Definition: a cycle was detected (cyclic dependency): " + ancestors.toString() + " " + id;
+      String message = "ERROR in YAML Definition: a cycle was detected (cyclic dependency): " 
+        + ancestors.toString() + " " + id;
       logger.error(String.format("Prob: %s %s", prob, message));
       throw new DagConstructionException();
     }
