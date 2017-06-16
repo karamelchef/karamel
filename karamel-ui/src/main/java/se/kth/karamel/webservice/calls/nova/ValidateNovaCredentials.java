@@ -42,6 +42,7 @@ public class ValidateNovaCredentials extends AbstractCall {
       credentials.setAccountPass(providerJSON.getAccountPass());
       credentials.setEndpoint(providerJSON.getEndpoint());
       credentials.setRegion(providerJSON.getRegion());
+      credentials.setVersion(providerJSON.getVersion());
       credentials.setNetworkId(providerJSON.getNetworkId());
       if (karamelApi.updateNovaCredentialsIfValid(credentials)) {
         response = Response.status(Response.Status.OK).

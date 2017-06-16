@@ -85,7 +85,7 @@ public class NovaLauncherTest {
     novaCredentials.setAccountPass("1234");
     novaCredentials.setEndpoint("http://sics-nova.se:8080");
     novaCredentials.setRegion("SICSRegion");
-
+    novaCredentials.setVersion("v2");
 
     nova = new Nova();
     nova.setImage("ubuntu14.04");
@@ -156,6 +156,7 @@ public class NovaLauncherTest {
     when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter())).thenReturn(novaCredentials.getAccountName());
     when(confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter())).thenReturn(novaCredentials.getAccountPass());
     when(confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter())).thenReturn(novaCredentials.getEndpoint());
+    when(confs.getProperty(NovaSetting.NOVA_VERSION.getParameter())).thenReturn(novaCredentials.getEndpoint());
     when(confs.getProperty(NovaSetting.NOVA_REGION.getParameter())).thenReturn(novaCredentials.getRegion());
     NovaCredentials credentials = NovaLauncher.readCredentials(confs);
     assertNotNull(credentials);

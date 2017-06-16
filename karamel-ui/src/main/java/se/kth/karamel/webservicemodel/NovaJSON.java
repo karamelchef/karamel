@@ -7,6 +7,7 @@ public class NovaJSON {
   private String accountName;
   private String accountPass;
   private String endpoint;
+  private String version;
   private String region;
   private String networkId;
 
@@ -16,6 +17,14 @@ public class NovaJSON {
 
   public void setAccountName(String accountName) {
     this.accountName = accountName;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   public String getAccountPass() {

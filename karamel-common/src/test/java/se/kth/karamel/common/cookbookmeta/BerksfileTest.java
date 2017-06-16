@@ -63,7 +63,7 @@ public class BerksfileTest {
         + "cookbook 'kzookeeper', github: \"hopshadoop/kzookeeper\", branch: \"master\"\n"
         + "cookbook 'kkafka', github: \"hopshadoop/kafka-cookbook\", branch: \"master\"\n"
         + "cookbook 'elastic', github: \"hopshadoop/elasticsearch-chef\", branch: \"master\"\n"
-        + "cookbook 'kibana', github: \"hopshadoop/kibana-chef\", branch: \"master\"\n"
+        // + "cookbook 'kibana', github: \"hopshadoop/kibana-chef\", branch: \"master\"\n"
         + "\n"
         + "cookbook 'hopsmonitor', github: \"hopshadoop/hopsmonitor-chef\", branch: \"master\"\n"
         + "#cookbook 'chef-grafana', github: \"chef-cookbooks/chef-grafana\", branch: \"master\"\n"
@@ -132,8 +132,8 @@ public class BerksfileTest {
     Assert.assertTrue(berksfile.getDeps().containsKey("elastic"));
     Assert.assertEquals("master", berksfile.getDeps().get("elastic").getBranch());
 
-    Assert.assertTrue(berksfile.getDeps().containsKey("kibana"));
-    Assert.assertEquals("master", berksfile.getDeps().get("kibana").getBranch());
+    //Assert.assertTrue(berksfile.getDeps().containsKey("kibana"));
+    //Assert.assertEquals("master", berksfile.getDeps().get("kibana").getBranch());
 
     Assert.assertTrue(berksfile.getDeps().containsKey("hopsmonitor"));
     Assert.assertEquals("master", berksfile.getDeps().get("hopsmonitor").getBranch());

@@ -23,6 +23,8 @@ import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
 import se.kth.karamel.backend.launcher.nova.NovaLauncher;
+import se.kth.karamel.backend.launcher.novav3.NovaV3Context;
+import se.kth.karamel.backend.launcher.novav3.NovaV3Launcher;
 import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -163,15 +165,14 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException {
+  public NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException {
     Confs confs = Confs.loadKaramelConfs();
-    return NovaLauncher.readCredentials(confs);
+    return NovaV3Launcher.readCredentials(confs);
   }
 
   @Override
-  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
-    NovaContext context = NovaLauncher.validateCredentials(credentials,
-        ContextBuilder.newBuilder(new NovaApiMetadata()));
+  public boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
+    NovaV3Context context = NovaV3Launcher.validateCredentials(credentials);
     Confs confs = Confs.loadKaramelConfs();
     confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter(), credentials.getAccountName());
     confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
@@ -179,7 +180,38 @@ public class KaramelApiImpl implements KaramelApi {
     confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
     confs.put(NovaSetting.NOVA_NETWORKID.getParameter(), credentials.getNetworkId());
     confs.writeKaramelConfs();
-    clusterService.registerNovaContext(context);
+    clusterService.registerNovaV3Context(context);
+    return true;
+  }
+
+  @Override
+  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    return NovaLauncher.readCredentials(confs);
+  }
+
+  @Override
+  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws InvalidNovaCredentialsException {
+    if (credentials.getVersion().equals("v2")) {
+      NovaContext context = NovaLauncher.validateCredentials(credentials,
+        ContextBuilder.newBuilder(new NovaApiMetadata()));
+      clusterService.registerNovaContext(context);
+    } else if (credentials.getVersion().equals("v3")) {
+      NovaV3Context context = NovaV3Launcher.validateCredentials(credentials);
+      clusterService.registerNovaV3Context(context);
+    } else {
+      // Hej
+    }
+
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter(), credentials.getAccountName());
+    confs.put(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter(), credentials.getAccountPass());
+    confs.put(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter(), credentials.getEndpoint());
+    confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
+    confs.put(NovaSetting.NOVA_REGION.getParameter(), credentials.getRegion());
+    confs.put(NovaSetting.NOVA_VERSION.getParameter(), credentials.getVersion());
+    confs.put(NovaSetting.NOVA_NETWORKID.getParameter(), credentials.getNetworkId());
+    confs.writeKaramelConfs();
     return true;
   }
 

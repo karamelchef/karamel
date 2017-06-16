@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
+import se.kth.karamel.backend.launcher.novav3.NovaV3Context;
 import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
@@ -240,6 +241,10 @@ public class ClusterService {
     ClusterContext validatedContext = ClusterContext.validateContext(definition, context, commonContext);
     clusterContexts.put(name, validatedContext);
     return validatedContext;
+  }
+
+  public synchronized void registerNovaV3Context(NovaV3Context context) {
+    commonContext.setNovaV3Context(context);
   }
 
   public synchronized void registerNovaContext(NovaContext context) {

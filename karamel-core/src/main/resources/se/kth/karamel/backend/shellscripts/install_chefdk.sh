@@ -1,4 +1,9 @@
 set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
+set -eo pipefail
+
+curl --connect-timeout 10 -m 120 https://omnitruck.chef.io/install.sh | sudo bash -s -- -c stable -P chefdk -v 1.4.3 && echo '%task_id%' >> %succeedtasks_filepath%
+
+exit
 
 set -eo pipefail
 if [ %osfamily% == "redhat" ] ; then

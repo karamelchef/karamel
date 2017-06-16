@@ -419,12 +419,14 @@ function Nova() {
   this.networkId = null;
   this.accountName = null;
   this.accountPass = null;
+  this.version = "v2";
 
   this.load = function(other) {
     this.flavor = other.flavor || null;
     this.username = other.username || null;
     this.image = other.image || null;
     this.networkId = other.networkId || null;
+    this.version = other.version || "v2";
   };
 
   this.copy = function(other) {
@@ -432,11 +434,13 @@ function Nova() {
     this.username = other.username || null;
     this.image = other.image || null;
     this.networkId = other.networkId || null;
+    this.version = other.version || "v2";
   };
 
   this.addAccountDetails = function(other) {
     this.accountName = other.accountName || null;
     this.accountPass = other.accountPass || null;
+    this.version = other.version || "v2";
   };
 }
 
