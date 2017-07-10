@@ -18,7 +18,6 @@ public abstract class Scope {
   private Baremetal baremetal;
   private Gce gce;
   private Nova nova;
-  private NovaV3 novaV3;
   private Occi occi;
 
   public Scope() {
@@ -30,7 +29,6 @@ public abstract class Scope {
     this.baremetal = scope.getBaremetal();
     this.gce = scope.getGce();
     this.nova = scope.getNova();
-    this.novaV3 = scope.getNovaV3();
     this.occi = scope.getOcci();
   }
 
@@ -94,14 +92,8 @@ public abstract class Scope {
 
   public Nova getNova() {return nova;}
   
-  public NovaV3 getNovaV3() {return novaV3;}
-
   public void setNova(Nova nova) {
     this.nova = nova;
-  }
-
-  public void setNovaV3(NovaV3 nova_v3) {
-    this.novaV3 = nova_v3;
   }
 
   public void validate() throws ValidationException {
@@ -116,9 +108,6 @@ public abstract class Scope {
     }
     if(nova != null) {
       nova.validate();
-    }
-    if(novaV3 != null) {
-      novaV3.validate();
     }
     if(occi != null) {
       occi.validate();
