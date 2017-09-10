@@ -1,13 +1,13 @@
 set -e; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 set -e
 export LC_CTYPE=en_US.UTF-8
-%sudo_command% mkdir -p %cookbooks_home%
+mkdir -p %cookbooks_home%
 cd %cookbooks_home% 
-%sudo_command% rm -fr %github_repo_name%
-%sudo_command% git clone %github_repo_url%
+rm -fr %github_repo_name%*
+git clone %github_repo_url%
 cd %github_repo_name%
-%sudo_command% git checkout %branch_name%
-%sudo_command% berks vendor %vendor_path%
+git checkout %branch_name%
+berks vendor %vendor_path%
 cd %install_dir_path%
 echo '%task_id%' >> %succeedtasks_filepath%
 ' > clone_%github_repo_name%.sh ; chmod +x clone_%github_repo_name%.sh ; ./clone_%github_repo_name%.sh
