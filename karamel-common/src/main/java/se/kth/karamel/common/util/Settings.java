@@ -67,7 +67,7 @@ public class Settings {
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
   public static final String CHEFDK_VERSION_KEY = "chefdk.version";
-  public static final String CHEFDK_VERSION_DEFAULT = "0.16.28";
+  public static final String CHEFDK_VERSION_DEFAULT = "2.3.1";
 
   //-----------------------------------------------JCLOUDS--------------------------------------------------------------
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -254,7 +254,7 @@ public class Settings {
   public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
   public static final String REMOTE_WORKING_DIR_NAME = ".karamel";
   public static final String REMOTE_INSTALL_DIR_NAME = "install";
-  
+
   public static String RECIPE_RESULT_REMOTE_PATH(String recipeName) {
     String recName;
     if (!recipeName.contains(COOKBOOK_DELIMITER)) {
@@ -285,7 +285,7 @@ public class Settings {
   public static String REMOTE_WORKING_DIR_PATH(String sshUserName) {
     return REMOTE_USER_HOME_PATH(sshUserName) + "/" + REMOTE_WORKING_DIR_NAME;
   }
-  
+
   public static String REMOTE_INSTALL_DIR_PATH(String sshUserName) {
     return REMOTE_WORKING_DIR_PATH(sshUserName) + "/" + REMOTE_INSTALL_DIR_NAME;
   }
@@ -293,7 +293,7 @@ public class Settings {
   public static String REMOTE_COOKBOOKS_PATH(String sshUserName) {
     return REMOTE_WORKING_DIR_PATH(sshUserName) + "/" + REMOTE_COOKBOOKS_DIR_NAME;
   }
-  
+
   public static String REMOTE_COOKBOOK_VENDOR_PATH(String sshUserName, String repoName) {
     return REMOTE_COOKBOOKS_PATH(sshUserName) + "/" + repoName + "_vendor";
   }
