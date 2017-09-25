@@ -58,6 +58,12 @@ public class Confs<K extends String, V extends String> extends Properties {
 
       if (!folder.exists()) {
         folder.mkdirs();
+        // note that: .karamel/install/* files can include the sudo passwd, so keep them hidden.
+        Set<PosixFilePermission> perms = new HashSet<>();
+        perms.add(PosixFilePermission.OWNER_READ);
+        perms.add(PosixFilePermission.OWNER_WRITE);
+        perms.add(PosixFilePermission.OWNER_EXECUTE);	
+        Files.setPosixFilePermissions(folder.toPath(), perms);
       }
       File file = new File(folder, Settings.KARAMEL_CONF_NAME);
       out = new FileOutputStream(file);
