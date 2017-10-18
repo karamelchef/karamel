@@ -10,6 +10,7 @@ public class Nova extends Provider {
 
   private String flavor;
   private String image;
+  private String version;
 
   public static Nova makeDefault() {
     Nova nova = new Nova();
@@ -22,6 +23,14 @@ public class Nova extends Provider {
 
   public void setFlavor(String flavor) {
     this.flavor = flavor;
+  }
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   public String getImage() {
@@ -68,6 +77,9 @@ public class Nova extends Provider {
     }
     if (clone.getFlavor() == null) {
       clone.setFlavor(NovaSetting.NOVA_DEFAULT_FLAVOR.getParameter());
+    }
+    if (clone.getVersion() == null) {
+      clone.setVersion(NovaSetting.NOVA_DEFAULT_VERSION.getParameter());
     }
     return clone;
   }

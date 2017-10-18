@@ -37,6 +37,7 @@ public class LoadNovaCredentials extends AbstractCall {
       NovaJSON provider = new NovaJSON();
       provider.setAccountName((credentials == null) ? "" : credentials.getAccountName());
       provider.setAccountPass((credentials == null) ? "" : credentials.getAccountPass());
+      provider.setVersion((credentials == null) ? "v2" : credentials.getVersion());
       provider.setEndpoint((credentials == null) ? "" : credentials.getEndpoint());
       provider.setRegion((credentials == null) ? "" : credentials.getRegion());
       provider.setNetworkId((credentials == null) ? "" : credentials.getNetworkId());

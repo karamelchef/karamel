@@ -10,6 +10,7 @@ public class NovaCredentials {
   private String endpoint;
   private String region;
   private String networkId;
+  private String version;
 
   public String getNetworkId() {
     return networkId;
@@ -18,7 +19,15 @@ public class NovaCredentials {
   public void setNetworkId(String id) {
     this.networkId = id;
   }
-  
+
+  public String getVersion() {
+    return version;
+  }
+
+  public void setVersion(String version) {
+    this.version = version;
+  }
+
   public String getRegion() {
     return region;
   }

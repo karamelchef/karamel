@@ -1,24 +1,45 @@
-package se.kth.karamel.backend.launcher.nova;
+package se.kth.karamel.backend.launcher.novav3;
 
 import com.google.common.base.Predicate;
+/*
 import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
+*/
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+//import com.google.common.collect.Sets;
+import org.openstack4j.api.exceptions.AuthenticationException;
+import org.openstack4j.api.exceptions.ClientResponseException;
+import org.openstack4j.api.Builders;
+import org.openstack4j.api.compute.ComputeSecurityGroupService;
+//import org.openstack4j.api.exceptions.AuthenticationException;
+import org.openstack4j.model.compute.Server;
+import org.openstack4j.model.compute.SecGroupExtension;
+import org.openstack4j.model.compute.Address;
+import org.openstack4j.model.common.ActionResponse;
+import org.openstack4j.model.compute.IPProtocol;
+import org.openstack4j.model.compute.ServerCreate;
+import org.openstack4j.model.compute.FloatingIP;
+//import org.openstack4j.model.common.Identifier;
+
 import org.apache.log4j.Logger;
+import org.jclouds.compute.domain.NodeMetadata;
+//import org.jclouds.compute.RunNodesException;
+import org.jclouds.http.HttpResponseException;
+
+/*
 import org.jclouds.ContextBuilder;
-import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
 import org.jclouds.compute.options.TemplateOptions;
-import org.jclouds.http.HttpResponseException;
 import org.jclouds.net.domain.IpProtocol;
+
 import org.jclouds.openstack.nova.v2_0.compute.options.NovaTemplateOptions;
 import org.jclouds.openstack.nova.v2_0.domain.Ingress;
 import org.jclouds.openstack.nova.v2_0.domain.KeyPair;
 import org.jclouds.openstack.nova.v2_0.domain.SecurityGroup;
 import org.jclouds.openstack.nova.v2_0.extensions.SecurityGroupApi;
-import org.jclouds.rest.AuthorizationException;
+*/
+//import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -42,42 +63,43 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
+import java.util.Arrays;
+import java.util.Date;
 
 /**
  * Created by Alberto on 2015-05-16.
  */
-public final class NovaLauncher extends Launcher{
-  private static final Logger logger = Logger.getLogger(NovaLauncher.class);
+public final class NovaV3Launcher extends Launcher {
+  private static final Logger logger = Logger.getLogger(NovaV3Launcher.class);
   private static boolean TESTING = true;
-  private final NovaContext novaContext;
+  private final NovaV3Context novaContext;
   private final SshKeyPair sshKeyPair;
 
   private Set<String> keys = new HashSet<>();
 
-  public NovaLauncher(NovaContext novaContext, SshKeyPair sshKeyPair) throws KaramelException {
+  public NovaV3Launcher(NovaV3Context novaContext, SshKeyPair sshKeyPair) throws KaramelException {
     if (novaContext == null) {
       throw new KaramelException("Register your valid credentials first :-| ");
     } else if (sshKeyPair == null) {
       throw new KaramelException("Choose your ssh keypair first :-| ");
     } else {
       this.novaContext = novaContext;
+      this.novaContext.reauth();
       this.sshKeyPair = sshKeyPair;
-      logger.info(String.format("Account-Name='%s'", novaContext.getNovaCredentials().getAccountName()));
-      logger.info(String.format("Public-key='%s'", sshKeyPair.getPublicKeyPath()));
-      logger.info(String.format("Private-key='%s'", sshKeyPair.getPrivateKeyPath()));
+      //logger.info(String.format("Account-Name='%s'", novaContext.getNovaCredentials().getAccountName()));
+      //logger.info(String.format("Public-key='%s'", sshKeyPair.getPublicKeyPath()));
+      //logger.info(String.format("Private-key='%s'", sshKeyPair.getPrivateKeyPath()));
     }
   }
 
-  public static NovaContext validateCredentials(NovaCredentials novaCredentials, ContextBuilder builder)
+  public static NovaV3Context validateCredentials(NovaCredentials novaCredentials)
           throws InvalidNovaCredentialsException {
     try {
-      NovaContext context = new NovaContext(novaCredentials, builder);
-      SecurityGroupApi securityGroupApi = context.getSecurityGroupApi();
-      securityGroupApi.list();
+      NovaV3Context context = new NovaV3Context(novaCredentials);
+      context.authenticate();
+      //this.novaContext.getCmpute().servers().list();
       return context;
-    } catch (AuthorizationException e) {
+    } catch (AuthenticationException e) {
       throw new InvalidNovaCredentialsException("account-name:" + novaCredentials.getAccountName(), e);
     }
   }
@@ -86,19 +108,16 @@ public final class NovaLauncher extends Launcher{
     String accountId = confs.getProperty(NovaSetting.NOVA_ACCOUNT_ID_KEY.getParameter());
     String accessKey = confs.getProperty(NovaSetting.NOVA_ACCESSKEY_KEY.getParameter());
     String endpoint = confs.getProperty(NovaSetting.NOVA_ACCOUNT_ENDPOINT.getParameter());
-    String version = confs.getProperty(NovaSetting.NOVA_VERSION.getParameter());
     String novaRegion = confs.getProperty(NovaSetting.NOVA_REGION.getParameter());
     String novaNetworkId = confs.getProperty(NovaSetting.NOVA_NETWORKID.getParameter());
     NovaCredentials novaCredentials = null;
     if (accountId != null && !accountId.isEmpty() && accessKey != null && !accessKey.isEmpty()
-            && endpoint != null && !endpoint.isEmpty() && novaRegion != null && !novaRegion.isEmpty()
-            && version != null && !version.isEmpty()) {
+            && endpoint != null && !endpoint.isEmpty() && novaRegion != null && !novaRegion.isEmpty()) {
       novaCredentials = new NovaCredentials();
       novaCredentials.setAccountName(accountId);
       novaCredentials.setAccountPass(accessKey);
       novaCredentials.setEndpoint(endpoint);
       novaCredentials.setRegion(novaRegion);
-      novaCredentials.setVersion(version);
       novaCredentials.setNetworkId(novaNetworkId);
     }
     return novaCredentials;
@@ -107,69 +126,67 @@ public final class NovaLauncher extends Launcher{
   public String createSecurityGroup(String clusterName, String groupName, Nova nova, Set<String> ports) {
     String securityGroupUniqueName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, groupName);
     logger.info(String.format("Creating security group '%s' ...", securityGroupUniqueName));
-    SecurityGroupApi client = novaContext.getSecurityGroupApi();
-    String groupId;
-    //TODO Do we have something similar to VPC EC2 in Nova?
-    SecurityGroup created = client.createWithDescription(securityGroupUniqueName, NovaSetting
-              .NOVA_UNIQUE_GROUP_DESCRIPTION(clusterName, groupName));
-    //Get id of the security group
-    groupId = created.getId();
+
+    SecGroupExtension group = this.novaContext.getCompute().securityGroups().create(securityGroupUniqueName,
+        String.format("Security group for hops cluster %s, node group %s", clusterName, groupName));
+
     //Go over the ips
     if (!TESTING) {
       for (String port : ports) {
         Integer portNumber;
-        IpProtocol ipProtocol;
+        IPProtocol ipProtocol;
         if (port.contains("/")) {
           String[] s = port.split("/");
           portNumber = Integer.valueOf(s[0]);
-          ipProtocol = IpProtocol.valueOf(s[1]);
+          ipProtocol = IPProtocol.valueOf(s[1]);
         } else {
           portNumber = Integer.valueOf(port);
-          ipProtocol = IpProtocol.TCP;
+          ipProtocol = IPProtocol.TCP;
         }
-        Ingress ingress = Ingress.builder()
-                .fromPort(portNumber)
-                .toPort(portNumber)
-                .ipProtocol(ipProtocol)
-                .build();
 
-        client.createRuleAllowingCidrBlock(groupId, ingress, "0.0.0.0/0");
+        SecGroupExtension.Rule rule = this.novaContext.getCompute().securityGroups()
+          .createRule(Builders.secGroupRule()
+              .parentGroupId(group.getId())
+              .protocol(IPProtocol.TCP)
+              .cidr("0.0.0.0/0")
+              .range(portNumber, portNumber).build()
+              );
+
         logger.info(String.format("Ports became open for '%s'", securityGroupUniqueName));
       }
     } else {
-      Ingress ingress = Ingress.builder()
-              .fromPort(1)
-              .toPort(65535)
-              .ipProtocol(IpProtocol.TCP)
-              .build();
-      client.createRuleAllowingCidrBlock(groupId, ingress, "0.0.0.0/0");
+      SecGroupExtension.Rule rule = this.novaContext.getCompute().securityGroups()
+        .createRule(Builders.secGroupRule()
+            .parentGroupId(group.getId())
+            .protocol(IPProtocol.TCP)
+            .cidr("0.0.0.0/0")
+            .range(1, 65535).build()
+            );
+
       logger.info(String.format("Ports became open for '%s'", securityGroupUniqueName));
     }
     logger.info(String.format("Security group '%s' was created :)", securityGroupUniqueName));
-    return groupId;
+    return group.getId();
   }
 
   public boolean uploadSshPublicKey(String keyPairName, Nova nova, boolean removeOld) {
-    boolean uploadSuccesful;
-    FluentIterable<KeyPair> keyPairs = novaContext.getKeyPairApi().list();
-    if (keyPairs.isEmpty()) {
-      logger.info(String.format("New keypair '%s' is being uploaded to Nova OpenStack", keyPairName));
-      novaContext.getKeyPairApi().createWithPublicKey(keyPairName, sshKeyPair.getPublicKey());
-      uploadSuccesful = true;
-    } else if (removeOld) {
-      logger.info(String.format("Removing the old keypair '%s' and uploading the new one ...", keyPairName));
-      boolean deleteSuccesful = novaContext.getKeyPairApi().delete(keyPairName);
-      KeyPair pair = novaContext.getKeyPairApi().createWithPublicKey(keyPairName, sshKeyPair.getPublicKey());
-      uploadSuccesful = deleteSuccesful && pair != null;
-    } else {
-      uploadSuccesful = false;
+
+    if (removeOld) {
+      ActionResponse res = this.novaContext.getCompute().keypairs().delete(keyPairName);
+      if (!res.isSuccess())
+        logger.info(String.format("Could not remove key maube it does not exist '%s'", keyPairName));
     }
-    return uploadSuccesful;
+
+    logger.info(String.format("New keypair '%s' is being uploaded to Nova OpenStack", keyPairName));
+    this.novaContext.getCompute().keypairs().create(keyPairName, sshKeyPair.getPublicKey());
+    
+    return true;
   }
 
 
   public boolean cleanupFailedNodes(Map<NodeMetadata, Throwable> failedNodes) {
-    boolean success;
+    boolean success = false;
+    /*/
     if (failedNodes.size() > 0) {
       Set<String> lostIds = Sets.newLinkedHashSet();
       for (Map.Entry<NodeMetadata, Throwable> lostNode : failedNodes.entrySet()) {
@@ -188,7 +205,7 @@ public final class NovaLauncher extends Launcher{
       success = numberOfNodesSuccesfullyDeleted == numberOfNodesToDelete;
     } else {
       success = true;
-    }
+    }*/
     return success;
 
   }
@@ -200,9 +217,11 @@ public final class NovaLauncher extends Launcher{
     Set<String> allNovaVms = new HashSet<>();
     Set<String> allNovaVmsIds = new HashSet<>();
     Map<String, String> groupRegion = new HashMap<>();
+    
     for (GroupRuntime group : groups) {
       group.getCluster().resolveFailures();
       Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+      logger.info(String.format("Deleteing with provider %s", provider));
       if (provider instanceof Nova) {
         for (MachineRuntime machine : group.getMachines()) {
           if (machine.getVmId() != null) {
@@ -213,28 +232,51 @@ public final class NovaLauncher extends Launcher{
         List<String> vmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(group.getCluster().getName(), group.getName(),
                 jg.getSize());
         allNovaVms.addAll(vmNames);
-        groupRegion.put(group.getName(), novaContext.getNovaCredentials().getRegion());
+        // Get right region
+        groupRegion.put(group.getName(), "RegionOne");
       }
     }
+
     cleanup(definition.getName(), allNovaVmsIds, allNovaVms, groupRegion);
   }
 
   public void cleanup(String clusterName, Set<String> vmIds, Set<String> vmNames, Map<String, String> groupRegion)
           throws KaramelException {
     Set<String> groupNames = new HashSet<>();
+    
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
       groupNames.add(NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, gp.getKey()));
     }
+    
     logger.info(String.format("Killing following machines with names: \n %s \nor inside group names %s \nor with ids: "
             + "%s", vmNames.toString(), groupNames, vmIds));
     logger.info(String.format("Killing all machines in groups: %s", groupNames.toString()));
-    novaContext.getComputeService().destroyNodesMatching(withPredicate(vmIds, vmNames, groupNames));
+    for (Server s : this.novaContext.getCompute().servers().list()) {
+      String gname = s.getMetadata().get("Group");
+      if (gname != null && gname != "" && groupNames.contains(gname)) {
+        logger.info(String.format("Deleting server with name %s ", s.getName()));
+        this.novaContext.getCompute().servers().delete(s.getId());
+      }
+    }
+
     logger.info(String.format("All machines destroyed in all the security groups. :) "));
+    
+    for (String nodeId : vmIds) {
+      logger.info(String.format("Deleteing server with id %s", nodeId));
+      ActionResponse res = this.novaContext.getCompute().servers().delete(nodeId);
+      if (!res.isSuccess()) {
+        logger.info(String.format("Could not kill server with id %s", nodeId));
+      }
+    }
+
+
+    ComputeSecurityGroupService sec = this.novaContext.getCompute().securityGroups();
+
     for (Map.Entry<String, String> gp : groupRegion.entrySet()) {
       String uniqueGroupName = NovaSetting.NOVA_UNIQUE_GROUP_NAME(clusterName, gp.getKey());
-      for (SecurityGroup secgroup : novaContext.getSecurityGroupApi().list()) {
+      for (SecGroupExtension secgroup : sec.list()) {
         //TODO find the real name of the jclouds groups in openstack
-        if (secgroup.getName().startsWith("jclouds-" + uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
+        if (secgroup.getName().startsWith(uniqueGroupName) || secgroup.getName().equals(uniqueGroupName)) {
           logger.info(String.format("Destroying security group '%s' ...", secgroup.getName()));
           boolean retry = false;
           int count = 0;
@@ -242,7 +284,7 @@ public final class NovaLauncher extends Launcher{
             count++;
             try {
               logger.info(String.format("#%d Destroying security group '%s' ...", count, secgroup.getName()));
-              novaContext.getSecurityGroupApi().delete(secgroup.getId());
+              sec.delete(secgroup.getId());
             } catch (IllegalStateException ex) {
               logger.info(String.format("Hurry up Nova!! terminate machines!! '%s', will retry in %d ms :@",
                           uniqueGroupName, NovaSetting.NOVA_RETRY_INTERVAL.getParameter()));
@@ -258,34 +300,40 @@ public final class NovaLauncher extends Launcher{
         }
       }
     }
+  
   }
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String name) throws KaramelException {
+    
+    Set<String> ports = new HashSet<>();
     JsonGroup jg = UserClusterDataExtractor.findGroup(definition,name);
     Provider provider = UserClusterDataExtractor.getGroupProvider(definition,name);
     Nova nova = (Nova) provider;
-    Set<String> ports = new HashSet<>();
+    
     ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
-    String groupId = createSecurityGroup(definition.getName(), jg.getName(), nova, ports);
-    return groupId;
+    return createSecurityGroup(definition.getName(), jg.getName(), nova, ports);
+
   }
 
   @Override
   public List<MachineRuntime> forkMachines(JsonCluster definition, ClusterRuntime runtime, String name)
           throws KaramelException {
+
     Nova nova = (Nova) UserClusterDataExtractor.getGroupProvider(definition,name);
     JsonGroup definedGroup = UserClusterDataExtractor.findGroup(definition, name);
     GroupRuntime groupRuntime = UserClusterDataExtractor.findGroup(runtime,name);
     Set<String> groupIds = new HashSet<>();
+    
     groupIds.add(groupRuntime.getId());
-
-    String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(), novaContext.getNovaCredentials().getRegion());
+    
+    String keypairName = NovaSetting.NOVA_KEYPAIR_NAME(runtime.getName(),
+        this.novaContext.getNovaCredentials().getRegion());
     if(!keys.contains(keypairName)) {
-      uploadSshPublicKey(keypairName,nova,true);
+      uploadSshPublicKey(keypairName, nova, true);
       keys.add(keypairName);
     }
-    return requestNodes(keypairName,groupRuntime,groupIds,Integer.valueOf(definedGroup.getSize()),nova);
+    return requestNodes(keypairName, groupRuntime, groupIds, Integer.valueOf(definedGroup.getSize()), nova);
   }
 
   private List<MachineRuntime> requestNodes(String keypairName, GroupRuntime groupRuntime, Set<String> groupIds,
@@ -296,49 +344,56 @@ public final class NovaLauncher extends Launcher{
     List<String> allVmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
             groupRuntime.getName(), totalSize.intValue());
 
+    List<String> leftVmNames = NovaSetting.NOVA_UNIQUE_VM_NAMES(groupRuntime.getCluster().getName(),
+            groupRuntime.getName(), totalSize.intValue());
+
     logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqueGroupName));
 
     boolean succeed = false;
     int tries = 0;
-    Set<NodeMetadata> successfulNodes = Sets.newLinkedHashSet();
-    List<String> unforkedVmNames = new ArrayList<>();
-    List<String> toBeForkedVmNames;
-    unforkedVmNames.addAll(allVmNames);
+    List<Server> successfulNodes = new ArrayList<>();
+    List<Server> forkedVms = new ArrayList<>();
     Map<NodeMetadata, Throwable> failedNodes = Maps.newHashMap();
+
+    this.novaContext.getOsClient().useRegion(novaContext.getNovaCredentials().getRegion());
+
     while (!succeed && tries < Settings.AWS_RETRY_MAX) {
       int requestSize = totalSize - successfulNodes.size();
       int maxForkRequests = Integer.parseInt(NovaSetting.NOVA_MAX_FORK_VMS_PER_REQUEST.getParameter());
       if (requestSize > maxForkRequests) {
         requestSize = maxForkRequests;
-        toBeForkedVmNames = unforkedVmNames.subList(0, maxForkRequests);
       } else {
-        toBeForkedVmNames = unforkedVmNames;
+        tries++;
       }
-      TemplateBuilder template = novaContext.getComputeService().templateBuilder();
-      TemplateOptions templateOptions = novaContext.getComputeService().templateOptions().securityGroups(groupIds);
-      logger.info("novaContext.getNovaCredentials().getNetworkId() = " 
-                  + novaContext.getNovaCredentials().getNetworkId());
-      NovaTemplateOptions options = templateOptions.as(NovaTemplateOptions.class)
-              .keyPairName(keypairName)
-              .autoAssignFloatingIp(true)
-              .nodeNames(toBeForkedVmNames)
-              .networks("d5465024-4d06-44b2-acba-43c1363762fd");
-      //      .networks(novaContext.getNovaCredentials().getNetworkId());
-
-      template.options(options);
-      template.os64Bit(true);
-      template.hardwareId(novaContext.getNovaCredentials().getRegion()+"/"+nova.getFlavor());
-      template.imageId(novaContext.getNovaCredentials().getRegion()+"/"+nova.getImage());
-      template.locationId(novaContext.getNovaCredentials().getRegion());
-      tries++;
-      Set<NodeMetadata> succ = new HashSet<>();
+      List<String> networks = Arrays.asList(novaContext.getNovaCredentials().getNetworkId());
+       
       try {
         logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
                 requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), totalSize));
+        for (String nodeName : leftVmNames) {
+          logger.info(String.format("Building server with name '%s'", nodeName));
+          ServerCreate sc = Builders.server()
+            .name(nodeName)
+            .flavor(nova.getFlavor())
+            .image(nova.getImage())
+            .networks(networks)
+            .keypairName(keypairName)
+            .addMetadataItem("Group", uniqueGroupName)
+            .addMetadataItem("sshuser", nova.getUsername())
+            .addMetadataItem("sshport", "22")
+            .addMetadataItem("Descr", "Created by karamel(v3)")
+            .build();
+
+          for (String secGroupId : groupIds) {
+            sc.addSecurityGroup(secGroupId);
+          }
+          Server server = this.novaContext.getCompute().servers().boot(sc);
+          forkedVms.add(server);
+        }
+        /*
         succ.addAll(novaContext.getComputeService().createNodesInGroup(
                 uniqueGroupName, requestSize, template.build()));
-      } catch (RunNodesException ex) {
-        addSuccessAndLostNodes(ex, succ, failedNodes);
+        */
       } catch (HttpResponseException e) {
         //Need error handling on the different possible
         logger.error("", e);
@@ -349,14 +404,11 @@ public final class NovaLauncher extends Launcher{
                 uniqueGroupName, NovaSetting.NOVA_RETRY_INTERVAL), ex);
       }
 
-      unforkedVmNames = findLeftVmNames(succ, unforkedVmNames);
-      successfulNodes.addAll(succ);
+      successfulNodes = handleForkedNodes(forkedVms, leftVmNames);
       if (successfulNodes.size() < totalSize) {
         try {
           succeed = false;
-          logger.info(String.format("So far we got %d successful-machine(s) and %d failed-machine(s) out of %d "
-                          + "original-number for '%s'. Failed nodes will be killed later.", successfulNodes.size(),
-                  failedNodes.size(),
+          logger.info(String.format("So far we got %d successful-machine(s) out of %d", successfulNodes.size(),
                   totalSize, uniqueGroupName));
           Thread.currentThread().sleep(Settings.AWS_RETRY_INTERVAL);
         } catch (InterruptedException ex1) {
@@ -364,31 +416,64 @@ public final class NovaLauncher extends Launcher{
         }
       } else {
         succeed = true;
-        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-) we have %d failed-machines to kill "
-                + "before we go on..", totalSize, uniqueGroupName, failedNodes.size()));
-        if (failedNodes.size() > 0) {
-          cleanupFailedNodes(failedNodes);
-        }
+        logger.info(String.format("Cool!! we got all %d machine(s) for '%s' |;-)", totalSize, uniqueGroupName));
+        
         List<MachineRuntime> machines = new ArrayList<>();
-        for (NodeMetadata node : successfulNodes) {
-          if (node != null) {
-            MachineRuntime machine = new MachineRuntime(groupRuntime);
-            ArrayList<String> privateIps = new ArrayList();
-            ArrayList<String> publicIps = new ArrayList();
-            privateIps.addAll(node.getPrivateAddresses());
-            publicIps.addAll(node.getPublicAddresses());
-            machine.setVmId(node.getId());
-            machine.setName(node.getName());
-            machine.setPrivateIp(privateIps.get(0));
 
-            //TODO fix this, for now we set ip to the same private if not accessible
-            String publicIp = publicIps.isEmpty()?privateIps.get(0):publicIps.get(0);
+        for (Server s : successfulNodes) {
 
-            machine.setPublicIp(publicIp);
-            machine.setSshPort(node.getLoginPort());
-            machine.setSshUser(node.getCredentials().getUser());
-            machines.add(machine);
+          FloatingIP server_extip = this.getFloatingIp();
+
+          if (server_extip == null) {
+            // TODO: delete server !?
+            logger.info(String.format("Failed to alloc flaoting ip :("));
+            continue;
           }
+
+          ActionResponse r = this.novaContext.getCompute().floatingIps()
+            .addFloatingIP(s, server_extip.getFloatingIpAddress());
+          if (!r.isSuccess()) {
+            logger.info(String.format("Failed to addFloatinIp to %s", s.getName()));
+            continue;
+          }
+
+          String privateIp = null;
+          String floatingIp = server_extip.getFloatingIpAddress();
+          
+          // Get the first addresses
+          Map<String, List<? extends Address>> adrMap = s.getAddresses().getAddresses();
+          for (String key : adrMap.keySet()) {
+            List<? extends Address> adrList = adrMap.get(key);
+            for (Address adr : adrList) {
+              logger.info(String.format("Network resource key: {} of instance: {}, address: {}",
+                    key, s.getName(), adr.getAddr()));
+              switch (adr.getType()) {
+                case "fixed":
+                  if (privateIp == null)
+                    privateIp = adr.getAddr();
+                  break;
+                case "floating":
+                  if (floatingIp == null)
+                    floatingIp = adr.getAddr();
+                  break;
+                default:
+                  logger.error(String.format("No such network resource type: {}, instance: {}",
+                        adr.getType(), s.getName()));
+              }
+            }
+          }
+
+          // Set data about server  
+          MachineRuntime machine = new MachineRuntime(groupRuntime);
+          machine.setVmId(s.getId());
+          machine.setName(s.getName());
+          machine.setPrivateIp(privateIp);
+
+          machine.setPublicIp(floatingIp);
+
+          machine.setSshPort(Integer.valueOf(s.getMetadata().get("sshport")));
+          machine.setSshUser(s.getMetadata().get("sshuser"));
+          machines.add(machine);
         }
         return machines;
       }
@@ -396,40 +481,66 @@ public final class NovaLauncher extends Launcher{
     throw new KaramelException(String.format("Couldn't fork machines for group'%s'", groupRuntime.getName()));
   }
 
-  private void addSuccessAndLostNodes(RunNodesException rnex, Set<NodeMetadata> successfulNodes, Map<NodeMetadata,
-          Throwable> lostNodes) {
-    // workaround https://code.google.com/p/jclouds/issues/detail?id=923
-    // by ensuring that any nodes in the "NodeErrors" do not get considered
-    // successful
-    Set<? extends NodeMetadata> reportedSuccessfulNodes = rnex.getSuccessfulNodes();
-    Map<? extends NodeMetadata, ? extends Throwable> errorNodesMap = rnex.getNodeErrors();
-    Set<? extends NodeMetadata> errorNodes = errorNodesMap.keySet();
+  private FloatingIP getFloatingIp() {
 
-    // "actual" successful nodes are ones that don't appear in the errorNodes
-    successfulNodes.addAll(Sets.difference(reportedSuccessfulNodes, errorNodes));
-    lostNodes.putAll(errorNodesMap);
+    // Check for free ones
+    for (FloatingIP ip : this.novaContext.getCompute().floatingIps().list()) {
+      logger.info(String.format("Ip addresses %s", ip.getFixedIpAddress()));
+      if (ip.getFixedIpAddress() == null || ip.getFixedIpAddress().equals("")) {
+        return ip;
+      }
+    }
+
+    // Try to allocate 
+    for (String poolName : this.novaContext.getCompute().floatingIps().getPoolNames()) {
+      FloatingIP ip = null;
+      try { 
+        ip = this.novaContext.getCompute().floatingIps().allocateIP(poolName);
+      } catch (ClientResponseException e) {
+        logger.info(String.format("Could not allocate floating ip, status code %s: ", e.getStatusCode()), e);
+        ip = null;
+        continue;
+      }
+      return ip;
+    }
+
+    return null;
   }
 
-  private List<String> findLeftVmNames(Set<? extends NodeMetadata> successfulNodes, List<String> vmNames) {
-    List<String> leftVmNames = new ArrayList<>();
-    leftVmNames.addAll(vmNames);
+  /*
+  private getAddresses(Server server) {
+    return server.getAddresses().getAddresses();
+  }
+  */
+
+  private List<Server> handleForkedNodes(List<Server> forkedNodes, List<String> leftNodes) {
+    List<Server> activeNodes = new ArrayList<>();
+    List<Server> failedNodes = new ArrayList<>();
+    
     int unnamedVms = 0;
-    for (NodeMetadata nodeMetadata : successfulNodes) {
-      String nodeName = nodeMetadata.getName();
-      if (leftVmNames.contains(nodeName)) {
-        leftVmNames.remove(nodeName);
-      } else {
-        unnamedVms++;
+    for (Server s : forkedNodes ) {
+      logger.info(String.format("Checking node %s", s.getId()));
+      Server updated_s = this.novaContext.getCompute().servers().get(s.getId());
+      String nodeName = updated_s.getName();
+      leftNodes.remove(nodeName);
+      if (updated_s.getStatus() == Server.Status.ACTIVE) {
+        activeNodes.add(updated_s);
+      } else if (updated_s.getCreated() != null &&
+          updated_s.getCreated().getTime() + (10*60*1000) < new Date().getTime()) {
+        logger.info(String.format("Server %s(%s) createdi at %s now is %s did not start in time",
+              nodeName, s.getId(), updated_s.getCreated().getTime(), new Date().getTime()));
+        logger.info(String.format("Server %s(%s) did not start in time lets try again", nodeName, s.getId()));
+        this.novaContext.getCompute().servers().delete(s.getId());
+        // Readd so we restart it
+        leftNodes.add(nodeName);
+        failedNodes.add(s);
       }
     }
 
-    for (int i = 0; i < unnamedVms; i++) {
-      if (leftVmNames.size() > 0) {
-        logger.debug(String.format("Taking %s as one of the unnamed vms.", leftVmNames.get(0)));
-        leftVmNames.remove(0);
-      }
-    }
-    return leftVmNames;
+    // removed failed
+    forkedNodes.removeAll(failedNodes);
+
+    return activeNodes;
   }
 
   public static Predicate<NodeMetadata> withPredicate(final Set<String> ids, final Set<String> names,

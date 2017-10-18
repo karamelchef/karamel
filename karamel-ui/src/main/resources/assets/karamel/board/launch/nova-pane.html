@@ -1,6 +1,12 @@
 <div class="tab-pane" ng-show="selected">
 
     <div class="form-group">
+        <label for="version" class="control-label col-xs-3" style="text-align: left">Keystone(v2 or v3)</label>
+        <div class="col-xs-9">
+            <input type="text" class="form-control" name="version" id="version" required ng-model="account.version" placeholder="Version" tabindex="1" ng-change="warnUser()">
+        </div>
+    </div>
+    <div class="form-group">
         <label for="accountName" class="control-label col-xs-3" style="text-align: left">Account Name</label>
         <div class="col-xs-9">
             <input type="text" class="form-control" name="accountName" id="accountName" required ng-model="account.accountName" placeholder="Account Name" tabindex="1" ng-change="warnUser()">

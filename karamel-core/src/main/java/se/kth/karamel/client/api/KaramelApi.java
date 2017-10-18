@@ -298,8 +298,12 @@ public interface KaramelApi {
   public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
 
   public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
+  
+  public NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
 
   public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+  
+  public boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
 
   public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
 

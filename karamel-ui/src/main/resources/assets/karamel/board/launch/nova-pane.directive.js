@@ -17,6 +17,7 @@ angular.module('main.module')
                     scp.mapKey = 'nova';
                     scp.bootUp = true;
                     scp.account = {
+			version: "v2",
                         accountName: null,
                         accountPass: null,
                         region: null,
@@ -81,6 +82,7 @@ angular.module('main.module')
                                 .success(function(data) {
                                     scope.account.accountName = data.accountName;
                                     scope.account.accountPass = data.accountPass;
+                                    scope.account.version = data.version;
                                     scope.account.region = data.region;
                                     scope.account.endpoint = data.endpoint;
                                     scope.account.networkId = data.networkId;

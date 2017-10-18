@@ -91,7 +91,7 @@ public abstract class Scope {
   }
 
   public Nova getNova() {return nova;}
-
+  
   public void setNova(Nova nova) {
     this.nova = nova;
   }

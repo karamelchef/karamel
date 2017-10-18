@@ -171,6 +171,10 @@ public class ChefJsonGenerator {
     ips = new JsonArray();
     ips.add(new JsonPrimitive(machineEntity.getPublicIp()));
     json.add("public_ips", ips);
+
+    JsonObject hosts = new JsonObject();
+    hosts.add(machineEntity.getPublicIp(), new JsonPrimitive(machineEntity.getName()));
+    json.add("hosts", hosts);
   }
 
   /**
@@ -232,6 +236,8 @@ public class ChefJsonGenerator {
   public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
     Map<String, Set<String>> privateIps = new HashMap<>();
     Map<String, Set<String>> publicIps = new HashMap<>();
+    Map<String, Map<String, String>> hosts = new HashMap<>();
+
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
@@ -242,21 +248,61 @@ public class ChefJsonGenerator {
                   Settings.REMOTE_CHEFJSON_PRIVATEIPS_TAG;
               String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
                   Settings.REMOTE_CHEFJSON_PUBLICIPS_TAG;
+              String hostsAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
+                  Settings.REMOTE_CHEFJSON_HOSTS_TAG;
               if (!privateIps.containsKey(privateAttr)) {
                 privateIps.put(privateAttr, new HashSet<String>());
                 publicIps.put(publicAttr, new HashSet<String>());
+                hosts.put(hostsAttr, new HashMap<String, String>());
               }
               privateIps.get(privateAttr).add(me.getPrivateIp());
               publicIps.get(publicAttr).add(me.getPublicIp());
+              hosts.get(hostsAttr).put(me.getPublicIp(), me.getName());
+              hosts.get(hostsAttr).put(me.getPrivateIp(), me.getName());
             }
           }
         }
       }
     }
-
     attr2Json(json, privateIps);
     attr2Json(json, publicIps);
+    attrMap2Json(json, hosts);
   }
+
+  /**
+   * It converts attributes into the json format and adds them into the root json object. 
+   * For example hadoop::dn/hosts: {192.168.0.1: node-name} is converted into 
+   * {"hadoop":{"dn":{"hosts": {"192.168.0.1": "node-name"},}}}
+   * @param root
+   * @param attrs 
+   */
+  public static void attrMap2Json(JsonObject root, Map<String, Map<String, String>> attrs) {
+    for (Map.Entry<String, Map<String, String>> entry : attrs.entrySet()) {
+      String[] keyComps = entry.getKey().split(Settings.COOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
+      JsonObject o1 = root;
+      for (int i = 0; i < keyComps.length; i++) {
+        String comp = keyComps[i];
+        if (i == keyComps.length - 1) {
+          JsonObject jobj = new JsonObject();
+          for (Map.Entry<String, String> e2 : entry.getValue().entrySet()) {
+            jobj.add(e2.getKey(), new JsonPrimitive(e2.getValue().toString()));
+          }
+          o1.add(comp, jobj);
+        } else {
+          JsonElement o2 = o1.get(comp);
+          if (o2 == null) {
+            JsonObject o3 = new JsonObject();
+            o1.add(comp, o3);
+            o1 = o3;
+          } else {
+            o1 = o2.getAsJsonObject();
+          }
+        }
+      }
+    }
+  }
+
+
 
   /**
    * It converts attributes into the json format and adds them into the root json object. 

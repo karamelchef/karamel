@@ -10,6 +10,7 @@ import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
+import se.kth.karamel.backend.launcher.novav3.NovaV3Context;
 import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Gce;
@@ -34,6 +35,7 @@ public class ClusterContext {
   private GceContext gceContext;
   private SshKeyPair sshKeyPair;
   private NovaContext novaContext;
+  private NovaV3Context novaV3Context;
   private OcciContext occiContext;
   private String sudoAccountPassword = "";
 
@@ -79,6 +81,9 @@ public class ClusterContext {
     if (novaContext == null) {
       novaContext = commonContext.getNovaContext();
     }
+    if (novaV3Context == null) {
+      novaV3Context = commonContext.getNovaV3Context();
+    }
     if (occiContext == null) {
       occiContext = commonContext.getOcciContext();
     }
@@ -97,8 +102,10 @@ public class ClusterContext {
         throw new KaramelException("No valid Ec2 credentials registered :-|");
       } else if (provider instanceof Gce && context.getGceContext() == null) {
         throw new KaramelException("No valid Gce credentials registered :-|");
-      } else if (provider instanceof Nova && context.getNovaContext() == null) {
-        throw new KaramelException("No valid Nova credentials registered :-|");
+      } else if (provider instanceof Nova) {
+        if (context.getNovaContext() == null && context.getNovaV3Context() == null) {
+          throw new KaramelException("No valid Novai(v2 or v3) credentials registered :-|");
+        }
       } else if (provider instanceof Occi && context.getOcciContext() == null) {
         throw new KaramelException("No valid Occi credentials registered :-|");
       }
@@ -130,6 +137,14 @@ public class ClusterContext {
 
   public NovaContext getNovaContext() {
     return novaContext;
+  }
+
+  public void setNovaV3Context(NovaV3Context novaV3Context) {
+    this.novaV3Context = novaV3Context;
+  }
+
+  public NovaV3Context getNovaV3Context() {
+    return novaV3Context;
   }
 
   public void setOcciContext(OcciContext occiContext) {

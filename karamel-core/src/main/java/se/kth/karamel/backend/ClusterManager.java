@@ -17,6 +17,7 @@ import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.baremetal.BaremetalLauncher;
 import se.kth.karamel.backend.launcher.google.GceLauncher;
 import se.kth.karamel.backend.launcher.nova.NovaLauncher;
+import se.kth.karamel.backend.launcher.novav3.NovaV3Launcher;
 import se.kth.karamel.backend.launcher.occi.OcciLauncher;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -227,7 +228,11 @@ public class ClusterManager implements Runnable {
         } else if (provider instanceof Gce) {
           launcher = new GceLauncher(clusterContext.getGceContext(), clusterContext.getSshKeyPair());
         } else if (provider instanceof Nova) {
-          launcher = new NovaLauncher(clusterContext.getNovaContext(), clusterContext.getSshKeyPair());
+          if (clusterContext.getNovaContext() != null) {
+            launcher = new NovaLauncher(clusterContext.getNovaContext(), clusterContext.getSshKeyPair());
+          } else if (clusterContext.getNovaV3Context() != null) {
+            launcher = new NovaV3Launcher(clusterContext.getNovaV3Context(), clusterContext.getSshKeyPair());
+          }
         } else if (provider instanceof Occi) {
           launcher = new OcciLauncher(clusterContext.getOcciContext(), clusterContext.getSshKeyPair());
         }
@@ -269,6 +274,7 @@ public class ClusterManager implements Runnable {
         }
       }
     } catch (Exception ex) {
+      logger.info("Cleanup error", ex);
       if (!(ex.getCause() instanceof InterruptedException && stopping)) {
         logger.error("", ex);
         runtime.issueFailure(new Failure(Failure.Type.CLEANUP_FAILE, ex.getMessage()));
@@ -298,6 +304,7 @@ public class ClusterManager implements Runnable {
           group.setId(groupId);
           group.setPhase(GroupRuntime.GroupPhase.GROUPS_FORKED);
         } catch (Exception ex) {
+          logger.info("Fork groups ", ex);
           if (ex instanceof InterruptedException) {
             InterruptedException ex1 = (InterruptedException) ex;
             throw ex1;
@@ -393,19 +400,28 @@ public class ClusterManager implements Runnable {
     runtime.setPhase(ClusterRuntime.ClusterPhases.FORKING_MACHINES);
     runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, null));
     List<GroupRuntime> groups = runtime.getGroups();
+    
+
+    logger.info(String.format("groups '%s'", groups));
+
     for (GroupRuntime group : groups) {
       if (group.getPhase() == GroupRuntime.GroupPhase.GROUPS_FORKED
           || (group.getPhase() == GroupRuntime.GroupPhase.FORKING_MACHINES)) {
         group.setPhase(GroupRuntime.GroupPhase.FORKING_MACHINES);
         runtime.resolveFailure(Failure.hash(Failure.Type.FORK_MACHINE_FAILURE, group.getName()));
+        logger.info(String.format("Gogo"));
         Provider provider = UserClusterDataExtractor.getGroupProvider(definition, group.getName());
+        logger.info(String.format("Using provider '%s'", provider));
         Launcher launcher = launchers.get(provider.getClass());
+        logger.info(String.format("Using launcher '%s'", launcher));
         try {
+          logger.info(String.format("Using launcher '%s'", launcher));
           List<MachineRuntime> mcs = launcher.forkMachines(definition, runtime, group.getName());
           group.setMachines(mcs);
           machinesMonitor.addMachines(mcs);
           group.setPhase(GroupRuntime.GroupPhase.MACHINES_FORKED);
         } catch (Exception ex) {
+          logger.error("Fork error", ex);
           runtime.issueFailure(new Failure(Failure.Type.FORK_MACHINE_FAILURE, group.getName(), ex.getMessage()));
           throw ex;
         }

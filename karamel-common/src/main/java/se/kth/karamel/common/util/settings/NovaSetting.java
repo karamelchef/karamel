@@ -16,6 +16,7 @@ public enum NovaSetting {
   NOVA_DEFAULT_REGION("default region here!"),
   NOVA_DEFAULT_IMAGE("default image here!"),
   NOVA_DEFAULT_USERNAME("default username here!"),
+  NOVA_DEFAULT_VERSION("v2"),
   NOVA_DEFAULT_ENDPOINT("default endpoint here!"),
   NOVA_ACCOUNT_ID_KEY("nova.account.id"),
   NOVA_ACCOUNT_ENDPOINT("nova.account.endpoint"),
@@ -23,6 +24,7 @@ public enum NovaSetting {
   NOVA_NETWORKID("nova.networkId"),
   NOVA_ACCESSKEY_KEY("nova.access.key"),
   NOVA_KEYPAIR_NAME_KEY("nova.keypair.name"),
+  NOVA_VERSION("nova.version"),
   NOVA_RETRY_INTERVAL("5000"),
   NOVA_MAX_FORK_VMS_PER_REQUEST("50");
 

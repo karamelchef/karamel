@@ -458,7 +458,8 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             client.connect(machineEntity.getPublicIp(), machineEntity.getSshPort());
           } catch (IOException ex) {
-            logger.warn(String.format("%s: Opps!! coudln' t connect :@", machineEntity.getId()));
+            logger.warn(String.format("%s: Opps!! coudln' t connect to %s:%s :@", machineEntity.getId(),
+                  machineEntity.getPublicIp(), machineEntity.getSshPort()));
             if (passphrase != null && passphrase.isEmpty() == false) {
               if (numRetries > 1) {
                 logger.warn(String.format("%s: Could be a slow network, will retry. ", machineEntity.getId()));
