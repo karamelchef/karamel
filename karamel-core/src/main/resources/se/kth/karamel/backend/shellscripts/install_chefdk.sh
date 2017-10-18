@@ -1,10 +1,6 @@
 set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
 set -eo pipefail
-curl --connect-timeout 60 -m 240 https://omnitruck.chef.io/install.sh | sudo bash -s -- -c stable -P chefdk && echo '%task_id%' >> %succeedtasks_filepath%
-exit
-
-set -eo pipefail
 if [ %osfamily% == "redhat" ] ; then
   chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 
