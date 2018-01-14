@@ -123,6 +123,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         .hasArg()
         .withDescription("Sudo password")
         .create("passwd"));
+    options.addOption(OptionBuilder.withArgName("sshPassphrase")
+        .hasArg()
+        .withDescription("Ssh Key Passphrase")
+        .create("passphrase"));
   }
 
   public static void create() {
@@ -206,8 +210,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       } else {
         noSudoPasswd = true;
       }
-      if (line.hasOption("sshkey-passwd")) {
-        sshPassphrase = line.getOptionValue("sshkey-passwd");
+      if (line.hasOption("passphrase")) {
+        sshPassphrase = line.getOptionValue("passphrase");
       } else {
         noSshKeyPasswd = true;
       }
