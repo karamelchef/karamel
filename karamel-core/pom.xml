@@ -5,6 +5,7 @@
   <parent>
     <groupId>se.kth.karamel</groupId>
     <artifactId>karamel-parent</artifactId>
+    <relativePath>../pom.xml</relativePath>
     <version>${karamel.version}</version>
   </parent>
 
