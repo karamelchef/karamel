@@ -75,7 +75,7 @@ import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
-    KaramelServiceApplication.class);
+      KaramelServiceApplication.class);
 
   private static KaramelApi karamelApi;
 
@@ -91,6 +91,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static boolean cli = false;
   private static boolean headless = false;
   private static boolean noSudoPasswd = false;
+  private static boolean noSshKeyPasswd = false;
 
   static {
 // Ensure a single instance of the app is running
@@ -98,28 +99,30 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       s = new ServerSocket(PORT, 10, InetAddress.getLocalHost());
     } catch (UnknownHostException e) {
       // shouldn't happen for localhost
+      logger.error("Unknown host when trying to bind to port " + PORT + ". Exiting...");
+      System.exit(10);
     } catch (IOException e) {
       // port taken, so app is already running
-      logger.info("An instance of Karamel is already running. Exiting...");
+      logger.error("An instance of Karamel is already running. Need to bind to port " + PORT + ". Exiting...");
       System.exit(10);
     }
 
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
-      .hasArg()
-      .withDescription("Dropwizard configuration in a YAML file")
-      .create("server"));
+        .hasArg()
+        .withDescription("Dropwizard configuration in a YAML file")
+        .create("server"));
     options.addOption(OptionBuilder.withArgName("yamlFile")
-      .hasArg()
-      .withDescription("Karamel cluster definition in a YAML file")
-      .create("launch"));
+        .hasArg()
+        .withDescription("Karamel cluster definition in a YAML file")
+        .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
 //    options.addOption("passwd", false, "Sudo password");
     options.addOption(OptionBuilder.withArgName("sudoPassword")
-      .hasArg()
-      .withDescription("Sudo password")
-      .create("passwd"));
+        .hasArg()
+        .withDescription("Sudo password")
+        .create("passwd"));
   }
 
   public static void create() {
@@ -173,6 +176,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     String[] modifiedArgs = new String[2];
     modifiedArgs[0] = "server";
     String sudoPasswd = "";
+    String sshPassphrase = "";
 
     karamelApi = new KaramelApiImpl();
 
@@ -198,14 +202,19 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         headless = true;
       }
       if (line.hasOption("passwd")) {
-        sudoPasswd = line.getOptionValue("passwd");        
+        sshPassphrase = line.getOptionValue("passwd");
       } else {
         noSudoPasswd = true;
+      }
+      if (line.hasOption("sshkey-passwd")) {
+        sshPassphrase = line.getOptionValue("sshkey-passwd");
+      } else {
+        noSshKeyPasswd = true;
       }
 
       if (cli) {
 
-        ClusterManager.EXIT_ON_COMPLETION  = true;
+        ClusterManager.EXIT_ON_COMPLETION = true;
 //        if (!noSudoPasswd) {
 //          Console c = null;
 //          c = System.console();
@@ -229,6 +238,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         }
 
         SshKeyPair pair = karamelApi.loadSshKeysIfExist();
+        if (!noSshKeyPasswd) {
+          pair.setPassphrase(sshPassphrase);
+        }
 
         karamelApi.registerSshKeys(pair);
 
@@ -289,21 +301,21 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     filter.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class
     ), true, "/*");
     filter.setInitParameter(
-      "allowedOrigins", "*"); // allowed origins comma separated
+        "allowedOrigins", "*"); // allowed origins comma separated
     filter.setInitParameter(
-      "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
+        "allowedHeaders", "Content-Type,Authorization,X-Requested-With,Content-Length,Accept,Origin");
     filter.setInitParameter(
-      "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
+        "allowedMethods", "GET,PUT,POST,DELETE,OPTIONS,HEAD");
     filter.setInitParameter(
-      "preflightMaxAge", "5184000"); // 2 months
+        "preflightMaxAge", "5184000"); // 2 months
     filter.setInitParameter(
-      "allowCredentials", "true");
+        "allowCredentials", "true");
 
     environment.jersey()
-      .setUrlPattern("/api/*");
+        .setUrlPattern("/api/*");
 
     environment.healthChecks()
-      .register("template", healthCheck);
+        .register("template", healthCheck);
 
     //definitions
     environment.jersey().register(new YamlToJson(karamelApi));
@@ -416,7 +428,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
     } else {
       System.err.println("Brower UI could not be launched using Java's Desktop library. "
-        + "Are you running a window manager?");
+          + "Are you running a window manager?");
       System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
       System.err.println("Retrying to launch the browser now using a different method.");
       BareBonesBrowserLaunch.openURL(uri.toASCIIString());
