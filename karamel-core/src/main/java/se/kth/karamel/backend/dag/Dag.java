@@ -30,6 +30,14 @@ public class Dag {
     }
   }
 
+  public void removeNode(DagNode parent) {
+    allNodes.remove(parent.getId());
+
+    for (DagNode node : allNodes.values()) {
+      node.removePredecessor(parent);
+    }
+  }
+
   public void addTask(DagTask task) throws DagConstructionException {
     logger.debug("Adding task: " + task.dagNodeId());
     DagNode node = null;

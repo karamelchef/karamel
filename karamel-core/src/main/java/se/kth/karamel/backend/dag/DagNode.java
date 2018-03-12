@@ -93,6 +93,10 @@ public class DagNode implements DagTaskCallback {
     }
   }
 
+  public void removePredecessor(DagNode predecessor) {
+    predecessors.remove(predecessor);
+  }
+
   public void prepareToStart(String prob) throws DagConstructionException {
     if (probs.contains(prob)) {
       return;

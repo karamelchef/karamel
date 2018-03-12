@@ -10,7 +10,10 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
@@ -34,6 +37,7 @@ public class KaramelizedCookbook {
   private final KaramelFile karamelFile;
   private final Berksfile berksFile;
   private final List<ExperimentRecipe> experimentRecipes = new ArrayList<>();
+  private final Set<KaramelizedCookbook> dependencies = new HashSet<>();
   private InstallRecipe installRecipe;
   private String json;
   private boolean reciepsLoaded = false;
@@ -207,4 +211,13 @@ public class KaramelizedCookbook {
     return urls;
   }
 
+  public void addDependency(KaramelizedCookbook cookbook) {
+    this.dependencies.add(cookbook);
+  }
+
+  public void addDependencies(Set<KaramelizedCookbook> cookbooks) {
+    this.dependencies.addAll(cookbooks);
+  }
+
+  public Set<KaramelizedCookbook> getDependencies() { return this.dependencies; }
 }
