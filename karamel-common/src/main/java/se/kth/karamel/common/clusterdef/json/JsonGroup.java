@@ -5,13 +5,14 @@
  */
 package se.kth.karamel.common.clusterdef.json;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.clusterdef.Baremetal;
+import se.kth.karamel.common.cookbookmeta.Attribute;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.RecipeNotfoundException;
@@ -32,6 +33,7 @@ public class JsonGroup extends JsonScope {
   }
 
   public JsonGroup(YamlCluster cluster, YamlGroup group, String name) throws KaramelException {
+    // We are doing the same work several times here
     super(cluster, group);
     setName(name);
     this.size = group.getSize();
@@ -42,36 +44,44 @@ public class JsonGroup extends JsonScope {
       for (JsonCookbook cb : getCookbooks()) {
         if (cb.getName().equals(comp[0])) {
           cookbook = cb;
+          break;
         }
       }
       if (cookbook == null) {
-        throw new RecipeNotfoundException(String.format("Opps!! Import cookbook for '%s' ಠ_ಠ", rec));
+        throw new RecipeNotfoundException(String.format("Opps!! Import cookbook for '%s'", rec));
       }
       JsonRecipe jsonRecipe = new JsonRecipe();
       jsonRecipe.setName(rec);
       cookbook.getRecipes().add(jsonRecipe);
     }
-    List<JsonCookbook> cookbooks = new ArrayList<>();
-    cookbooks.addAll(getCookbooks());
-    for (JsonCookbook cb : cookbooks) {
-      if (cb.getRecipes().isEmpty()) {
-        getCookbooks().remove(cb);
+
+    getCookbooks().removeIf(jsonCb -> jsonCb.getRecipes().isEmpty());
+
+    Map<String, Object> groupAttrs = new HashMap<>(group.flattenAttrs());
+    Set<String> usedAttributes = new HashSet<>();
+    for (JsonCookbook jc : getCookbooks()) {
+      KaramelizedCookbook kcb = jc.getKaramelizedCookbook();
+      Set<Attribute> allValidAttrs = new HashSet<>(kcb.getMetadataRb().getAttributes());
+      for (KaramelizedCookbook depKcb : kcb.getDependencies()) {
+        allValidAttrs.addAll(depKcb.getMetadataRb().getAttributes());
       }
-    }
-    Map<String, Object> attrs = new HashMap<>();
-    attrs.putAll(group.flattenAttrs());
-    for (JsonCookbook jc : cookbooks) {
-      Map<String, Object> attrs1 = jc.getAttrs();
-      for (Map.Entry<String, Object> entry : attrs1.entrySet()) {
-        String key = entry.getKey();
-        if (attrs.containsKey(key)) {
-          attrs.remove(key);
+
+      // I think that this map should be <String, Attribute>. But I don't want to see
+      // what happen if I change it.
+      Map<String, Object> validUsedAttrs = new HashMap<>();
+      for (String usedAttr: groupAttrs.keySet()) {
+        if (allValidAttrs.contains(new Attribute(usedAttr))) {
+          validUsedAttrs.put(usedAttr, groupAttrs.get(usedAttr));
+          usedAttributes.add(usedAttr);
         }
       }
+      jc.setAttrs(validUsedAttrs);
     }
 
-    if (!attrs.isEmpty()) {
-      throw new KaramelException(String.format("Undefined attributes: %s", attrs.keySet().toString()));
+    if (!usedAttributes.containsAll(groupAttrs.keySet())){
+      Set<String> invalidAttrs = groupAttrs.keySet();
+      invalidAttrs.removeAll(usedAttributes);
+      throw new KaramelException(String.format("Undefined attributes: %s", invalidAttrs.toString()));
     }
   }
 

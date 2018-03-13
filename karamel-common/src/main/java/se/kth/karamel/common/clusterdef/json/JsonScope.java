@@ -5,10 +5,7 @@
  */
 package se.kth.karamel.common.clusterdef.json;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.clusterdef.Scope;
 import se.kth.karamel.common.cookbookmeta.Attribute;
@@ -17,6 +14,13 @@ import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlScope;
 import se.kth.karamel.common.exception.ValidationException;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -36,15 +40,23 @@ public class JsonScope extends Scope {
     List<KaramelizedCookbook> allCookbooks = CACHE.loadAllKaramelizedCookbooks(cluster);
     //filtering invalid(not defined in metadata.rb) attributes from yaml model
     for (KaramelizedCookbook kcb : allCookbooks) {
-      List<Attribute> allValidAttrs = kcb.getMetadataRb().getAttributes();
+      // Get all the valid attributes, also for transient dependency
+      Set<Attribute> allValidAttrs = new HashSet<>(kcb.getMetadataRb().getAttributes());
+      for (KaramelizedCookbook depKcb : kcb.getDependencies()) {
+        allValidAttrs.addAll(depKcb.getMetadataRb().getAttributes());
+      }
+
+      // I think that this map should be <String, Attribute>. But I don't want to see
+      // what happen if I change it.
       Map<String, Object> validUsedAttrs = new HashMap<>();
-      for (Attribute att : allValidAttrs) {
-        if (usedAttrs.containsKey(att.getName())) {
-          validUsedAttrs.put(att.getName(), usedAttrs.get(att.getName()));
+      for (String usedAttr: usedAttrs.keySet()) {
+        if (allValidAttrs.contains(new Attribute(usedAttr))) {
+          validUsedAttrs.put(usedAttr, usedAttrs.get(usedAttr));
         }
       }
-      JsonCookbook jck = new JsonCookbook(kcb.getUrls().id, kcb.getMetadataRb().getName(), 
-          kcb.getMetadataRb().getName(), validUsedAttrs);
+
+      JsonCookbook jck = new JsonCookbook(kcb.getUrls().id, kcb.getMetadataRb().getName(),
+          kcb.getMetadataRb().getName(), validUsedAttrs, kcb);
       cookbooks.add(jck);
     }
     

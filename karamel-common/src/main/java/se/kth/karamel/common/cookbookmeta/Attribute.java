@@ -21,6 +21,12 @@ public class Attribute {
   Object defaultVal;
   String required;
 
+  public Attribute(String name) {
+    this.name = name;
+  }
+
+  public Attribute() { }
+
   public void setDefault(Object defaultVal) {
     this.defaultVal = defaultVal;
   }
@@ -68,5 +74,18 @@ public class Attribute {
   public void setDescription(String description) {
     this.description = description;
   }
-  
+
+  @Override
+  public int hashCode() {
+    return name.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o instanceof Attribute) {
+      return name.equals(((Attribute) o).getName());
+    }
+
+    return false;
+  }
 }

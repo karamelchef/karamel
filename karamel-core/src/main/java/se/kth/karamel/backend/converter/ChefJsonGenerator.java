@@ -80,6 +80,12 @@ public class ChefJsonGenerator {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
+
+    // Add global attributes
+    for (JsonCookbook cb : definition.getCookbooks()) {
+      addCookbookAttributes(cb, root);
+    }
+
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());

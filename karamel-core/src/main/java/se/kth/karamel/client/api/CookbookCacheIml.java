@@ -8,12 +8,7 @@
  */
 package se.kth.karamel.client.api;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.dag.Dag;
@@ -30,6 +25,14 @@ import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
 import se.kth.karamel.common.util.Settings;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -185,7 +188,47 @@ public class CookbookCacheIml implements CookbookCache {
     for (Cookbook cb : cluster.getCookbooks().values()) {
       toLoad.add(cb.getUrls().id);
     }
-    return loadAllKaramelizedCookbooks(cluster.getName(), toLoad, new Dag());
+
+    Dag dag = new Dag();
+    // An hacky fix for a crappy code. The thing is that, where this function is called, I'd like to have
+    // also the attributes of dependencies (including the transient ones) for the filtering of valid attributes.
+    // So here we build a Topological sort of the dependency graph, reverse it, and traverse it.
+    // For each KaramelizedCookbook we add in a set all the *references* to the dependency, both direct and transient
+    // that's the reason of using the topological sort.
+    // As we are using references to the same set of KaramelizedCookbooks, the default methods for equals and hashcode
+    // (comparing addresses) works fine.
+
+    // Result ignored on purpose
+    loadAllKaramelizedCookbooks(cluster.getName(), toLoad, dag);
+    List<KaramelizedCookbook> topologicalSort = new ArrayList<>();
+
+    Set<DagNode> rootNodes = dag.findRootNodes();
+    while (!rootNodes.isEmpty()) {
+      for (DagNode dagNode : rootNodes) {
+        KaramelizedCookbook kcb = cookbooks.get(dagNode.getId());
+        if (kcb != null) {
+          topologicalSort.add(cookbooks.get(dagNode.getId()));
+        }
+        dag.removeNode(dagNode);
+      }
+      rootNodes = dag.findRootNodes();
+    }
+
+    // Reverse the list
+    Collections.reverse(topologicalSort);
+
+    for (KaramelizedCookbook kcb : topologicalSort) {
+      Map<String, Cookbook> dependencies = kcb.getBerksFile().getDeps();
+      for (Cookbook cookbook : dependencies.values()) {
+        KaramelizedCookbook depKbc = cookbooks.get(cookbook.getUrls().id);
+        if (depKbc != null) {
+          kcb.addDependency(depKbc);
+          kcb.addDependencies(depKbc.getDependencies());
+        }
+      }
+    }
+
+    return topologicalSort;
   }
 
   private List<KaramelizedCookbook> loadAllKaramelizedCookbooks(String clusterName, Set<String> toLoad, Dag dag)

@@ -210,7 +210,7 @@ public class Settings {
   public static final String METADATA_INCOMMENT_HOST_KEY = "%host%";
 
   //-----------------------------------------KANDY----------------------------------------------------------------------
-  public static final String KANDY_REST_ROOT = "http://130.237.20.55:8080/CloudServiceRecommender/api/cluster";
+  public static final String KANDY_REST_ROOT = "http://127.0.0.1:0/CloudServiceRecommender/api/cluster";
   public static final String KANDY_REST_STATS_STORE = KANDY_REST_ROOT + "/stats/store";
   public static final String KANDY_REST_CLUSTER_COST = KANDY_REST_ROOT + "/cost";
 

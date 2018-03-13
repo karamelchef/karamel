@@ -269,7 +269,7 @@ public class KaramelApiImpl implements KaramelApi {
 
   @Override
   public void startCluster(String json) throws KaramelException {
-    logger.info("cluster to launch: \n" + json);
+    //logger.info("cluster to launch: \n" + json);
     clusterService.startCluster(json);
   }
 
