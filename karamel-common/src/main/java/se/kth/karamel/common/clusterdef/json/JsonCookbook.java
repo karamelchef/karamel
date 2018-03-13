@@ -32,11 +32,13 @@ public class JsonCookbook {
   public JsonCookbook() {
   }
 
-  public JsonCookbook(String id, String alias, String name, Map<String, Object> attrs) {
+  public JsonCookbook(String id, String alias, String name, Map<String, Object> attrs,
+                      KaramelizedCookbook karamelizedCookbook) {
     this.id = id;
     this.alias = alias;
     this.name = name;
     this.attrs = attrs;
+    this.karamelizedCookbook = karamelizedCookbook;
   }
 
   public String getName() throws KaramelException {
@@ -73,6 +75,11 @@ public class JsonCookbook {
 
   public void setRecipes(Set<JsonRecipe> recipes) {
     this.recipes = recipes;
+  }
+
+  @JsonIgnore
+  public KaramelizedCookbook getKaramelizedCookbook() {
+    return karamelizedCookbook;
   }
 
   public CookbookUrls getUrls() throws KaramelException {
