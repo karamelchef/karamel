@@ -8,11 +8,11 @@ if [ ! -d ../../karamel-examples ] ; then
   echo "cd ../../"
   echo "git clone git@github.com:karamelchef/karamel-examples.git"
   echo ""
-  exit 1 
+  exit 1
 fi
 
 # This reads the pom.xml file in the current directory, and extracts the first version element in the xml version element.
-version=`grep -o -a -m 1 -h -r "karamel.version>.*</karamel.version" ../pom.xml | head -1 | sed "s/karamel.version//g" | sed "s/>//" | sed "s/<\///g"`
+version=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -q)
 
 echo "version is: $version"
 
@@ -38,8 +38,8 @@ mv $dist ${dist}-linux
 #create jar archive
 mkdir ${dist}-jar
 cp karamel-ui-${version}-shaded.jar ${dist}-jar/karamel-ui-${version}.jar
-cp -r appassembler/conf/* ${dist}-jar/ 
-cp ../README.linux ${dist}-jar/README.txt 
+cp -r appassembler/conf/* ${dist}-jar/
+cp ../README.linux ${dist}-jar/README.txt
 mkdir ${dist}-jar/examples
 cd ../../../karamel-examples
 git checkout-index -a -f --prefix=../karamel/karamel-ui/target/${dist}-jar/examples/
