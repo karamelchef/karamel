@@ -81,7 +81,8 @@ public class GceSettings {
         projectName, networkName));
   }
 
-  public static URI buildImageUri(String imageName) throws URISyntaxException, UnsupportedImageType {
+  public static URI buildGlobalImageUri(String imageName) throws
+      URISyntaxException, UnsupportedImageType {
     ImageType type;
     if (imageName.contains("ubuntu")) {
       type = ImageType.ubuntu;
@@ -103,4 +104,12 @@ public class GceSettings {
     return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s",
         type.toString(), imageName));
   }
+  
+  
+  public static URI buildProjectImageUri(String projectName, String
+      imageName) throws URISyntaxException {
+    return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/images/%s",
+        projectName, imageName));
+  }
+  
 }

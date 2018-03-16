@@ -172,7 +172,7 @@ public class GceLauncher extends Launcher {
     try {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
       URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
-      URI imageType = GceSettings.buildImageUri(gce.getImage());
+      URI imageType = getImageType(gce);
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
       String uniqeGroupName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
@@ -369,5 +369,15 @@ public class GceLauncher extends Launcher {
       operation = api.get(operation.selfLink());
     }
     return 0;
+  }
+  
+  private URI getImageType(Gce gce)
+      throws UnsupportedImageType, URISyntaxException {
+    URI imageType = GceSettings.buildGlobalImageUri(gce.getImage());
+    if(context.getGceApi().images().get(imageType) == null){
+      imageType = GceSettings.buildProjectImageUri(context.getProjectName()
+          , gce.getImage());
+    }
+    return imageType;
   }
 }
