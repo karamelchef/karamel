@@ -168,7 +168,7 @@ public class MetadataParser {
               }
 
               if (!found2) {
-                logger.warn(String.format("Urecognized line for attribute in the metadata.rb '%s'", line));
+                logger.debug(String.format("Urecognized line for attribute in the metadata.rb '%s'", line));
               }
             }
             metadata.getAttributes().add(attr);
