@@ -2,6 +2,7 @@ package se.kth.karamel.backend.launcher.google;
 
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
@@ -19,21 +20,18 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.domain.Credentials;
 import org.jclouds.googlecloud.GoogleCredentialsFromJson;
-import org.jclouds.googlecloud.domain.ListPage;
 import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
+import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.domain.Metadata;
-import org.jclouds.googlecomputeengine.domain.Network;
 import org.jclouds.googlecomputeengine.domain.NewInstance;
 import org.jclouds.googlecomputeengine.domain.Operation;
-import org.jclouds.googlecomputeengine.domain.Route;
-import org.jclouds.googlecomputeengine.features.FirewallApi;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.features.NetworkApi;
 import org.jclouds.googlecomputeengine.features.OperationApi;
-import org.jclouds.googlecomputeengine.features.RouteApi;
 import org.jclouds.googlecomputeengine.options.FirewallOptions;
+import org.jclouds.googlecomputeengine.options.NetworkCreationOptions;
 import org.jclouds.rest.AuthorizationException;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.launcher.Launcher;
@@ -108,12 +106,30 @@ public class GceLauncher extends Launcher {
 
   @Override
   public String forkGroup(JsonCluster definition, ClusterRuntime runtime, String groupName) throws KaramelException {
-    JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
-    Set<String> ports = new HashSet<>();
-    ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
+    //JsonGroup jg = UserClusterDataExtractor.findGroup(definition, groupName);
+    //Set<String> ports = new HashSet<>();
+    //ports.addAll(Settings.AWS_VM_PORTS_DEFAULT);
     // TODO: assign arbitrary ip range.
-    String groupId = createFirewall(definition.getName(), jg.getName(), Settings.GCE_DEFAULT_IP_RANGE, ports);
-    return groupId;
+    //String groupId = createFirewall(definition.getName(), jg.getName(),
+    //    Settings.GCE_DEFAULT_IP_RANGE, ports);
+    
+    //Don't create a network, instead use the vpc network supplied or the
+    //default one if the supplied network doesn't exist otherwise through an
+    //exception
+  
+    Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
+    String vpcNetwork = gce.getVpc();
+    if(context.getNetworkApi().get(vpcNetwork) == null){
+      logger.warn("VPC network ("+ vpcNetwork +") doesn't exist, fallback to " +
+          "default network");
+      vpcNetwork = GceSettings.DEFAULT_NETWORK_NAME;
+      if(context.getNetworkApi().get(vpcNetwork) == null){
+        throw new KaramelException("The vpc network provided (" +
+            vpcNetwork + ") and the default one don't exist");
+      }
+      definition.getGce().setVpc(vpcNetwork);
+    }
+    return vpcNetwork;
   }
 
   // TODO: Tags can be added.
@@ -121,7 +137,9 @@ public class GceLauncher extends Launcher {
       throws KaramelException {
     String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
     NetworkApi netApi = context.getNetworkApi();
-    if (waitForOperation(context.getGceApi().operations(), netApi.createInIPv4Range(networkName, ipRange)) == 1) {
+    Operation createNetOp = netApi.create(NetworkCreationOptions.create
+        (networkName,null,null, null, true));
+    if (waitForOperation(context.getGceApi().operations(), createNetOp) == 1) {
       throw new KaramelException("Failed to create network with name " + networkName);
     }
     try {
@@ -171,7 +189,8 @@ public class GceLauncher extends Launcher {
     List<MachineRuntime> machines = new ArrayList<>(totalSize);
     try {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
-      URI networkType = GceSettings.buildDefaultNetworkUri(context.getProjectName());
+      URI networkType = GceSettings.buildNetworkUri(context.getProjectName(),
+          gce.getVpc());
       URI imageType = getImageType(gce);
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
@@ -181,7 +200,14 @@ public class GceLauncher extends Launcher {
       logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
       InstanceApi instanceApi = context.getGceApi().instancesInZone(gce.getZone());
       for (String name : allVmNames) {
-        Operation operation = instanceApi.create(NewInstance.create(name, machineType, networkType, imageType));
+        
+        AttachDisk disk = AttachDisk.create(AttachDisk.Type.PERSISTENT, null,
+            null, null, true, AttachDisk.InitializeParams.create(null, gce
+                .getDiskSize(), imageType, null), true, null, null);
+        
+        Operation operation = instanceApi.create(NewInstance.create(name,
+            machineType, networkType, null, Lists.newArrayList(disk), null,
+            null));
         logger.info("Starting instance " + name);
         operations.add(operation);
       }
@@ -286,7 +312,7 @@ public class GceLauncher extends Launcher {
 
     // TODO: Handle the operations failures situation.
     operations.clear();
-    NetworkApi netApi = context.getNetworkApi();
+    /*NetworkApi netApi = context.getNetworkApi();
     FirewallApi fwApi = context.getFireWallApi();
     RouteApi routeApi = context.getRouteApi();
     //Delete network firewalls and routes first and then delete network, Otherwise network deletion will not work.
@@ -301,15 +327,6 @@ public class GceLauncher extends Launcher {
           for (Firewall fw : page) {
             if (fw.network().equals(networkUri)) {
               operations.add(fwApi.delete(fw.name()));
-            }
-          }
-        }
-        Iterator<ListPage<Route>> routeIterator = routeApi.list();
-        while (routeIterator.hasNext()) {
-          ListPage<Route> page = routeIterator.next();
-          for (Route route : page) {
-            if (route.network().equals(networkUri)) {
-              operations.add(routeApi.delete(route.name()));
             }
           }
         }
@@ -346,7 +363,7 @@ public class GceLauncher extends Launcher {
         logger.info(String.format("Operation %s  was successfully done on %s\n.",
             operation.operationType(), operation.targetLink()));
       }
-    }
+    }*/
   }
 
   private static int waitForOperation(OperationApi api, Operation operation) {
