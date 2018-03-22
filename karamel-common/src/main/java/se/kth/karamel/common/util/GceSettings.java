@@ -15,7 +15,8 @@ public class GceSettings {
   public static final String DEFAULT_IMAGE = "ubuntu-1404-trusty-v20150316";
   public static final String DEFAULT_ZONE = "europe-west1-b";
   public static final String DEFAULT_MACHINE_TYPE = MachineType.n1_standard_1.toString();
-
+  public static final Long DEFAULT_DISKSIZE_IN_GB = 15l;
+  
   public enum MachineType {
 
     n1_standard_1("n1-standard-1"),

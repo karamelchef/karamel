@@ -11,11 +11,11 @@ import se.kth.karamel.common.exception.ValidationException;
 public class Gce extends Provider {
 
   private String type;
-  // TODO: IP range to give to VMs.
-//  private String network;
   private String zone;
   private String image;
-
+  private String vpc;
+  private Long diskSize;
+  
   /**
    * Machine type.
    *
@@ -42,19 +42,19 @@ public class Gce extends Provider {
     this.zone = zone;
   }
 
-//  /**
-//   * @return the network
-//   */
-//  public String getNetwork() {
-//    return network;
-//  }
-//
-//  /**
-//   * @param network the network to set
-//   */
-//  public void setNetwork(String network) {
-//    this.network = network;
-//  }
+  /**
+   * @return the vpc network
+   */
+  public String getVpc() {
+    return vpc;
+  }
+
+  /**
+   * @param vpc the vpc network to set
+   */
+  public void setVpc(String vpc) {
+    this.vpc = vpc;
+  }
   /**
    * Image name
    *
@@ -72,16 +72,32 @@ public class Gce extends Provider {
   public void setImage(String image) {
     this.image = image;
   }
-
+  
+  /**
+   * Size for the boot disk in GB
+   * @return the diskSize in GB
+   */
+  public Long getDiskSize() {
+    return diskSize;
+  }
+  
+  /**
+   * Boot Disksize in GB
+   * @param diskSize
+   */
+  public void setDiskSize(Long diskSize) {
+    this.diskSize = diskSize;
+  }
+  
   @Override
   public Gce cloneMe() {
     Gce gce = new Gce();
     gce.setUsername(this.getUsername());
     gce.setImage(image);
     gce.setType(type);
-//    gce.setNetwork(network);
+    gce.setVpc(vpc);
     gce.setZone(zone);
-
+    gce.setDiskSize(diskSize);
     return gce;
   }
 
@@ -102,6 +118,12 @@ public class Gce extends Provider {
       if (clone.getType() == null) {
         clone.setType(parentGce.getType());
       }
+      if(clone.getVpc() == null){
+        clone.setVpc(parentGce.getVpc());
+      }
+      if(clone.getDiskSize() == null){
+        clone.setDiskSize(parentGce.getDiskSize());
+      }
     }
     return clone;
   }
@@ -121,11 +143,28 @@ public class Gce extends Provider {
     if (clone.getType() == null) {
       clone.setType(GceSettings.DEFAULT_MACHINE_TYPE);
     }
+    if(clone.getVpc() == null){
+      clone.setVpc(GceSettings.DEFAULT_NETWORK_NAME);
+    }
+    if(clone.getDiskSize() == null){
+      clone.setDiskSize(GceSettings.DEFAULT_DISKSIZE_IN_GB);
+    }
     return clone;
   }
 
   @Override
   public void validate() throws ValidationException {
     // Currently nothing to validate. But IP range can be validate here.
+  }
+  
+  @Override
+  public String toString() {
+    return "Gce{" +
+        "type='" + type + '\'' +
+        ", zone='" + zone + '\'' +
+        ", image='" + image + '\'' +
+        ", vpc='" + vpc + '\'' +
+        ", diskSize=" + diskSize +
+        '}';
   }
 }
