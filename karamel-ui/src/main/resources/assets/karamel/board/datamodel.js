@@ -390,6 +390,7 @@ function Gce() {
   this.jsonKeyPath = null;
   this.vpc = null;
   this.diskSize = null;
+  this.subnet = null;
 
   this.load = function(other) {
     this.type = other.type || null;
@@ -398,6 +399,7 @@ function Gce() {
     this.image = other.image || null;
     this.vpc = other.vpc || null;
     this.diskSize = other.diskSize || null;
+    this.subnet = other.subnet || null;
   };
 
   this.copy = function(other) {
@@ -407,6 +409,7 @@ function Gce() {
     this.image = other.image || null;
     this.vpc = other.vpc || null;
     this.diskSize = other.diskSize || null;
+    this.subnet = other.subnet || null;
   };
 
   this.addAccountDetails = function(other) {
@@ -840,6 +843,7 @@ function toCoreApiFormat(uiCluster) {
     this.image = null;
     this.vpc = null;
     this.diskSize = null;
+    this.subnet = null;
     this.load = function(other) {
       this.type = other.type || null;
       this.zone = other.zone || null;
@@ -847,6 +851,7 @@ function toCoreApiFormat(uiCluster) {
       this.image = other.image || null;
       this.vpc = other.vpc || null;
       this.diskSize = other.diskSize || null;
+      this.subnet = other.subnet || null;
     }
   }
 

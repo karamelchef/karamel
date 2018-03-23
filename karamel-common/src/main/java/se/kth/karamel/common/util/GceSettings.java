@@ -82,6 +82,12 @@ public class GceSettings {
         projectName, networkName));
   }
 
+  public static URI buildSubnetUri(String projectName, String region, String subnetName)
+      throws URISyntaxException {
+    return new URI(String.format("https://www.googleapis.com/compute/v1/projects/%s/regions/%s/subnetworks/%s",
+        new Object[]{projectName, region, subnetName}));
+  }
+  
   public static URI buildGlobalImageUri(String imageName) throws
       URISyntaxException, UnsupportedImageType {
     ImageType type;
