@@ -15,6 +15,7 @@ public class Gce extends Provider {
   private String image;
   private String vpc;
   private Long diskSize;
+  private String subnet;
   
   /**
    * Machine type.
@@ -89,6 +90,22 @@ public class Gce extends Provider {
     this.diskSize = diskSize;
   }
   
+  /**
+   * Subnet name
+   * @return the subnet
+   */
+  public String getSubnet() {
+    return subnet;
+  }
+  
+  /**
+   * Subnet name
+   * @param subnet
+   */
+  public void setSubnet(String subnet) {
+    this.subnet = subnet;
+  }
+  
   @Override
   public Gce cloneMe() {
     Gce gce = new Gce();
@@ -98,6 +115,7 @@ public class Gce extends Provider {
     gce.setVpc(vpc);
     gce.setZone(zone);
     gce.setDiskSize(diskSize);
+    gce.setSubnet(subnet);
     return gce;
   }
 
@@ -123,6 +141,9 @@ public class Gce extends Provider {
       }
       if(clone.getDiskSize() == null){
         clone.setDiskSize(parentGce.getDiskSize());
+      }
+      if(clone.getSubnet() == null){
+        clone.setSubnet(parentGce.getSubnet());
       }
     }
     return clone;
@@ -165,6 +186,7 @@ public class Gce extends Provider {
         ", image='" + image + '\'' +
         ", vpc='" + vpc + '\'' +
         ", diskSize=" + diskSize +
+        ", subnet='" + subnet + '\'' +
         '}';
   }
 }

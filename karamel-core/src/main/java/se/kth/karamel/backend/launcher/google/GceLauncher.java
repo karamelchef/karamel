@@ -27,6 +27,7 @@ import org.jclouds.googlecomputeengine.domain.Instance;
 import org.jclouds.googlecomputeengine.domain.Metadata;
 import org.jclouds.googlecomputeengine.domain.NewInstance;
 import org.jclouds.googlecomputeengine.domain.Operation;
+import org.jclouds.googlecomputeengine.domain.Zone;
 import org.jclouds.googlecomputeengine.features.InstanceApi;
 import org.jclouds.googlecomputeengine.features.NetworkApi;
 import org.jclouds.googlecomputeengine.features.OperationApi;
@@ -191,6 +192,7 @@ public class GceLauncher extends Launcher {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
       URI networkType = GceSettings.buildNetworkUri(context.getProjectName(),
           gce.getVpc());
+      URI subnetType = getSubnetType(gce);
       URI imageType = getImageType(gce);
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
@@ -206,7 +208,7 @@ public class GceLauncher extends Launcher {
                 .getDiskSize(), imageType, null), true, null, null);
         
         Operation operation = instanceApi.create(NewInstance.create(name,
-            machineType, networkType, null, Lists.newArrayList(disk), null,
+            machineType, networkType, subnetType, Lists.newArrayList(disk), null,
             null));
         logger.info("Starting instance " + name);
         operations.add(operation);
@@ -397,4 +399,26 @@ public class GceLauncher extends Launcher {
     }
     return imageType;
   }
+  
+  private URI getSubnetType(Gce gce) throws URISyntaxException {
+    if(gce.getSubnet() == null)
+      return null;
+    
+    Zone zone = context.getGceApi().zones().get(gce.getZone());
+    if(zone != null){
+      String regionUrl = zone.region();
+      String region = regionUrl.substring(regionUrl.lastIndexOf("/")+1,
+          regionUrl.length());
+      URI subnet = GceSettings.buildSubnetUri(context.getProjectName(),
+          region, gce.getSubnet());
+      if(context.getGceApi().subnetworksInRegion(region).get(gce
+          .getSubnet()) != null){
+        return subnet;
+      }
+      logger.info("Subnet (" + gce.getSubnet() + ") does not exist in region " +
+          "(" + region +") ");
+    }
+    return null;
+  }
+  
 }
