@@ -118,6 +118,7 @@ gce:
   zone: europe-west1-b
   image: ubuntu-1404-trusty-v20150316
   vpc: default
+  subnet: default
   diskSize: 15
 ```
 <a href="https://cloud.google.com/compute/docs/machine-types">Machine type</a>, <a href="https://cloud.google.com/compute/docs/zones">zone of the VMs</a>, <a href="https://cloud.google.com/vpc/docs/vpc">VPC network</a>, <a href="https://cloud.google.com/compute/docs/images">VM image</a>, and the diskSize (in GB) can be specified by the user.
