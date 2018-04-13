@@ -1,31 +1,39 @@
 set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
-#set -eo pipefail
 RES=0
 if [ %osfamily% == "redhat" ] ; then
-  chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 
-  rm -f "$chefdkfile"
-  wget "http://snurran.sics.se/hops/$chefdkfile"
+  yum list installed chefdk
+  if [ $? -ne 0 ] ; then
+    chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 
-  %sudo_command% yum install -y "$chefdkfile"
-  RES=$?
-  if [ $RES -ne 0 ] ; then
-    sleep 10
+    rm -f "$chefdkfile"
+    wget "http://snurran.sics.se/hops/$chefdkfile"
+
     %sudo_command% yum install -y "$chefdkfile"
+    RES=$?
+    if [ $RES -ne 0 ] ; then
+      sleep 10
+      %sudo_command% yum install -y "$chefdkfile"
+    fi
   fi
 
 elif [ %osfamily% == "ubuntu" ] ; then
-  chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
 
-  rm -f "$chefdkfile"
-  wget "http://snurran.sics.se/hops/$chefdkfile"
+  dpkg -s
+  if [ $? -ne 0 ] ; then
+ 
+    chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
 
-  %sudo_command% dpkg -i "$chefdkfile"
-  RES=$?
-  if [ $RES -ne 0 ] ; then
-    sleep 10
+    rm -f "$chefdkfile"
+    wget "http://snurran.sics.se/hops/$chefdkfile"
+
     %sudo_command% dpkg -i "$chefdkfile"
+    RES=$?
+    if [ $RES -ne 0 ] ; then
+      sleep 10
+      %sudo_command% dpkg -i "$chefdkfile"
+    fi
   fi
 else 
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
