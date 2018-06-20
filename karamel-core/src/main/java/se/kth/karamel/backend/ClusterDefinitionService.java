@@ -64,24 +64,15 @@ public class ClusterDefinitionService {
     options.setPrettyFlow(true);
     options.setDefaultScalarStyle(DumperOptions.ScalarStyle.PLAIN);
     YamlPropertyRepresenter yamlPropertyRepresenter = new YamlPropertyRepresenter();
-    yamlPropertyRepresenter
-      .addClassTag(YamlCluster.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Ec2.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Baremetal.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Gce.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Nova.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Occi.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(Cookbook.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(YamlGroup.class, Tag.MAP);
-    yamlPropertyRepresenter
-      .addClassTag(HashSet.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(YamlCluster.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Ec2.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Baremetal.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Gce.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Nova.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Occi.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(Cookbook.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
+    yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
     Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
     String content = yaml.dump(yamlCluster);
     return content;

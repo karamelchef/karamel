@@ -145,6 +145,7 @@ public class GceLauncherTest {
     gce.setZone(zone);
     gce.setType(GceSettings.MachineType.n1_standard_1.toString());
     gce.setUsername("hooman");
+    gce.setPreemptible(false);
     GceLauncher launcher = new GceLauncher(context, keypair);
     ClusterRuntime cluster = new ClusterRuntime(clusterName);
     JsonGroup jsonGroup = new JsonGroup();

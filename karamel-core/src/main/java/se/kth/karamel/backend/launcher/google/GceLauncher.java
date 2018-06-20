@@ -24,6 +24,7 @@ import org.jclouds.googlecomputeengine.GoogleComputeEngineApi;
 import org.jclouds.googlecomputeengine.domain.AttachDisk;
 import org.jclouds.googlecomputeengine.domain.Firewall;
 import org.jclouds.googlecomputeengine.domain.Instance;
+import org.jclouds.googlecomputeengine.domain.Instance.Scheduling;
 import org.jclouds.googlecomputeengine.domain.Metadata;
 import org.jclouds.googlecomputeengine.domain.NewInstance;
 import org.jclouds.googlecomputeengine.domain.Operation;
@@ -113,20 +114,17 @@ public class GceLauncher extends Launcher {
     // TODO: assign arbitrary ip range.
     //String groupId = createFirewall(definition.getName(), jg.getName(),
     //    Settings.GCE_DEFAULT_IP_RANGE, ports);
-    
+
     //Don't create a network, instead use the vpc network supplied or the
     //default one if the supplied network doesn't exist otherwise through an
     //exception
-  
     Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     String vpcNetwork = gce.getVpc();
-    if(context.getNetworkApi().get(vpcNetwork) == null){
-      logger.warn("VPC network ("+ vpcNetwork +") doesn't exist, fallback to " +
-          "default network");
+    if (context.getNetworkApi().get(vpcNetwork) == null) {
+      logger.warn("VPC network (" + vpcNetwork + ") doesn't exist, fallback to " + "default network");
       vpcNetwork = GceSettings.DEFAULT_NETWORK_NAME;
-      if(context.getNetworkApi().get(vpcNetwork) == null){
-        throw new KaramelException("The vpc network provided (" +
-            vpcNetwork + ") and the default one don't exist");
+      if (context.getNetworkApi().get(vpcNetwork) == null) {
+        throw new KaramelException("The vpc network provided (" + vpcNetwork + ") and the default one don't exist");
       }
       definition.getGce().setVpc(vpcNetwork);
     }
@@ -138,8 +136,7 @@ public class GceLauncher extends Launcher {
       throws KaramelException {
     String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
     NetworkApi netApi = context.getNetworkApi();
-    Operation createNetOp = netApi.create(NetworkCreationOptions.create
-        (networkName,null,null, null, true));
+    Operation createNetOp = netApi.create(NetworkCreationOptions.create(networkName, null, null, null, true));
     if (waitForOperation(context.getGceApi().operations(), createNetOp) == 1) {
       throw new KaramelException("Failed to create network with name " + networkName);
     }
@@ -190,26 +187,37 @@ public class GceLauncher extends Launcher {
     List<MachineRuntime> machines = new ArrayList<>(totalSize);
     try {
       URI machineType = GceSettings.buildMachineTypeUri(context.getProjectName(), gce.getZone(), gce.getType());
-      URI networkType = GceSettings.buildNetworkUri(context.getProjectName(),
-          gce.getVpc());
+      URI networkType = GceSettings.buildNetworkUri(context.getProjectName(), gce.getVpc());
       URI subnetType = getSubnetType(gce);
       URI imageType = getImageType(gce);
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
+      boolean isPreemptible = gce.isPreemptible();
       String uniqeGroupName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, groupName);
       List<String> allVmNames = Settings.UNIQUE_VM_NAMES(GCE_PROVIDER, clusterName, groupName, totalSize);
       ArrayList<Operation> operations = new ArrayList<>(totalSize);
       logger.info(String.format("Start forking %d machine(s) for '%s' ...", totalSize, uniqeGroupName));
       InstanceApi instanceApi = context.getGceApi().instancesInZone(gce.getZone());
+
+      boolean autoRestart = false;
+
       for (String name : allVmNames) {
-        
         AttachDisk disk = AttachDisk.create(AttachDisk.Type.PERSISTENT, null,
             null, null, true, AttachDisk.InitializeParams.create(null, gce
                 .getDiskSize(), imageType, null), true, null, null);
-        
-        Operation operation = instanceApi.create(NewInstance.create(name,
-            machineType, networkType, subnetType, Lists.newArrayList(disk), null,
-            null));
+
+        Scheduling scheduling;
+        if (isPreemptible) {
+          scheduling = Scheduling.create(Scheduling.OnHostMaintenance.TERMINATE, false, true);
+        } else {
+          scheduling = Scheduling.create(Scheduling.OnHostMaintenance.MIGRATE, false, false);
+        }
+        NewInstance.Builder builder = new NewInstance.Builder(name, machineType, networkType, subnetType,
+            Lists.newArrayList(disk)).scheduling(scheduling);
+        Operation operation = instanceApi.create(builder.build());
+//        Operation operation = instanceApi.create(NewInstance.create(name,
+//            machineType, networkType, subnetType, Lists.newArrayList(disk), null, null));
+//        instanceApi.setScheduling(name, Instance.Scheduling.OnHostMaintenance.MIGRATE, autoRestart, isPreemptible);
         logger.info("Starting instance " + name);
         operations.add(operation);
       }
@@ -227,7 +235,7 @@ public class GceLauncher extends Launcher {
           metadata.put("sshKeys", gce.getUsername() + ":" + sshKeyPair.getPublicKey());
           metadataOperations.add(instanceApi.setMetadata(allVmNames.get(i), metadata));
           MachineRuntime machine = new MachineRuntime(group);
-          machine.setMachineType("gce/"+ gce.getZone() + "/" + gce.getType() + "/" + gce.getImage());
+          machine.setMachineType("gce/" + gce.getZone() + "/" + gce.getType() + "/" + gce.getImage());
           machine.setVmId(vm.id());
           machine.setName(vm.name());
           Instance.NetworkInterface netInterface = vm.networkInterfaces().get(0);
@@ -314,58 +322,60 @@ public class GceLauncher extends Launcher {
 
     // TODO: Handle the operations failures situation.
     operations.clear();
-    /*NetworkApi netApi = context.getNetworkApi();
-    FirewallApi fwApi = context.getFireWallApi();
-    RouteApi routeApi = context.getRouteApi();
-    //Delete network firewalls and routes first and then delete network, Otherwise network deletion will not work.
-    for (String group : groupNames) {
-      String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
-      Network network = netApi.get(networkName);
-      if (network != null) {
-        URI networkUri = network.selfLink();
-        Iterator<ListPage<Firewall>> fwIterator = fwApi.list();
-        while (fwIterator.hasNext()) {
-          ListPage<Firewall> page = fwIterator.next();
-          for (Firewall fw : page) {
-            if (fw.network().equals(networkUri)) {
-              operations.add(fwApi.delete(fw.name()));
-            }
-          }
-        }
-      }
-    }
-
-    for (Operation operation : operations) {
-      if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
-        logger.warn(String.format("%s operation has timedout: %s\n",
-            operation.operationType(), operation.httpErrorMessage()));
-      } else {
-        logger.info(String.format("Operation %s  was successfully done on %s\n.",
-            operation.operationType(), operation.targetLink()));
-      }
-    }
-
-    operations.clear();
-
-    for (String group : groupNames) {
-      String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
-      Operation op = netApi.delete(networkName);
-      if (op != null) {
-        operations.add(op);
-      } else {
-        logger.info(String.format("Network %s does not exist.", networkName));
-      }
-    }
-
-    for (Operation operation : operations) {
-      if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
-        logger.warn(String.format("%s operation has timedout: %s\n",
-            operation.operationType(), operation.httpErrorMessage()));
-      } else {
-        logger.info(String.format("Operation %s  was successfully done on %s\n.",
-            operation.operationType(), operation.targetLink()));
-      }
-    }*/
+    /*
+     * NetworkApi netApi = context.getNetworkApi();
+     * FirewallApi fwApi = context.getFireWallApi();
+     * RouteApi routeApi = context.getRouteApi();
+     * //Delete network firewalls and routes first and then delete network, Otherwise network deletion will not work.
+     * for (String group : groupNames) {
+     * String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
+     * Network network = netApi.get(networkName);
+     * if (network != null) {
+     * URI networkUri = network.selfLink();
+     * Iterator<ListPage<Firewall>> fwIterator = fwApi.list();
+     * while (fwIterator.hasNext()) {
+     * ListPage<Firewall> page = fwIterator.next();
+     * for (Firewall fw : page) {
+     * if (fw.network().equals(networkUri)) {
+     * operations.add(fwApi.delete(fw.name()));
+     * }
+     * }
+     * }
+     * }
+     * }
+     *
+     * for (Operation operation : operations) {
+     * if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
+     * logger.warn(String.format("%s operation has timedout: %s\n",
+     * operation.operationType(), operation.httpErrorMessage()));
+     * } else {
+     * logger.info(String.format("Operation %s was successfully done on %s\n.",
+     * operation.operationType(), operation.targetLink()));
+     * }
+     * }
+     *
+     * operations.clear();
+     *
+     * for (String group : groupNames) {
+     * String networkName = Settings.UNIQUE_GROUP_NAME(GCE_PROVIDER, clusterName, group);
+     * Operation op = netApi.delete(networkName);
+     * if (op != null) {
+     * operations.add(op);
+     * } else {
+     * logger.info(String.format("Network %s does not exist.", networkName));
+     * }
+     * }
+     *
+     * for (Operation operation : operations) {
+     * if (waitForOperation(context.getGceApi().operations(), operation) == 1) {
+     * logger.warn(String.format("%s operation has timedout: %s\n",
+     * operation.operationType(), operation.httpErrorMessage()));
+     * } else {
+     * logger.info(String.format("Operation %s was successfully done on %s\n.",
+     * operation.operationType(), operation.targetLink()));
+     * }
+     * }
+     */
   }
 
   private static int waitForOperation(OperationApi api, Operation operation) {
@@ -389,36 +399,36 @@ public class GceLauncher extends Launcher {
     }
     return 0;
   }
-  
+
   private URI getImageType(Gce gce)
       throws UnsupportedImageType, URISyntaxException {
     URI imageType = GceSettings.buildGlobalImageUri(gce.getImage());
-    if(context.getGceApi().images().get(imageType) == null){
-      imageType = GceSettings.buildProjectImageUri(context.getProjectName()
-          , gce.getImage());
+    if (context.getGceApi().images().get(imageType) == null) {
+      imageType = GceSettings.buildProjectImageUri(context.getProjectName(),
+           gce.getImage());
     }
     return imageType;
   }
-  
+
   private URI getSubnetType(Gce gce) throws URISyntaxException {
-    if(gce.getSubnet() == null)
+    if (gce.getSubnet() == null) {
       return null;
-    
+    }
+
     Zone zone = context.getGceApi().zones().get(gce.getZone());
-    if(zone != null){
+    if (zone != null) {
       String regionUrl = zone.region();
-      String region = regionUrl.substring(regionUrl.lastIndexOf("/")+1,
+      String region = regionUrl.substring(regionUrl.lastIndexOf("/") + 1,
           regionUrl.length());
       URI subnet = GceSettings.buildSubnetUri(context.getProjectName(),
           region, gce.getSubnet());
-      if(context.getGceApi().subnetworksInRegion(region).get(gce
-          .getSubnet()) != null){
+      if (context.getGceApi().subnetworksInRegion(region).get(gce
+          .getSubnet()) != null) {
         return subnet;
       }
-      logger.info("Subnet (" + gce.getSubnet() + ") does not exist in region " +
-          "(" + region +") ");
+      logger.info("Subnet (" + gce.getSubnet() + ") does not exist in region " + "(" + region + ") ");
     }
     return null;
   }
-  
+
 }

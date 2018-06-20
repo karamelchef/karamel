@@ -391,6 +391,7 @@ function Gce() {
   this.vpc = null;
   this.diskSize = null;
   this.subnet = null;
+  this.preemptible = null;
 
   this.load = function(other) {
     this.type = other.type || null;
@@ -400,6 +401,7 @@ function Gce() {
     this.vpc = other.vpc || null;
     this.diskSize = other.diskSize || null;
     this.subnet = other.subnet || null;
+    this.preemptible = other.preemptible || null;
   };
 
   this.copy = function(other) {
@@ -410,6 +412,7 @@ function Gce() {
     this.vpc = other.vpc || null;
     this.diskSize = other.diskSize || null;
     this.subnet = other.subnet || null;
+    this.preemptible = other.preemptible || null;
   };
 
   this.addAccountDetails = function(other) {
@@ -852,6 +855,7 @@ function toCoreApiFormat(uiCluster) {
       this.vpc = other.vpc || null;
       this.diskSize = other.diskSize || null;
       this.subnet = other.subnet || null;
+      this.preemptible = other.preemptible || null;
     }
   }
 

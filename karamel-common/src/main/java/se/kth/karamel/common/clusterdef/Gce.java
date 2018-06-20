@@ -16,6 +16,7 @@ public class Gce extends Provider {
   private String vpc;
   private Long diskSize;
   private String subnet;
+  private Boolean preemptible;
   
   /**
    * Machine type.
@@ -105,17 +106,38 @@ public class Gce extends Provider {
   public void setSubnet(String subnet) {
     this.subnet = subnet;
   }
+
+  /**
+   * Is this a preemptible VM or not?
+   * @return true (if preemptible)
+   */
+  public Boolean isPreemptible() {
+    return preemptible;
+  }
+  
+  public Boolean getPreemptible() {
+    return preemptible;
+  }
+
+  /** 
+   * Set 'true' to make the VM preemptible
+   * @param preemptible 'true' for preemptible, otherise 'false'
+   */
+  public void setPreemptible(Boolean preemptible) {
+    this.preemptible = preemptible;
+  }
   
   @Override
   public Gce cloneMe() {
     Gce gce = new Gce();
     gce.setUsername(this.getUsername());
-    gce.setImage(image);
-    gce.setType(type);
-    gce.setVpc(vpc);
-    gce.setZone(zone);
-    gce.setDiskSize(diskSize);
-    gce.setSubnet(subnet);
+    gce.setImage(this.image);
+    gce.setType(this.type);
+    gce.setVpc(this.vpc);
+    gce.setZone(this.zone);
+    gce.setDiskSize(this.diskSize);
+    gce.setSubnet(this.subnet);
+    gce.setPreemptible(this.preemptible);
     return gce;
   }
 
@@ -145,6 +167,9 @@ public class Gce extends Provider {
       if(clone.getSubnet() == null){
         clone.setSubnet(parentGce.getSubnet());
       }
+      if(clone.isPreemptible() == null){
+        clone.setPreemptible(parentGce.isPreemptible());
+      }
     }
     return clone;
   }
@@ -170,6 +195,9 @@ public class Gce extends Provider {
     if(clone.getDiskSize() == null){
       clone.setDiskSize(GceSettings.DEFAULT_DISKSIZE_IN_GB);
     }
+    if(clone.isPreemptible()== null){
+      clone.setPreemptible(GceSettings.DEFAULT_IS_PRE_EMPTIBLE);
+    }
     return clone;
   }
 
@@ -187,6 +215,7 @@ public class Gce extends Provider {
         ", vpc='" + vpc + '\'' +
         ", diskSize=" + diskSize +
         ", subnet='" + subnet + '\'' +
+        ", preemptible='" + preemptible + '\'' +
         '}';
   }
 }

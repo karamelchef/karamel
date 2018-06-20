@@ -103,6 +103,9 @@ public abstract class Scope {
     if (baremetal != null) {
       baremetal.validate();
     }
+    if (gce != null) {
+      gce.validate();
+    }
     if (vagrant != null) {
       vagrant.validate();
     }
