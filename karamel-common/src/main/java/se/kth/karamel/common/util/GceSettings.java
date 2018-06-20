@@ -16,6 +16,7 @@ public class GceSettings {
   public static final String DEFAULT_ZONE = "europe-west1-b";
   public static final String DEFAULT_MACHINE_TYPE = MachineType.n1_standard_1.toString();
   public static final Long DEFAULT_DISKSIZE_IN_GB = 15l;
+  public static final Boolean DEFAULT_IS_PRE_EMPTIBLE = false;
   
   public enum MachineType {
 

@@ -123,6 +123,7 @@ public class ClusterDefinitionTest {
     assertEquals("n1-standard-1", provider5.getType());
     assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
     assertEquals("europe-west1-b", provider5.getZone());
+    assertTrue(provider5.isPreemptible());
 
     Nova provider6 = (Nova) groups.get("novavms").getProvider();
     assertEquals("1", provider6.getFlavor());

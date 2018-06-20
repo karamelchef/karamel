@@ -110,6 +110,7 @@ groups:
         type: n1-standard-1
         zone: europe-west1-b
         image: ubuntu-1404-trusty-v20150316
+        preemptible: true
   novavms:
     size: 4
     nova:
