@@ -6,6 +6,8 @@
 package se.kth.karamel.backend.running.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,23 @@ public class ClusterRuntime {
       GroupRuntime group = new GroupRuntime(this, jg);
       groups.add(group);
     }
+    Collections.sort(groups, new Comparator<GroupRuntime>() {
+      @Override
+      public int compare(GroupRuntime o1, GroupRuntime o2) {
+        String group1str = o1.getName().replaceAll("[0-9]", "").trim();
+        String group1number = o1.getName().replaceAll("[^0-9]", "").trim();
+        String group2str = o2.getName().replaceAll("[0-9]", "").trim();
+        String group2number = o2.getName().replaceAll("[^0-9]", "").trim();
+  
+        if (group1str.equalsIgnoreCase(group2str)) {
+          if(!group1number.isEmpty() && !group2number.isEmpty()) {
+            return Integer.compare(Integer.parseInt(group1number),
+                Integer.parseInt(group2number));
+          }
+        }
+        return group1str.compareTo(group2str);
+      }
+    });
   }
 
   public String getName() {

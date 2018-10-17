@@ -120,8 +120,11 @@ gce:
   vpc: default
   subnet: default
   diskSize: 15
+  nvme: 1
+  hdd: 1
+  ssd: 1
 ```
-<a href="https://cloud.google.com/compute/docs/machine-types">Machine type</a>, <a href="https://cloud.google.com/compute/docs/zones">zone of the VMs</a>, <a href="https://cloud.google.com/vpc/docs/vpc">VPC network</a>, <a href="https://cloud.google.com/compute/docs/images">VM image</a>, and the diskSize (in GB) can be specified by the user.
+<a href="https://cloud.google.com/compute/docs/machine-types">Machine type</a>, <a href="https://cloud.google.com/compute/docs/zones">zone of the VMs</a>, <a href="https://cloud.google.com/vpc/docs/vpc">VPC network</a>, <a href="https://cloud.google.com/compute/docs/images">VM image</a>, and the diskSize (in GB) can be specified by the user. A user can also specify the number of <a href="https://cloud.google.com/compute/docs/disks/">HDD, SSD, and NVMe </a> disks to be attached to the machine. The diskSize attribute specifies the diskSize for the boot disk and any HDD or SSD disks. The diskSize for the NVMe is 375 GB by default and cann't be changed.
 
 First of all, you need to enable Google Compute Engine API by going to the API Manager section in your Google Cloud Platform account. Karamel uses Compute Engine’s OAuth 2.0 authentication method. Therefore, an OAuth 2.0 client ID needs to be created through the Google’s Developer Console. The description on how to generate a client ID is available <a href="https://support.google.com/cloud/answer/6158849?hl=en">here</a>. You need to select _Service account_ as the application type. After generating a service account, click on _Generate new JSON key_ button to download a generated JSON file that contains both private and public keys. You need to register the fullpath of the generated JSON file with Karamel API.
 

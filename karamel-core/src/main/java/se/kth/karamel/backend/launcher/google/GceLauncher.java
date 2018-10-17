@@ -118,6 +118,7 @@ public class GceLauncher extends Launcher {
     //Don't create a network, instead use the vpc network supplied or the
     //default one if the supplied network doesn't exist otherwise through an
     //exception
+    logger.info("GCE fork group " + groupName);
     Gce gce = (Gce) UserClusterDataExtractor.getGroupProvider(definition, groupName);
     String vpcNetwork = gce.getVpc();
     if (context.getNetworkApi().get(vpcNetwork) == null) {
@@ -190,6 +191,10 @@ public class GceLauncher extends Launcher {
       URI networkType = GceSettings.buildNetworkUri(context.getProjectName(), gce.getVpc());
       URI subnetType = getSubnetType(gce);
       URI imageType = getImageType(gce);
+      URI nvmeDiskType = getNVMeDiskType(gce);
+      URI hddDiskType = getHDDDiskType(gce);
+      URI ssdDiskType = getSSDDiskType(gce);
+      
       String clusterName = group.getCluster().getName();
       String groupName = group.getName();
       boolean isPreemptible = gce.isPreemptible();
@@ -205,7 +210,32 @@ public class GceLauncher extends Launcher {
         AttachDisk disk = AttachDisk.create(AttachDisk.Type.PERSISTENT, null,
             null, null, true, AttachDisk.InitializeParams.create(null, gce
                 .getDiskSize(), imageType, null), true, null, null);
-
+  
+        List<AttachDisk> disks = Lists.newArrayList(disk);
+        //NVMe
+        for(int i=0; i<gce.getNvme(); i++){
+          AttachDisk nvme = AttachDisk.create(AttachDisk.Type.SCRATCH,
+              AttachDisk.Mode.READ_WRITE, null, null, false,
+              AttachDisk.InitializeParams.create(null,null,
+                  null, nvmeDiskType), true, null,
+              AttachDisk.DiskInterface.NVME);
+          disks.add(nvme);
+        }
+        //HDD
+        for(int i=0; i<gce.getHdd(); i++){
+          AttachDisk hdd = AttachDisk.create(AttachDisk.Type.PERSISTENT, null,
+              null, null, false, AttachDisk.InitializeParams.create(null, gce
+                  .getDiskSize(), null, hddDiskType), true, null, null);
+          disks.add(hdd);
+        }
+        //SSD
+        for(int i=0; i<gce.getSsd(); i++){
+          AttachDisk ssd = AttachDisk.create(AttachDisk.Type.PERSISTENT, null,
+              null, null, false, AttachDisk.InitializeParams.create(null, gce
+                  .getDiskSize(), null, ssdDiskType), true, null, null);
+          disks.add(ssd);
+        }
+        
         Scheduling scheduling;
         if (isPreemptible) {
           scheduling = Scheduling.create(Scheduling.OnHostMaintenance.TERMINATE, false, true);
@@ -213,7 +243,7 @@ public class GceLauncher extends Launcher {
           scheduling = Scheduling.create(Scheduling.OnHostMaintenance.MIGRATE, false, false);
         }
         NewInstance.Builder builder = new NewInstance.Builder(name, machineType, networkType, subnetType,
-            Lists.newArrayList(disk)).scheduling(scheduling);
+            disks).scheduling(scheduling);
         Operation operation = instanceApi.create(builder.build());
 //        Operation operation = instanceApi.create(NewInstance.create(name,
 //            machineType, networkType, subnetType, Lists.newArrayList(disk), null, null));
@@ -244,6 +274,7 @@ public class GceLauncher extends Launcher {
           machines.add(machine);
           machine.setSshPort(DEFAULT_SSH_PORT);
           machine.setSshUser(gce.getUsername());
+          machine.setLocationDomainId(getLocationDomainId(gce));
         }
       }
       // TODO handle failure for setting metadata using metadataOperations list.
@@ -429,6 +460,40 @@ public class GceLauncher extends Launcher {
       logger.info("Subnet (" + gce.getSubnet() + ") does not exist in region " + "(" + region + ") ");
     }
     return null;
+  }
+  
+  private URI getNVMeDiskType(Gce gce)
+      throws URISyntaxException {
+    return GceSettings.buildLocalSSDDiskTypeUri(context.getProjectName(),
+        gce.getZone());
+  }
+  
+  private URI getHDDDiskType(Gce gce)
+      throws URISyntaxException {
+    return GceSettings.buildHDDDiskTypeUri(context.getProjectName(),
+        gce.getZone());
+  }
+  
+  private URI getSSDDiskType(Gce gce)
+      throws URISyntaxException {
+    return GceSettings.buildSSDDiskTypeUri(context.getProjectName(),
+        gce.getZone());
+  }
+  
+  private int getLocationDomainId(Gce gce){
+    switch (gce.getZone().charAt(gce.getZone().length() - 1)){
+      case 'a':
+        return 1;
+      case 'b':
+        return 2;
+      case 'c':
+        return 3;
+      case 'd':
+        return 4;
+      case 'f':
+        return 5;
+    }
+    return MachineRuntime.DEFAULT_LOCATION_DOMAIN_ID;
   }
 
 }

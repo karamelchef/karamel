@@ -392,6 +392,9 @@ function Gce() {
   this.diskSize = null;
   this.subnet = null;
   this.preemptible = null;
+  this.nvme = null;
+  this.hdd = null;
+  this.ssd = null;
 
   this.load = function(other) {
     this.type = other.type || null;
@@ -402,6 +405,9 @@ function Gce() {
     this.diskSize = other.diskSize || null;
     this.subnet = other.subnet || null;
     this.preemptible = other.preemptible || null;
+    this.nvme = other.nvme || null;
+    this.hdd = other.hdd || null;
+    this.ssd = other.ssd || null;
   };
 
   this.copy = function(other) {
@@ -413,6 +419,9 @@ function Gce() {
     this.diskSize = other.diskSize || null;
     this.subnet = other.subnet || null;
     this.preemptible = other.preemptible || null;
+    this.nvme = other.nvme || null;
+    this.hdd = other.hdd || null;
+    this.ssd = other.ssd || null;
   };
 
   this.addAccountDetails = function(other) {
@@ -847,6 +856,10 @@ function toCoreApiFormat(uiCluster) {
     this.vpc = null;
     this.diskSize = null;
     this.subnet = null;
+    this.nvme = null;
+    this.hdd = null;
+    this.ssd = null;
+
     this.load = function(other) {
       this.type = other.type || null;
       this.zone = other.zone || null;
@@ -856,6 +869,9 @@ function toCoreApiFormat(uiCluster) {
       this.diskSize = other.diskSize || null;
       this.subnet = other.subnet || null;
       this.preemptible = other.preemptible || null;
+      this.nvme = other.nvme || null;
+      this.hdd = other.hdd || null;
+      this.ssd = other.ssd || null;
     }
   }
 

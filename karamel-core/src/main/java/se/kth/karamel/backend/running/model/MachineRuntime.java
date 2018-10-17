@@ -26,6 +26,8 @@ public class MachineRuntime {
     ONGOING, FAILED, PAUSING, PAUSED, EMPTY
   }
 
+  public static final  int DEFAULT_LOCATION_DOMAIN_ID = 0;
+  
   private final GroupRuntime group;
   private LifeStatus lifeStatus = LifeStatus.FORKED;
   private TasksStatus tasksStatus = TasksStatus.EMPTY;
@@ -37,7 +39,8 @@ public class MachineRuntime {
   private String sshUser;
   private String machineType;
   private OsType osType;
-
+  private int locationDomainId = DEFAULT_LOCATION_DOMAIN_ID;
+  
   private final List<Task> tasks = new ArrayList<>();
 
   public MachineRuntime(GroupRuntime group) {
@@ -146,5 +149,14 @@ public class MachineRuntime {
   public String getId() {
     return publicIp;
   }
-
+  
+  
+  public int getLocationDomainId() {
+    return locationDomainId;
+  }
+  
+  public void setLocationDomainId(int locdomainId) {
+    this.locationDomainId = locdomainId;
+  }
+  
 }
