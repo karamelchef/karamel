@@ -62,7 +62,7 @@ public class Dag {
     }
 
     if (first.equals(next)) {
-      throw new DagConstructionException(String.format("Cyrcular dependency is not allowed: %s -> %s", first, next));
+      throw new DagConstructionException(String.format("Circular dependency is not allowed: %s -> %s", first, next));
     }
 
     logger.debug("Adding dependency: " + first + " -> " + next);

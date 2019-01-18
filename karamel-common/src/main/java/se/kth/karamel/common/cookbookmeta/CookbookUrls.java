@@ -210,7 +210,7 @@ public class CookbookUrls {
       String base = CB_CLASSPATH_MODE ? TEST_CB_ROOT_FOLDER : GITHUB_BASE_URL;
       String raw = CB_CLASSPATH_MODE ? TEST_CB_ROOT_FOLDER : GITHUB_RAW_URL;
 
-      id = GITHUB_BASE_URL + SLASH + org + SLASH + repo + SLASH + "tree" + SLASH + branch;
+      id = org + SLASH + repo;
       String home = base + SLASH + org + SLASH + repo;
       String repoHome = base + SLASH + org + SLASH + repo;
       String rawHome = raw + SLASH + org + SLASH + repo + SLASH + branch;

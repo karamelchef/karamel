@@ -47,9 +47,7 @@ public class CookbookCacheIml implements CookbookCache {
 
   @Override
   public KaramelizedCookbook readNew(String cookbookUrl) throws KaramelException {
-    if (problematics.contains(cookbookUrl)) {
-      problematics.remove(cookbookUrl);
-    }
+    problematics.remove(cookbookUrl);
     try {
       KaramelizedCookbook cookbook = new KaramelizedCookbook(cookbookUrl, false);
       cookbooks.put(cookbookUrl, cookbook);

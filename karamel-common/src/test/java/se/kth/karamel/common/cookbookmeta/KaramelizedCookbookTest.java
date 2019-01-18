@@ -177,22 +177,4 @@ public class KaramelizedCookbookTest {
     String content = IoUtils.readContentFromClasspath("testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/Berksfile");
     Berksfile berksfile = new Berksfile(content);
   }
-
-  @Test
-  public void testParseRecipes() throws CookbookUrlException, IOException {
-    try {
-      Settings.CB_CLASSPATH_MODE = true;
-      String recipe = Resources.toString(Resources.getResource(
-          "testgithub/testorg/testrepo/master/cookbooks/hopshadoop/hopsworks-chef/recipes/experiment.rb"), Charsets.UTF_8);
-      ExperimentRecipe er = ExperimentRecipeParser.parse("experiment", recipe, "config.props", "x=y");
-      assertEquals("experiment", er.getRecipeName());
-      assertEquals(er.getConfigFileName().isEmpty(), false);
-      assertEquals(er.getConfigFileContents().isEmpty(), false);
-      assertEquals(er.getScriptContents().isEmpty(), false);
-      assertEquals(er.getScriptType(), "bash");
-    } catch (RecipeParseException ex) {
-      Assert.fail(ex.toString());
-    }
-
-  }
 }

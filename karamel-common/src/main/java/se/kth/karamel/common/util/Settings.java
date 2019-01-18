@@ -78,7 +78,6 @@ public class Settings {
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";
   public static final String SCRIPT_PATH_APTGET_ESSENTIALS = SCRIPT_PATH_ROOT + "aptget_essentials.sc";
   public static final String SCRIPT_FIND_OSTYPE = SCRIPT_PATH_ROOT + "find_ostype.sc";
-  public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
   public static final String SCRIPET_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
   public static final String SCRIPT_NAME_INSTALL_CHEFDK = "install_chefdk.sh";
@@ -125,7 +124,6 @@ public class Settings {
   public static final String AWS_ACCESSKEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRETKEY_KEY = "aws.secret.key";
   public static final String AWS_SECRETKEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
-  public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
   public static final Integer AWS_BATCH_SIZE_DEFAULT = 1;
   public static final String AWS_BATCH_SIZE_KEY = "aws.batch.size";
   public static final int AWS_RETRY_INTERVAL = 6 * 1000;
@@ -175,7 +173,6 @@ public class Settings {
   public static final String OCCI_DEFAULT_IMAGE_SIZE = "atlas";
   public static final String OCCI_USER_CERTIFICATE_PATH = "/tmp/x509up_u1000";
   public static final String OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
-  public static final List<String> OCCI_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
 
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
   public static final String CB_DEFAULTRB_REL_URL = "/attributes/default.rb";
@@ -189,11 +186,7 @@ public class Settings {
   public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"
       + File.separator + "backend" + File.separator + "templates" + File.separator;
   public static final String CB_TEMPLATE_RECIPE_INSTALL = CB_TEMPLATE_PATH_ROOT + "recipe_install";
-  public static final String CB_TEMPLATE_RECIPE_EXPERIMENT = CB_TEMPLATE_PATH_ROOT + "recipe_experiment";
-  public static final String CB_TEMPLATE_CONFIG_PROPS = CB_TEMPLATE_PATH_ROOT + CB_CONFIGFILE;
-  public static final String CB_TEMPLATE_KITCHEN_YML = CB_TEMPLATE_PATH_ROOT + "kitchen_yml";
   public static final String CB_TEMPLATE_METADATA = CB_TEMPLATE_PATH_ROOT + "metadata";
-  public static final String CB_TEMPLATE_KARAMELFILE = CB_TEMPLATE_PATH_ROOT + "Karamelfile";
   public static final String CB_TEMPLATE_BERKSFILE = CB_TEMPLATE_PATH_ROOT + "Berksfile";
   public static final String CB_TEMPLATE_README = CB_TEMPLATE_PATH_ROOT + "README.md";
   public static final String CB_TEMPLATE_ATTRIBUTES_DEFAULT = CB_TEMPLATE_PATH_ROOT + "attributes_default";
@@ -307,9 +300,6 @@ public class Settings {
     return REMOTE_INSTALL_DIR_PATH(sshUserName) + "/" + OSTYPE_FILE_NAME;
   }
 
-  public static String REMOTE_PIDFILE_PATH(String sshUserName) {
-    return REMOTE_INSTALL_DIR_PATH(sshUserName) + "/" + PID_FILE_NAME;
-  }
   //------------------------------------------Karamel Machine-----------------------------------------------------------
   public static final String USER_HOME = System.getProperty("user.home");
   public static final String USER_NAME = System.getProperty("user.name");
