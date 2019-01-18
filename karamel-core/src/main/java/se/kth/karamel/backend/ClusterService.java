@@ -83,28 +83,21 @@ public class ClusterService {
     clusterContexts.put(name, clusterContext);
   }
 
-  public synchronized void registerGceContext(GceContext gceContext) throws KaramelException {
+  public synchronized void registerGceContext(GceContext gceContext) {
     commonContext.setGceContext(gceContext);
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {
 
     File pubKey = new File(sshKeyPair.getPublicKeyPath());
-    if (pubKey.exists() == false) {
+    if (!pubKey.exists()) {
       throw new KaramelException("Could not find public key: " + sshKeyPair.getPublicKeyPath());
     }
     File privKey = new File(sshKeyPair.getPrivateKeyPath());
-    if (privKey.exists() == false) {
+    if (!privKey.exists()) {
       throw new KaramelException("Could not find private key: " + sshKeyPair.getPrivateKeyPath());
     }
     sshKeyPair.setNeedsPassword(SshKeyService.checkIfPasswordNeeded(sshKeyPair));
-//    boolean needsPassword = SshKeyService.checkIfPasswordNeeded(sshKeyPair);
-//    if (needsPassword) {
-//      if (sshKeyPair.getPassphrase() == null || sshKeyPair.getPassphrase().isEmpty()) {
-//        throw new KaramelException("The passphrase needs to be entered for the OpenSshKey.");
-//      }
-//      sshKeyPair.setNeedsPassword(true);
-//    }
 
     commonContext.setSshKeyPair(sshKeyPair);
   }

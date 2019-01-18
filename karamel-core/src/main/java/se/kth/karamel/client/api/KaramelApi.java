@@ -5,7 +5,6 @@
  */
 package se.kth.karamel.client.api;
 
-import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.github.GithubUser;
 import se.kth.karamel.backend.github.OrgItem;
@@ -23,7 +22,7 @@ import java.util.List;
  *
  * @author kamal
  */
-public interface KaramelApi {
+ interface KaramelApi {
 
   /**
    * Demonstrates available commands and their usage
@@ -31,7 +30,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String commandCheatSheet() throws KaramelException;
+   String commandCheatSheet() throws KaramelException;
 
   /**
    * Parses the command, if valid fetches the result in string, result could have different formatting depends on the
@@ -42,7 +41,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public CommandResponse processCommand(String command, String... args) throws KaramelException;
+   CommandResponse processCommand(String command, String... args) throws KaramelException;
 
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
@@ -52,7 +51,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException;
+   String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException;
 
   /**
    * Converts json definition of the cluster into a yaml object
@@ -61,7 +60,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String jsonToYaml(String json) throws KaramelException;
+   String jsonToYaml(String json) throws KaramelException;
 
   /**
    * Converts yaml definition of the cluster into the json
@@ -70,7 +69,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String yamlToJson(String yaml) throws KaramelException;
+   String yamlToJson(String yaml) throws KaramelException;
 
   /**
    * Loads Karamel common keys
@@ -78,7 +77,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist() throws KaramelException;
+   SshKeyPair loadSshKeysIfExist() throws KaramelException;
 
   /**
    * Loads cluster specific keys
@@ -87,7 +86,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
+   SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
 
   /**
    * Generates a common ssh keys in the karamel folder
@@ -95,7 +94,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
+   SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
 
   /**
    * Generates cluster specific ssh keys
@@ -104,7 +103,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
+   SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
    * Register ssh keys for the current runtime of karamel
@@ -113,7 +112,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
+   SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
 
   /**
    * Register ssh keys for the specified cluster
@@ -123,7 +122,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
+   SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file
@@ -131,7 +130,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
+   Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
 
   /**
    * Validates user's credentials before starting the cluster
@@ -140,7 +139,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
+   boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
 
   /**
    * Starts running the cluster by launching machines and installing softwares It expect to receive a complete
@@ -149,7 +148,7 @@ public interface KaramelApi {
    * @param json
    * @throws KaramelException
    */
-  public void startCluster(String json) throws KaramelException;
+   void startCluster(String json) throws KaramelException;
 
   /**
    * In case user wants to pause the running cluster for inspection reasons. It implies that machines won't receive any
@@ -158,7 +157,7 @@ public interface KaramelApi {
    * @param clusterName
    * @throws KaramelException
    */
-  public void pauseCluster(String clusterName) throws KaramelException;
+   void pauseCluster(String clusterName) throws KaramelException;
 
   /**
    * It resumes an already paused cluster, machines will go on and run ssh commands.
@@ -166,7 +165,7 @@ public interface KaramelApi {
    * @param clusterName
    * @throws KaramelException
    */
-  public void resumeCluster(String clusterName) throws KaramelException;
+   void resumeCluster(String clusterName) throws KaramelException;
 
   /**
    * It stops sending new ssh command to machines, destroys the automatic allocated machines and disconnects ssh clients
@@ -175,7 +174,7 @@ public interface KaramelApi {
    * @param clusterName
    * @throws KaramelException
    */
-  public void terminateCluster(String clusterName) throws KaramelException;
+   void terminateCluster(String clusterName) throws KaramelException;
 
   /**
    * Returns a json containing all groups, machines, their status, tasks/commands and their status.
@@ -184,7 +183,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String getClusterStatus(String clusterName) throws KaramelException;
+   String getClusterStatus(String clusterName) throws KaramelException;
 
   /**
    * Returns installation flow DAG that each node is a task assigned to a certain machine with the current status of the
@@ -194,7 +193,7 @@ public interface KaramelApi {
    * @return
    * @throws KaramelException
    */
-  public String getInstallationDag(String clusterName) throws KaramelException;
+   String getInstallationDag(String clusterName) throws KaramelException;
 
   /**
    * Register password for Baremetal sudo account
@@ -202,7 +201,7 @@ public interface KaramelApi {
    * @param password
    * @throws KaramelException
    */
-  public void registerSudoPassword(String password) throws KaramelException;
+   void registerSudoPassword(String password) throws KaramelException;
 
   /**
    * Register username/password for github account
@@ -212,7 +211,7 @@ public interface KaramelApi {
    * @return GithubUser Json object also containing primary github email address
    * @throws KaramelException
    */
-  public GithubUser registerGithubAccount(String user, String password) throws KaramelException;
+   GithubUser registerGithubAccount(String user, String password) throws KaramelException;
 
   /**
    * Load any existing credentials stored locally
@@ -220,7 +219,7 @@ public interface KaramelApi {
    * @return GithubUser object
    * @throws KaramelException
    */
-  public GithubUser loadGithubCredentials() throws KaramelException;
+   GithubUser loadGithubCredentials() throws KaramelException;
 
   /**
    * Lists the available repos in a github organization.
@@ -229,7 +228,7 @@ public interface KaramelApi {
    * @return List of available repos
    * @throws KaramelException
    */
-  public List<RepoItem> listGithubRepos(String organization) throws KaramelException;
+   List<RepoItem> listGithubRepos(String organization) throws KaramelException;
 
   /**
    * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
@@ -237,52 +236,7 @@ public interface KaramelApi {
    * @return List of available orgs
    * @throws KaramelException
    */
-  public List<OrgItem> listGithubOrganizations() throws KaramelException;
-
-//  /**
-//   * Create a new github repo in an organization
-//   *
-//   * @param organization if organization is empty or null, create the repo for the authenticated user
-//   * @param repo the name of the repo to create
-//   * @param description of what's in the repository
-//   * @throws KaramelException
-//   */
-//  public void createGithubRepo(String organization, String repo, String description) throws KaramelException;
-  /**
-   * Add a file to an existing repo, commit it, and push it to github.
-   *
-   * @param experiment bash scripts and config files to add, commit, and push.
-   * @throws KaramelException
-   */
-  public void commitAndPushExperiment(Experiment experiment)
-      throws KaramelException;
-
-  /**
-   * Loads an experiment into the Designer, given its clone URL
-   *
-   * @param githubRepoUrl url for github repo
-   * @return Json object for the ExperimentContext
-   * @throws se.kth.karamel.common.exception.KaramelException
-   */
-  public Experiment loadExperiment(String githubRepoUrl) throws KaramelException;
-
-  /**
-   *
-   * @param org github org name
-   * @param repo github repo name
-   * @param description repo description
-   * @return RepoItem bean/json containing name, description of repo.
-   * @throws KaramelException
-   */
-  public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
-
-  /**
-   *
-   * @param owner
-   * @param repo
-   * @param experimentName
-   */
-  public void removeFileFromExperiment(String owner, String repo, String experimentName);
+   List<OrgItem> listGithubOrganizations() throws KaramelException;
 
   /**
    *
@@ -291,21 +245,21 @@ public interface KaramelApi {
    * @param removeGitHub
    * @param removeLocal
    */
-  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
+   void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
 
-  public String loadGceCredentialsIfExist() throws KaramelException;
+   String loadGceCredentialsIfExist() throws KaramelException;
 
-  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
+   boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
 
-  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
+   NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
   
-  public NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
+   NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
 
-  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+   boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
   
-  public boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+   boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
 
-  public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
+   OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
 
-  public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
+   boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
 }

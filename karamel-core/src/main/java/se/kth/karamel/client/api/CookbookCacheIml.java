@@ -168,21 +168,6 @@ public class CookbookCacheIml implements CookbookCache {
   }
 
   @Override
-  public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(JsonCluster jsonCluster) throws KaramelException {
-    List<JsonGroup> jsonGroups = jsonCluster.getGroups();
-    Set<String> toLoad = new HashSet<>();
-    for (JsonGroup jsonGroup : jsonGroups) {
-      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
-        toLoad.add(cb.getId());
-      }
-    }
-    for (JsonCookbook cb : jsonCluster.getCookbooks()) {
-      toLoad.add(cb.getId());
-    }
-    return loadAllKaramelizedCookbooks(jsonCluster.getName(), toLoad, new Dag());
-  }
-
-  @Override
   public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(YamlCluster cluster) throws KaramelException {
     Set<String> toLoad = new HashSet<>();
     for (Cookbook cb : cluster.getCookbooks().values()) {

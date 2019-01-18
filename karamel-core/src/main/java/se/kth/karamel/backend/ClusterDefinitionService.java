@@ -74,8 +74,7 @@ public class ClusterDefinitionService {
     yamlPropertyRepresenter.addClassTag(YamlGroup.class, Tag.MAP);
     yamlPropertyRepresenter.addClassTag(HashSet.class, Tag.MAP);
     Yaml yaml = new Yaml(yamlPropertyRepresenter, options);
-    String content = yaml.dump(yamlCluster);
-    return content;
+    return yaml.dump(yamlCluster);
   }
 
   public static void saveYaml(String yaml) throws KaramelException {
@@ -105,8 +104,7 @@ public class ClusterDefinitionService {
       if (!file.exists()) {
         throw new KaramelException(String.format("yaml '%s' is not available", yamlPath));
       }
-      String yaml = Files.toString(file, Charsets.UTF_8);
-      return yaml;
+      return Files.toString(file, Charsets.UTF_8);
     } catch (IOException ex) {
       throw new KaramelException("Could not save the yaml ", ex);
     }
@@ -121,8 +119,8 @@ public class ClusterDefinitionService {
     }
   }
 
-  public static List<String> listClusters() throws KaramelException {
-    List<String> clusters = new ArrayList();
+  public static List<String> listClusters() {
+    List<String> clusters = new ArrayList<>();
     File folder = new File(Settings.KARAMEL_ROOT_PATH);
     if (folder.exists()) {
       File[] files = folder.listFiles();
@@ -142,16 +140,13 @@ public class ClusterDefinitionService {
 
   public static String jsonToYaml(String json) throws KaramelException {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
-    );
+    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
     return jsonToYaml(jsonCluster);
   }
 
-  public static JsonCluster jsonToJsonObject(String json) throws KaramelException {
+  public static JsonCluster jsonToJsonObject(String json) {
     Gson gson = new Gson();
-    JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class
-    );
-    return jsonCluster;
+    return gson.fromJson(json, JsonCluster.class);
   }
 
   public static JsonCluster yamlToJsonObject(String yaml) throws KaramelException {
@@ -176,11 +171,10 @@ public class ClusterDefinitionService {
     return serializeJson(jsonObj);
   }
 
-  public static String serializeJson(JsonCluster jsonCluster) throws KaramelException {
+  public static String serializeJson(JsonCluster jsonCluster) {
     GsonBuilder builder = new GsonBuilder();
     builder.disableHtmlEscaping();
     Gson gson = builder.setPrettyPrinting().create();
-    String json = gson.toJson(jsonCluster);
-    return json;
+    return gson.toJson(jsonCluster);
   }
 }
