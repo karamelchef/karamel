@@ -352,15 +352,6 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public void removeFileFromExperiment(String owner, String repo, String experimentName) {
-    try {
-      GithubApi.removeFile(owner, repo, experimentName);
-    } catch (KaramelException ex) {
-      // Do nothing - Repository hasn't been created yet. That's ok.");
-    }
-  }
-
-  @Override
   public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException {
     boolean failedLocal = false;
     String failedMsg = "";

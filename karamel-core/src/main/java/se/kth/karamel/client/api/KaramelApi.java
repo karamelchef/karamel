@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.client.api;
 
 import se.kth.karamel.backend.command.CommandResponse;
@@ -20,9 +15,8 @@ import java.util.List;
 /**
  * The main API of Karamel-Core for Karamel clients
  *
- * @author kamal
  */
- interface KaramelApi {
+public interface KaramelApi {
 
   /**
    * Demonstrates available commands and their usage
@@ -30,7 +24,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String commandCheatSheet() throws KaramelException;
+  String commandCheatSheet() throws KaramelException;
 
   /**
    * Parses the command, if valid fetches the result in string, result could have different formatting depends on the
@@ -41,7 +35,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   CommandResponse processCommand(String command, String... args) throws KaramelException;
+  CommandResponse processCommand(String command, String... args) throws KaramelException;
 
   /**
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
@@ -51,7 +45,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException;
+  String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException;
 
   /**
    * Converts json definition of the cluster into a yaml object
@@ -60,7 +54,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String jsonToYaml(String json) throws KaramelException;
+  String jsonToYaml(String json) throws KaramelException;
 
   /**
    * Converts yaml definition of the cluster into the json
@@ -69,7 +63,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String yamlToJson(String yaml) throws KaramelException;
+  String yamlToJson(String yaml) throws KaramelException;
 
   /**
    * Loads Karamel common keys
@@ -77,7 +71,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair loadSshKeysIfExist() throws KaramelException;
+  SshKeyPair loadSshKeysIfExist() throws KaramelException;
 
   /**
    * Loads cluster specific keys
@@ -86,7 +80,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
+  SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
 
   /**
    * Generates a common ssh keys in the karamel folder
@@ -94,7 +88,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
+  SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
 
   /**
    * Generates cluster specific ssh keys
@@ -103,7 +97,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
+  SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
 
   /**
    * Register ssh keys for the current runtime of karamel
@@ -112,7 +106,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
+  SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
 
   /**
    * Register ssh keys for the specified cluster
@@ -122,7 +116,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
+  SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
 
   /**
    * Reads it from default karamel conf file
@@ -130,7 +124,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
+  Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
 
   /**
    * Validates user's credentials before starting the cluster
@@ -139,7 +133,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
+  boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
 
   /**
    * Starts running the cluster by launching machines and installing softwares It expect to receive a complete
@@ -148,7 +142,7 @@ import java.util.List;
    * @param json
    * @throws KaramelException
    */
-   void startCluster(String json) throws KaramelException;
+  void startCluster(String json) throws KaramelException;
 
   /**
    * In case user wants to pause the running cluster for inspection reasons. It implies that machines won't receive any
@@ -157,7 +151,7 @@ import java.util.List;
    * @param clusterName
    * @throws KaramelException
    */
-   void pauseCluster(String clusterName) throws KaramelException;
+  void pauseCluster(String clusterName) throws KaramelException;
 
   /**
    * It resumes an already paused cluster, machines will go on and run ssh commands.
@@ -165,7 +159,7 @@ import java.util.List;
    * @param clusterName
    * @throws KaramelException
    */
-   void resumeCluster(String clusterName) throws KaramelException;
+  void resumeCluster(String clusterName) throws KaramelException;
 
   /**
    * It stops sending new ssh command to machines, destroys the automatic allocated machines and disconnects ssh clients
@@ -174,7 +168,7 @@ import java.util.List;
    * @param clusterName
    * @throws KaramelException
    */
-   void terminateCluster(String clusterName) throws KaramelException;
+  void terminateCluster(String clusterName) throws KaramelException;
 
   /**
    * Returns a json containing all groups, machines, their status, tasks/commands and their status.
@@ -183,7 +177,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String getClusterStatus(String clusterName) throws KaramelException;
+  String getClusterStatus(String clusterName) throws KaramelException;
 
   /**
    * Returns installation flow DAG that each node is a task assigned to a certain machine with the current status of the
@@ -193,7 +187,7 @@ import java.util.List;
    * @return
    * @throws KaramelException
    */
-   String getInstallationDag(String clusterName) throws KaramelException;
+  String getInstallationDag(String clusterName) throws KaramelException;
 
   /**
    * Register password for Baremetal sudo account
@@ -201,7 +195,7 @@ import java.util.List;
    * @param password
    * @throws KaramelException
    */
-   void registerSudoPassword(String password) throws KaramelException;
+  void registerSudoPassword(String password) throws KaramelException;
 
   /**
    * Register username/password for github account
@@ -211,7 +205,7 @@ import java.util.List;
    * @return GithubUser Json object also containing primary github email address
    * @throws KaramelException
    */
-   GithubUser registerGithubAccount(String user, String password) throws KaramelException;
+  GithubUser registerGithubAccount(String user, String password) throws KaramelException;
 
   /**
    * Load any existing credentials stored locally
@@ -219,7 +213,7 @@ import java.util.List;
    * @return GithubUser object
    * @throws KaramelException
    */
-   GithubUser loadGithubCredentials() throws KaramelException;
+  GithubUser loadGithubCredentials() throws KaramelException;
 
   /**
    * Lists the available repos in a github organization.
@@ -228,7 +222,7 @@ import java.util.List;
    * @return List of available repos
    * @throws KaramelException
    */
-   List<RepoItem> listGithubRepos(String organization) throws KaramelException;
+  List<RepoItem> listGithubRepos(String organization) throws KaramelException;
 
   /**
    * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
@@ -236,7 +230,7 @@ import java.util.List;
    * @return List of available orgs
    * @throws KaramelException
    */
-   List<OrgItem> listGithubOrganizations() throws KaramelException;
+  List<OrgItem> listGithubOrganizations() throws KaramelException;
 
   /**
    *
@@ -245,21 +239,21 @@ import java.util.List;
    * @param removeGitHub
    * @param removeLocal
    */
-   void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
+  void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
 
-   String loadGceCredentialsIfExist() throws KaramelException;
+  String loadGceCredentialsIfExist() throws KaramelException;
 
-   boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
+  boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
 
-   NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
-  
-   NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
+  NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
 
-   boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
-  
-   boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+  NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
 
-   OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
+  boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
 
-   boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
+  boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
+
+  OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
+
+  boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
 }
