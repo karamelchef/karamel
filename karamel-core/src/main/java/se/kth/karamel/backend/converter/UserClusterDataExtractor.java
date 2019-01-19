@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.converter;
 
 import java.util.HashSet;
@@ -13,6 +8,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
@@ -21,14 +17,9 @@ import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
-import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.MetadataRb;
 import se.kth.karamel.common.cookbookmeta.Recipe;
 
-/**
- *
- * @author kamal
- */
 public class UserClusterDataExtractor {
 
   private static final Logger logger = Logger.getLogger(UserClusterDataExtractor.class);
@@ -39,43 +30,41 @@ public class UserClusterDataExtractor {
     StringBuilder builder = new StringBuilder();
     HashSet<String> cbids = new HashSet<>();
     for (JsonGroup jg : cluster.getGroups()) {
-      for (JsonCookbook jc : jg.getCookbooks()) {
-        String cbid = jc.getId();
+      for (KaramelizedCookbook kcb: jg.getCookbooks()) {
+        String cbid = kcb.getCookbookName();
         cbids.add(cbid);
         cookbookCache.prepareParallel(cbids);
       }
     }
     for (JsonGroup jg : cluster.getGroups()) {
-      for (JsonCookbook jc : jg.getCookbooks()) {
-        for (JsonRecipe rec : jc.getRecipes()) {
-          String cbid = jc.getId();
-          KaramelizedCookbook cb = cookbookCache.get(cbid);
-          MetadataRb metadataRb = cb.getMetadataRb();
-          List<Recipe> recipes = metadataRb.getRecipes();
-          for (Recipe recipe : recipes) {
-            if (recipe.getCanonicalName().equalsIgnoreCase(rec.getCanonicalName())) {
-              Set<String> links = recipe.getLinks();
-              for (String link : links) {
-                if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
-                  if (clusterEntity != null) {
-                    GroupRuntime ge = findGroup(clusterEntity, jg.getName());
-                    if (ge != null) {
-                      List<MachineRuntime> machines = ge.getMachines();
-                      if (machines != null) {
-                        for (MachineRuntime me : ge.getMachines()) {
-                          String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
-                          builder.append(l).append("\n");
-                        }
+      for (JsonRecipe rec : jg.getRecipes()) {
+        String cbid = rec.getCookbook().getCookbookName();
+        KaramelizedCookbook cb = cookbookCache.get(cbid);
+        MetadataRb metadataRb = cb.getMetadataRb();
+        List<Recipe> recipes = metadataRb.getRecipes();
+        for (Recipe recipe : recipes) {
+          if (recipe.getCanonicalName().equalsIgnoreCase(rec.getCanonicalName())) {
+            Set<String> links = recipe.getLinks();
+            for (String link : links) {
+              if (link.contains(Settings.METADATA_INCOMMENT_HOST_KEY)) {
+                if (clusterEntity != null) {
+                  GroupRuntime ge = findGroup(clusterEntity, jg.getName());
+                  if (ge != null) {
+                    List<MachineRuntime> machines = ge.getMachines();
+                    if (machines != null) {
+                      for (MachineRuntime me : ge.getMachines()) {
+                        String l = link.replaceAll(Settings.METADATA_INCOMMENT_HOST_KEY, me.getPublicIp());
+                        builder.append(l).append("\n");
                       }
                     }
                   }
-                } else {
-                  builder.append(link).append("\n");
                 }
-
+              } else {
+                builder.append(link).append("\n");
               }
 
             }
+
           }
         }
       }
@@ -129,8 +118,7 @@ public class UserClusterDataExtractor {
   public static String makeVendorPath(String sshUser, List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
     Set<String> paths = new HashSet<>();
     for (KaramelizedCookbook kcb : rootCookbooks) {
-      CookbookUrls urls = kcb.getUrls();
-      String cookbookPath = urls.repoName;
+      String cookbookPath = kcb.getCookbookName();
       paths.add(Settings.REMOTE_COOKBOOK_VENDOR_PATH(sshUser, cookbookPath));
     }
     Object[] arr = paths.toArray();

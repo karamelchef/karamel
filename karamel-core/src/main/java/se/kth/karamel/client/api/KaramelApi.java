@@ -1,16 +1,12 @@
 package se.kth.karamel.client.api;
 
 import se.kth.karamel.backend.command.CommandResponse;
-import se.kth.karamel.backend.github.GithubUser;
-import se.kth.karamel.backend.github.OrgItem;
-import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.common.util.NovaCredentials;
 import se.kth.karamel.common.util.SshKeyPair;
 
-import java.util.List;
 
 /**
  * The main API of Karamel-Core for Karamel clients
@@ -196,50 +192,6 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   void registerSudoPassword(String password) throws KaramelException;
-
-  /**
-   * Register username/password for github account
-   *
-   * @param user github account name
-   * @param password github password
-   * @return GithubUser Json object also containing primary github email address
-   * @throws KaramelException
-   */
-  GithubUser registerGithubAccount(String user, String password) throws KaramelException;
-
-  /**
-   * Load any existing credentials stored locally
-   *
-   * @return GithubUser object
-   * @throws KaramelException
-   */
-  GithubUser loadGithubCredentials() throws KaramelException;
-
-  /**
-   * Lists the available repos in a github organization.
-   *
-   * @param organization
-   * @return List of available repos
-   * @throws KaramelException
-   */
-  List<RepoItem> listGithubRepos(String organization) throws KaramelException;
-
-  /**
-   * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
-   *
-   * @return List of available orgs
-   * @throws KaramelException
-   */
-  List<OrgItem> listGithubOrganizations() throws KaramelException;
-
-  /**
-   *
-   * @param owner
-   * @param repo
-   * @param removeGitHub
-   * @param removeLocal
-   */
-  void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
 
   String loadGceCredentialsIfExist() throws KaramelException;
 

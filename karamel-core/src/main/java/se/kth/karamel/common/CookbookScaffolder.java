@@ -1,5 +1,7 @@
 package se.kth.karamel.common;
 
+import com.google.common.io.Resources;
+import org.apache.commons.io.Charsets;
 import se.kth.karamel.common.util.Settings;
 
 import java.io.File;
@@ -44,7 +46,7 @@ public class CookbookScaffolder {
    * @throws IOException
    */
   public static void createFile(String path, String template, String name) throws IOException {
-    String script = IoUtils.readContentFromClasspath(template);
+    String script = Resources.toString(Resources.getResource(template), Charsets.UTF_8);
     script = script.replaceAll("%%NAME%%", name);
     String uid = System.getProperty("user.name");
     script = script.replaceAll("%%USER%%", uid);

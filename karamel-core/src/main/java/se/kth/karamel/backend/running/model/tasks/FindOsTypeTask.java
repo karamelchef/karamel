@@ -5,10 +5,14 @@
  */
 package se.kth.karamel.backend.running.model.tasks;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import com.google.common.io.Files;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.launcher.OsType;
@@ -72,7 +76,7 @@ public class FindOsTypeTask extends Task {
       return;
     }
     try {
-      String content = IoUtils.readContentFromPath(localResultsFile);
+      String content = Files.toString(new File(localResultsFile), Charset.forName("UTF-8"));
       content = content.trim().toLowerCase();
       if (content.isEmpty()) {
         throw new KaramelException(String.format("The OS-Type file for %s is empty", publicIp));

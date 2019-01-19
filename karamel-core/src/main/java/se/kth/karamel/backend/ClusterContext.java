@@ -6,7 +6,6 @@
 package se.kth.karamel.backend;
 
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import se.kth.karamel.backend.github.GithubApi;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.google.GceContext;
 import se.kth.karamel.backend.launcher.nova.NovaContext;
@@ -41,11 +40,6 @@ public class ClusterContext {
 
   public void setSudoAccountPassword(String sudoAccountPassword) {
     this.sudoAccountPassword = sudoAccountPassword;
-  }
-
-  public String getGithubUsername() {
-    return GithubApi.getEmail().isEmpty() ? "karamel" : GithubApi.getEmail().substring(0,
-        GithubApi.getEmail().lastIndexOf("@"));
   }
 
   public String getSudoAccountPassword() {

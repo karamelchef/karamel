@@ -5,7 +5,9 @@
  */
 package se.kth.karamel.backend.command;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import com.google.gson.JsonObject;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,9 +71,12 @@ public class CommandService {
 
   static {
     try {
-      HELP_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/helppage");
-      HOME_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/homepage");
-      RUNNING_PAGE_TEMPLATE = IoUtils.readContentFromClasspath("se/kth/karamel/backend/command/running");
+      HELP_PAGE_TEMPLATE = Resources.toString(
+          Resources.getResource("se/kth/karamel/backend/command/helppage"), Charsets.UTF_8);
+      HOME_PAGE_TEMPLATE = Resources.toString(
+          Resources.getResource("se/kth/karamel/backend/command/homepage"), Charsets.UTF_8);
+      RUNNING_PAGE_TEMPLATE = Resources.toString(
+          Resources.getResource("se/kth/karamel/backend/command/running"), Charsets.UTF_8);
     } catch (IOException e) {
 
     }

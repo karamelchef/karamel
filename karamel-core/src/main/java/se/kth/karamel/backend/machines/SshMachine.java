@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+
+import com.google.common.base.Charsets;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
@@ -563,7 +565,7 @@ public class SshMachine implements MachineInterface, Runnable {
       //shoudn't throw this because I am deleting the local file already here
     } finally {
       try {
-        String list = IoUtils.readContentFromPath(localSucceedPath);
+        String list = com.google.common.io.Files.toString(new File(localSucceedPath), Charsets.UTF_8);
         String[] items = list.split("\n");
         succeedTasksHistory.clear();
         succeedTasksHistory.addAll(Arrays.asList(items));

@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.launcher.OsType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
@@ -35,12 +34,10 @@ public class AptGetEssentialsTask extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     OsType osType = getMachine().getOsType();
     String sudocommand = getSudoCommand();
-    String githuuser = ClusterService.getInstance().getCommonContext().getGithubUsername();
     String osfamily = osType.family.toString().toLowerCase();
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", sudocommand,
-          "github_username", githuuser,
           "osfamily", osfamily,
           "task_id", getId(),
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),

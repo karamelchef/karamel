@@ -9,10 +9,6 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.backend.command.CommandService;
-import se.kth.karamel.backend.github.GithubApi;
-import se.kth.karamel.backend.github.GithubUser;
-import se.kth.karamel.backend.github.OrgItem;
-import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.backend.launcher.google.GceContext;
@@ -51,7 +47,6 @@ import se.kth.karamel.common.util.SshKeyService;
 import se.kth.karamel.common.util.settings.NovaSetting;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
@@ -329,48 +324,5 @@ public class KaramelApiImpl implements KaramelApi {
   @Override
   public void registerSudoPassword(String password) {
     ClusterService.getInstance().getCommonContext().setSudoAccountPassword(password);
-  }
-
-  @Override
-  public List<OrgItem> listGithubOrganizations() throws KaramelException {
-    return GithubApi.getOrganizations();
-  }
-
-  @Override
-  public List<RepoItem> listGithubRepos(String organization) throws KaramelException {
-    return GithubApi.getRepos(organization);
-  }
-
-  @Override
-  public GithubUser registerGithubAccount(String user, String password) throws KaramelException {
-    return GithubApi.registerCredentials(user, password);
-  }
-
-  @Override
-  public GithubUser loadGithubCredentials() throws KaramelException {
-    return GithubApi.loadGithubCredentials();
-  }
-
-  @Override
-  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException {
-    boolean failedLocal = false;
-    String failedMsg = "";
-
-    // if failure while removing locally, still try and remove remote repo (if requested)
-    if (removeLocal) {
-      try {
-        GithubApi.removeLocalRepo(owner, repo);
-      } catch (KaramelException ex) {
-        failedLocal = true;
-        failedMsg = ex.toString();
-      }
-    }
-    if (removeGitHub) {
-      GithubApi.removeRepo(owner, repo);
-    }
-    if (failedLocal) {
-      throw new KaramelException(failedMsg);
-    }
-
   }
 }

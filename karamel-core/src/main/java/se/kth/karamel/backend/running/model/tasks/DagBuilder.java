@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.running.model.tasks;
 
 import com.google.gson.Gson;
@@ -17,6 +12,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -31,7 +27,6 @@ import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
 import se.kth.karamel.common.util.Confs;
@@ -152,12 +147,10 @@ public class DagBuilder {
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          for (JsonRecipe rec : jc.getRecipes()) {
-            JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
-            addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, clusterStats, map, json1, submitter,
-                jc.getId(), allRecipeTasks, dag, rootCookbooks);
-          }
+        for (JsonRecipe rec : jg.getRecipes()) {
+          JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
+          addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, clusterStats, map, json1, submitter,
+              rec.getCookbook().getCookbookName(), allRecipeTasks, dag, rootCookbooks);
         }
       }
     }
@@ -232,20 +225,18 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
-        for (KaramelizedCookbook rcb : rootCookbooks) {
-          CookbookUrls urls = rcb.getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
-              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()),
-              urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
+        for (KaramelizedCookbook kcb: rootCookbooks) {
+          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter,
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), kcb);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
         }
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getUrls();
-          String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
+
+        for (KaramelizedCookbook kbc : jg.getCookbooks()) {
+          String recipeName = kbc.getCookbookName() + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
           JsonObject json = chefJsons.get(me.getId() + recipeName);
-          RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats, json, submitter, urls.id,
-              jc.getName(), allRecipeTasks, dag, rootCookbooks);
+          RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats, json, submitter,
+              kbc.getCookbookName(), allRecipeTasks, dag, rootCookbooks);
           map1.put(t2.uniqueId(), t2);
         }
         logger.debug(String.format("Cookbook-level tasks for the machine '%s' in the group '%s' are: %s",
@@ -274,7 +265,7 @@ public class DagBuilder {
    * @return
    * @throws KaramelException
    */
-  public static Map<String, Map<String, Task>> cookbookLevelInstallationTasks(JsonCluster cluster,
+  private static Map<String, Map<String, Task>> cookbookLevelInstallationTasks(JsonCluster cluster,
       ClusterRuntime clusterEntity, ClusterStats clusterStats, Map<String, JsonObject> chefJsons,
       TaskSubmitter submitter, Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
       List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
@@ -283,20 +274,18 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
-        for (KaramelizedCookbook rcb : rootCookbooks) {
-          CookbookUrls urls = rcb.getUrls();
-          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter, urls.id,
-              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()),
-              urls.repoUrl, urls.repoName, urls.cookbookRelPath, urls.branch);
+        for (KaramelizedCookbook kcb : rootCookbooks) {
+          VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter,
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), kcb);
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
         }
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          CookbookUrls urls = jc.getUrls();
-          String recipeName = jc.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+
+        for (KaramelizedCookbook kcb : jg.getCookbooks()) {
+          String recipeName = kcb.getCookbookName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
           JsonObject json = chefJsons.get(me.getId() + recipeName);
           RunRecipeTask t2 = makeRecipeTaskIfNotExist(recipeName, me, clusterStats,
-              json, submitter, urls.id, jc.getName(), allRecipeTasks, dag, rootCookbooks);
+              json, submitter, kcb.getCookbookName(), allRecipeTasks, dag, rootCookbooks);
           map1.put(t2.uniqueId(), t2);
         }
         logger.debug(String.format("Cookbook-level tasks for the machine '%s' in the group '%s' are: %s",
