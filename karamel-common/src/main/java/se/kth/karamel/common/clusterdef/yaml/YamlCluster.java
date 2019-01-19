@@ -42,11 +42,7 @@ public class YamlCluster extends YamlScope {
 
     List<KaramelizedCookbook> allCbs = CACHE.loadRootKaramelizedCookbooks(jsonCluster);
     for (KaramelizedCookbook kc : allCbs) {
-      Cookbook ck = new Cookbook();
-      ck.setBranch(kc.getUrls().branch);
-      ck.setCookbook(kc.getUrls().cookbookRelPath);
-      ck.setGithub(kc.getUrls().orgRepo);
-      cookbooks.put(kc.getMetadataRb().getName(), ck);
+      cookbooks.put(kc.getCookbookName(), kc.getCookbook());
     }
   }
 

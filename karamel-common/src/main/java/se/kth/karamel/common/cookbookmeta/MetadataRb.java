@@ -17,11 +17,11 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public class MetadataRb {
 
-  String name;
-  String description;
-  String version;
-  List<Recipe> recipes = new ArrayList<>();
-  List<Attribute> attributes = new ArrayList<>();
+  private String name;
+  private String description;
+  private String version;
+  private List<Recipe> recipes = new ArrayList<>();
+  private List<Attribute> attributes = new ArrayList<>();
   
   public void setAttributes(List<Attribute> attributes) {
     this.attributes = attributes;

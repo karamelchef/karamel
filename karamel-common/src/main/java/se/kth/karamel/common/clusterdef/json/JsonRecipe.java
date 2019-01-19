@@ -1,20 +1,17 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package se.kth.karamel.common.clusterdef.json;
 
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.Settings;
 
-/**
- *
- * @author kamal
- */
 public class JsonRecipe implements Comparable<JsonRecipe>{
 
-  String name;
+  private KaramelizedCookbook cookbook;
+  private String name;
+
+  public JsonRecipe(KaramelizedCookbook cookbook, String name) {
+    this.cookbook = cookbook;
+    this.name = name;
+  }
 
   public String getName() {
     return name;
@@ -23,14 +20,22 @@ public class JsonRecipe implements Comparable<JsonRecipe>{
   public void setName(String name) {
     this.name = name;
   }
-  
+
+  public KaramelizedCookbook getCookbook() {
+    return cookbook;
+  }
+
+  public void setCookbook(KaramelizedCookbook cookbook) {
+    this.cookbook = cookbook;
+  }
+
   public String getCanonicalName() {
-    return Settings.RECIPE_CANONICAL_NAME(name);
+    return cookbook.getCookbookName() + Settings.COOKBOOK_DELIMITER + name;
   }
 
   @Override
   public int compareTo(JsonRecipe o) {
-    return getCanonicalName().compareTo(o.getCanonicalName());
+    return name.compareTo(o.name);
   }
-    
+
 }

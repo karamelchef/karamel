@@ -13,24 +13,18 @@ import java.util.List;
  * @author kamal
  */
 public class CookbookInfoJson {
-  private final String id;
   private final String name;
   private final String description;
   private final String version;
   private final List<Attribute> attributes;
   private final List<Recipe> recipes;
 
-  public CookbookInfoJson(String id, MetadataRb metadataRb) {
-    this.id = id;
+  public CookbookInfoJson(MetadataRb metadataRb) {
     this.name = metadataRb.getName();
     this.description = metadataRb.getDescription();
     this.version = metadataRb.getVersion();
     this.attributes = metadataRb.getAttributes();
     this.recipes = metadataRb.getRecipes();
-  }
-
-  public String getId() {
-    return id;
   }
 
   public String getName() {
@@ -52,6 +46,4 @@ public class CookbookInfoJson {
   public List<Recipe> getRecipes() {
     return recipes;
   }
-  
-  
 }

@@ -26,9 +26,7 @@ import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.DagConstructionException;
@@ -158,7 +156,7 @@ public class DagBuilder {
           for (JsonRecipe rec : jc.getRecipes()) {
             JsonObject json1 = chefJsons.get(me.getId() + rec.getCanonicalName());
             addRecipeTaskForMachineIntoRecipesMap(rec.getCanonicalName(), me, clusterStats, map, json1, submitter,
-                jc.getId(), jc.getName(), allRecipeTasks, dag, rootCookbooks);
+                jc.getId(), allRecipeTasks, dag, rootCookbooks);
           }
         }
       }
@@ -171,11 +169,12 @@ public class DagBuilder {
    */
   private static RunRecipeTask addRecipeTaskForMachineIntoRecipesMap(String recipeName, MachineRuntime machine,
       ClusterStats clusterStats, Map<String, Map<String, Task>> map, JsonObject chefJson, TaskSubmitter submitter,
-      String cookbookId, String cookbookName, Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
-      List<KaramelizedCookbook> rootCookbooks)
-      throws DagConstructionException {
+      String cookbookId, Map<String, RunRecipeTask> allRecipeTasks, Dag dag,
+      List<KaramelizedCookbook> rootCookbooks) throws DagConstructionException {
+
     RunRecipeTask t1 = makeRecipeTaskIfNotExist(recipeName, machine, clusterStats, chefJson, submitter, cookbookId,
-        cookbookName, allRecipeTasks, dag, rootCookbooks);
+        allRecipeTasks, dag, rootCookbooks);
+
     Map<String, Task> map1 = map.get(recipeName);
     if (map1 == null) {
       map1 = new HashMap<>();
@@ -190,8 +189,9 @@ public class DagBuilder {
    */
   private static RunRecipeTask makeRecipeTaskIfNotExist(String recipeName, MachineRuntime machine,
       ClusterStats clusterStats, JsonObject chefJson,
-      TaskSubmitter submitter, String cookbookId, String cookbookName, Map<String, RunRecipeTask> allRecipeTasks,
+      TaskSubmitter submitter, String cookbookId, Map<String, RunRecipeTask> allRecipeTasks,
       Dag dag, List<KaramelizedCookbook> rootCookbooks) throws DagConstructionException {
+
     String recId = RunRecipeTask.makeUniqueId(machine.getId(), recipeName);
     RunRecipeTask runRecipeTask = allRecipeTasks.get(recId);
     if (!allRecipeTasks.containsKey(recId)) {
@@ -202,7 +202,7 @@ public class DagBuilder {
       String jsonString = gson.toJson(chefJson);
       runRecipeTask
           = new RunRecipeTask(machine, clusterStats, recipeName, jsonString,
-              submitter, cookbookId, cookbookName, rootCookbooks);
+              submitter, cookbookId, rootCookbooks);
       dag.addTask(runRecipeTask);
     }
     allRecipeTasks.put(recId, runRecipeTask);

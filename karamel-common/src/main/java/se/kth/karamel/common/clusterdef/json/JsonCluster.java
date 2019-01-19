@@ -1,16 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.clusterdef.json;
 
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import se.kth.karamel.common.cookbookmeta.Attribute;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.exception.KaramelException;
 
 /**
@@ -20,21 +20,46 @@ import se.kth.karamel.common.exception.KaramelException;
 public class JsonCluster extends JsonScope {
 
   private String name;
-
   private List<JsonGroup> groups = new ArrayList<>();
 
   public JsonCluster() {
   }
 
   public JsonCluster(YamlCluster cluster) throws KaramelException {
-    super(cluster, cluster);
-    this.name = cluster.getName();
+    super(cluster);
+    name = cluster.getName();
+    attributes = cluster.flattenAttrs();
+    Set<Attribute> validAttrs = new HashSet<>();
+
+    List<KaramelizedCookbook> allCookbooks = CACHE.loadAllKaramelizedCookbooks(cluster);
+
+    //filtering invalid(not defined in metadata.rb) attributes from yaml model
+    // Get all the valid attributes, also for transient dependency
+    for (KaramelizedCookbook kcb : allCookbooks) {
+      validAttrs.addAll(kcb.getMetadataRb().getAttributes());
+
+      // Populate the cookbooks list
+      cookbooks.add(kcb);
+    }
+
+    // TODO(Fabio): I think that this map should be <String, Attribute>. But I don't want to see
+    // what happen if I change it.
+    Map<String, Object> invalidAttrs = new HashMap<>();
+
+    for (String usedAttr: attributes.keySet()) {
+      if (!validAttrs.contains(new Attribute(usedAttr))) {
+        invalidAttrs.put(usedAttr, attributes.get(usedAttr));
+      }
+    }
+
+    if (!invalidAttrs.isEmpty()) {
+      throw new KaramelException(String.format("Invalid attributes, all used attributes must be defined in metadata.rb "
+          + "files: %s", invalidAttrs.keySet().toString()));
+    }
+
     Set<Map.Entry<String, YamlGroup>> entrySet = cluster.getGroups().entrySet();
     for (Map.Entry<String, YamlGroup> entry : entrySet) {
-      String gName = entry.getKey();
-      YamlGroup group = entry.getValue();
-      JsonGroup jsonGroup = new JsonGroup(cluster, group, gName);
-      this.groups.add(jsonGroup);
+      groups.add(new JsonGroup(entry.getValue(), entry.getKey()));
     }
 
   }

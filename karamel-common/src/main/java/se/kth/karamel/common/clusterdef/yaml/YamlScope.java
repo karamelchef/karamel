@@ -1,17 +1,13 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.clusterdef.yaml;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.clusterdef.Scope;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonScope;
 import se.kth.karamel.common.util.CollectionsUtil;
 import se.kth.karamel.common.exception.MetadataParseException;
@@ -30,9 +26,10 @@ public abstract class YamlScope extends Scope {
 
   public YamlScope(JsonScope scope) throws MetadataParseException {
     super(scope);
-    List<JsonCookbook> cookbooks = scope.getCookbooks();
-    for (JsonCookbook cb : cookbooks) {
-      Set<Map.Entry<String, Object>> entries = cb.getAttrs().entrySet();
+    List<KaramelizedCookbook> cookbooks = scope.getCookbooks();
+    for (KaramelizedCookbook cb : cookbooks) {
+      // TODO(Fabio) this is probably wrong.
+      Set<Map.Entry<String, Object>> entries = new HashSet<>();
       for (Map.Entry<String, Object> entry : entries) {
         foldOutAttr(entry.getKey(), entry.getValue(), attrs);
       }

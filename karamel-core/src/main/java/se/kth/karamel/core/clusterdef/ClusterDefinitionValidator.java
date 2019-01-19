@@ -10,9 +10,7 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
-import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.exception.ValidationException;
 
 import java.util.ArrayList;

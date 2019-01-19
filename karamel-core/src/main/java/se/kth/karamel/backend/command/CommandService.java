@@ -225,10 +225,6 @@ public class CommandService {
           builder.append(" but it is on pause.").append("\n");
         }
 
-        if (clusterEntity.isFailed() && !clusterEntity.getFailures().isEmpty()) {
-	    //          builder.append(" List of failures: ").append("\n");
-	  //          builder.append(failureTable(clusterEntity.getFailures().values(), true));
-        }
         builder.append("\n\n");
         builder.append("Passed Phases:");
         builder.append("\n");

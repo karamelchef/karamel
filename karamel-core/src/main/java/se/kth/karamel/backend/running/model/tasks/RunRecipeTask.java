@@ -41,17 +41,15 @@ public class RunRecipeTask extends Task {
   private final String recipeCanonicalName;
   private String json;
   private final String cookbookId;
-  private final String cookbookName;
   private final List<KaramelizedCookbook> rookCookbooks;
 
   public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json,
-      TaskSubmitter submitter, String cookbookId, String cookbookName, List<KaramelizedCookbook> rookCookbooks) {
+      TaskSubmitter submitter, String cookbookId, List<KaramelizedCookbook> rootCookbooks) {
     super(recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
     this.cookbookId = cookbookId;
-    this.cookbookName = cookbookName;
-    this.rookCookbooks = rookCookbooks;
+    this.rookCookbooks = rootCookbooks;
   }
 
   /**
@@ -134,13 +132,6 @@ public class RunRecipeTask extends Task {
     return cookbookId;
   }
 
-  public String getRecipeName() {
-    return recipeCanonicalName.split(Settings.COOKBOOK_DELIMITER)[1];
-  }
-
-  public String getCookbookName() {
-    return cookbookName;
-  }
 
   public static String installRecipeIdFromCookbookName(String machineId, String cookbook) {
     String installName = cookbook + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
@@ -175,7 +166,7 @@ public class RunRecipeTask extends Task {
     String purgeId = purgeRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
     if (uniqueId().equals(installId) || uniqueId().equals(purgeId)) {
       for (KaramelizedCookbook kcb : rookCookbooks) {
-        String id = VendorCookbookTask.makeUniqueId(getMachineId(), kcb.getUrls().id);
+        String id = VendorCookbookTask.makeUniqueId(getMachineId(), kcb.getCookbookName());
         deps.add(id);
       }
     } else {

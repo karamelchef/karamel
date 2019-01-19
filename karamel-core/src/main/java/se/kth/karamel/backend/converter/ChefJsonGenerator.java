@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.converter;
 
 import com.google.gson.Gson;
@@ -19,16 +14,13 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.json.JsonRecipe;
+import se.kth.karamel.common.clusterdef.json.JsonScope;
+import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
-/**
- *
- * @author kamal
- */
 public class ChefJsonGenerator {
 
     /**
@@ -44,17 +36,16 @@ public class ChefJsonGenerator {
    * @return map of machineId-recipeName->json
    */
   public static Map<String, JsonObject> generateClusterChefJsonsForPurge(JsonCluster definition,
-      ClusterRuntime clusterEntity) throws KaramelException {
+                                                                         ClusterRuntime clusterEntity) {
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
-      //Adding all attribtues to all chef-jsons
-      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
-        addCookbookAttributes(cb, clone);
-      }
-      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
+      //Adding all attributes to all chef-jsons
+      addScopeAttributes(jsonGroup, root);
+
+      for (KaramelizedCookbook cb : jsonGroup.getCookbooks()) {
         Map<String, JsonObject> gj = generatePurgeChefJsons(clone, cb, groupEntity);
         chefJsons.putAll(gj);
       }
@@ -76,27 +67,23 @@ public class ChefJsonGenerator {
    * @return map of machineId-recipeName->json
    */
   public static Map<String, JsonObject> generateClusterChefJsonsForInstallation(JsonCluster definition,
-      ClusterRuntime clusterEntity) throws KaramelException {
+                                                                                ClusterRuntime clusterEntity)
+      throws KaramelException {
+
     Map<String, JsonObject> chefJsons = new HashMap<>();
     JsonObject root = new JsonObject();
     aggregateIpAddresses(root, definition, clusterEntity);
 
     // Add global attributes
-    for (JsonCookbook cb : definition.getCookbooks()) {
-      addCookbookAttributes(cb, root);
-    }
+    addScopeAttributes(definition, root);
 
     for (GroupRuntime groupEntity : clusterEntity.getGroups()) {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
       //Adding all attribtues to all chef-jsons
-      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
-        addCookbookAttributes(cb, clone);
-      }
-      for (JsonCookbook cb : jsonGroup.getCookbooks()) {
-        Map<String, JsonObject> gj = generateRecipesChefJsons(clone, cb, groupEntity);
-        chefJsons.putAll(gj);
-      }
+      addScopeAttributes(jsonGroup, root);
+
+      chefJsons.putAll(generateRecipesChefJsons(clone, jsonGroup, groupEntity));
     }
     return chefJsons;
   }
@@ -109,12 +96,12 @@ public class ChefJsonGenerator {
    * @return
    * @throws KaramelException 
    */
-  public static Map<String, JsonObject> generatePurgeChefJsons(JsonObject json, JsonCookbook cb,
-      GroupRuntime groupEntity) throws KaramelException {
+  private static Map<String, JsonObject> generatePurgeChefJsons(JsonObject json, KaramelizedCookbook cb,
+      GroupRuntime groupEntity) {
     Map<String, JsonObject> groupJsons = new HashMap<>();
 
     for (MachineRuntime me : groupEntity.getMachines()) {
-      String purgeRecipeName = cb.getName() + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
+      String purgeRecipeName = cb.getCookbookName() + Settings.COOKBOOK_DELIMITER + Settings.PURGE_RECIPE;
       JsonObject clone = addMachineNRecipeToJson(json, me, purgeRecipeName);
       groupJsons.put(me.getId() + purgeRecipeName, clone);
     }
@@ -129,23 +116,25 @@ public class ChefJsonGenerator {
    * @return
    * @throws KaramelException 
    */
-  public static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonCookbook cb,
-      GroupRuntime groupEntity) throws KaramelException {
+  private static Map<String, JsonObject> generateRecipesChefJsons(JsonObject json, JsonGroup jsonGroup,
+                                                                  GroupRuntime groupEntity) throws KaramelException {
     Map<String, JsonObject> groupJsons = new HashMap<>();
 
     for (MachineRuntime me : groupEntity.getMachines()) {
-      for (JsonRecipe recipe : cb.getRecipes()) {
+      for (JsonRecipe recipe : jsonGroup.getRecipes()) {
         JsonObject clone = addMachineNRecipeToJson(json, me, recipe.getCanonicalName());
         groupJsons.put(me.getId() + recipe.getCanonicalName(), clone);
       }
-      String installRecipeName = cb.getName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
-      JsonObject clone = addMachineNRecipeToJson(json, me, installRecipeName);
-      groupJsons.put(me.getId() + installRecipeName, clone);
+      for (KaramelizedCookbook cookbook : jsonGroup.getCookbooks()) {
+        String installRecipeName = cookbook.getCookbookName() + Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE;
+        JsonObject clone = addMachineNRecipeToJson(json, me, installRecipeName);
+        groupJsons.put(me.getId() + installRecipeName, clone);
+      }
     }
     return groupJsons;
   }
 
-  public static JsonObject addMachineNRecipeToJson(JsonObject json, MachineRuntime me, String recipeName) {
+  private static JsonObject addMachineNRecipeToJson(JsonObject json, MachineRuntime me, String recipeName) {
     JsonObject clone = cloneJsonObject(json);
     addMachineIps(clone, me);
     addRunListForRecipe(clone, recipeName);
@@ -169,7 +158,7 @@ public class ChefJsonGenerator {
    * @param json
    * @param machineEntity 
    */
-  public static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
+  private static void addMachineIps(JsonObject json, MachineRuntime machineEntity) {
     JsonArray ips = new JsonArray();
     ips.add(new JsonPrimitive(machineEntity.getPrivateIp()));
     json.add("private_ips", ips);
@@ -186,22 +175,15 @@ public class ChefJsonGenerator {
   /**
    * It adds those attributes related to one cookbook into the json object. 
    * For example [ndb/ports=[123, 134, 145], ndb/DataMemory=111]
-   * @param jc
+   * @param jsonScope
    * @param root 
    */
-  public static void addCookbookAttributes(JsonCookbook jc, JsonObject root) {
-    Set<Map.Entry<String, Object>> entrySet = jc.getAttrs().entrySet();
+  private static void addScopeAttributes(JsonScope jsonScope, JsonObject root) {
+    Set<Map.Entry<String, Object>> entrySet = jsonScope.getAttributes().entrySet();
     for (Map.Entry<String, Object> entry : entrySet) {
       String[] keyComps = entry.getKey().split(Settings.ATTR_DELIMITER);
       Object value = entry.getValue();
-//      Object value = valStr;
-//      if (valStr.startsWith("$")) {
-//        if (valStr.contains(".")) {
-//          value = cluster.getVariable(valStr.substring(1));
-//        } else {
-//          value = getVariable(valStr.substring(1));
-//        }
-//      }
+
       JsonObject o1 = root;
       for (int i = 0; i < keyComps.length; i++) {
         String comp = keyComps[i];
@@ -239,7 +221,7 @@ public class ChefJsonGenerator {
    * @param definition
    * @param clusterEntity 
    */
-  public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
+  private static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
     Map<String, Set<String>> privateIps = new HashMap<>();
     Map<String, Set<String>> publicIps = new HashMap<>();
     Map<String, Map<String, String>> hosts = new HashMap<>();
@@ -247,25 +229,23 @@ public class ChefJsonGenerator {
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
-        for (JsonCookbook jc : jg.getCookbooks()) {
-          for (JsonRecipe recipe : jc.getRecipes()) {
-            if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
-              String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
-                  Settings.REMOTE_CHEFJSON_PRIVATEIPS_TAG;
-              String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
-                  Settings.REMOTE_CHEFJSON_PUBLICIPS_TAG;
-              String hostsAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
-                  Settings.REMOTE_CHEFJSON_HOSTS_TAG;
-              if (!privateIps.containsKey(privateAttr)) {
-                privateIps.put(privateAttr, new HashSet<String>());
-                publicIps.put(publicAttr, new HashSet<String>());
-                hosts.put(hostsAttr, new HashMap<String, String>());
-              }
-              privateIps.get(privateAttr).add(me.getPrivateIp());
-              publicIps.get(publicAttr).add(me.getPublicIp());
-              hosts.get(hostsAttr).put(me.getPublicIp(), me.getName());
-              hosts.get(hostsAttr).put(me.getPrivateIp(), me.getName());
+        for (JsonRecipe recipe : jg.getRecipes()) {
+          if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
+            String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER +
+                Settings.REMOTE_CHEFJSON_PRIVATEIPS_TAG;
+            String publicAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER +
+                Settings.REMOTE_CHEFJSON_PUBLICIPS_TAG;
+            String hostsAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER +
+                Settings.REMOTE_CHEFJSON_HOSTS_TAG;
+            if (!privateIps.containsKey(privateAttr)) {
+              privateIps.put(privateAttr, new HashSet<>());
+              publicIps.put(publicAttr, new HashSet<>());
+              hosts.put(hostsAttr, new HashMap<>());
             }
+            privateIps.get(privateAttr).add(me.getPrivateIp());
+            publicIps.get(publicAttr).add(me.getPublicIp());
+            hosts.get(hostsAttr).put(me.getPublicIp(), me.getName());
+            hosts.get(hostsAttr).put(me.getPrivateIp(), me.getName());
           }
         }
       }
@@ -282,7 +262,7 @@ public class ChefJsonGenerator {
    * @param root
    * @param attrs 
    */
-  public static void attrMap2Json(JsonObject root, Map<String, Map<String, String>> attrs) {
+  private static void attrMap2Json(JsonObject root, Map<String, Map<String, String>> attrs) {
     for (Map.Entry<String, Map<String, String>> entry : attrs.entrySet()) {
       String[] keyComps = entry.getKey().split(Settings.COOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
       JsonObject o1 = root;
@@ -317,7 +297,7 @@ public class ChefJsonGenerator {
    * @param root
    * @param attrs 
    */
-  public static void attr2Json(JsonObject root, Map<String, Set<String>> attrs) {
+  private static void attr2Json(JsonObject root, Map<String, Set<String>> attrs) {
     Set<Map.Entry<String, Set<String>>> entrySet = attrs.entrySet();
     for (Map.Entry<String, Set<String>> entry : entrySet) {
       String[] keyComps = entry.getKey().split(Settings.COOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
@@ -344,11 +324,10 @@ public class ChefJsonGenerator {
     }
   }
 
-  public static JsonObject cloneJsonObject(JsonObject jo) {
+  private static JsonObject cloneJsonObject(JsonObject jo) {
     Gson gson = new Gson();
     JsonElement jelem = gson.fromJson(jo.toString(), JsonElement.class);
-    JsonObject clone = jelem.getAsJsonObject();
-    return clone;
+    return jelem.getAsJsonObject();
   }
 
 }

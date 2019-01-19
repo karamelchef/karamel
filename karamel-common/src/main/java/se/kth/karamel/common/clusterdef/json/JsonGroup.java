@@ -1,14 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.clusterdef.json;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.cookbookmeta.Attribute;
@@ -16,84 +11,61 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.RecipeNotfoundException;
-import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import se.kth.karamel.common.exception.ValidationException;
 
-/**
- *
- * @author kamal
- */
 public class JsonGroup extends JsonScope {
 
   private String name;
   private int size;
 
+  private List<JsonRecipe> recipes = new ArrayList<>();
+
   public JsonGroup() {
   }
 
-  public JsonGroup(YamlCluster cluster, YamlGroup group, String name) throws KaramelException {
-    // We are doing the same work several times here
-    super(cluster, group);
+  public JsonGroup(YamlGroup group, String name) throws KaramelException {
+    super(group);
     setName(name);
     this.size = group.getSize();
-    List<String> recipes = group.getRecipes();
-    for (String rec : recipes) {
+
+    List<String> clusterDefRecipes = group.getRecipes();
+    for (String rec : clusterDefRecipes) {
       String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
-      JsonCookbook cookbook = null;
-      for (JsonCookbook cb : getCookbooks()) {
-        if (cb.getName().equals(comp[0])) {
+      KaramelizedCookbook cookbook = null;
+      for (KaramelizedCookbook cb : getCookbooks()) {
+        if (cb.getCookbookName().equals(comp[0])) {
           cookbook = cb;
           break;
         }
       }
       if (cookbook == null) {
         throw new RecipeNotfoundException(String.format("Opps!! Import cookbook for '%s'", rec));
+      } else {
+        recipes.add(new JsonRecipe(cookbook, comp.length == 2 ? comp[1] : "default"));
+        cookbooks.add(cookbook);
       }
-      JsonRecipe jsonRecipe = new JsonRecipe();
-      jsonRecipe.setName(rec);
-      cookbook.getRecipes().add(jsonRecipe);
     }
 
-    getCookbooks().removeIf(jsonCb -> jsonCb.getRecipes().isEmpty());
-
-    Map<String, Object> groupAttrs = new HashMap<>(group.flattenAttrs());
-    Set<String> usedAttributes = new HashSet<>();
-    for (JsonCookbook jc : getCookbooks()) {
-      KaramelizedCookbook kcb = jc.getKaramelizedCookbook();
-      Set<Attribute> allValidAttrs = new HashSet<>(kcb.getMetadataRb().getAttributes());
-      for (KaramelizedCookbook depKcb : kcb.getDependencies()) {
-        allValidAttrs.addAll(depKcb.getMetadataRb().getAttributes());
-      }
-
-      // I think that this map should be <String, Attribute>. But I don't want to see
-      // what happen if I change it.
-      Map<String, Object> validUsedAttrs = new HashMap<>();
-      for (String usedAttr: groupAttrs.keySet()) {
-        if (allValidAttrs.contains(new Attribute(usedAttr))) {
-          validUsedAttrs.put(usedAttr, groupAttrs.get(usedAttr));
-          usedAttributes.add(usedAttr);
-        }
-      }
-      jc.setAttrs(validUsedAttrs);
+    attributes = new HashMap<>(group.flattenAttrs());
+    Set<Attribute> allValidAttrs = new HashSet<>();
+    for (KaramelizedCookbook kcb : cookbooks) {
+      allValidAttrs.addAll(kcb.getMetadataRb().getAttributes());
     }
 
-    if (!usedAttributes.containsAll(groupAttrs.keySet())){
-      Set<String> invalidAttrs = groupAttrs.keySet();
-      invalidAttrs.removeAll(usedAttributes);
+    // I think that this map should be <String, Attribute>. But I don't want to see
+    // what happen if I change it.
+    Set<String> invalidAttrs = new HashSet<>();
+
+    for (String usedAttr: attributes.keySet()) {
+      if (!allValidAttrs.contains(new Attribute(usedAttr))) {
+        invalidAttrs.add(usedAttr);
+      }
+    }
+
+    if (!invalidAttrs.isEmpty()) {
       throw new KaramelException(String.format("Undefined attributes: %s", invalidAttrs.toString()));
     }
-  }
-
-  public Set<String> flattenRecipes() {
-    Set<String> recipes = new HashSet<>();
-    for (JsonCookbook cb : getCookbooks()) {
-      Set<JsonRecipe> recipes1 = cb.getRecipes();
-      for (JsonRecipe jsonRecipe : recipes1) {
-        recipes.add(jsonRecipe.getCanonicalName());
-      }
-    }
-    return recipes;
   }
 
   public String getName() {
@@ -114,6 +86,10 @@ public class JsonGroup extends JsonScope {
 
   public void setSize(int size) {
     this.size = size;
+  }
+
+  public List<JsonRecipe> getRecipes() {
+    return recipes;
   }
 
   @Override

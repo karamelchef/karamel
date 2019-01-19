@@ -7,7 +7,6 @@ import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.dag.DagNode;
 import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
@@ -170,7 +169,7 @@ public class CookbookCacheIml implements CookbookCache {
     Set<Cookbook> toClone = (HashSet<Cookbook>)cluster.getCookbooks().values();
     cloneAndVendorCookbooks(toClone);
 
-
+    // TODO(Fabio)
 
     return null;
   }

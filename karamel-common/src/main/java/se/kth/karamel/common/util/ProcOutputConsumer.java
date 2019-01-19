@@ -1,12 +1,12 @@
 package se.kth.karamel.common.util;
 
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ProcOutputConsumer implements Callable<String> {
 
@@ -31,7 +31,7 @@ public class ProcOutputConsumer implements Callable<String> {
         outputBuilder.append(charArray, 0, actualBuffered);
       }
     } catch (IOException e) {
-      LOGGER.log(Level.WARNING, "Could not read the process output", e);
+      LOGGER.error("Could not read the process output", e);
     } finally {
       try {
         br.close();
