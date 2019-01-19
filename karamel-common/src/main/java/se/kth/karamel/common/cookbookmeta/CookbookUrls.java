@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.cookbookmeta;
 
 import java.util.regex.Matcher;
@@ -10,8 +5,6 @@ import se.kth.karamel.common.util.Settings;
 import static se.kth.karamel.common.util.Settings.CB_CLASSPATH_MODE;
 import static se.kth.karamel.common.util.Settings.COOKBOOKS_PATH;
 import static se.kth.karamel.common.util.Settings.CB_BERKSFILE_REL_URL;
-import static se.kth.karamel.common.util.Settings.CB_CONFIGFILE_REL_URL;
-import static se.kth.karamel.common.util.Settings.CB_DEFAULTRB_REL_URL;
 import static se.kth.karamel.common.util.Settings.CB_KARAMELFILE_REL_URL;
 import static se.kth.karamel.common.util.Settings.CB_METADATARB_REL_URL;
 import static se.kth.karamel.common.util.Settings.GITHUB_BASE_URL;
@@ -41,17 +34,12 @@ public class CookbookUrls {
   public String cookbookRelPath;
   public String id;
   public String cookbookUrl;
-  public String cookbookRawUrl;
-  public String attrFile;
   public String metadataFile;
   public String karamelFile;
   public String berksFile;
-  public String configFile;
-  public String recipesHome;
 
   public CookbookUrls(String orgName, String repoName, String orgRepo, String repoUrl, String branch,
-      String cookbookRelPath, String id, String home, String rawHome, String attrFile, String metadataFile,
-      String karamelFile, String berksFile, String configFile, String recipesHome) {
+      String cookbookRelPath, String id, String home, String metadataFile, String karamelFile, String berksFile) {
     this.orgName = orgName;
     this.repoName = repoName;
     this.orgRepo = orgRepo;
@@ -60,13 +48,9 @@ public class CookbookUrls {
     this.cookbookRelPath = cookbookRelPath;
     this.id = id;
     this.cookbookUrl = home;
-    this.cookbookRawUrl = rawHome;
-    this.attrFile = attrFile;
     this.metadataFile = metadataFile;
     this.karamelFile = karamelFile;
     this.berksFile = berksFile;
-    this.configFile = configFile;
-    this.recipesHome = recipesHome;
   }
 
   public static class Builder {
@@ -226,15 +210,11 @@ public class CookbookUrls {
         rawHome = COOKBOOKS_PATH + SLASH + repo;
       }
 
-      String attrFile = rawHome + CB_DEFAULTRB_REL_URL;
       String metadataFile = rawHome + CB_METADATARB_REL_URL;
       String karamelFile = rawHome + CB_KARAMELFILE_REL_URL;
       String berksFile = rawHome + CB_BERKSFILE_REL_URL;
-      String configFile = rawHome + CB_CONFIGFILE_REL_URL;
-      String recipesHome = rawHome + "/recipes/";
-      CookbookUrls urls = new CookbookUrls(org, repo, org + SLASH + repo, repoHome, branch, cookbookRelPath, id, home,
-          rawHome, attrFile, metadataFile, karamelFile, berksFile, configFile, recipesHome);
-      return urls;
+      return new CookbookUrls(org, repo, org + SLASH + repo, repoHome, branch, cookbookRelPath, id,
+          home, metadataFile, karamelFile, berksFile);
     }
 
   }

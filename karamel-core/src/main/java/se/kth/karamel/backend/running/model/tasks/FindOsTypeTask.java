@@ -17,7 +17,6 @@ import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 
 /**

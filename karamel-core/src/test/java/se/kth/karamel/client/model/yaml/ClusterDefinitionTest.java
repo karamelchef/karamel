@@ -22,7 +22,6 @@ import se.kth.karamel.common.clusterdef.yaml.YamlScope;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 

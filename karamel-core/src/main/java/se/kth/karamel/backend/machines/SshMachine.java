@@ -41,7 +41,6 @@ import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.common.util.Confs;
-import se.kth.karamel.common.util.IoUtils;
 
 /**
  *

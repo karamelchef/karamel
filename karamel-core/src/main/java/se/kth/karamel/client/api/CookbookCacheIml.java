@@ -1,11 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- * It caches cookbooks' metadata that being read from Github
- */
 package se.kth.karamel.client.api;
 
 
@@ -21,18 +13,28 @@ import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
-import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.NoKaramelizedCookbookException;
-import se.kth.karamel.common.util.Settings;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import se.kth.karamel.common.util.ProcOutputConsumer;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -44,6 +46,8 @@ public class CookbookCacheIml implements CookbookCache {
 
   public Map<String, KaramelizedCookbook> cookbooks = new HashMap<>();
   public Set<String> problematics = new HashSet<>();
+
+  private ExecutorService es = Executors.newFixedThreadPool(2);
 
   @Override
   public KaramelizedCookbook readNew(String cookbookUrl) throws KaramelException {
@@ -80,7 +84,6 @@ public class CookbookCacheIml implements CookbookCache {
       if (cb == null) {
         CookbookUrls.Builder builder = new CookbookUrls.Builder();
         CookbookUrls urls = builder.url(cookbookUrl).build();
-        allUrls.add(urls.attrFile);
         allUrls.add(urls.metadataFile);
         allUrls.add(urls.karamelFile);
         allUrls.add(urls.berksFile);
@@ -92,12 +95,11 @@ public class CookbookCacheIml implements CookbookCache {
       if (cb == null) {
         CookbookUrls.Builder builder = new CookbookUrls.Builder();
         CookbookUrls urls = builder.url(cookbookUrl).build();
-        if (contents.containsKey(urls.attrFile)
-            && contents.containsKey(urls.metadataFile)
+        if (contents.containsKey(urls.metadataFile)
             && contents.containsKey(urls.karamelFile)
             && contents.containsKey(urls.berksFile)) {
-          KaramelizedCookbook kc = new KaramelizedCookbook(urls, contents.get(urls.attrFile),
-              contents.get(urls.metadataFile), contents.get(urls.karamelFile), contents.get(urls.berksFile));
+          KaramelizedCookbook kc = new KaramelizedCookbook(urls, contents.get(urls.metadataFile),
+              contents.get(urls.karamelFile), contents.get(urls.berksFile));
           cookbooks.put(cookbookUrl, kc);
         } else {
           problematics.add(cookbookUrl);
@@ -112,7 +114,6 @@ public class CookbookCacheIml implements CookbookCache {
     for (String cookbookUrl : cookbookUrls) {
       CookbookUrls.Builder builder = new CookbookUrls.Builder();
       CookbookUrls urls = builder.url(cookbookUrl).build();
-      allUrls.add(urls.attrFile);
       allUrls.add(urls.metadataFile);
       allUrls.add(urls.karamelFile);
       allUrls.add(urls.berksFile);
@@ -121,12 +122,11 @@ public class CookbookCacheIml implements CookbookCache {
     for (String cookbookUrl : cookbookUrls) {
       CookbookUrls.Builder builder = new CookbookUrls.Builder();
       CookbookUrls urls = builder.url(cookbookUrl).build();
-      if (contents.containsKey(urls.attrFile)
-          && contents.containsKey(urls.metadataFile)
+      if (contents.containsKey(urls.metadataFile)
           && contents.containsKey(urls.karamelFile)
           && contents.containsKey(urls.berksFile)) {
-        KaramelizedCookbook kc = new KaramelizedCookbook(urls, contents.get(urls.attrFile),
-            contents.get(urls.metadataFile), contents.get(urls.karamelFile), contents.get(urls.berksFile));
+        KaramelizedCookbook kc = new KaramelizedCookbook(urls, contents.get(urls.metadataFile),
+            contents.get(urls.karamelFile), contents.get(urls.berksFile));
         cookbooks.put(cookbookUrl, kc);
       }
     }
@@ -167,95 +167,42 @@ public class CookbookCacheIml implements CookbookCache {
 
   @Override
   public List<KaramelizedCookbook> loadAllKaramelizedCookbooks(YamlCluster cluster) throws KaramelException {
-    Set<String> toLoad = new HashSet<>();
-    for (Cookbook cb : cluster.getCookbooks().values()) {
-      toLoad.add(cb.getUrls().id);
-    }
+    Set<Cookbook> toClone = (HashSet<Cookbook>)cluster.getCookbooks().values();
+    cloneAndVendorCookbooks(toClone);
 
-    Dag dag = new Dag();
-    // An hacky fix for a crappy code. The thing is that, where this function is called, I'd like to have
-    // also the attributes of dependencies (including the transient ones) for the filtering of valid attributes.
-    // So here we build a Topological sort of the dependency graph, reverse it, and traverse it.
-    // For each KaramelizedCookbook we add in a set all the *references* to the dependency, both direct and transient
-    // that's the reason of using the topological sort.
-    // As we are using references to the same set of KaramelizedCookbooks, the default methods for equals and hashcode
-    // (comparing addresses) works fine.
 
-    // Result ignored on purpose
-    loadAllKaramelizedCookbooks(cluster.getName(), toLoad, dag);
-    List<KaramelizedCookbook> topologicalSort = new ArrayList<>();
 
-    Set<DagNode> rootNodes = dag.findRootNodes();
-    while (!rootNodes.isEmpty()) {
-      for (DagNode dagNode : rootNodes) {
-        KaramelizedCookbook kcb = cookbooks.get(dagNode.getId());
-        if (kcb != null) {
-          topologicalSort.add(cookbooks.get(dagNode.getId()));
-        }
-        dag.removeNode(dagNode);
-      }
-      rootNodes = dag.findRootNodes();
-    }
-
-    // Reverse the list
-    Collections.reverse(topologicalSort);
-
-    for (KaramelizedCookbook kcb : topologicalSort) {
-      Map<String, Cookbook> dependencies = kcb.getBerksFile().getDeps();
-      for (Cookbook cookbook : dependencies.values()) {
-        KaramelizedCookbook depKbc = cookbooks.get(cookbook.getUrls().id);
-        if (depKbc != null) {
-          kcb.addDependency(depKbc);
-          kcb.addDependencies(depKbc.getDependencies());
-        }
-      }
-    }
-
-    return topologicalSort;
+    return null;
   }
 
-  private List<KaramelizedCookbook> loadAllKaramelizedCookbooks(String clusterName, Set<String> toLoad, Dag dag)
-      throws KaramelException {
-    Set<String> loaded = new HashSet<>();
-    List<KaramelizedCookbook> all = new ArrayList<>();
-
-    int level = 0;
-
-    while (!toLoad.isEmpty()) {
-      logger.info(String.format("%d-level cookbooks for %s is %d", level++, clusterName, toLoad.size()));
-      prepareParallel(toLoad);
-      for (String tl : toLoad) {
-        dag.addNode(tl);
-        if (problematics.contains(tl)) {
-          dag.updateLabel(tl, "NON_KARAMELIZED");
-        } else {
-          dag.updateLabel(tl, "OK");
-        }
+  private void cloneAndVendorCookbooks(Set<Cookbook> toClone) throws KaramelException {
+    for (Cookbook cb : toClone) {
+      // Clone the repository
+      try {
+        Git.cloneRepository()
+            // TODO(Fabio): make base url as setting in the cluster definition
+            // So we can support also GitLab/Bitbucket and so on.
+            .setURI(Settings.GITHUB_BASE_URL + "/" + cb.getGithub())
+            .setBranch(cb.getBranch())
+            .setDirectory(new File(Settings.WORKING_DIR))
+            .call();
+      } catch (GitAPIException e) {
+        throw new KaramelException(e);
       }
-      toLoad.removeAll(problematics);
-      Set<String> depsToLoad = new HashSet();
-      for (String cbid : toLoad) {
-        KaramelizedCookbook kc = get(cbid);
-        all.add(kc);
-        if (!Settings.CB_CLASSPATH_MODE) {
-          Map<String, Cookbook> deps = kc.getBerksFile().getDeps();
-          for (Cookbook cb : deps.values()) {
-            String depId = cb.getUrls().id;
-            dag.addDependency(cbid, depId);
-            if (!loaded.contains(depId) && !problematics.contains(depId)) {
-              depsToLoad.add(depId);
-            }
-          }
-        }
-      }
-      loaded.addAll(toLoad);
-      toLoad.clear();
-      toLoad.addAll(depsToLoad);
 
+      // Vendor the repository
+      try {
+        Process vendorProcess = Runtime.getRuntime().exec("berks vendor --berksfile=" +
+            Paths.get(Settings.WORKING_DIR, cb.getCookbook(), "Berksfile") + " " + Settings.WORKING_DIR);
+        Future<String> vendorOutput = es.submit(new ProcOutputConsumer(vendorProcess.getInputStream()));
+        vendorProcess.waitFor(1, TimeUnit.MINUTES);
+
+        if (vendorProcess.exitValue() != 0) {
+          throw new KaramelException("Fail to vendor the cookbook: " + cb.getCookbook() + " " + vendorOutput.get());
+        }
+      } catch (IOException | InterruptedException | ExecutionException e) {
+        throw new KaramelException(e);
+      }
     }
-    logger.info(String.format("################## COOKBOOK TRANSIENT DEPENDENCIES FOR %s ############", clusterName));
-    logger.info(dag.print());
-    logger.info("############################################################################");
-    return all;
   }
 }

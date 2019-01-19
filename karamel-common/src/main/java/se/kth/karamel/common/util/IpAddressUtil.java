@@ -19,13 +19,6 @@ public class IpAddressUtil {
 
   public static Pattern IP_PATTERN = Pattern.compile(Settings.IP_REGEX);
 
-  public static void main(String[] args) {
-    try {
-      ipRange("192.168.0.1", "192.168.1.3");
-    } catch (IpAddressException ex) {
-    }
-  }
-
   public static List<String> ipRange(String ipStr) throws IpAddressException {
     if (ipStr.contains("-")) {
       String[] indivIp = ipStr.split("-");

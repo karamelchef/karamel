@@ -43,7 +43,6 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.stats.TaskStat;
-import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.SshKeyPair;
 
 /**

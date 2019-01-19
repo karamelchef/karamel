@@ -11,9 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
-import se.kth.karamel.common.exception.RecipeParseException;
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.util.IoUtils;
 import se.kth.karamel.common.util.Settings;
 
 import java.io.IOException;

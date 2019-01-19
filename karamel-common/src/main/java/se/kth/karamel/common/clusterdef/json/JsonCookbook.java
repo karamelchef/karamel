@@ -84,8 +84,7 @@ public class JsonCookbook {
 
   public CookbookUrls getUrls() throws KaramelException {
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
-    CookbookUrls urls = builder.buildById(id);
-    return urls;
+    return builder.buildById(id);
   }
 
 }

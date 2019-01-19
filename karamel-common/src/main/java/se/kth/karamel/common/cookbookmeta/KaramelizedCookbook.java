@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.CookbookUrlException;
 import se.kth.karamel.common.exception.MetadataParseException;
@@ -17,12 +17,9 @@ public class KaramelizedCookbook {
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(KaramelizedCookbook.class);
 
-  private final CookbookUrls urls;
-  private final DefaultRb defaultRb;
+  private final Cookbook cookbook;
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
-  private final Berksfile berksFile;
-  private final Set<KaramelizedCookbook> dependencies = new HashSet<>();
   private String json;
 
   /**
@@ -48,13 +45,10 @@ public class KaramelizedCookbook {
       throw new NoKaramelizedCookbookException(e);
     }
     try {
-      String defaultRbC = IoUtils.readContent(urls.attrFile);
       String metadataRbC = IoUtils.readContent(urls.metadataFile);
       String berksfileC = IoUtils.readContent(urls.berksFile);
-      this.defaultRb = new DefaultRb(defaultRbC);
       this.metadataRb = MetadataParser.parse(metadataRbC);
       this.metadataRb.normalizeRecipeNames();
-      this.metadataRb.setDefaults(defaultRb);
       this.karamelFile = new KaramelFile(karamelFileC);
       this.berksFile = new Berksfile(berksfileC);
     } catch (IOException e) {
@@ -63,19 +57,13 @@ public class KaramelizedCookbook {
     }
   }
 
-  public KaramelizedCookbook(CookbookUrls urls, String defaultRbC, String metadataRbC, String karamelFileC,
+  public KaramelizedCookbook(CookbookUrls urls, String metadataRbC, String karamelFileC,
       String berksfileC) throws CookbookUrlException, MetadataParseException, ValidationException {
     this.urls = urls;
-    this.defaultRb = new DefaultRb(defaultRbC);
     this.metadataRb = MetadataParser.parse(metadataRbC);
     this.metadataRb.normalizeRecipeNames();
-    this.metadataRb.setDefaults(defaultRb);
     this.karamelFile = new KaramelFile(karamelFileC);
     this.berksFile = new Berksfile(berksfileC);
-  }
-
-  public Berksfile getBerksFile() {
-    return berksFile;
   }
 
   public String getInfoJson() {
@@ -95,10 +83,6 @@ public class KaramelizedCookbook {
 
   public KaramelFile getKaramelFile() {
     return karamelFile;
-  }
-
-  public DefaultRb getDefaultRb() {
-    return defaultRb;
   }
 
   public CookbookUrls getUrls() {

@@ -15,18 +15,10 @@ import se.kth.karamel.common.exception.CookbookUrlException;
 public class Cookbook {
 
   private String github;
-  private String version;
   private String branch;
   private String cookbook;
 
   public Cookbook() {
-  }
-
-  public Cookbook(Cookbook cookbook) {
-    this.github = cookbook.getGithub();
-    this.version = cookbook.getVersion();
-    this.branch = cookbook.getBranch();
-    this.cookbook = cookbook.cookbook;
   }
 
   public String getBranch() {
@@ -45,14 +37,6 @@ public class Cookbook {
     this.github = github;
   }
 
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
   public String getCookbook() {
     return cookbook;
   }
@@ -60,17 +44,14 @@ public class Cookbook {
   public void setCookbook(String cookbook) {
     this.cookbook = cookbook;
   }
-  
+
   public CookbookUrls getUrls() throws CookbookUrlException {
     CookbookUrls.Builder builder = new CookbookUrls.Builder();
     builder.url(github);
     if (branch != null)
       builder.branchOrVersion(branch);
-    else if (version != null)
-      builder.branchOrVersion(version);
     if (cookbook != null)
       builder.cookbookRelPath(cookbook);
-    CookbookUrls urls = builder.build();
-    return urls;
+    return builder.build();
   }
 }

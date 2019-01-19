@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.util;
 
 import org.apache.log4j.Logger;
@@ -24,6 +19,9 @@ import java.util.regex.Pattern;
  * @author kamal
  */
 public class Settings {
+
+  // ---- Added by Fabio
+  public static final String WORKING_DIR = "/tmp/karamel";
 
   private static final Logger logger = Logger.getLogger(Settings.class);
 
@@ -175,12 +173,9 @@ public class Settings {
   public static final String OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
 
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
-  public static final String CB_DEFAULTRB_REL_URL = "/attributes/default.rb";
   public static final String CB_METADATARB_REL_URL = "/metadata.rb";
   public static final String CB_KARAMELFILE_REL_URL = "/Karamelfile";
   public static final String CB_BERKSFILE_REL_URL = "/Berksfile";
-  public static final String CB_CONFIGFILE = "config.props";
-  public static final String CB_CONFIGFILE_REL_URL = "/templates/default/" + CB_CONFIGFILE;
 
   // ---------------------------------Cookbooks Scaffolding on Karamel Machine------------------------------------------
   public static final String CB_TEMPLATE_PATH_ROOT = "se" + File.separator + "kth" + File.separator + "karamel"
