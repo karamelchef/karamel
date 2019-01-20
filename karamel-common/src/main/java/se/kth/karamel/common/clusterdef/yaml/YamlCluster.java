@@ -29,6 +29,7 @@ public class YamlCluster extends YamlScope {
       groups.put(jsonGroup.getName(), yamlGroup);
     }
 
+    attrs.putAll(jsonCluster.getAttributes());
     cookbooks.putAll(jsonCluster.getRootCookbooks());
   }
 

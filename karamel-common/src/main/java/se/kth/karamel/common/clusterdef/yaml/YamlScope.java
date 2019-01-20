@@ -19,7 +19,7 @@ import se.kth.karamel.common.exception.ValidationException;
  */
 public abstract class YamlScope extends Scope {
 
-  private Map<String, Object> attrs = new HashMap<>();
+  protected Map<String, Object> attrs = new HashMap<>();
 
   public YamlScope() {
   }

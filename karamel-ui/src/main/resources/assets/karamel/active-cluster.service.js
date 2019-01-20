@@ -10,12 +10,7 @@ angular.module('main.module')
       cacheService, alertService) {
 
       function _launchCluster() {
-        var coreFormatCluster = $rootScope.activeCluster.toCoreApiFormat();
-        var data = {
-          json: angular.toJson(coreFormatCluster)
-        };
-        $log.info(data);
-        coreService.startCluster(data)
+        coreService.startCluster($rootScope.activeCluster)
           .success(function(data, status, headers, config) {
             $log.info("Connection Successful.");
             alertService.addAlert({type: 'success', msg: 'Cluster Launch Successful.'});
@@ -28,7 +23,7 @@ angular.module('main.module')
           });
       }
       return {
-        addNewRecipe: function(group) {
+        /*addNewRecipe: function(group) {
 
           var modalInstance = $modal.open({
             templateUrl: 'karamel/board/groups/new-recipe.html',
@@ -136,7 +131,7 @@ angular.module('main.module')
               SweetAlert.swal("Cancelled", "Phew, That was close :)", "error");
             }
           });
-        },
+        }, */
         sudoPassword: function(password) {
 
           coreService.sudoPassword(password)
@@ -161,12 +156,12 @@ angular.module('main.module')
           });
 
           modalInstance.result.then(function(newGroupInfo) {
-            if (newGroupInfo) {
+            /*if (newGroupInfo) {
               var group = new Group();
               group.load(newGroupInfo);
               $rootScope.activeCluster.addGroup(group);
               cacheService.updateCache();
-            }
+            }*/
           });
         },
         updateGroupInfo: function(existingGroupInfo) {
@@ -182,7 +177,7 @@ angular.module('main.module')
           });
 
           modalInstance.result.then(function(updatedGroupInfo) {
-            if (updatedGroupInfo) {
+            /*if (updatedGroupInfo) {
               var cluster = $rootScope.activeCluster;
               var id = -1;
               for (var i = 0; i < cluster.groups.length; i++) {
@@ -197,7 +192,7 @@ angular.module('main.module')
               }
 
               cacheService.updateCache();
-            }
+            } */
           });
         },
         configureGlobalAttributes: function() {
@@ -216,10 +211,10 @@ angular.module('main.module')
           });
 
           modalInstance.result.then(function(result) {
-            if (result) {
+            /*if (result) {
               $rootScope.activeCluster.cookbooks = result.cookbooks;
               cacheService.updateCache();
-            }
+            } */
           });
         },
         configureGlobalProvider: function() {
@@ -238,11 +233,12 @@ angular.module('main.module')
           });
 
           modalInstance.result.then(function(result) {
-            if (result) {
+            /*if (result) {
               $rootScope.activeCluster.ec2 = result.ec2;
               $rootScope.activeCluster.baremetal = result.baremetal;
               cacheService.updateCache();
-            }
+              
+            } */
           });
 
         },
@@ -262,11 +258,11 @@ angular.module('main.module')
 
           });
           modalInstance.result.then(function(result) {
-            if (result) {
+            /*if (result) {
               group.ec2 = result.ec2;
               group.baremetal = result.baremetal;
               cacheService.updateCache();
-            }
+            }*/
           });
         },
         configureGroupAttributes: function(group) {
@@ -291,25 +287,22 @@ angular.module('main.module')
           });
         },
         hasEc2: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasEc2());
+          return ($rootScope.activeCluster && $rootScope.activeCluster.ec2 != null);
         },
         hasBaremetal: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasBaremetal());
+          return ($rootScope.activeCluster && $rootScope.activeCluster.baremetal != null);
         },
         hasGce: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasGce());
+          return ($rootScope.activeCluster && $rootScope.activeCluster.gce != null);
         },
         hasNova: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasNova());
+          return ($rootScope.activeCluster && $rootScope.activeCluster.nova != null);
         },
         hasOcci: function() {
-          return ($rootScope.activeCluster && $rootScope.activeCluster.hasOcci());
+          return ($rootScope.activeCluster && $rootScope.activeCluster.occi != null);
         },
         hasProvider: function() {
-          return ($rootScope.activeCluster &&
-            ($rootScope.activeCluster.hasEc2() || $rootScope.activeCluster.hasBaremetal() ||
-              $rootScope.activeCluster.hasGce() || $rootScope.activeCluster.hasNova() ||
-              $rootScope.activeCluster.hasOcci()));
+          return (this.hasEc2() || this.hasBaremetal() || this.hasGce() || this.hasNova() || this.hasOcci());
         },
         name: function() {
           return $rootScope.activeCluster.name;
@@ -321,19 +314,11 @@ angular.module('main.module')
             alertService.addAlert({type: 'warning', msg: 'No Active Cluster Found.'});
             return;
           }
-          if (!$rootScope.activeCluster.areCredentialsSet()) {
-            this.setCredentials(true);
-          }
-          else {
-            _launchCluster();
-          }
+          this.setCredentials(true);
+          _launchCluster();
         },
         getJsonForRest: function() {
-          var coreFormatCluster = $rootScope.activeCluster.toCoreApiFormat();
-          var data = {
-            json: angular.toJson(coreFormatCluster)
-          };
-          return data;
+            return $rootScope.activeCluster;
         },
         setCredentials: function(isLaunch) {
           var modalInstance = $modal.open({

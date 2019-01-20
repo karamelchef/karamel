@@ -15,7 +15,7 @@ public class JsonScope extends Scope {
 
   protected final List<KaramelizedCookbook> cookbooks = new ArrayList<>();
 
-  protected Map<String, Object> attributes;
+  public Map<String, Object> attributes;
 
   public static CookbookCache CACHE;
 
@@ -41,6 +41,10 @@ public class JsonScope extends Scope {
 
   public Map<String, Object> getAttributes() {
     return attributes;
+  }
+
+  public void setAttributes(Map<String, Object> attributes) {
+    this.attributes = attributes;
   }
 
   @Override

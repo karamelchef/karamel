@@ -81,7 +81,7 @@ public class ChefJsonGenerator {
       JsonObject clone = cloneJsonObject(root);
       JsonGroup jsonGroup = UserClusterDataExtractor.findGroup(definition, groupEntity.getName());
       //Adding all attribtues to all chef-jsons
-      addScopeAttributes(jsonGroup, root);
+      addScopeAttributes(jsonGroup, clone);
 
       chefJsons.putAll(generateRecipesChefJsons(clone, jsonGroup, groupEntity));
     }

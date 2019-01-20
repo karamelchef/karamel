@@ -27,7 +27,7 @@ public class VendorCookbookTask extends Task {
         clusterStats, submitter);
     this.cookbookName = cookbookName;
     this.cookbooksHome = cookbooksHome;
-    this.githubRepoUrl = Settings.GITHUB_BASE_URL + cookbook.getGithub();
+    this.githubRepoUrl = Settings.GITHUB_BASE_URL + "/" + cookbook.getGithub();
     this.branch = cookbook.getBranch();
   }
 

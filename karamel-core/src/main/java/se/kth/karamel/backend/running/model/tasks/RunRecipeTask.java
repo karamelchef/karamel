@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.running.model.tasks;
 
 import com.google.gson.Gson;
@@ -26,25 +21,21 @@ import se.kth.karamel.backend.dag.DagParams;
 import se.kth.karamel.backend.machines.MachineInterface;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 
-/**
- *
- * @author kamal
- */
 public class RunRecipeTask extends Task {
 
   private static final Logger logger = Logger.getLogger(RunRecipeTask.class);
   private final String recipeCanonicalName;
   private String json;
   private final String cookbookId;
-  private final List<KaramelizedCookbook> rookCookbooks;
+  private final Map<String, Cookbook> rookCookbooks;
 
   public RunRecipeTask(MachineRuntime machine, ClusterStats clusterStats, String recipe, String json,
-      TaskSubmitter submitter, String cookbookId, List<KaramelizedCookbook> rootCookbooks) {
+      TaskSubmitter submitter, String cookbookId, Map<String, Cookbook> rootCookbooks) {
     super(recipe, cookbookId + "/" + recipe, false, machine, clusterStats, submitter);
     this.recipeCanonicalName = recipe;
     this.json = json;
@@ -165,8 +156,8 @@ public class RunRecipeTask extends Task {
     String installId = installRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
     String purgeId = purgeRecipeIdFromAnotherRecipeName(getMachineId(), recipeCanonicalName);
     if (uniqueId().equals(installId) || uniqueId().equals(purgeId)) {
-      for (KaramelizedCookbook kcb : rookCookbooks) {
-        String id = VendorCookbookTask.makeUniqueId(getMachineId(), kcb.getCookbookName());
+      for (Map.Entry<String, Cookbook> rootCookbook : rookCookbooks.entrySet()) {
+        String id = VendorCookbookTask.makeUniqueId(getMachineId(), rootCookbook.getKey());
         deps.add(id);
       }
     } else {

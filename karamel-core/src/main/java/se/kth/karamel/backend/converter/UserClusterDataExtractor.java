@@ -2,12 +2,14 @@ package se.kth.karamel.backend.converter;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.clusterdef.Ec2;
@@ -108,11 +110,10 @@ public class UserClusterDataExtractor {
     return provider;
   }
 
-  public static String makeVendorPath(String sshUser, List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
+  public static String makeVendorPath(String sshUser, Map<String, Cookbook> rootCookbooks) throws KaramelException {
     Set<String> paths = new HashSet<>();
-    for (KaramelizedCookbook kcb : rootCookbooks) {
-      String cookbookPath = kcb.getCookbookName();
-      paths.add(Settings.REMOTE_COOKBOOK_VENDOR_PATH(sshUser, cookbookPath));
+    for (Map.Entry<String, Cookbook> cookbook : rootCookbooks.entrySet()) {
+      paths.add(Settings.REMOTE_COOKBOOK_VENDOR_PATH(sshUser, cookbook.getKey()));
     }
     Object[] arr = paths.toArray();
     StringBuilder buffer = new StringBuilder();

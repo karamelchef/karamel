@@ -15,8 +15,8 @@ angular.module('main.module')
 
           if (clusterObj !== null) {
             try {
-              var cluster = new Cluster();
-              cluster.copy(clusterObj);
+              //var cluster = new Cluster();
+              //cluster.copy(clusterObj);
               $rootScope.activeCluster = cluster;
               $rootScope.context = cluster.name;
               alertService.addAlert({type: 'success', msg: 'Model Loaded Successfully.'});

@@ -8,16 +8,16 @@ angular.module('main.module')
       }
 
       function _setUpHolderMap(map) {
-        if (info.cluster.hasEc2()) {
+        if (info.cluster.ec2 != null) {
           map[info.cluster.ec2.getMapKey()] = info.cluster.ec2;
         }
-        if (info.cluster.hasGce()) {
+        if (info.cluster.gce != null) {
           map[info.cluster.gce.getMapKey()] = info.cluster.gce;
         }
-        if (info.cluster.hasNova()) {
+        if (info.cluster.nova != null) {
           map[info.cluster.nova.getMapKey()] = info.cluster.nova;
         }
-        if (info.cluster.hasOcci()) {
+        if (info.cluster.occi != null) {
           map[info.cluster.occi.getMapKey()] = info.cluster.occi;
         }
         map[info.cluster.sshKeyPair.getMapKey()] = info.cluster.sshKeyPair;

@@ -5,9 +5,9 @@ import com.google.gson.GsonBuilder;
 
 public class KaramelizedCookbook {
 
-  private final String cookbookName;
-  private final MetadataRb metadataRb;
-  private final KaramelFile karamelFile;
+  private String cookbookName;
+  private MetadataRb metadataRb;
+  private KaramelFile karamelFile;
   private String json;
 
   public KaramelizedCookbook(MetadataRb metadata, KaramelFile karamelFile) {
@@ -38,5 +38,17 @@ public class KaramelizedCookbook {
 
   public String getCookbookName() {
     return cookbookName;
+  }
+
+  public void setCookbookName(String cookbookName) {
+    this.cookbookName = cookbookName;
+  }
+
+  public void setMetadataRb(MetadataRb metadataRb) {
+    this.metadataRb = metadataRb;
+  }
+
+  public void setKaramelFile(KaramelFile karamelFile) {
+    this.karamelFile = karamelFile;
   }
 }

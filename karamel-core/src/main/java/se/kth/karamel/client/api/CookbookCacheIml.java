@@ -72,8 +72,7 @@ public class CookbookCacheIml implements CookbookCache {
       return new ArrayList<>(cookbooks.values());
     }
 
-    Set<Cookbook> toClone = (HashSet<Cookbook>)jsonCluster.getRootCookbooks().values();
-    cloneAndVendorCookbooks(toClone);
+    cloneAndVendorCookbooks(jsonCluster.getRootCookbooks());
     buildCookbookObjects();
     return new ArrayList<>(cookbooks.values());
   }
@@ -84,23 +83,30 @@ public class CookbookCacheIml implements CookbookCache {
       return new ArrayList<>(cookbooks.values());
     }
 
-    Set<Cookbook> toClone = (HashSet<Cookbook>)cluster.getCookbooks().values();
-    cloneAndVendorCookbooks(toClone);
+    cloneAndVendorCookbooks(cluster.getCookbooks());
     buildCookbookObjects();
     return new ArrayList<>(cookbooks.values());
   }
 
-  private void cloneAndVendorCookbooks(Set<Cookbook> toClone) throws KaramelException {
-    for (Cookbook cb : toClone) {
+  private void cloneAndVendorCookbooks(Map<String, Cookbook> toClone) throws KaramelException {
+    File workingDir = Paths.get(Settings.WORKING_DIR).toFile();
+    if (!workingDir.exists()) {
+      workingDir.mkdir();
+    }
+
+    for (Map.Entry<String, Cookbook> cb : toClone.entrySet()) {
       // Clone the repository
       try {
-        Git.cloneRepository()
-            // TODO(Fabio): make base url as setting in the cluster definition
-            // So we can support also GitLab/Bitbucket and so on.
-            .setURI(Settings.GITHUB_BASE_URL + "/" + cb.getGithub())
-            .setBranch(cb.getBranch())
-            .setDirectory(new File(Settings.WORKING_DIR))
-            .call();
+        if (!Paths.get(Settings.WORKING_DIR, cb.getKey()).toFile().exists()) {
+          Git.cloneRepository()
+              // TODO(Fabio): make base url as setting in the cluster definition
+              // So we can support also GitLab/Bitbucket and so on.
+              .setURI(Settings.GITHUB_BASE_URL + "/" + cb.getValue().getGithub())
+              .setBranch(cb.getValue().getBranch())
+              .setDirectory(Paths.get(Settings.WORKING_DIR, cb.getKey()).toFile())
+              .call();
+        }
+        // TODO(Fabio) try to update the branch
       } catch (GitAPIException e) {
         throw new KaramelException(e);
       }
@@ -108,12 +114,12 @@ public class CookbookCacheIml implements CookbookCache {
       // Vendor the repository
       try {
         Process vendorProcess = Runtime.getRuntime().exec("berks vendor --berksfile=" +
-            Paths.get(Settings.WORKING_DIR, cb.getCookbook(), "Berksfile") + " " + Settings.WORKING_DIR);
+            Paths.get(Settings.WORKING_DIR, cb.getKey(), "Berksfile") + " " + Settings.WORKING_DIR);
         Future<String> vendorOutput = es.submit(new ProcOutputConsumer(vendorProcess.getInputStream()));
-        vendorProcess.waitFor(1, TimeUnit.MINUTES);
+        vendorProcess.waitFor(10, TimeUnit.MINUTES);
 
         if (vendorProcess.exitValue() != 0) {
-          throw new KaramelException("Fail to vendor the cookbook: " + cb.getCookbook() + " " + vendorOutput.get());
+          throw new KaramelException("Fail to vendor the cookbook: " + cb.getKey() + " " + vendorOutput.get());
         }
       } catch (IOException | InterruptedException | ExecutionException e) {
         throw new KaramelException(e);

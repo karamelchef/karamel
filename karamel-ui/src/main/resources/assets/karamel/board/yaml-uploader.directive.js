@@ -25,10 +25,10 @@ angular.module('main.module')
 
                   try {
                     $log.info(data);
-                    var cluster = new Cluster();
-                    cluster.load(data);
-                    $rootScope.activeCluster = cluster;
-                    $rootScope.context = cluster.name;
+//                    var cluster = new Cluster();
+//                   cluster.load(data);
+                    $rootScope.activeCluster = data;
+                    $rootScope.context = data.name;
                     alertService.addAlert({type: 'success', msg: 'Model Created Successfully.'});
                   }
                   catch (err) {

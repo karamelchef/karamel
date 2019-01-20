@@ -131,9 +131,10 @@ public class ClusterService {
     JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
     ClusterDefinitionValidator.validate(jsonCluster);
     String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
+    // TODO(Fabio): This is total BS - The result of writing spaghetti code.
     //We have to do it again otherwise the global scope attributes get lost
     //for more info refer to https://github.com/karamelchef/karamel/issues/28
-    jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
+    //jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
     ClusterDefinitionService.saveYaml(yml);
     logger.debug(String.format("Let me see if I can start '%s' ...", jsonCluster.getName()));
     String clusterName = jsonCluster.getName();

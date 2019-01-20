@@ -1,7 +1,7 @@
 // ================================================  CLUSTER ======================================  //
 function Cluster() {
   this.name = null;
-  this.cookbooks = [];
+  this.rootCookbooks = [];
   this.groups = [];
   this.ec2 = null;
   this.gce = null;
@@ -11,31 +11,31 @@ function Cluster() {
   this.sshKeyPair = null;
 
   this.addCookbook = function(cookbook) {
-    if (this.cookbooks == null) {
-      this.cookbooks = [];
+    if (this.rootCookbooks == null) {
+      this.rootCookbooks = [];
     }
-    this.cookbooks.push(cookbook);
+    this.rootCookbooks.push(cookbook);
   };
 
   this.removeCookbook = function(cookbook) {
     var id = -1;
-    // In this we can also override the equals method in the cookbook object and then call the equals method TODO :==============
-    for (var i = 0; i < this.cookbooks.length; i++) {
-      if (this.cookbooks[i].id === cookbook.id) {
+   // In this we can also override the equals method in the cookbook object and then call the equals method TODO :==============
+    for (var i = 0; i < this.rootCookbooks.length; i++) {
+      if (this.rootCookbooks[i].id === cookbook.id) {
         id = i;
       }
     }
 
     // If any match found, then remove the entry.
     if (id != -1) {
-      this.cookbooks.splice(id, 1);
+      this.rootCookbooks.splice(id, 1);
     }
   };
 
   this.containsCookbook = function(cookbook) {
-    for (var i = 0; i < this.cookbooks.length; i++) {
-      if (cookbook.id === this.cookbooks[i].id) {
-        return this.cookbooks[i];
+    for (var i = 0; i < this.rootCookbooks.length; i++) {
+      if (cookbook.id === this.rootCookbooks[i].id) {
+        return this.rootCookbooks[i];
       }
     }
     return null;
@@ -47,7 +47,7 @@ function Cluster() {
 
   this.copyUpdatedClusterData = function(updatedClusterInfo) {
     this.name = updatedClusterInfo.name;
-    this.cookbooks = updatedClusterInfo.cookbooks;
+    this.cookbooks = updatedClusterInfo.rootCookbooks;
     this.groups = updatedClusterInfo.groups;
   };
 
@@ -61,7 +61,7 @@ function Cluster() {
     this.loadBaremetal(this, other["baremetal"]);
     this.loadSshKeyPair(this, null);
     this.loadGroups(this, other["groups"]);
-    this.loadCookbooks(this, other["cookbooks"]);
+    this.loadRootCookbook(this, other["rootCookbooks"]);
   };
 
   this.copy = function(other) {
@@ -101,7 +101,7 @@ function Cluster() {
       this.sshKeyPair.copy(other.sshKeyPair);
     }
     this.copyGroups(this, other["groups"]);
-    this.copyCookbooks(this, other["cookbooks"]);
+    this.copyCookbooks(this, other["rootCookbooks"]);
   };
 
   this.containsCookbook = function(cookbookArray, cookbook) {
@@ -176,12 +176,24 @@ function Cluster() {
     container.sshKeyPair = new SshKeyPair();
   };
 
+  this.laodRootCookbooks = function(container, cookbooks) {
+    for (var i = 0; i < cookbooks.length; i++) {
+      var cookbook = new Cookbook();
+      cookbook.load(cookbooks[i]);
+      container.addCookbook(cookbook);
+      var recipes = cookbooks[i].metadataRb.recipes;
+      for (var j = 0; j < recipes.length; j++) {
+        cookbook.addRecipe(new Recipe(recipes[j]["name"]));
+      }
+    }
+  };
+
   this.loadCookbooks = function(container, cookbooks) {
     for (var i = 0; i < cookbooks.length; i++) {
       var cookbook = new Cookbook();
       cookbook.load(cookbooks[i]);
       container.addCookbook(cookbook);
-      var recipes = cookbooks[i]["recipes"];
+      var recipes = cookbooks[i].metadataRb.recipes;
       for (var j = 0; j < recipes.length; j++) {
         cookbook.addRecipe(new Recipe(recipes[j]["name"]));
       }
@@ -203,7 +215,7 @@ function Cluster() {
       var cookbook = new Cookbook();
       cookbook.copy(cookbooks[i]);
       container.addCookbook(cookbook);
-      var recipes = cookbooks[i]["recipes"];
+      var recipes = cookbooks[i].metadataRb.recipes;
       for (var j = 0; j < recipes.length; j++) {
         cookbook.addRecipe(new Recipe(recipes[j]["title"]));
       }
@@ -515,19 +527,9 @@ function Baremetal() {
 Baremetal.prototype = Object.create(Provider.prototype);
 
 // ===========================================  COOKBOOKS ============================================== //
-function Cookbook() {
-  this.id = null;
-  this.alias = null;
-  this.attributes = {};
-  this.recipes = [];
-
-  this.addPropertyToAttributes = function(key, value) {
-    this.attributes[key] = value;
-  };
-
-  this.removePropertyFromAttributes = function(key) {
-    delete this.attributes[key];
-  };
+function RootCookbook() {
+  this.github = "";
+  this.branch = "";
 
   this.equals = function(other) {
     if (other != null) {
@@ -540,75 +542,59 @@ function Cookbook() {
 
   // Load data into the cookbook.
   this.load = function(other) {
-    this.id = other.id;
-    this.alias = other.alias;
-    this.attributes = other.attrs;          // FIX ME: Name discrepancy should not be there.
-    this.cookbookHomeUrl = other.cookbookHomeUrl;
+      this.github = other.github;
+      this.branch = other.branch;
   };
-
 
   this.copy = function(other) {
-    this.id = other.id;
-    this.alias = other.alias;
-    this.attributes = other.attributes;
-    this.cookbookHomeUrl = other.cookbookHomeUrl;
-
-    // Load recipes instead of copying.
+      this.github = other.github;
+      this.branch = other.branch;
   };
+}
 
-  // Add recipe to the cookbook.
-  this.addRecipe = function(recipe) {
-    if (this.recipes == null) {
-      this.recipes = [];
-    }
-    this.recipes.push(recipe);
+function KarmelFile() {
 
-  };
+}
 
-  this.containsRecipe = function(recipe) {
+// ===========================================  Karamelized Cookbooks ============================================== //
+function KaramelizedCookbooks() {
+    this.cookbookName;
+    this.metadataRb;
+    this.karamelFile;
 
-    if (this.recipes == null) {
+    this.equals = function(other) {
+      if (other != null) {
+        if (this.id === other.id) {
+          return true;
+        }
+      }
       return false;
-    }
+    };
 
-    for (var i = 0; i < this.recipes.length; i++) {
-      if (recipe.title === this.recipes[i].title) {
-        console.log(" Inside Comparison." + " Received: " + recipe.title + " Present: " + this.recipes[i].title);
-        return true;
-      }
-    }
-    return false;
-  };
+    // Load data into the cookbook.
+    this.load = function(other) {
+        this.github = other.github;
+        this.branch = other.branch;
+    };
 
-
-  this.removeRecipe = function(receipe) {
-    var id = -1;
-    for (var i = 0; i < this.recipes.length; i++) {
-      if (this.recipes[i].title == receipe.title) {
-        id = i;
-        break;
-      }
-    }
-
-    // If any recipe found.
-    if (id != -1) {
-      this.recipes.splice(id, 1);
-    }
-  };
+    this.copy = function(other) {
+        this.github = other.github;
+        this.branch = other.branch;
+    };
 }
 
 // ==============================================================  GROUP  ===============================  //
 function Group() {
 
-  this.name = "";
-  this.provider = "";
-  this.attrs = [];
-  this.size = 0;
-  this.ec2 = {};
-  this.gce = {};
-  this.nova = {};
-  this.occi = {};
-  this.baremetal = {};
+    this.name = "";
+    this.provider = "";
+    this.attrs = [];
+    this.size = 0;
+    this.ec2 = {};
+    this.gce = {};
+    this.nova = {};
+    this.occi = {};
+    this.baremetal = {};
   this.cookbooks = [];
 
   this.addCookbook = function(cookbook) {

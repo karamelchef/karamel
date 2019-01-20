@@ -24,7 +24,7 @@ public class JsonGroup extends JsonScope {
   public JsonGroup() {
   }
 
-  public JsonGroup(YamlGroup group, String name) throws KaramelException {
+  public JsonGroup(YamlGroup group, String name, List<KaramelizedCookbook> allCookbooks) throws KaramelException {
     super(group);
     setName(name);
     this.size = group.getSize();
@@ -33,7 +33,7 @@ public class JsonGroup extends JsonScope {
     for (String rec : clusterDefRecipes) {
       String[] comp = rec.split(Settings.COOKBOOK_DELIMITER);
       KaramelizedCookbook cookbook = null;
-      for (KaramelizedCookbook cb : getCookbooks()) {
+      for (KaramelizedCookbook cb : allCookbooks) {
         if (cb.getCookbookName().equals(comp[0])) {
           cookbook = cb;
           break;

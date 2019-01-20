@@ -14,14 +14,10 @@ import se.kth.karamel.common.cookbookmeta.Attribute;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.exception.KaramelException;
 
-/**
- *
- * @author kamal
- */
 public class JsonCluster extends JsonScope {
 
   private String name;
-  private Map<String, Cookbook> rootCookbooks;
+  private Map<String, Cookbook> rootCookbooks = new HashMap<>();
   private List<JsonGroup> groups = new ArrayList<>();
 
   public JsonCluster() {
@@ -34,15 +30,12 @@ public class JsonCluster extends JsonScope {
     attributes = cluster.flattenAttrs();
     Set<Attribute> validAttrs = new HashSet<>();
 
-    List<KaramelizedCookbook> allCookbooks = CACHE.loadAllKaramelizedCookbooks(cluster);
+    cookbooks.addAll(CACHE.loadAllKaramelizedCookbooks(cluster));
 
     //filtering invalid(not defined in metadata.rb) attributes from yaml model
     // Get all the valid attributes, also for transient dependency
-    for (KaramelizedCookbook kcb : allCookbooks) {
+    for (KaramelizedCookbook kcb : cookbooks) {
       validAttrs.addAll(kcb.getMetadataRb().getAttributes());
-
-      // Populate the cookbooks list
-      cookbooks.add(kcb);
     }
 
     // TODO(Fabio): I think that this map should be <String, Attribute>. But I don't want to see
@@ -62,7 +55,7 @@ public class JsonCluster extends JsonScope {
 
     Set<Map.Entry<String, YamlGroup>> entrySet = cluster.getGroups().entrySet();
     for (Map.Entry<String, YamlGroup> entry : entrySet) {
-      groups.add(new JsonGroup(entry.getValue(), entry.getKey()));
+      groups.add(new JsonGroup(entry.getValue(), entry.getKey(), cookbooks));
     }
 
   }
@@ -87,4 +80,7 @@ public class JsonCluster extends JsonScope {
     return rootCookbooks;
   }
 
+  public void setRootCookbooks(Map<String, Cookbook> rootCookbooks) {
+    this.rootCookbooks = rootCookbooks;
+  }
 }

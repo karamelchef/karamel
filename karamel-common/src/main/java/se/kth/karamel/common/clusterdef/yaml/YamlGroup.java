@@ -20,6 +20,7 @@ public class YamlGroup extends YamlScope {
   YamlGroup(JsonGroup jsonGroup) throws MetadataParseException {
     super(jsonGroup);
     this.size = jsonGroup.getSize();
+    attrs.putAll(jsonGroup.getAttributes());
     recipes = jsonGroup.getRecipes().stream().map(JsonRecipe::getCanonicalName).collect(Collectors.toList());
   }
 
