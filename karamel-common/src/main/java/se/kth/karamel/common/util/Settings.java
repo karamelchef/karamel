@@ -22,13 +22,12 @@ public class Settings {
 
   // ---- Added by Fabio
   public static final String WORKING_DIR = "/tmp/karamel";
+  public static boolean USE_CLONED_REPO_FILES = true;
 
   private static final Logger logger = Logger.getLogger(Settings.class);
 
   //test
   public static boolean CB_CLASSPATH_MODE = false;
-  // files
-  public static boolean USE_CLONED_REPO_FILES = false;
 
   //read
   public static final String ATTR_DELIMITER = "/";
