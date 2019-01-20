@@ -33,7 +33,7 @@ public class FetchCookbook extends AbstractCall {
   public Response getCookbook(CookbookJSON cookbookJSON) {
     Response response = null;
     try {
-      String cookbookDetails = karamelApi.getCookbookDetails(cookbookJSON.getUrl(), cookbookJSON.isRefresh());
+      String cookbookDetails = karamelApi.getCookbookDetails(cookbookJSON.getUrl());
       response = Response.status(Response.Status.OK).entity(cookbookDetails).build();
 
     } catch (KaramelException e) {

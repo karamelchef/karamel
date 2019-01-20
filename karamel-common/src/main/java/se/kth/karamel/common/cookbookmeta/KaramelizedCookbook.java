@@ -2,18 +2,15 @@ package se.kth.karamel.common.cookbookmeta;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import se.kth.karamel.common.clusterdef.Cookbook;
 
 public class KaramelizedCookbook {
 
   private final String cookbookName;
-  private final Cookbook cookbook;
   private final MetadataRb metadataRb;
   private final KaramelFile karamelFile;
   private String json;
 
-  public KaramelizedCookbook(Cookbook cookbook, MetadataRb metadata, KaramelFile karamelFile) {
-    this.cookbook = cookbook;
+  public KaramelizedCookbook(MetadataRb metadata, KaramelFile karamelFile) {
     this.cookbookName = metadata.getName();
     this.metadataRb = metadata;
     this.karamelFile = karamelFile;
@@ -37,10 +34,6 @@ public class KaramelizedCookbook {
 
   public KaramelFile getKaramelFile() {
     return karamelFile;
-  }
-
-  public Cookbook getCookbook() {
-    return cookbook;
   }
 
   public String getCookbookName() {

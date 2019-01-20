@@ -37,11 +37,10 @@ public interface KaramelApi {
    * Returns visible recipes and attributes of the cookbook with their detail as a json file
    *
    * @param cookbookUrl
-   * @param refresh
    * @return
    * @throws KaramelException
    */
-  String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException;
+  String getCookbookDetails(String cookbookUrl) throws KaramelException;
 
   /**
    * Converts json definition of the cluster into a yaml object

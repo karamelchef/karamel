@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.common.clusterdef.yaml;
 
 import java.util.HashMap;
@@ -13,14 +8,8 @@ import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.exception.MetadataParseException;
 import se.kth.karamel.common.exception.ValidationException;
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 
-/**
- *
- * @author kamal
- */
 public class YamlCluster extends YamlScope {
 
   public static CookbookCache CACHE;
@@ -31,7 +20,7 @@ public class YamlCluster extends YamlScope {
   public YamlCluster() {
   }
 
-  public YamlCluster(JsonCluster jsonCluster) throws MetadataParseException, KaramelException {
+  public YamlCluster(JsonCluster jsonCluster) throws KaramelException {
     super(jsonCluster);
     this.name = jsonCluster.getName();
     List<JsonGroup> jsonGroups = jsonCluster.getGroups();
@@ -40,10 +29,7 @@ public class YamlCluster extends YamlScope {
       groups.put(jsonGroup.getName(), yamlGroup);
     }
 
-    List<KaramelizedCookbook> allCbs = CACHE.loadRootKaramelizedCookbooks(jsonCluster);
-    for (KaramelizedCookbook kc : allCbs) {
-      cookbooks.put(kc.getCookbookName(), kc.getCookbook());
-    }
+    cookbooks.putAll(jsonCluster.getRootCookbooks());
   }
 
   public String getName() {

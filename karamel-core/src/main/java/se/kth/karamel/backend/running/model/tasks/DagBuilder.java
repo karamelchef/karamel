@@ -12,6 +12,7 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.json.JsonRecipe;
 import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
@@ -56,7 +57,7 @@ public class DagBuilder {
     Dag dag = new Dag();
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     CookbookCache cache = ClusterDefinitionService.CACHE;
-    List<KaramelizedCookbook> kcbs = cache.loadRootKaramelizedCookbooks(cluster);
+    List<KaramelizedCookbook> kcbs = cache.loadAllKaramelizedCookbooks(cluster);
     machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag, kcbs);
     cookbookLevelPurgingTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag, kcbs);
     return dag;
@@ -80,7 +81,7 @@ public class DagBuilder {
     Dag dag = new Dag();
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     CookbookCache cache = ClusterDefinitionService.CACHE;
-    List<KaramelizedCookbook> kcbs = cache.loadRootKaramelizedCookbooks(cluster);
+    List<KaramelizedCookbook> kcbs = cache.loadAllKaramelizedCookbooks(cluster);
     machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag, kcbs);
     cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag,
         kcbs);
@@ -98,7 +99,6 @@ public class DagBuilder {
       cbids.add(task.getCookbookId());
     }
     CookbookCache cache = ClusterDefinitionService.CACHE;
-    cache.prepareParallel(cbids);
     for (RunRecipeTask task : allRecipeTasks.values()) {
       String tid = task.uniqueId();
       KaramelizedCookbook kcb = cache.get(task.getCookbookId());
@@ -225,9 +225,11 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
-        for (KaramelizedCookbook kcb: rootCookbooks) {
+
+        for (Map.Entry<String, Cookbook> cb : cluster.getRootCookbooks().entrySet()) {
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter,
-              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), kcb);
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), cb.getKey(), cb.getValue());
+
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
         }
@@ -274,9 +276,10 @@ public class DagBuilder {
       JsonGroup jg = UserClusterDataExtractor.findGroup(cluster, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         Map<String, Task> map1 = new HashMap<>();
-        for (KaramelizedCookbook kcb : rootCookbooks) {
+
+        for (Map.Entry<String, Cookbook> cb : cluster.getRootCookbooks().entrySet()) {
           VendorCookbookTask t1 = new VendorCookbookTask(me, clusterStats, submitter,
-              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), kcb);
+              Settings.REMOTE_COOKBOOKS_PATH(me.getSshUser()), cb.getKey(), cb.getValue());
           dag.addTask(t1);
           map1.put(t1.uniqueId(), t1);
         }

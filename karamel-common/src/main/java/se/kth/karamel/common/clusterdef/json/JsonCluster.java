@@ -1,5 +1,6 @@
 package se.kth.karamel.common.clusterdef.json;
 
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.clusterdef.yaml.YamlGroup;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import se.kth.karamel.common.exception.KaramelException;
 public class JsonCluster extends JsonScope {
 
   private String name;
+  private Map<String, Cookbook> rootCookbooks;
   private List<JsonGroup> groups = new ArrayList<>();
 
   public JsonCluster() {
@@ -28,6 +30,7 @@ public class JsonCluster extends JsonScope {
   public JsonCluster(YamlCluster cluster) throws KaramelException {
     super(cluster);
     name = cluster.getName();
+    rootCookbooks = cluster.getCookbooks();
     attributes = cluster.flattenAttrs();
     Set<Attribute> validAttrs = new HashSet<>();
 
@@ -78,6 +81,10 @@ public class JsonCluster extends JsonScope {
 
   public void setGroups(List<JsonGroup> groups) {
     this.groups = groups;
+  }
+
+  public Map<String, Cookbook> getRootCookbooks() {
+    return rootCookbooks;
   }
 
 }

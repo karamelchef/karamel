@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
@@ -12,15 +7,11 @@ import java.util.Set;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
+import se.kth.karamel.common.clusterdef.Cookbook;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
-/**
- *
- * @author kamal
- */
 public class VendorCookbookTask extends Task {
 
   private final String cookbookName;
@@ -29,14 +20,15 @@ public class VendorCookbookTask extends Task {
   private final String branch;
 
   public VendorCookbookTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
-                            String cookbooksHome, KaramelizedCookbook kcb) throws KaramelException {
-    super("clone and vendor " + kcb.getCookbookName(),
-        "clone and vendor " + kcb.getCookbookName(), true, machine,
+                            String cookbooksHome, String cookbookName, Cookbook cookbook)
+      throws KaramelException {
+    super("clone and vendor " + cookbookName,
+        "clone and vendor " + cookbookName, true, machine,
         clusterStats, submitter);
-    this.cookbookName = kcb.getCookbookName();
+    this.cookbookName = cookbookName;
     this.cookbooksHome = cookbooksHome;
-    this.githubRepoUrl = kcb.getCookbook().getUrls().repoUrl;
-    this.branch = kcb.getCookbook().getBranch();
+    this.githubRepoUrl = Settings.GITHUB_BASE_URL + cookbook.getGithub();
+    this.branch = cookbook.getBranch();
   }
 
   @Override

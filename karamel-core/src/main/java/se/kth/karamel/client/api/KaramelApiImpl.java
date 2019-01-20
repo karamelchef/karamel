@@ -46,8 +46,6 @@ import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.common.util.SshKeyService;
 import se.kth.karamel.common.util.settings.NovaSetting;
 
-import java.util.HashSet;
-import java.util.Set;
 import se.kth.karamel.common.cookbookmeta.CookbookCache;
 
 /**
@@ -72,19 +70,10 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
-  public String getCookbookDetails(String cookbookUrl, boolean refresh) throws KaramelException {
-    Set<String> urls = new HashSet<>();
-    urls.add(cookbookUrl);
+  public String getCookbookDetails(String cookbookName) throws KaramelException {
     CookbookCache cache = ClusterDefinitionService.CACHE;
-    if (refresh) {
-      cache.prepareNewParallel(urls);
-      KaramelizedCookbook cb = cache.get(cookbookUrl);
-      return cb.getInfoJson();
-    } else {
-      cache.prepareParallel(urls);
-      KaramelizedCookbook cb = cache.get(cookbookUrl);
-      return cb.getInfoJson();
-    }
+    KaramelizedCookbook cb = cache.get(cookbookName);
+    return cb.getInfoJson();
   }
 
   @Override
