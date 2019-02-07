@@ -84,6 +84,11 @@
       <version>${jclouds.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.jclouds.provider</groupId>
+      <artifactId>azureblob</artifactId>
+      <version>${jclouds.version}</version>
+    </dependency>
+    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>

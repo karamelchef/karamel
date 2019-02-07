@@ -80,7 +80,8 @@ public class Settings {
   public static final String SCRIPT_FIND_OSTYPE = SCRIPT_PATH_ROOT + "find_ostype.sc";
   public static final String SCRIPT_PATH_SUDO_PASSWORD_CHECK = SCRIPT_PATH_ROOT + "sudo_password_check.sc";
   public static final String SCRIPT_PATH_CLONE_VENDOR_COOKBOOK = SCRIPT_PATH_ROOT + "clone_vendor_cookbook.sb";
-  public static final String SCRIPET_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
+  public static final String SCRIPT_PATH_PREPARE_STORAGE = SCRIPT_PATH_ROOT + "prepare_storages.sh";
+  public static final String SCRIPT_CHECK_STICKYBIT_TMP = SCRIPT_PATH_ROOT + "check_stickybit_set_tmp.sh";
   public static final String SCRIPT_NAME_INSTALL_CHEFDK = "install_chefdk.sh";
   public static final String SCRIPT_PATH_INSTALL_CHEFDK = SCRIPT_PATH_ROOT
       + SCRIPT_NAME_INSTALL_CHEFDK;

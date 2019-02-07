@@ -37,7 +37,7 @@ public class PrepareStoragesTask extends Task {
       for (StorageDevice device : storageDevices) {
         tuple.append(String.format("'%s','%s' ", device.kernelAlias(), device.mountPoint()));
       }
-      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPET_PATH_PREPARE_STORAGE,
+      commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_PREPARE_STORAGE,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),          
