@@ -253,6 +253,9 @@ public class Settings {
   public final static String REMOTE_CHEFJSON_PRIVATEIPS_TAG = "private_ips";
   public final static String REMOTE_CHEFJSON_PUBLICIPS_TAG = "public_ips";
   public final static String REMOTE_CHEFJSON_HOSTS_TAG = "hosts";
+  public final static String REMOTE_CHEFJSON_PRIVATEIPS_DOMAIN_IDS_TAG =
+      "private_ips_domainIds";
+  
   public static final String REMOTE_CHEFJSON_RUNLIST_TAG = "run_list";
   public static final String REMOTE_WORKING_DIR_NAME = ".karamel";
   public static final String REMOTE_INSTALL_DIR_NAME = "install";

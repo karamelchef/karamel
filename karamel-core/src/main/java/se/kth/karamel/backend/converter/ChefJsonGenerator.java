@@ -10,9 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
@@ -240,15 +242,17 @@ public class ChefJsonGenerator {
    * @param clusterEntity 
    */
   public static void aggregateIpAddresses(JsonObject json, JsonCluster definition, ClusterRuntime clusterEntity) {
-    Map<String, Set<String>> privateIps = new HashMap<>();
-    Map<String, Set<String>> publicIps = new HashMap<>();
+    Map<String, List<String>> privateIps = new HashMap<>();
+    Map<String, List<String>> publicIps = new HashMap<>();
     Map<String, Map<String, String>> hosts = new HashMap<>();
+    Map<String, Map<String, String>> privateIpsDomainIds = new HashMap<>();
 
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       JsonGroup jg = UserClusterDataExtractor.findGroup(definition, ge.getName());
       for (MachineRuntime me : ge.getMachines()) {
         for (JsonCookbook jc : jg.getCookbooks()) {
           for (JsonRecipe recipe : jc.getRecipes()) {
+            
             if (!recipe.getCanonicalName().endsWith(Settings.COOKBOOK_DELIMITER + Settings.INSTALL_RECIPE)) {
               String privateAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
                   Settings.REMOTE_CHEFJSON_PRIVATEIPS_TAG;
@@ -256,15 +260,23 @@ public class ChefJsonGenerator {
                   Settings.REMOTE_CHEFJSON_PUBLICIPS_TAG;
               String hostsAttr = recipe.getCanonicalName() + Settings.ATTR_DELIMITER + 
                   Settings.REMOTE_CHEFJSON_HOSTS_TAG;
+              String privateAttrDomain =
+                  recipe.getCanonicalName() + Settings.ATTR_DELIMITER +
+                  Settings.REMOTE_CHEFJSON_PRIVATEIPS_DOMAIN_IDS_TAG;
+              
               if (!privateIps.containsKey(privateAttr)) {
-                privateIps.put(privateAttr, new HashSet<String>());
-                publicIps.put(publicAttr, new HashSet<String>());
+                privateIps.put(privateAttr, new ArrayList<>());
+                publicIps.put(publicAttr, new ArrayList<>());
                 hosts.put(hostsAttr, new HashMap<String, String>());
+                privateIpsDomainIds.put(privateAttrDomain,
+                    new HashMap<>());
               }
               privateIps.get(privateAttr).add(me.getPrivateIp());
               publicIps.get(publicAttr).add(me.getPublicIp());
               hosts.get(hostsAttr).put(me.getPublicIp(), me.getName());
               hosts.get(hostsAttr).put(me.getPrivateIp(), me.getName());
+              privateIpsDomainIds.get(privateAttrDomain).put(me.getPrivateIp(),
+                  String.valueOf(me.getLocationDomainId()));
             }
           }
         }
@@ -272,6 +284,7 @@ public class ChefJsonGenerator {
     }
     attr2Json(json, privateIps);
     attr2Json(json, publicIps);
+    attrMap2Json(json, privateIpsDomainIds);
     attrMap2Json(json, hosts);
   }
 
@@ -317,9 +330,10 @@ public class ChefJsonGenerator {
    * @param root
    * @param attrs 
    */
-  public static void attr2Json(JsonObject root, Map<String, Set<String>> attrs) {
-    Set<Map.Entry<String, Set<String>>> entrySet = attrs.entrySet();
-    for (Map.Entry<String, Set<String>> entry : entrySet) {
+  public static void attr2Json(JsonObject root,
+      Map<String, List<String>> attrs) {
+    Set<Map.Entry<String, List<String>>> entrySet = attrs.entrySet();
+    for (Map.Entry<String, List<String>> entry : entrySet) {
       String[] keyComps = entry.getKey().split(Settings.COOKBOOK_DELIMITER + "|" + Settings.ATTR_DELIMITER);
       JsonObject o1 = root;
       for (int i = 0; i < keyComps.length; i++) {

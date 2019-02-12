@@ -17,6 +17,9 @@ public class Gce extends Provider {
   private Long diskSize;
   private String subnet;
   private Boolean preemptible;
+  private Integer nvme;
+  private Integer hdd;
+  private Integer ssd;
   
   /**
    * Machine type.
@@ -127,6 +130,54 @@ public class Gce extends Provider {
     this.preemptible = preemptible;
   }
   
+  /**
+   * Number of NVMe disks (maximum 8)
+   * @return the number of NVMe disks.
+   */
+  public Integer getNvme() {
+    return nvme;
+  }
+  
+  /**
+   * Number of NVMe disks (maximum 8)
+   * @param nvme
+   */
+  public void setNvme(Integer nvme) {
+    this.nvme = nvme;
+  }
+  
+  /**
+   * Number of HDD disks.
+   * @return
+   */
+  public Integer getHdd() {
+    return hdd;
+  }
+  
+  /**
+   * Number of HDD disks.
+   * @param hdd
+   */
+  public void setHdd(Integer hdd) {
+    this.hdd = hdd;
+  }
+  
+  /**
+   * Number of SSD disks.
+   * @return
+   */
+  public Integer getSsd() {
+    return ssd;
+  }
+  
+  /**
+   * Number of SSD disks.
+   * @param ssd
+   */
+  public void setSsd(Integer ssd) {
+    this.ssd = ssd;
+  }
+  
   @Override
   public Gce cloneMe() {
     Gce gce = new Gce();
@@ -138,6 +189,9 @@ public class Gce extends Provider {
     gce.setDiskSize(this.diskSize);
     gce.setSubnet(this.subnet);
     gce.setPreemptible(this.preemptible);
+    gce.setNvme(this.nvme);
+    gce.setHdd(this.hdd);
+    gce.setSsd(this.ssd);
     return gce;
   }
 
@@ -170,6 +224,15 @@ public class Gce extends Provider {
       if(clone.isPreemptible() == null){
         clone.setPreemptible(parentGce.isPreemptible());
       }
+      if(clone.getNvme() == null){
+        clone.setNvme(parentGce.getNvme());
+      }
+      if(clone.getHdd() == null){
+        clone.setHdd(parentGce.getHdd());
+      }
+      if(clone.getSsd() == null){
+        clone.setSsd(parentGce.getSsd());
+      }
     }
     return clone;
   }
@@ -198,6 +261,15 @@ public class Gce extends Provider {
     if(clone.isPreemptible()== null){
       clone.setPreemptible(GceSettings.DEFAULT_IS_PRE_EMPTIBLE);
     }
+    if(clone.getNvme() == null){
+      clone.setNvme(GceSettings.DEFAULT_NUMBER_NVMe_DISKS);
+    }
+    if(clone.getHdd() == null){
+      clone.setHdd(GceSettings.DEFAULT_NUMBER_HDD_DISKS);
+    }
+    if(clone.getSsd() == null){
+      clone.setSsd(GceSettings.DEFAULT_NUMBER_SSD_DISKS);
+    }
     return clone;
   }
 
@@ -216,6 +288,9 @@ public class Gce extends Provider {
         ", diskSize=" + diskSize +
         ", subnet='" + subnet + '\'' +
         ", preemptible='" + preemptible + '\'' +
+        ", nvme=" + nvme +
+        ", hdd=" + hdd +
+        ", ssd=" + ssd +
         '}';
   }
 }

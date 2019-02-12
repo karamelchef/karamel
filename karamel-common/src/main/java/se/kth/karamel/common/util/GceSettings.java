@@ -17,6 +17,9 @@ public class GceSettings {
   public static final String DEFAULT_MACHINE_TYPE = MachineType.n1_standard_1.toString();
   public static final Long DEFAULT_DISKSIZE_IN_GB = 15l;
   public static final Boolean DEFAULT_IS_PRE_EMPTIBLE = false;
+  public static final Integer DEFAULT_NUMBER_NVMe_DISKS = 0;
+  public static final Integer DEFAULT_NUMBER_HDD_DISKS = 0;
+  public static final Integer DEFAULT_NUMBER_SSD_DISKS = 0;
   
   public enum MachineType {
 
@@ -120,4 +123,24 @@ public class GceSettings {
         projectName, imageName));
   }
   
+  public static URI buildLocalSSDDiskTypeUri(String projectName, String zone)
+      throws URISyntaxException {
+    return new URI(String.format("https://www.googleapis" +
+            ".com/compute/v1/projects/%s/zones/%s/diskTypes/local-ssd",
+        projectName, zone));
+  }
+  
+  public static URI buildSSDDiskTypeUri(String projectName, String zone)
+      throws URISyntaxException {
+    return new URI(String.format("https://www.googleapis" +
+            ".com/compute/v1/projects/%s/zones/%s/diskTypes/pd-ssd",
+        projectName, zone));
+  }
+  
+  public static URI buildHDDDiskTypeUri(String projectName, String zone)
+      throws URISyntaxException {
+    return new URI(String.format("https://www.googleapis" +
+            ".com/compute/v1/projects/%s/zones/%s/diskTypes/pd-standard",
+        projectName, zone));
+  }
 }
