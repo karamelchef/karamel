@@ -5,6 +5,7 @@ ec2:                                                                            
     region: eu-west-1
     username: ubuntu 
     price: 0.1
+    iamarn: arn:aws:iam::822623301872:instance-profile/hopsfs-s3-access
 
 cookbooks:                                                                      #Github repos for cookbooks, if one cookbook is not defined here it will be looked up in default git repo (https://www.github.com/hopstart/<cookbook_name>-chef)
   kagent:                                                                     #'name' is an alias used in the yaml

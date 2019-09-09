@@ -53,6 +53,7 @@ public class ClusterDefinitionTest {
     assertEquals("eu-west-1", provider.getRegion());
     assertEquals("ubuntu", provider.getUsername());
     assertTrue(0.1f == provider.getPrice());
+    assertEquals("arn:aws:iam::822623301872:instance-profile/hopsfs-s3-access", provider.getIamarn());
 
     assertEquals(cluster.getAttr("mysql/user"), "admin");
     assertEquals(cluster.getAttr("ndb/ndbapi/public_ips"), "$ndb.public_ips");

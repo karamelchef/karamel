@@ -1,5 +1,6 @@
 package se.kth.karamel.webservice;
 
+import com.google.gson.Gson;
 import icons.TrayUI;
 import io.dropwizard.Application;
 import io.dropwizard.assets.AssetsBundle;
@@ -36,13 +37,26 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
+import se.kth.karamel.backend.converter.UserClusterDataExtractor;
+import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
+
+import se.kth.karamel.common.clusterdef.Ec2;
+import se.kth.karamel.common.clusterdef.Gce;
+import se.kth.karamel.common.clusterdef.Nova;
+import se.kth.karamel.common.clusterdef.Occi;
+import se.kth.karamel.common.clusterdef.Provider;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.SshKeyPair;
+import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
 import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.calls.definition.FetchCookbook;
@@ -75,7 +89,7 @@ import se.kth.karamel.webservice.utils.TemplateHealthCheck;
 public class KaramelServiceApplication extends Application<KaramelServiceConfiguration> {
 
   private static final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(
-    KaramelServiceApplication.class);
+          KaramelServiceApplication.class);
 
   private static KaramelApi karamelApi;
 
@@ -100,26 +114,27 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       // shouldn't happen for localhost
     } catch (IOException e) {
       // port taken, so app is already running
-      logger.info("An instance of Karamel is already running. Exiting...");
+      logger.error("An instance of Karamel is already running. Exiting...");
+      logger.error(e,e);
       System.exit(10);
     }
 
     options.addOption("help", false, "Print help message.");
     options.addOption(OptionBuilder.withArgName("yamlFile")
-      .hasArg()
-      .withDescription("Dropwizard configuration in a YAML file")
-      .create("server"));
+            .hasArg()
+            .withDescription("Dropwizard configuration in a YAML file")
+            .create("server"));
     options.addOption(OptionBuilder.withArgName("yamlFile")
-      .hasArg()
-      .withDescription("Karamel cluster definition in a YAML file")
-      .create("launch"));
+            .hasArg()
+            .withDescription("Karamel cluster definition in a YAML file")
+            .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
 //    options.addOption("passwd", false, "Sudo password");
     options.addOption(OptionBuilder.withArgName("sudoPassword")
-      .hasArg()
-      .withDescription("Sudo password")
-      .create("passwd"));
+            .hasArg()
+            .withDescription("Sudo password")
+            .create("passwd"));
   }
 
   public static void create() {
@@ -198,14 +213,14 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         headless = true;
       }
       if (line.hasOption("passwd")) {
-        sudoPasswd = line.getOptionValue("passwd");        
+        sudoPasswd = line.getOptionValue("passwd");
       } else {
         noSudoPasswd = true;
       }
 
       if (cli) {
 
-        ClusterManager.EXIT_ON_COMPLETION  = true;
+        ClusterManager.EXIT_ON_COMPLETION = true;
 //        if (!noSudoPasswd) {
 //          Console c = null;
 //          c = System.console();
@@ -232,12 +247,16 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
         karamelApi.registerSshKeys(pair);
 
+        if (headless && cli) {
+          loadCredentialsForHeadlessInstallation(jsonTxt);
+        }
+
         karamelApi.startCluster(jsonTxt);
 
         long ms1 = System.currentTimeMillis();
-        while (ms1 + 60000000 > System.currentTimeMillis()) {
-//          String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
-//          logger.debug(clusterStatus);
+        while (ms1 + 2 * 60 * 60 * 1000 > System.currentTimeMillis()) {
+          //String clusterStatus = karamelApi.getClusterStatus(cluster.getName());
+          //logger.info(clusterStatus);
 
           Thread.currentThread().sleep(30000);
         }
@@ -245,7 +264,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     } catch (ParseException e) {
       usage(-1);
     } catch (KaramelException e) {
-      System.err.println("Inalid yaml file; " + e.getMessage());
+      String message = "Inalid yaml file; " + e.getMessage();
+      logger.error(message);
       System.exit(-2);
     }
 
@@ -255,6 +275,38 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     Runtime.getRuntime().addShutdownHook(new KaramelCleanupBeforeShutdownThread());
   }
+
+  private static void loadCredentialsForHeadlessInstallation(String json) {
+    try {
+      Gson gson = new Gson();
+      JsonCluster jsonCluster = gson.fromJson(json, JsonCluster.class);
+      ClusterDefinitionValidator.validate(jsonCluster);
+      String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
+      jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
+
+      for (JsonGroup group : jsonCluster.getGroups()) {
+        Provider provider = UserClusterDataExtractor.getGroupProvider(jsonCluster, group.getName());
+        if (provider instanceof Ec2) {
+          Confs confs = Confs.loadKaramelConfs();
+          Ec2Credentials cred = Ec2Launcher.readCredentials(confs);
+          karamelApi.updateEc2CredentialsIfValid(cred);
+        } else if (provider instanceof Gce) {
+          throw new UnsupportedOperationException("Headless command line installationf or GCE is " +
+                  "not yet Implemented");
+        } else if (provider instanceof Nova) {
+          throw new UnsupportedOperationException("Headless command line installationf or NOVA is" +
+                  " not yet Implemented");
+        } else if (provider instanceof Occi) {
+          throw new UnsupportedOperationException("Headless command line installationf or Occi is" +
+                  " not yet Implemented");
+        }
+      }
+    } catch (KaramelException e) {
+      logger.error(e, e);
+      System.exit(1);
+    }
+  }
+
 
 // Name of the application displayed when application boots up.
   @Override
@@ -379,7 +431,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     URL imageURL = TrayUI.class.getResource(path);
 
     if (imageURL == null) {
-      System.err.println("Resource not found: " + path);
+      logger.error("Resource not found: " + path);
       return null;
     } else {
       return (new ImageIcon(imageURL, description)).getImage();
@@ -415,10 +467,10 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         e.printStackTrace();
       }
     } else {
-      System.err.println("Brower UI could not be launched using Java's Desktop library. "
+      logger.error("Brower UI could not be launched using Java's Desktop library. "
         + "Are you running a window manager?");
-      System.err.println("If you are using Ubuntu, try: sudo apt-get install libgnome");
-      System.err.println("Retrying to launch the browser now using a different method.");
+      logger.error("If you are using Ubuntu, try: sudo apt-get install libgnome");
+      logger.error("Retrying to launch the browser now using a different method.");
       BareBonesBrowserLaunch.openURL(uri.toASCIIString());
     }
   }

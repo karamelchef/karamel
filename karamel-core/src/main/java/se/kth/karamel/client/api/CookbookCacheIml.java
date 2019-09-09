@@ -270,9 +270,10 @@ public class CookbookCacheIml implements CookbookCache {
       toLoad.addAll(depsToLoad);
 
     }
-    logger.info(String.format("################## COOKBOOK TRANSIENT DEPENDENCIES FOR %s ############", clusterName));
-    logger.info(dag.print());
-    logger.info("############################################################################");
+    logger.debug(String.format("################## COOKBOOK TRANSIENT DEPENDENCIES FOR %s " +
+            "############", clusterName));
+    logger.debug(dag.print());
+    logger.debug("############################################################################");
     return all;
   }
 }

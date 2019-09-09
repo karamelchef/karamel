@@ -21,6 +21,7 @@ public class Ec2 extends Provider {
   private Float price;
   private String vpc;
   private String subnet;
+  private String iamarn;
 
   public String getType() {
     return type;
@@ -70,6 +71,14 @@ public class Ec2 extends Provider {
     this.vpc = vpc;
   }
 
+  public String getIamarn() {
+    return iamarn;
+  }
+
+  public void setIamarn(String iamarn) {
+    this.iamarn = iamarn;
+  }
+
   public static Ec2 makeDefault() {
     Ec2 ec2 = new Ec2();
     return ec2.applyDefaults();
@@ -105,6 +114,7 @@ public class Ec2 extends Provider {
     ec2.setPrice(price);
     ec2.setSubnet(subnet);
     ec2.setVpc(vpc);
+    ec2.setIamarn(iamarn);
     return ec2;
   }
 
@@ -133,6 +143,9 @@ public class Ec2 extends Provider {
       }
       if (clone.getVpc() == null) {
         clone.setVpc(parentEc2.getVpc());
+      }
+      if (clone.getIamarn() == null) {
+        clone.setIamarn(parentEc2.getIamarn());
       }
     }
     return clone;
