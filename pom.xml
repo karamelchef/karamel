@@ -5,7 +5,7 @@
   <groupId>se.kth.karamel</groupId>
   <artifactId>karamel-parent</artifactId>
   <packaging>pom</packaging>
-  <version>0.5</version>
+  <version>0.6</version>
   <name>karamel-parent</name>
   <url>http://maven.apache.org</url>
 

@@ -25,6 +25,11 @@ public enum StorageDevice {
     return Settings.AWS_STORAGE_VIRTUALNAME_PREFIX + ordinal();
   }
 
+  public String nvmeName() {
+    return Settings.AWS_NVME_MAPPINGNAME_PREFIX + ordinal() + "1";
+  }
+  
+  
   public String kernelAlias() {
     return Settings.AWS_STORAGE_KERNELALIAS_PREFIX + name();
   }
