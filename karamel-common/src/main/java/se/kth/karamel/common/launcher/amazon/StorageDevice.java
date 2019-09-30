@@ -5,37 +5,40 @@
  */
 package se.kth.karamel.common.launcher.amazon;
 
-import se.kth.karamel.common.util.Settings;
-
 /**
  *
  * @author kamal
  */
-public enum StorageDevice {
 
-  b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z;
+public class StorageDevice {
 
-  public String mountPoint;
+  public final String mountPoint;
+  public final String device;
+  public final String vitualName;
+
+  StorageDevice(String dev, String mountPoint, String vitualName){
+    this.device = dev;
+    this.mountPoint = mountPoint;
+    this.vitualName = vitualName;
+  }
 
   public String mappingName() {
-    return Settings.AWS_STORAGE_MAPPINGNAME_PREFIX + name();
+//    return Settings.AWS_STORAGE_MAPPINGNAME_PREFIX + name();
+    return  mountPoint;
   }
 
   public String virtualName() {
-    return Settings.AWS_STORAGE_VIRTUALNAME_PREFIX + ordinal();
+//    return Settings.AWS_STORAGE_VIRTUALNAME_PREFIX + ordinal();
+    return vitualName;
   }
 
-  public String nvmeName() {
-    return Settings.AWS_NVME_MAPPINGNAME_PREFIX + ordinal() + "1";
-  }
-  
-  
   public String kernelAlias() {
-    return Settings.AWS_STORAGE_KERNELALIAS_PREFIX + name();
+//    return Settings.AWS_STORAGE_KERNELALIAS_PREFIX + name();
+    return  device;
   }
 
   public String mountPoint() {
-    return Settings.AWS_STORAGE_MOUNTPOINT_PREFIX + (ordinal() + 1);
+    return mountPoint;
   }
 
 }

@@ -4,7 +4,6 @@
  */
 package se.kth.karamel.backend.launcher.amazon;
 
-import se.kth.karamel.common.launcher.amazon.InstanceType;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
@@ -25,7 +24,6 @@ import org.jclouds.aws.ec2.options.CreateSecurityGroupOptions;
 import org.jclouds.compute.RunNodesException;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.compute.domain.TemplateBuilder;
-import org.jclouds.ec2.domain.BlockDeviceMapping;
 import org.jclouds.ec2.domain.KeyPair;
 import org.jclouds.ec2.domain.SecurityGroup;
 import org.jclouds.ec2.features.SecurityGroupApi;
@@ -221,8 +219,9 @@ public final class Ec2Launcher extends Launcher {
         numForked += forkSize;
       }
     } catch (KaramelException ex) {
-      logger.error(
-          "Didn't get all machines in this node group. Got " + allMachines.size() + "/" + definedGroup.getSize());
+      logger.error("Didn't get all machines in this node group. Got " +
+              allMachines.size() + "/" + definedGroup.getSize());
+      logger.error(ex, ex);
     }
     return allMachines;
   }
@@ -246,13 +245,19 @@ public final class Ec2Launcher extends Launcher {
       options.spotPrice(ec2.getPrice());
     }
 
+    if (ec2.getIamarn() != null) {
+      logger.info("Using IAM ARN "+ec2.getIamarn());
+      options.iamInstanceProfileArn(ec2.getIamarn());
+    }
+
     Confs confs = Confs.loadKaramelConfs();
     String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
-    if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
-      InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
-      List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
-      options.blockDeviceMappings(maps);
-    }
+    logger.info("Prepare storage is "+prepStorages);
+//    if (prepStorages != null && prepStorages.equalsIgnoreCase("true")) {
+//      InstanceType instanceType = InstanceType.valueByModel(ec2.getType());
+//      List<BlockDeviceMapping> maps = instanceType.getEphemeralDeviceMappings();
+//      options.blockDeviceMappings(maps);
+//    }
 
     boolean succeed = false;
     int tries = 0;
@@ -288,7 +293,8 @@ public final class Ec2Launcher extends Launcher {
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();
       try {
-        logger.info(String.format("Forking %d machine(s) for '%s', so far(succeeded:%d, failed:%d, total:%d)",
+        logger.info(String.format("Forking %d "+ec2.getType()+" machine(s) "
+                        +"for '%s', so far " + "(succeeded:%d, failed:%d, total:%d)",
             requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
         succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
         long finishTime = System.currentTimeMillis();
