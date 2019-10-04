@@ -1,12 +1,10 @@
 #!/bin/bash
-
 set -e
-
-if [ ! -d ../../karamel-examples ] ; then
+if [ ! -d ../../karamel-chef ] ; then
   echo ""
-  echo "You have to checkout git@github.com:karamelchef/karamel-examples.git in the parent folder for karamel to generate a distribution of karamel"
+  echo "You have to checkout git@github.com:logicalclocks/karamel-chef.git in the parent folder for karamel to generate a distribution of karamel"
   echo "cd ../../"
-  echo "git clone git@github.com:karamelchef/karamel-examples.git"
+  echo "git clone git@github.com:logicalclocks/karamel-chef.git"
   echo ""
   exit 1
 fi
@@ -20,7 +18,7 @@ dist=karamel-$version
 
 cd ..
 mvn clean package -DskipTests
-cd ../karamel-examples
+cd ../karamel-chef
 git pull
 cd ../karamel
 cd karamel-ui/target
@@ -29,9 +27,7 @@ cd karamel-ui/target
 cp -r appassembler/* $dist/
 cp ../README.linux $dist/README.txt
 mkdir $dist/examples
-cd ../../../karamel-examples
-git checkout-index -a -f --prefix=../karamel/karamel-ui/target/$dist/examples/
-cd ../karamel/karamel-ui/target
+cp ../../../karamel-chef/cluster-defns/* $dist/examples/
 tar zcf ${dist}.tgz $dist
 mv $dist ${dist}-linux
 
@@ -41,9 +37,7 @@ cp karamel-ui-${version}-shaded.jar ${dist}-jar/karamel-ui-${version}.jar
 cp -r appassembler/conf/* ${dist}-jar/
 cp ../README.linux ${dist}-jar/README.txt
 mkdir ${dist}-jar/examples
-cd ../../../karamel-examples
-git checkout-index -a -f --prefix=../karamel/karamel-ui/target/${dist}-jar/examples/
-cd ../karamel/karamel-ui/target
+cp ../../../karamel-chef/cluster-defns/* ${dist}-jar/examples/
 zip -r ${dist}-jar.zip $dist-jar
 
 scp ${dist}.tgz glassfish@snurran.sics.se:/var/www/karamel.io/sites/default/files/downloads/
@@ -58,9 +52,7 @@ mv karamel.exe $dist/karamel.exe
 #create windows archive
 cp ../README.windows $dist/README.txt
 mkdir $dist/examples
-cd ../../../karamel-examples
-git checkout-index -a -f --prefix=../karamel/karamel-ui/target/$dist/examples/
-cd ../karamel/karamel-ui/target
+cp ../../../karamel-chef/cluster-defns/* $dist/examples/
 zip -r ${dist}.zip $dist
 
 mv ${dist} ${dist}-windows

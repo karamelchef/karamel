@@ -103,7 +103,7 @@ public class Settings {
   }
 
   public static final String PREPARE_STORAGES_KEY = "karamel.prepare.storages";
-  public static final String PREPARE_STORAGES_DEFAULT = "false";
+  public static final String PREPARE_STORAGES_DEFAULT = "true";
   public static final String SKIP_EXISTINGTASKS_KEY = "karamel.skip.existing.tasks";
   public static final String SKIP_EXISTINGTASKS_DEFAULT = "false";
 
