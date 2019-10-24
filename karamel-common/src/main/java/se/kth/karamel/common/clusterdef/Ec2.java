@@ -22,6 +22,7 @@ public class Ec2 extends Provider {
   private String vpc;
   private String subnet;
   private String iamarn;
+  private String zone;
 
   public String getType() {
     return type;
@@ -84,6 +85,14 @@ public class Ec2 extends Provider {
     return ec2.applyDefaults();
   }
 
+  public String getZone() {
+    return zone;
+  }
+
+  public void setZone(String zone) {
+    this.zone = zone;
+  }
+
   @Override
   public Ec2 applyDefaults() {
     Ec2 clone = cloneMe();
@@ -115,6 +124,7 @@ public class Ec2 extends Provider {
     ec2.setSubnet(subnet);
     ec2.setVpc(vpc);
     ec2.setIamarn(iamarn);
+    ec2.setZone(zone);
     return ec2;
   }
 
@@ -146,6 +156,9 @@ public class Ec2 extends Provider {
       }
       if (clone.getIamarn() == null) {
         clone.setIamarn(parentEc2.getIamarn());
+      }
+      if (clone.getZone() == null) {
+        clone.setZone(parentEc2.getZone());
       }
     }
     return clone;
