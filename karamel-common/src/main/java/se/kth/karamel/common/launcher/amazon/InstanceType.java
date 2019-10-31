@@ -252,9 +252,9 @@ public enum InstanceType {
   }
 
   public StorageDevice[] getStorageDevices() {
-    if (diskType == DiskType.EBS) {
-      return new StorageDevice[0];
-    }
+//    if (diskType == DiskType.EBS) {
+//      return new StorageDevice[0];
+//    }
 
     StorageDevice[] devices = new StorageDevice[numDisks];
     for (int i = 0; i < numDisks; i++) {
@@ -266,7 +266,7 @@ public enum InstanceType {
         devices[i] = new StorageDevice(Settings.AWS_SSD_MAPPINGNAME_PREFIX+ (char)('b'+i),
                 "/mnt" +
                 "/ssd"+i, Settings.AWS_STORAGE_VIRTUALNAME_PREFIX +i);
-      } else if (diskType == DiskType.NVMe_SSD){
+      } else if (diskType == DiskType.NVMe_SSD || diskType == DiskType.EBS){
         devices[i] = new StorageDevice(Settings.AWS_NVME_MAPPINGNAME_PREFIX+ i+"n1", "/mnt" +
                 "/nvme_ssd"+i, Settings.AWS_STORAGE_VIRTUALNAME_PREFIX +i);
       } else {
