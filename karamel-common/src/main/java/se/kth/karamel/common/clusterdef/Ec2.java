@@ -23,6 +23,7 @@ public class Ec2 extends Provider {
   private String subnet;
   private String iamarn;
   private String zone;
+  private String securityGroups;
 
   public String getType() {
     return type;
@@ -93,6 +94,14 @@ public class Ec2 extends Provider {
     this.zone = zone;
   }
 
+  public String getSecurityGroups() {
+    return securityGroups;
+  }
+
+  public void setSecurityGroups(String securityGroups) {
+    this.securityGroups = securityGroups;
+  }
+
   @Override
   public Ec2 applyDefaults() {
     Ec2 clone = cloneMe();
@@ -125,6 +134,7 @@ public class Ec2 extends Provider {
     ec2.setVpc(vpc);
     ec2.setIamarn(iamarn);
     ec2.setZone(zone);
+    ec2.setSecurityGroups(securityGroups);
     return ec2;
   }
 
@@ -159,6 +169,9 @@ public class Ec2 extends Provider {
       }
       if (clone.getZone() == null) {
         clone.setZone(parentEc2.getZone());
+      }
+      if (clone.getSecurityGroups() == null) {
+        clone.setSecurityGroups(parentEc2.getSecurityGroups());
       }
     }
     return clone;

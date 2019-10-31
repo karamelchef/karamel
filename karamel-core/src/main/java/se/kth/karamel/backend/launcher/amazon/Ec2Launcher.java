@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
@@ -248,6 +249,13 @@ public final class Ec2Launcher extends Launcher {
     if (ec2.getIamarn() != null) {
       logger.info("Using IAM ARN "+ec2.getIamarn());
       options.iamInstanceProfileArn(ec2.getIamarn());
+    }
+
+    //set security groups if any
+    if (ec2.getSecurityGroups() != null) {
+      String[] sgs = ec2.getSecurityGroups().split(",");
+      options.securityGroups(Arrays.asList(sgs));
+      logger.info("Security Groups: " + Arrays.asList(sgs));
     }
 
     Confs confs = Confs.loadKaramelConfs();
