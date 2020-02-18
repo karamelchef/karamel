@@ -20,11 +20,9 @@ if [ %osfamily% == "redhat" ] ; then
 
 elif [ %osfamily% == "ubuntu" ] ; then
 
-  dpkg -s
+  dpkg -s chefdk
   if [ $? -ne 0 ] ; then
- 
     chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
-
     rm -f "$chefdkfile"
     wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
 
