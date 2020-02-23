@@ -14,6 +14,7 @@ import se.kth.karamel.common.exception.KaramelException;
 public enum OsType {
 
   CENTOS("centos", LinuxFamily.REDHAT),
+  AWS("os", LinuxFamily.REDHAT),  
   FEDORA("fedora", LinuxFamily.REDHAT),
   REDHAT("redhat", LinuxFamily.REDHAT),
   UBUNTU("ubuntu", LinuxFamily.UBUNTU),
