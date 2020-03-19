@@ -228,6 +228,7 @@ public enum InstanceType {
   m5d_8xlarge   ("m5d.8xlarge"   , 32  , 2  , DiskType.NVMe_SSD),
   m5_16xlarge   ("m5.16xlarge"   , 64  , 1  , DiskType.EBS),
   c5d_9xlarge   ("c5d.9xlarge"   , 36  , 1  , DiskType.NVMe_SSD),
+  c5d_12xlarge  ("c5d.12xlarge"  , 48  , 2  , DiskType.NVMe_SSD),
   c5_12xlarge   ("c5.12xlarge"   , 48  , 1  , DiskType.EBS),
   c5n_4xlarge   ("c5n.4xlarge"   , 16  , 1  , DiskType.EBS),
   m5_8xlarge    ("m5.8xlarge"    , 32  , 1  , DiskType.EBS);
