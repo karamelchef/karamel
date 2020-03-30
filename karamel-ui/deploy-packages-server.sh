@@ -14,7 +14,7 @@ karamelize() {
     cd appassembler/bin
     head -n -9 karamel > karamel.tmp
     echo '
-exec "$JAVACMD" $JAVA_OPTS -Xms128m \
+exec "$JAVACMD" $JAVA_OPTS -Xms128m -Xmx4g \
   -classpath "$CLASSPATH" \
   -Dapp.name="karamel" \
   -Dapp.pid="$$" \

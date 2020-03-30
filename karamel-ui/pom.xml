@@ -272,6 +272,7 @@
               <configurationDirectory>conf</configurationDirectory>
               <copyConfigurationDirectory>true</copyConfigurationDirectory>
               <extraJvmArguments>-Xms128m</extraJvmArguments>
+              <extraJvmArguments>-Xmx4g</extraJvmArguments>
               <platforms>
                 <platform>unix</platform>
               </platforms>
