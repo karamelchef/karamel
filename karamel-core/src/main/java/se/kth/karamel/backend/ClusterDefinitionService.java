@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonWriter;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
@@ -32,6 +33,8 @@ import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Writer;
+import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -180,7 +183,12 @@ public class ClusterDefinitionService {
     GsonBuilder builder = new GsonBuilder();
     builder.disableHtmlEscaping();
     Gson gson = builder.setPrettyPrinting().create();
-    String json = gson.toJson(jsonCluster);
-    return json;
+    Writer result = new StringWriter();
+    try (JsonWriter writer = new JsonWriter(result)) {
+      gson.toJson(jsonCluster, jsonCluster.getClass(), writer);
+      return result.toString();
+    } catch (IOException ex) {
+      throw new KaramelException(ex);
+    }
   }
 }
