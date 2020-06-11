@@ -17,7 +17,7 @@ if [ \"$UNAME\" == \"linux\" ]; then
           if [[ $DISTRO =~ "Ubuntu" ]]; then
                 DISTRO="Ubuntu"
           elif [[ $DISTRO =~ "centos" ]] || [[ "$DISTRO" =~ "os" ]] ; then
-                DISTRO="centos"
+                DISTRO="CentOS"
           else
                 echo "Could not recognize Linux distro: $DISTRO"
                 exit_error
