@@ -37,12 +37,22 @@ public class AptGetEssentialsTask extends Task {
     String sudocommand = getSudoCommand();
     String githuuser = ClusterService.getInstance().getCommonContext().getGithubUsername();
     String osfamily = osType.family.toString().toLowerCase();
+    String httpProxy = System.getProperty("http.proxy");
+    if (httpProxy == null) {
+      httpProxy = "";
+    }
+    String httpsProxy = System.getProperty("https.proxy");      
+    if (httpsProxy == null) {
+      httpsProxy = "";
+    }
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", sudocommand,
           "github_username", githuuser,
           "osfamily", osfamily,
           "task_id", getId(),
+          "http_proxy", httpProxy,
+          "https_proxy", httpProxy,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,
           "pid_file", Settings.PID_FILE_NAME);

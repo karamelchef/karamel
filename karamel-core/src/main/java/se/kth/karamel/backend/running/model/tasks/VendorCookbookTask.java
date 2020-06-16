@@ -49,12 +49,22 @@ public class VendorCookbookTask extends Task {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
     if (commands == null) {
+      String httpProxy = System.getProperty("http.proxy");
+      if (httpProxy == null) {
+        httpProxy = "";
+      }
+      String httpsProxy = System.getProperty("https.proxy");      
+      if (httpsProxy == null) {
+        httpsProxy = "";
+      }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,
           "github_repo_name", githubRepoName,
           "cookbook_path", cookbookPath,
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
+          "http_proxy", httpProxy,
+          "https_proxy", httpProxy,
           "vendor_path", Settings.REMOTE_COOKBOOK_VENDOR_PATH(getSshUser(), githubRepoName),
           "sudo_command", getSudoCommand(),
           "task_id", getId(),

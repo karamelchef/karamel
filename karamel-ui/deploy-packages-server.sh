@@ -20,9 +20,11 @@ exec "$JAVACMD" $JAVA_OPTS -Xms128m -Xmx4g \
   -Dapp.pid="$$" \
   -Dapp.repo="$REPO" \
   -Dapp.home="$BASEDIR" \
-  -Dhttp.proxyHost="$http_proxy"\
+  -Dhttp.proxy="$http_proxy" \
+  -Dhttps.proxy="$https_proxy" \
+  -Dhttp.proxyHost="$http_proxy_host"\
   -Dhttp.proxyPort="$http_proxy_port"\
-  -Dhttps.proxyHost="$https_proxy"\
+  -Dhttps.proxyHost="$https_proxy_host"\
   -Dhttps.proxyPort="$https_proxy_port"\
   -Dbasedir="$BASEDIR" \
   se.kth.karamel.webservice.KaramelServiceApplication \
