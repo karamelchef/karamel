@@ -31,7 +31,7 @@ git config --global http.postBuffer 524288000
 if [ $http_proxy != "" ] ; then
    git config --global http.proxy $http_proxy
 elif [ $https_proxy != "" ] ; then
-   git config --global http.proxy $https_proxy   
+   git config --global https.proxy $https_proxy   
 fi
 
 
