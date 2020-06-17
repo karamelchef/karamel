@@ -1,6 +1,6 @@
 mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
-export $http_proxy=%http_proxy%
-export $https_proxy=%https_proxy%
+export http_proxy=%http_proxy%
+export https_proxy=%https_proxy%
 
 if [ %osfamily% == "redhat" ] ; then
 %sudo_command% perl -pi -e "s/Defaults\s*requiretty/#Defaults   requiretty/g" /etc/sudoers

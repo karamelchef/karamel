@@ -45,6 +45,7 @@ public class VendorCookbookTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     String cookbookPath = githubRepoName;
+    String githubuser = ClusterService.getInstance().getCommonContext().getGithubUsername();    
     if (subCookbookName != null && !subCookbookName.isEmpty()) {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
@@ -60,6 +61,7 @@ public class VendorCookbookTask extends Task {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,
           "github_repo_name", githubRepoName,
+          "github_username", githubuser,							   
           "cookbook_path", cookbookPath,
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,

@@ -1,7 +1,7 @@
 set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
-export $http_proxy=%http_proxy%
-export $https_proxy=%https_proxy%
+export http_proxy=%http_proxy%
+export https_proxy=%https_proxy%
 
 RES=0
 if [ %osfamily% == "redhat" ] ; then
