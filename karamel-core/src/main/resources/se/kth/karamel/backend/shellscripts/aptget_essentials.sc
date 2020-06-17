@@ -28,9 +28,9 @@ fi
 git config --global user.name %github_username% 
 git config --global http.sslVerify false
 git config --global http.postBuffer 524288000
-if [ $http_proxy != "" ] ; then
+if [ "$http_proxy" != "" ] ; then
    git config --global http.proxy $http_proxy
-elif [ $https_proxy != "" ] ; then
+elif [ "$https_proxy" != "" ] ; then
    git config --global https.proxy $https_proxy   
 fi
 
