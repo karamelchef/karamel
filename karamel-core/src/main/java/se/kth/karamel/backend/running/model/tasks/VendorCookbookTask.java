@@ -64,7 +64,7 @@ public class VendorCookbookTask extends Task {
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
           "http_proxy", httpProxy,
-          "https_proxy", httpProxy,
+          "https_proxy", httpsProxy,
           "vendor_path", Settings.REMOTE_COOKBOOK_VENDOR_PATH(getSshUser(), githubRepoName),
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
