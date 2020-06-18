@@ -8,8 +8,10 @@ git config --global http.sslVerify false
 git config --global http.postBuffer 524288000
 if [ "$http_proxy" != "" ] ; then
    git config --global http.proxy $http_proxy
+   git config --global unset https.proxy
 elif [ "$https_proxy" != "" ] ; then
-   git config --global https.proxy $https_proxy   
+   git config --global https.proxy $https_proxy
+   git config --global unset http.proxy   
 fi
 
 # %sudo% chown -R $USER ~/.berkshelf
