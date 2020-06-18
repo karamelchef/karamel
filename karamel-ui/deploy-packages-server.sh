@@ -20,8 +20,6 @@ exec "$JAVACMD" $JAVA_OPTS -Xms128m -Xmx4g \
   -Dapp.pid="$$" \
   -Dapp.repo="$REPO" \
   -Dapp.home="$BASEDIR" \
-  -Dhttp.proxy="$http_proxy" \
-  -Dhttps.proxy="$https_proxy" \
   -Dhttp.proxyHost="$http_proxy_host"\
   -Dhttp.proxyPort="$http_proxy_port"\
   -Dhttps.proxyHost="$https_proxy_host"\

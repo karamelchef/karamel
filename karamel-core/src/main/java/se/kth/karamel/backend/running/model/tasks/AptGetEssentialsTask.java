@@ -37,14 +37,15 @@ public class AptGetEssentialsTask extends Task {
     String sudocommand = getSudoCommand();
     String githuuser = ClusterService.getInstance().getCommonContext().getGithubUsername();
     String osfamily = osType.family.toString().toLowerCase();
-    String httpProxy = System.getProperty("http.proxy");
+    String httpProxy = System.getenv("http.proxy");
     if (httpProxy == null) {
       httpProxy = "";
     }
-    String httpsProxy = System.getProperty("https.proxy");      
+    String httpsProxy = System.getenv("https.proxy");      
     if (httpsProxy == null) {
       httpsProxy = "";
     }
+
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_APTGET_ESSENTIALS,
           "sudo_command", sudocommand,
