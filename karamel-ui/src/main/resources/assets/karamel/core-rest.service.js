@@ -19,7 +19,6 @@ angular.module('main.module')
 
 
       /* window.location.hostname for the webserver  */
-
       var _defaultHost = 'http://' + $location.host() + ':' + $location.port() + '/api';
       var _defaultContentType = 'application/json';
 
