@@ -37,11 +37,11 @@ public class AptGetEssentialsTask extends Task {
     String sudocommand = getSudoCommand();
     String githuuser = ClusterService.getInstance().getCommonContext().getGithubUsername();
     String osfamily = osType.family.toString().toLowerCase();
-    String httpProxy = System.getenv("http.proxy");
+    String httpProxy = System.getProperty("http.proxy");
     if (httpProxy == null) {
       httpProxy = "";
     }
-    String httpsProxy = System.getenv("https.proxy");      
+    String httpsProxy = System.getProperty("https.proxy");      
     if (httpsProxy == null) {
       httpsProxy = "";
     }

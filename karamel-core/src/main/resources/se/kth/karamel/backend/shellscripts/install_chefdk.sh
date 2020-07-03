@@ -15,7 +15,6 @@ if [ %osfamily% == "redhat" ] ; then
     #
     # If behind a proxy, check that $http_proxy or $https_proxy is set to the correct URL. 
     # wget automatically sets a proxy if $http(s)_proxy is set.
-    # e.g., http://proxy.verizy.com:80
     #
     wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
     %sudo_command% yum install -y "$chefdkfile"

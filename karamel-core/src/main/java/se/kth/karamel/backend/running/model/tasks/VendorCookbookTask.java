@@ -51,11 +51,11 @@ public class VendorCookbookTask extends Task {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
     if (commands == null) {
-      String httpProxy = System.getenv("http.proxy");
+      String httpProxy = System.getProperty("http.proxy");
       if (httpProxy == null) {
         httpProxy = "";
       }
-      String httpsProxy = System.getenv("https.proxy");      
+      String httpsProxy = System.getProperty("https.proxy");      
       if (httpsProxy == null) {
         httpsProxy = "";
       }

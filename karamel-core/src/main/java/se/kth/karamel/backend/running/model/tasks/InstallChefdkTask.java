@@ -33,11 +33,11 @@ public class InstallChefdkTask extends Task {
     if (commands == null) {
       Confs confs = Confs.loadKaramelConfs();
       String chefdkVersion = confs.getProperty(Settings.CHEFDK_VERSION_KEY);
-      String httpProxy = System.getenv("http.proxy");
+      String httpProxy = System.getProperty("http.proxy");
       if (httpProxy == null) {
         httpProxy = "";
       }
-      String httpsProxy = System.getenv("https.proxy");      
+      String httpsProxy = System.getProperty("https.proxy");      
       if (httpsProxy == null) {
         httpsProxy = "";
       }
