@@ -31,9 +31,19 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
+      String httpProxy = System.getProperty("http.proxy");
+      if (httpProxy == null) {
+        httpProxy = "";
+      }
+      String httpsProxy = System.getProperty("https.proxy");      
+      if (httpsProxy == null) {
+        httpsProxy = "";
+      }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "cookbooks_path", vendorPath,
+          "http_proxy", httpProxy,
+          "https_proxy", httpsProxy,
           "sudo_command", getSudoCommand(),
           "pid_file", Settings.PID_FILE_NAME);
     }
