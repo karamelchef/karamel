@@ -34,10 +34,14 @@ public class MakeSoloRbTask extends Task {
       String httpProxy = System.getProperty("http.proxy");
       if (httpProxy == null) {
         httpProxy = "";
+      } else {
+        httpProxy = "http_proxy \"" + httpProxy + "\"";
       }
       String httpsProxy = System.getProperty("https.proxy");      
       if (httpsProxy == null) {
         httpsProxy = "";
+      } else {
+        httpsProxy = "https_proxy \"" + httpsProxy + "\"";	  
       }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
