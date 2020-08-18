@@ -3,7 +3,9 @@ set -e; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file
 set -e
 export LC_CTYPE=en_US.UTF-8
 export http_proxy=%http_proxy%
-export https_proxy=%https_proxy%
+if [ "$http_proxy" == "" ] ; then
+  export https_proxy=%https_proxy%
+fi
 
 git config --global user.name %github_username% 
 git config --global http.sslVerify false
