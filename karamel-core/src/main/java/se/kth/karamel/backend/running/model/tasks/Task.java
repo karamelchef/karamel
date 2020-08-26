@@ -212,8 +212,9 @@ public abstract class Task implements DagTask, TaskCallback {
     dagCallback.skipped();
   }
 
-  public void collectResults(MachineInterface sshMachine) throws KaramelException {
+  public String collectResults(MachineInterface sshMachine) throws KaramelException {
     //override it in the subclasses if needed
+    return "";
   }
 
   public boolean isSudoTerminalReqd() {
