@@ -191,17 +191,17 @@ public class RunRecipeTask extends Task {
    * @throws se.kth.karamel.common.exception.KaramelException
    */
   @Override
-  public String collectResults(MachineInterface sshMachine) throws KaramelException {
+  public void collectResults(MachineInterface sshMachine) throws KaramelException {
     String remoteFile = Settings.RECIPE_RESULT_REMOTE_PATH(getRecipeCanonicalName());
     String localResultsFile = Settings.RECIPE_RESULT_LOCAL_PATH(getRecipeCanonicalName(),
         getMachine().getGroup().getCluster().getName(), getMachine().getPublicIp());
     String stdout;
     try {
-      stdout = sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
+      sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
     } catch (IOException ex) {
       logger.debug(String.format("No return values for %s on %s", getRecipeCanonicalName(),
           getMachine().getPublicIp()));
-      return "";
+      return;
     }
     JsonReader reader;
     try {
@@ -219,7 +219,6 @@ public class RunRecipeTask extends Task {
       throw new KaramelException(String.format("Invalid return value as Json object for %s on %s",
           getRecipeCanonicalName(), getMachine().getPublicIp()), ex);
     }
-    return stdout;
   }
 
   @Override

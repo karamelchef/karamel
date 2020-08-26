@@ -249,7 +249,6 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void runTask(Task task) {
-    StringBuffer output = new StringBuffer();
     logger.debug("start running " + task.getId());
     if (!isSucceedTaskHistoryUpdated) {
       logger.debug("updating the task history");
@@ -279,14 +278,15 @@ public class SshMachine implements MachineInterface, Runnable {
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
                   cmd.getCmdStr()));
-              logger.error("Start Failed Task logs:");
-              logger.error(output.toString());
-              logger.error("End Failed Task logs:");
+              logger.error("=================Start Failed Task log=================");
+              String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
+              String log = LogService.loadLog(clusterName, machineEntity.getPublicIp(), task.getName());
+              logger.error(log);
+              logger.error("=================End Failed Task log=================");
               break;
             } else {
               try {
-                String stdout = task.collectResults(this);
-                output.append(stdout);
+                task.collectResults(this);
                 if (task instanceof RunRecipeTask) {
                   // If this task is an experiment, try and download the experiment results
                   // In contrast with 'collectResults' - the results will not necessarly be json objects,
@@ -585,7 +585,7 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   @Override
-  public String downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite)
+  public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite)
       throws KaramelException, IOException {
 
     connect();
@@ -604,6 +604,5 @@ public class SshMachine implements MachineInterface, Runnable {
     // If the file doesn't exist, it should quickly throw an IOException
     scp.download(remoteFilePath, localFilePath);
 
-    return IoUtils.readContentFromPath(localFilePath);
   }
 }
