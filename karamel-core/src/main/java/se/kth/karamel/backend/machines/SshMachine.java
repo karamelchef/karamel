@@ -282,9 +282,9 @@ public class SshMachine implements MachineInterface, Runnable {
               String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
               String log = LogService.loadLog(clusterName, machineEntity.getPublicIp(), task.getName());
               logger.error(log);
-              System.err.println("-------------------------------------------------------------------------------");
+              logger.error("-------------------------------------------------------------------------------\n");
               logger.error(String.format("End Log for Failed: '%s' '%s'", task.getName(), machineEntity.getId()));
-              System.err.println("-------------------------------------------------------------------------------");
+              logger.error("-------------------------------------------------------------------------------\n");
               break;
             } else {
               try {
