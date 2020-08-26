@@ -32,13 +32,13 @@ public class MakeSoloRbTask extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
       String httpProxy = System.getProperty("http.proxy");
-      if (httpProxy == null) {
+      if (httpProxy == null || httpProxy.isEmpty()) {
         httpProxy = "";
       } else {
         httpProxy = "http_proxy \"" + httpProxy + "\"";
       }
       String httpsProxy = System.getProperty("https.proxy");      
-      if (httpsProxy == null) {
+      if (httpsProxy == null || httpsProxy.isEmpty()) {
         httpsProxy = "";
       } else {
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";	  

@@ -18,7 +18,6 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <!--jclouds.version>2.1.3</jclouds.version-->
     <jclouds.version>2.2.1</jclouds.version>
     <java.compiler.version>1.8</java.compiler.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
