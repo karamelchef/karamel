@@ -278,11 +278,11 @@ public class SshMachine implements MachineInterface, Runnable {
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
                   cmd.getCmdStr()));
-              logger.error("=================Start Failed Task log=================");
+              logger.error("\n=================Start Failed " + task.getName() + " log=================\n");
               String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
               String log = LogService.loadLog(clusterName, machineEntity.getPublicIp(), task.getName());
               logger.error(log);
-              logger.error("=================End Failed Task log=================");
+              logger.error("\n=================End Failed \" + task.getName() + \" log=================\n");
               break;
             } else {
               try {
