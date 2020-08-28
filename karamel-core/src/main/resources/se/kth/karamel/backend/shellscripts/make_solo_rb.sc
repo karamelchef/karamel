@@ -3,6 +3,8 @@ set -eo pipefail
 %sudo_command% touch solo.rb
 %sudo_command% chmod 777 solo.rb
 
+%start_gems_server%
+
 cat > solo.rb <<-'END_OF_FILE'
 file_cache_path "/tmp/chef-solo"
 cookbook_path [%cookbooks_path%]

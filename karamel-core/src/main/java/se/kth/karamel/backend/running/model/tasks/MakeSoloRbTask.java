@@ -6,9 +6,12 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.bouncycastle.util.encoders.UrlBase64;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
@@ -47,8 +50,12 @@ public class MakeSoloRbTask extends Task {
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";	  
       }
       String gemsUrl = gemsServerUrl;
+      String startGemsServer = "";
       if (!gemsUrl.isEmpty()) {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
+        URL url = new URL(gemsServerUrl);
+        startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
+                "--dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
@@ -58,6 +65,7 @@ public class MakeSoloRbTask extends Task {
           "https_proxy", httpsProxy,
           "sudo_command", getSudoCommand(),
           "gems_server_url", gemsUrl,
+          "start_gems_server", startGemsServer,
           "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
