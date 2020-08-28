@@ -223,7 +223,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         noSudoPasswd = true;
       }
       if (line.hasOption("gemserver")) {
-        gemsServerUrl = line.getOptionValue("url");
+        gemsServerUrl = line.getOptionValue("gemserver");
+        System.out.println("gem url" + gemsServerUrl);
         try {
           new URL(gemsServerUrl);
         } catch (MalformedURLException malformedURLException) {
