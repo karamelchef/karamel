@@ -124,6 +124,7 @@ public class Settings {
   public static final List<String> AWS_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
   public static final String AWS_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
+  public static final String GEMS_SERVER_URL = "gems.server.url";
   public static final String AWS_ACCESSKEY_KEY = "aws.access.key";
   public static final String AWS_ACCESSKEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRETKEY_KEY = "aws.secret.key";

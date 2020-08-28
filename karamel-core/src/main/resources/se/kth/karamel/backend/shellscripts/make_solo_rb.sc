@@ -8,4 +8,5 @@ file_cache_path "/tmp/chef-solo"
 cookbook_path [%cookbooks_path%]
 %http_proxy%
 %https_proxy%
+%gems_server_url%
 END_OF_FILE' > make_solo_rb.sh ; chmod +x make_solo_rb.sh ; ./make_solo_rb.sh

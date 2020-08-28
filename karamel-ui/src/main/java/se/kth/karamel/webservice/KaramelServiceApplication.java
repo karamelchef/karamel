@@ -14,12 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
@@ -104,8 +99,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static ServerSocket s;
   private static boolean cli = false;
   private static boolean headless = false;
-  private static boolean noSudoPasswd = false;
-
   static {
 // Ensure a single instance of the app is running
     try {
@@ -130,12 +123,18 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
-//    options.addOption("passwd", false, "Sudo password");
+    options.addOption(OptionBuilder.withArgName("url")
+            .hasArg()
+            .withDescription("URL for the Gems Server (default: http://www.rubygems.org)")
+            .create("gemserver"));
     options.addOption(OptionBuilder.withArgName("sudoPassword")
             .hasArg()
             .withDescription("Sudo password")
             .create("passwd"));
   }
+
+  private static boolean noSudoPasswd = false;
+  private static String gemsServerUrl = "";
 
   public static void create() {
     String name = "";
@@ -217,19 +216,20 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       } else {
         noSudoPasswd = true;
       }
+      if (line.hasOption("gemserver")) {
+        gemsServerUrl = line.getOptionValue("url");
+        try {
+          new URL(gemsServerUrl);
+        } catch (MalformedURLException malformedURLException) {
+          String message = "Invalid URL: " + gemsServerUrl;
+          logger.error(message);
+          System.exit(-5);
+        }
+      }
 
       if (cli) {
 
         ClusterManager.EXIT_ON_COMPLETION = true;
-//        if (!noSudoPasswd) {
-//          Console c = null;
-//          c = System.console();
-//          if (c == null) {
-//            System.err.println("No console available.");
-//            System.exit(1);
-//          }
-//          sudoPasswd = c.readLine("Enter your sudo password (just press 'enter' if you don't have one):");
-//        }
         new KaramelServiceApplication().run(modifiedArgs);
         Thread.currentThread().sleep(2000);
 
@@ -242,6 +242,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         if (!noSudoPasswd && sudoPasswd.isEmpty() == false) {
           karamelApi.registerSudoPassword(sudoPasswd);
         }
+
+        karamelApi.registerGemsServerUrl(gemsServerUrl);
 
         SshKeyPair pair = karamelApi.loadSshKeysIfExist();
 

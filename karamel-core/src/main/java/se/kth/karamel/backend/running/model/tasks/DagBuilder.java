@@ -344,7 +344,8 @@ public class DagBuilder {
         }
         AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
         InstallChefdkTask t2 = new InstallChefdkTask(me, clusterStats, submitter);
-        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
+        MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter,
+                confs.getProperty(Settings.GEMS_SERVER_URL));
         dag.addTask(t1);
         dag.addTask(t2);
         dag.addTask(t3);

@@ -22,10 +22,13 @@ import se.kth.karamel.common.util.Settings;
 public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
+  private final String gemsServerUrl;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter,
+                        String gemsServerUrl) {
     super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
+    this.gemsServerUrl = gemsServerUrl;
   }
 
   @Override
@@ -43,12 +46,14 @@ public class MakeSoloRbTask extends Task {
       } else {
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";	  
       }
+
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "cookbooks_path", vendorPath,
           "http_proxy", httpProxy,
           "https_proxy", httpsProxy,
           "sudo_command", getSudoCommand(),
+          "gems_server_url", gemsServerUrl,
           "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
