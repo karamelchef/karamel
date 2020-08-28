@@ -55,7 +55,7 @@ public class MakeSoloRbTask extends Task {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
-                "--dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
+                " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
