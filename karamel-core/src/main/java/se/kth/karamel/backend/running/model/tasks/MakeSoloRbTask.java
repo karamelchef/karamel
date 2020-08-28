@@ -46,6 +46,10 @@ public class MakeSoloRbTask extends Task {
       } else {
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";	  
       }
+      String gemsUrl = gemsServerUrl;
+      if (!gemsUrl.isEmpty()) {
+        gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
+      }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
@@ -53,7 +57,7 @@ public class MakeSoloRbTask extends Task {
           "http_proxy", httpProxy,
           "https_proxy", httpsProxy,
           "sudo_command", getSudoCommand(),
-          "gems_server_url", gemsServerUrl,
+          "gems_server_url", gemsUrl,
           "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
