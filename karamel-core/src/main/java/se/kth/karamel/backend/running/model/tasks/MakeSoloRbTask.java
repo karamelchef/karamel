@@ -53,7 +53,7 @@ public class MakeSoloRbTask extends Task {
       if (!gemsUrl.isEmpty()) {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
-        startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
+        startGemsServer = "setsid /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
                 " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
       }
 
