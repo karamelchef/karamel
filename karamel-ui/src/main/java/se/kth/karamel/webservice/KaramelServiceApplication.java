@@ -227,7 +227,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         System.out.println("gem url" + gemsServerUrl);
         try {
           URL gemUrl = new URL(gemsServerUrl);
-          if (gemUrl.getPort() > 1024) {
+          if (gemUrl.getPort() < 1024) {
             String message = "Invalid port for gemserver URL (must be > 1024) : " + gemUrl.getPort();
             logger.error(message);
             System.exit(-57);
