@@ -7,6 +7,8 @@ if [ $? -ne 0 ] ; then
 fi
 %sudo_command% chmod 777 solo.rb
 
+echo "Making solo.rb"
+
 if [ "%gem_server_port%" != "" ] ; then
   %sudo_command% netstat -ltpn | grep %gem_server_port%
   if [ $? -ne 0 ] ; then
