@@ -50,9 +50,11 @@ public class MakeSoloRbTask extends Task {
       }
       String gemsUrl = gemsServerUrl;
       String startGemsServer = "";
+      String gemsServerPort = "";
       if (!gemsUrl.isEmpty()) {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
+        gemsServerPort = Integer.toString(url.getPort());
         startGemsServer = "setsid /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
                 " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
       }
@@ -64,6 +66,7 @@ public class MakeSoloRbTask extends Task {
           "https_proxy", httpsProxy,
           "sudo_command", getSudoCommand(),
           "gems_server_url", gemsUrl,
+          "gem_server_port", gemsServerPort,
           "start_gems_server", startGemsServer,
           "pid_file", Settings.PID_FILE_NAME);
     }

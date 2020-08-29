@@ -23,6 +23,7 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
+import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.Task;
@@ -340,6 +341,9 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             session = client.startSession();
             if (task.isSudoTerminalReqd()) {
+              session.allocateDefaultPTY();
+            }
+            if (task instanceof MakeSoloRbTask) {
               session.allocateDefaultPTY();
             }
             numSessionRetries = -1;

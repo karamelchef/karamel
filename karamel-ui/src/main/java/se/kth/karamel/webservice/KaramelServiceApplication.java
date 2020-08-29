@@ -226,7 +226,12 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
         gemsServerUrl = line.getOptionValue("gemserver");
         System.out.println("gem url" + gemsServerUrl);
         try {
-          new URL(gemsServerUrl);
+          URL gemUrl = new URL(gemsServerUrl);
+          if (gemUrl.getPort() > 1024) {
+            String message = "Invalid port for gemserver URL (must be > 1024) : " + gemUrl.getPort();
+            logger.error(message);
+            System.exit(-57);
+          }
         } catch (MalformedURLException malformedURLException) {
           String message = "Invalid URL: " + gemsServerUrl;
           logger.error(message);
