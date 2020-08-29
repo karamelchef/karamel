@@ -23,6 +23,7 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
+import se.kth.karamel.backend.running.model.tasks.MakeSoloRbTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.Task;
@@ -373,11 +374,17 @@ public class SshMachine implements MachineInterface, Runnable {
         try {
           String cmdStr = shellCommand.getCmdStr();
           String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+          String execCmd = cmdStr;
           if (password != null && !password.isEmpty()) {
-            cmd = session.exec(cmdStr.replaceAll("%password_hidden%", password));
-          } else {
-            cmd = session.exec(cmdStr);
+            execCmd = cmdStr.replaceAll("%password_hidden%", password);
           }
+          cmd = session.exec(execCmd);
+
+          if (task instanceof MakeSoloRbTask) {
+            // Jim: I have no idea why, but i have to execute this script twice if it starts a gem server
+            cmd = session.exec(execCmd);
+          }
+
           cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
           updateHeartbeat();
           if (cmd.getExitStatus() != 0) {
