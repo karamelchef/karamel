@@ -8,11 +8,11 @@ fi
 %sudo_command% chmod 777 solo.rb
 
 if [ "%gem_server_port%" != "" ] ; then
-  netstat -ltpn | grep %gem_server_port%
+  %sudo_command% netstat -ltpn | grep %gem_server_port%
   if [ $? -ne 0 ] ; then
     %sudo_command% %start_gems_server%
     if [ $? -ne 0 ] ; then
-      echo "Problem start local gem server with command: "
+      echo "Problem starting local gem server with command: "
       echo "%start_gems_server%"
       exit 12
     fi
