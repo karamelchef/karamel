@@ -14,11 +14,15 @@ if [ "%gem_server_port%" != "" ] ; then
   %sudo_command% netstat -ltpn | grep %gem_server_port%
   if [ $? -ne 0 ] ; then
     echo "Starting gem server" >> make_solo.log
+    echo "%sudo_command% %start_gems_server%" >> make_solo.log
     %sudo_command% %start_gems_server%
+    sleep 2
+    %sudo_command% netstat -ltpn | grep %gem_server_port%
     if [ $? -ne 0 ] ; then
       echo "Retrying gem server" >> make_solo.log
-      sleep 2
       %sudo_command% %start_gems_server%
+      sleep 2
+      %sudo_command% netstat -ltpn | grep %gem_server_port%
       if [ $? -ne 0 ] ; then
         echo "Problem starting local gem server with command: " >> make_solo.log
         echo "%start_gems_server%" >> make_solo.log
