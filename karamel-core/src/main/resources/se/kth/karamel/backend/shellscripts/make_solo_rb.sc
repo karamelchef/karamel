@@ -7,23 +7,29 @@ if [ $? -ne 0 ] ; then
 fi
 %sudo_command% chmod 777 solo.rb
 
-echo "Making solo.rb"
+echo "Making solo.rb" > make_solo.log
 
 if [ "%gem_server_port%" != "" ] ; then
+  echo "ported" >> make_solo.og
   %sudo_command% netstat -ltpn | grep %gem_server_port%
   if [ $? -ne 0 ] ; then
+    echo "Starting gem server" >> make_solo.log
     %sudo_command% %start_gems_server%
     if [ $? -ne 0 ] ; then
-      echo "Trying again"
+      echo "Retrying gem server" >> make_solo.log
       sleep 2
       %sudo_command% %start_gems_server%
       if [ $? -ne 0 ] ; then
-        echo "Problem starting local gem server with command: "
-        echo "%start_gems_server%"
+        echo "Problem starting local gem server with command: " >> make_solo.log
+        echo "%start_gems_server%" >> make_solo.log
         exit 12
       fi
     fi
+  else
+    echo "gem server already running" >> make_solo.log
   fi
+else
+  echo "Not starting gem server" >> make_solo.log
 fi
 
 cat > solo.rb <<-'END_OF_FILE'
