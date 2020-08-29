@@ -224,7 +224,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
       if (line.hasOption("gemserver")) {
         gemsServerUrl = line.getOptionValue("gemserver");
-        System.out.println("gem url" + gemsServerUrl);
         try {
           URL gemUrl = new URL(gemsServerUrl);
           if (gemUrl.getPort() < 1024) {
