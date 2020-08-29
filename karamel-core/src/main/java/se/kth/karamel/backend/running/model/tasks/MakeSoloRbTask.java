@@ -55,8 +55,10 @@ public class MakeSoloRbTask extends Task {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         gemsServerPort = Integer.toString(url.getPort());
-        startGemsServer = "setsid /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
-                " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems &";
+        // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open
+        // https://superuser.com/questions/449193/nohup-over-ssh-wont-return
+        startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
+                " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems  >/dev/null 2>&1 &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
@@ -88,5 +90,10 @@ public class MakeSoloRbTask extends Task {
     String id = InstallChefdkTask.makeUniqueId(getMachineId());
     deps.add(id);
     return deps;
+  }
+
+  @Override
+  public boolean isSudoTerminalReqd() {
+    return true;
   }
 }

@@ -343,9 +343,6 @@ public class SshMachine implements MachineInterface, Runnable {
             if (task.isSudoTerminalReqd()) {
               session.allocateDefaultPTY();
             }
-            if (task instanceof MakeSoloRbTask) {
-              session.allocateDefaultPTY();
-            }
             numSessionRetries = -1;
           } catch (ConnectionException | TransportException ex) {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
