@@ -380,11 +380,6 @@ public class SshMachine implements MachineInterface, Runnable {
           }
           cmd = session.exec(execCmd);
 
-          if (task instanceof MakeSoloRbTask) {
-            // Jim: I have no idea why, but i have to execute this script twice if it starts a gem server
-            cmd = session.exec(execCmd);
-          }
-
           cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
           updateHeartbeat();
           if (cmd.getExitStatus() != 0) {

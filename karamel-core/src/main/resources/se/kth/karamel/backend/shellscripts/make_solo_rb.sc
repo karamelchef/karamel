@@ -14,9 +14,14 @@ if [ "%gem_server_port%" != "" ] ; then
   if [ $? -ne 0 ] ; then
     %sudo_command% %start_gems_server%
     if [ $? -ne 0 ] ; then
-      echo "Problem starting local gem server with command: "
-      echo "%start_gems_server%"
-      exit 12
+      echo "Trying again"
+      sleep 2
+      %sudo_command% %start_gems_server%
+      if [ $? -ne 0 ] ; then
+        echo "Problem starting local gem server with command: "
+        echo "%start_gems_server%"
+        exit 12
+      fi
     fi
   fi
 fi
