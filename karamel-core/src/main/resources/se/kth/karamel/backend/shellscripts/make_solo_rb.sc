@@ -11,20 +11,20 @@ echo "Making solo.rb" > make_solo.log
 
 if [ "%start_gems_server%" != "" ] ; then
   echo "ported" >> make_solo.log
-  %sudo_command% netstat -ltpn | grep %gem_server_port%
+  %sudo_command% netstat -ltpn | grep %gems_server_port%
   if [ $? -ne 0 ] ; then
     local_ip=$(ip a s|sed -ne '/127.0.0.1/!{s/^[ \\t]*inet[ \\t]*\\([0-9.]\\+\\)\\/.*$/\\1/p}')
-    if [ "%gem_server_host%" == "$local_ip" ] ; then
+    if [ "%gems_server_host%" == "$local_ip" ] ; then
       echo "Starting gem server" >> make_solo.log
       echo "%sudo_command% %start_gems_server%" >> make_solo.log
       %sudo_command% %start_gems_server%
       sleep 2
-      %sudo_command% netstat -ltpn | grep %gem_server_port%
+      %sudo_command% netstat -ltpn | grep %gems_server_port%
       if [ $? -ne 0 ] ; then
         echo "Retrying gem server" >> make_solo.log
         %sudo_command% %start_gems_server%
         sleep 2
-        %sudo_command% netstat -ltpn | grep %gem_server_port%
+        %sudo_command% netstat -ltpn | grep %gems_server_port%
         if [ $? -ne 0 ] ; then
           echo "Problem starting local gem server with command: " >> make_solo.log
           echo "%start_gems_server%" >> make_solo.log

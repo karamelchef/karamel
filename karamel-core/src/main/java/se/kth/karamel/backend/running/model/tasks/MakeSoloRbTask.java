@@ -76,8 +76,8 @@ public class MakeSoloRbTask extends Task {
         "https_proxy", httpsProxy,
         "sudo_command", getSudoCommand(),
         "gems_server_url", gemsUrl,
-        "gem_server_port", gemsServerPort,
-        "gem_server_host", gemsServerHost,
+        "gems_server_port", gemsServerPort,
+        "gems_server_host", gemsServerHost,
         "start_gems_server", startGemsServer,
         "pid_file", Settings.PID_FILE_NAME);
     }
