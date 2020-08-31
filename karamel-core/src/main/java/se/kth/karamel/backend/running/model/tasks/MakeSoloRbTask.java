@@ -57,14 +57,12 @@ public class MakeSoloRbTask extends Task {
       String gemsUrl = gemsServerUrl;
       String startGemsServer = "";
       String gemsServerPort = "";
-      String gemsServerHost = "";
       String gemsDir = "";
       String gemsSrcDir = "";
       if (!gemsUrl.isEmpty()) {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         gemsServerPort = Integer.toString(url.getPort());
-        gemsServerHost = url.getHost();
         gemsSrcDir = Paths.get("repo/gems").toAbsolutePath().toString();
         String baseDir = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION;
         gemsDir = baseDir + "/cache";
@@ -84,7 +82,6 @@ public class MakeSoloRbTask extends Task {
         "gems_src_dir", gemsSrcDir,
         "gems_server_url", gemsUrl,
         "gems_server_port", gemsServerPort,
-        "gems_server_host", gemsServerHost,
         "start_gems_server", startGemsServer,
         "pid_file", Settings.PID_FILE_NAME);
     }

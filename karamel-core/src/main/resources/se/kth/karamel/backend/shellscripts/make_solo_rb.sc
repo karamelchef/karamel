@@ -13,8 +13,8 @@ if [ "%start_gems_server%" != "" ] ; then
   echo "ported" >> make_solo.log
   %sudo_command% netstat -ltpn | grep %gems_server_port%
   if [ $? -ne 0 ] ; then
-    local_ip=$(hostname -I | cut -d" " -f1)
-    if [ "%gems_server_host%" == "$local_ip" ] ; then
+    # Only start the gem server on the head karamel node
+    if [ -d %gems_src_dir% ] ; then
       %sudo_command% cp -f %gems_src_dir%/*.gem %gems_dir%/
       echo "Starting gem server" >> make_solo.log
       echo "%sudo_command% %start_gems_server%" >> make_solo.log
