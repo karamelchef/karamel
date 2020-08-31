@@ -110,50 +110,53 @@ public class MakeSoloRbTask extends Task {
   }
 
   private void startGemsServer(Integer port) {
-    List<String> subcommands = new ArrayList<>();
-    String path = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems";
-    subcommands.add(getSudoCommand());
-    subcommands.add("nohup");
-    subcommands.add("/opt/chefdk/embedded/bin/gem server");
-    subcommands.add("--port");
-    subcommands.add(port.toString());
-    subcommands.add("--dir");
-    subcommands.add(path);
+    try {
+      List<String> subcommands = new ArrayList<>();
+      String path = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems";
+      subcommands.add(getSudoCommand());
+      subcommands.add("nohup");
+      subcommands.add("/opt/chefdk/embedded/bin/gem server");
+      subcommands.add("--port");
+      subcommands.add(port.toString());
+      subcommands.add("--dir");
+      subcommands.add(path);
 //    subcommands.add(">/dev/null");
 //    subcommands.add("2>&1");
-    subcommands.add("&");
+      subcommands.add("&");
 
-    logger.info("Gem server command: ");
-    subcommands.forEach(System.out::println);
+      logger.info("Gem server command: ");
+      subcommands.forEach(System.out::println);
 
-    File cwd = new File(path);
+      File cwd = new File(path);
 
-    ProcessBuilder processBuilder = new ProcessBuilder(subcommands);
-    processBuilder.directory(cwd);
-    processBuilder.redirectErrorStream(true);
+      ProcessBuilder processBuilder = new ProcessBuilder(subcommands);
+      processBuilder.directory(cwd);
+      processBuilder.redirectErrorStream(true);
 
-    Process process = null;
-    try {
-      process = processBuilder.start();
-    } catch (IOException e) {
-      e.printStackTrace();
-      logger.error("Could not start gem server");
+      Process process = null;
+      try {
+        process = processBuilder.start();
+      } catch (IOException e) {
+        e.printStackTrace();
+        logger.error("Could not start gem server");
+      }
+      ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+      ByteArrayOutputStream errStream = new ByteArrayOutputStream();
+      boolean ignoreStreams = true;
+
+      StreamGobbler stderrGobbler;
+      StreamGobbler stdoutGobbler;
+
+      stderrGobbler = new StreamGobbler(process.getErrorStream(), errStream, ignoreStreams);
+      stdoutGobbler = new StreamGobbler(process.getInputStream(), outStream, ignoreStreams);
+      ExecutorService executorService = Executors.newSingleThreadExecutor();
+      executorService.submit(stderrGobbler);
+
+      ExecutorService executorService2 = Executors.newSingleThreadExecutor();
+      executorService2.submit(stdoutGobbler);
+    } catch (Exception e) {
+      logger.error("Problem starting gem server: " + e.getMessage());
     }
-    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-    ByteArrayOutputStream errStream = new ByteArrayOutputStream();
-    boolean ignoreStreams = true;
-
-    StreamGobbler stderrGobbler;
-    StreamGobbler stdoutGobbler;
-
-    stderrGobbler = new StreamGobbler(process.getErrorStream(), errStream, ignoreStreams);
-    stdoutGobbler = new StreamGobbler(process.getInputStream(), outStream, ignoreStreams);
-    ExecutorService executorService = Executors.newSingleThreadExecutor();
-    executorService.submit(stderrGobbler);
-
-    ExecutorService executorService2 = Executors.newSingleThreadExecutor();
-    executorService2.submit(stdoutGobbler);
-
   }
 
   private class StreamGobbler implements Runnable {
