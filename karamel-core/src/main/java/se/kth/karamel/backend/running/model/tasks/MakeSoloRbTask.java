@@ -65,16 +65,17 @@ public class MakeSoloRbTask extends Task {
       String gemsUrl = gemsServerUrl;
       String startGemsServer = "";
       String gemsServerPort = "";
+      String gemsServerHost = "";
       if (!gemsUrl.isEmpty()) {
         logger.info("Starting gems server");
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         gemsServerPort = Integer.toString(url.getPort());
-        startGemsServer(url.getPort());
+        gemsServerHost = url.getHost();
         // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open
         // https://superuser.com/questions/449193/nohup-over-ssh-wont-return
-//                startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
-//                        " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems  >/dev/null 2>&1 &";
+        startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
+          " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems  >/dev/null 2>&1 &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
@@ -85,6 +86,7 @@ public class MakeSoloRbTask extends Task {
         "sudo_command", getSudoCommand(),
         "gems_server_url", gemsUrl,
         "gem_server_port", gemsServerPort,
+        "gem_server_host", gemsServerHost,
         "start_gems_server", startGemsServer,
         "pid_file", Settings.PID_FILE_NAME);
     }
@@ -108,85 +110,4 @@ public class MakeSoloRbTask extends Task {
   public boolean isSudoTerminalReqd() {
     return true;
   }
-
-  private void startGemsServer(Integer port) {
-    try {
-      List<String> subcommands = new ArrayList<>();
-      String path = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems";
-      subcommands.add(getSudoCommand());
-      subcommands.add("nohup");
-      subcommands.add("/opt/chefdk/embedded/bin/gem server");
-      subcommands.add("--port");
-      subcommands.add(port.toString());
-      subcommands.add("--dir");
-      subcommands.add(path);
-//    subcommands.add(">/dev/null");
-//    subcommands.add("2>&1");
-      subcommands.add("&");
-
-      logger.info("Gem server command: ");
-      subcommands.forEach(System.out::println);
-
-      File cwd = new File(path);
-
-      ProcessBuilder processBuilder = new ProcessBuilder(subcommands);
-      processBuilder.directory(cwd);
-      processBuilder.redirectErrorStream(true);
-
-      Process process = null;
-      try {
-        process = processBuilder.start();
-      } catch (IOException e) {
-        e.printStackTrace();
-        logger.error("Could not start gem server");
-      }
-      ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-      ByteArrayOutputStream errStream = new ByteArrayOutputStream();
-      boolean ignoreStreams = true;
-
-      StreamGobbler stderrGobbler;
-      StreamGobbler stdoutGobbler;
-
-      stderrGobbler = new StreamGobbler(process.getErrorStream(), errStream, ignoreStreams);
-      stdoutGobbler = new StreamGobbler(process.getInputStream(), outStream, ignoreStreams);
-      ExecutorService executorService = Executors.newSingleThreadExecutor();
-      executorService.submit(stderrGobbler);
-
-      ExecutorService executorService2 = Executors.newSingleThreadExecutor();
-      executorService2.submit(stdoutGobbler);
-    } catch (Exception e) {
-      logger.error("Problem starting gem server: " + e.getMessage());
-    }
-  }
-
-  private class StreamGobbler implements Runnable {
-    private final static int KB = 1024;
-
-    private final InputStream in;
-    private final OutputStream out;
-    private final byte[] buffer;
-    private final boolean ignoreStream;
-
-    public StreamGobbler(InputStream in, OutputStream out, boolean ignoreStream) {
-      this.in = in;
-      this.out = out;
-      this.ignoreStream = ignoreStream;
-      this.buffer = new byte[4 * KB];
-    }
-
-    @Override
-    public void run() {
-      int bytesRead = 0;
-      try (BufferedInputStream bis = new BufferedInputStream(in)) {
-        while ((bytesRead = bis.read(buffer)) != -1) {
-          if (!ignoreStream) {
-            out.write(buffer, 0, bytesRead);
-          }
-        }
-      } catch (IOException ex) {
-        ex.printStackTrace(new PrintStream(out));
-      }
-    }
-  }
-
 }
