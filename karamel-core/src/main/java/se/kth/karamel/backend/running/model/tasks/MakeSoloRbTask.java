@@ -14,6 +14,7 @@ import se.kth.karamel.common.util.Settings;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,16 +58,20 @@ public class MakeSoloRbTask extends Task {
       String startGemsServer = "";
       String gemsServerPort = "";
       String gemsServerHost = "";
+      String gemsDir = "";
+      String gemsSrcDir = "";
       if (!gemsUrl.isEmpty()) {
-        logger.info("Starting gems server");
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         gemsServerPort = Integer.toString(url.getPort());
         gemsServerHost = url.getHost();
+        gemsSrcDir = Paths.get("repo/gems").toAbsolutePath().toString();
+        String baseDir = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION;
+        gemsDir = baseDir + "/cache";
         // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open
         // https://superuser.com/questions/449193/nohup-over-ssh-wont-return
         startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
-          " --dir /opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION + "/gems  >/dev/null 2>&1 &";
+          " --dir " + baseDir + "/gems," + baseDir + "/cache >/dev/null 2>&1 &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
@@ -75,6 +80,8 @@ public class MakeSoloRbTask extends Task {
         "http_proxy", httpProxy,
         "https_proxy", httpsProxy,
         "sudo_command", getSudoCommand(),
+        "gems_dir", gemsDir,
+        "gems_src_dir", gemsSrcDir,
         "gems_server_url", gemsUrl,
         "gems_server_port", gemsServerPort,
         "gems_server_host", gemsServerHost,
