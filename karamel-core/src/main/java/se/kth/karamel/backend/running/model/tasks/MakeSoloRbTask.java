@@ -13,6 +13,7 @@ import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * @author kamal
@@ -116,8 +119,8 @@ public class MakeSoloRbTask extends Task {
     subcommands.add(port.toString());
     subcommands.add("--dir");
     subcommands.add(path);
-    subcommands.add(">/dev/null");
-    subcommands.add("2>&1");
+//    subcommands.add(">/dev/null");
+//    subcommands.add("2>&1");
     subcommands.add("&");
 
     logger.info("Gem server command: ");
@@ -136,20 +139,20 @@ public class MakeSoloRbTask extends Task {
       e.printStackTrace();
       logger.error("Could not start gem server");
     }
-//        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-//        ByteArrayOutputStream errStream = new ByteArrayOutputStream();
-//        boolean ignoreStreams = true;
-//
-//        StreamGobbler stderrGobbler;
-//        StreamGobbler stdoutGobbler;
-//
-//        stderrGobbler = new StreamGobbler(process.getErrorStream(), errStream, ignoreStreams);
-//        stdoutGobbler = new StreamGobbler(process.getInputStream(), outStream, ignoreStreams);
-//        ExecutorService executorService = Executors.newSingleThreadExecutor();
-//        executorService.submit(stderrGobbler);
-//
-//        ExecutorService executorService2 = Executors.newSingleThreadExecutor();
-//        executorService2.submit(stdoutGobbler);
+    ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream errStream = new ByteArrayOutputStream();
+    boolean ignoreStreams = true;
+
+    StreamGobbler stderrGobbler;
+    StreamGobbler stdoutGobbler;
+
+    stderrGobbler = new StreamGobbler(process.getErrorStream(), errStream, ignoreStreams);
+    stdoutGobbler = new StreamGobbler(process.getInputStream(), outStream, ignoreStreams);
+    ExecutorService executorService = Executors.newSingleThreadExecutor();
+    executorService.submit(stderrGobbler);
+
+    ExecutorService executorService2 = Executors.newSingleThreadExecutor();
+    executorService2.submit(stdoutGobbler);
 
   }
 
