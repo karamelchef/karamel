@@ -15,7 +15,8 @@ if [ "%start_gems_server%" != "" ] ; then
   if [ $? -ne 0 ] ; then
     # Only start the gem server on the head karamel node
     if [ -d %gems_src_dir% ] ; then
-      %sudo_command% cp -f %gems_src_dir%/*.gem %gems_dir%/
+      %sudo_command% cp -f %gems_src_dir%/chefdk_gems.tgz /root
+      tar zxf /root/chefdk_gems.tgz -C /root
       echo "Starting gem server" >> make_solo.log
       echo "%sudo_command% %start_gems_server%" >> make_solo.log
       %sudo_command% %start_gems_server%

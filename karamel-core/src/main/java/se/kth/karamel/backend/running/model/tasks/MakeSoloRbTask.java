@@ -69,7 +69,7 @@ public class MakeSoloRbTask extends Task {
         // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open
         // https://superuser.com/questions/449193/nohup-over-ssh-wont-return
         startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
-          " --dir " + baseDir + "/gems," + baseDir + "/cache >/dev/null 2>&1 &";
+          " --dir " + baseDir + ",/root/.chefdk/gem/ruby/2.5.0 >/dev/null 2>&1 &";
       }
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
