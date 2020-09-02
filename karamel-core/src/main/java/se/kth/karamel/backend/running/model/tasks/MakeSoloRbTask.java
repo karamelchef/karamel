@@ -14,6 +14,7 @@ import se.kth.karamel.common.util.Settings;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +64,8 @@ public class MakeSoloRbTask extends Task {
         gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
         URL url = new URL(gemsServerUrl);
         gemsServerPort = Integer.toString(url.getPort());
-        gemsSrcDir = Paths.get("repo/gems").toAbsolutePath().toString();
+        // user.dir is the CWD, which should be the karamel-0.6 directory.
+        gemsSrcDir = System.getProperty("user.dir") + "/repo/gems";
         String baseDir = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION;
         gemsDir = baseDir + "/cache";
         // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open

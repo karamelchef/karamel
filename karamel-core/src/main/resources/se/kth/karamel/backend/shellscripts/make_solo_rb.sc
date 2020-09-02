@@ -9,7 +9,7 @@ fi
 
 echo "Making solo.rb" > make_solo.log
 
-if [ "%start_gems_server%" != "" ] ; then
+if [ "%gems_server_port%" != "" ] ; then
   echo "ported" >> make_solo.log
   %sudo_command% netstat -ltpn | grep %gems_server_port%
   if [ $? -ne 0 ] ; then

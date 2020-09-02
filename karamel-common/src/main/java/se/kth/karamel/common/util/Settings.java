@@ -69,6 +69,7 @@ public class Settings {
   public static final String CHEFDK_VERSION_KEY = "chefdk.version";
   public static final String CHEFDK_VERSION_DEFAULT = "3.7.23";
   public static final String GEM_SERVER_VERSION = "2.5.0";
+  public static final String KARAMEL_VERSION = "0.6";
 
   //-----------------------------------------------JCLOUDS--------------------------------------------------------------
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
