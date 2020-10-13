@@ -51,11 +51,11 @@ public class MakeSoloRbTask extends Task {
       if (httpsProxy == null || httpsProxy.isEmpty()) {
         httpsProxy = "";
       } else {
-        httpsProxy = "https_proxy \"" + httpsProxy + "\"";
-        // solo.rb wants the http_proxy set as well for download the gems
         if (httpProxy.isEmpty()) {
           httpProxy = "http_proxy \"" + httpsProxy + "\"";
         }
+        httpsProxy = "https_proxy \"" + httpsProxy + "\"";
+        // solo.rb wants the http_proxy set as well for download the gems
       }
       String gemsUrl = gemsServerUrl;
       String startGemsServer = "";
