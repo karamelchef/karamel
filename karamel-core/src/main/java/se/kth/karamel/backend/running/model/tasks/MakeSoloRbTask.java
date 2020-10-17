@@ -41,18 +41,15 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
-      String httpProxy = System.getProperty("http.proxy");
-      if (httpProxy == null || httpProxy.isEmpty()) {
-        httpProxy = "";
-      } else {
+      String httpProxy = System.getProperty("http.proxy", "");
+      String httpProxyCopy=httpProxy;
+      if (!httpProxy.isEmpty()) {
         httpProxy = "http_proxy \"" + httpProxy + "\"";
       }
-      String httpsProxy = System.getProperty("https.proxy");
-      if (httpsProxy == null || httpsProxy.isEmpty()) {
-        httpsProxy = "";
-      } else {
+      String httpsProxy = System.getProperty("https.proxy", "");
+      if (! httpsProxy.isEmpty()) {
         if (httpProxy.isEmpty()) {
-          httpProxy = "http_proxy \"" + httpsProxy + "\"";
+          httpProxy = "https_proxy \"" + httpsProxy + "\"";
         }
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";
         // solo.rb wants the http_proxy set as well for download the gems

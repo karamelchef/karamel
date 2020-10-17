@@ -105,6 +105,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
   private static ServerSocket s;
   private static boolean cli = false;
   private static boolean headless = false;
+  private static boolean githubValidate = true;
   static {
 // Ensure a single instance of the app is running
     try {
@@ -129,6 +130,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
             .create("launch"));
     options.addOption("scaffold", false, "Creates scaffolding for a new Chef/Karamel Cookbook.");
     options.addOption("headless", false, "Launch Karamel from a headless server (no terminal on the server).");
+//    options.addOption("novalidate", false, "Do not validate cluster yml attributes by connecting to Github.");
     options.addOption(OptionBuilder.withArgName("url")
             .hasArg()
             .withDescription("URL for the Gems Server (default: http://www.rubygems.org)")
@@ -206,6 +208,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       }
       if (line.hasOption("scaffold")) {
         create();
+      }
+      if (line.hasOption("novalidate")) {
+        githubValidate = false;
       }
       if (line.hasOption("server")) {
         modifiedArgs[1] = line.getOptionValue("server");
