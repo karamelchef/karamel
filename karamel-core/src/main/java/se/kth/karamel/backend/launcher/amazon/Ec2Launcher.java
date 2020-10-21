@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 import java.util.Set;
 import org.apache.log4j.Logger;
 import org.jclouds.aws.AWSResponseException;
@@ -250,6 +251,13 @@ public final class Ec2Launcher extends Launcher {
       options.iamInstanceProfileArn(ec2.getIamarn());
     }
 
+    //set security groups if any
+    if (ec2.getSecurityGroups() != null) {
+      String[] sgs = ec2.getSecurityGroups().split(",");
+      options.securityGroups(Arrays.asList(sgs));
+      logger.info("Security Groups: " + Arrays.asList(sgs));
+    }
+
     Confs confs = Confs.loadKaramelConfs();
     String prepStorages = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
     logger.info("Prepare storage is "+prepStorages);
@@ -289,14 +297,19 @@ public final class Ec2Launcher extends Launcher {
       template.os64Bit(true);
       template.hardwareId(ec2.getType());
       template.imageId(ec2.getRegion() + "/" + ec2.getAmi());
-      template.locationId(ec2.getRegion());
+      String locationID = ec2.getRegion();
+      if (ec2.getZone() != null) {
+        locationID += ec2.getZone();
+      }
+      template.locationId(locationID);
       tries++;
       Set<NodeMetadata> succ = new HashSet<>();
       try {
         logger.info(String.format("Forking %d "+ec2.getType()+" machine(s) "
                         +"for '%s', so far " + "(succeeded:%d, failed:%d, total:%d)",
             requestSize, uniqueGroupName, successfulNodes.size(), failedNodes.size(), numberToLaunch));
-        succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize, template.build()));
+        succ.addAll(context.getComputeService().createNodesInGroup(uniqueGroupName, requestSize,
+                template.build()));
         long finishTime = System.currentTimeMillis();
         numSuccess += succ.size();
       } catch (RunNodesException ex) {

@@ -33,10 +33,20 @@ public class InstallChefdkTask extends Task {
     if (commands == null) {
       Confs confs = Confs.loadKaramelConfs();
       String chefdkVersion = confs.getProperty(Settings.CHEFDK_VERSION_KEY);
+      String httpProxy = System.getProperty("http.proxy");
+      if (httpProxy == null) {
+        httpProxy = "";
+      }
+      String httpsProxy = System.getProperty("https.proxy");      
+      if (httpsProxy == null) {
+        httpsProxy = "";
+      }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_INSTALL_CHEFDK,
           "chefdk_version", chefdkVersion,
           "sudo_command", getSudoCommand(),
           "task_id", getId(),
+          "http_proxy", httpProxy,
+          "https_proxy", httpsProxy,
           "osfamily", osType.family.toString().toLowerCase(),
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "succeedtasks_filepath", Settings.SUCCEED_TASKLIST_FILENAME,

@@ -40,7 +40,7 @@ public class MachineRuntime {
   private String machineType;
   private OsType osType;
   private int locationDomainId = DEFAULT_LOCATION_DOMAIN_ID;
-  
+
   private final List<Task> tasks = new ArrayList<>();
 
   public MachineRuntime(GroupRuntime group) {
@@ -158,5 +158,5 @@ public class MachineRuntime {
   public void setLocationDomainId(int locdomainId) {
     this.locationDomainId = locdomainId;
   }
-  
+
 }

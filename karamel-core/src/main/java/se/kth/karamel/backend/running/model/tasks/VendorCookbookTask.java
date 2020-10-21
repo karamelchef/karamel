@@ -14,6 +14,7 @@ import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
+import se.kth.karamel.backend.ClusterService;
 
 /**
  *
@@ -45,16 +46,28 @@ public class VendorCookbookTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     String cookbookPath = githubRepoName;
+    String githubuser = ClusterService.getInstance().getCommonContext().getGithubUsername();    
     if (subCookbookName != null && !subCookbookName.isEmpty()) {
       cookbookPath += Settings.SLASH + subCookbookName;
     }
     if (commands == null) {
+      String httpProxy = System.getProperty("http.proxy");
+      if (httpProxy == null) {
+        httpProxy = "";
+      }
+      String httpsProxy = System.getProperty("https.proxy");      
+      if (httpsProxy == null) {
+        httpsProxy = "";
+      }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,
           "github_repo_name", githubRepoName,
+          "github_username", githubuser,							   
           "cookbook_path", cookbookPath,
           "github_repo_url", githubRepoUrl,
           "branch_name", branch,
+          "http_proxy", httpProxy,
+          "https_proxy", httpsProxy,
           "vendor_path", Settings.REMOTE_COOKBOOK_VENDOR_PATH(getSshUser(), githubRepoName),
           "sudo_command", getSudoCommand(),
           "task_id", getId(),

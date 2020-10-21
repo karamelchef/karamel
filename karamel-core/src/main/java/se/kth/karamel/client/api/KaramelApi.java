@@ -308,4 +308,14 @@ public interface KaramelApi {
   public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
 
   public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
+
+
+  /**
+   * Register URL for gemserver
+   *
+   * @param url
+   * @throws KaramelException
+   */
+  public void registerGemsServerUrl(String url) throws KaramelException;
+
 }

@@ -232,6 +232,13 @@ public class KaramelApiImpl implements KaramelApi {
   }
 
   @Override
+  public void registerGemsServerUrl(String url) throws KaramelException {
+    Confs confs = Confs.loadKaramelConfs();
+    confs.put(Settings.GEMS_SERVER_URL, url);
+    confs.writeKaramelConfs();
+  }
+
+  @Override
   public String getClusterStatus(String clusterName) throws KaramelException {
     ClusterRuntime clusterManager = clusterService.clusterStatus(clusterName);
     GsonBuilder builder = new GsonBuilder();

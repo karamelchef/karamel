@@ -61,6 +61,7 @@ public class FindOsTypeTask extends Task {
 
   @Override
   public void collectResults(MachineInterface sshMachine) throws KaramelException {
+    String content = "";
     String sshUser = getMachine().getSshUser();
     String clusterName = getMachine().getGroup().getCluster().getName();
     String publicIp = getMachine().getPublicIp();
@@ -73,7 +74,7 @@ public class FindOsTypeTask extends Task {
       return;
     }
     try {
-      String content = IoUtils.readContentFromPath(localResultsFile);
+      content = IoUtils.readContentFromPath(localResultsFile);
       content = content.trim().toLowerCase();
       if (content.isEmpty()) {
         throw new KaramelException(String.format("The OS-Type file for %s is empty", publicIp));
@@ -84,7 +85,6 @@ public class FindOsTypeTask extends Task {
       String msg = String.format("Cannot find the results file for ostype in %s ", publicIp);
       throw new KaramelException(msg, ex);
     }
-
   }
 
 }

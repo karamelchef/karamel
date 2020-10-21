@@ -350,6 +350,8 @@ function Ec2() {
   this.accessKey = null;
   this.secretKey = null;
   this.iamarn = null;
+  this.zone = null;
+  this.securityGroups = null;  
 
   this.load = function(other) {
     this.type = other.type || null;
@@ -360,6 +362,8 @@ function Ec2() {
     this.vpc = other.vpc || null;
     this.subnet = other.subnet || null;
     this.iamarn = other.iamarn || null;
+    this.zone = other.zone || null;
+    this.securityGroups = other.securityGroups || null;
   };
 
   this.copy = function(other) {
@@ -373,6 +377,8 @@ function Ec2() {
     this.accessKey = other.accessKey || null;
     this.secretKey = other.secretKey || null;
     this.iamarn = other.iamarn || null;
+    this.zone = other.zone || null;
+    this.securityGroups = other.securityGroups || null;
   };
 
   this.addAccountDetails = function(other) {
@@ -841,6 +847,8 @@ function toCoreApiFormat(uiCluster) {
     this.vpc = null;
     this.subnet = null;
     this.iamarm = null;
+    this.zone = null;
+    this.securityGroups = null;
 
     this.load = function(other) {
       this.type = other.type || null;
@@ -851,6 +859,8 @@ function toCoreApiFormat(uiCluster) {
       this.vpc = other.vpc || null;
       this.subnet = other.subnet || null;
       this.iamarn = other.iamarn || null;
+      this.zone = other.zone || null;
+      this.securityGroups = other.securityGroups || null;
     }
   }
 
