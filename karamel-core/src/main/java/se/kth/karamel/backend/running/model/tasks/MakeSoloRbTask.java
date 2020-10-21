@@ -31,6 +31,9 @@ public class MakeSoloRbTask extends Task {
                         String gemsServerUrl) {
     super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
+    if (gemsServerUrl == null) {
+      gemsServerUrl = "";
+    }
     this.gemsServerUrl = gemsServerUrl;
   }
 
@@ -42,13 +45,19 @@ public class MakeSoloRbTask extends Task {
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
       String httpProxy = System.getProperty("http.proxy", "");
+      String httpsProxy = System.getProperty("https.proxy", "");
       if (!httpProxy.isEmpty()) {
+        if (httpsProxy.isEmpty()) {
+          httpsProxy = "https_proxy \"" + httpsProxy + "\"";
+        }
         httpProxy = "http_proxy \"" + httpProxy + "\"";
       }
-      String httpsProxy = System.getProperty("https.proxy", "");
-      if (! httpsProxy.isEmpty()) {
+      if (!httpsProxy.isEmpty()) {
+        // solo.rb needs http_proxy to be set as well for downloading the gems
+        if (httpProxy.isEmpty()) {
+          httpProxy = "http_proxy \"" + httpsProxy + "\"";
+        }
         httpsProxy = "https_proxy \"" + httpsProxy + "\"";
-        // solo.rb wants the http_proxy set as well for downloading the gems
       }
       String gemsUrl = gemsServerUrl;
       String startGemsServer = "";
@@ -68,6 +77,9 @@ public class MakeSoloRbTask extends Task {
         startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
           " --dir " + baseDir + ",/root/.chefdk/gem/ruby/2.5.0 >/dev/null 2>&1 &";
       }
+
+      logger.info("http_proxy: " + httpProxy);
+      logger.info("https_proxy: " + httpsProxy);
 
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
         "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
