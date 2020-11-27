@@ -8,7 +8,7 @@ if [ %osfamily% == "redhat" ] ; then
     chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 
     rm -f "$chefdkfile"
-    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
+    wget "https://repo.hops.works/master/chef/$chefdkfile"
 
     %sudo_command% yum install -y "$chefdkfile"
     RES=$?
@@ -24,7 +24,7 @@ elif [ %osfamily% == "ubuntu" ] ; then
   if [ $? -ne 0 ] ; then
     chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
     rm -f "$chefdkfile"
-    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
+    wget "https://repo.hops.works/master/chef/$chefdkfile"
 
     %sudo_command% dpkg -i "$chefdkfile"
     RES=$?
