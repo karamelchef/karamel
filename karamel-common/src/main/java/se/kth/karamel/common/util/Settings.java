@@ -12,6 +12,7 @@ import org.jclouds.ec2.domain.InstanceType;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -286,7 +287,7 @@ public class Settings {
   }
 
   public static String REMOTE_USER_HOME_PATH(String sshUserName) {
-    return REMOTE_HOME_ROOT + "/" + sshUserName;
+    return USER_HOME != null ? USER_HOME : Paths.get(REMOTE_HOME_ROOT, sshUserName).toString();
   }
 
   public static String REMOTE_WORKING_DIR_PATH(String sshUserName) {
