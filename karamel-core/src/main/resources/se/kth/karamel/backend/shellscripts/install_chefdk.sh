@@ -39,7 +39,7 @@ else
 fi
 if [ $RES -eq 0 ] ; then
   # Fix for expired Lets Encrypt CA
-  %sudo_command% sed -ie '/DST Root CA X3/,+19d' /opt/chefdk/embedded/ssl/certs/cacert.pem
+  %sudo_command% sed -ie "/DST Root CA X3/,+19d" /opt/chefdk/embedded/ssl/certs/cacert.pem
   echo '%task_id%' >> %succeedtasks_filepath%
 fi
 exit $RES
