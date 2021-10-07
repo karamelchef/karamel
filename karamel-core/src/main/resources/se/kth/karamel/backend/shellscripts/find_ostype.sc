@@ -10,6 +10,19 @@ if [ \"$UNAME\" == \"linux\" ]; then
     # Otherwise, use release info file
     else
         export DISTRO=$(ls -d /etc/[A-Za-z]*[_-][rv]e[lr]* | grep -v \"lsb\" | cut -d'/' -f3 | cut -d'-' -f1 | cut -d'_' -f1)
+        if [ "$DISTRO" == "Ubuntu" ] || [ "$DISTRO" == "centos" ] ; then
+            echo "Found os: $DISTRO"
+        else
+          # =~ is a case-insentive substring match
+          if [[ $DISTRO =~ "Ubuntu" ]]; then
+                DISTRO="Ubuntu"
+          elif [[ $DISTRO =~ "centos" ]] || [[ "$DISTRO" =~ "os" ]] ; then
+                DISTRO="CentOS"
+          else
+                echo "Could not recognize Linux distro: $DISTRO"
+                exit_error
+          fi
+        fi
     fi
 fi
 echo "$DISTRO" > %ostype_filename%

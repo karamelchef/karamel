@@ -1,5 +1,8 @@
 set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 
+export http_proxy=%http_proxy%
+export https_proxy=%https_proxy%
+
 RES=0
 if [ %osfamily% == "redhat" ] ; then
 
@@ -8,8 +11,12 @@ if [ %osfamily% == "redhat" ] ; then
     chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
 
     rm -f "$chefdkfile"
-    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
 
+    #
+    # If behind a proxy, check that $http_proxy or $https_proxy is set to the correct URL. 
+    # wget automatically sets a proxy if $http(s)_proxy is set.
+    #
+    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
     %sudo_command% yum install -y "$chefdkfile"
     RES=$?
     if [ $RES -ne 0 ] ; then
@@ -25,7 +32,6 @@ elif [ %osfamily% == "ubuntu" ] ; then
     chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
     rm -f "$chefdkfile"
     wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
-
     %sudo_command% dpkg -i "$chefdkfile"
     RES=$?
     if [ $RES -ne 0 ] ; then

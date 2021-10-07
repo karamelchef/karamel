@@ -79,7 +79,7 @@ public class CheckStickybitTmpTask extends Task {
       String msg = String.format("Cannot find the results file for ostype in %s ", publicIp);
       throw new KaramelException(msg, ex);
     }
-
+    return;
   }
 
 }

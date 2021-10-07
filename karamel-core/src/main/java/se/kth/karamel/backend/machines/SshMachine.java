@@ -5,43 +5,44 @@
  */
 package se.kth.karamel.backend.machines;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.SequenceInputStream;
-import java.nio.file.Files;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
-import org.apache.log4j.Logger;
-import se.kth.karamel.backend.running.model.MachineRuntime;
-import se.kth.karamel.backend.running.model.tasks.ShellCommand;
-import se.kth.karamel.backend.running.model.tasks.Task;
-import se.kth.karamel.backend.running.model.tasks.Task.Status;
-import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.exception.KaramelException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import java.security.Security;
-import java.util.ArrayList;
-import java.util.Arrays;
 import net.schmizz.sshj.userauth.UserAuthException;
+import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
 import net.schmizz.sshj.xfer.scp.SCPFileTransfer;
+import org.apache.log4j.Logger;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import se.kth.karamel.backend.ClusterService;
 import se.kth.karamel.backend.LogService;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.Failure;
+import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.KillSessionTask;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.backend.running.model.tasks.ShellCommand;
+import se.kth.karamel.backend.running.model.tasks.Task;
+import se.kth.karamel.backend.running.model.tasks.Task.Status;
+import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Confs;
 import se.kth.karamel.common.util.IoUtils;
+import se.kth.karamel.common.util.Settings;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.SequenceInputStream;
+import java.nio.file.Files;
+import java.security.Security;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -156,7 +157,7 @@ public class SshMachine implements MachineInterface, Runnable {
                 return;
               } else {
                 logger.error(
-                    String.format("%s: Got interrupted without having recieved stopping signal",
+                    String.format("%s: Got interrupted without having received a stopping signal",
                         machineEntity.getId()));
               }
             }
@@ -169,7 +170,7 @@ public class SshMachine implements MachineInterface, Runnable {
             } catch (InterruptedException ex) {
               if (!stopping) {
                 logger.error(
-                    String.format("%s: Got interrupted without having recieved stopping signal",
+                    String.format("%s: Got interrupted without having received a stopping signal",
                         machineEntity.getId()));
               }
             }
@@ -252,7 +253,7 @@ public class SshMachine implements MachineInterface, Runnable {
     if (!isSucceedTaskHistoryUpdated) {
       logger.debug("updating the task history");
       loadSucceedListFromMachineToMemory();
-      logger.debug("the taks history was updated");
+      logger.debug("the task history was updated");
       isSucceedTaskHistoryUpdated = true;
     }
     String skipConf = confs.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
@@ -277,6 +278,13 @@ public class SshMachine implements MachineInterface, Runnable {
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
                   cmd.getCmdStr()));
+              logger.error(String.format("Start log for Failed: '%s' '%s'", task.getName(), machineEntity.getId()));
+              String clusterName = machineEntity.getGroup().getCluster().getName().toLowerCase();
+              String log = LogService.loadLog(clusterName, machineEntity.getPublicIp(), task.getName());
+              logger.error(log);
+              logger.error("-------------------------------------------------------------------------------\n");
+              logger.error(String.format("End Log for Failed: '%s' '%s'", task.getName(), machineEntity.getId()));
+              logger.error("-------------------------------------------------------------------------------\n");
               break;
             } else {
               try {
@@ -296,7 +304,7 @@ public class SshMachine implements MachineInterface, Runnable {
               }
             }
           } else {
-            logger.debug(String.format("skiping this command, status is %s", cmd.getStatus().toString()));
+            logger.debug(String.format("skipping this command, status is %s", cmd.getStatus().toString()));
           }
         }
         if (task.getStatus() == Status.ONGOING) {
@@ -339,10 +347,10 @@ public class SshMachine implements MachineInterface, Runnable {
             logger.warn(String.format("%s: Couldn't start ssh session, will retry", machineEntity.getId()), ex);
             numSessionRetries--;
             if (numSessionRetries == -1) {
-              logger.error(String.format("%s: Exhasuted retrying to start a ssh session", machineEntity.getId()));
+              logger.error(String.format("%s: Exhausted retrying to start a ssh session", machineEntity.getId()));
               return;
             }
-            //make sure to relese the session in case of exception to avoid to many session leak problem
+            //make sure to release the session in case of exception to avoid to many session leak problem
             if (session != null) {
               try {
                 session.close();
@@ -365,16 +373,20 @@ public class SshMachine implements MachineInterface, Runnable {
         try {
           String cmdStr = shellCommand.getCmdStr();
           String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+          String execCmd = cmdStr;
           if (password != null && !password.isEmpty()) {
-            cmd = session.exec(cmdStr.replaceAll("%password_hidden%", password));
-          } else {
-            cmd = session.exec(cmdStr);
+            execCmd = cmdStr.replaceAll("%password_hidden%", password);
           }
+          cmd = session.exec(execCmd);
+
           cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
           updateHeartbeat();
           if (cmd.getExitStatus() != 0) {
             shellCommand.setStatus(ShellCommand.Status.FAILED);
-            // Retry just in case there was a network problem somewhere on the server side
+            // Retry just in case there was a network problem somewhere on the server
+
+            // Print failure to stderr
+
           } else {
             shellCommand.setStatus(ShellCommand.Status.DONE);
             finished = true;
@@ -594,5 +606,6 @@ public class SshMachine implements MachineInterface, Runnable {
     }
     // If the file doesn't exist, it should quickly throw an IOException
     scp.download(remoteFilePath, localFilePath);
+
   }
 }

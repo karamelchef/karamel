@@ -69,6 +69,8 @@ public class Settings {
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
   public static final String CHEFDK_VERSION_KEY = "chefdk.version";
   public static final String CHEFDK_VERSION_DEFAULT = "3.7.23";
+  public static final String GEM_SERVER_VERSION = "2.5.0";
+  public static final String KARAMEL_VERSION = "0.6";
 
   //-----------------------------------------------JCLOUDS--------------------------------------------------------------
   public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
@@ -125,6 +127,7 @@ public class Settings {
   public static final List<String> AWS_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
   public static final String AWS_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
 
+  public static final String GEMS_SERVER_URL = "gems.server.url";
   public static final String AWS_ACCESSKEY_KEY = "aws.access.key";
   public static final String AWS_ACCESSKEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
   public static final String AWS_SECRETKEY_KEY = "aws.secret.key";
@@ -134,6 +137,7 @@ public class Settings {
   public static final String AWS_BATCH_SIZE_KEY = "aws.batch.size";
   public static final int AWS_RETRY_INTERVAL = 6 * 1000;
   public static final int AWS_RETRY_MAX = 300;
+
 
   public static final String AWS_KEYPAIR_NAME(String clusterName, String region) {
     return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_ADDRESS).toLowerCase();

@@ -195,6 +195,7 @@ public class RunRecipeTask extends Task {
     String remoteFile = Settings.RECIPE_RESULT_REMOTE_PATH(getRecipeCanonicalName());
     String localResultsFile = Settings.RECIPE_RESULT_LOCAL_PATH(getRecipeCanonicalName(),
         getMachine().getGroup().getCluster().getName(), getMachine().getPublicIp());
+    String stdout;
     try {
       sshMachine.downloadRemoteFile(remoteFile, localResultsFile, true);
     } catch (IOException ex) {

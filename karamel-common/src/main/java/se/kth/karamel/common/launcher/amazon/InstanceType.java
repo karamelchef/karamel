@@ -228,6 +228,7 @@ public enum InstanceType {
   m5d_8xlarge   ("m5d.8xlarge"   , 32  , 2  , DiskType.NVMe_SSD),
   m5_16xlarge   ("m5.16xlarge"   , 64  , 1  , DiskType.EBS),
   c5d_9xlarge   ("c5d.9xlarge"   , 36  , 1  , DiskType.NVMe_SSD),
+  c5d_12xlarge  ("c5d.12xlarge"  , 48  , 2  , DiskType.NVMe_SSD),
   c5_12xlarge   ("c5.12xlarge"   , 48  , 1  , DiskType.EBS),
   c5n_4xlarge   ("c5n.4xlarge"   , 16  , 1  , DiskType.EBS),
   m5_8xlarge    ("m5.8xlarge"    , 32  , 1  , DiskType.EBS);
@@ -252,9 +253,9 @@ public enum InstanceType {
   }
 
   public StorageDevice[] getStorageDevices() {
-    if (diskType == DiskType.EBS) {
-      return new StorageDevice[0];
-    }
+//    if (diskType == DiskType.EBS) {
+//      return new StorageDevice[0];
+//    }
 
     StorageDevice[] devices = new StorageDevice[numDisks];
     for (int i = 0; i < numDisks; i++) {
@@ -266,7 +267,7 @@ public enum InstanceType {
         devices[i] = new StorageDevice(Settings.AWS_SSD_MAPPINGNAME_PREFIX+ (char)('b'+i),
                 "/mnt" +
                 "/ssd"+i, Settings.AWS_STORAGE_VIRTUALNAME_PREFIX +i);
-      } else if (diskType == DiskType.NVMe_SSD){
+      } else if (diskType == DiskType.NVMe_SSD || diskType == DiskType.EBS){
         devices[i] = new StorageDevice(Settings.AWS_NVME_MAPPINGNAME_PREFIX+ i+"n1", "/mnt" +
                 "/nvme_ssd"+i, Settings.AWS_STORAGE_VIRTUALNAME_PREFIX +i);
       } else {

@@ -5,43 +5,96 @@
  */
 package se.kth.karamel.backend.running.model.tasks;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import org.apache.log4j.Logger;
 import se.kth.karamel.backend.converter.ShellCommandBuilder;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.util.Settings;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
- *
  * @author kamal
  */
 public class MakeSoloRbTask extends Task {
 
+  private static final Logger logger = Logger.getLogger(MakeSoloRbTask.class);
   private final String vendorPath;
+  private final String gemsServerUrl;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter,
+                        String gemsServerUrl) {
     super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
+    if (gemsServerUrl == null) {
+      gemsServerUrl = "";
+    }
+    this.gemsServerUrl = gemsServerUrl;
+  }
+
+  public static String makeUniqueId(String machineId) {
+    return "make solo.rb on " + machineId;
   }
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
+      String httpProxy = System.getProperty("http.proxy", "");
+      String httpsProxy = System.getProperty("https.proxy", "");
+      if (!httpProxy.isEmpty()) {
+        if (httpsProxy.isEmpty()) {
+          httpsProxy = "https_proxy \"" + httpsProxy + "\"";
+        }
+        httpProxy = "http_proxy \"" + httpProxy + "\"";
+      }
+      if (!httpsProxy.isEmpty()) {
+        // solo.rb needs http_proxy to be set as well for downloading the gems
+        if (httpProxy.isEmpty()) {
+          httpProxy = "http_proxy \"" + httpsProxy + "\"";
+        }
+        httpsProxy = "https_proxy \"" + httpsProxy + "\"";
+      }
+      String gemsUrl = gemsServerUrl;
+      String startGemsServer = "";
+      String gemsServerPort = "";
+      String gemsDir = "";
+      String gemsSrcDir = "";
+      if (!gemsUrl.isEmpty()) {
+        gemsUrl = "rubygems_url \"" + gemsServerUrl + "/\"";
+        URL url = new URL(gemsServerUrl);
+        gemsServerPort = Integer.toString(url.getPort());
+        // user.dir is the CWD, which should be the karamel-0.6 directory.
+        gemsSrcDir = System.getProperty("user.dir") + "/repo/gems";
+        String baseDir = "/opt/chefdk/embedded/lib/ruby/gems/" + Settings.GEM_SERVER_VERSION;
+        gemsDir = baseDir + "/cache";
+        // Note: stdout/stdin have to be redirected for this command, otherwise the SSH connection will remain open
+        // https://superuser.com/questions/449193/nohup-over-ssh-wont-return
+        startGemsServer = "nohup /opt/chefdk/embedded/bin/gem server --port " + url.getPort() +
+          " --dir " + baseDir + ",/root/.chefdk/gem/ruby/2.5.0 >/dev/null 2>&1 &";
+      }
+
+      logger.info("http_proxy: " + httpProxy);
+      logger.info("https_proxy: " + httpsProxy);
+
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
-          "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
-          "cookbooks_path", vendorPath,
-          "sudo_command", getSudoCommand(),
-          "pid_file", Settings.PID_FILE_NAME);
+        "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
+        "cookbooks_path", vendorPath,
+        "http_proxy", httpProxy,
+        "https_proxy", httpsProxy,
+        "sudo_command", getSudoCommand(),
+        "gems_dir", gemsDir,
+        "gems_src_dir", gemsSrcDir,
+        "gems_server_url", gemsUrl,
+        "gems_server_port", gemsServerPort,
+        "start_gems_server", startGemsServer,
+        "pid_file", Settings.PID_FILE_NAME);
     }
     return commands;
-  }
-
-  public static String makeUniqueId(String machineId) {
-    return "make solo.rb on " + machineId;
   }
 
   @Override
@@ -55,5 +108,10 @@ public class MakeSoloRbTask extends Task {
     String id = InstallChefdkTask.makeUniqueId(getMachineId());
     deps.add(id);
     return deps;
+  }
+
+  @Override
+  public boolean isSudoTerminalReqd() {
+    return true;
   }
 }
