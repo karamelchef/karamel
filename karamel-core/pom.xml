@@ -89,6 +89,11 @@
       <version>2.4</version>
     </dependency>
     <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
+    </dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-client</artifactId>
       <version>1.19</version>
@@ -100,7 +105,7 @@
     <dependency>
       <groupId>org.kohsuke</groupId>
       <artifactId>github-api</artifactId>
-      <version>1.68</version>
+      <version>1.135</version>
     </dependency>
     <dependency>
       <groupId>cz.cesnet.cloud</groupId>

@@ -83,7 +83,7 @@ public class CookbookCacheIml implements CookbookCache {
       return new ArrayList<>(cookbooks.values());
     }
 
-    if (Settings.USE_CLONED_REPO_FILES) {
+    if (!Settings.USE_CLONED_REPO_FILES) {
       cloneAndVendorCookbooks(cluster.getCookbooks());
     }
 
