@@ -7,7 +7,7 @@ package se.kth.karamel.common;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
+//#import org.apache.commons.lang.StringUtils;
 
 /**
  *
@@ -36,17 +36,17 @@ public class TextTable {
     }
 
     if (rowNumbering) {
-      builder.append(StringUtils.repeat(" ", paddingLen + 2));
+//      builder.append(StringUtils.repeat(" ", paddingLen + 2));
     }
 
     //top line _______
-    builder.append(StringUtils.repeat("_", totalLegth));
+//builder.append(StringUtils.repeat("_", totalLegth));
 
     builder.append("\n");
 
-    if (rowNumbering) {
-      builder.append(StringUtils.repeat(" ", paddingLen + 2));
-    }
+//if (rowNumbering) {
+//      builder.append(StringUtils.repeat(" ", paddingLen + 2));
+//    }
 
     //title row
     for (int i = 0; i < columnNames.length; i++) {
@@ -57,10 +57,10 @@ public class TextTable {
 
     builder.append("\n");
     //botton line =====
-    if (rowNumbering) {
-      builder.append(StringUtils.repeat(" ", paddingLen + 2));
-    }
-    builder.append(StringUtils.repeat("=", totalLegth));
+//    if (rowNumbering) {
+//      builder.append(StringUtils.repeat(" ", paddingLen + 2));
+//    }
+//    builder.append(StringUtils.repeat("=", totalLegth));
     //data rows
     for (int x = 0; x < data.length; x++) {
       Object[] row = data[x];

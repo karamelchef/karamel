@@ -103,9 +103,14 @@
       <artifactId>karamel-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.kohsuke</groupId>
+    <groupId>org.kohsuke</groupId>
       <artifactId>github-api</artifactId>
-      <version>1.68</version>
+      <version>1.307</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
     </dependency>
     <dependency>
       <groupId>cz.cesnet.cloud</groupId>
