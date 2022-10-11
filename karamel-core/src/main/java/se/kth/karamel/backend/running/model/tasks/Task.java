@@ -227,7 +227,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public String getSudoCommand() {
     String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
-    return (password == null || password.isEmpty()) ? "sudo" : "echo \"%password_hidden%\" | sudo -S ";
+    return (password == null || password.isEmpty()) ? "dzdo" : "echo \"%password_hidden%\" | dzdo -S ";
   }
 
   private void addStats() {
