@@ -113,6 +113,9 @@ public class Settings {
   public static final String CHEF_SUDO_BINARY = "chef.sudo_binary";
   public static final String DEFAULT_CHEF_SUDO_BINARY = "sudo";
 
+  public static final String KARAMEL_AIRGAP = "karamel.airgap";
+  public static final String DEFAULT_KARAMEL_AIRGAP = "false";
+
   //--------------------------------------------Baremetal---------------------------------------------------------------
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;

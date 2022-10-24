@@ -170,6 +170,10 @@ public class Confs<K extends String, V extends String> extends Properties {
       prop.put(Settings.CHEF_SUDO_BINARY, Settings.DEFAULT_CHEF_SUDO_BINARY);
     }
 
+    String airgap = prop.getProperty(Settings.KARAMEL_AIRGAP);
+    if (airgap == null) {
+      prop.put(Settings.KARAMEL_AIRGAP, Settings.DEFAULT_KARAMEL_AIRGAP);
+    }
     return prop;
   }
 
