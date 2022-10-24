@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Properties;
@@ -158,7 +159,25 @@ public class Confs<K extends String, V extends String> extends Properties {
       prop.put(Settings.CHEFDK_VERSION_KEY, Settings.CHEFDK_VERSION_DEFAULT);
     }
 
+    String chefFileCachePath = prop.getProperty(Settings.CHEF_FILE_CACHE_PATH);
+    if (chefFileCachePath == null) {
+      String tmp = System.getProperty("java.io.tmpdir");
+      prop.put(Settings.CHEF_FILE_CACHE_PATH, Paths.get(tmp, "chef-solo").toString());
+    }
+
+    String sudoBinary = prop.getProperty(Settings.CHEF_SUDO_BINARY);
+    if (sudoBinary == null) {
+      prop.put(Settings.CHEF_SUDO_BINARY, Settings.DEFAULT_CHEF_SUDO_BINARY);
+    }
+
     return prop;
+  }
+
+
+  public String getProperty(String key) {
+    String envVariableName = key.replaceAll("\\.", "_").toUpperCase();
+    String value = System.getenv(envVariableName);
+    return value != null ? value : super.getProperty(key);
   }
 
   @Override

@@ -23,7 +23,8 @@ public class MakeSoloRbTask extends Task {
 
   private final String vendorPath;
 
-  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats, TaskSubmitter submitter) {
+  public MakeSoloRbTask(MachineRuntime machine, String vendorPath, ClusterStats clusterStats,
+      TaskSubmitter submitter) {
     super("make solo.rb", "make solo.rb", false, machine, clusterStats, submitter);
     this.vendorPath = vendorPath;
   }
@@ -31,11 +32,18 @@ public class MakeSoloRbTask extends Task {
   @Override
   public List<ShellCommand> getCommands() throws IOException {
     if (commands == null) {
+      String rubygemsUrlConf = "";
+      String rubygemsUrl = conf.getProperty(Settings.CHEF_RUBYGEMS_URL);
+      if (rubygemsUrl != null) {
+        rubygemsUrlConf = String.format("rubygems_url \"%s\"", rubygemsUrl);
+      }
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_MAKE_SOLO_RB,
           "install_dir_path", Settings.REMOTE_INSTALL_DIR_PATH(getSshUser()),
           "cookbooks_path", vendorPath,
           "sudo_command", getSudoCommand(),
-          "pid_file", Settings.PID_FILE_NAME);
+          "pid_file", Settings.PID_FILE_NAME,
+          "file_cache_path", conf.getProperty(Settings.CHEF_FILE_CACHE_PATH),
+          "rubygems_url", rubygemsUrlConf);
     }
     return commands;
   }
