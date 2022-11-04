@@ -19,6 +19,8 @@ import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.TaskStat;
+import se.kth.karamel.common.util.Confs;
+import se.kth.karamel.common.util.Settings;
 
 /**
  *
@@ -47,6 +49,7 @@ public abstract class Task implements DagTask, TaskCallback {
   private long startTime;
   private long duration = 0;
   private boolean markSkip = false;
+  protected final Confs conf;
 
   public Task(String name, String id, boolean idempotent, MachineRuntime machine, ClusterStats clusterStats,
       TaskSubmitter submitter) {
@@ -59,6 +62,7 @@ public abstract class Task implements DagTask, TaskCallback {
     this.uuid = UUID.randomUUID().toString();
     this.clusterStats = clusterStats;
     this.submitter = submitter;
+    this.conf = Confs.loadKaramelConfs();
   }
 
   public void setDuration(long duration) {
@@ -227,7 +231,9 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public String getSudoCommand() {
     String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
-    return (password == null || password.isEmpty()) ? "dzdo" : "echo \"%password_hidden%\" | dzdo -S ";
+    String sudoBinary = conf.getProperty(Settings.CHEF_SUDO_BINARY);
+    return (password == null || password.isEmpty()) ? sudoBinary : "echo \"%password_hidden%\" | "
+        + sudoBinary + " -S ";
   }
 
   private void addStats() {

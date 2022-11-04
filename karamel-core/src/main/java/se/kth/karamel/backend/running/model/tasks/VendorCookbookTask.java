@@ -1,6 +1,7 @@
 package se.kth.karamel.backend.running.model.tasks;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,6 +34,10 @@ public class VendorCookbookTask extends Task {
 
   @Override
   public List<ShellCommand> getCommands() throws IOException {
+    if (Boolean.parseBoolean(conf.getProperty(Settings.KARAMEL_AIRGAP))) {
+      commands = new ArrayList<>(0);
+      return commands;
+    }
     if (commands == null) {
       commands = ShellCommandBuilder.makeSingleFileCommand(Settings.SCRIPT_PATH_CLONE_VENDOR_COOKBOOK,
           "cookbooks_home", cookbooksHome,

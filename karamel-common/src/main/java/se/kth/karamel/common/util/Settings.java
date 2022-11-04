@@ -103,6 +103,14 @@ public class Settings {
   public static final String SKIP_EXISTINGTASKS_KEY = "karamel.skip.existing.tasks";
   public static final String SKIP_EXISTINGTASKS_DEFAULT = "false";
 
+  public static final String CHEF_FILE_CACHE_PATH = "chef.file_cache.path";
+  public static final String CHEF_RUBYGEMS_URL = "chef.rubygems_url";
+  public static final String CHEF_SUDO_BINARY = "chef.sudo_binary";
+  public static final String DEFAULT_CHEF_SUDO_BINARY = "sudo";
+
+  public static final String KARAMEL_AIRGAP = "karamel.airgap";
+  public static final String DEFAULT_KARAMEL_AIRGAP = "false";
+
   //--------------------------------------------Baremetal---------------------------------------------------------------
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;

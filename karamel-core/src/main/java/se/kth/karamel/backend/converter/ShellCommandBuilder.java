@@ -17,6 +17,9 @@ public class ShellCommandBuilder {
       for (int i = 0; i < pairs.length; i += 2) {
         String key = pairs[i];
         String val = pairs[i + 1];
+        if (key == null || val == null) {
+          continue;
+        }
         script = script.replaceAll("%" + key + "%", val);
       }
     }
