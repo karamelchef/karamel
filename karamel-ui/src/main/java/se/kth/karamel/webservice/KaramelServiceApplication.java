@@ -64,16 +64,8 @@ import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
 import se.kth.karamel.webservice.calls.ec2.LoadEc2Credentials;
 import se.kth.karamel.webservice.calls.ec2.ValidateEc2Credentials;
-import se.kth.karamel.webservice.calls.experiment.LoadExperiment;
-import se.kth.karamel.webservice.calls.experiment.PushExperiment;
-import se.kth.karamel.webservice.calls.experiment.RemoveFileFromExperiment;
 import se.kth.karamel.webservice.calls.gce.LoadGceCredentials;
 import se.kth.karamel.webservice.calls.gce.ValidateGceCredentials;
-import se.kth.karamel.webservice.calls.github.GetGithubCredentials;
-import se.kth.karamel.webservice.calls.github.GetGithubOrgs;
-import se.kth.karamel.webservice.calls.github.GetGithubRepos;
-import se.kth.karamel.webservice.calls.github.RemoveRepository;
-import se.kth.karamel.webservice.calls.github.SetGithubCredentials;
 import se.kth.karamel.webservice.calls.nova.LoadNovaCredentials;
 import se.kth.karamel.webservice.calls.nova.ValidateNovaCredentials;
 import se.kth.karamel.webservice.calls.occi.LoadOcciCredentials;
@@ -382,18 +374,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     environment.jersey().register(new ExitKaramel(karamelApi));
     environment.jersey().register(new PingServer(karamelApi));
-
-    //github
-    environment.jersey().register(new GetGithubCredentials(karamelApi));
-    environment.jersey().register(new SetGithubCredentials(karamelApi));
-    environment.jersey().register(new GetGithubOrgs(karamelApi));
-    environment.jersey().register(new GetGithubRepos(karamelApi));
-    environment.jersey().register(new RemoveRepository(karamelApi));
-
-    //experiment
-    environment.jersey().register(new LoadExperiment(karamelApi));
-    environment.jersey().register(new PushExperiment(karamelApi));
-    environment.jersey().register(new RemoveFileFromExperiment(karamelApi));
 
     //Openstack nova
     environment.jersey().register(new LoadNovaCredentials(karamelApi));

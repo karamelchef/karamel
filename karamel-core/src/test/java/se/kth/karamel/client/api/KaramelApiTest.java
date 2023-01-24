@@ -4,7 +4,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import org.junit.Test;
 import se.kth.karamel.backend.ClusterService;
-import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
@@ -12,7 +11,6 @@ import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.util.SshKeyPair;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -29,32 +27,6 @@ public class KaramelApiTest {
   @Test
   public void dummyTest() {
     //just that we dont need to ignore this class all the time
-  }
-
-  @Test
-  public void commitPushTest() throws KaramelException {
-    Experiment exp = new Experiment();
-
-    exp.setBerksfile("ark\njava");
-    exp.setClusterDefinition("");
-    Experiment.Code ec = new Experiment.Code("experiment", "echo 'jim'", "config/config.props", "jim=dow", "bash");
-    Experiment.Code ecL = new Experiment.Code("linda", "python blah", "my.props", "lin=gron", "python");
-    ArrayList<Experiment.Code> code = new ArrayList<>();
-    code.add(ec);
-    code.add(ecL);
-    exp.setCode(code);
-
-    exp.setDescription("some repo");
-    exp.setExperimentSetupCode("chef code");
-    exp.setGithubOwner("karamelchef");
-    exp.setGithubRepo("test");
-    exp.setGlobalDependencies("hops::nn\nhops::dn");
-    exp.setGroup("testG");
-    exp.setLocalDependencies("hops::install");
-    exp.setUser("testU");
-//    ChefExperimentExtractor.parseAttributesAddToGit("karamelchef", "test", exp);
-//    ChefExperimentExtractor.parseRecipesAddToGit("karamelchef", "test", exp);
-//    KaramelizedCookbook kc = new KaramelizedCookbook("https://github.com/karamelchef/test", true);
   }
 
 //  @Test

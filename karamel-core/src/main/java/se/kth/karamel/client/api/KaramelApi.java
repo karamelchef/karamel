@@ -5,18 +5,12 @@
  */
 package se.kth.karamel.client.api;
 
-import se.kth.karamel.backend.Experiment;
 import se.kth.karamel.backend.command.CommandResponse;
-import se.kth.karamel.backend.github.GithubUser;
-import se.kth.karamel.backend.github.OrgItem;
-import se.kth.karamel.backend.github.RepoItem;
 import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.OcciCredentials;
 import se.kth.karamel.common.util.NovaCredentials;
 import se.kth.karamel.common.util.SshKeyPair;
-
-import java.util.List;
 
 /**
  * The main API of Karamel-Core for Karamel clients
@@ -203,95 +197,6 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public void registerSudoPassword(String password) throws KaramelException;
-
-  /**
-   * Register username/password for github account
-   *
-   * @param user github account name
-   * @param password github password
-   * @return GithubUser Json object also containing primary github email address
-   * @throws KaramelException
-   */
-  public GithubUser registerGithubAccount(String user, String password) throws KaramelException;
-
-  /**
-   * Load any existing credentials stored locally
-   *
-   * @return GithubUser object
-   * @throws KaramelException
-   */
-  public GithubUser loadGithubCredentials() throws KaramelException;
-
-  /**
-   * Lists the available repos in a github organization.
-   *
-   * @param organization
-   * @return List of available repos
-   * @throws KaramelException
-   */
-  public List<RepoItem> listGithubRepos(String organization) throws KaramelException;
-
-  /**
-   * Lists the available organizations for a user in github. Must call 'registerGithubAccount' first.
-   *
-   * @return List of available orgs
-   * @throws KaramelException
-   */
-  public List<OrgItem> listGithubOrganizations() throws KaramelException;
-
-//  /**
-//   * Create a new github repo in an organization
-//   *
-//   * @param organization if organization is empty or null, create the repo for the authenticated user
-//   * @param repo the name of the repo to create
-//   * @param description of what's in the repository
-//   * @throws KaramelException
-//   */
-//  public void createGithubRepo(String organization, String repo, String description) throws KaramelException;
-  /**
-   * Add a file to an existing repo, commit it, and push it to github.
-   *
-   * @param experiment bash scripts and config files to add, commit, and push.
-   * @throws KaramelException
-   */
-  public void commitAndPushExperiment(Experiment experiment)
-      throws KaramelException;
-
-  /**
-   * Loads an experiment into the Designer, given its clone URL
-   *
-   * @param githubRepoUrl url for github repo
-   * @return Json object for the ExperimentContext
-   * @throws se.kth.karamel.common.exception.KaramelException
-   */
-  public Experiment loadExperiment(String githubRepoUrl) throws KaramelException;
-
-  /**
-   *
-   * @param org github org name
-   * @param repo github repo name
-   * @param description repo description
-   * @return RepoItem bean/json containing name, description of repo.
-   * @throws KaramelException
-   */
-  public RepoItem createGithubRepo(String org, String repo, String description) throws KaramelException;
-
-  /**
-   *
-   * @param owner
-   * @param repo
-   * @param experimentName
-   */
-  public void removeFileFromExperiment(String owner, String repo, String experimentName);
-
-  /**
-   *
-   * @param owner
-   * @param repo
-   * @param removeGitHub
-   * @param removeLocal
-   */
-  public void removeRepo(String owner, String repo, boolean removeLocal, boolean removeGitHub) throws KaramelException;
 
   public String loadGceCredentialsIfExist() throws KaramelException;
 
