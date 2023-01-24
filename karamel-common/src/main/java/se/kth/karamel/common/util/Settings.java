@@ -6,8 +6,6 @@
 package se.kth.karamel.common.util;
 
 import org.apache.log4j.Logger;
-import org.jclouds.aws.domain.Region;
-import org.jclouds.ec2.domain.InstanceType;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -15,7 +13,6 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -119,75 +116,6 @@ public class Settings {
   //--------------------------------------------Baremetal---------------------------------------------------------------
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
   public static final int BAREMETAL_DEFAULT_SSH_PORT = 22;
-
-  //--------------------------------------------AWS EC2-----------------------------------------------------------------
-  public static final String AWS_VM_TYPE_DEFAULT = InstanceType.M3_MEDIUM;
-  public static final String AWS_REGION_CODE_DEFAULT = Region.EU_WEST_1;
-  public static final String AWS_VM_USERNAME_DEFAULT = "ubuntu";
-  public static final String AWS_STORAGE_MAPPINGNAME_PREFIX = "/dev/xvd";
-  public static final String AWS_NVME_MAPPINGNAME_PREFIX = "/dev/nvme";
-  public static final String AWS_SSD_MAPPINGNAME_PREFIX = "/dev/xvd";
-  public static final String AWS_STORAGE_VIRTUALNAME_PREFIX = "ephemeral";
-  public static final String AWS_STORAGE_KERNELALIAS_PREFIX = "/dev/xvd";
-  public static final String AWS_STORAGE_MOUNTPOINT_PREFIX = "/mnt/disk";
-  public static final List<String> AWS_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
-  public static final String AWS_GEOUPNAME_PATTERN = "[a-z0-9][[a-z0-9]|[-]]*";
-
-  public static final String AWS_ACCESSKEY_KEY = "aws.access.key";
-  public static final String AWS_ACCESSKEY_ENV_VAR = "AWS_ACCESS_KEY_ID";
-  public static final String AWS_SECRETKEY_KEY = "aws.secret.key";
-  public static final String AWS_SECRETKEY_ENV_VAR = "AWS_SECRET_ACCESS_KEY";
-  public static final String AWS_KEYPAIR_NAME_KEY = "aws.keypair.name";
-  public static final Integer AWS_BATCH_SIZE_DEFAULT = 1;
-  public static final String AWS_BATCH_SIZE_KEY = "aws.batch.size";
-  public static final int AWS_RETRY_INTERVAL = 6 * 1000;
-  public static final int AWS_RETRY_MAX = 300;
-
-  public static final String AWS_KEYPAIR_NAME(String clusterName, String region) {
-    return (USER_NAME + "-" + clusterName + "-" + region + "-" + OS_NAME + "-" + IP_ADDRESS).toLowerCase();
-  }
-
-  public static final String AWS_UNIQUE_GROUP_NAME(String clusterName, String groupName) {
-    return (USER_NAME + "-" + clusterName + "-" + groupName).toLowerCase();
-  }
-
-  public static final List<String> AWS_UNIQUE_VM_NAMES(String clusterName, String groupName, int startCount, int size) {
-    List<String> names = new ArrayList<>();
-    for (int i = startCount; i <= size; i++) {
-      names.add(AWS_UNIQUE_GROUP_NAME(clusterName, groupName) + "-" + i);
-    }
-    return names;
-  }
-
-  public static final int AWS_VM_BATCH_SIZE() {
-    Confs confs = Confs.loadKaramelConfs();
-    int batchSize = Settings.AWS_BATCH_SIZE_DEFAULT;
-    if (confs != null && confs.getProperty(Settings.AWS_BATCH_SIZE_KEY) != null) {
-      try {
-        batchSize = Integer.parseInt(confs.getProperty(Settings.AWS_BATCH_SIZE_KEY));
-      } catch (NumberFormatException ex) {
-        logger.warn("Batch size in karamel config file is not a valid integer");
-      }
-    }
-    return batchSize;
-  }
-
-  //--------------------------------------Google Compute Engine---------------------------------------------------------
-  public static final String GCE_JSON_KEY_FILE_PATH = "gce.jsonkey.path";
-  public static final String GCE_DEFAULT_IP_RANGE = "10.240.0.0/16";
-
-  public static final String GCE_UNIQUE_FIREWALL_NAME(String networkName, String port, String protocol) {
-    return (networkName + "-" + protocol + port).toLowerCase();
-  }
-
-  //--------------------------------------OCCI Engine---------------------------------------------------------
-  public static final String OCCI_DEFAULT_USERNAME = "ubuntu";
-  public static final String OCCI_DEFAULT_ENDPOINT = "https://carach5.ics.muni.cz:11443";
-  public static final String OCCI_DEFAULT_IMAGE = "uuid_training_ubuntu_server_12_04_lts_fedcloud_warg_122";
-  public static final String OCCI_DEFAULT_IMAGE_SIZE = "atlas";
-  public static final String OCCI_USER_CERTIFICATE_PATH = "/tmp/x509up_u1000";
-  public static final String OCCI_CERTIFICATE_DIR = "/etc/grid-security/certificates/";
-  public static final List<String> OCCI_VM_PORTS_DEFAULT = Arrays.asList(new String[]{"22"});
 
   //------------------------------------Cookbooks on Github-------------------------------------------------------------
   public static final String CB_DEFAULTRB_REL_URL = "/attributes/default.rb";

@@ -37,24 +37,14 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlets.CrossOriginFilter;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.ClusterManager;
-import se.kth.karamel.backend.converter.UserClusterDataExtractor;
-import se.kth.karamel.backend.launcher.amazon.Ec2Launcher;
 import se.kth.karamel.client.api.KaramelApi;
 import se.kth.karamel.client.api.KaramelApiImpl;
 import se.kth.karamel.common.CookbookScaffolder;
 import static se.kth.karamel.common.CookbookScaffolder.deleteRecursive;
 
-import se.kth.karamel.common.clusterdef.Ec2;
-import se.kth.karamel.common.clusterdef.Gce;
-import se.kth.karamel.common.clusterdef.Nova;
-import se.kth.karamel.common.clusterdef.Occi;
-import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
-import se.kth.karamel.common.clusterdef.json.JsonGroup;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.util.Confs;
-import se.kth.karamel.common.util.Ec2Credentials;
 import se.kth.karamel.common.util.SshKeyPair;
 import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.webservice.calls.cluster.ProcessCommand;
@@ -62,17 +52,6 @@ import se.kth.karamel.webservice.calls.cluster.StartCluster;
 import se.kth.karamel.webservice.calls.definition.FetchCookbook;
 import se.kth.karamel.webservice.calls.definition.JsonToYaml;
 import se.kth.karamel.webservice.calls.definition.YamlToJson;
-import se.kth.karamel.webservice.calls.ec2.LoadEc2Credentials;
-import se.kth.karamel.webservice.calls.ec2.ValidateEc2Credentials;
-import se.kth.karamel.webservice.calls.gce.LoadGceCredentials;
-import se.kth.karamel.webservice.calls.gce.ValidateGceCredentials;
-import se.kth.karamel.webservice.calls.nova.LoadNovaCredentials;
-import se.kth.karamel.webservice.calls.nova.ValidateNovaCredentials;
-import se.kth.karamel.webservice.calls.occi.LoadOcciCredentials;
-import se.kth.karamel.webservice.calls.occi.ValidateOcciCredentials;
-import se.kth.karamel.webservice.calls.sshkeys.GenerateSshKeys;
-import se.kth.karamel.webservice.calls.sshkeys.LoadSshKeys;
-import se.kth.karamel.webservice.calls.sshkeys.RegisterSshKeys;
 import se.kth.karamel.webservice.calls.sshkeys.SetSudoPassword;
 import se.kth.karamel.webservice.calls.system.ExitKaramel;
 import se.kth.karamel.webservice.calls.system.PingServer;
@@ -275,24 +254,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
       ClusterDefinitionValidator.validate(jsonCluster);
       String yml = ClusterDefinitionService.jsonToYaml(jsonCluster);
       jsonCluster = ClusterDefinitionService.yamlToJsonObject(yml);
-
-      for (JsonGroup group : jsonCluster.getGroups()) {
-        Provider provider = UserClusterDataExtractor.getGroupProvider(jsonCluster, group.getName());
-        if (provider instanceof Ec2) {
-          Confs confs = Confs.loadKaramelConfs();
-          Ec2Credentials cred = Ec2Launcher.readCredentials(confs);
-          karamelApi.updateEc2CredentialsIfValid(cred);
-        } else if (provider instanceof Gce) {
-          throw new UnsupportedOperationException("Headless command line installationf or GCE is " +
-                  "not yet Implemented");
-        } else if (provider instanceof Nova) {
-          throw new UnsupportedOperationException("Headless command line installationf or NOVA is" +
-                  " not yet Implemented");
-        } else if (provider instanceof Occi) {
-          throw new UnsupportedOperationException("Headless command line installationf or Occi is" +
-                  " not yet Implemented");
-        }
-      }
     } catch (KaramelException e) {
       logger.error(e, e);
       System.exit(1);
@@ -355,18 +316,7 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     environment.jersey().register(new FetchCookbook(karamelApi));
 
     //ssh
-    environment.jersey().register(new LoadSshKeys(karamelApi));
-    environment.jersey().register(new RegisterSshKeys(karamelApi));
-    environment.jersey().register(new GenerateSshKeys(karamelApi));
     environment.jersey().register(new SetSudoPassword(karamelApi));
-
-    //ec2
-    environment.jersey().register(new LoadEc2Credentials(karamelApi));
-    environment.jersey().register(new ValidateEc2Credentials(karamelApi));
-
-    //gce
-    environment.jersey().register(new LoadGceCredentials(karamelApi));
-    environment.jersey().register(new ValidateGceCredentials(karamelApi));
 
     //cluster
     environment.jersey().register(new StartCluster(karamelApi));
@@ -374,14 +324,6 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 
     environment.jersey().register(new ExitKaramel(karamelApi));
     environment.jersey().register(new PingServer(karamelApi));
-
-    //Openstack nova
-    environment.jersey().register(new LoadNovaCredentials(karamelApi));
-    environment.jersey().register(new ValidateNovaCredentials(karamelApi));
-
-    //occi
-    environment.jersey().register(new LoadOcciCredentials(karamelApi));
-    environment.jersey().register(new ValidateOcciCredentials(karamelApi));
 
     // Wait to make sure jersey/angularJS is running before launching the browser
     final int webPort = getPort(environment);

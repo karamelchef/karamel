@@ -7,9 +7,6 @@ package se.kth.karamel.client.api;
 
 import se.kth.karamel.backend.command.CommandResponse;
 import se.kth.karamel.common.exception.KaramelException;
-import se.kth.karamel.common.util.Ec2Credentials;
-import se.kth.karamel.common.util.OcciCredentials;
-import se.kth.karamel.common.util.NovaCredentials;
 import se.kth.karamel.common.util.SshKeyPair;
 
 /**
@@ -75,32 +72,6 @@ public interface KaramelApi {
   public SshKeyPair loadSshKeysIfExist() throws KaramelException;
 
   /**
-   * Loads cluster specific keys
-   *
-   * @param clusterName
-   * @return
-   * @throws KaramelException
-   */
-  public SshKeyPair loadSshKeysIfExist(String clusterName) throws KaramelException;
-
-  /**
-   * Generates a common ssh keys in the karamel folder
-   *
-   * @return
-   * @throws KaramelException
-   */
-  public SshKeyPair generateSshKeysAndUpdateConf() throws KaramelException;
-
-  /**
-   * Generates cluster specific ssh keys
-   *
-   * @param clusterName
-   * @return
-   * @throws KaramelException
-   */
-  public SshKeyPair generateSshKeysAndUpdateConf(String clusterName) throws KaramelException;
-
-  /**
    * Register ssh keys for the current runtime of karamel
    *
    * @param keypair
@@ -108,33 +79,6 @@ public interface KaramelApi {
    * @throws KaramelException
    */
   public SshKeyPair registerSshKeys(SshKeyPair keypair) throws KaramelException;
-
-  /**
-   * Register ssh keys for the specified cluster
-   *
-   * @param clusterName
-   * @param keypair
-   * @return
-   * @throws KaramelException
-   */
-  public SshKeyPair registerSshKeys(String clusterName, SshKeyPair keypair) throws KaramelException;
-
-  /**
-   * Reads it from default karamel conf file
-   *
-   * @return
-   * @throws KaramelException
-   */
-  public Ec2Credentials loadEc2CredentialsIfExist() throws KaramelException;
-
-  /**
-   * Validates user's credentials before starting the cluster
-   *
-   * @param credentials
-   * @return
-   * @throws KaramelException
-   */
-  public boolean updateEc2CredentialsIfValid(Ec2Credentials credentials) throws KaramelException;
 
   /**
    * Starts running the cluster by launching machines and installing softwares It expect to receive a complete
@@ -198,19 +142,4 @@ public interface KaramelApi {
    */
   public void registerSudoPassword(String password) throws KaramelException;
 
-  public String loadGceCredentialsIfExist() throws KaramelException;
-
-  public boolean updateGceCredentialsIfValid(String jsonFilePath) throws KaramelException;
-
-  public NovaCredentials loadNovaCredentialsIfExist() throws KaramelException;
-  
-  public NovaCredentials loadNovaV3CredentialsIfExist() throws KaramelException;
-
-  public boolean updateNovaCredentialsIfValid(NovaCredentials credentials) throws KaramelException;
-  
-  public boolean updateNovaV3CredentialsIfValid(NovaCredentials credentials) throws KaramelException;
-
-  public OcciCredentials loadOcciCredentialsIfExist() throws KaramelException;
-
-  public boolean updateOcciCredentialsIfValid(OcciCredentials credentials) throws KaramelException;
 }

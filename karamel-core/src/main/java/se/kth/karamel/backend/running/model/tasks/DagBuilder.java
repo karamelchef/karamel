@@ -17,14 +17,11 @@ import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.backend.converter.ChefJsonGenerator;
 import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
-import se.kth.karamel.common.launcher.amazon.InstanceType;
 import se.kth.karamel.backend.machines.TaskSubmitter;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.stats.ClusterStats;
-import se.kth.karamel.common.clusterdef.Ec2;
-import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.json.JsonGroup;
@@ -36,7 +33,6 @@ import se.kth.karamel.common.exception.KaramelException;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.KaramelFileYamlDeps;
-import se.kth.karamel.common.util.Confs;
 
 /**
  *
@@ -64,7 +60,7 @@ public class DagBuilder {
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     CookbookCache cache = ClusterDefinitionService.CACHE;
     List<KaramelizedCookbook> kcbs = cache.loadRootKaramelizedCookbooks(cluster);
-    machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag, kcbs);
+    machineLevelTasks(clusterEntity, clusterStats, submitter, dag, kcbs);
     cookbookLevelPurgingTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag, kcbs);
     return dag;
   }
@@ -88,7 +84,7 @@ public class DagBuilder {
     Map<String, RunRecipeTask> allRecipeTasks = new HashMap<>();
     CookbookCache cache = ClusterDefinitionService.CACHE;
     List<KaramelizedCookbook> kcbs = cache.loadRootKaramelizedCookbooks(cluster);
-    machineLevelTasks(cluster, clusterEntity, clusterStats, submitter, dag, kcbs);
+    machineLevelTasks(clusterEntity, clusterStats, submitter, dag, kcbs);
     cookbookLevelInstallationTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter, allRecipeTasks, dag,
         kcbs);
     Map<String, Map<String, Task>> rlts = recipeLevelTasks(cluster, clusterEntity, clusterStats, chefJsons, submitter,
@@ -315,7 +311,6 @@ public class DagBuilder {
    * Tasks that are machine specific, specifically those that are run in the very start preparation phase. For example:
    * - AptGetEssential - PrepareStorage - InstallBerkshelf - MakeSoloRb
    *
-   * @param cluster
    * @param clusterEntity
    * @param clusterStats
    * @param submitter
@@ -323,26 +318,14 @@ public class DagBuilder {
    * @param rootCookbooks
    * @throws KaramelException
    */
-  public static void machineLevelTasks(JsonCluster cluster, ClusterRuntime clusterEntity, ClusterStats clusterStats,
+  public static void machineLevelTasks(ClusterRuntime clusterEntity, ClusterStats clusterStats,
       TaskSubmitter submitter, Dag dag, List<KaramelizedCookbook> rootCookbooks) throws KaramelException {
-    Confs confs = Confs.loadKaramelConfs();
-    String prepStoragesConf = confs.getProperty(Settings.PREPARE_STORAGES_KEY);
     for (GroupRuntime ge : clusterEntity.getGroups()) {
       for (MachineRuntime me : ge.getMachines()) {
         String vendorPath = UserClusterDataExtractor.makeVendorPath(me.getSshUser(), rootCookbooks);
         FindOsTypeTask findOs = new FindOsTypeTask(me, clusterStats, submitter);
         dag.addTask(findOs);
-        Provider provider = UserClusterDataExtractor.getGroupProvider(cluster, ge.getName());
-        boolean storagePreparation = (prepStoragesConf != null && prepStoragesConf.equalsIgnoreCase("true")
-            && (provider instanceof Ec2));
-        if (storagePreparation) {
-          String model = ((Ec2) provider).getType();
-          InstanceType instanceType = InstanceType.valueByModel(model);
-          PrepareStoragesTask st
-              = new PrepareStoragesTask(me, clusterStats, submitter, instanceType.getStorageDevices());
-          dag.addTask(st);
-        }
-        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter, storagePreparation);
+        AptGetEssentialsTask t1 = new AptGetEssentialsTask(me, clusterStats, submitter);
         InstallChefdkTask t2 = new InstallChefdkTask(me, clusterStats, submitter);
         MakeSoloRbTask t3 = new MakeSoloRbTask(me, vendorPath, clusterStats, submitter);
         dag.addTask(t1);

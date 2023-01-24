@@ -49,46 +49,6 @@
       <version>1.11</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.jclouds.api</groupId>
-      <artifactId>openstack-nova</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.api</groupId>
-      <artifactId>openstack-keystone</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>aws-ec2</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-bouncycastle</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-sshj</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.driver</groupId>
-      <artifactId>jclouds-enterprise</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>google-compute-engine</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.jclouds.provider</groupId>
-      <artifactId>azureblob</artifactId>
-      <version>${jclouds.version}</version>
-    </dependency>
-    <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>2.4</version>
@@ -107,25 +67,12 @@
       <artifactId>karamel-common</artifactId>
     </dependency>
     <dependency>
-      <groupId>cz.cesnet.cloud</groupId>
-      <artifactId>jocci-api</artifactId>
-      <version>0.2.3</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.bouncycastle</groupId>
-          <artifactId>bcprov-jdk16</artifactId>
-        </exclusion> 
-      </exclusions>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
     </dependency>
     <dependency>
-	    <groupId>org.pacesys</groupId>
-	    <artifactId>openstack4j-core</artifactId>
-	    <version>3.0.4</version>
-    </dependency>
-    <dependency>
-	    <groupId>org.pacesys.openstack4j.connectors</groupId>
-	    <artifactId>openstack4j-okhttp</artifactId>
-	    <version>3.0.4</version>
+      <groupId>com.hierynomus</groupId>
+      <artifactId>sshj</artifactId>
     </dependency>
     <dependency>
       <groupId>junit</groupId>

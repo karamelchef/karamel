@@ -12,11 +12,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.log4j.Logger;
-import se.kth.karamel.backend.launcher.amazon.Ec2Context;
-import se.kth.karamel.backend.launcher.google.GceContext;
-import se.kth.karamel.backend.launcher.nova.NovaContext;
-import se.kth.karamel.backend.launcher.novav3.NovaV3Context;
-import se.kth.karamel.backend.launcher.occi.OcciContext;
 import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.core.clusterdef.ClusterDefinitionValidator;
 import se.kth.karamel.common.exception.KaramelException;
@@ -61,30 +56,6 @@ public class ClusterService {
 
   public synchronized void registerSudoAccountPassword(String password) {
     commonContext.setSudoAccountPassword(password);
-  }
-
-  public synchronized void registerEc2Context(Ec2Context ec2Context) throws KaramelException {
-    commonContext.setEc2Context(ec2Context);
-  }
-
-  public synchronized void registerEc2Context(String clusterName, Ec2Context ec2Context) throws KaramelException {
-    String name = clusterName.toLowerCase();
-    if (repository.containsKey(name)) {
-      logger.error(String.format("'%s' is already running, you cannot change the ec2 credentials now :-|",
-          clusterName));
-      throw new KaramelException(String.format("Cluster '%s' is already running", clusterName));
-    }
-
-    ClusterContext clusterContext = clusterContexts.get(name);
-    if (clusterContext == null) {
-      clusterContext = new ClusterContext();
-    }
-    clusterContext.setEc2Context(ec2Context);
-    clusterContexts.put(name, clusterContext);
-  }
-
-  public synchronized void registerGceContext(GceContext gceContext) throws KaramelException {
-    commonContext.setGceContext(gceContext);
   }
 
   public synchronized void registerSshKeyPair(SshKeyPair sshKeyPair) throws KaramelException {
@@ -241,17 +212,5 @@ public class ClusterService {
     ClusterContext validatedContext = ClusterContext.validateContext(definition, context, commonContext);
     clusterContexts.put(name, validatedContext);
     return validatedContext;
-  }
-
-  public synchronized void registerNovaV3Context(NovaV3Context context) {
-    commonContext.setNovaV3Context(context);
-  }
-
-  public synchronized void registerNovaContext(NovaContext context) {
-    commonContext.setNovaContext(context);
-  }
-
-  public synchronized void registerOcciContext(OcciContext context) {
-    commonContext.setOcciContext(context);
   }
 }

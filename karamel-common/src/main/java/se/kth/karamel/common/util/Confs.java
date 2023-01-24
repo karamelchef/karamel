@@ -134,7 +134,6 @@ public class Confs<K extends String, V extends String> extends Properties {
   public static Confs applyDefaults(Confs prop) {
     String pubKeyPath = prop.getProperty(Settings.SSH_PUBKEY_PATH_KEY);
     String priKeyPath = prop.getProperty(Settings.SSH_PRIVKEY_PATH_KEY);
-    String batchSize = prop.getProperty(Settings.AWS_BATCH_SIZE_KEY);
     String prepareStorage = prop.getProperty(Settings.PREPARE_STORAGES_KEY);
     String skipExistingTasks = prop.getProperty(Settings.SKIP_EXISTINGTASKS_KEY);
     String chefdkVersion = prop.getProperty(Settings.CHEFDK_VERSION_KEY);
@@ -145,9 +144,6 @@ public class Confs<K extends String, V extends String> extends Properties {
         prop.put(Settings.SSH_PUBKEY_PATH_KEY, pubKeyPath);
         prop.put(Settings.SSH_PRIVKEY_PATH_KEY, priKeyPath);
       }
-    }
-    if (batchSize == null) {
-      prop.put(Settings.AWS_BATCH_SIZE_KEY, Settings.AWS_BATCH_SIZE_DEFAULT.toString());
     }
     if (prepareStorage == null) {
       prop.put(Settings.PREPARE_STORAGES_KEY, Settings.PREPARE_STORAGES_DEFAULT);

@@ -25,7 +25,6 @@ import se.kth.karamel.backend.converter.UserClusterDataExtractor;
 import se.kth.karamel.backend.dag.Dag;
 import se.kth.karamel.backend.kandy.KandyRestClient;
 import se.kth.karamel.backend.launcher.OsType;
-import se.kth.karamel.backend.launcher.amazon.Ec2Context;
 import se.kth.karamel.backend.machines.MachinesMonitor;
 import se.kth.karamel.backend.machines.SshMachine;
 import se.kth.karamel.backend.machines.SshShell;
@@ -711,13 +710,6 @@ public class CommandService {
             result = String.format("%s has been chosen.", chosenCluster());
           } else {
             throw new KaramelException("no cluster has been chosen yet!!");
-          }
-        } else if (subcmd.equals("aws")) {
-          Ec2Context ec2Context = clusterService.getCommonContext().getEc2Context();
-          if (ec2Context != null) {
-            result = String.format("aws account id is %s", ec2Context.getCredentials().getAccessKey());
-          } else {
-            throw new KaramelException("no aws account has been chosen yet!!");
           }
         } else if (subcmd.equals("ssh")) {
           SshKeyPair sshKeyPair = clusterService.getCommonContext().getSshKeyPair();

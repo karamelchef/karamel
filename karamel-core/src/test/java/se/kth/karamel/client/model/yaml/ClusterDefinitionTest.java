@@ -11,9 +11,6 @@ import org.yaml.snakeyaml.Yaml;
 import se.kth.karamel.backend.ClusterDefinitionService;
 import se.kth.karamel.common.clusterdef.Baremetal;
 import se.kth.karamel.common.clusterdef.Cookbook;
-import se.kth.karamel.common.clusterdef.Ec2;
-import se.kth.karamel.common.clusterdef.Gce;
-import se.kth.karamel.common.clusterdef.Nova;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
 import se.kth.karamel.common.clusterdef.yaml.YamlCluster;
@@ -46,15 +43,6 @@ public class ClusterDefinitionTest {
     cluster = ClusterDefinitionService.yamlToYamlObject(yaml);
     assertNotNull(cluster);
     assertEquals("ReferenceYaml", cluster.getName());
-    assertTrue(cluster.getProvider() instanceof Ec2);
-    Ec2 provider = (Ec2) cluster.getProvider();
-    assertEquals("m1.small", provider.getType());
-    assertEquals("ami-0307ce74", provider.getAmi());
-    assertEquals("eu-west-1", provider.getRegion());
-    assertEquals("ubuntu", provider.getUsername());
-    assertTrue(0.1f == provider.getPrice());
-    assertEquals("arn:aws:iam::822623301872:instance-profile/hopsfs-s3-access", provider.getIamarn());
-
     assertEquals(cluster.getAttr("mysql/user"), "admin");
     assertEquals(cluster.getAttr("ndb/ndbapi/public_ips"), "$ndb.public_ips");
     assertEquals(Lists.newArrayList("123", "134", "145"), cluster.getAttr("hop/ports"));
@@ -96,9 +84,6 @@ public class ClusterDefinitionTest {
     assertTrue(groups.get("namenodes").getRecipes().contains("hops::nn"));
     assertTrue(groups.get("namenodes").getRecipes().contains("hops::rm"));
     assertTrue(groups.get("namenodes").getRecipes().contains("hops::jhs"));
-    assertTrue(groups.get("namenodes").getProvider() instanceof Ec2);
-    Ec2 provider2 = (Ec2) groups.get("namenodes").getProvider();
-    assertEquals("m3.medium", provider2.getType());
     assertTrue(groups.containsKey("ndb"));
     assertEquals(2, groups.get("ndb").getSize());
     assertTrue(groups.get("ndb").getRecipes().contains("kagent"));
@@ -116,19 +101,6 @@ public class ClusterDefinitionTest {
     assertTrue(groups.get("datanodes").getRecipes().contains("kagent"));
     assertTrue(groups.get("datanodes").getRecipes().contains("hops::dn"));
     assertTrue(groups.get("datanodes").getRecipes().contains("hops::nm"));
-    assertTrue(groups.get("datanodes").getProvider() instanceof Ec2);
-    Ec2 provider4 = (Ec2) groups.get("datanodes").getProvider();
-    assertEquals("m3.medium", provider4.getType());
-
-    Gce provider5 = (Gce) groups.get("gcevms").getProvider();
-    assertEquals("n1-standard-1", provider5.getType());
-    assertEquals("ubuntu-1404-trusty-v20150316", provider5.getImage());
-    assertEquals("europe-west1-b", provider5.getZone());
-    assertTrue(provider5.isPreemptible());
-
-    Nova provider6 = (Nova) groups.get("novavms").getProvider();
-    assertEquals("1", provider6.getFlavor());
-    assertEquals("ubuntu-1404", provider6.getImage());
   }
 
   @Test

@@ -14,7 +14,6 @@ import se.kth.karamel.backend.running.model.ClusterRuntime;
 import se.kth.karamel.backend.running.model.GroupRuntime;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.common.util.Settings;
-import se.kth.karamel.common.clusterdef.Ec2;
 import se.kth.karamel.common.clusterdef.Provider;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.json.JsonCookbook;
@@ -26,6 +25,8 @@ import se.kth.karamel.common.cookbookmeta.KaramelizedCookbook;
 import se.kth.karamel.common.cookbookmeta.CookbookUrls;
 import se.kth.karamel.common.cookbookmeta.MetadataRb;
 import se.kth.karamel.common.cookbookmeta.Recipe;
+
+import static se.kth.karamel.common.clusterdef.Baremetal.makeDefault;
 
 /**
  *
@@ -117,7 +118,7 @@ public class UserClusterDataExtractor {
     Provider clusterScopeProvider = cluster.getProvider();
     Provider provider = null;
     if (groupScopeProvider == null && clusterScopeProvider == null) {
-      provider = Ec2.makeDefault();
+      provider = makeDefault();
     } else if (groupScopeProvider == null && clusterScopeProvider != null) {
       provider = (Provider) clusterScopeProvider.cloneMe();
       provider = provider.applyDefaults();

@@ -26,8 +26,6 @@ import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.backend.running.model.tasks.Task.Status;
 import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
 import net.schmizz.sshj.userauth.UserAuthException;
@@ -48,10 +46,6 @@ import se.kth.karamel.common.util.IoUtils;
  * @author kamal
  */
 public class SshMachine implements MachineInterface, Runnable {
-
-  static {
-    Security.addProvider(new BouncyCastleProvider());
-  }
 
   private static final Logger logger = Logger.getLogger(SshMachine.class);
   private final MachineRuntime machineEntity;

@@ -22,12 +22,8 @@ import se.kth.karamel.common.util.Settings;
  */
 public class AptGetEssentialsTask extends Task {
 
-  private final boolean storagePreparation;
-
-  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter,
-      boolean storagePreparation) {
+  public AptGetEssentialsTask(MachineRuntime machine, ClusterStats clusterStats, TaskSubmitter submitter) {
     super("apt-get essentials", "apt-get essentials", true, machine, clusterStats, submitter);
-    this.storagePreparation = storagePreparation;
   }
 
   @Override
@@ -69,10 +65,6 @@ public class AptGetEssentialsTask extends Task {
     Set<String> deps = new HashSet<>();
     String findOsId = FindOsTypeTask.makeUniqueId(getMachineId());
     deps.add(findOsId);
-    if (storagePreparation) {
-      String uniqId = PrepareStoragesTask.makeUniqueId(getMachineId());
-      deps.add(uniqId);
-    }
     return deps;
   }
 
