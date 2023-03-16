@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.common.util.IoUtils;
 
@@ -63,7 +65,7 @@ public class ShellCommandBuilder {
         if (key == null || val == null) {
           continue;
         }
-        script = script.replaceAll("%" + key + "%", val);
+        script = script.replaceAll("%" + key + "%", Matcher.quoteReplacement(val));
       }
     }
     List<ShellCommand> cmds = new ArrayList<>();
