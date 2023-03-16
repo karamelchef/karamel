@@ -3,6 +3,7 @@ package se.kth.karamel.backend.converter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
@@ -20,7 +21,7 @@ public class ShellCommandBuilder {
         if (key == null || val == null) {
           continue;
         }
-        script = script.replaceAll("%" + key + "%", val);
+        script = script.replaceAll("%" + key + "%", Matcher.quoteReplacement(val));
       }
     }
     List<ShellCommand> cmds = new ArrayList<>();
