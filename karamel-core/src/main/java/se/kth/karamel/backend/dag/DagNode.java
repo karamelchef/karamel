@@ -9,7 +9,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
+import se.kth.karamel.common.clusterdef.yaml.RuntimeConfiguration;
 import se.kth.karamel.common.exception.DagConstructionException;
 import se.kth.karamel.common.exception.KaramelException;
 
@@ -35,18 +39,24 @@ public class DagNode implements DagTaskCallback {
   private Status status = Status.WAITING;
   private int indention = 1;
   private String label;
+  private final Dag dag;
 
   public DagNode(String id) {
-    this.id = id;
+    this(id, null, null);
   }
 
-  public DagNode(String id, DagTask task) {
+  public DagNode(String id, DagTask task, Dag dag) {
     this.id = id;
     this.task = task;
+    this.dag = dag;
   }
 
   public String getId() {
     return id;
+  }
+
+  public Dag getDag() {
+    return dag;
   }
 
   public Status getStatus() {
@@ -97,15 +107,26 @@ public class DagNode implements DagTaskCallback {
     predecessors.remove(predecessor);
   }
 
-  public void prepareToStart(String prob) throws DagConstructionException {
+  public void prepareToStart(String prob, JsonCluster clusterDefinition) throws DagConstructionException {
     if (probs.contains(prob)) {
       return;
     }
     probs.add(prob);
     task.prepareToStart();
+    if (task instanceof RunRecipeTask) {
+      String recipeCanonicalName = ((RunRecipeTask) task).getRecipeCanonicalName();
+      if (clusterDefinition != null) {
+        RuntimeConfiguration runtimeConfiguration = clusterDefinition.getRuntimeConfiguration();
+        // Recipe canonical name is for example "ndb::ndbd"
+        Integer recipeParallelism = runtimeConfiguration.getRecipesParallelism().get(recipeCanonicalName);
+        if (recipeParallelism != null && recipeParallelism > 0) {
+          dag.addSerializableRecipe(recipeCanonicalName, recipeParallelism);
+        }
+      }
+    }
 
     for (DagNode succ : successors) {
-      succ.prepareToStart(prob);
+      succ.prepareToStart(prob, clusterDefinition);
     }
   }
 
@@ -201,6 +222,7 @@ public class DagNode implements DagTaskCallback {
   public void succeed() {
     logger.debug(String.format("Done '%s'", id));
     status = Status.DONE;
+    releaseSerializedTask();
     signalChildren();
   }
 
@@ -208,6 +230,7 @@ public class DagNode implements DagTaskCallback {
   public void skipped() {
     logger.debug(String.format("Skip '%s'", id));
     status = Status.SKIPPED;
+    releaseSerializedTask();
     signalChildren();
   }
 
@@ -216,7 +239,18 @@ public class DagNode implements DagTaskCallback {
       for (DagNode succ : successors) {
         succ.terminate();
       }
+      releaseSerializedTask();
       task.terminate();
+    }
+  }
+
+  private void releaseSerializedTask() {
+    if (task instanceof RunRecipeTask) {
+      RunRecipeTask recipeTask = (RunRecipeTask) task;
+      RecipeSerialization serialization = dag.getSerializableRecipeCounter(recipeTask.getRecipeCanonicalName());
+      if (serialization != null) {
+        serialization.release(recipeTask);
+      }
     }
   }
 
@@ -252,6 +286,7 @@ public class DagNode implements DagTaskCallback {
   @Override
   public void failed(String reason) {
     logger.error(String.format("Failed '%s' because '%s', DAG is stuck here :(", id, reason));
+    releaseSerializedTask();
     status = Status.FAILED;
   }
 

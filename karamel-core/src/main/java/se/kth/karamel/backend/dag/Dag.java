@@ -12,7 +12,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.apache.log4j.Logger;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.DagConstructionException;
 
 /**
@@ -23,6 +26,21 @@ public class Dag {
 
   private static final Logger logger = Logger.getLogger(Dag.class);
   private final Map<String, DagNode> allNodes = new HashMap<>();
+
+  private final Map<String, RecipeSerialization> serializableRecipes = new ConcurrentHashMap<>();
+
+  public void addSerializableRecipe(String id, Integer parallelism) {
+    String safeId = id.trim();
+    if (serializableRecipes.containsKey(safeId)) {
+      return;
+    }
+    logger.info("Adding serializable recipe " + safeId + " with parallelism " + parallelism);
+    serializableRecipes.put(safeId, new RecipeSerialization(parallelism));
+  }
+
+  public RecipeSerialization getSerializableRecipeCounter(String id) {
+    return serializableRecipes.get(id.trim());
+  }
 
   public void addNode(String nodeId) {
     if (!allNodes.containsKey(nodeId)) {
@@ -42,7 +60,7 @@ public class Dag {
     logger.debug("Adding task: " + task.dagNodeId());
     DagNode node = null;
     if (!allNodes.containsKey(task.dagNodeId())) {
-      node = new DagNode(task.dagNodeId(), task);
+      node = new DagNode(task.dagNodeId(), task, this);
       allNodes.put(task.dagNodeId(), node);
     } else {
       node = allNodes.get(task.dagNodeId());
@@ -94,12 +112,12 @@ public class Dag {
     }
   }
 
-  public void start() throws DagConstructionException {
+  public void start(JsonCluster clusterDefinition) throws DagConstructionException {
     validate();
     logger.debug("Dag is starting: \n" + print());
     String prob = UUID.randomUUID().toString();
     for (DagNode node : findRootNodes()) {
-      node.prepareToStart(prob);
+      node.prepareToStart(prob, clusterDefinition);
     }
     for (DagNode node : findRootNodes()) {
       node.start();

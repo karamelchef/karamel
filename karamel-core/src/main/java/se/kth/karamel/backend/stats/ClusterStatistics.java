@@ -14,7 +14,7 @@ import se.kth.karamel.common.util.Settings;
  */
 public class ClusterStatistics {
 
-  public static final String DEFAULT_TIME_STAT_FILE_DIR = Settings.KARAMEL_ROOT_PATH;
+  public static final String DEFAULT_TIME_STAT_FILE_DIR = Settings.getKaramelRootPath();
   private static String fileName = null;
   private static FileWriter writer = null;
   private static String experimentName = "";

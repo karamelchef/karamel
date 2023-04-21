@@ -39,6 +39,7 @@ import se.kth.karamel.common.stats.ClusterStats;
 import se.kth.karamel.common.stats.PhaseStat;
 import se.kth.karamel.common.util.Settings;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -347,7 +348,7 @@ public class ClusterManager implements Runnable {
             generateClusterChefJsonsForPurge(definition, runtime);
         currentDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
       }
-      currentDag.start();
+      currentDag.start(definition);
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.DAG_FAILURE, ex.getMessage()));
       throw ex;
@@ -365,6 +366,9 @@ public class ClusterManager implements Runnable {
       logger.info(String.format("\\o/\\o/\\o/\\o/\\o/'%s' DAG IS DONE \\o/\\o/\\o/\\o/\\o/", definition.getName()));
       
       if (ClusterManager.EXIT_ON_COMPLETION) {
+        Duration cooldown = Duration.ofMinutes(2);
+        logger.info(String.format("Cooling down for %d minutes before exiting", cooldown.toMinutes()));
+        TimeUnit.MINUTES.sleep(cooldown.toMinutes());
         System.exit(0);
       }
     }

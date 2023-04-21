@@ -84,7 +84,11 @@ public abstract class Task implements DagTask, TaskCallback {
   public String getSshUser() {
     return sshUser;
   }
-  
+
+  public DagTaskCallback getDagCallback() {
+    return dagCallback;
+  }
+
   public String getName() {
     return name;
   }

@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.common.clusterdef;
 
+import se.kth.karamel.common.clusterdef.yaml.RuntimeConfiguration;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -16,6 +17,7 @@ public abstract class Scope {
   private Ec2 ec2;
   private Vagrant vagrant;
   private Baremetal baremetal;
+  private RuntimeConfiguration runtimeConfiguration = new RuntimeConfiguration();
   private Gce gce;
   private Nova nova;
   private Occi occi;
@@ -27,6 +29,7 @@ public abstract class Scope {
     this.ec2 = scope.getEc2();
     this.vagrant = scope.getVagrant();
     this.baremetal = scope.getBaremetal();
+    this.runtimeConfiguration = scope.getRuntimeConfiguration();
     this.gce = scope.getGce();
     this.nova = scope.getNova();
     this.occi = scope.getOcci();
@@ -81,17 +84,17 @@ public abstract class Scope {
   public void setGce(Gce gce) {
     this.gce = gce;
   }
-  
+
   public Occi getOcci() {
     return occi;
   }
-  
+
   public void setOcci(Occi occi) {
     this.occi = occi;
   }
 
   public Nova getNova() {return nova;}
-  
+
   public void setNova(Nova nova) {
     this.nova = nova;
   }
@@ -116,5 +119,12 @@ public abstract class Scope {
       occi.validate();
     }
   }
-;
+
+  public RuntimeConfiguration getRuntimeConfiguration() {
+    return runtimeConfiguration;
+  }
+
+  public void setRuntimeConfiguration(RuntimeConfiguration runtimeConfiguration) {
+    this.runtimeConfiguration = runtimeConfiguration;
+  }
 }

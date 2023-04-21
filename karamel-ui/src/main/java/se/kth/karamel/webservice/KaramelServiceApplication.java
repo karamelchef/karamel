@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.EnumSet;
+import java.util.Properties;
 import javax.servlet.DispatcherType;
 import javax.servlet.FilterRegistration;
 import javax.swing.ImageIcon;
@@ -156,6 +157,16 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     System.exit(exitValue);
   }
 
+  private String getKaramelVersion() {
+    final Properties props = new Properties();
+    try {
+      props.load(getClass().getClassLoader().getResourceAsStream("karamel.properties"));
+    } catch (IOException ex) {
+      return "unknown";
+    }
+    return props.getProperty("karamel.version", "unknown");
+  }
+
   public static void main(String[] args) throws Exception {
 
     System.setProperty("java.net.preferIPv4Stack", "true");
@@ -167,6 +178,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     String sudoPasswd = "";
 
     karamelApi = new KaramelApiImpl();
+    KaramelServiceApplication karamelServiceApplication = new KaramelServiceApplication();
+    System.out.println("Version: " + karamelServiceApplication.getKaramelVersion());
 
     try {
       CommandLine line = parser.parse(options, args);
@@ -207,7 +220,9 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
 //          }
 //          sudoPasswd = c.readLine("Enter your sudo password (just press 'enter' if you don't have one):");
 //        }
-        new KaramelServiceApplication().run(modifiedArgs);
+        karamelServiceApplication.run(modifiedArgs);
+        logger.info(String.format("Version: %s", karamelServiceApplication.getKaramelVersion()));
+
         Thread.currentThread().sleep(2000);
 
         // Try to open and read the yaml file. 
@@ -242,7 +257,8 @@ public class KaramelServiceApplication extends Application<KaramelServiceConfigu
     }
 
     if (!cli) {
-      new KaramelServiceApplication().run(modifiedArgs);
+      karamelServiceApplication.run(modifiedArgs);
+      logger.info(String.format("Version: %s", karamelServiceApplication.getKaramelVersion()));
     }
 
     Runtime.getRuntime().addShutdownHook(new KaramelCleanupBeforeShutdownThread());

@@ -37,7 +37,7 @@ public class KaramelEvaluation {
       sshKeys = api.generateSshKeysAndUpdateConf(clusterName);
     }
     api.registerSshKeys(sshKeys);
-    api.updateGceCredentialsIfValid(Settings.KARAMEL_ROOT_PATH + "/gce-key.json");
+    api.updateGceCredentialsIfValid(Settings.getKaramelRootPath() + "/gce-key.json");
 
     KaramelEvaluation evaluation = new KaramelEvaluation();
 

@@ -110,6 +110,7 @@ public class Settings {
 
   public static final String KARAMEL_AIRGAP = "karamel.airgap";
   public static final String DEFAULT_KARAMEL_AIRGAP = "false";
+  private static final String KARAMEL_WORKING_DIRECTORY = "KARAMEL_WORKING_DIRECTORY";
 
   //--------------------------------------------Baremetal---------------------------------------------------------------
   public static final String PROVIDER_BAREMETAL_DEFAULT_USERNAME = "root";
@@ -280,6 +281,10 @@ public class Settings {
   }
 
   public static String REMOTE_WORKING_DIR_PATH(String sshUserName) {
+    String karamelWorkingDirectory = System.getenv(KARAMEL_WORKING_DIRECTORY);
+    if (karamelWorkingDirectory != null) {
+      return karamelWorkingDirectory;
+    }
     return REMOTE_USER_HOME_PATH(sshUserName) + "/" + REMOTE_WORKING_DIR_NAME;
   }
 
@@ -315,17 +320,24 @@ public class Settings {
   public static final String SSH_PUBKEY_PATH_KEY = "ssh.publickey.path";
   public static final String SSH_PRIVKEY_PATH_KEY = "ssh.privatekey.path";
   public static final String TEST_CB_ROOT_FOLDER = "testgithub";
-  public static final String KARAMEL_ROOT_PATH = USER_HOME + File.separator + ".karamel";
-  public static final String COOKBOOKS_PATH = KARAMEL_ROOT_PATH + File.separator + "cookbooks";
+  public static final String COOKBOOKS_PATH = getKaramelRootPath() + File.separator + "cookbooks";
   public static final String YAML_FILE_NAME = "definition.yaml";
   public static final String KARAMEL_CONF_NAME = "conf";
   public static final String SSH_FOLDER_NAME = ".ssh";
   public static final String STATS_FOLDER_NAME = "stats";
-  public static final String KARAMEL_SSH_PATH = KARAMEL_ROOT_PATH + File.separator + SSH_FOLDER_NAME;
-  public static final String KARAMEL_TMP_PATH = KARAMEL_ROOT_PATH + File.separator + TMP_FOLDER_NAME;
+  public static final String KARAMEL_SSH_PATH = getKaramelRootPath() + File.separator + SSH_FOLDER_NAME;
+  public static final String KARAMEL_TMP_PATH = getKaramelRootPath() + File.separator + TMP_FOLDER_NAME;
   public static final String SSH_PUBKEY_FILENAME = "ida_rsa.pub";
   public static final String SSH_PRIVKEY_FILENAME = "ida_rsa";
   public static final String RECIPE_RESULT_POSFIX = "__out.json";
+
+  public static String getKaramelRootPath() {
+    String karamelWorkingDirectory = System.getenv(KARAMEL_WORKING_DIRECTORY);
+    if (karamelWorkingDirectory != null) {
+      return karamelWorkingDirectory;
+    }
+    return Paths.get(USER_HOME, ".karamel").toString();
+  }
 
   public static String loadIpAddress() {
     String address = "UnknownHost";
@@ -350,7 +362,7 @@ public class Settings {
   }
 
   public static String CLUSTER_ROOT_PATH(String clusterName) {
-    return KARAMEL_ROOT_PATH + File.separator + clusterName.toLowerCase();
+    return getKaramelRootPath() + File.separator + clusterName.toLowerCase();
   }
 
   public static String CLUSTER_SSH_PATH(String clusterName) {
@@ -414,7 +426,7 @@ public class Settings {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyMMddHHmmssZ");
 
-    return KARAMEL_ROOT_PATH + File.separator + "results" + File.separator + clusterName.toLowerCase()
+    return getKaramelRootPath() + File.separator + "results" + File.separator + clusterName.toLowerCase()
         + File.separator + recName.replace(COOKBOOK_DELIMITER, REMOTE_CB_FS_PATH_DELIMITER) + File.separator
         + recName.replace(COOKBOOK_DELIMITER, REMOTE_CB_FS_PATH_DELIMITER) + "-"
         + sdf.format(new Date(System.currentTimeMillis())) + ".out";

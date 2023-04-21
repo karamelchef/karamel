@@ -44,7 +44,7 @@ public class Confs<K extends String, V extends String> extends Properties {
   }
 
   public void writeKaramelConfs() {
-    File folder = new File(Settings.KARAMEL_ROOT_PATH);
+    File folder = new File(Settings.getKaramelRootPath());
     writeConfs(folder);
   }
 
@@ -103,7 +103,7 @@ public class Confs<K extends String, V extends String> extends Properties {
 
   public static Confs loadKaramelConfs() {
     if (memConfs == null) {
-      return loadConfs(Settings.KARAMEL_ROOT_PATH);
+      return loadConfs(Settings.getKaramelRootPath());
     } else {
       return applyDefaults(memConfs);
     }
