@@ -28,6 +28,9 @@ import se.kth.karamel.common.util.Settings;
 import se.kth.karamel.common.exception.KaramelException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import net.schmizz.sshj.userauth.UserAuthException;
 import net.schmizz.sshj.userauth.password.PasswordFinder;
 import net.schmizz.sshj.userauth.password.Resource;
@@ -55,13 +58,14 @@ public class SshMachine implements MachineInterface, Runnable {
   private SSHClient client;
   private long lastHeartbeat = 0;
   private final BlockingQueue<Task> taskQueue = new ArrayBlockingQueue<>(Settings.MACHINES_TASKQUEUE_SIZE);
-  private boolean stopping = false;
-  private boolean killing = false;
+  private final AtomicBoolean stopping = new AtomicBoolean(false);
+  private final AtomicBoolean killing = new AtomicBoolean(false);
   private final SshShell shell;
   private Task activeTask;
   private boolean isSucceedTaskHistoryUpdated = false;
   private final List<String> succeedTasksHistory = new ArrayList<>();
   private static Confs confs = Confs.loadKaramelConfs();
+  private final ReentrantReadWriteLock clientConnectLock = new ReentrantReadWriteLock();
 
   /**
    * This constructor is used for users with SSH keys protected by a password
@@ -89,7 +93,7 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   public void setStopping(boolean stopping) {
-    this.stopping = stopping;
+    this.stopping.set(stopping);
   }
 
   public void pause() {
@@ -124,7 +128,7 @@ public class SshMachine implements MachineInterface, Runnable {
   public void run() {
     logger.debug(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
     try {
-      while (!stopping) {
+      while (!stopping.get()) {
         try {
           if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
               && (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING
@@ -145,7 +149,7 @@ public class SshMachine implements MachineInterface, Runnable {
               logger.debug(String.format("%s: Task for execution.. '%s'", machineEntity.getId(), activeTask.getName()));
               runTask(activeTask);
             } catch (InterruptedException ex) {
-              if (stopping) {
+              if (stopping.get()) {
                 logger.debug(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
                 return;
               } else {
@@ -161,7 +165,7 @@ public class SshMachine implements MachineInterface, Runnable {
             try {
               Thread.sleep(Settings.MACHINE_TASKRUNNER_BUSYWAITING_INTERVALS);
             } catch (InterruptedException ex) {
-              if (!stopping) {
+              if (!stopping.get()) {
                 logger.error(
                     String.format("%s: Got interrupted without having recieved stopping signal",
                         machineEntity.getId()));
@@ -201,7 +205,7 @@ public class SshMachine implements MachineInterface, Runnable {
     if (activeTask == task) {
       logger.info(String.format("Killing '%s' on '%s'", task.getName(), task.getMachine().getPublicIp()));
       KillSessionTask killTask = new KillSessionTask(machineEntity);
-      killing = true;
+      killing.set(true);
       runTask(killTask);
     } else {
       logger.warn(String.format("Request to kill '%s' on '%s' but the task is not ongoing now", task.getName(),
@@ -266,7 +270,7 @@ public class SshMachine implements MachineInterface, Runnable {
         for (ShellCommand cmd : commands) {
           if (cmd.getStatus() != ShellCommand.Status.DONE) {
             logger.debug(String.format("command to run %s", cmd.getCmdStr()));
-            runSshCmd(cmd, task, false);
+            runSshCmd2(cmd, task, false);
 
             if (cmd.getStatus() != ShellCommand.Status.DONE) {
               task.failed(String.format("%s: Command did not complete: %s", machineEntity.getId(),
@@ -307,6 +311,123 @@ public class SshMachine implements MachineInterface, Runnable {
     }
   }
 
+  private void runSshCmd2(ShellCommand shellCommand, Task task, boolean killCommand) {
+    logger.info(getLogWithmachineId("Received task to run " + task.getName()));
+    logger.debug(getLogWithmachineId("Command to run " + shellCommand.getCmdStr()));
+
+    int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
+    int delayBetweenRetries = Settings.SSH_CMD_RETRY_INTERVALS;
+    Session session = null;
+
+    while (!stopping.get() && !killing.get()) {
+      logger.info(getLogWithmachineId(String.format("Running task: %s", task.getName())));
+      shellCommand.setStatus(ShellCommand.Status.ONGOING);
+      Session.Command cmd = null;
+      try {
+        clientConnectLock.writeLock().lock();
+        if (client == null || !client.isConnected()) {
+          logger.info(getLogWithmachineId("SSH client is disconnected. Connecting"));
+          connect();
+        }
+        logger.debug(getLogWithmachineId("Starting new SSH session"));
+        session = client.startSession();
+        logger.info(getLogWithmachineId("Started new SSH session"));
+        if (task.isSudoTerminalReqd()) {
+          session.allocateDefaultPTY();
+        }
+
+        logger.info(getLogWithmachineId("Executing remote command"));
+        String cmdStr = shellCommand.getCmdStr();
+        String password = ClusterService.getInstance().getCommonContext().getSudoAccountPassword();
+        if (password != null && !password.isEmpty()) {
+          cmd = session.exec(cmdStr.replaceAll("%password_hidden%", password));
+        } else {
+          cmd = session.exec(cmdStr);
+        }
+        try {
+          logger.debug(getLogWithmachineId("Waiting for command to finish"));
+          cmd.join(Settings.SSH_CMD_MAX_TIOMEOUT, TimeUnit.MINUTES);
+        } catch (ConnectionException tex) {
+          logger.warn(getLogWithmachineId("Timeout reached while waiting for command to finish executing"));
+          throw tex;
+        }
+        updateHeartbeat();
+        SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
+        LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
+        if (cmd.getExitStatus() == 0) {
+          logger.info(getLogWithmachineId("Command finished successfully"));
+          shellCommand.setStatus(ShellCommand.Status.DONE);
+          return;
+        }
+        String log = getLogWithmachineId("Command " + task.getName() + " failed with exit code " + cmd.getExitStatus());
+        logger.warn(log);
+        throw new KaramelException(log);
+      } catch (Exception ex) {
+        if (ex instanceof ConnectionException || ex instanceof TransportException) {
+          if (session != null) {
+            try {
+              logger.warn(getLogWithmachineId("Closing SSH session after error"));
+              session.close();
+            } catch (TransportException | ConnectionException cex) {
+              logger.warn(getLogWithmachineId("Error while closing session, but we ignore it"), cex);
+            }
+          } else {
+            logger.info(getLogWithmachineId("Will not close SSH session because it is null"));
+          }
+
+          if (client != null) {
+            try {
+              logger.warn(getLogWithmachineId("Disconnecting SSH session after error"));
+              client.disconnect();
+            } catch (IOException cex) {
+              logger.warn(getLogWithmachineId("Error while disconnecting client, but we ignore it"), cex);
+            }
+          } else {
+            logger.info(getLogWithmachineId("Will not disconnect SSH client because it is null"));
+          }
+        }
+
+        logger.warn(getLogWithmachineId("Error while executing command"));
+        if (--numCmdRetries < 0) {
+          logger.error(getLogWithmachineId("Terminal error while executing command"), ex);
+          logger.error(getLogWithmachineId(String.format("Exhausted all %d retries, giving up!!!",
+              Settings.SSH_CMD_RETRY_NUM)));
+          shellCommand.setStatus(ShellCommand.Status.FAILED);
+          return;
+        }
+        try {
+          TimeUnit.MILLISECONDS.sleep(delayBetweenRetries);
+        } catch (InterruptedException iex) {
+          if (!stopping.get() && !killing.get()) {
+            logger.warn(getLogWithmachineId("Interrupted waiting to retry a command. Continuing..."));
+          }
+        }
+        delayBetweenRetries *= Settings.SSH_CMD_RETRY_SCALE;
+      } finally {
+        killing.compareAndSet(true, false);
+        if (session != null && session.isOpen()) {
+          try {
+            session.close();
+          } catch (TransportException | ConnectionException ex) {
+            logger.info(getLogWithmachineId("Error while closing SSH session, ignoring..."));
+          }
+        }
+        clientConnectLock.writeLock().unlock();
+      }
+    }
+  }
+
+  private String getLogWithmachineId(String log) {
+    return String.format("%s: %s", machineEntity.getId(), log);
+  }
+
+  /*
+   * This method is not used any longer. It has been re-written into runShhCmd2
+   * to address connectivity issues with the way it is handling the SSH client
+   * and sessions and concurrency.
+   *
+   * Leaving it here just for reference
+   */
   private void runSshCmd(ShellCommand shellCommand, Task task, boolean killcommand) {
     logger.debug(String.format("recieved a command to run '%s'", shellCommand.getCmdStr()));
     int numCmdRetries = Settings.SSH_CMD_RETRY_NUM;
@@ -314,7 +435,7 @@ public class SshMachine implements MachineInterface, Runnable {
     boolean finished = false;
     Session session = null;
 
-    while (!stopping && !killing && !finished && numCmdRetries > 0) {
+    while (!stopping.get() && !killing.get() && !finished && numCmdRetries > 0) {
       shellCommand.setStatus(ShellCommand.Status.ONGOING);
       try {
         logger.info(String.format("%s: Running task: %s", machineEntity.getId(), task.getName()));
@@ -347,7 +468,7 @@ public class SshMachine implements MachineInterface, Runnable {
             try {
               Thread.sleep(timeBetweenRetries);
             } catch (InterruptedException ex3) {
-              if (!stopping && !killing) {
+              if (!stopping.get() && !killing.get()) {
                 logger.warn(String.format("%s: Interrupted while waiting to start ssh session. Continuing...",
                     machineEntity.getId()));
               }
@@ -376,12 +497,12 @@ public class SshMachine implements MachineInterface, Runnable {
           SequenceInputStream sequenceInputStream = new SequenceInputStream(cmd.getInputStream(), cmd.getErrorStream());
           LogService.serializeTaskLog(task, machineEntity.getPublicIp(), sequenceInputStream);
         } catch (ConnectionException | TransportException ex) {
-          if (!killing
+          if (!killing.get()
               && getMachineEntity().getGroup().getCluster().getPhase() != ClusterRuntime.ClusterPhases.TERMINATING) {
             logger.error(String.format("%s: Couldn't excecute command", machineEntity.getId()), ex);
           }
 
-          if (killing) {
+          if (killing.get()) {
             logger.info(String.format("Killed '%s' on '%s' successfully...", task.getName(), machineEntity.getId()));
           }
         }
@@ -393,7 +514,7 @@ public class SshMachine implements MachineInterface, Runnable {
           try {
             Thread.sleep(timeBetweenRetries);
           } catch (InterruptedException ex) {
-            if (!stopping && !killing) {
+            if (!stopping.get() && !killing.get()) {
               logger.warn(
                   String.format("%s: Interrupted waiting to retry a command. Continuing...", machineEntity.getId()));
             }
@@ -408,7 +529,7 @@ public class SshMachine implements MachineInterface, Runnable {
             logger.error(String.format("Couldn't close ssh session to '%s' ", machineEntity.getId()), ex);
           }
         }
-        killing = false;
+        killing.set(false);
       }
     }
   }
@@ -432,6 +553,7 @@ public class SshMachine implements MachineInterface, Runnable {
     if (client == null || !client.isConnected()) {
       isSucceedTaskHistoryUpdated = false;
       try {
+        clientConnectLock.writeLock().lock();
         KeyProvider keys;
         client = new SSHClient();
         client.addHostKeyVerifier(new PromiscuousVerifier());
@@ -508,8 +630,9 @@ public class SshMachine implements MachineInterface, Runnable {
         throw exp;
       } catch (IOException e) {
         throw new KaramelException(e);
+      } finally {
+        clientConnectLock.writeLock().unlock();
       }
-      return;
     }
   }
 
@@ -528,6 +651,7 @@ public class SshMachine implements MachineInterface, Runnable {
       if (client != null && client.isConnected()) {
         updateHeartbeat();
       } else {
+        logger.warn("Lost connection to " + machineEntity.getId() + " Reconnecting...");
         connect();
       }
     }
