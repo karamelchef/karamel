@@ -697,20 +697,25 @@ public class SshMachine implements MachineInterface, Runnable {
   public void downloadRemoteFile(String remoteFilePath, String localFilePath, boolean overwrite)
       throws KaramelException, IOException {
 
-    connect();
-    SCPFileTransfer scp = client.newSCPFileTransfer();
-    File f = new File(localFilePath);
-    f.mkdirs();
-    // Don't collect logs of values, just overwrite
-    if (f.exists()) {
-      if (overwrite) {
-        f.delete();
-      } else {
-        throw new KaramelException(String.format("%s: Local file already exist %s",
-            machineEntity.getId(), localFilePath));
+    try {
+      clientConnectLock.writeLock().lock();
+      connect();
+      SCPFileTransfer scp = client.newSCPFileTransfer();
+      File f = new File(localFilePath);
+      f.mkdirs();
+      // Don't collect logs of values, just overwrite
+      if (f.exists()) {
+        if (overwrite) {
+          f.delete();
+        } else {
+          throw new KaramelException(String.format("%s: Local file already exist %s",
+              machineEntity.getId(), localFilePath));
+        }
       }
+      // If the file doesn't exist, it should quickly throw an IOException
+      scp.download(remoteFilePath, localFilePath);
+    } finally {
+      clientConnectLock.writeLock().unlock();
     }
-    // If the file doesn't exist, it should quickly throw an IOException
-    scp.download(remoteFilePath, localFilePath);
   }
 }
