@@ -25,4 +25,6 @@ public interface DagTaskCallback {
   public void terminated();
   
   public void skipped();
+
+  Dag getDag();
 }

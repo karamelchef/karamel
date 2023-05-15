@@ -323,7 +323,7 @@ public class ClusterManager implements Runnable {
             generateClusterChefJsonsForPurge(definition, runtime);
         currentDag = DagBuilder.getPurgingDag(definition, runtime, stats, machinesMonitor, chefJsons);
       }
-      currentDag.start();
+      currentDag.start(definition);
     } catch (Exception ex) {
       runtime.issueFailure(new Failure(Failure.Type.DAG_FAILURE, ex.getMessage()));
       throw ex;

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 import org.junit.Assert;
 import org.junit.Test;
+import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.exception.DagConstructionException;
 
 /**
@@ -160,7 +161,7 @@ public class DagTest {
     dag.addTask(new DummyTask("task31"));
     dag.addTask(new DummyTask("task32"));
     //task33 doesnt have any task, expecting exception here
-    dag.start();
+    dag.start(new JsonCluster());
   }
 
   @Test
@@ -232,7 +233,7 @@ public class DagTest {
     dag.addTask(new DummyTask("task31"));
     dag.addTask(new DummyTask("task32"));
     dag.addTask(new DummyTask("task33"));
-    dag.start();
+    dag.start(new JsonCluster());
   }
 
   @Test

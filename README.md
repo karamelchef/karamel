@@ -18,6 +18,29 @@ We leverage Berkshelf to transparently download and install transitive cookbook 
 ---
 Cluster definition is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, name of the cluster must be unique in each Karamel-runtime.
 
+#### Recipes execution parallelism
+Karamel will execute recipes in parallel on all machines respecting any dependency stated in Karamelfile. Regardless 
+of the dependencies, the same recipes will be executed in parallel on all machines. For example if we run recipe 
+`ndb::ndbd` on three machines, they may be executed in parallel depending on how Karamel will schedule them.
+
+In some cases we want to guarantee only a portion of machines to execute recipes in parallel. For example in case of 
+a rolling restart/upgrade we want to execute `ndb::ndbd` serially. You can configure recipe parallelism under 
+`runtimeConfiguration/recipesParallelism` section in the cluster definition in the format `recipe_name: parallelism`.
+Multiple recipes can be configured. For example:
+
+```yaml
+runtimeConfiguration:                                                                                                                                                                                                                         
+  recipesParallelism:                                                                                                                                                                                                                         
+    consul::master: 1                                                                                                                                                                                                                         
+    ndb::ndbd: 1                                                                                                                                                                                                                         
+    ndb::mysqld: 2 
+    ndb::mysqld_tls: 2 
+    onlinefs::default: 1 
+    hops::nn: 1                                                                                                                                                                                                                               
+    hops::rm: 1
+```
+
+#### Cloud providers
 We support five cloud providers: Amazon EC2 (ec2), Google Compute Engine (gce), Openstack Nova (nova), OCCI and bare-metal (baremetal). You can define provider globally or per group. In the group scope, you can overwrite some attributes of the network/machines in the global scope or you can entirely choose another cloud provider, that's how we support multi-cloud deployment. Settings and properties for each provider is introduced in a following separate section. 
 
  Cookbooks section introduces github references to the used cookbooks, it is also possible to refer to a specific version or branch for each github repository.

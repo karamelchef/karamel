@@ -5,6 +5,7 @@
  */
 package se.kth.karamel.common.clusterdef;
 
+import se.kth.karamel.common.clusterdef.yaml.RuntimeConfiguration;
 import se.kth.karamel.common.exception.ValidationException;
 
 /**
@@ -14,12 +15,14 @@ import se.kth.karamel.common.exception.ValidationException;
 public abstract class Scope {
 
   private Baremetal baremetal;
+  private RuntimeConfiguration runtimeConfiguration = new RuntimeConfiguration();
 
   public Scope() {
   }
 
   public Scope(Scope scope) {
     this.baremetal = scope.getBaremetal();
+    this.runtimeConfiguration = scope.getRuntimeConfiguration();
   }
 
   public abstract Object getAttr(String key);
@@ -40,5 +43,13 @@ public abstract class Scope {
     if (baremetal != null) {
       baremetal.validate();
     }
+  }
+
+  public RuntimeConfiguration getRuntimeConfiguration() {
+    return runtimeConfiguration;
+  }
+
+  public void setRuntimeConfiguration(RuntimeConfiguration runtimeConfiguration) {
+    this.runtimeConfiguration = runtimeConfiguration;
   }
 }

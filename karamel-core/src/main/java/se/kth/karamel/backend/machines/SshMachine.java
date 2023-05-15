@@ -20,6 +20,7 @@ import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyProvider;
 import org.apache.log4j.Logger;
+import se.kth.karamel.backend.dag.RecipeSerialization;
 import se.kth.karamel.backend.running.model.MachineRuntime;
 import se.kth.karamel.backend.running.model.tasks.ShellCommand;
 import se.kth.karamel.backend.running.model.tasks.Task;
@@ -124,6 +125,17 @@ public class SshMachine implements MachineInterface, Runnable {
     return anyfailure;
   }
 
+  private void prepareSerializedTask(Task task) throws InterruptedException {
+    if (task instanceof RunRecipeTask) {
+      RunRecipeTask recipeTask = (RunRecipeTask) task;
+      RecipeSerialization serialization = task.getDagCallback().getDag()
+          .getSerializableRecipeCounter(recipeTask.getRecipeCanonicalName());
+      if (serialization != null) {
+        serialization.prepareToExecute(recipeTask);
+      }
+    }
+  }
+
   @Override
   public void run() {
     logger.debug(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
@@ -147,6 +159,7 @@ public class SshMachine implements MachineInterface, Runnable {
                         machineEntity.getId()));
               }
               logger.debug(String.format("%s: Task for execution.. '%s'", machineEntity.getId(), activeTask.getName()));
+              prepareSerializedTask(activeTask);
               runTask(activeTask);
             } catch (InterruptedException ex) {
               if (stopping.get()) {
@@ -388,7 +401,7 @@ public class SshMachine implements MachineInterface, Runnable {
         }
 
         logger.warn(getLogWithmachineId("Error while executing command"));
-        if (--numCmdRetries < 0) {
+        if (--numCmdRetries <= 0) {
           logger.error(getLogWithmachineId("Terminal error while executing command"), ex);
           logger.error(getLogWithmachineId(String.format("Exhausted all %d retries, giving up!!!",
               Settings.SSH_CMD_RETRY_NUM)));
