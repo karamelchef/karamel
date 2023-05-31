@@ -118,7 +118,7 @@ public class ClusterDefinitionService {
 
   public static List<String> listClusters() throws KaramelException {
     List<String> clusters = new ArrayList();
-    File folder = new File(Settings.KARAMEL_ROOT_PATH);
+    File folder = new File(Settings.getKaramelRootPath());
     if (folder.exists()) {
       File[] files = folder.listFiles();
       for (File file : files) {

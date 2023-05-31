@@ -14,6 +14,28 @@ Karamel introduces Karamelfile to orchestrate the execution of Chef recipes. Kar
 
 We leverage Berkshelf to transparently download and install transitive cookbook dependencies, so large systems can be defined in a few lines of code. Finally, the Karamel runtime builds and manages the execution of the DAG of Chef recipes by executing them with Chef Solo. 
 
+### Configuration
+#### Karamel working directory
+By default Karamel (local & remote) working directory is `$HOME/.karamel` If you want to override this directory
+use the environment variable `KARAMEL_WORKING_DIRECTORY` such as `export 
+KARAMEL_WORKING_DIRECTORY=/tmp/karamel_directory`
+
+#### Chef file cache
+Chef will download files to `/tmp/chef-solo` before using them. To change the staging location use the
+environment variable `CHEF_FILE_CACHE_PATH` such as `export CHEF_FILE_CACHE_PATH=/run/chef-solo`
+
+#### Elevated privileges program
+Karamel requires to run with elevated privileges. The default program for that is `sudo` but if your
+organization uses another program set it with the environment variable `CHEF_SUDO_BINARY` such as
+`export CHEF_SUDO_BINARY=dzdo`
+
+#### Airgapped installations
+If you are installing Hopsworks on an environment with no internet connectivity set `KARAMEL_AIRGAP=true`
+
+#### Ruby Gems server
+To point Chef to a local Ruby gems server instead of https://rubygems.org export 
+`CHEF_RUBYGEMS_URL=http://IP_ADDRESS:8808`
+
 ### Cluster Definition
 ---
 Cluster definition is an expressive DSL based on YAML as you can see in the following sample. Since Karamel can run several clusters simultaneously, name of the cluster must be unique in each Karamel-runtime.
