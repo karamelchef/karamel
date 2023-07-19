@@ -65,12 +65,7 @@ public class Settings {
   public static final float SSH_CMD_RETRY_SCALE = 1.5f;
   public static final int SSH_CMD_MAX_TIOMEOUT = DAY_IN_MIN;
   public static final String CHEFDK_VERSION_KEY = "chefdk.version";
-  public static final String CHEFDK_VERSION_DEFAULT = "3.7.23";
-
-  //-----------------------------------------------JCLOUDS--------------------------------------------------------------
-  public static final int JCLOUDS_PROPERTY_MAX_RETRIES = 100;
-  public static final int JCLOUDS_PROPERTY_RETRY_DELAY_START = 1000; //ms
-  public static final int EC2_MAX_FORK_VMS_PER_REQUEST = 50;
+  public static final String CHEFDK_VERSION_DEFAULT = "22.12.1024";
 
   //-------------------------------------------Shell script templates---------------------------------------------------
   public static final String SCRIPT_PATH_ROOT = "se/kth/karamel/backend/shellscripts/";

@@ -3,12 +3,12 @@ set -eo pipefail; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ >
 RES=0
 if [ %osfamily% == "redhat" ] ; then
 
-  yum list installed chefdk
+  yum list installed cinc-workstation
   if [ $? -ne 0 ] ; then
-    chefdkfile='chefdk-%chefdk_version%-1.el7.x86_64.rpm'
+    chefdkfile='cinc-workstation-%chefdk_version%-1.el8.x86_64.rpm'
 
     rm -f "$chefdkfile"
-    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
+    wget "https://repo.hops.works/master/$chefdkfile"
 
     %sudo_command% yum install -y "$chefdkfile"
     RES=$?
@@ -22,9 +22,9 @@ elif [ %osfamily% == "ubuntu" ] ; then
 
   dpkg -s chefdk
   if [ $? -ne 0 ] ; then
-    chefdkfile='chefdk_%chefdk_version%-1_amd64.deb'
+    chefdkfile='cinc-workstation_%chefdk_version%-1_amd64.deb'
     rm -f "$chefdkfile"
-    wget "https://hopsworks-distribution.s3-eu-west-1.amazonaws.com/$chefdkfile"
+    wget "https://repo.hops.works/master/$chefdkfile"
 
     %sudo_command% dpkg -i "$chefdkfile"
     RES=$?
@@ -36,11 +36,6 @@ elif [ %osfamily% == "ubuntu" ] ; then
 else 
  echo "Unrecognized version of linux. Not ubuntu or redhat family."
  exit 1
-fi
-if [ $RES -eq 0 ] ; then
-  # Fix for expired Lets Encrypt CA
-  %sudo_command% sed -ie "/DST Root CA X3/,+19d" /opt/chefdk/embedded/ssl/certs/cacert.pem
-  echo '%task_id%' >> %succeedtasks_filepath%
 fi
 exit $RES
 ' > install-chefdk.sh ; chmod +x install-chefdk.sh ; ./install-chefdk.sh
