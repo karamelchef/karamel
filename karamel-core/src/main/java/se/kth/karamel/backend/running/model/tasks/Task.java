@@ -32,7 +32,7 @@ public abstract class Task implements DagTask, TaskCallback {
 
   public static enum Status {
 
-    WAITING, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
+    WAITING, BLOCKED, READY, EXIST, ONGOING, DONE, FAILED, SKIPPED;
   }
   private Status status = Status.WAITING;
   private final String name;
@@ -190,6 +190,10 @@ public abstract class Task implements DagTask, TaskCallback {
     status = Status.ONGOING;
     startTime = System.currentTimeMillis();
     dagCallback.started();
+  }
+
+  public void blocked() {
+    status = Status.BLOCKED;
   }
 
   @Override

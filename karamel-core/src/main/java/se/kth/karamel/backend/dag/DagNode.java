@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import se.kth.karamel.backend.running.model.tasks.RunRecipeTask;
+import se.kth.karamel.backend.running.model.tasks.Task;
 import se.kth.karamel.common.clusterdef.json.JsonCluster;
 import se.kth.karamel.common.clusterdef.yaml.RuntimeConfiguration;
 import se.kth.karamel.common.exception.DagConstructionException;
@@ -249,6 +250,17 @@ public class DagNode implements DagTaskCallback {
       RunRecipeTask recipeTask = (RunRecipeTask) task;
       RecipeSerialization serialization = dag.getSerializableRecipeCounter(recipeTask.getRecipeCanonicalName());
       if (serialization != null) {
+        synchronized (serialization) {
+          serialization.setFailedStatus(((RunRecipeTask) task).getStatus().equals(Task.Status.FAILED));
+          logger.info(String.format("%s: Recipe %s RecipeSerializationID: %s Has recipe failed: %s",
+              ((RunRecipeTask) task).getMachine().getId(),
+              ((RunRecipeTask) task).getName(),
+              serialization.hashCode(),
+              serialization.hasFailed()));
+          logger.debug(String.format("%s: Recipe %s NotifyingAll", ((RunRecipeTask) task).getMachine().getId(),
+              ((RunRecipeTask) task).getName()));
+          serialization.notifyAll();
+        }
         serialization.release(recipeTask);
       }
     }
