@@ -16,6 +16,7 @@ public class RecipeSerialization {
   private final Integer maxParallelism;
   private final Set<RecipeSerializationClaim> claims;
   private final ReentrantReadWriteLock claimsLock;
+  private boolean failed = false;
 
   public RecipeSerialization(Integer parallelism) {
     this.parallelism = new Semaphore(parallelism, true);
@@ -48,6 +49,7 @@ public class RecipeSerialization {
           + " at the moment because parallelism is limited. Available parallelism permits: "
           + parallelism.availablePermits() + "/" + maxParallelism + " - we wait until a permit becomes available."
           + " Current claims: " + printableClaims());
+      task.blocked();
       parallelism.acquire();
     }
     claimsLock.writeLock().lock();
@@ -74,5 +76,13 @@ public class RecipeSerialization {
     } finally {
       claimsLock.readLock().unlock();
     }
+  }
+
+  public synchronized void setFailedStatus(boolean failed) {
+    this.failed = failed;
+  }
+
+  public synchronized boolean hasFailed() {
+    return failed;
   }
 }

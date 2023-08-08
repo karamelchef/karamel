@@ -9,8 +9,12 @@ public class RecipeSerializationClaim {
   private final String id;
   private final Instant claimedAt;
 
+  public static String serializationClaimId(RunRecipeTask task) {
+    return String.format("%s@%s", task.getRecipeCanonicalName(), task.getMachineId());
+  }
+
   public RecipeSerializationClaim(RunRecipeTask task) {
-    id = String.format("%s@%s", task.getRecipeCanonicalName(), task.getMachineId());
+    id = serializationClaimId(task);
     claimedAt = Instant.now();
   }
 

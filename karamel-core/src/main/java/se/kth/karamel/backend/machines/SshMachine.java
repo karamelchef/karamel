@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -133,26 +134,35 @@ public class SshMachine implements MachineInterface, Runnable {
   }
 
   private void prepareSerializedTask(Task task) throws InterruptedException {
+    Optional<RecipeSerialization> maybeRS = getRecipeSerialization(task);
+    if (maybeRS.isPresent()) {
+      RecipeSerialization recipeSerialization = maybeRS.get();
+      recipeSerialization.prepareToExecute((RunRecipeTask) task);
+    }
+  }
+
+  private Optional<RecipeSerialization> getRecipeSerialization(Task task) {
     if (task instanceof RunRecipeTask) {
       RunRecipeTask recipeTask = (RunRecipeTask) task;
       RecipeSerialization serialization = task.getDagCallback().getDag()
           .getSerializableRecipeCounter(recipeTask.getRecipeCanonicalName());
-      if (serialization != null) {
-        serialization.prepareToExecute(recipeTask);
-      }
+      return Optional.ofNullable(serialization);
     }
+    return Optional.empty();
   }
 
   @Override
   public void run() {
     logger.debug(String.format("%s: Started SSH_Machine d'-'", machineEntity.getId()));
     try {
+      boolean hasAbortedDueToFailure = false;
       while (!stopping.get()) {
         try {
           if (machineEntity.getLifeStatus() == MachineRuntime.LifeStatus.CONNECTED
               && (machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.ONGOING
               || machineEntity.getTasksStatus() == MachineRuntime.TasksStatus.EMPTY)) {
             try {
+              boolean retry = false;
               if (activeTask == null) {
                 if (taskQueue.isEmpty()) {
                   machineEntity.setTasksStatus(MachineRuntime.TasksStatus.EMPTY, null, null);
@@ -160,14 +170,72 @@ public class SshMachine implements MachineInterface, Runnable {
                 activeTask = taskQueue.take();
                 logger.debug(String.format("%s: Taking a new task from the queue.", machineEntity.getId()));
                 machineEntity.setTasksStatus(MachineRuntime.TasksStatus.ONGOING, null, null);
+                hasAbortedDueToFailure = false;
               } else {
+                retry = true;
                 logger.debug(
                     String.format("%s: Retrying a task that didn't complete on last execution attempt.",
                         machineEntity.getId()));
               }
               logger.debug(String.format("%s: Task for execution.. '%s'", machineEntity.getId(), activeTask.getName()));
+
+              Optional<RecipeSerialization> recipeSerialization = getRecipeSerialization(activeTask);
+              if (recipeSerialization.isPresent()) {
+                RecipeSerialization rs = recipeSerialization.get();
+                // In retries we don't check if it has failed because we already know it has failed, hence retried
+                // If we do check, it will lead to deadlock
+                //
+                // After the task gotten the green light to proceed with running the task - parallelism claim
+                // has been satisfied, we check again if the task has failed. While waiting for the claim to be
+                // satisfied, the task might have failed on another node. In that case, we continue the loop without
+                // executing the task. Then we come here, where it is a retry but it has aborted due to failure
+                // and we wait until the failure is resolved
+                if (!retry || hasAbortedDueToFailure) {
+                  logger.debug(String.format("%s: retry: %s hasAborted: %s", machineEntity.getId(),
+                      activeTask.getName(), retry, hasAbortedDueToFailure));
+                  synchronized (rs) {
+                    logger.debug(String.format("%s: Recipe %s RecipeSerializationID: %s Has failed: %s",
+                        activeTask.getMachine().getId(),
+                        activeTask.getName(),
+                        rs.hashCode(),
+                        rs.hasFailed()));
+                    if (rs.hasFailed()) {
+                      logger.info(String.format("%s: Recipe %s has failed on another node. Wait until it succeeds",
+                          machineEntity.getId(), activeTask.getName()));
+                      rs.wait();
+                    } else {
+                      logger.debug(String.format("%s: Recipe %s has NOT failed on another node. Executing",
+                          machineEntity.getId(), activeTask.getName()));
+                    }
+                  }
+                } else {
+                  logger.debug(String.format("%s: %s it is a retry", machineEntity.getId(), activeTask.getName()));
+                }
+              }
+
               prepareSerializedTask(activeTask);
+
+              if (recipeSerialization.isPresent()) {
+                RecipeSerialization rs = recipeSerialization.get();
+                // For explanation read above
+                if (!retry || hasAbortedDueToFailure) {
+                  synchronized (rs) {
+                    logger.debug(String.format("%s: %s Checking again after getting hold of the lock if recipe has " +
+                        "failed", machineEntity.getId(), activeTask.getName()));
+                    if (rs.hasFailed()) {
+                      logger.info(String.format("%s: %s Recipe has failed on another node, releasing the lock and " +
+                              "continue", machineEntity.getId(), activeTask.getName()));
+                      rs.release((RunRecipeTask) activeTask);
+                      logger.debug(String.format("%s: %s Released and continue", machineEntity.getId(),
+                          activeTask.getName()));
+                      hasAbortedDueToFailure = true;
+                      continue;
+                    }
+                  }
+                }
+              }
               runTask(activeTask);
+              hasAbortedDueToFailure = false;
             } catch (InterruptedException ex) {
               if (stopping.get()) {
                 logger.debug(String.format("%s: Stopping SSH_Machine", machineEntity.getId()));
