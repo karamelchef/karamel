@@ -3,7 +3,8 @@ set -e
 export LC_CTYPE=en_US.UTF-8
 # %sudo% chown -R $USER ~/.berkshelf
 mkdir -p %cookbooks_home%
-cd %cookbooks_home% 
+cd %cookbooks_home%
+rm -rf nodes
 rm -fr %github_repo_name%*
 git clone %github_repo_url% %github_repo_name%
 cd %github_repo_name%
