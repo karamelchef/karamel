@@ -1,15 +1,19 @@
 set -e; mkdir -p %install_dir_path% ; cd %install_dir_path%; echo $$ > %pid_file%; echo '#!/bin/bash
 set -e
-export LC_CTYPE=en_US.UTF-8
-# %sudo% chown -R $USER ~/.berkshelf
-mkdir -p %cookbooks_home%
-cd %cookbooks_home%
-%sudo_command% rm -rf nodes
-rm -fr %github_repo_name%*
-git clone %github_repo_url% %github_repo_name%
-cd %github_repo_name%
-git checkout %branch_name%
-berks vendor %vendor_path%
-cd %install_dir_path%
-echo '%task_id%' >> %succeedtasks_filepath%
+IS_AIRGAP=%is_airgap%
+%sudo_command% rm -rf %cookbooks_home%/nodes
+
+if [ "$IS_AIRGAP" == "false" ]; then
+    export LC_CTYPE=en_US.UTF-8
+    # %sudo% chown -R $USER ~/.berkshelf
+    mkdir -p %cookbooks_home%
+    cd %cookbooks_home%
+    rm -fr %github_repo_name%*
+    git clone %github_repo_url%
+    cd %github_repo_name%
+    git checkout %branch_name%
+    berks vendor %vendor_path%
+    cd %install_dir_path%
+    echo '%task_id%' >> %succeedtasks_filepath%
+fi
 ' > clone_%github_repo_name%.sh ; chmod +x clone_%github_repo_name%.sh ; ./clone_%github_repo_name%.sh
